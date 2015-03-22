@@ -47,15 +47,17 @@
 (defun ee-windows () (ee-list (mapcar #'buffer-file-name (ee-buffers))))
 
 (defun ee-parse-message (string)
-  (split-string string))
-;;(ee-parse-message "goto x y z")
+  (loop for (x . pos) = (read-from-string-safe string)
+                        then (read-from-string-safe string pos)
+        while pos collect (if (symbolp x) (symbol-name x) x)))
+;;(ee-parse-message "\"goto\" qwe 1")
+;;(read " goto x y z")
 
 ;;; TODO: resolve this hack when we know how to handle spaces in filenames
-(defun ee-goto-file (filename line-string column-string)
+(defun ee-goto-file (filename line column)
   (find-file (url-unhex-string filename))
-  (goto-char (line-column->point (string-to-number line-string)
-				 (string-to-number column-string))))
-;;(apply #'ee-goto-file-1 (list "/cygdrive/c/Users/eier/Google%20Drive/site-lisp/mb-lisp/EditorEngine.Emacs/ee-log.el" "3" "3"))
+  (goto-char (line-column->point line column)))
+;;(apply #'ee-goto-file (list "/cygdrive/c/Users/eier/Google%20Drive/site-lisp/mb-lisp/EditorEngine.Emacs/ee-log.el" 3 3))
 
 (defun ee-client-filter (proc string)
   (ee-client-receive-log string)
