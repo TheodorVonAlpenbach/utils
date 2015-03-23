@@ -94,7 +94,11 @@ STREAM. It returnes the path to the DATAFILE."
 ;;(line-1 t `(:d ,#'sqrt :x-values (.5 1.0)) :title "qwe" :x-range nil)
 ;;(untrace line-1)
 
-(defun line-p (x) (and (consp x) (eql (first x) :l)))
+(defun line-p (x &optional with-subline-p)
+  (and (consp x)
+       (member (first x) (if with-subline-p '(:l :d) '(:l)))))
+;;(mapcar #'line-p '(nil #'sin (:l bla) (:d bla)))
+;;(mapcar (bind #'line-p t) '(nil #'sin (:l bla) (:d bla)))
 
 (defun line (out expression)
   "Converts GP-LINES and title to gnuplot string and writes it to
@@ -133,18 +137,18 @@ Here graph and plot is the same"
   "Converts GP-LINES and title to gnuplot string and writes it to
 STREAM. Here graph and plot is the same"
   (when expression
-    (princ "plot " out)
-    (format-list out (if (graph-p expression)
-		       (if (line-p (second expression))
-			 (list (second expression)) (second expression))
-		       (listify expression))
-		 #'(lambda (out x) (line out x))
-		 :in ", ")))
+    (princ "plot " t)
+    (let* ((target (if (graph-p expression)
+		     (second expression)
+		     expression))
+	   (targets (if (or (atom target) (line-p target t))
+		      (list target) target)))
+      (format-list out targets #'(lambda (out x) (line out x))
+		   :in ", "))))
 ;;(graph t `((:l (:d ,#'sqrt :x-values (0 2))) (:l (:d ,#'sqrt :x-values (0 2)))))
 ;;(graph t `(:d ,#'sqrt :x-values (0 2)))
 ;;(graph t `(,#'sqrt ,#'sqrt))
 ;;(untrace graph)
-(progn (princ "plot " t)(format t "1"))
 
 (defun script (scriptpath expression terminal)
   "Returns a gnuplot script for plotting unary FUNCTION from A to B
@@ -174,6 +178,6 @@ with N points."
     (ext:execute "/usr/bin/gnuplot" scriptpath)
     (list :script scriptpath :target target)))
 ;;(gp:plot `(:p ,#'sqrt ,#'sq (:l (:d ,#'(lambda (x) (sq (sin x))) :x-range (0.01 1)) :title "Geir")))
-;;(gp:plot `(:d ,#'sqrt))
+;;(gp:plot `(:d ,#'sqrt))q
 ;;/ssh:ssh:/
 ;;(ext:execute "/usr/bin/gnuplot" "/tmp/gp0017.gp")
