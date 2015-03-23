@@ -1,0 +1,37 @@
+--
+psc 15.9.99
+distance.h: linje 62
+
+Var:
+
+template<class Tx, class Ty>
+inline double distance_sqr(const envelope<Tx,Ty>& e, const point<Tx,Ty>& p)
+{return sqr(distance(e.xI(), p)) + sqr(distance(e.yI(), p));}
+
+Er nå:
+
+template<class Tx, class Ty>
+inline double distance_sqr(const envelope<Tx,Ty>& e, const point<Tx,Ty>& p)
+{return sqr(distance(e.xI(), p.x())) + sqr(distance(e.yI(), p.y()));}
+
+Feil:
+
+Fikk uendelig rekursjon i den generelle distance(), mellom point og
+envelope fordi distance_sqr() tok parametrene interval<double>,
+double, men det ble sent inn interval<double>, pointD
+
+ok mb.
+--
+fb 30.9.99:
+vector2d: mangler #include <ostream>
+Husk å legge på std:: for bruken av ostream'en også...
+ok mb.
+--
+psc 4.10.99:
+_BORLAND_ -> __BORLANDC__ (som borland setter selv)
+ok mb 4.10.99.
+--
+psc 4.10.99:
+using xxx::yyy inne i namespace får bcc til å kræsje. Flytt utenfor.
+ok mb 4.10.99.
+--

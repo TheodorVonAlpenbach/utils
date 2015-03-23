@@ -1,0 +1,243 @@
+;;;; Pitch class
+;;;; Main methods
+;;;; new, copy, list
+;;;; read, write (name)
+(require "yamal")
+(in-package :yamal)
+
+(defclass pitch ()
+  ((8th-transpositions 
+    :accessor n-value
+    :initarg :n
+    :initform 0
+    :type integer
+    :documentation "The number of 8th traspositions in PITCH.")
+   (12th-transpositions
+    :accessor m-value
+    :initarg :m
+    :initform 0
+    :type integer
+    :documentation "The number of 12th traspositions in PITCH."))
+  (:documentation "An implementaion of a pitch as a transposition from a base frequency."))
+;;(make-instance 'pitch :n 1 :m 3)
+
+(defmethod pitch-equal (&rest pitches)
+  (and (apply #'= (mapcar #'n-value pitches))
+       (apply #'= (mapcar #'m-value pitches))))
+;;(pitch-equal (make-pitch) (make-pitch) (make-pitch))
+
+(defun make-pitch (&optional (n 0) (m 0))
+  (make-instance 'pitch :n n :m m))
+;;(p-list (make-pitch))
+
+(defun operate-pitch (function &rest pitches)
+  "Nice utility that makes you operate easily on a seqeuence of pitches.
+FUNCTION is applied to both n- and m-value of all the PITCHES.
+See TRANSPOSE for usage examples."
+  (apply #'make-pitch (apply #'mapcar function (mapcar #'p-list pitches))))
+;;(p-name (operate-pitch (let ((k 4)) #'(lambda (x y) (+ x (* k y)))) (read-pitch 'C0 nil) (read-pitch 'C0 nil)) nil)
+;;(p-list (operate-pitch #'- (read-pitch 'G0 nil)))
+
+(defmethod transpose ((pitch pitch) (interval pitch) &optional (n 1))
+  "Transposes PITCH N INTERVALs up."
+  (operate-pitch #'(lambda (x y) (+ x (* n y))) pitch interval))
+;;(p-name (transpose (read-pitch 'C0) (read-pitch 'C0 nil)))
+
+(defun p-copy (pitch)
+  "Returns a copy of PITCH"
+  (make-instance 'pitch :n (n-value p) :m (m-value p)))
+;;(p-copy (make-pitch))
+
+(defun p-list (p)
+  (list (n-value p) (m-value p)))
+;;(p-list (make-instance 'pitch :n 1 :m 3))
+
+(defmethod pitch-class-base ((m integer))
+  (mod m 7))
+
+(defmethod pitch-class-base ((p pitch))
+  (pitch-class-base (m-value p)))
+;;(pitch-class-base (make-pitch 1 11))
+
+(defmethod alteration ((m integer))
+  (floor m 7))
+
+(defmethod alteration ((p pitch))
+  (alteration (m-value p)))
+;;(alteration (make-pitch 1 11))
+
+(defmethod octave-transpositions ((m integer))
+  "Regarding m as the number of duodecim (third partial)
+transpositions to reach the pitch class represented by m, this method
+returns the number of corresponding octave transpositions to reach the
+base octave (going from #P(0 0) to #P(1 0). Example: For C0, since base
+pitch is F0, this pitch is achieved with one duodecim and one
+/negative/ octave tranposition. Execpt for zero values, it always
+holds that the duodecim number and the octave number have different
+signs."
+  (floor (/ (* 11 m) 7)))
+;;(mapcar #'octave-transpositions (a-b -7 7))
+
+(defmethod octave-transpositions ((p pitch))
+  "Regards Ps m-value. See pitch-class-octave-transpositions."
+  (octave-transpositions (m-value p)))
+;;(loop for m in (a-b -7 7) collect (octave-transpositions (make-pitch 1 m)))
+
+(defun octave-style-modification (m style)
+  (if (and (member style '(:ANSI :lilypond))
+	   (evenp (mod m 7)))
+    1 0))
+
+(defun octave (p &optional (style *default-style*))
+  "Supported styles are :ANSI.
+Using formula o + om = n + ot, hence o = n + ot - om"
+  (- (+ (n-value p)
+	(octave-transpositions p))
+     (octave-style-modification (m-value p) style)))
+;;(octave-transpositions (make-pitch -2 2))
+;;(octave (make-pitch -2 2) )
+;;(p-list (read-pitch 'C0))
+;;(loop for m in (a-b -7 7) collect (octave (make-pitch (octave-transpositions m) m) nil))
+;;(loop for m in (a-b -7 7) collect (octave (make-pitch (octave-transpositions m) m) :ANSI))
+
+(defun p= (p1 p2)
+  "Returns t if pitches P1 and P2 are the same"
+  (and (= (n-value p1) (n-value p2))
+       (= (m-value p1) (m-value p2))))
+;;(p= (make-pitch) (make-pitch))
+
+;;; Steps
+(defmethod pitch-class-step ((m integer) &optional (style *default-style*))
+  "Returns 4M mod 7, which is the pitch-step of pitch (0, M)."
+  (mod (* 4 (if (eq style :ANSI) (1- m) m)) 7))
+;;(loop for m in (a-b -2 8) collect (pitch-class-step m))
+
+(defmethod pitch-class-step ((p pitch) &optional (style *default-style*))
+  "See pitch-class-step."
+  (pitch-class-step (m-value p) style))
+
+(defmethod pitch-step ((p pitch) &optional (style *default-style*))
+  "Returns 0 for F0, 1 for G0, 2 for A0 etc. and -1 for E-1, -2 for D-1.
+Alteration does not affect the return value. E.g. the pitch-step of F##0
+is still 0."
+  (+ (pitch-class-step p style)
+     (* 7 (octave p style))))
+;;(pitch-step (read-pitch 'G1 ))
+;;(p-list (read-pitch 'G1 nil))
+
+;;; Comparisons
+(defmethod pitch< (p1 p2)
+  "Needs pitch-step"
+  (let ((s1 (pitch-step p1 nil))
+	(s2 (pitch-step p2 nil)))
+    (if (= s1 s2)
+      (< (alteration p1) (alteration p2))
+      (< s1 s2))))
+;;(sort '("C0" "Db-0" "E0" "G###-14" "F-1"  "F-0" "G0" "A0" "B0" "C#0") #'pitch< :key #'read-pitch)
+
+(defun octavate-pitchf (p &optional (k 1))
+  "Octavates P K times. Side-effect."
+  (incf (n-value p) k))
+;;(octavate-pitchf (read-pitch "C#0") -1)
+
+(defun octavate-pitch (p &optional (k 1))
+  "Returns a pitch K octaves higher than P."
+  (let ((res (p-copy p)))
+    (octavate-pitchf res k)
+    res))
+;;(p-name (octavate-pitch (read-pitch "C#0") 10))
+
+(defmethod alterate-pitchf (p &optional (a 1))
+  "Alters P N times. Side-effect."
+  (values (incf (m-value p) (* 7 a))
+	  (decf (n-value p) (* 11 a))))
+;;(alterate-pitchf (read-pitch 'F0 nil) 1)
+
+(defmethod alterate-pitch (p &optional (a 1))
+  "Returns a pitch alterated A times compared with P."
+  (let ((res (p-copy p)))
+    (alterate-pitchf res a)
+    res))
+;;(p-name (alterate-pitch (read-pitch 'F0) 1))
+
+
+;;; Write
+(defmethod format-pitch-class-base ((base integer) (style symbol))
+  (string (aref "FCGDAEB" base)))
+;;(mapcar #'pc-base-name '(0 1 2 3 4 5 6))
+
+(defmethod format-alteration ((alteration integer) (style symbol))
+  (make-string (abs alteration) :initial-element (if (plusp alteration)
+						   #\# #\b)))
+;;(loop for a in  '(-2 -1 0 1 2) collect (format-alteration a nil))
+
+(defmethod format-pitch-class ((m integer) (style symbol)) 
+  (concatenate 'string 
+    (format-pitch-class-base (pitch-class-base m) style)
+    (format-alteration (alteration m) style)))
+;;(loop for a in  (a-b -7 7) collect (format-pitch-class a nil))
+
+(defmethod format-octave ((octave integer) (style symbol))
+  (write-to-string octave))
+
+(defmethod format-octave ((pitch pitch) (style symbol))
+  (format-octave (octave pitch style) style))
+
+(defmethod format-pitch ((pitch pitch) (style symbol))
+  "General format of PITCH"
+  (concatenate 'string 
+    (format-pitch-class (m-value pitch) style) 
+    (format-octave pitch style)))
+;;(loop for m in (a-b -7 7) collect (format-pitch (make-pitch 0 m) :ANSI))
+
+(defmethod print-pitch ((pitch pitch) &optional (style *default-style*))
+  (format-pitch pitch style))
+;;; Read
+
+(defun pitch-class-base-read (pitch-class-base-name)
+  (position (char pitch-class-base-name 0) "FCGDAEB"))
+;;(pitch-class-base-read "A")
+
+(defun alteration-read (format-alteration) 
+  (let ((l (length format-alteration)))
+    (if (zerop l)
+      0 (if (eq (char format-alteration 0) #\#)
+	  l (- l)))))
+;;(mapcar #'alteration-read '("##" "" "b"))
+
+(defun octave-read (format-octave) 
+  (parse-integer format-octave))
+;;(octave-read "1")
+
+(defun p-parse (s)
+  "Returns the semantic parts of s, e.g. C#2 ==> (1 1 2). Helper for
+read-pitch."
+  (multiple-value-bind (p-match pcb-match pca-match po-match)
+      (regexp:match "\\([A-G]\\)\\(#*\\|b*\\)\\(-\\?[0-9]\\+\\)" s)
+    (values (pitch-class-base-read (regexp:match-string s pcb-match))
+	    (alteration-read (regexp:match-string s pca-match))
+	    (octave-read (regexp:match-string s po-match)))))
+;;(p-parse "Cbb0")
+
+(defun make-pitch-bao (&optional (base 0) (alteration 0) (octave 0) (style *default-style*))
+  "Creates a pitch based pitch class BASE, pitch class ALTERATION and an ANSI-like OCTAVE."
+  (let* ((m (+ (* 7 alteration) base))
+	 ;; Using formula o + om = n + ot, hence n = o + om - ot.
+	 (n (- (+ octave
+		  (octave-style-modification m style))
+	       (octave-transpositions m))))
+    (make-pitch n m)))
+
+(defmethod read-pitch ((s string) &optional (style *default-style*))
+  "Reads a pitch from string. Exported."
+  (multiple-value-bind (b a o) (p-parse s)
+    (make-pitch-bao b a o style)))
+;;(mapcar #'(lambda (x) (p-name (read-pitch x))) (list "F0" "C0" "G0" "D0" "A0" "E0" "B0" "B#1"))
+
+(defmethod read-pitch ((s symbol) &optional (style *default-style*))
+  "Reads a pitch from string. Exported."
+  (read-pitch (symbol-name s) style))
+;;(mapcar #'(lambda (x) (p-name (read-pitch x nil) nil)) '(F0 C0 G0 D0 A0 E0 B0 F#0 C#0 G#0 D#0 A#0 E#0 B#1))
+;;(mapcar #'(lambda (x) (p-name (read-pitch x))) '(F0 C0 G0 D0 A0 E0 B0 F#0 C#0 G#0 D#0 A#0 E#0 B#1))
+
+(provide "pitch")

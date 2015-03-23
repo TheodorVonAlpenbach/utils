@@ -1,0 +1,13 @@
+mb  proper design of touch/segment
+mb  templatize envelope.h:extend
+mb  projection template argument for point<>
+mb  accuracy handling (eps, eps2)
+mb  limits -> "mb_limits.h" if _GNU_ else -> "limits"
+mb  testprograms for all functions and classes
+mb  collect bug reports, suggestions etc
+mb  find out which "defines" are set by gnu and replace _GNU_ by one of these.
+mb  remove fi_templates and misc (wait to after christmas)
+fb  add path ctor with size argument
+
+-- done --
+o apply cvs/rcs to project

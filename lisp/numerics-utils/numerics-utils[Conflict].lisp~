@@ -1,0 +1,140 @@
+(in-package :numerics-utils)
+
+;;; from parse-number
+(defun parse-real (x &optional (NaN "NaN"))
+  "Same as PARSE-REAL-NUMBER in package :PARSE-NUMBER, except that it returns nil for NaN"
+  (unless (string= x NaN) (parse-real-number x)))
+;;(mapcar #'parse-real '("NaN" "1" "1.0" "1." "1E0" "1.0E0" ""))
+
+;;; clem sugar
+(defun list->matrix (list) (clem:array->matrix (tree->array list)))
+(defun matrix->array (m) (clem::matrix-vals m))
+(defun prmat (matrix) (matrix->array matrix))
+(defun matrix-col (col matrix) (clem::get-col-list matrix col))
+;;(prmat (list->matrix '((1 2) (3 4))))
+;;(prmat (list->matrix '(3 4)))
+;;(matrix-col 0 (list->matrix '((1 2) (3 4))))
+
+;;; A few universal utils
+(defun vec (n &optional (init 0)) (make-list n :initial-element init))
+(defun vec+ (vec &rest vecs) (apply #'map (type-of vec) #'+ vec vecs))
+(defun vec- (vec &rest vecs) (apply #'mapcar #'- vec vecs))
+(defun vec-copies (vec n) (loop repeat n collect (copy-list vec)))
+(defun dot-product (vec1 vec2) (reduce #'+ (map (type-of vec1) #'safe-* vec1 vec2)))
+;;(dot-product '(1 1) '(2 1))
+
+(defun mat (n &optional (m n) (init 0)) (loop for i below n collect (vec m init)))
+(defun mat+ (mat &rest mats) (apply #'mapcar #'vec+ mat mats))
+(defun diagmat (vec) (let ((res (mat (length vec))))
+		       (loop for row in res
+			     for x in vec
+			     for i from 0
+			     do (setf (nth i row) x))
+		       res))
+;;(dot-product '(1 2 3) '(1 2 3))
+
+(defun integrate-simpson-sequence (f-values x0 xm)
+  "Return the integral of a function F from X0 to XM, based on F-VALUES.
+The f-values are the set [F(xi)] for xi in [X0, X0 + d, X0 + 2d, ...,
+ XM], where d = (XM - X0)/M for some positive even integer M. This
+ function is a variant of `integrate-simpson' in cl-math."
+  (declare (float x0 xm sum-odd sum-even)
+	   (fixnum i m))
+  (let ((m (1- (length f-values)))) ; M is the number of partitions of the integration interval
+    (when (oddp m) (error "Simpson requires an even number of steps, i.e. odd number of elements in input sequence"))
+    (loop for i from 1 below m
+	  if (oddp i) sum (aref f-values i) into sum-odd
+	  else        sum (aref f-values i) into sum-even
+	  finally (return (* (/ (- xm x0) 3 m)
+			     (+ (aref f-values 0)
+				(* 4 sum-odd)
+				(* 2 sum-even)
+				(aref f-values m)))))))
+
+(defun generate-integrate-simpson-sequence (fn x0 xm m)
+  "Converts input parameters to `integrate-simpson' to input parameters to `integrate-simpson-sequence'."
+  (coerce (loop with step = (/ (- xm x0) (if (oddp m) (1+ m) m))
+		for x from x0 to xm by step
+		collect (funcall fn x)) 'vector))
+;;(generate-integrate-simpson-sequence #'sqrt 0 1 3)
+
+(defun integrate-simpson-emulate (fn x0 xm m)
+  "This function is equivalent to `integrate-simpson', but is
+implemented with the use of `integrate-simpson-sequence'. It is useful
+for testing."
+  (integrate-simpson-sequence (generate-integrate-simpson-sequence fn x0 xm m) x0 xm))
+;;(integrate-simpson #'sqrt 0 1 10000)
+
+(defun test-integrate-simpson-sequence (&key (fns (list #'sqrt)) (x0s '(0)) (x1s '(1)) (ms '(10 11)))
+  (loop for fn in fns always
+	(loop for x0 in x0s always
+	      (loop for x1 in x1s always
+		    (loop for m in ms
+			  for fn1 = (integrate-simpson fn x0 x1 m)
+			  for fn2 = (integrate-simpson-emulate fn x0 x1 m)
+			  always (or (= fn1 fn2)
+				     (error "Differences for arguments ~a: ~a and ~a"
+					    (list fn x0 x1 m) fn1 fn2)))))))
+;;(test-integrate-simpson-sequence :ms '(10000))
+
+(let ((C1 (/ 1 (sqrt pi)))
+      (C2 (* 2 pi))
+      (C3 (sqrt 2)))
+  (defun wrapped-normal-distribution (mu sigma &optional (k 50))
+    ;;  (declare (float mu sigma h g d theta f) (fixnum k))
+    (let* ((h (/ 1 C3 sigma)) (g (* C2 h)) (d (* C1 h)))
+      (lambda (theta)
+	(* d (loop for k from (- k) to k
+		   for f = (* (- theta mu) h)
+		   sum (exp-safe (- (expt (+ f (* g k)) 2)))))))))
+
+(defun map-2d-array (fn array &rest arrays)
+  (let ((res (make-array (array-dimensions array))))
+    (loop for i below (array-dimension array 0) do
+	  (loop for j below (array-dimension array 1) do
+		(setf (aref res i j)
+		      (apply fn (aref array i j)
+			     (mapcar (utils:mbind #'aref (i j) (1 2)) arrays)))))
+    res))
+;;(map-2d-array #'* (tree->array '((1 2) (1 2))) (tree->array '((1 2) (1 2))) (tree->array '((1 2) (1 2))))
+
+(defun exp-safe (exponent) (if (< exponent -80) 0 (exp exponent)))
+
+(defun safe-* (&rest args)
+  (restart-case (reduce #'* args)
+    (use-value (value) value)
+    (round-floating-point-underflow-to-zero () 0)
+    (save-multiplication-outflow-by-log ()
+      (if (zerop (reduce #'min args))
+	  0 (exp-safe (reduce #'+ (mapcar #'log args)))))))
+;;(safe-* 1E-20 1E-20 2E20)
+
+(defun round-floating-point-underflow-to-zero (c)
+  (invoke-restart 'round-floating-point-underflow-to-zero))
+(defun save-multiplication-outflow-by-log (c)
+  (invoke-restart 'save-multiplication-outflow-by-log))
+
+;;(handler-bind ((floating-point-underflow #'save-multiplication-outflow-by-log))
+;;  (loop for i below 5 collect (safe-* 1E-20 1E-20 2E20 i)))
+
+(defun array-mult (&rest arrays)
+  (apply #'map-2d-array #'safe-* arrays))
+
+(defun array-squared (array)
+  (array-mult array array))
+;;(array-squared (tree->array '((1 2) (1 2))))
+
+(defun sq (x) (declare (number x)) (* x x))
+
+(defun 2a-row (2a i &optional (type 'vector))
+  (coerce (loop for j below (array-dimension 2a 1)
+	     collect (aref 2a i j))
+	  type))
+;;(2a-row (tree->array '((1 2) (3 4))) 0)
+
+(defun 2a-rows (2a &optional (from 0) (to (array-dimension 2a 0)) (type 'vector))
+  (loop for i from from below to collect (2a-row 2a i type)))
+
+(defun 2a-map-rows (fn 2a &optional (type 'vector))
+  (coerce (mapcar fn (2a-rows 2a)) type))
+;;(2a-map-rows #'length (tree->array '((1 2) (3 4))))

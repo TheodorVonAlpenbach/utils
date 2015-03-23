@@ -1,0 +1,7 @@
+(asdf:defsystem :mb-utils
+  :name "mb-utils"
+  :author "Mats Bergstrrøm <mats@contango.no>"
+  :version "0.9.1"
+  :licence "GNU"
+  :components
+  ((:cl-source-file "mb-utils")))

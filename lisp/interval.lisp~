@@ -1,0 +1,58 @@
+;;;; Should be moved into some utility package, for instance :math.
+(require "geometry")
+(in-package :geometry)
+
+(defclass interval ()
+  ((left
+    :accessor left-boundary
+    :initarg :left
+    :initform 0
+    :documentation "The left boundary of an interval")
+   (right
+    :accessor right-boundary
+    :initarg :right
+    :initform 0
+    :documentation "The right boundary of an interval"))
+  (:documentation "A half open interval, including the left boundary"))
+
+(defun make-interval (x y)
+  (make-instance 'interval :left x :right y))
+
+(defmethod equal-geometry ((x interval) (y interval))
+  (and (equal (left-boundary x) (left-boundary y))
+       (equal (right-boundary x) (right-boundary y))))
+;;(equal-geometry (make-interval 0 1) (make-interval 0 2))
+
+(defmethod boundary ((x interval))
+  (and x (list (left-boundary x) (right-boundary x))))
+
+(defun interval-length (x)
+  (- (right-boundary x) (left-boundary x)))
+
+(defmethod noverlap ((x interval) (y interval))
+  "This method is destructive on X (but X only)."
+  (with-accessors ((lx left-boundary) (rx left-boundary)) x
+    (with-accessors ((ly left-boundary) (ry left-boundary)) y
+      (when (< lx ly) (setf lx ly))
+      (when (> rx ry) (setf rx ry))
+      (unless (> lx ry) x))))
+;;(let ((x (make-interval 0 4)) (y (make-interval 4 6))) (mapcar #'interval-list (list (noverlap x y) x y)))
+
+(defmethod nsplit ((interval interval) (x number))
+  "Splits INTERVAL in two values if it contains X. Otherwise return INTERVAL as is."
+  (if (contains interval x)
+    (let ((right-interval (copy-interval interval)))
+      (setf (right-boundary interval) x)
+      (setf (left-boundary right-interval) x)
+      (values interval right-interval))
+    interval))
+;;(multiple-value-bind (x y) (nsplit (make-interval 0 4) 3/2) (list (interval-list x) (interval-list y)))
+;;(multiple-value-bind (x y) (nsplit (make-interval 0 4) 13/2) (list (interval-list x) (interval-list y)))
+
+(defmethod nshift ((x interval) shift)
+  "Destructively shifts the start time of duration X"
+  (incf (left-boundary x) shift)
+  (incf (right-boundary x) shift)
+  x)
+
+(provide "geometry-interval")

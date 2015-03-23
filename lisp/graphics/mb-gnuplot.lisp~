@@ -1,0 +1,80 @@
+(defpackage :mb-gnuplot
+  (:nicknames :gp)
+  (:use :common-lisp :mb-utils)
+  (:export :plot))
+
+(in-package :mb-gnuplot)
+
+;;; Move this to utils later
+(defmacro with-temporary-file ((stream &optional (prefix "/tmp/tmp")) &rest body)
+  "Executes BODY with STREAM bound to a file stream to a newly created
+file. Returns the pathname of the stream together with the value of last form in BODY."
+  `(let ((,stream (posix:mkstemp ,prefix)))
+     (values (pathname ,stream)
+	     (prog1 (progn ,@body) (close ,stream)))))
+
+(defun function-data (stream function &key (x-values (list 0 1)) (resolution 100))
+  "Returns a gnuplot script for plotting unary FUNCTION from A to B
+with N points."
+  (loop with (a b) = x-values
+	for x in (mb-utils::a-b a b :length resolution)
+	do (format stream "~f~T~f~%" x (funcall function x))))
+
+(defun array-data (stream y-values &key (x-values (0-n (length y-values) :type 'vector)))
+  "Returns a gnuplot script for plotting unary FUNCTION from A to B
+with N points."
+  (loop for x across x-values
+	for y across y-values
+	do (format stream "~f~T~f~%" x y)))
+
+(defun data-1 (stream target &rest plist)
+  "TARGET should be either a function or an array"
+  (typecase target
+    (function (apply #'function-data stream target plist))
+    (array (apply #'array-data stream target plist))
+    (t (error "Unknown type ~a for target ~a" (type-of target) target))))
+;;(data-1 t #'sqrt :resolution 10)
+
+(defun data (target &rest plist)
+  "Returns a gnuplot script for plotting unary FUNCTION from A to B
+with N points."
+  (with-temporary-file (s) (apply data-1 s target plist)))
+;;(data t (list #'sqrt :resolution 10))
+
+(defun line (stream line &key (with :lines) title x-values)
+  "Converts GP-LINES and PLIST to gnuplot string and writes it to
+STREAM. It returnes the path to the DATAFILE."
+  (awhen (data line :x-values x-values)
+    (let ((title (case title
+		   (:default nil)
+		   ((:notitle nil) "notitle")
+		   (t (format nil "title \"~a\"" title)))))
+      (format stream "plot '~a' with lines~@[ ~a~]"
+	      (namestring it) title))
+    it))
+;;(line t (list #'sqrt :title "qwe"))
+
+(defun graph (stream gp-lines &key title)
+  "Converts GP-LINES and title to gnuplot string and writes it to
+STREAM."
+  (if (line-p gp-lines)
+    (line stream gp-lines)
+    (loop for x in gp-lines collect (line stream x))))
+
+(defun script (gp-graph &key title)
+  "Returns a gnuplot script for plotting unary FUNCTION from A to B
+with N points."
+  (with-temporary-file (s)
+    (format s "set terminal pdf~%")
+    (format s "set output '~a.pdf'~%" (namestring s))
+    (graph s gp-graph)))
+
+(defun plot (plots &key title)
+  "Returns a gnuplot script for plotting unary FUNCTION from A to B
+with N points."
+  (destructuring-bind (scriptpath datapath)
+      (maptree #'namestring (multiple-value-list (script plots)))
+    (ext:execute "/usr/bin/gnuplot" (namestring scriptpath))
+    (list :script scriptpath :data datapath :pdf (format nil "~a.pdf" scriptpath))))
+;;(gp:plot (list #'sqrt :title "qwe"))
+;;(gp:plot #(2 3 5 7 11) :x-values #(10 20 30 40 50) :title "hello-world")

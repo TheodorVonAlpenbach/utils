@@ -1,0 +1,18 @@
+(defclass http-query-string ()
+  ((fields :accessor http-query-fields
+	   :reader #'http-query-fields-reader
+	   :writer #'http-query-fields-writer
+	   :type string
+	   :documentation "A list of http fields, where each field is a pair (field-name . field-value)"))
+  (:documentation "An implementaion of a pitch."))
+
+(defmethod http-query-fields-reader ((s string))
+  "Parses an HTTP query string to a list of fields.
+TODO: handle encodings?"
+  )
+
+(defmethod http-query-fields-writer ((fields list))
+  "Converts list of HTTP fields to an HTTP query string.
+Not implemented."
+  )
+
