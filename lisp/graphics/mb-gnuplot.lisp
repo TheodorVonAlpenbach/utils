@@ -137,7 +137,7 @@ Here graph and plot is the same"
   "Converts GP-LINES and title to gnuplot string and writes it to
 STREAM. Here graph and plot is the same"
   (when expression
-    (princ "plot " t)
+    (princ "plot " out)
     (let* ((target (if (graph-p expression)
 		     (second expression)
 		     expression))
@@ -178,6 +178,6 @@ with N points."
     (ext:execute "/usr/bin/gnuplot" scriptpath)
     (list :script scriptpath :target target)))
 ;;(gp:plot `(:p ,#'sqrt ,#'sq (:l (:d ,#'(lambda (x) (sq (sin x))) :x-range (0.01 1)) :title "Geir")))
-;;(gp:plot `(:d ,#'sqrt))q
+;;(gp:plot `(:d ,#'sqrt))
 ;;/ssh:ssh:/
 ;;(ext:execute "/usr/bin/gnuplot" "/tmp/gp0017.gp")
