@@ -10,7 +10,7 @@
    :nth* :pop-list
    :copy-if :infix-list
    :remove-nth
-   :write-list :concat :split-by-char
+   :write-list :concat :format-list :split-by-char
    :bind :mbind :newline :mapreduce
    :members :split :compose :equal-elements
    :multi-split :nsplit-list-if :nsplit-list :split-list :list-insert
@@ -353,6 +353,16 @@ IN may also be a function (fn i), taking an index argument, see `infix-list'."
 (defun concat (list &rest args) (apply #'write-list list nil args))
 ;;(time (progn (concat (a-b 0 100000) :in ", " :pre "<<" :suf ">>" :test #'oddp :key #'1+) :fine))
 ;;(concat (a-b 0 10) :in :newline :pre "<<" :suf ">>" :test #'oddp :key #'1+)
+
+(defun format-list (out list format-fn &key pre in suf test key)
+  (flet ((sp (x) (when x (case x (:newline (format out "~%")) (t (princ x out))))))
+    (let ((list (if key (mapcar key list) list)))
+      (sp pre)
+      (loop for x on (if test (remove-if-not test list) list)
+	    do (funcall format-fn out (first x))
+	    while (rest x) do (sp in))
+      (sp suf))))
+;;(format-list t '(1 2 3) #'(lambda (out x) (format out "~a" x)) :in ", ")
 
 (defun split-by-char (string char &optional remove-empty-string-p)
    "Returns a list of substrings of string divided by ONE CHAR each.
@@ -727,7 +737,7 @@ is the same throughout TREE."
   (loop for x1 in list1 for x2 in list2
 	when (funcall lt x1 x2) return t
 	never (funcall lt x2 x1)
-	finally return nil))
+	finally (return nil)))
 ;;(list< '(0 0) '(0 1))
 
 (defun parse-iso-date (iso-date) (mapcar #'parse-integer (split-by-char iso-date #\-)))
