@@ -44,12 +44,13 @@ file. Returns the pathname of the stream together with the value of last form in
   (concatenate 'string (gp-directory directory) (gp-filename name type)))
 ;;(gp-path "dir" "mats" "pdf")
 
-(defun write-function (stream function &key x-values (resolution 100))
+(defun write-function (stream function &key x-values (resolution 100) x-range)
   "Returns the filename containing RESOLUTION samples of FUNCTION in the interval X-VALUES.
 TODO: Handle n-ary functions and generalize X-VALUES to N dimensions."
-  (loop with (a b) = (or x-values (list 0 1))
+  (loop with (a b) = (or x-values x-range (list 0 1))
 	for x in (mb-utils::a-b a b :length resolution)
 	do (format stream "~f~T~f~%" x (funcall function x))))
+;;(trace write-function)
 
 (defun write-array (stream y-values &key (x-values (0-n (length y-values) :type 'vector)))
   "Returns the filename containing y-values as the second #\TAB delimited column.
@@ -69,57 +70,77 @@ TODO:
     (array (apply #'write-array stream target plist))
     (t (error "Unknown type ~a for target ~a" (type-of target) target))))
 ;;(write-data-1 t #'sqrt :resolution 10)
+;;(trace write-data-1)
 
-(defun write-data (target &rest plist)
+(defun write-data (stream target &rest plist)
   "Writes a data file based on TARGET."
   (with-temporary-file (stream)
-    (if (consp target)
-      (if (eql (first target) :d)
-      ;; skip the initial :d
-	(apply #'write-data-1 stream (append (rest target) plist))
-	(error "Wrong data format: ~a" target))
-      (apply #'write-data-1 stream target plist))))
-;;(write-data `(:d ,#'sqrt) :resolution 10)
+    (if (atom target)
+      (apply #'write-data-1 stream target plist)
+      (apply #'write-data-1 stream (append (rest target) plist)))))
+;;(write-data t `(:d ,#'sqrt :x-values (.5 1.0)) :x-range nil)
+;;(write-data t #'sqrt)
+;;(trace write-data)
 
-(defun line-1 (out data &key (with :lines) title)
+(defun line-1 (out data &key (with :lines) title x-range y-range)
   "Converts GP-LINES and PLIST to gnuplot string and writes it to
 STREAM. It returnes the path to the DATAFILE."
-  (awhen (write-data data)
+  (awhen (write-data out data :x-range x-range)
     (let ((title (case title
 		   (:default nil)
 		   ((:notitle nil) "notitle")
 		   (t (format nil "title \"~a\"" title)))))
       (format out "'~a' with lines~@[ ~a~]" (namestring it) title))))
-;;(line-1 t `(:d ,#'sqrt :x-values (0 2)) :title "qwe")
+;;(line-1 t `(:d ,#'sqrt :x-values (.5 1.0)) :title "qwe" :x-range nil)
+;;(untrace line-1)
+
+(defun line-p (x) (and (consp x) (eql (first x) :l)))
 
 (defun line (out expression)
   "Converts GP-LINES and title to gnuplot string and writes it to
 STREAM.
 Here graph and plot is the same"
-  (if (and (consp expression) (eql (first expression) :l))
+  (if (line-p expression)
     (apply #'line-1 out (rest expression))
     ;; else expression is just the data expression
     (line-1 out expression)))
-;;(line `(:l (:d ,#'sqrt :x-values (0 2)) :title "qwe" :x-values (0.3 0.7)))
+;;(line t `(:l (:d ,#'sqrt :x-values (0 2)) :title "qwe" :x-range (0.3 0.7)))
 ;;(line t `(:d ,#'sqrt :x-values (0 2)))
 ;;(line t #'sqrt)
+;;(trace line)
 
 (defun graph-p (expression)
   (and (consp expression)
        (member (first expression) '(:g :p))))
 
-;;concat
+(defun dispatch-margins (margins)
+  (destructuring-bind (l-r &optional t-b) (listify margins)
+    (destructuring-bind (ml &optional mr) (listify l-r)
+      (destructuring-bind (mt &optional mb) (listify t-b)
+	(cut (list :lmargin ml :rmargin mr :tmargin mt :bmargin mb))))))
+;;(dispatch-margins 1)
+
+(defun format-property (out property-key value)
+  (format out "set ~a ~a~%" (key->gp-name property-key) value))
+;;(format-property t :lmargin 3)
+
+(defun format-margins (out margins)
+  (loop for (key value) in (dispatch-margins margins)
+	if value do (format-property out key value)))
+;;(format-margins t '((1 3) (2 4)))
+
 (defun graph (out expression &key x-range y-range)
   "Converts GP-LINES and title to gnuplot string and writes it to
 STREAM. Here graph and plot is the same"
   (when expression
     (princ "plot " out)
     (format-list out (if (graph-p expression)
-		       (rest expression)
+		       (if (line-p (second expression))
+			 (list (second expression)) (second expression))
 		       (listify expression))
 		 #'(lambda (out x) (line out x))
 		 :in ", ")))
-;;(graph t `(:g (:d ,#'sqrt :x-values (0 2)) (:d ,#'sqrt :x-values (0 2))))
+;;(graph t `((:l (:d ,#'sqrt :x-values (0 2))) (:l (:d ,#'sqrt :x-values (0 2)))))
 ;;(graph t `(:d ,#'sqrt :x-values (0 2)))
 ;;(graph t `(,#'sqrt ,#'sqrt))
 ;;(untrace graph)
@@ -138,17 +159,21 @@ with N points."
 ;;(script nil `(:g ,#'sqrt ,#'sqrt) :pdf)
 ;;(trace script)
 
+(defun key->gp-name (key)
+  (string-downcase (symbol-name key)))
+
 (defun terminal->type (terminal)
-  (string-downcase (symbol-name (first (listify terminal)))))
+  (key->gp-name (first (listify terminal))))
 ;;(terminal->type :pdf)
 
-(defun plot (expression &key directory name (terminal :pdf))
+(defun plot (expression &key directory name (terminal :pdf) margins)
   "Returns a gnuplot script for plotting unary FUNCTION from A to B
 with N points."
   (let* ((scriptpath (gp-path directory name "gp"))
 	(target (script scriptpath expression terminal)))
     (ext:execute "/usr/bin/gnuplot" scriptpath)
     (list :script scriptpath :target target)))
-;;(gp:plot `(:p ,#'sqrt ,#'sq (:l (:d ,#'(lambda (x) (sq (sin x))) :x-values (0.01 1)) :title "Geir")))
+;;(gp:plot `(:p ,#'sqrt ,#'sq (:l (:d ,#'(lambda (x) (sq (sin x))) :x-range (0.01 1)) :title "Geir")))
+;;(gp:plot `(:d ,#'sqrt))
 ;;/ssh:ssh:/
 ;;(ext:execute "/usr/bin/gnuplot" "/tmp/gp0017.gp")
