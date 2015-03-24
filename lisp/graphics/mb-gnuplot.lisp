@@ -52,16 +52,29 @@ TODO: Handle n-ary functions and generalize X-VALUES to N dimensions."
 	do (format stream "~f~T~f~%" x (funcall function x))))
 ;;(trace write-function)
 
-(defun write-array (stream y-values &key (x-values (0-n (length y-values) :type 'vector)))
+(defun write-2d-array (stream array)
   "Returns the filename containing y-values as the second #\TAB delimited column.
 The first column currently only contains consecutive integers running from 0.
 TODO: 
 1. allow N dimensional array, where the Nth row contains data in the Nth dimension.
 2. only write points where the first dimension is within x-values.
 3. allow y-values, z-values etc, and modify task 2 accordingly"
-  (loop for x across x-values
-	for y across y-values
+  (loop for (x y) in (array->tree array)
 	do (format stream "~f~T~f~%" x y)))
+
+(defun write-array (stream y-values &key x-values x-range)
+  "Returns the filename containing y-values as the second #\TAB delimited column.
+The first column currently only contains consecutive integers running from 0.
+TODO: 
+1. allow N dimensional array, where the Nth row contains data in the Nth dimension.
+2. only write points where the first dimension is within x-values.
+3. allow y-values, z-values etc, and modify task 2 accordingly"
+  (if (= (array-rank y-values) 2)
+    (write-2d-array stream y-values)
+    (loop for x across (or x-values (0-n (length y-values) :type 'vector))
+	for y across y-values
+	  do (format stream "~f~T~f~%" x y))))
+;;(write-array t #2A((1 2)))
 
 (defun write-data-1 (stream target &rest plist)
   "TARGET should be either a function or an array"
@@ -90,7 +103,8 @@ STREAM. It returnes the path to the DATAFILE."
 		   (:default nil)
 		   ((:notitle nil) "notitle")
 		   (t (format nil "title \"~a\"" title)))))
-      (format out "'~a' with lines~@[ ~a~]" (namestring it) title))))
+      (format out "'~a' with ~a~@[ ~a~]"
+	(namestring it) (key->gp-name with) title))))
 ;;(line-1 t `(:d ,#'sqrt :x-values (.5 1.0)) :title "qwe" :x-range nil)
 ;;(untrace line-1)
 
@@ -124,27 +138,37 @@ Here graph and plot is the same"
 	(cut (list :lmargin ml :rmargin mr :tmargin mt :bmargin mb))))))
 ;;(dispatch-margins 1)
 
-(defun format-property (out property-key value)
-  (format out "set ~a ~a~%" (key->gp-name property-key) value))
-;;(format-property t :lmargin 3)
+(defun write-property (key value out)
+  (format out "set ~a ~a~%" (key->gp-name key) value))
+;;(write-property :lmargin 3 t)
 
-(defun format-margins (out margins)
+(defun write-margins (margins out)
   (loop for (key value) in (dispatch-margins margins)
-	if value do (format-property out key value)))
-;;(format-margins t '((1 3) (2 4)))
+	if value do (write-property key value out)))
+;;(write-margins '((1 3) (2 4)) t)
 
-(defun graph (out expression &key x-range y-range)
+(defun write-range (range out)
+  (format out "[~a:~a]" (first range) (second range)))
+;;(write-range '(2 3) t)
+;;(write-property :xrange (write-range '(2 3) nil) t)
+
+(defun graph-1 (out lines &key x-range y-range)
+  "Converts GP-LINES and title to gnuplot string and writes it to
+STREAM. Here graph and plot is the same"
+  (when lines
+    (when x-range (write-property :xrange (write-range x-range nil) out))
+    (when y-range (write-property :yrange (write-range y-range nil) out))
+    (princ "plot " out)
+    (format-list out (listify lines) #'(lambda (out x) (line out x))
+		 :in ", ")))
+
+(defun graph (out expression)
   "Converts GP-LINES and title to gnuplot string and writes it to
 STREAM. Here graph and plot is the same"
   (when expression
-    (princ "plot " out)
-    (let* ((target (if (graph-p expression)
-		     (second expression)
-		     expression))
-	   (targets (if (or (atom target) (line-p target t))
-		      (list target) target)))
-      (format-list out targets #'(lambda (out x) (line out x))
-		   :in ", "))))
+    (if (graph-p expression)
+      (apply #'graph-1 out (rest expression))
+      (graph-1 out expression))))
 ;;(graph t `((:l (:d ,#'sqrt :x-values (0 2))) (:l (:d ,#'sqrt :x-values (0 2)))))
 ;;(graph t `(:d ,#'sqrt :x-values (0 2)))
 ;;(graph t `(,#'sqrt ,#'sqrt))
@@ -178,6 +202,117 @@ with N points."
     (ext:execute "/usr/bin/gnuplot" scriptpath)
     (list :script scriptpath :target target)))
 ;;(gp:plot `(:p ,#'sqrt ,#'sq (:l (:d ,#'(lambda (x) (sq (sin x))) :x-range (0.01 1)) :title "Geir")))
-;;(gp:plot `(:d ,#'sqrt))
-;;/ssh:ssh:/
-;;(ext:execute "/usr/bin/gnuplot" "/tmp/gp0017.gp")
+;;(gp:plot `(:l (:d ,#'sqrt :resolution 10) :with :linespoints))
+;;(gp:plot `((:l (:d ,(lambda (x) (sq x)) :x-values (0 1) :resolution 10) :with :linespoints) (:l (:d ,(lambda (x) (- 2 (sq x))) :x-values (1 2) :resolution 10) :with :linespoints)))
+
+(defun version-number (name)
+  (if (stringp name)
+    (let ((pos (1+ (position-if-not #'digit-char-p name :from-end t))))
+      (values (subseq name pos) (subseq name 0 pos)))
+    (warn "argument is not a string")))
+;;(version-number "qwe")
+
+(defun new-name-version (name &optional length)
+  "Implement LENGTH later"
+  (multiple-value-bind (n string) (version-number name)
+    (format nil "~a~a"
+      (or string "tmp")
+      (1+ (or (and n (parse-integer n :junk-allowed t)) 0)))))
+;;(new-name-version "qwe")
+
+(defun new-pathname (path &optional new-name)
+  (make-pathname
+   :name (or new-name (new-name-version (pathname-name path)))
+   :defaults path))
+;;(new-pathname "~/projects/utils/lisp/graphics/")
+
+(defun gp-line-p (line target &optional (plot-string "plot"))
+  (awhen (search target (string-trim '(#\Space #\Tab) line))
+    (zerop it)))
+
+(defun plot-line-p (line &optional (plot-string "plot"))
+  (gp-line-p line plot-string))
+;;(plot-line-p "  plot")
+
+(defun output-line-p (line)
+  (let ((tokens (split-by-char line #\Space t)))
+    (and (= (length tokens) 3)
+	 (destructuring-bind (set output path) tokens
+	   (and (string= set "set")
+		(string= output "output")
+		tokens)))))
+;;(output-line-p "set output '/tmp/PM-97-100.pdf'")
+
+(defun gp-modify-output (lines new-path)
+  "Ugly but works"
+  (loop for l in lines
+        for tokens = (output-line-p l)
+	if tokens collect (format nil "set output '~a'"
+			      (make-pathname :name (pathname-name new-path)
+					     :defaults (string-trim "'" (third tokens))))
+	else collect l))
+;;(gp-modify-output (file->lines "/tmp/PM.gp") "/tmp/PM-97-100.gp")
+
+(defun reset-range-in-script (scriptpath x-range &optional new-name)
+  (let* ((lines (file->lines scriptpath))
+	 (pos (position-if #'plot-line-p lines))
+	 (new-path (new-pathname scriptpath new-name)))
+    (with-open-file (out new-path :direction :output :if-exists :supersede)
+      (setf lines (gp-modify-ouput lines new-path))
+      (write-lines (subseq lines 0 pos) out)
+      (write-property :xrange (write-range x-range nil) out)
+      (write-lines (subseq lines pos) out)
+      (pathname out))))
+;;(reset-range-in-script "/tmp/PM.gp" '(97 100) "PM-97-100")
+
+(defun rangify-name (path range)
+  (format nil "~a-~a-~a" (pathname-name path) (first range) (second range)))
+;;(rangify-name "/tmp/PM.gp" '(97 100))
+
+(defun reset-range (scriptpath x-range &optional (new-name (rangify-name scriptpath x-range)))
+  (let ((scriptpath (reset-range-in-script scriptpath x-range new-name)))
+    (ext:execute "/usr/bin/gnuplot" (namestring scriptpath))
+    (list :script (namestring scriptpath) :target (namestring (make-pathname :type "pdf" :defaults scriptpath)))))
+;;(reset-range "/tmp/PM.gp" '(97 100))
+
+(defun zoom-plot (scriptpath zoom-factor &optional (dimension :x))
+  "Zooms first plot defined in scriptpath by ZOOM-FACTOR.
+It only works with DIMENSION :X currently." )
+
+
+;;; convert fns to arrays, replot
+;;; write merge function with arrays
+;;; write merge function with segment
+(defvar testlength 100)
+(defun testarray (fn a b)
+  (tree->array (loop for x in (a-b a b :length testlength)
+		     collect (list x (funcall fn x)))))
+;;(testarray #'sq 0 1)
+;;(testarray #'(lambda (x) (- 2 (sq x))) 1 2)
+
+(defun mergearray (arr1 arr2)
+  (let ((tree1 (array->tree arr1))
+	(tree2 (array->tree arr2)))
+    (let* ((y0 (second (first (last tree1))))
+	   (y-1 (second (first (last tree1 2))))
+	   (y1 (- (* 2 y0) y-1))
+	   (z0 (second (first tree2)))
+	   (z1 (second (second tree2)))
+	   (a (/ (- y0 y1) (- z0 z1)))
+	   (b (- y0 (* a z0)))
+	   (as (a-b 0 testlength :length testlength :key #'(lambda (x) (+ (* (- a 1) (sq (/ (- x testlength) testlength))) 1))))
+	   (bs (a-b b 0 :length testlength :direction :auto)))
+      (values (tree->array (loop for (x y) in tree2
+			 for a in as
+			 for b in bs
+				 collect (list x (+ (* a y) b))))
+	      (list :y0 y0 :y1 y1 :z0 z0 :z1 z1 :a a :b b :as as :bs bs)))))
+;;(mergearray (testarray #'sq 0 1) (testarray #'(lambda (x) (- 2 (sq x))) 1 2))
+
+(defun merge-test ()
+  (gp:plot `(:p ((:l (:d ,(testarray #'sq 0 1)) :with linespoints)
+		 (:l (:d ,(testarray #'(lambda (x) (- 2 (sq x))) 1 2))  :with linespoints)
+		 (:l (:d ,(mergearray (testarray #'sq 0 1) (testarray #'(lambda (x) (- 2 (sq x))) 1 2))) :with linespoints))
+;;		:x-range (1.8 2)
+		)))
+;;(merge-test)
