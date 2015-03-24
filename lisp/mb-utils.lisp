@@ -23,7 +23,9 @@
    :group :pairs :tuples
    :boundaries
    :with-gensyms
-   :read-lines :read-text-file :read-text-file-lines
+   :read-lines :file->lines :file->string
+   :write-lines :lines->file :string->file
+   :read-text-file :read-text-file-lines ;;deprecated methods
    :sequence-index-boundary
    :win32-homepath
    :parse-iso-dttm
@@ -247,17 +249,22 @@ TODO: string keys could also evalute to a list"
                                (progn ,@(cdr cl)))))
                        clauses)))))
 
-(defun a-b (a b &key length (step (if length (/ (- b a) (1- length)) 1)) (type 'list))
+(defun a-b (a b &key length (step (if length (/ (- b a) (1- length)) 1)) (type 'list) (direction :up) key)
   "Returns the sequence from and including A to and including B by STEP
 If TYPE is provided, the result is #'COERCEd to TYPE."
-  (let ((res (loop for i from a to b by step collect i)))
-    (values
-     (if (and type (not (eql (type-of res) type)))
-       (coerce res type)
-       res)
-     step)))
-;;(a-b -2 2 :step 1/3 :type 'vector)
-;;(a-b 0 10 :length 3)
+  (flet ((up () (loop for i from a to b by step collect (if key (funcall key i) i)))
+	 (down () (loop for i downfrom a to b by (abs step) collect (if key (funcall key i) i))))
+    (let ((res (case direction
+		 (:up (up))
+		 (:down (down))
+		 (:auto (if (< a b) (up) (down))))))
+      (values
+       (if (and type (not (eql (type-of res) type)))
+	 (coerce res type)
+	 res)
+       step))))
+;;(a-b -2 2 :length 10 :type 'vector :direction :auto :key #'sqrt)
+;;(a-b 0 10 :type 'array :key #'(lambda (x) (list x (sq x))))
 
 (defun 0-n (n &rest args) (apply #'a-b 0 (1- n) args))
 ;;(0-n 10)
@@ -648,10 +655,6 @@ is true. The latter option is the fastest in this implementation."
        ((not it))
      ,@body))
 
-(defun read-text-file-lines (filespec &optional remove-empty-lines-p)
-  (with-open-file (in filespec) (read-lines in remove-empty-lines-p)))
-;;(first (read-text-file-lines "/home/MBe/projects/imms/data/rao/txt/RAO_FR85_LC78.txt" t))
-
 (defun read-lines (stream &optional remove-empty-lines-p)
   "Move to util file"
   (loop for line = (read-line stream nil nil)
@@ -660,8 +663,36 @@ is true. The latter option is the fastest in this implementation."
      collect line))
 ;;(first (read-lines "/home/MBe/projects/imms/data/rao/txt/RAO_FR85_LC78.txt" t))
 
+(defun read-text-file-lines (filespec &optional remove-empty-lines-p)
+  (warn "This function is deprecated. Use FILE->LINES instead.")
+  (file->lines path remove-empty-lines-p))
+
+(defun file->lines (filespec &optional remove-empty-lines-p)
+  (with-open-file (in filespec)
+    (read-lines in remove-empty-lines-p)))
+;;(first (file->lines "/home/MBe/projects/imms/data/rao/txt/RAO_FR85_LC78.txt" t))
+
 (defun read-text-file (path)
-  (concat (read-text-file-lines path) :in (string #\Newline)))
+  (warn "This function is deprecated. Use FILE->STRING instead.")
+  (file->string path))
+
+(defun file->string (filespec)
+  (concat (file->lines filespec) :in (string #\Newline)))
+;;(subseq (file->string "/home/MBe/projects/imms/data/rao/txt/RAO_FR85_LC78.txt") 0 10)
+
+(defun write-lines (lines stream)
+  (loop for line in lines do (write-line line stream)))
+;;(write-lines '("line1" "line2") t)
+
+(defun lines->file (lines filespec &key (if-exists :supersede))
+  (with-open-file (out filespec :direction :output :if-exists if-exists)
+    (write-lines lines out)))
+;;(let ((path "~/tmp/lines.txt")) (lines->file '("line1" "line2") path) (file->string path))
+
+(defun string->file (string filespec &key (if-exists :supersede))
+  (with-open-file (out filespec :direction :output :if-exists if-exists)
+    (write-string string out)))
+;;(let ((path "~/tmp/lines.txt")) (string->file "qwe" path) (file->string path))
 
 (defun neq (x y) (not (eq x y)))
 
