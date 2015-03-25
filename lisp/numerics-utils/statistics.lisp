@@ -25,7 +25,7 @@
 	  (* d (loop for k from (- k-limit) to k-limit
 		     sum (exp (- (sq (+ f (* g k))))))))))))
 ;;(funcall (wrapped-normal-distribution 3.6826447217080354073L0 0.59857875) (+ pi (* 2 pi)))
-;;(gp::plot (wrapped-normal-distribution -2.600540585471551 0.7) :x-values (list (- pi) pi))
+;;(gp::plot `((:l (:d ,(wrapped-normal-distribution -2.600540585471551 0.7) :x-values ,(list (- pi) pi)))))
 
 (defun wnd (&rest args) (apply #'wrapped-normal-distribution args))
 ;;(funcall (wnd 0 1) (- pi))

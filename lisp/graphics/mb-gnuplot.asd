@@ -5,4 +5,5 @@
   :licence "GNU"
   :depends-on (:mb-utils)
   :components
-  ((:cl-source-file "mb-gnuplot")))
+  ((:cl-source-file "mb-gnuplot")
+   (:cl-source-file "bezier")))
