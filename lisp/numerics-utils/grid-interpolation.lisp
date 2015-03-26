@@ -157,18 +157,11 @@ F(point), f1 = F(point + x1), f2 = (point + x2), .."
 (defun reshape-grid (grid new-axes)
   "Returns a new grid of same type as GRID but with grid axes defined
 by NEW-AXES. The grid point values are calculated by local
-interpolation, see GRID-INTERPOLATE. Note that this function is
-destructive, so consider copying argument before sending it."
-  (setf (grid-data grid) (grid-data (span-grid (lambda (&rest p) (grid-interpolate p grid)) new-axes)))
-  (setf (grid-axes grid) new-axes)
-  grid)
-
-(defun reshape-grid (grid new-axes)
-  "Returns a new grid of same type as GRID but with grid axes defined
-by NEW-AXES. The grid point values are calculated by local
 interpolation, see GRID-INTERPOLATE."
-  (copy-object grid
-    :data (grid-data (span-grid (lambda (&rest p) (grid-interpolate p grid)) new-axes))
-    :axes new-axes))
+  (if (equal (grid-axes grid) new-axes)
+    grid
+    (copy-object grid
+      :data (grid-data (span-grid (lambda (&rest p) (grid-interpolate p grid)) new-axes))
+      :axes new-axes)))
 ;;(list-grid (reshape-grid *test-grid* '(#(0 .5 1) #(5 9))))
 ;;(list-grid *test-grid*)

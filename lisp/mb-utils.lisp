@@ -8,6 +8,7 @@
    :a-b :0-n :abs- :abs+ :string-case :cut :cut-if :nor
    :awhen :aif :it :awhile
    :nth* :pop-list
+   :rcons
    :copy-if :infix-list
    :remove-nth
    :write-list :concat :format-list :split-by-char
@@ -620,6 +621,9 @@ number, only flatten down this many tree levels."
   (nth (mod n (length list)) list))
 ;;(nth* -1123 '(1 2 3))
 
+(defun rcons (list x) (append list (list x)))
+;;(let ((l '(1 2))) (list (rcons l 1) l))
+
 (defun maptree (function tree &optional (levels most-positive-fixnum))
   "Maps TREE to another three with same structure applying
 FUNCTION If optional argument LEVEL is provided, the mapping goes
@@ -879,17 +883,20 @@ is (fn A1(I) A2(I) ...), I being a row major index."
   `(defmacro ,new-name (&rest args)
      `(,',prev-name ,@args)))
 
-(defun boundaries-1 (list)
+(defun nboundaries-1 (list)
   (loop for (a b) in (pairs list) collect (/ (+ b a) 2)))
 ;;(boundaries-1 '(1.0 3.0 4.0))
 
-(defun boundaries (list &optional flank-p)
-  (boundaries-1 (if flank-p
+(defun nboundaries (list &optional flank-p)
+  (nboundaries-1 (if flank-p
 		  (nflank (- (* 2 (car list)) (cadr list))
 			  list
 			  (- (* 2 (car (last list))) (car (last list 2))))
 		  list)))
-;;(boundaries (list -4.0 -3.0 -1.0) t)
+
+(defun boundaries (list &optional flank-p)
+  (nboundaries (copy-seq list) flank-p))
+;;(let ((l (list -4.0 -3.0 -1.0))) (list (boundaries l t) l))
 
 ;;;; Not exported:
 ;;; These utils may seem a bit obscure, but they are pretty fast on lists.

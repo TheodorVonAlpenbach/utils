@@ -152,12 +152,14 @@ Here graph and plot is the same"
 ;;(write-range '(2 3) t)
 ;;(write-property :xrange (write-range '(2 3) nil) t)
 
-(defun graph-1 (out lines &key x-range y-range)
+(defun graph-1 (out lines &key x-range y-range xlabel ylabel)
   "Converts GP-LINES and title to gnuplot string and writes it to
 STREAM. Here graph and plot is the same"
   (when lines
     (when x-range (write-property :xrange (write-range x-range nil) out))
     (when y-range (write-property :yrange (write-range y-range nil) out))
+    (when xlabel (write-property :xlabel xlabel out))
+    (when ylabel (write-property :ylabel ylabel out))
     (princ "plot " out)
     (format-list out (listify lines) #'(lambda (out x) (line out x))
 		 :in ", ")))
@@ -174,25 +176,38 @@ STREAM. Here graph and plot is the same"
 ;;(graph t `(,#'sqrt ,#'sqrt))
 ;;(untrace graph)
 
+(defun key->gp-name (key)
+  (string-downcase (symbol-name key)))
+
+(defun terminal-type (terminal)
+  (first (listify terminal)))
+
+(defun terminal->pathtype (terminal)
+  (let ((terminal-type (terminal-type terminal)))
+    (case terminal-type
+      ((:tex :latex :cairolatex) "tex")
+      (t (key->gp-name terminal-type)))))
+;;(mapcar #'terminal->pathtype '((:cairolatex) (:latex) :tex :pdf :bogus))
+
+(defun write-terminal (terminal out)
+  (format out "set terminal ~a" (key->gp-name (terminal-type terminal)))
+  (if (consp terminal)
+    (format out " roman ~a" (third terminal)))
+  (terpri out))
+;;(write-terminal '(:latex :fontsize 6) t)
+
 (defun script (scriptpath expression terminal)
   "Returns a gnuplot script for plotting unary FUNCTION from A to B
 with N points."
   (with-open-file (out scriptpath :direction :output :if-exists :supersede)
-    (let* ((type (terminal->type terminal))
+    (let* ((type (terminal->pathtype terminal))
 	   (target (namestring (make-pathname :type type :defaults out))))
-      (format out "set terminal ~a~%" type)
+      (write-terminal terminal out)
       (format out "set output '~a'~%" target)
       (graph out expression)
       target)))
 ;;(script nil `(:g ,#'sqrt ,#'sqrt) :pdf)
 ;;(trace script)
-
-(defun key->gp-name (key)
-  (string-downcase (symbol-name key)))
-
-(defun terminal->type (terminal)
-  (key->gp-name (first (listify terminal))))
-;;(terminal->type :pdf)
 
 (defun plot (expression &key directory name (terminal :pdf) margins)
   "Returns a gnuplot script for plotting unary FUNCTION from A to B
