@@ -1,15 +1,18 @@
 (defpackage :mb-grid
-  (:use :cl :mb-utils :numerics-utils)
-  (:export :grid :make-grid :grid-data :grid-axes :list-grid))
+  (:use :cl :mb-utils :numerics-utils :csv)
+  (:export :grid :make-grid :grid-data :grid-axes
+	   :list-grid :grid-axes* :span-grid :map-grid
+	   :export-grid))
 
 (in-package :mb-grid)
 
 ;;;; TODO: make GRID a printable object, and remove LIST-GRID
-
-
 (defclass grid ()
   ((data :initarg :data :accessor grid-data :type array)
    (axes :initarg :axes :accessor grid-axes :type cons)))
+
+(defmethod dimension ((x grid)) (array-rank (grid-data x)))
+;;(dimension (make-grid #(1 2 3) #(1 2 3)))
 
 (defun make-grid (data axes)
   (make-instance 'grid :data data :axes axes))
@@ -25,7 +28,15 @@
 
 (defmethod grid-axes ((grid cons))
   (second grid))
-;;(grid-axes (list 'data 'axes))
+;;(grid-axes (span-grid (lambda (&rest p) (sqrt (reduce #'+ p))) '(#(0 1 2) #(5 10))))
+
+(defun grid-axes* (grid &optional type)
+  "Returns the axes of grid as a list. If TYPE is non-nil, it converts
+each axis to a sequence of this TYPE"
+  (if type
+    (loop for x in (grid-axes grid) collect (coerce x type))
+    (grid-axes grid)))
+;;(grid-axes* (span-grid (lambda (&rest p) (sqrt (reduce #'+ p))) '(#(0 1 2) #(5 10))) 'list)
 
 (defmethod span-grid (fn axes)
   (make-grid (apply #'span-array fn axes) axes))
@@ -33,4 +44,21 @@
 
 (defun map-grid (fn &rest grids)
   "Assumes all grids have the same axes"
-  (make-grid (map-array fn (mapcar #'grid-data grids)) (first grids)))
+  (make-grid (apply #'map-array fn (mapcar #'grid-data grids)) (grid-axes (first grids))))
+;;(setf qwe (span-grid (lambda (&rest p) (sqrt (reduce #'+ p))) '(#(0 1 2) #(5 10))))
+;;(list-grid (map-grid (bind #'+ 17) qwe))
+;;(list-grid (map-grid #'+ qwe qwe))
+
+(defun gnuplot-grid (grid)
+  "Converts grid to the layout expected by gnuplot for splotting with a nonuniform matrix.
+splot 'file' nonuniform matrix. See gnuplot doc for more"
+  (assert (= (dimension grid) 2))
+  (destructuring-bind (row-axis column-axis) (grid-axes* grid 'list)
+    (cons (cons (length column-axis) column-axis)
+	  (mapcar #'cons row-axis (array->tree (grid-data grid))))))
+;;(write-csv-file (gnuplot-grid qwe) "~/projects/imms/src/spectrum.csv")
+
+(defun export-grid (grid filename &rest args)
+  "Exports GRID to csv format and writes it to FILENAME. See write-csv for ARGS"
+  (apply #'write-csv-file (gnuplot-grid grid) filename args))
+;;(export-grid (span-grid #'+ '(#(0 1 2) #(5 10))) "~/tmp/test.csv" :column-separator #\Space)
