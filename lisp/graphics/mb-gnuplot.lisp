@@ -1,6 +1,6 @@
 (defpackage :mb-gnuplot
   (:nicknames :gp)
-  (:use :common-lisp :mb-utils)
+  (:use :common-lisp :mb-utils :csv)
   (:export :plot))
 
 (in-package :mb-gnuplot)
@@ -164,13 +164,29 @@ STREAM. Here graph and plot is the same"
     (format-list out (listify lines) #'(lambda (out x) (line out x))
 		 :in ", ")))
 
+(defun write-matrix (grid)
+  "Writes a data file based on GRID"
+  (with-temporary-file (out)
+    (write-csv grid out :column-separator #\Space)))
+
+(defun splot (out grid)
+  "splots ARRAY."
+  (awhen (write-matrix grid)
+    (format out "set view map~%")
+    (format out "splot '~a' nonuniform matrix with image~%" it)))
+
+(defun splot-p (x) (when (consp x) (awhen (first x) (eql it :s))))
+;;(mapcar #'splot-p '((:s) :s nil 123))
+
 (defun graph (out expression)
   "Converts GP-LINES and title to gnuplot string and writes it to
 STREAM. Here graph and plot is the same"
   (when expression
     (if (graph-p expression)
       (apply #'graph-1 out (rest expression))
-      (graph-1 out expression))))
+      (if (splot-p expression)
+	(apply #'splot out (rest expression))
+	(graph-1 out expression)))))
 ;;(graph t `((:l (:d ,#'sqrt :x-values (0 2))) (:l (:d ,#'sqrt :x-values (0 2)))))
 ;;(graph t `(:d ,#'sqrt :x-values (0 2)))
 ;;(graph t `(,#'sqrt ,#'sqrt))
