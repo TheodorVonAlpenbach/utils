@@ -18,18 +18,19 @@
    :relations
    :copy-object :copy-object-to
    :draw :draw-if
-   :last-elt :butlast* :head :last* :butfirst
+   :subseq* :last-elt :butlast* :head :last* :butfirst
    :transpose-tree
    :flatten* :minimum :maximum :maptree
    :group :pairs :tuples
    :boundaries
    :with-gensyms
+   :with-outfile
    :read-lines :file->lines :file->string
    :write-lines :lines->file :string->file
    :read-text-file :read-text-file-lines ;;deprecated methods
    :sequence-index-boundary
    :win32-homepath
-   :parse-iso-dttm
+   :parse-iso-dttm :parse-iso-date :parse-iso-time
    :tree->value-index-tuples
    :tree-dimensions
    :tree->array :array->tree
@@ -130,6 +131,12 @@ TODO: implement a mapping key, see `pairs' (when needed)"
   "Same as `butlast' but accepts negative argument, meaning counting from start."
   (butlast list (mod (or n 1) (length list))))
 ;;(butlast* '(a b c d e) -2)
+
+(defmacro subseq* (sequence start &optional end)
+  (with-gensyms (glength)
+    `(let ((,glength (length ,sequence)))
+       (subseq ,sequence (mod ,start ,glength) (and ,end (mod ,end ,glength))))))
+;;(subseq* (a-b 0 10) 1 -1)
 
 (defun head (list &optional n)
   "Returns the N first elements of LIST"
@@ -659,6 +666,10 @@ is true. The latter option is the fastest in this implementation."
        ((not it))
      ,@body))
 
+(defmacro with-outfile ((out filespec) &body body)
+  `(with-open-file (,out ,filespec :direction :output :if-exists :supersede)
+     ,@body))
+
 (defun read-lines (stream &optional remove-empty-lines-p)
   "Move to util file"
   (loop for line = (read-line stream nil nil)
@@ -845,6 +856,7 @@ is (fn A1(I) A2(I) ...), I being a row major index."
   (generate-array (and arrays (array-dimensions (first arrays)))
 		  (lambda (i) (apply fn (mapcar (bind #'row-major-aref i) arrays)))))
 ;;(map-array #'+ #3A(((101 2) (3 4)) ((1 2) (3 4))) #3A(((1 2) (3 4)) ((1 2) (3 4))))
+;;(map-array (bind #'+ 17) #3A(((101 2) (3 4)) ((1 2) (3 4))))
 
 (defun map-array-rows (fn 2a &optional (type 'vector))
   (coerce (mapcar fn (array-rows 2a)) type))

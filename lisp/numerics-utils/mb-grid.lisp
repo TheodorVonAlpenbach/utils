@@ -2,6 +2,7 @@
   (:use :cl :mb-utils :numerics-utils :csv)
   (:export :grid :make-grid :grid-data :grid-axes
 	   :list-grid :grid-axes* :span-grid :map-grid
+	   :gnuplot-matrix->grid :grid->gnuplot-matrix
 	   :export-grid))
 
 (in-package :mb-grid)
@@ -13,6 +14,8 @@
 
 (defmethod dimension ((x grid)) (array-rank (grid-data x)))
 ;;(dimension (make-grid #(1 2 3) #(1 2 3)))
+
+;;(with-slots (data axes) (make-grid #(1 2 3) #(1 2 3)) data)
 
 (defun make-grid (data axes)
   (make-instance 'grid :data data :axes axes))
@@ -49,16 +52,21 @@ each axis to a sequence of this TYPE"
 ;;(list-grid (map-grid (bind #'+ 17) qwe))
 ;;(list-grid (map-grid #'+ qwe qwe))
 
-(defun gnuplot-grid (grid)
+(defun grid->gnuplot-matrix (grid)
   "Converts grid to the layout expected by gnuplot for splotting with a nonuniform matrix.
 splot 'file' nonuniform matrix. See gnuplot doc for more"
   (assert (= (dimension grid) 2))
   (destructuring-bind (row-axis column-axis) (grid-axes* grid 'list)
     (cons (cons (length column-axis) column-axis)
 	  (mapcar #'cons row-axis (array->tree (grid-data grid))))))
-;;(write-csv-file (gnuplot-grid qwe) "~/projects/imms/src/spectrum.csv")
+
+(defun gnuplot-matrix->grid (matrix)
+  (make-grid (tree->array (mapcar #'rest (rest matrix)))
+	     (list (map 'vector #'first (rest matrix))
+		   (coerce (rest (first matrix)) 'vector))))
+;;(list-grid (gnuplot-matrix->grid '((nil 1 2 3) (0.1 2 3 4) (0.2 3 4 5) (0.3 4 5 6))))
 
 (defun export-grid (grid filename &rest args)
   "Exports GRID to csv format and writes it to FILENAME. See write-csv for ARGS"
-  (apply #'write-csv-file (gnuplot-grid grid) filename args))
+  (apply #'write-csv-file (gnuplot-matrix->grid grid) filename args))
 ;;(export-grid (span-grid #'+ '(#(0 1 2) #(5 10))) "~/tmp/test.csv" :column-separator #\Space)

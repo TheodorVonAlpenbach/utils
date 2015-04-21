@@ -1,6 +1,7 @@
 (defpackage :numerics-utils
   (:use :cl :mb-utils)
   (:export :parse-real
+	   :normalize-radian
 	   :grid-interpolate
 	   :reshape-grid
 	   :gamma-function

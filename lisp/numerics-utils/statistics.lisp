@@ -5,8 +5,15 @@
 (defconstant 2PI (* 2 pi))
 (defconstant SQRT-2 (sqrt 2))
 
-(defun normalize-radian (x)
-  (- (mod (+ x pi) 2PI) pi))
+(defun normal-distribution (mu sigma)
+  (let ((a (/ 1 (* sigma (sqrt 2PI))))
+	(b (- (/ 1 (* 2 (sq sigma))))))
+    (lambda (x) (* a (exp (* b (sq (- x mu))))))))
+;;(gp::plot `(:d ,(normal-distribution 0 1) :x-values (-4 4)))
+
+(defun normalize-radian (x &optional (min-radian (- pi)))
+  (+ (mod (- x min-radian) 2PI) min-radian))
+;;(normalize-radian pi)
 
 (defun wrapped-normal-distribution (mu sigma)
   "Returns WND for MU and SIGMA."
@@ -43,3 +50,21 @@
   (let ((a (/ -1 2 (sq σ))))
     (lambda (x) (- 1 (exp-safe (* a (sq x)))))))
 ;;(gp:plot (rayleigh-cumulative-function 4) :x-values '(0 10))
+
+(defun variance-vector (vector)
+  "Returns unbiased sample variance of the elements in VECTOR"
+  (let ((mean (average vector)))
+    (/ (loop for x across vector
+	     sum (sq (- x mean)))
+       (1- (length vector)))))
+;;(stdev-vector #(1 2 3 4))
+
+(defun variance (sequence) (variance-vector (coerce sequence 'vector)))
+(defun stdev (sequence) (sqrt (variance sequence)))
+
+(defun random-normal-fn (mu sigma &optional (n 12))
+  "Returns a function that generates values that are normal distributed"
+  (let ((n/2 (/ n 2)))
+    (lambda () (+ mu (* sigma (- (loop repeat 12 sum (random 1.0)) n/2))))))
+;;(stdev (loop with fn = (random-normal-fn 0 PI) repeat 100000 collect (funcall fn)))
+

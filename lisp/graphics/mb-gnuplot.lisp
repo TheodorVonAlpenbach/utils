@@ -147,31 +147,46 @@ Here graph and plot is the same"
 	if value do (write-property key value out)))
 ;;(write-margins '((1 3) (2 4)) t)
 
-(defun write-range (range out)
+(defun write-range (range &optional (out nil))
   (format out "[~a:~a]" (first range) (second range)))
 ;;(write-range '(2 3) t)
 ;;(write-property :xrange (write-range '(2 3) nil) t)
+
+(defun gp-listify (x)
+  (if (or (graph-p x) (line-p x t))
+    (list x) x))
+;;(gp-listify `(:d #'sin :x-values (-3 3)))
 
 (defun graph-1 (out lines &key x-range y-range xlabel ylabel)
   "Converts GP-LINES and title to gnuplot string and writes it to
 STREAM. Here graph and plot is the same"
   (when lines
-    (when x-range (write-property :xrange (write-range x-range nil) out))
-    (when y-range (write-property :yrange (write-range y-range nil) out))
+    (when x-range (write-property :xrange (write-range x-range) out))
+    (when y-range (write-property :yrange (write-range y-range) out))
     (when xlabel (write-property :xlabel xlabel out))
     (when ylabel (write-property :ylabel ylabel out))
     (princ "plot " out)
-    (format-list out (listify lines) #'(lambda (out x) (line out x))
+    (format-list out (gp-listify lines) #'(lambda (out x) (line out x))
 		 :in ", ")))
+;;(untrace graph-1)
 
 (defun write-matrix (grid)
   "Writes a data file based on GRID"
   (with-temporary-file (out)
     (write-csv grid out :column-separator #\Space)))
 
-(defun splot (out grid)
+(defun format-properties (p-list out)
+  (loop for (k v) in (cut p-list)
+ 	do (write-property
+	    k (case k
+		((:xrange :yrange) (write-range v))
+		((:xlabel :ylabel) (format nil "'~a'" v)))
+	    out)))
+
+(defun splot (out grid &rest p-list)
   "splots ARRAY."
   (awhen (write-matrix grid)
+    (format-properties p-list out)
     (format out "set view map~%")
     (format out "splot '~a' nonuniform matrix with image~%" it)))
 
@@ -190,20 +205,24 @@ STREAM. Here graph and plot is the same"
 ;;(graph t `((:l (:d ,#'sqrt :x-values (0 2))) (:l (:d ,#'sqrt :x-values (0 2)))))
 ;;(graph t `(:d ,#'sqrt :x-values (0 2)))
 ;;(graph t `(,#'sqrt ,#'sqrt))
-;;(untrace graph)
 
 (defun key->gp-name (key)
   (string-downcase (symbol-name key)))
 
 (defun terminal-type (terminal)
-  (first (listify terminal)))
+  (let ((res (first (listify terminal))))
+    (case res
+      (:eps :epscairo)
+      (t res))))
+;;(mapcar #'terminal-type '(:eps :epscairo (:eps) :pdf))
 
 (defun terminal->pathtype (terminal)
   (let ((terminal-type (terminal-type terminal)))
     (case terminal-type
       ((:tex :latex :cairolatex) "tex")
+      ((:epscairo) "eps")
       (t (key->gp-name terminal-type)))))
-;;(mapcar #'terminal->pathtype '((:cairolatex) (:latex) :tex :pdf :bogus))
+;;(mapcar #'terminal->pathtype '((:cairolatex) (:latex) :tex :pdf :bogus :eps))
 
 (defun write-terminal (terminal out)
   (format out "set terminal ~a" (key->gp-name (terminal-type terminal)))
