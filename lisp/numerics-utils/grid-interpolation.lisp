@@ -2,8 +2,8 @@
 
 ;;; A tiny implementation of matrix as a list of row vectors
 ;;; This is hairy. Should use real matrices instead, me thinks (MB).
-;;; These methods should by no means be exported.
-(defun vec (n &optional (init 0)) (make-list n :initial-element init))
+;;; These methods should by no means be exported.s
+(defun vec (n &optional (init 0)) (make-list n :initial-element init))1
 (defun vec+ (vec &rest vecs) (apply #'map (type-of vec) #'+ vec vecs))
 (defun vec- (vec &rest vecs) (apply #'mapcar #'- vec vecs))
 (defun vec-copies (vec n) (loop repeat n collect (copy-list vec)))
@@ -129,9 +129,9 @@ F(point), f1 = F(point + x1), f2 = (point + x2), .."
 					   (tree->array (mapcar #'list fd)))))
 	 (b (- f0 (dot-product a p0)))
 	 (F^ (+ (dot-product a point) b)))
-    (if *rao-verbose*
-      (values F^ (list :p0 p0 :p p :V V :f0 f0 :f f :fd fd :a a :b b))
-      F^)))
+    (when *rao-verbose*
+      (print  (list :point point :F^ F^ :p0 p0 :p p :V V :f0 f0 :f f :fd fd :a a :b b)))
+      F^))
 ;;(grid-interpolate '(2 2 0) *test-grid*)
 
 (defun grid-interpolate (point grid)
@@ -145,6 +145,7 @@ F(point), f1 = F(point + x1), f2 = (point + x2), .."
     (when *rao-verbose* (print (list point index-edges index-points points values)))
     (interpolate point points values)))
 ;;(grid-interpolate '(1 10) *test-grid*)
+;;(trace grid-interpolate)
 
 (defun test-grid-interpolate (grid)
   (loop for ip in (grid-index-points grid)
@@ -154,14 +155,33 @@ F(point), f1 = F(point + x1), f2 = (point + x2), .."
 	collect (abs (- iv gv))))
 ;;(reduce #'+ (test-grid-interpolate *test-grid*))
 
-(defun reshape-grid (grid new-axes)
+(defun wrap-grid (grid diameter dimension)
+  "Wraps GRID in dimension DIMENSION, so the grid becomes in effect a
+cylinder with diameter CYCLE-LENGTH. Currently only DIMENSION 1 is
+supported."
+  (assert (= dimension 1))
+  (copy-object
+      :data (with-tree (x (grid-data rao)) (tree-expand x 1))
+      :axes (list (first (grid-axes rao))
+		  (expand-sequence (second (grid-axes rao)) 1 wrap-length))))
+;;(list-grid (reshape-rao (first *raos*) (new-domain)))
+;;(grid-data (first *raos*))
+;;(grid-data (reshape-rao (first *raos*) (new-domain)))
+
+(defun interpolate-cyclic (rao new-axes)
+  "Add cyclic columns. Interpolate."
+  (reshape-grid (wrap-grid rao 1 (* 2 pi)) new-axes))
+
+(defun reshape-grid (grid new-axes &optional diameter (dimension 1))
   "Returns a new grid of same type as GRID but with grid axes defined
 by NEW-AXES. The grid point values are calculated by local
 interpolation, see GRID-INTERPOLATE."
   (if (equal (grid-axes grid) new-axes)
     grid
-    (copy-object grid
-      :data (grid-data (span-grid (lambda (&rest p) (grid-interpolate p grid)) new-axes))
-      :axes new-axes)))
+    (if diameter
+      (reshape-grid (wrap-grid grid diameter dimension) new-axes)
+      (copy-object grid
+	:data (grid-data (span-grid (lambda (&rest p) (grid-interpolate p grid)) new-axes))
+	:axes new-axes))))
 ;;(list-grid (reshape-grid *test-grid* '(#(0 .5 1) #(5 9))))
 ;;(list-grid *test-grid*)

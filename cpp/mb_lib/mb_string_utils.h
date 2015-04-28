@@ -26,7 +26,7 @@ namespace mb {
   // Manipulation
   std::string singleQuote(const std::string&); // s -> 's'
   std::string padString(const std::string& s, const int length, const char c = ' ');
-  std::vector<std::string> split_string(const std::string& s, const std::string& del = whitespaces);
+  //std::vector<std::string> split_string(const std::string& s, const std::string& del = whitespaces);
   std::string trim_string(const std::string& s, const std::string& del = whitespaces);
 
   // Reads S with '<<' into a std::vector of strings.
@@ -50,7 +50,7 @@ namespace mb {
 
   //// Implementations
   inline std::string padString(const std::string& s, const int length, const char c) 
-  { return s + std::string(max<int>(length - s.size(), 1), c); }
+  { return s + std::string(std::max<int>(length - s.size(), 1), c); }
 
   inline std::vector<std::string> readString(const std::string& s) {
     std::istringstream ist(s.c_str());

@@ -21,6 +21,7 @@
    :subseq* :last-elt :butlast* :head :last* :butfirst
    :transpose-tree
    :flatten* :minimum :maximum :maptree
+   :flank
    :group :pairs :tuples
    :boundaries
    :with-gensyms
@@ -89,14 +90,24 @@ second and third arguments respectively."
   (minimum list :test (complement test) :key key))
 ;;(maximum '(3 2 1 5))
 
-(defun nflank (a list b)
+(defun nrcons (x list)
+  "B after LIST. Destructive."
+  (nconc list (list x)))
+;;(let ((l '(a))) (list (rcons 'b l) l))
+
+(defun rcons (list x) (append list (list x)))
+;;(let ((l '(1 2))) (list (rcons l 1) l))
+
+(defun nflank (a list &optional (b a))
   "Inserts A before and B after LIST. Destructive."
-  (nconc (cons a list) (list b)))
+  (cons a (nrcons b list)))
 ;;(let ((l (list 2 3))) (list l (nflank 1 l 4)))
 
-(defun flank (a list b)
-  "Inserts A before and B after LIST."
+(defun flank (a list &optional (b a))
+  "Inserts A before and B after LIST.
+If B is not specified, A is used."
   (nflank a (copy-list list) b))
+;;(flank 'a (flank 1 ()) 'b)
 
 (defmacro twins (x) `(make-list 2 :initial-element ,x))
 ;;(twins (+ 1 2))
@@ -257,7 +268,7 @@ TODO: string keys could also evalute to a list"
                                (progn ,@(cdr cl)))))
                        clauses)))))
 
-(defun a-b (a b &key length (step (if length (/ (- b a) (1- length)) 1)) (type 'list) (direction :up) key)
+(defun a-b (a b &key length (step (if length (/ (- b a) (1- length)) 1)) (type 'list) (direction :auto) key)
   "Returns the sequence from and including A to and including B by STEP
 If TYPE is provided, the result is #'COERCEd to TYPE."
   (flet ((up () (loop for i from a to b by step collect (if key (funcall key i) i)))
@@ -609,7 +620,7 @@ about the copying process."
 
 (defun last-elt (sequence &optional (n 1))
   (elt sequence (- (length sequence) n)))
-;;;;(loop for x in (list "qwe" '(0 1 2) #(3 4 5)) collect (last-elt x 1))
+;;;;(loop for x in (list "qwe" '(0 1 2) #(3 4 5)) collect (last-elt x 2))
 
 (defun flatten* (x &optional (levels most-positive-fixnum))
   "Flattens out all arguments in tree X. If optional LEVELS is a
@@ -627,9 +638,6 @@ number, only flatten down this many tree levels."
   <= M < L and M is equal to N modulo L."
   (nth (mod n (length list)) list))
 ;;(nth* -1123 '(1 2 3))
-
-(defun rcons (list x) (append list (list x)))
-;;(let ((l '(1 2))) (list (rcons l 1) l))
 
 (defun maptree (function tree &optional (levels most-positive-fixnum))
   "Maps TREE to another three with same structure applying
@@ -863,8 +871,19 @@ is (fn A1(I) A2(I) ...), I being a row major index."
 ;;(map-array-rows #'length (tree->array '((1 2) (3 4))))
 
 (defun array->tree (a)
+  "This works only for 2d arrays"
   (loop for row in (array-rows a) collect (coerce row 'list)))
 ;;(array->tree (tree->array '((a b) (a b))))
+
+(defun array->tree (array)
+  "This works only for 1d and 2d arrays"
+  (case (array-rank array)
+    (0 (aref array))
+    (1 (coerce array 'list))
+    (2 (loop for row in (array-rows array) collect (coerce row 'list)))
+    (t (error "ARRAY->TREE is not implemented for arrays of rank ~a" (array-rank array)))))
+;;(mapcar #'array->tree (list #0A1234 #1A(1 2 3 4) #(1 2 3 4) #2A((1 2) (3 4))))
+
 
 (defun array-reverse-rows (a)
   "Reverts rows in A. ``Slower'' version."

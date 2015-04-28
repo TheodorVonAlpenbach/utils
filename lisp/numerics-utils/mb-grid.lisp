@@ -68,5 +68,6 @@ splot 'file' nonuniform matrix. See gnuplot doc for more"
 
 (defun export-grid (grid filename &rest args)
   "Exports GRID to csv format and writes it to FILENAME. See write-csv for ARGS"
-  (apply #'write-csv-file (gnuplot-matrix->grid grid) filename args))
+  (apply #'write-csv-file (grid->gnuplot-matrix grid) filename args))
+
 ;;(export-grid (span-grid #'+ '(#(0 1 2) #(5 10))) "~/tmp/test.csv" :column-separator #\Space)

@@ -73,7 +73,6 @@ This could perhaps be renamed to CONCATENATE-MATRIX-COLUMNS."
 		     do (setf (aref res ri rj) (aref a i j))))
       res)))
 ;;(submatrix (identity-matrix 3) :columns 1)
-;;(submatrix #2A((1 0 0 1 0 0) (0 1 0 0 1 0) (0 0 1 0 0 1)) :columns (loop for i from 3 below (* 2 3)))
 
 (defun invert-matrix (a)
   "Inverts square matrix A"
@@ -144,4 +143,8 @@ This could perhaps be renamed to CONCATENATE-MATRIX-COLUMNS."
 
 (defun matrix-column (matrix &optional (j 0))
   (make-array (array-dimension matrix 1) :displaced-to (submatrix matrix :columns j)))
-;;(mapcar (bind #'matrix-column #2A((0.1962614) (0.16367006)) 1) '(0))
+
+(defun matrix-column (matrix &optional (j 0))
+  "Returns the Jth column of MATRIX as a VECTOR"
+  (make-array (array-dimension matrix 0) :displaced-to (submatrix matrix :columns j)))
+;;(matrix-column #2A((0.1962614) (0.16367006)))
