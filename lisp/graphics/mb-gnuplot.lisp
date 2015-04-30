@@ -108,28 +108,30 @@ STREAM. It returnes the path to the DATAFILE."
 ;;(line-1 t `(:d ,#'sqrt :x-values (.5 1.0)) :title "qwe" :x-range nil)
 ;;(untrace line-1)
 
-(defun line-p (x &optional with-subline-p)
-  (and (consp x)
-       (member (first x) (if with-subline-p '(:l :d) '(:l)))))
+(defun data-p (expression)
+  (or (functionp expression)
+      (arrayp expression)
+      (and (consp x) (eql (first x) :d))))
+
+(defun line-p (expression)
+  (or (and (data-p expression) :atom)
+      (and (consp x) (eql (first x) :l))))
 ;;(mapcar #'line-p '(nil #'sin (:l bla) (:d bla)))
-;;(mapcar (bind #'line-p t) '(nil #'sin (:l bla) (:d bla)))
+;;(mapcar (bind #'line-p) '(nil #'sin (:l bla) (:d bla)))
 
 (defun line (out expression)
   "Converts GP-LINES and title to gnuplot string and writes it to
 STREAM.
 Here graph and plot is the same"
-  (if (line-p expression)
-    (apply #'line-1 out (rest expression))
-    ;; else expression is just the data expression
-    (line-1 out expression)))
+  (aif (line-p expression)
+    (if (eql it :atom)
+      (line-1 out expression)
+      (apply #'line-1 out (rest expression)))
+    (error "In LINE: expression `~a' is not a line" expression)))
 ;;(line t `(:l (:d ,#'sqrt :x-values (0 2)) :title "qwe" :x-range (0.3 0.7)))
 ;;(line t `(:d ,#'sqrt :x-values (0 2)))
 ;;(line t #'sqrt)
 ;;(trace line)
-
-(defun graph-p (expression)
-  (and (consp expression)
-       (member (first expression) '(:g :p))))
 
 (defun dispatch-margins (margins)
   (destructuring-bind (l-r &optional t-b) (listify margins)
@@ -153,7 +155,7 @@ Here graph and plot is the same"
 ;;(write-property :xrange (write-range '(2 3) nil) t)
 
 (defun gp-listify (x)
-  (if (or (graph-p x) (line-p x t))
+  (if (or (graph-p x) (line-p x))
     (list x) x))
 ;;(gp-listify `(:d #'sin :x-values (-3 3)))
 
@@ -173,7 +175,8 @@ STREAM. Here graph and plot is the same"
 (defun write-matrix (grid)
   "Writes a data file based on GRID"
   (with-temporary-file (out)
-    (write-csv grid out :column-separator #\Space)))
+    (write-csv (if (arrayp grid) (array->tree grid) grid)
+	       out :column-separator #\Space)))
 
 (defun format-properties (p-list out)
   (loop for (k v) in (cut p-list)
@@ -193,18 +196,28 @@ STREAM. Here graph and plot is the same"
 (defun splot-p (x) (when (consp x) (awhen (first x) (eql it :s))))
 ;;(mapcar #'splot-p '((:s) :s nil 123))
 
+(defun graph-p (expression)
+  (or (and (line-p expression) :atom)
+      (and (consp expression)
+	   (eql (first expression) :g))))
+;;(untrace graph-p)
+
 (defun graph (out expression)
   "Converts GP-LINES and title to gnuplot string and writes it to
 STREAM. Here graph and plot is the same"
   (when expression
-    (if (graph-p expression)
-      (apply #'graph-1 out (rest expression))
+    (aif (graph-p expression)
+      (if (eql it :atom)
+	(graph-1 out expression)
+	(apply #'graph-1 out (rest expression)))
+      ;; do the :ATOM thing here as well
       (if (splot-p expression)
 	(apply #'splot out (rest expression))
 	(graph-1 out expression)))))
 ;;(graph t `((:l (:d ,#'sqrt :x-values (0 2))) (:l (:d ,#'sqrt :x-values (0 2)))))
 ;;(graph t `(:d ,#'sqrt :x-values (0 2)))
 ;;(graph t `(,#'sqrt ,#'sqrt))
+;;(trace graph)
 
 (defun key->gp-name (key)
   (string-downcase (symbol-name key)))
