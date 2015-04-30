@@ -6,6 +6,7 @@
 #include <mb_algorithm.h>
 #include <mb_math.h>
 
+// for struct tm, see http://www.cplusplus.com/reference/ctime/tm/
 inline std::ostream& operator<<(std::ostream& os, const tm& to) {
   os << "{" 
      << to.tm_sec << "," 
@@ -55,19 +56,34 @@ namespace mb {
   inline tm time2tm(time_t time = now()) { return *localtime(&time); }
   inline time_t tm2time(tm to) { return mktime(&to); }
 
-  inline time_t iso2time(std::string iso_string) {
-    std::vector<std::string> ss = split_string(iso_string, "-");
-    std::string year = ss[0];
-    std::string month = ss[1];
-    std::string day = ss[2];
-    int imonth = string2int(month);
-    std::vector<int> ii;
-    transform_in(ss, std::ptr_fun(string2int), ii);
+  inline time_t iso_date2time(std::string iso_string) {
+    std::vector<std::string> ss = split_string(iso_string, '-');
+    std::vector<int> ii = transform_vector(ss, std::ptr_fun(string2int));
     tm to = {0,0,0,0,0,0};
     to.tm_year = ii[0] - 1900;
     to.tm_mon = ii[1] - 1;
     to.tm_mday = ii[2];
     return tm2time(to);
+  }
+
+  inline time_t iso_time2time(std::string iso_string) {
+    std::vector<std::string> ss = split_string(iso_string, ':');
+    std::vector<int> ii = transform_vector(ss, std::ptr_fun(string2int));
+    tm to = {0,0,0,1,0,70};
+    to.tm_hour = ii[0];
+    if (ii.size() > 1) to.tm_min = ii[1];
+    if (ii.size() > 2) to.tm_sec = ii[2];
+    return tm2time(to);
+  }
+
+  inline time_t iso_dttm2time(std::string iso_dttm) {
+    std::vector<std::string> ss = split_string(iso_dttm, 'T');
+    return iso_date2time(ss[0]) + iso_time2time(ss[1]);
+  }
+
+  inline time_t iso2time(std::string iso_string) {
+    std::cerr << "Warning: iso2time is deprecated. Use iso_date2time instead." << std::endl;
+    return iso_date2time(iso_string);
   }
 
   inline tm iso2tm(const std::string& iso_string) { return time2tm(iso2time(iso_string)); }

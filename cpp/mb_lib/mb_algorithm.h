@@ -439,10 +439,13 @@ namespace mb {
     return 1.0*accum / counter;
   }
 
-  template <class C, class Op = std::identity<typename C::value_type> >
+  template <class C, class Op>
   inline typename Op::result_type
-  average_in (const C& c, Op op = Op()) 
-  { return average(c.begin(), c.end(), op); }
+  average_in (const C& c, Op op) { return average(c.begin(), c.end(), op); }
+
+  template <class C>
+  inline typename C::value_type
+  average_in (const C& c) { return average(c.begin(), c.end(), std::identity<typename C::value_type>()); }
 
   template <class T>
   inline T average2 (const T x, const T y) {return (x + y)/2;}
