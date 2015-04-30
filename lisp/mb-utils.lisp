@@ -7,6 +7,7 @@
    :sq
    :a-b :0-n :abs- :abs+ :string-case :cut :cut-if :nor
    :awhen :aif :it :awhile
+   :mnth :project
    :nth* :pop-list
    :rcons
    :copy-if :infix-list
@@ -19,8 +20,8 @@
    :copy-object :copy-object-to
    :draw :draw-if
    :subseq* :last-elt :butlast* :head :last* :butfirst
-   :transpose-tree
-   :flatten* :minimum :maximum :maptree
+   :minimum :maximum
+   :transpose-tree :flatten* :maptree :with-tree
    :flank
    :group :pairs :tuples
    :boundaries
@@ -631,6 +632,19 @@ number, only flatten down this many tree levels."
       (mapcan (bind #'flatten* (1- levels)) x)    
       x)))
 
+(defun mnth (list &rest positions)
+  "Extracts the elements at POSITIONS from LIST"
+  (loop for x in list
+     for i from 0
+     while positions
+     if (= i (car positions))
+     collect x and do (pop positions)))
+;;(mnth (0-n 10) 2 5)
+
+(defun project (tree &rest positions)
+  (mapcar #'(lambda (x) (apply #'mnth x positions)) tree))
+;;(project '((a b c) (d e f)) 0 2)
+
 (defun nth* (n list)
   "Same as NTH, but accepts negative arguments. If N < 0 then (nth* N
   LIST) returns the Nth last element in LIST. In fact, if L is the
@@ -650,6 +664,12 @@ similar to `mapcar'"
 	  collect (maptree function x (1- levels)))
     (funcall function tree)))
 ;;(maptree #'1+ '(1 2 (3 4)))
+
+(defmacro with-tree ((var array) &body body)
+  "Transforms ARRAY a tree, binds this to VAR in BODY and returns the array transform of BODY result."
+  `(let ((,var (array->tree ,array)))
+     (tree->array (progn ,@body))))
+;;(with-tree (x #2A((1 2 3) (a b c))) (rest x))
 
 (defun list-insert (x n list)
   "Inserts element X at position N in LIST"
@@ -678,22 +698,35 @@ is true. The latter option is the fastest in this implementation."
   `(with-open-file (,out ,filespec :direction :output :if-exists :supersede)
      ,@body))
 
-(defun read-lines (stream &optional remove-empty-lines-p)
-  "Move to util file"
-  (loop for line = (read-line stream nil nil)
-     while line
-     if (not (and remove-empty-lines-p (string= line "")))
-     collect line))
-;;(first (read-lines "/home/MBe/projects/imms/data/rao/txt/RAO_FR85_LC78.txt" t))
+(defun forward-line (stream &optional (n 1))
+  "Reads N lines in STREAM, and returns the last line that was read.
+If EOF is reached before N are read, nil is returned."
+  (when (plusp n)
+    (loop repeat (1- n) while (read-line stream nil nil))
+    (read-line stream nil nil)))
+;;(time (with-open-file (in "~/projects/imms/src/TimeSeries/amplitudes-84-100x50.dat") (forward-line in 0)))
+
+(defun read-lines (stream &key (from 0) to remove-empty-p)
+  "Read and collect lines from STREAM, skipping the first FROM lines and stopping before line TO.
+If REMOVE-EMPTY-P is non-nil, empty strings are discarded from the result list.
+Hence (<= (length (read-lines x)) (- to from))."
+  (when (or (zerop from) (forward-line stream from))
+    (loop for line-number from from
+       for line = (read-line stream nil nil)
+       while (and line (or (not to) (< line-number to)))
+       if (not (and remove-empty-p (string= line "")))
+       collect line)))
+;;(with-open-file (in "~/.bashrc") (read-lines in :from 0 :to 11 :remove-empty-p t))
+;;(with-open-file (in "~/.bashrc") (read-lines in :remove-empty-p t))
 
 (defun read-text-file-lines (filespec &optional remove-empty-lines-p)
   (warn "This function is deprecated. Use FILE->LINES instead.")
   (file->lines path remove-empty-lines-p))
 
-(defun file->lines (filespec &optional remove-empty-lines-p)
-  (with-open-file (in filespec)
-    (read-lines in remove-empty-lines-p)))
-;;(first (file->lines "/home/MBe/projects/imms/data/rao/txt/RAO_FR85_LC78.txt" t))
+(defun file->lines (filespec &rest args)
+  "Read and collect lines from FILESPEC. For ARGS, see READ-LINES."
+  (with-open-file (in filespec) (apply #'read-lines in args)))
+;;(file->lines "~/projects/imms/data/rao/txt/RAO_FR85_LC78.txt" :to 2 :remove-empty-p t)
 
 (defun read-text-file (path)
   (warn "This function is deprecated. Use FILE->STRING instead.")
