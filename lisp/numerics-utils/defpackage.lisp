@@ -6,6 +6,7 @@
 	   :reshape-grid
 	   :gamma-function
 	   :wrapped-normal-distribution :wnd
+	   :safe-op
 	   :safe-*
 	   :round-floating-point-underflow-to-zero
 	   :handles-outflow

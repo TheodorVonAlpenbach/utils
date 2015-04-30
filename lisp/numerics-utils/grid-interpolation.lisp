@@ -128,7 +128,7 @@ F(point), f1 = F(point + x1), f2 = (point + x2), .."
 	 (a (matrix-column (matrix-product (invert-matrix (tree->array V))
 					   (tree->array (mapcar #'list fd)))))
 	 (b (- f0 (dot-product a p0)))
-	 (F^ (+ (dot-product a point) b)))
+	 (F^ (safe-op #'+ (dot-product a point) b)))
     (when *rao-verbose*
       (print  (list :point point :F^ F^ :p0 p0 :p p :V V :f0 f0 :f f :fd fd :a a :b b)))
       F^))
@@ -167,10 +167,6 @@ supported."
 ;;(list-grid (reshape-rao (first *raos*) (new-domain)))
 ;;(grid-data (first *raos*))
 ;;(grid-data (reshape-rao (first *raos*) (new-domain)))
-
-(defun interpolate-cyclic (rao new-axes)
-  "Add cyclic columns. Interpolate."
-  (reshape-grid (wrap-grid rao 1 (* 2 pi)) new-axes))
 
 (defun reshape-grid (grid new-axes &optional diameter (dimension 1))
   "Returns a new grid of same type as GRID but with grid axes defined
