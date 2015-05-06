@@ -1,31 +1,38 @@
 (defpackage :mb-utils
   (:use :common-lisp)
   (:export
+   :average
    :remf* :popf
    :listify :list<
    :sq
    :a-b :0-n :abs- :abs+ :string-case :cut :cut-if :nor
    :awhen :aif :it :awhile
+   :mnth :project
    :nth* :pop-list
+   :rcons
    :copy-if :infix-list
    :remove-nth
-   :write-list :concat :split-by-char
+   :write-list :concat :format-list :split-by-char
    :bind :mbind :newline :mapreduce
    :members :split :compose :equal-elements
    :multi-split :nsplit-list-if :nsplit-list :split-list :list-insert
    :relations
    :copy-object :copy-object-to
    :draw :draw-if
-   :last-elt :butlast* :head :last* :butfirst
-   :transpose-tree
-   :flatten* :minimum :maximum :maptree
+   :subseq* :last-elt :butlast* :head :last* :butfirst
+   :minimum :maximum
+   :transpose-tree :flatten* :maptree :with-tree
+   :flank
    :group :pairs :tuples
    :boundaries
    :with-gensyms
-   :read-lines :read-text-file :read-text-file-lines
+   :with-outfile
+   :read-lines :file->lines :file->string
+   :write-lines :lines->file :string->file
+   :read-text-file :read-text-file-lines ;;deprecated methods
    :sequence-index-boundary
    :win32-homepath
-   :parse-iso-dttm
+   :parse-iso-dttm :parse-iso-date :parse-iso-time
    :tree->value-index-tuples
    :tree-dimensions
    :tree->array :array->tree
@@ -35,9 +42,19 @@
    :map-array-rows
    :array-reverse-rows
    :swap-rows
-   :alias))
+   :random-interval :random-array
+   :dimensions
+   :alias
+   :with-transpose
+   :list-expand
+   :tree-expand))
 
 (in-package :mb-utils)
+
+(defun average (sequence &key (accumulation-fn #'+))
+  (/ (reduce accumulation-fn sequence)
+     (length sequence)))
+;;(average (a-b 1 10 :type 'vector))
 
 (defun remf* (plist key)
   "Returns a copy of PLIST where KEY and its associated value are removed."
@@ -78,6 +95,11 @@ second and third arguments respectively."
 (defun maximum (list &key (test #'<) (key #'identity))
   (minimum list :test (complement test) :key key))
 ;;(maximum '(3 2 1 5))
+
+(defun nrcons (x list)
+  "B after LIST. Destructive."
+  (nconc list (list x)))
+;;(let ((l '(a))) (list (rcons 'b l) l))
 
 (defun nflank (a list b)
   "Inserts A before and B after LIST. Destructive."
@@ -717,7 +739,7 @@ is the same throughout TREE."
   (loop for x1 in list1 for x2 in list2
 	when (funcall lt x1 x2) return t
 	never (funcall lt x2 x1)
-	finally return nil))
+	finally (return nil)))
 ;;(list< '(0 0) '(0 1))
 
 (defun parse-iso-date (iso-date) (mapcar #'parse-integer (split-by-char iso-date #\-)))
@@ -759,6 +781,27 @@ corresponding row major index in the new array."
       res))
 ;;(generate-array '(2 2)) ==> #2A((0 1) (2 3))
 
+(defmethod dimensions ((x cons)) x)
+(defmethod dimensions ((x array)) (array-dimensions x))
+;;(mapcar #'dimensions '((2 2) #2A((1 2) (3 4))))
+
+(defun random-interval (a &optional b)
+  "Returns a number randomly distributed in the interval [A B[."
+  (if b
+    (+ a (random (- b a)))
+    (if (plusp a) (random a) (random-interval a 0))))
+;;(random-interval -10.0)
+
+(defun random-array (dimensions-designator &optional (interval '(0 1.0)))
+  "Returns an array of DIMENSIONS-DESIGNATOR where each array element is randomly distributed number in INTERVAL.
+DIMENSIONS-DESIGNATOR is either a cons or an array.
+If INTERVAL is a number, then the interval [0 INTERVAL[ is assumed"
+  (generate-array (dimensions dimensions-designator) (lambda (i)
+						       (declare (ignore i))
+						       (apply #'random-interval (listify interval)))))
+;;(random-array '(2 2) (* 2 pi))
+;;(random-array #2A((0.9952052 0.81327087) (0.98107666 0.29935586)))
+
 (defun subscripts-rev (dimensions row-major-index)
   "Helper function for SUBSCRIPTS"
   (loop for n = row-major-index then (/ (- n m) d)
@@ -768,8 +811,8 @@ corresponding row major index in the new array."
 
 (defun subscripts (dimensions row-major-index)
   "Converts ROW-MAJOR-INDEX corresponding to DIMENSIONS to subscripts."
-  (nreverse (subscripts-rev (reverse dimensions) row-major-index)))
-;;(mapcar (bind #'subscripts '(10 10 10) 1) (0-n 1000))
+  (nreverse (subscripts-rev dimensions row-major-index)))
+;;(loop for i below 6 collect (subscripts '(3 2) i))
 
 (defun array-subscripts (array row-major-index)
   "Converts ROW-MAJOR-INDEX corresponding to ARRAY's dimensions to subscripts.
@@ -782,7 +825,7 @@ where S1, S2, ... are the elements in SEQUENCES."
   (let ((dims (mapcar #'length sequences)))
     (flet ((span (i) (apply fn (mapcar #'elt sequences (subscripts dims i)))))
       (generate-array dims #'span))))
-;;(span-array #'* #(1 2 3) '(1 2 3))
+;;(span-array #'* #(1 2) #(1 2 3))
 
 (defun map-array (fn &rest arrays)
   "Returns an array A of the same dimensions as arrays, and where A(I)
@@ -795,9 +838,14 @@ is (fn A1(I) A2(I) ...), I being a row major index."
   (coerce (mapcar fn (array-rows 2a)) type))
 ;;(map-array-rows #'length (tree->array '((1 2) (3 4))))
 
-(defun array->tree (a)
-  (loop for row in (array-rows a) collect (coerce row 'list)))
-;;(array->tree (tree->array '((a b) (a b))))
+(defun array->tree (array)
+  "This works only for 1d and 2d arrays"
+  (case (array-rank array)
+    (0 (aref array))
+    (1 (coerce array 'list))
+    (2 (loop for row in (array-rows array) collect (coerce row 'list)))
+    (t (error "ARRAY->TREE is not implemented for arrays of rank ~a" (array-rank array)))))
+;;(mapcar #'array->tree (list #0A1234 #1A(1 2 3 4) #(1 2 3 4) #2A((1 2) (3 4))))
 
 (defun array-reverse-rows (a)
   "Reverts rows in A. ``Slower'' version."
@@ -828,17 +876,20 @@ is (fn A1(I) A2(I) ...), I being a row major index."
   `(defmacro ,new-name (&rest args)
      `(,',prev-name ,@args)))
 
-(defun boundaries-1 (list)
+(defun nboundaries-1 (list)
   (loop for (a b) in (pairs list) collect (/ (+ b a) 2)))
 ;;(boundaries-1 '(1.0 3.0 4.0))
 
-(defun boundaries (list &optional flank-p)
-  (boundaries-1 (if flank-p
+(defun nboundaries (list &optional flank-p)
+  (nboundaries-1 (if flank-p
 		  (nflank (- (* 2 (car list)) (cadr list))
 			  list
 			  (- (* 2 (car (last list))) (car (last list 2))))
 		  list)))
-;;(boundaries (list -4.0 -3.0 -1.0) t)
+
+(defun boundaries (list &optional flank-p)
+  (nboundaries (copy-seq list) flank-p))
+;;(let ((l (list -4.0 -3.0 -1.0))) (list (boundaries l t) l))
 
 ;;;; Not exported:
 ;;; These utils may seem a bit obscure, but they are pretty fast on lists.
@@ -866,3 +917,46 @@ It is meant as a helper function for DELTAS-LIST."
 If A, B, C are consecutive numbers, the delta for B is (- (/ (+ A C) 2) B)."
   (coerce (deltas-list (coerce sequence 'list)) (type-of sequence)))
 ;;(deltas #(0 1 3))
+
+(defmacro with-transpose ((var tree) &body body)
+  "Executes BODY with the transpose of TREE bound to VAR returning the transpose of the result of BODY."
+  `(let ((,var (transpose-tree ,tree)))
+     (transpose-tree (progn ,@body))))
+;;(with-transpose (it '((1 2 3) (a b c))) (sort it #'> :key #'first))
+
+(defun list-expand (list &optional (n 1) wrap)
+  (flet ((wrap (list x) (mapcar (bind #'+ x) list)))
+    (if wrap
+      ;;cyclic extension
+      (if (numberp wrap)
+	(append (wrap (last list n) (- wrap)) list (wrap (head list n) wrap))
+	(append (last list n) list (head list n)))
+      ;;linear extension
+      (let ((a (first list))
+	    (d (last-elt list)))
+	(if (> (length list) 1)
+	  (let ((b (second list))
+		(c (last-elt list 2)))
+	    (flatten* (list (- (* 2 a) b) list (- (* 2 d) c))))
+	  (flatten* (list (1- a) list (1+ d))))))))
+;;(list-expand '(1 2 3 5) 2)
+;;(list-expand '(1 2 3) 1 5)
+
+(defun tree-expand (tree dimension &optional (n 1) wrap)
+  "EXPANDS tree just like LIST-EXPAND in the specified DIMENSION.
+With DIMENSION set to 0 it is equivalent to LIST-EXPAND."
+  (case dimension
+    (0 (list-expand tree n wrap))
+    (1 (with-transpose (x tree) (list-expand x n wrap)))
+    (t (error "TREE-MIMIC-CIRCULARITY does not support DIMENSION > 1"))))
+;;(tree-expand '((1 2 3) (a b c)) 1)
+;;(tree-expand '((1 2 3) (11 12 13)) 1)
+
+;;; this one is currently not exported
+(defmacro with-list ((var sequence &optional res-type) &body body)
+  (with-gensyms (gsequence)
+    `(let ((,gsequence ,sequence))
+       (let ((,var (coerce ,gsequence 'list)))
+	 (coerce (progn ,@body) (or ,res-type (class-of ,gsequence)))))))
+;;(with-list (x '(1 2 3) 'vector) (rest x))
+

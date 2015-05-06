@@ -14,10 +14,8 @@
   "TODO: move to utils. Or load a common package. 
 Converts CSV content from STREAM to a list of list of strings.
 For info abount CSV files, see http://en.wikipedia.org/wiki/Comma-separated_values"
-  (loop for line in (read-lines stream
-				:remove-empty-p remove-empty-lines-p
-				:from from-line
-				:to to-line)
+  (loop for line in (read-lines stream :remove-empty-p remove-empty-lines-p
+				:start from-line :end to-line)
      for all-columns = (split-by-char line column-separator remove-empty-columns-p)
      collect (if (eql columns t)
 	       all-columns
@@ -47,6 +45,6 @@ For info abount CSV files, see http://en.wikipedia.org/wiki/Comma-separated_valu
 (defun write-csv-file (tree filename &rest args)
   (with-open-file (s filename :direction :output)
     (apply #'write-csv tree s args)))
-;;(write-csv-file '(("a" "b") ("a" "b")) "~/tmp/qwe.qwe.txt")
+;;(write-csv-file '(("a" "b") ("a" "b")) "~/tmp/qwe/qwe.txt")
 
 (provide 'csv)

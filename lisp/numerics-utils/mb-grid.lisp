@@ -3,7 +3,8 @@
   (:export :grid :make-grid :grid-data :grid-axes
 	   :list-grid :grid-axes* :span-grid :map-grid
 	   :gnuplot-matrix->grid :grid->gnuplot-matrix
-	   :export-grid))
+	   :export-grid
+	   :with-grid-data))
 
 (in-package :mb-grid)
 
@@ -12,6 +13,7 @@
   ((data :initarg :data :accessor grid-data :type array)
    (axes :initarg :axes :accessor grid-axes :type cons)))
 
+(defmethod dimensions ((x grid)) (array-dimensions (grid-data x)))
 (defmethod dimension ((x grid)) (array-rank (grid-data x)))
 ;;(dimension (make-grid #(1 2 3) #(1 2 3)))
 
@@ -69,5 +71,20 @@ splot 'file' nonuniform matrix. See gnuplot doc for more"
 (defun export-grid (grid filename &rest args)
   "Exports GRID to csv format and writes it to FILENAME. See write-csv for ARGS"
   (apply #'write-csv-file (grid->gnuplot-matrix grid) filename args))
-
 ;;(export-grid (span-grid #'+ '(#(0 1 2) #(5 10))) "~/tmp/test.csv" :column-separator #\Space)
+
+(defmacro with-grid-data ((var grid &optional (data-type 'array)) &body body)
+  "Returns a copy of grid but with data set to the result of BODY.
+In BODY the grid data are bound to VAR The grid data is converted to
+DATA-TYPE in BODY."
+  (with-gensyms (gdata)
+    `(let ((,gdata (grid-data ,grid)))
+       (copy-object ,grid
+	 :data ,(case data-type
+		      (array `(let ((,var ,gdata))
+				(progn ,@body)))
+		      (tree `(with-tree (,var ,gdata)
+			       (progn ,@body)))
+		      (t (error "WITH-GRID-DATA only supports the types ARRAY and TREE"))))))) 
+;;(list-grid (with-grid-data (x (make-grid #2A((1 2 3) (2 3 4)) '(#(1 2 3) #(1 2))) tree) (rest x)))
+;;(list-grid (with-grid-data (x (first *raos*) tree) (rest x)))

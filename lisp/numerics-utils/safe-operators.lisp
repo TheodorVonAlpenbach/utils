@@ -9,6 +9,14 @@
       value)
     (round-floating-point-underflow-to-zero () 0)))
 
+(defun expt-safe (base-number power-number)
+  (restart-case (expt base-number power-number)
+    (use-value (value)
+      :report "Use a new value."
+      :interactive read-new-value
+      value)
+    (round-floating-point-underflow-to-zero () 0)))
+
 (defun read-new-value ()
   (format t "Enter a new value: ")
   (multiple-value-list (eval (read))))

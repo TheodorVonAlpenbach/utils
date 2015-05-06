@@ -1,16 +1,17 @@
 (defpackage :numerics-utils
   (:use :cl :mb-utils)
   (:export :parse-real
+	   :random-interval
 	   :normalize-radian
 	   :grid-interpolate
 	   :reshape-grid
 	   :gamma-function
 	   :wrapped-normal-distribution :wnd
+	   :exp-safe :expt-safe
 	   :safe-op
 	   :safe-*
 	   :round-floating-point-underflow-to-zero
 	   :handles-outflow
-	   :exp-safe
 	   :dot-product
 	   :save-multiplication-outflow-by-log
 	   :matrix-map-rows

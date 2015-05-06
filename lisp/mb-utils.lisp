@@ -42,7 +42,12 @@
    :map-array-rows
    :array-reverse-rows
    :swap-rows
-   :alias))
+   :random-interval :random-array
+   :dimensions
+   :alias
+   :with-transpose
+   :list-expand
+   :tree-expand))
 
 (in-package :mb-utils)
 
@@ -96,19 +101,14 @@ second and third arguments respectively."
   (nconc list (list x)))
 ;;(let ((l '(a))) (list (rcons 'b l) l))
 
-(defun rcons (list x) (append list (list x)))
-;;(let ((l '(1 2))) (list (rcons l 1) l))
-
-(defun nflank (a list &optional (b a))
+(defun nflank (a list b)
   "Inserts A before and B after LIST. Destructive."
-  (cons a (nrcons b list)))
+  (nconc (cons a list) (list b)))
 ;;(let ((l (list 2 3))) (list l (nflank 1 l 4)))
 
-(defun flank (a list &optional (b a))
-  "Inserts A before and B after LIST.
-If B is not specified, A is used."
+(defun flank (a list b)
+  "Inserts A before and B after LIST."
   (nflank a (copy-list list) b))
-;;(flank 'a (flank 1 ()) 'b)
 
 (defmacro twins (x) `(make-list 2 :initial-element ,x))
 ;;(twins (+ 1 2))
@@ -143,12 +143,6 @@ TODO: implement a mapping key, see `pairs' (when needed)"
   "Same as `butlast' but accepts negative argument, meaning counting from start."
   (butlast list (mod (or n 1) (length list))))
 ;;(butlast* '(a b c d e) -2)
-
-(defmacro subseq* (sequence start &optional end)
-  (with-gensyms (glength)
-    `(let ((,glength (length ,sequence)))
-       (subseq ,sequence (mod ,start ,glength) (and ,end (mod ,end ,glength))))))
-;;(subseq* (a-b 0 10) 1 -1)
 
 (defun head (list &optional n)
   "Returns the N first elements of LIST"
@@ -269,22 +263,17 @@ TODO: string keys could also evalute to a list"
                                (progn ,@(cdr cl)))))
                        clauses)))))
 
-(defun a-b (a b &key length (step (if length (/ (- b a) (1- length)) 1)) (type 'list) (direction :auto) key)
+(defun a-b (a b &key length (step (if length (/ (- b a) (1- length)) 1)) (type 'list))
   "Returns the sequence from and including A to and including B by STEP
 If TYPE is provided, the result is #'COERCEd to TYPE."
-  (flet ((up () (loop for i from a to b by step collect (if key (funcall key i) i)))
-	 (down () (loop for i downfrom a to b by (abs step) collect (if key (funcall key i) i))))
-    (let ((res (case direction
-		 (:up (up))
-		 (:down (down))
-		 (:auto (if (< a b) (up) (down))))))
-      (values
-       (if (and type (not (eql (type-of res) type)))
-	 (coerce res type)
-	 res)
-       step))))
-;;(a-b -2 2 :length 10 :type 'vector :direction :auto :key #'sqrt)
-;;(a-b 0 10 :type 'array :key #'(lambda (x) (list x (sq x))))
+  (let ((res (loop for i from a to b by step collect i)))
+    (values
+     (if (and type (not (eql (type-of res) type)))
+       (coerce res type)
+       res)
+     step)))
+;;(a-b -2 2 :step 1/3 :type 'vector)
+;;(a-b 0 10 :length 3)
 
 (defun 0-n (n &rest args) (apply #'a-b 0 (1- n) args))
 ;;(0-n 10)
@@ -369,27 +358,13 @@ IN may also be a function (fn i), taking an index argument, see `infix-list'."
 ;;;; is no such restriction in the new concat (or rather, write-list).
 ;;;; And INFIX-LIST is now obsolete, as far as I can see.
 (defun write-list (list stream &key pre in suf test key)
-  (flet ((sp (x) (case x (:newline (format nil "~%")) (t x))))
-    (let ((list (if key (mapcar key list) list)))
-      (format stream (concatenate 'string "~@[~a~]~{~a"
-				  (format nil "~@[~~^~a~]" (sp in))
-				  "~}~@[~a~]")
-	(sp pre) (if test (copy-if test list) list) (sp suf)))))
+  (let ((list (if key (mapcar key list) list)))
+    (format stream (concatenate 'string "~@[~a~]~{~a" (format nil "~@[~~^~a~]" in) "~}~@[~a~]")
+	    pre (if test (copy-if test list) list) suf)))
 ;;(time (progn (write-list (a-b 0 10000) nil :in ", " :pre "<<" :suf ">>" :test #'oddp :key #'1+) :fine))
 
 (defun concat (list &rest args) (apply #'write-list list nil args))
 ;;(time (progn (concat (a-b 0 100000) :in ", " :pre "<<" :suf ">>" :test #'oddp :key #'1+) :fine))
-;;(concat (a-b 0 10) :in :newline :pre "<<" :suf ">>" :test #'oddp :key #'1+)
-
-(defun format-list (out list format-fn &key pre in suf test key)
-  (flet ((sp (x) (when x (case x (:newline (format out "~%")) (t (princ x out))))))
-    (let ((list (if key (mapcar key list) list)))
-      (sp pre)
-      (loop for x on (if test (remove-if-not test list) list)
-	    do (funcall format-fn out (first x))
-	    while (rest x) do (sp in))
-      (sp suf))))
-;;(format-list t '(1 2 3) #'(lambda (out x) (format out "~a" x)) :in ", ")
 
 (defun split-by-char (string char &optional remove-empty-string-p)
    "Returns a list of substrings of string divided by ONE CHAR each.
@@ -621,7 +596,7 @@ about the copying process."
 
 (defun last-elt (sequence &optional (n 1))
   (elt sequence (- (length sequence) n)))
-;;;;(loop for x in (list "qwe" '(0 1 2) #(3 4 5)) collect (last-elt x 2))
+;;;;(loop for x in (list "qwe" '(0 1 2) #(3 4 5)) collect (last-elt x 1))
 
 (defun flatten* (x &optional (levels most-positive-fixnum))
   "Flattens out all arguments in tree X. If optional LEVELS is a
@@ -631,19 +606,6 @@ number, only flatten down this many tree levels."
     (if (plusp levels)
       (mapcan (bind #'flatten* (1- levels)) x)    
       x)))
-
-(defun mnth (list &rest positions)
-  "Extracts the elements at POSITIONS from LIST"
-  (loop for x in list
-     for i from 0
-     while positions
-     if (= i (car positions))
-     collect x and do (pop positions)))
-;;(mnth (0-n 10) 2 5)
-
-(defun project (tree &rest positions)
-  (mapcar #'(lambda (x) (apply #'mnth x positions)) tree))
-;;(project '((a b c) (d e f)) 0 2)
 
 (defun nth* (n list)
   "Same as NTH, but accepts negative arguments. If N < 0 then (nth* N
@@ -664,12 +626,6 @@ similar to `mapcar'"
 	  collect (maptree function x (1- levels)))
     (funcall function tree)))
 ;;(maptree #'1+ '(1 2 (3 4)))
-
-(defmacro with-tree ((var array) &body body)
-  "Transforms ARRAY a tree, binds this to VAR in BODY and returns the array transform of BODY result."
-  `(let ((,var (array->tree ,array)))
-     (tree->array (progn ,@body))))
-;;(with-tree (x #2A((1 2 3) (a b c))) (rest x))
 
 (defun list-insert (x n list)
   "Inserts element X at position N in LIST"
@@ -694,61 +650,26 @@ is true. The latter option is the fastest in this implementation."
        ((not it))
      ,@body))
 
-(defmacro with-outfile ((out filespec) &body body)
-  `(with-open-file (,out ,filespec :direction :output :if-exists :supersede)
-     ,@body))
+(defun skip-lines (stream n)
+  "Move to util file"
+  (loop repeat n while (read-line stream nil nil)))
 
-(defun forward-line (stream &optional (n 1))
-  "Reads N lines in STREAM, and returns the last line that was read.
-If EOF is reached before N are read, nil is returned."
-  (when (plusp n)
-    (loop repeat (1- n) while (read-line stream nil nil))
-    (read-line stream nil nil)))
-;;(time (with-open-file (in "~/projects/imms/src/TimeSeries/amplitudes-84-100x50.dat") (forward-line in 0)))
+(defun read-lines (stream &key start end remove-empty-p)
+  "Move to util file"
+  (when start (skip-lines stream start))
+  (loop for line = (read-line stream nil nil)
+     for i from (or start 0)
+     while (and line (or (not end) (< i end)))
+     if (not (and remove-empty-p (string= line "")))
+     collect line))
+;;(read-text-file-lines "/home/MBe/projects/imms/data/rao/txt/RAO_FR85_LC78.txt" :end 1)
 
-(defun read-lines (stream &key (from 0) to remove-empty-p)
-  "Read and collect lines from STREAM, skipping the first FROM lines and stopping before line TO.
-If REMOVE-EMPTY-P is non-nil, empty strings are discarded from the result list.
-Hence (<= (length (read-lines x)) (- to from))."
-  (when (or (zerop from) (forward-line stream from))
-    (loop for line-number from from
-       for line = (read-line stream nil nil)
-       while (and line (or (not to) (< line-number to)))
-       if (not (and remove-empty-p (string= line "")))
-       collect line)))
-;;(with-open-file (in "~/.bashrc") (read-lines in :from 0 :to 11 :remove-empty-p t))
-;;(with-open-file (in "~/.bashrc") (read-lines in :remove-empty-p t))
-
-(defun read-text-file-lines (filespec &optional remove-empty-lines-p)
-  (warn "This function is deprecated. Use FILE->LINES instead.")
-  (file->lines path remove-empty-lines-p))
-
-(defun file->lines (filespec &rest args)
-  "Read and collect lines from FILESPEC. For ARGS, see READ-LINES."
+(defun read-text-file-lines (filespec &rest args)
   (with-open-file (in filespec) (apply #'read-lines in args)))
-;;(file->lines "~/projects/imms/data/rao/txt/RAO_FR85_LC78.txt" :to 2 :remove-empty-p t)
+;;(first (read-text-file-lines "/home/MBe/projects/imms/data/rao/txt/RAO_FR85_LC78.txt" t))
 
-(defun read-text-file (path)
-  (warn "This function is deprecated. Use FILE->STRING instead.")
-  (file->string path))
-
-(defun file->string (filespec)
-  (concat (file->lines filespec) :in (string #\Newline)))
-;;(subseq (file->string "/home/MBe/projects/imms/data/rao/txt/RAO_FR85_LC78.txt") 0 10)
-
-(defun write-lines (lines stream)
-  (loop for line in lines do (write-line line stream)))
-;;(write-lines '("line1" "line2") t)
-
-(defun lines->file (lines filespec &key (if-exists :supersede))
-  (with-open-file (out filespec :direction :output :if-exists if-exists)
-    (write-lines lines out)))
-;;(let ((path "~/tmp/lines.txt")) (lines->file '("line1" "line2") path) (file->string path))
-
-(defun string->file (string filespec &key (if-exists :supersede))
-  (with-open-file (out filespec :direction :output :if-exists if-exists)
-    (write-string string out)))
-;;(let ((path "~/tmp/lines.txt")) (string->file "qwe" path) (file->string path))
+(defun read-text-file (path &rest args)
+  (concat (apply #'read-text-file-lines path args) :in (string #\Newline)))
 
 (defun neq (x y) (not (eq x y)))
 
@@ -866,6 +787,27 @@ corresponding row major index in the new array."
       res))
 ;;(generate-array '(2 2)) ==> #2A((0 1) (2 3))
 
+(defmethod dimensions ((x cons)) x)
+(defmethod dimensions ((x array)) (array-dimensions x))
+;;(mapcar #'dimensions '((2 2) #2A((1 2) (3 4))))
+
+(defun random-interval (a &optional b)
+  "Returns a number randomly distributed in the interval [A B[."
+  (if b
+    (+ a (random (- b a)))
+    (if (plusp a) (random a) (random-interval a 0))))
+;;(random-interval -10.0)
+
+(defun random-array (dimensions-designator &optional (interval '(0 1.0)))
+  "Returns an array of DIMENSIONS-DESIGNATOR where each array element is randomly distributed number in INTERVAL.
+DIMENSIONS-DESIGNATOR is either a cons or an array.
+If INTERVAL is a number, then the interval [0 INTERVAL[ is assumed"
+  (generate-array (dimensions dimensions-designator) (lambda (i)
+						       (declare (ignore i))
+						       (apply #'random-interval (listify interval)))))
+;;(random-array '(2 2) (* 2 pi))
+;;(random-array #2A((0.9952052 0.81327087) (0.98107666 0.29935586)))
+
 (defun subscripts-rev (dimensions row-major-index)
   "Helper function for SUBSCRIPTS"
   (loop for n = row-major-index then (/ (- n m) d)
@@ -897,16 +839,10 @@ is (fn A1(I) A2(I) ...), I being a row major index."
   (generate-array (and arrays (array-dimensions (first arrays)))
 		  (lambda (i) (apply fn (mapcar (bind #'row-major-aref i) arrays)))))
 ;;(map-array #'+ #3A(((101 2) (3 4)) ((1 2) (3 4))) #3A(((1 2) (3 4)) ((1 2) (3 4))))
-;;(map-array (bind #'+ 17) #3A(((101 2) (3 4)) ((1 2) (3 4))))
 
 (defun map-array-rows (fn 2a &optional (type 'vector))
   (coerce (mapcar fn (array-rows 2a)) type))
 ;;(map-array-rows #'length (tree->array '((1 2) (3 4))))
-
-(defun array->tree (a)
-  "This works only for 2d arrays"
-  (loop for row in (array-rows a) collect (coerce row 'list)))
-;;(array->tree (tree->array '((a b) (a b))))
 
 (defun array->tree (array)
   "This works only for 1d and 2d arrays"
@@ -916,7 +852,6 @@ is (fn A1(I) A2(I) ...), I being a row major index."
     (2 (loop for row in (array-rows array) collect (coerce row 'list)))
     (t (error "ARRAY->TREE is not implemented for arrays of rank ~a" (array-rank array)))))
 ;;(mapcar #'array->tree (list #0A1234 #1A(1 2 3 4) #(1 2 3 4) #2A((1 2) (3 4))))
-
 
 (defun array-reverse-rows (a)
   "Reverts rows in A. ``Slower'' version."
@@ -988,3 +923,46 @@ It is meant as a helper function for DELTAS-LIST."
 If A, B, C are consecutive numbers, the delta for B is (- (/ (+ A C) 2) B)."
   (coerce (deltas-list (coerce sequence 'list)) (type-of sequence)))
 ;;(deltas #(0 1 3))
+
+(defmacro with-transpose ((var tree) &body body)
+  "Executes BODY with the transpose of TREE bound to VAR returning the transpose of the result of BODY."
+  `(let ((,var (transpose-tree ,tree)))
+     (transpose-tree (progn ,@body))))
+;;(with-transpose (it '((1 2 3) (a b c))) (sort it #'> :key #'first))
+
+(defun list-expand (list &optional (n 1) wrap)
+  (flet ((wrap (list x) (mapcar (bind #'+ x) list)))
+    (if wrap
+      ;;cyclic extension
+      (if (numberp wrap)
+	(append (wrap (last list n) (- wrap)) list (wrap (head list n) wrap))
+	(append (last list n) list (head list n)))
+      ;;linear extension
+      (let ((a (first list))
+	    (d (last-elt list)))
+	(if (> (length list) 1)
+	  (let ((b (second list))
+		(c (last-elt list 2)))
+	    (flatten* (list (- (* 2 a) b) list (- (* 2 d) c))))
+	  (flatten* (list (1- a) list (1+ d))))))))
+;;(list-expand '(1 2 3 5) 2)
+;;(list-expand '(1 2 3) 1 5)
+
+(defun tree-expand (tree dimension &optional (n 1) wrap)
+  "EXPANDS tree just like LIST-EXPAND in the specified DIMENSION.
+With DIMENSION set to 0 it is equivalent to LIST-EXPAND."
+  (case dimension
+    (0 (list-expand tree n wrap))
+    (1 (with-transpose (x tree) (list-expand x n wrap)))
+    (t (error "TREE-MIMIC-CIRCULARITY does not support DIMENSION > 1"))))
+;;(tree-expand '((1 2 3) (a b c)) 1)
+;;(tree-expand '((1 2 3) (11 12 13)) 1)
+
+;;; this one is currently not exported
+(defmacro with-list ((var sequence &optional res-type) &body body)
+  (with-gensyms (gsequence)
+    `(let ((,gsequence ,sequence))
+       (let ((,var (coerce ,gsequence 'list)))
+	 (coerce (progn ,@body) (or ,res-type (class-of ,gsequence)))))))
+;;(with-list (x '(1 2 3) 'vector) (rest x))
+
