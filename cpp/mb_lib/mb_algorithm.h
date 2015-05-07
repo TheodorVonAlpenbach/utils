@@ -21,6 +21,13 @@
 // }
 
 namespace mb {
+  template<class C>
+  inline typename C::value_type pop_back(C& c) {
+    typename C::value_type res = c.back();
+    c.pop_back();
+    return res;
+  }
+
   template<class In, class Out, class Pred>
   inline Out copy_while(In first, In last, Out res, const Pred& p) {
     while (first != last && p(*first)) 
