@@ -213,7 +213,7 @@ namespace mb
 } // mb
 
 namespace std {
- #if !defined(__SGI_STL_INTERNAL_FUNCTION_H) && !defined(__CYGWIN__)
+ #if !defined(__SGI_STL_INTERNAL_FUNCTION_H) && !defined(__unix__)
   // identity is an extensions: it is not part of the standard.
   template <class _Tp>
   struct _Identity : public std::unary_function<_Tp,_Tp> {
