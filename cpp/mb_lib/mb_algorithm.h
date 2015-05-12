@@ -7,6 +7,7 @@
 #include <iterator>
 #include <mb_iterator.h>
 #include <mb_functional_spec.h>
+#include <mb_math.h>
 
 // namespace std {
 //   template<class In, class Out, class Pred>
@@ -21,6 +22,11 @@
 // }
 
 namespace mb {
+  template<class C>
+  inline typename C::value_type nth(C& c, int i) {
+    return c[modulo(i, c.size())];
+  }
+
   template<class C>
   inline typename C::value_type pop_back(C& c) {
     typename C::value_type res = c.back();
