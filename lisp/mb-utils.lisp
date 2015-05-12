@@ -96,19 +96,24 @@ second and third arguments respectively."
   (minimum list :test (complement test) :key key))
 ;;(maximum '(3 2 1 5))
 
-(defun nrcons (x list)
+(defun nrcons (list x)
   "B after LIST. Destructive."
   (nconc list (list x)))
-;;(let ((l '(a))) (list (rcons 'b l) l))
+;;(let ((l '(a))) (list (nrcons l 'b) l))
 
-(defun nflank (a list b)
+(defun rcons (list x) (append list (list x)))
+;;(let ((l '(1 2))) (list (rcons l 1) l))
+
+(defun nflank (a list &optional (b a))
   "Inserts A before and B after LIST. Destructive."
   (nconc (cons a list) (list b)))
 ;;(let ((l (list 2 3))) (list l (nflank 1 l 4)))
 
-(defun flank (a list b)
-  "Inserts A before and B after LIST."
-  (nflank a (copy-list list) b))
+(defun flank (a list &optional (b a))
+  "Inserts A before and B after LIST.
+If B is not specified, A is used."
+   (nflank a (copy-list list) b))
+;;(let ((l (list 2 3))) (list l (flank 1 l 4)))
 
 (defmacro twins (x) `(make-list 2 :initial-element ,x))
 ;;(twins (+ 1 2))
@@ -263,17 +268,22 @@ TODO: string keys could also evalute to a list"
                                (progn ,@(cdr cl)))))
                        clauses)))))
 
-(defun a-b (a b &key length (step (if length (/ (- b a) (1- length)) 1)) (type 'list))
-  "Returns the sequence from and including A to and including B by STEP
-If TYPE is provided, the result is #'COERCEd to TYPE."
-  (let ((res (loop for i from a to b by step collect i)))
-    (values
-     (if (and type (not (eql (type-of res) type)))
-       (coerce res type)
-       res)
-     step)))
-;;(a-b -2 2 :step 1/3 :type 'vector)
-;;(a-b 0 10 :length 3)
+(defun a-b (a b &key length (step (if length (/ (- b a) (1- length)) 1)) (type 'list) (direction :auto) key)
+   "Returns the sequence from and including A to and including B by STEP
+ If TYPE is provided, the result is #'COERCEd to TYPE."
+  (flet ((up () (loop for i from a to b by step collect (if key (funcall key i) i)))
+        (down () (loop for i downfrom a to b by (abs step) collect (if key (funcall key i) i))))
+    (let ((res (case direction
+                (:up (up))
+                (:down (down))
+                (:auto (if (< a b) (up) (down))))))
+      (values
+       (if (and type (not (eql (type-of res) type)))
+        (coerce res type)
+        res)
+       step))))
+;;(a-b 2 -2 :length 10 :type 'vector :direction :auto :key #'sqrt)
+;;(a-b 10 0 :type 'array :key #'(lambda (x) (list x (sq x))))
 
 (defun 0-n (n &rest args) (apply #'a-b 0 (1- n) args))
 ;;(0-n 10)
@@ -594,6 +604,12 @@ about the copying process."
 ;;(macroexpand-1 (foobar-list (copy-object-to y 'foobar :a 321 :b 123))
 ;;(copy-object-initarg-plist y :b 14)
 
+(defmacro subseq* (sequence start &optional end)
+  (with-gensyms (glength)
+    `(let ((,glength (length ,sequence)))
+       (subseq ,sequence (mod ,start ,glength) (and ,end (mod ,end ,glength))))))
+;;(subseq* (a-b 0 10) 1 -1)
+
 (defun last-elt (sequence &optional (n 1))
   (elt sequence (- (length sequence) n)))
 ;;;;(loop for x in (list "qwe" '(0 1 2) #(3 4 5)) collect (last-elt x 1))
@@ -607,14 +623,6 @@ number, only flatten down this many tree levels."
       (mapcan (bind #'flatten* (1- levels)) x)    
       x)))
 
-(defun nth* (n list)
-  "Same as NTH, but accepts negative arguments. If N < 0 then (nth* N
-  LIST) returns the Nth last element in LIST. In fact, if L is the
-  length of LIST, it returns always the Mth element in LIST, where 0
-  <= M < L and M is equal to N modulo L."
-  (nth (mod n (length list)) list))
-;;(nth* -1123 '(1 2 3))
-
 (defun maptree (function tree &optional (levels most-positive-fixnum))
   "Maps TREE to another three with same structure applying
 FUNCTION If optional argument LEVEL is provided, the mapping goes
@@ -626,6 +634,33 @@ similar to `mapcar'"
 	  collect (maptree function x (1- levels)))
     (funcall function tree)))
 ;;(maptree #'1+ '(1 2 (3 4)))
+
+(defmacro with-tree ((var array) &body body)
+  "Transforms ARRAY a tree, binds this to VAR in BODY and returns the array transform of BODY result."
+  `(let ((,var (array->tree ,array)))
+     (tree->array (progn ,@body))))
+;;(with-tree (x #2A((1 2 3) (a b c))) (rest x))
+
+(defun nth* (n list)
+  "Same as NTH, but accepts negative arguments. If N < 0 then (nth* N
+  LIST) returns the Nth last element in LIST. In fact, if L is the
+  length of LIST, it returns always the Mth element in LIST, where 0
+  <= M < L and M is equal to N modulo L."
+  (nth (mod n (length list)) list))
+;;(nth* -1123 '(1 2 3))
+
+(defun mnth (list &rest positions)
+  "Extracts the elements at POSITIONS from LIST"
+  (loop for x in list
+     for i from 0
+     while positions
+     if (= i (car positions))
+     collect x and do (pop positions)))
+;;(mnth (0-n 10) 2 5)
+
+(defun project (tree &rest positions)
+  (mapcar #'(lambda (x) (apply #'mnth x positions)) tree))
+;;(project '((a b c) (d e f)) 0 2)
 
 (defun list-insert (x n list)
   "Inserts element X at position N in LIST"
@@ -650,6 +685,11 @@ is true. The latter option is the fastest in this implementation."
        ((not it))
      ,@body))
 
+(defmacro with-outfile ((out filespec) &body body)
+  `(with-open-file (,out ,filespec :direction :output :if-exists :supersede)
+     ,@body))
+
+;;; read text
 (defun skip-lines (stream n)
   "Move to util file"
   (loop repeat n while (read-line stream nil nil)))
@@ -664,12 +704,35 @@ is true. The latter option is the fastest in this implementation."
      collect line))
 ;;(read-text-file-lines "/home/MBe/projects/imms/data/rao/txt/RAO_FR85_LC78.txt" :end 1)
 
-(defun read-text-file-lines (filespec &rest args)
+(defun file->lines (filespec &rest args)
   (with-open-file (in filespec) (apply #'read-lines in args)))
+
+(defun read-text-file-lines (&rest args)
+  (warn "READ-TEXT-FILE-LINES is deprecated. Use FILE->LINES instead.")
+  (apply #'file->lines args))
 ;;(first (read-text-file-lines "/home/MBe/projects/imms/data/rao/txt/RAO_FR85_LC78.txt" t))
 
-(defun read-text-file (path &rest args)
+(defun string->file (path &rest args)
   (concat (apply #'read-text-file-lines path args) :in (string #\Newline)))
+
+(defun read-text-file (&rest args)
+  (warn "READ-TEXT-FILE is deprecated. Use STRING->LINES instead.")
+  (apply #'string->file args))
+
+;;; write text
+(defun write-lines (lines stream)
+  (loop for line in lines do (write-line line stream)))
+;;(write-lines '("line1" "line2") t)
+
+(defun lines->file (lines filespec &key (if-exists :supersede))
+  (with-open-file (out filespec :direction :output :if-exists if-exists)
+    (write-lines lines out)))
+;;(let ((path "~/tmp/lines.txt")) (lines->file '("line1" "line2") path) (file->string path))
+
+(defun string->file (string filespec &key (if-exists :supersede))
+  (with-open-file (out filespec :direction :output :if-exists if-exists)
+    (write-string string out)))
+;;(let ((path "~/tmp/lines.txt")) (string->file "qwe" path) (file->string path))
 
 (defun neq (x y) (not (eq x y)))
 

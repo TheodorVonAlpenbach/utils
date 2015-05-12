@@ -29,6 +29,14 @@
       value)
     (round-floating-point-underflow-to-zero () 0)))
 
+(defun safe-+ (&rest args)
+  (restart-case (reduce #'+ args)
+    (use-value (value)
+      :report "Use a new value."
+      :interactive read-new-value
+      value)
+    (round-floating-point-underflow-to-zero () 0)))
+
 (defun safe-* (&rest args)
   (restart-case (reduce #'* args)
     (use-value (value)

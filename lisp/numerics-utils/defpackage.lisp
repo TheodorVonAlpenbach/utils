@@ -8,8 +8,7 @@
 	   :gamma-function
 	   :wrapped-normal-distribution :wnd
 	   :exp-safe :expt-safe
-	   :safe-op
-	   :safe-*
+	   :safe-op :safe-+ :safe-*
 	   :round-floating-point-underflow-to-zero
 	   :handles-outflow
 	   :dot-product

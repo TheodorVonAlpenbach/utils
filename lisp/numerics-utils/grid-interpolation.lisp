@@ -7,7 +7,7 @@
 (defun vec+ (vec &rest vecs) (apply #'map (type-of vec) #'+ vec vecs))
 (defun vec- (vec &rest vecs) (apply #'mapcar #'- vec vecs))
 (defun vec-copies (vec n) (loop repeat n collect (copy-list vec)))
-(defun dot-product (vec1 vec2) (reduce #'+ (map (type-of vec1) #'safe-* vec1 vec2)))
+(defun dot-product (vec1 vec2) (reduce #'safe-+ (map (type-of vec1) #'safe-* vec1 vec2)))
 ;;(dot-product '(1 1) '(2 1))
 
 (defun mat (n &optional (m n) (init 0)) (loop for i below n collect (vec m init)))
@@ -128,7 +128,7 @@ F(point), f1 = F(point + x1), f2 = (point + x2), .."
 	 (fd (mapcar #'(lambda (x) (safe-op #'- x f0)) f))
 	 (a (matrix-column (matrix-product (invert-matrix (tree->array V))
 					   (tree->array (mapcar #'list fd)))))
-	 (b (- f0 (dot-product a p0)))
+	 (b (safe-op #'- f0 (dot-product a p0)))
 	 (F^ (safe-op #'+ (dot-product a point) b)))
     (when *rao-verbose*
       (print  (list :point point :F^ F^ :p0 p0 :p p :V V :f0 f0 :f f :fd fd :a a :b b)))
@@ -162,9 +162,9 @@ cylinder with diameter CYCLE-LENGTH. Currently only DIMENSION 1 is
 supported."
   (assert (= dimension 1))
   (copy-object
-      :data (with-tree (x (grid-data rao)) (tree-expand x 1))
-      :axes (list (first (grid-axes rao))
-		  (expand-sequence (second (grid-axes rao)) 1 wrap-length))))
+      :data (with-tree (x (grid-data grid)) (tree-expand x 1))
+      :axes (list (first (grid-axes grid))
+		  (expand-sequence (second (grid-axes grid)) 1 wrap-length))))
 ;;(list-grid (reshape-rao (first *raos*) (new-domain)))
 ;;(grid-data (first *raos*))
 ;;(grid-data (reshape-rao (first *raos*) (new-domain)))

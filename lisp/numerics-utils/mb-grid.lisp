@@ -61,6 +61,8 @@ splot 'file' nonuniform matrix. See gnuplot doc for more"
   (destructuring-bind (row-axis column-axis) (grid-axes* grid 'list)
     (cons (cons (length column-axis) column-axis)
 	  (mapcar #'cons row-axis (array->tree (grid-data grid))))))
+;;(grid->gnuplot-matrix (gnuplot-matrix->grid '((nil 1 2 3) (0.1 2 3 4) (0.2 3 4 5) (0.3 4 5 6))))
+;;(grid-data (egina::sort-grid-columns egina::qwe))
 
 (defun gnuplot-matrix->grid (matrix)
   (make-grid (tree->array (mapcar #'rest (rest matrix)))

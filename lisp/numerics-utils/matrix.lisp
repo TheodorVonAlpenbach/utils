@@ -137,12 +137,8 @@ This could perhaps be renamed to CONCATENATE-MATRIX-COLUMNS."
 (defun map-matrix (fn &rest matrices) (apply #'map-array fn matrices))
 (defun matrix-row (matrix i) (array-row matrix i))
 (defun matrix-rows (matrix) (array-rows matrix))
-(defun map-matrix (fn &rest args) (apply #'map-array fn args))
 (defun map-matrix-rows (fn array &optional (type 'vector)) (map-array-rows fn array type))
 (defun matrix-reverse-rows (a) (array-reverse-rows a))
-
-(defun matrix-column (matrix &optional (j 0))
-  (make-array (array-dimension matrix 1) :displaced-to (submatrix matrix :columns j)))
 
 (defun matrix-column (matrix &optional (j 0))
   "Returns the Jth column of MATRIX as a VECTOR"
