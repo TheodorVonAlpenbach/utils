@@ -16,10 +16,10 @@ Converts CSV content from STREAM to a list of list of strings.
 For info abount CSV files, see http://en.wikipedia.org/wiki/Comma-separated_values"
   (loop for line in (read-lines stream :remove-empty-p remove-empty-lines-p
 				:start from-line :end to-line)
-     for all-columns = (split-by-char line column-separator remove-empty-columns-p)
-     collect (if (eql columns t)
-	       all-columns
-	       (apply #'mnth all-columns columns))))
+	for all-columns = (split-by-char line column-separator remove-empty-columns-p)
+	collect (if (eql columns t)
+		  all-columns
+		  (apply #'mnth all-columns columns))))
 ;;(eql (= 1 1) t)
 
 (defun parse-csv-string (string &rest args)

@@ -712,12 +712,12 @@ is true. The latter option is the fastest in this implementation."
   (apply #'file->lines args))
 ;;(first (read-text-file-lines "/home/MBe/projects/imms/data/rao/txt/RAO_FR85_LC78.txt" t))
 
-(defun string->file (path &rest args)
+(defun file->string (path &rest args)
   (concat (apply #'read-text-file-lines path args) :in (string #\Newline)))
 
 (defun read-text-file (&rest args)
-  (warn "READ-TEXT-FILE is deprecated. Use STRING->LINES instead.")
-  (apply #'string->file args))
+  (warn "READ-TEXT-FILE is deprecated. Use FILE->STRING instead.")
+  (apply #'file->string args))
 
 ;;; write text
 (defun write-lines (lines stream)
