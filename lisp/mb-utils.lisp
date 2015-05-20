@@ -165,13 +165,16 @@ TODO: implement a mapping key, see `pairs' (when needed)"
 
 (defun cut-if (predicate sequence inclusion &rest args)
   "INCLUSION not supported yet."
-  (declare (ignore inclusion))
   (loop for start = 0 then end
 	for end in (apply #'positions-if predicate sequence args)
 	if (subseq sequence start end) collect it into res
-	finally (return (append res (list (subseq sequence (or end 0)))))))
+	finally (return (if inclusion
+			  (append res (list (subseq sequence (or end 0))))
+			  (mapcar #'(lambda (x) (subseq x 1))
+				  (append res (list (subseq sequence (or end 0)))))))))
 ;;(cut-if (constantly nil) (vector 0 1 2 3 4 5) nil)
-;;(cut-if #'oddp (vector 0 1 2 3 4 5) nil)
+;;(cut-if #'oddp (vector 0 1 1 2 2 2 3 4 5) nil)
+;;(cut-if #'(lambda (x) (char= x #\a)) "Anaconda" nil)
 
 (defun group-positions (list &key (test #'eq) (key #'identity))
   "Groups LIST into a list of sublists where all elements are equal
@@ -537,7 +540,7 @@ returns is the same as the return value of MEMBER-IF."
 (defun nsplit-list (item list &key (key #'identity) (test #'eql))
   "The single element compare version of nsplit-list-if."
   (nsplit-list-if #'(lambda (x) (funcall test item x)) list :key key))
-;;(nsplit-list 30 '(1 2 3 4 5) :test #'<)
+;;(nsplit-list 3 '(1 2 3 4 5) :test #'<)
 
 (defun split-list (item list &key (key #'identity) (test #'eql))
   "The single element compare version of nsplit-list-if."
