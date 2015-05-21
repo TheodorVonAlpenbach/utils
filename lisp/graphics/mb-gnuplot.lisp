@@ -108,13 +108,12 @@ STREAM. It returnes the path to the DATAFILE."
 ;;(line-1 t `(:d ,#'sqrt :x-values (.5 1.0)) :title "qwe" :x-range nil)
 ;;(untrace line-1)
 
-(defun data-p (expression)
-  (or (functionp expression)
-      (arrayp expression)
+(defun data-p (x)
+  (or (functionp x) (arrayp x)
       (and (consp x) (eql (first x) :d))))
 
-(defun line-p (expression)
-  (or (and (data-p expression) :atom)
+(defun line-p (x)
+  (or (and (data-p x) :atom)
       (and (consp x) (eql (first x) :l))))
 ;;(mapcar #'line-p '(nil #'sin (:l bla) (:d bla)))
 ;;(mapcar (bind #'line-p) '(nil #'sin (:l bla) (:d bla)))
@@ -193,7 +192,10 @@ STREAM. Here graph and plot is the same"
     (format out "set view map~%")
     (format out "splot '~a' nonuniform matrix with image~%" it)))
 
-(defun splot-p (x) (when (consp x) (awhen (first x) (eql it :s))))
+(defun splot-p (x)
+  (when (consp x)
+    (awhen (first x)
+      (eql it :s))))
 ;;(mapcar #'splot-p '((:s) :s nil 123))
 
 (defun graph-p (expression)
