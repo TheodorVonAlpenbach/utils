@@ -46,8 +46,7 @@
    :dimensions
    :alias
    :with-transpose
-   :list-expand
-   :tree-expand))
+   :expand-list :expand-tree :expand-sequence))
 
 (in-package :mb-utils)
 
@@ -1008,7 +1007,7 @@ If A, B, C are consecutive numbers, the delta for B is (- (/ (+ A C) 2) B)."
      (transpose-tree (progn ,@body))))
 ;;(with-transpose (it '((1 2 3) (a b c))) (sort it #'> :key #'first))
 
-(defun list-expand (list &optional (n 1) wrap)
+(defun expand-list (list &optional (n 1) wrap)
   "Expands LIST with N elements in at both ends. If WRAP is nil, LIST
 is expanded at the frond and the end by increments defined as the
 numerical difference between the two first and two last elements in
@@ -1030,18 +1029,22 @@ on a ring of length WRAP."
 	    (append (loop for i below n for x = (- a df) then (- x df) collect x)
 		    list
 		    (loop for i below n for x = (+ b de) then (+ x de) collect x))))))))
-;;(list-expand '(1 2 3 5) 2)
-;;(list-expand '(1 2 3) 2 5)
-;;(list-expand '(1 1 1))
+;;(expand-list '(1 2 3 5) 2)
+;;(expand-list '(1 2 3) 2 5)
+;;(expand-list '(1 1 1))
 
-(defun tree-expand (tree dimension &optional (n 1) wrap)
-  "EXPANDS tree just like LIST-EXPAND in the specified DIMENSION.
-With DIMENSION set to 0 it is equivalent to LIST-EXPAND."
+(defun expand-tree (tree dimension &optional (n 1) wrap)
+  "EXPANDS tree just like EXPAND-LIST in the specified DIMENSION.
+With DIMENSION set to 0 it is equivalent to EXPAND-LIST."
   (case dimension
-    (0 (with-transpose (x tree) (tree-expand x 1 n wrap)))
-    (1 (loop for row in tree collect (list-expand row n wrap)))
-    (t (error "TREE-EXPAND does not support DIMENSION > 1"))))
-;;(tree-expand '((1 2 3) (11 12 13)) 0 2)
+    (0 (with-transpose (x tree) (expand-tree x 1 n wrap)))
+    (1 (loop for row in tree collect (expand-list row n wrap)))
+    (t (error "EXPAND-TREE does not support DIMENSION > 1"))))
+;;(expand-tree '((1 2 3) (11 12 13)) 0 2)
+
+(defun expand-sequence (sequence &optional (n 1) wrap)
+  "Generalization of EXPAND-LIST to sequences."
+  (with-tree (x sequence) (expand-list x n wrap)))
 
 ;;; this one is currently not exported
 (defmacro with-list ((var sequence &optional res-type) &body body)

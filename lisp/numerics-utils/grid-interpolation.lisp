@@ -156,18 +156,13 @@ F(point), f1 = F(point + x1), f2 = (point + x2), .."
 	collect (abs (- iv gv))))
 ;;(reduce #'+ (test-grid-interpolate *test-grid*))
 
-(defun expand-sequence (sequence &optional (n 1) wrap)
-  "TODO: write macro with-list, so this defun can be simply
-\(with-list ((x sequence) body) (list-expand x n wrap))."
-  (with-tree (x sequence) (list-expand x n wrap)))
-
 (defun wrap-grid (grid diameter dimension)
   "Wraps GRID in dimension DIMENSION, so the grid becomes in effect a
 cylinder with diameter CYCLE-LENGTH. Currently only DIMENSION 1 is
 supported."
   (assert (= dimension 1))
   (copy-object grid
-      :data (with-tree (x (grid-data grid)) (tree-expand x dimension))
+      :data (with-tree (x (grid-data grid)) (expand-tree x dimension))
       :axes (list (first (grid-axes grid))
 		  (expand-sequence (second (grid-axes grid)) 1 diameter))))
 ;;(list-grid (reshape-rao (first *raos*) (new-domain)))
