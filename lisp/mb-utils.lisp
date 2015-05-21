@@ -272,19 +272,21 @@ TODO: string keys could also evalute to a list"
                        clauses)))))
 
 (defun a-b (a b &key length (step (if length (/ (- b a) (1- length)) 1)) (type 'list) (direction :auto) key)
-   "Returns the sequence from and including A to and including B by STEP
+  "Returns the sequence from and including A to and including B by STEP
  If TYPE is provided, the result is #'COERCEd to TYPE."
+  (assert (not (zerop step)))
   (flet ((up () (loop for i from a to b by step collect (if key (funcall key i) i)))
-        (down () (loop for i downfrom a to b by (abs step) collect (if key (funcall key i) i))))
+	 (down () (loop for i downfrom a to b by (abs step) collect (if key (funcall key i) i))))
     (let ((res (case direction
-                (:up (up))
-                (:down (down))
-                (:auto (if (< a b) (up) (down))))))
+		 (:up (up))
+		 (:down (down))
+		 (:auto (if (< a b) (up) (down))))))
       (values
        (if (and type (not (eql (type-of res) type)))
-        (coerce res type)
-        res)
+	 (coerce res type)
+	 res)
        step))))
+;;(a-b 0 0 :step 0)
 ;;(a-b 2 -2 :length 10 :type 'vector :direction :auto :key #'sqrt)
 ;;(a-b 10 0 :type 'array :key #'(lambda (x) (list x (sq x))))
 
@@ -378,6 +380,16 @@ IN may also be a function (fn i), taking an index argument, see `infix-list'."
 
 (defun concat (list &rest args) (apply #'write-list list nil args))
 ;;(time (progn (concat (a-b 0 100000) :in ", " :pre "<<" :suf ">>" :test #'oddp :key #'1+) :fine))
+
+(defun format-list (out list format-fn &key pre in suf test key)
+  (flet ((sp (x) (when x (case x (:newline (format out "~%")) (t (princ x out))))))
+    (let ((list (if key (mapcar key list) list)))
+      (sp pre)
+      (loop for x on (if test (remove-if-not test list) list)
+           do (funcall format-fn out (first x))
+           while (rest x) do (sp in))
+      (sp suf))))
+;;(format-list t '(1 2 3) #'(lambda (out x) (format out "~a" x)) :in ", ")
 
 (defun split-by-char (string char &optional remove-empty-string-p)
    "Returns a list of substrings of string divided by ONE CHAR each.
@@ -997,6 +1009,11 @@ If A, B, C are consecutive numbers, the delta for B is (- (/ (+ A C) 2) B)."
 ;;(with-transpose (it '((1 2 3) (a b c))) (sort it #'> :key #'first))
 
 (defun list-expand (list &optional (n 1) wrap)
+  "Expands LIST with N elements in at both ends. If WRAP is nil, LIST
+is expanded at the frond and the end by increments defined as the
+numerical difference between the two first and two last elements in
+LIST, respectively. If WRAP is a number, LIST is expanding by cycling
+on a ring of length WRAP."
   (flet ((wrap (list x) (mapcar (bind #'+ x) list)))
     (if wrap
       ;;cyclic extension
@@ -1005,24 +1022,26 @@ If A, B, C are consecutive numbers, the delta for B is (- (/ (+ A C) 2) B)."
 	(append (last list n) list (head list n)))
       ;;linear extension
       (let ((a (first list))
-	    (d (last-elt list)))
-	(if (> (length list) 1)
-	  (let ((b (second list))
-		(c (last-elt list 2)))
-	    (flatten* (list (- (* 2 a) b) list (- (* 2 d) c))))
-	  (flatten* (list (1- a) list (1+ d))))))))
+	    (b (last-elt list)))
+	(let ((deltas (if (> (length list) 1)
+			(list (- (second list) a) (- b (last-elt list 2)))
+			(list 1 1))))
+	  (destructuring-bind (df de) deltas
+	    (append (loop for i below n for x = (- a df) then (- x df) collect x)
+		    list
+		    (loop for i below n for x = (+ b de) then (+ x de) collect x))))))))
 ;;(list-expand '(1 2 3 5) 2)
-;;(list-expand '(1 2 3) 1 5)
+;;(list-expand '(1 2 3) 2 5)
+;;(list-expand '(1 1 1))
 
 (defun tree-expand (tree dimension &optional (n 1) wrap)
   "EXPANDS tree just like LIST-EXPAND in the specified DIMENSION.
 With DIMENSION set to 0 it is equivalent to LIST-EXPAND."
   (case dimension
-    (0 (list-expand tree n wrap))
-    (1 (with-transpose (x tree) (list-expand x n wrap)))
-    (t (error "TREE-MIMIC-CIRCULARITY does not support DIMENSION > 1"))))
-;;(tree-expand '((1 2 3) (a b c)) 1)
-;;(tree-expand '((1 2 3) (11 12 13)) 1)
+    (0 (with-transpose (x tree) (tree-expand x 1 n wrap)))
+    (1 (loop for row in tree collect (list-expand row n wrap)))
+    (t (error "TREE-EXPAND does not support DIMENSION > 1"))))
+;;(tree-expand '((1 2 3) (11 12 13)) 0 2)
 
 ;;; this one is currently not exported
 (defmacro with-list ((var sequence &optional res-type) &body body)
