@@ -29,8 +29,8 @@
 	(let* ((f (* (normalize-radian (- theta mu)) h))
 	       (k-limit (floor (/ (- eps (abs f)) g))))
 ;;	  (print (list :theta theta :k-limit k-limit))
-	  (* d (loop for k from (- k-limit) to k-limit
-		     sum (exp (- (sq (+ f (* g k))))))))))))
+	  (safe-* d (loop for k from (- k-limit) to k-limit
+		     sum (safe-op #'exp (- (sq (+ f (safe-* g k))))))))))))
 ;;(funcall (wrapped-normal-distribution 3.6826447217080354073L0 0.59857875) (+ pi (* 2 pi)))
 ;;(gp::plot `((:l (:d ,(wrapped-normal-distribution -2.600540585471551 0.7) :x-values ,(list (- pi) pi)))))
 
