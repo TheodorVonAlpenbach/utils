@@ -155,6 +155,8 @@
     (single-float (exp (fgammln        a )))
     (otherwise    (exp  (gammln        a )))))
 
+(defun gamma (a) (gamma-function a))
+
 (defun log-gamma-function (a)
   (typecase a
     (integer            (fgammln (float a)))
@@ -271,3 +273,32 @@
 ;;;		= (integral x to inf of (exp -t)(expt t a-1) dt)
 ;;; (gamma a+1 x) = a (gamma a x) - (exp -x) (expt x a)
 ;;; note distinction of LARGE and small gammas
+
+
+;;http://rosettacode.org/wiki/Gamma_function
+(defun upper-incomplete-gamma (a x)
+  "Returns Integral(t**(a-1)*e**-t, t = x..inf)"
+  (when (or (> a 171) (< x 0))
+    (error "overflow"))
+  (let ((xam (if (plusp x) (+ (- x) (* a (log x))) 0)))
+    (when (> xam 700)
+      (error "overflow"))
+
+    (if (> x (1+ a))
+      (loop for k from 60 downto 1
+	    for t0 = 0 then (/ (- k a) (1+ (/ k (+ x t0))))
+	    finally return (/ (exp-safe xam) (+ x t0)))
+    (let ((ga (gamma a)))
+      (if (zerop x)
+	ga
+	;; else x <= 1+a 
+      (loop for i from 1 to 60
+	    for s = (/ 1 a) then (+ s r)
+	    for r = s then (/ x (+ a i))
+	    while (< (abs (/ r s)) 1E-15)
+	    finally return (- ga (* (exp-safe xam) s))))))))
+;;(upper-incomplete-gamma 0.5 5)
+
+(defun lower-incomplete-gamma (a x)
+  "Returns Integral(t**(a-1)*e**-t, t = 0..x)"
+  (- (gamma a) (upper-incomplete-gamma a x)))
