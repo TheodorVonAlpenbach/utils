@@ -148,7 +148,7 @@ TODO: implement a mapping key, see `pairs' (when needed)"
   (butlast list (mod (or n 1) (length list))))
 ;;(butlast* '(a b c d e) -2)
 
-(defun head (list &optional n)
+(defun head (list &optional (n 1))
   "Returns the N first elements of LIST"
   (butlast* list (- n)))
 
@@ -285,7 +285,7 @@ TODO: string keys could also evalute to a list"
 	 (coerce res type)
 	 res)
        step))))
-;;(a-b 0 0 :step 0)
+;;(a-b 0 0)
 ;;(a-b 2 -2 :length 10 :type 'vector :direction :auto :key #'sqrt)
 ;;(a-b 10 0 :type 'array :key #'(lambda (x) (list x (sq x))))
 
