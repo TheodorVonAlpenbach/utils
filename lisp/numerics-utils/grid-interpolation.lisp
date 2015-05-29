@@ -112,8 +112,8 @@ numbers."
 	  (mat+ (vec-copies index-point (length index-point)) offset-mat))))
 ;;(closest-index-points (closest-index-edges '(0 5) (grid-axes *test-grid*)))
 
-(defvar *rao-verbose* nil)
-;;(setf *rao-verbose* nil)
+(defvar *grid-verbose* nil)
+;;(setf *grid-verbose* nil)
 
 (defun interpolate (point reference-points reference-values)
   "Solves Xa = f, where X = (x1, x2, ..)^T is the result of
@@ -130,7 +130,7 @@ F(point), f1 = F(point + x1), f2 = (point + x2), .."
 					   (tree->array (mapcar #'list fd)))))
 	 (b (safe-op #'- f0 (dot-product a p0)))
 	 (F^ (safe-op #'+ (dot-product a point) b)))
-    (when *rao-verbose*
+    (when *grid-verbose*
       (print  (list :point point :F^ F^ :p0 p0 :p p :V V :f0 f0 :f f :fd fd :a a :b b)))
       F^))
 ;;(grid-interpolate '(2 2 0) *test-grid*)
@@ -143,7 +143,7 @@ F(point), f1 = F(point + x1), f2 = (point + x2), .."
 	 (index-points (closest-index-points index-edges))
 	 (points (mapcar (bind #'index-point->grid-point (grid-axes grid)) index-points))
 	 (values (mapcar (bind #'index-point->grid-value (grid-data grid)) index-points)))
-    (when *rao-verbose* (print (list point index-edges index-points points values)))
+    (when *grid-verbose* (print (list point index-edges index-points points values)))
     (interpolate point points values)))
 ;;(grid-interpolate '(1 10) *test-grid*)
 ;;(trace grid-interpolate)
@@ -173,6 +173,8 @@ supported."
   "Returns a new grid of same type as GRID but with grid axes defined
 by NEW-AXES. The grid point values are calculated by local
 interpolation, see GRID-INTERPOLATE."
+  (when *grid-verbose*
+    (print (list-grid grid)))
   (if (equal (grid-axes grid) new-axes)
     grid
     (if diameter
