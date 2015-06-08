@@ -287,7 +287,7 @@
     (if (> x (1+ a))
       (loop for k from 60 downto 1
 	    for t0 = 0 then (/ (- k a) (1+ (/ k (+ x t0))))
-	    finally return (/ (exp-safe xam) (+ x t0)))
+	    finally return (safe-op #'/ (exp-safe xam) (+ x t0)))
     (let ((ga (gamma a)))
       (if (zerop x)
 	ga
