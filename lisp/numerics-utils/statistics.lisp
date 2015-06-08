@@ -37,17 +37,17 @@
 (defun wnd (&rest args) (apply #'wrapped-normal-distribution args))
 ;;(funcall (wnd 0 1) (- pi))
 
-(defun rayleigh-distribution-function (σ)
+(defun rayleigh-distribution-function (sigma)
   "http://en.wikipedia.org/wiki/Rayleigh_distribution"
-  (let* ((σ2 (sq σ))
-	 (a (/ 1 σ2))
-	 (b (/ -1 2 σ2)))
+  (let* ((sigma2 (sq sigma))
+	 (a (/ 1 sigma2))
+	 (b (/ -1 2 sigma2)))
     (lambda (x) (* a x (exp-safe (* b (sq x)))))))
 ;;(gp:plot (rayleigh-distribution-function 1) :x-values '(0 10))
 
-(defun rayleigh-cumulative-function (σ)
+(defun rayleigh-cumulative-function (sigma)
   "http://en.wikipedia.org/wiki/Rayleigh_distribution"
-  (let ((a (/ -1 2 (sq σ))))
+ (let ((a (/ -1 2 (sq sigma))))
     (lambda (x) (- 1 (exp-safe (* a (sq x)))))))
 ;;(gp:plot (rayleigh-cumulative-function 4) :x-values '(0 10))
 
