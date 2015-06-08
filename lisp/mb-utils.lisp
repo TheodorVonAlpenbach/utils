@@ -274,7 +274,13 @@ TODO: string keys could also evalute to a list"
   "Returns the sequence from and including A to and including B by STEP
  If TYPE is provided, the result is #'COERCEd to TYPE."
   (assert (not (zerop step)))
-  (flet ((up () (loop for i from a to b by step collect (if key (funcall key i) i)))
+  (flet ((up () (if length
+		  (rcons (loop repeat (1- length)
+			     for x = a then (+ x step)
+			     collect (if key (funcall key x) x))
+			 b)
+		  (loop for i from a to b by step collect (if key (funcall key i) i))))
+	 ;;TODO same as with up
 	 (down () (loop for i downfrom a to b by (abs step) collect (if key (funcall key i) i))))
     (let ((res (case direction
 		 (:up (up))
@@ -285,7 +291,8 @@ TODO: string keys could also evalute to a list"
 	 (coerce res type)
 	 res)
        step))))
-;;(a-b 0 0)
+;;(a-b 2 3)
+;;(loop for i from 2 below 20 collect (length (a-b (- pi) pi :length i)))
 ;;(a-b 2 -2 :length 10 :type 'vector :direction :auto :key #'sqrt)
 ;;(a-b 10 0 :type 'array :key #'(lambda (x) (list x (sq x))))
 
@@ -1045,6 +1052,7 @@ With DIMENSION set to 0 it is equivalent to EXPAND-LIST."
 (defun expand-sequence (sequence &optional (n 1) wrap)
   "Generalization of EXPAND-LIST to sequences."
   (with-tree (x sequence) (expand-list x n wrap)))
+;;(let ((v #(1 2 3 4))) (list (expand-sequence v) v))
 
 ;;; this one is currently not exported
 (defmacro with-list ((var sequence &optional res-type) &body body)
