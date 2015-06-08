@@ -3,7 +3,7 @@
   (:export :grid :make-grid :grid-data :grid-axes
 	   :list-grid :grid-axes* :span-grid :map-grid
 	   :gnuplot-matrix->grid :grid->gnuplot-matrix
-	   :export-grid
+	   :import-grid :export-grid
 	   :with-grid-data))
 
 (in-package :mb-grid)
@@ -71,9 +71,18 @@ splot 'file' nonuniform matrix. See gnuplot doc for more"
 ;;(list-grid (gnuplot-matrix->grid '((nil 1 2 3) (0.1 2 3 4) (0.2 3 4 5) (0.3 4 5 6))))
 
 (defun export-grid (grid filename &rest args)
-  "Exports GRID to csv format and writes it to FILENAME. See write-csv for ARGS"
+  "Exports GRID to csv format and writes it to FILENAME. See WRITE-CSV for ARGS"
   (apply #'write-csv-file (grid->gnuplot-matrix grid) filename args))
-;;(export-grid (span-grid #'+ '(#(0 1 2) #(5 10))) "~/tmp/test.csv" :column-separator #\Space)
+;;(export-grid (span-grid #'+ '(#(0 1 2) #(5 10))) "~/tmp/test.csv")
+
+(defun import-grid (filename &rest args)
+  "Imports and parses a grid object from csv like formatted file FILENAME.
+The format may be tuned. See READ-CSV-FILE for ARGS"
+  (flet ((parse-number (x)
+	   (handler-case (parse-number::parse-number x)
+	     (floating-point-underflow () 0))))
+    (gnuplot-matrix->grid (maptree #'parse-number (apply #'read-csv-file filename args)))))
+;;(list-grid (import-grid "~/tmp/test.csv"))
 
 (defmacro with-grid-data ((var grid &optional (data-type 'array)) &body body)
   "Returns a copy of grid but with data set to the result of BODY.
