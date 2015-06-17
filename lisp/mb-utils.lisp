@@ -23,7 +23,7 @@
    :minimum :maximum
    :transpose-tree :flatten* :maptree :with-tree
    :flank
-   :group :pairs :tuples
+   :group :pairs :tuples :combinations
    :boundaries
    :with-gensyms
    :with-outfile
@@ -138,6 +138,13 @@ TODO: implement a mapping key, see `pairs' (when needed)"
 	for i from (- (length list) n) downto 0
 	collect (butlast h i)))
 ;;(tuples '(a b c d e) 3)
+
+(defun combinations (list1 &optional (list2 list1) ordered)
+  (nconc (loop for x1 in list1 nconc 
+	       (loop for x2 in list2
+		     collect (list x1 x2)))
+	 (when (not ordered) (combinations list2 list1 t))))
+;;(combinations '(a b c) '(d e f) t)
 
 (defun last* (list &optional n)
   "Same as `butlast' but accepts negative argument, meaning counting from start."
