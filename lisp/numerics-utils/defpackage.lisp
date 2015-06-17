@@ -22,4 +22,8 @@
 	   :map-matrix
 	   :matrix-column
 	   :invert-matrix
-	   :matrix-product))
+	   :matrix-product
+	   :matrix-distance
+	   :rank
+	   :matrix-minus
+	   :columns->matrix))
