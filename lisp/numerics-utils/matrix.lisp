@@ -59,6 +59,8 @@ This could perhaps be renamed to CONCATENATE-MATRIX-COLUMNS."
   (apply #'concatenate-matrix-columns (map 'list #'column->matrix columns)))
 ;;(columns->matrix (list #(1 2) #(1 2)))
 
+(defun rows->matrix (rows) (matrix-transpose (columns->matrix rows)))
+
 (defun get-first-non-zero-row-in-col (a column &optional (start-row 0))
   (let ((n (array-dimension a 0)))
     (do ((i start-row (+ i 1)))
@@ -84,7 +86,7 @@ This could perhaps be renamed to CONCATENATE-MATRIX-COLUMNS."
       res)))
 ;;(submatrix (identity-matrix 3))
 
-(defun invert-matrix (a)
+(defun matrix-inversion (a)
   "Inverts square matrix A"
   (let* ((n (array-dimension a 0))
 	 (c (concatenate-matrix-columns a (identity-matrix n))))
@@ -110,7 +112,7 @@ This could perhaps be renamed to CONCATENATE-MATRIX-COLUMNS."
 
       (unless (not c)
         (submatrix c :columns (a-b n (1- (* 2 n)))))))
-;;(invert-matrix #2A((1 2) (3 4)))
+;;(matrix-inversion #2A((1 2) (3 4)))
 
 (defun matrix-product(a1 a2 &key (inner-fn #'safe-*) (outer-fn #'+))
   "Not exactly correct, but should work for square matrices"
@@ -125,7 +127,7 @@ This could perhaps be renamed to CONCATENATE-MATRIX-COLUMNS."
 				(loop for i below n2
 				      collect (funcall inner-fn (aref a1 r1 i) (aref a2 i c2)))))))
 	res))))
-;;(matrix-product asd (invert-matrix asd))
+;;(matrix-product asd (matrix-inversion asd))
 ;;(setf asd #2A((1 2) (3 4)))
 
 (defun span-matrix (fn row-span column-span)
@@ -224,10 +226,10 @@ see http://web.eecs.utk.edu/~dongarra/etemplates/node198.html"
    v))
 ;;(project-vector (vector (random 1.0) (random 1.0)) #(1 1))
 
-(defun matrix-minus (matrix &rest matrices)
+(defun matrix-difference (matrix &rest matrices)
   (apply #'map-array #'- matrix matrices))
 
-(defun m- (&rest args) (apply #'matrix-minus args))
+(defun m- (&rest args) (apply #'matrix-difference args))
 ;;(m- #(1) #(1) #(1))
 
 (defun zero-vector-p (vector) (every #'zerop vector))
@@ -262,3 +264,29 @@ TODO: Use SINGULAR-VALUE-DECOMPOSE to calculate rank."
 	  (matrix-rows matrix) (matrix-columns matrix))))
 ;;(rank sing)
 ;;(setf sing #2A((2 4 6) (1 1 1) (1 2 3)))
+
+(defun map-rows (fn matrix &key (start 0) end)
+  (rows->matrix (mapcar fn (subseq (matrix-rows matrix) start end))))
+;;(map-rows (bind #'scale-matrix 2 1) sing :start 1)
+
+;;; Simpex stuff. simplex is a list of points The main target for now
+;;; is to decide if a point is within a simplex Need to compute
+;;; determinant, and then I need some deep linear algebra functions
+(defun n-parallelepiped-volume (points)
+  (determinant points))
+
+(defun simplex-volume (simplex)
+  (/ (n-parallelepiped-volume simplex)
+     (faculty (length simplex))))
+
+(defun equal-signum-1 ()
+  (mapcar #'signum numbers))
+
+(defun equal-signum (&rest numbers)
+  (mapcar #'signum numbers))
+
+(defun within-simplex (x simplex &optional strictly-p)
+  (apply #'= (loop for i below (length simplex)
+		   for sgn = (signum (simplex-volume (replace-nth i x simplex)))
+		   if (not (and strictly-p (zerop sgn)))
+		   collect sgn)))
