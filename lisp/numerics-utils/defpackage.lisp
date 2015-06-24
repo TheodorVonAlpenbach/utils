@@ -21,9 +21,13 @@
 	   :span-matrix
 	   :map-matrix
 	   :matrix-column
-	   :invert-matrix
+	   :matrix-inversion :matrix-transpose
 	   :matrix-product
 	   :matrix-distance
 	   :rank
-	   :matrix-minus
-	   :columns->matrix))
+	   :matrix-difference
+	   :column->matrix :columns->matrix :rows->matrix
+	   :map-rows
+	   :matrix-row
+	   :submatrix
+	   :vector-inner-product))
