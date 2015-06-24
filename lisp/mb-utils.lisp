@@ -37,7 +37,7 @@
    :tree-dimensions
    :tree->array :array->tree
    :generate-array
-   :array-rows
+   :array-row :array-rows
    :span-array :map-array
    :map-array-rows
    :array-reverse-rows
@@ -282,9 +282,9 @@ TODO: string keys could also evalute to a list"
  If TYPE is provided, the result is #'COERCEd to TYPE."
   (assert (not (zerop step)))
   (flet ((up () (if length
-		  (rcons (loop repeat (1- length)
-			     for x = a then (+ x step)
-			     collect (if key (funcall key x) x))
+		  (rcons (loop for x = a then (+ x step)
+			       repeat (1- length)
+			       collect (if key (funcall key x) x))
 			 b)
 		  (loop for i from a to b by step collect (if key (funcall key i) i))))
 	 ;;TODO same as with up
@@ -856,6 +856,14 @@ is the same throughout TREE."
     (setf (nth dimension res) unit)
     res))
 ;;(unit-list 1 3 :unit 2 :zero 'zzzero)
+
+(defmethod row-major-index->index ((dimensions cons) row-major-index)
+  (loop for d in (butlast dimensions)
+	for n = row-major-index then remainder
+	for (index remainder) = (multiple-value-list (floor n d))
+	collect index into res
+	finally (return (rcons res remainder))))
+;;(loop for i below 6 collect (row-major-index->index '(2 3) i))
 
 (defun array-row (array i)
   (make-array (rest (array-dimensions array))
