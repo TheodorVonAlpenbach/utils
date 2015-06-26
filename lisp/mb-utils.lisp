@@ -865,6 +865,10 @@ is the same throughout TREE."
 	finally (return (rcons res remainder))))
 ;;(loop for i below 6 collect (row-major-index->index '(2 3) i))
 
+(defmethod row-major-index->index ((x array) row-major-index)
+  (row-major-index->index (array-dimensions x) row-major-index))
+;;(loop for i below 6 collect (row-major-index->index (make-array '(2 3)) i))
+
 (defun array-row (array i)
   (make-array (rest (array-dimensions array))
     :displaced-to array
