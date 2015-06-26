@@ -99,3 +99,40 @@ DATA-TYPE in BODY."
 		      (t (error "WITH-GRID-DATA only supports the types ARRAY and TREE"))))))) 
 ;;(list-grid (with-grid-data (x (make-grid #2A((1 2 3) (2 3 4)) '(#(1 2 3) #(1 2))) tree) (rest x)))
 ;;(list-grid (with-grid-data (x (first *raos*) tree) (rest x)))
+
+(defun swap-parts (sequence n)
+  (concatenate (type-of sequence) (subseq sequence n) (subseq sequence 0 n)))
+;;(swap-parts #(0 1 2 3) 2)
+
+(defmethod rotate ((x cons) &optional (n 1))
+  "A single rotation is equal to a transpose."
+  (swap-parts x (mod n (length x))))
+;;(rotate '(1 2 3 4 5 6) -1)
+
+(defun rotate-sequence (sequence &optional (n 1))
+  "A single rotation is equal to a transpose."
+  (coerce (rotate (coerce sequence 'list) n) (type-of sequence)))
+;;(rotate-sequence #(1 2 3 4 5 6) -1)
+
+(defmethod rotate ((x array) &optional (n 1))
+  "A single rotation is equal to a transpose."
+  (if (= (array-rank x) 1)
+    (coerce (rotate (coerce x 'list) n) 'vector)
+    (let ((res (make-array (array-dimensions x))))
+      (loop for i below (array-total-size x)
+	    do  (setf (apply #'aref res (rotate (listify (mb-utils::row-major-index->index x i)) n))
+		      (row-major-aref x i)))
+      res)))
+;;(rotate #2A((1 2) (3 4)))
+;;(rotate #(1 2 3))
+
+(defmethod rotate ((x grid) &optional (n 1))
+  "A single rotation is equal to a transpose."
+  (make-grid (rotate (grid-data x) n) (rotate (grid-axes x) n)))
+;;(list-grid (rotate (make-grid #2A((1 2 3) (2 3 4)) '(#(1 2 3) #(1 2)))))
+
+(defmethod transpose-grid ((x grid))
+  (assert (= (dimension x) 2))
+  (make-grid (matrix-transpose (grid-data x)) (rotate (grid-axes x))))
+;;(list-grid (transpose-grid (make-grid #2A((1 2 3) (2 3 4)) '(#(1 2 3) #(1 2)))))
+
