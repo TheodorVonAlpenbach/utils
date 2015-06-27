@@ -22,4 +22,5 @@
 	   :map-matrix
 	   :matrix-column
 	   :invert-matrix
-	   :matrix-product))
+	   :matrix-product
+	   :variance))
