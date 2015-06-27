@@ -47,7 +47,6 @@ namespace mb {
   // Count words in S
   inline int countWords(const std::string& s) {return readString(s).size();}
 
-
   //// Implementations
   inline std::string padString(const std::string& s, const int length, const char c) 
   { return s + std::string(std::max<int>(length - s.size(), 1), c); }
@@ -172,6 +171,15 @@ namespace mb {
       return rs;
     }
   };
+
+  // Path manipulations
+  inline std::string filename(std::string path) { return split_string(path, '/').back(); }
+
+  inline std::string sans_extension(std::string path) {
+    std::vector<std::string> ss = mb::split_string(path, '.');
+    ss.pop_back();
+    return mb::concat(ss, ".");
+  }
 
 } //mb
 

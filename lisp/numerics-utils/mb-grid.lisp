@@ -3,7 +3,7 @@
   (:export :grid :make-grid :grid-data :grid-axes
 	   :list-grid :grid-axes* :span-grid :map-grid
 	   :gnuplot-matrix->grid :grid->gnuplot-matrix
-	   :export-grid
+	   :import-grid :export-grid
 	   :with-grid-data))
 
 (in-package :mb-grid)
@@ -71,9 +71,18 @@ splot 'file' nonuniform matrix. See gnuplot doc for more"
 ;;(list-grid (gnuplot-matrix->grid '((nil 1 2 3) (0.1 2 3 4) (0.2 3 4 5) (0.3 4 5 6))))
 
 (defun export-grid (grid filename &rest args)
-  "Exports GRID to csv format and writes it to FILENAME. See write-csv for ARGS"
+  "Exports GRID to csv format and writes it to FILENAME. See WRITE-CSV for ARGS"
   (apply #'write-csv-file (grid->gnuplot-matrix grid) filename args))
-;;(export-grid (span-grid #'+ '(#(0 1 2) #(5 10))) "~/tmp/test.csv" :column-separator #\Space)
+;;(export-grid (span-grid #'+ '(#(0 1 2) #(5 10))) "~/tmp/test.csv")
+
+(defun import-grid (filename &rest args)
+  "Imports and parses a grid object from csv like formatted file FILENAME.
+The format may be tuned. See READ-CSV-FILE for ARGS"
+  (flet ((parse-number (x)
+	   (handler-case (parse-number::parse-number x)
+	     (floating-point-underflow () 0))))
+    (gnuplot-matrix->grid (maptree #'parse-number (apply #'read-csv-file filename args)))))
+;;(list-grid (import-grid "~/tmp/test.csv"))
 
 (defmacro with-grid-data ((var grid &optional (data-type 'array)) &body body)
   "Returns a copy of grid but with data set to the result of BODY.
@@ -90,3 +99,40 @@ DATA-TYPE in BODY."
 		      (t (error "WITH-GRID-DATA only supports the types ARRAY and TREE"))))))) 
 ;;(list-grid (with-grid-data (x (make-grid #2A((1 2 3) (2 3 4)) '(#(1 2 3) #(1 2))) tree) (rest x)))
 ;;(list-grid (with-grid-data (x (first *raos*) tree) (rest x)))
+
+(defun swap-parts (sequence n)
+  (concatenate (type-of sequence) (subseq sequence n) (subseq sequence 0 n)))
+;;(swap-parts #(0 1 2 3) 2)
+
+(defmethod rotate ((x cons) &optional (n 1))
+  "A single rotation is equal to a transpose."
+  (swap-parts x (mod n (length x))))
+;;(rotate '(1 2 3 4 5 6) -1)
+
+(defun rotate-sequence (sequence &optional (n 1))
+  "A single rotation is equal to a transpose."
+  (coerce (rotate (coerce sequence 'list) n) (type-of sequence)))
+;;(rotate-sequence #(1 2 3 4 5 6) -1)
+
+(defmethod rotate ((x array) &optional (n 1))
+  "A single rotation is equal to a transpose."
+  (if (= (array-rank x) 1)
+    (coerce (rotate (coerce x 'list) n) 'vector)
+    (let ((res (make-array (array-dimensions x))))
+      (loop for i below (array-total-size x)
+	    do  (setf (apply #'aref res (rotate (listify (mb-utils::row-major-index->index x i)) n))
+		      (row-major-aref x i)))
+      res)))
+;;(rotate #2A((1 2) (3 4)))
+;;(rotate #(1 2 3))
+
+(defmethod rotate ((x grid) &optional (n 1))
+  "A single rotation is equal to a transpose."
+  (make-grid (rotate (grid-data x) n) (rotate (grid-axes x) n)))
+;;(list-grid (rotate (make-grid #2A((1 2 3) (2 3 4)) '(#(1 2 3) #(1 2)))))
+
+(defmethod transpose-grid ((x grid))
+  (assert (= (dimension x) 2))
+  (make-grid (matrix-transpose (grid-data x)) (rotate (grid-axes x))))
+;;(list-grid (transpose-grid (make-grid #2A((1 2 3) (2 3 4)) '(#(1 2 3) #(1 2)))))
+

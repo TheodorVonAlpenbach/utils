@@ -23,7 +23,7 @@
    :minimum :maximum
    :transpose-tree :flatten* :maptree :with-tree
    :flank
-   :group :pairs :tuples
+   :group :pairs :tuples :combinations
    :boundaries
    :with-gensyms
    :with-outfile
@@ -37,7 +37,7 @@
    :tree-dimensions
    :tree->array :array->tree
    :generate-array
-   :array-rows
+   :array-row :array-rows
    :span-array :map-array
    :map-array-rows
    :array-reverse-rows
@@ -46,8 +46,7 @@
    :dimensions
    :alias
    :with-transpose
-   :list-expand
-   :tree-expand))
+   :expand-list :expand-tree :expand-sequence))
 
 (in-package :mb-utils)
 
@@ -140,6 +139,13 @@ TODO: implement a mapping key, see `pairs' (when needed)"
 	collect (butlast h i)))
 ;;(tuples '(a b c d e) 3)
 
+(defun combinations (list1 &optional (list2 list1) ordered)
+  (nconc (loop for x1 in list1 nconc 
+	       (loop for x2 in list2
+		     collect (list x1 x2)))
+	 (when (not ordered) (combinations list2 list1 t))))
+;;(combinations '(a b c) '(d e f) t)
+
 (defun last* (list &optional n)
   "Same as `butlast' but accepts negative argument, meaning counting from start."
   (last list (mod (or n 1) (length list))))
@@ -149,7 +155,7 @@ TODO: implement a mapping key, see `pairs' (when needed)"
   (butlast list (mod (or n 1) (length list))))
 ;;(butlast* '(a b c d e) -2)
 
-(defun head (list &optional n)
+(defun head (list &optional (n 1))
   "Returns the N first elements of LIST"
   (butlast* list (- n)))
 
@@ -165,13 +171,16 @@ TODO: implement a mapping key, see `pairs' (when needed)"
 
 (defun cut-if (predicate sequence inclusion &rest args)
   "INCLUSION not supported yet."
-  (declare (ignore inclusion))
   (loop for start = 0 then end
 	for end in (apply #'positions-if predicate sequence args)
 	if (subseq sequence start end) collect it into res
-	finally (return (append res (list (subseq sequence (or end 0)))))))
+	finally (return (if inclusion
+			  (append res (list (subseq sequence (or end 0))))
+			  (mapcar #'(lambda (x) (subseq x 1))
+				  (append res (list (subseq sequence (or end 0)))))))))
 ;;(cut-if (constantly nil) (vector 0 1 2 3 4 5) nil)
-;;(cut-if #'oddp (vector 0 1 2 3 4 5) nil)
+;;(cut-if #'oddp (vector 0 1 1 2 2 2 3 4 5) nil)
+;;(cut-if #'(lambda (x) (char= x #\a)) "Anaconda" nil)
 
 (defun group-positions (list &key (test #'eq) (key #'identity))
   "Groups LIST into a list of sublists where all elements are equal
@@ -269,19 +278,28 @@ TODO: string keys could also evalute to a list"
                        clauses)))))
 
 (defun a-b (a b &key length (step (if length (/ (- b a) (1- length)) 1)) (type 'list) (direction :auto) key)
-   "Returns the sequence from and including A to and including B by STEP
+  "Returns the sequence from and including A to and including B by STEP
  If TYPE is provided, the result is #'COERCEd to TYPE."
-  (flet ((up () (loop for i from a to b by step collect (if key (funcall key i) i)))
-        (down () (loop for i downfrom a to b by (abs step) collect (if key (funcall key i) i))))
+  (assert (not (zerop step)))
+  (flet ((up () (if length
+		  (rcons (loop for x = a then (+ x step)
+			       repeat (1- length)
+			       collect (if key (funcall key x) x))
+			 b)
+		  (loop for i from a to b by step collect (if key (funcall key i) i))))
+	 ;;TODO same as with up
+	 (down () (loop for i downfrom a to b by (abs step) collect (if key (funcall key i) i))))
     (let ((res (case direction
-                (:up (up))
-                (:down (down))
-                (:auto (if (< a b) (up) (down))))))
+		 (:up (up))
+		 (:down (down))
+		 (:auto (if (< a b) (up) (down))))))
       (values
        (if (and type (not (eql (type-of res) type)))
-        (coerce res type)
-        res)
+	 (coerce res type)
+	 res)
        step))))
+;;(a-b 2 3)
+;;(loop for i from 2 below 20 collect (length (a-b (- pi) pi :length i)))
 ;;(a-b 2 -2 :length 10 :type 'vector :direction :auto :key #'sqrt)
 ;;(a-b 10 0 :type 'array :key #'(lambda (x) (list x (sq x))))
 
@@ -366,6 +384,16 @@ Destructive."
 
 (defun concat (list &rest args) (apply #'write-list list nil args))
 ;;(time (progn (concat (a-b 0 100000) :in ", " :pre "<<" :suf ">>" :test #'oddp :key #'1+) :fine))
+
+(defun format-list (out list format-fn &key pre in suf test key)
+  (flet ((sp (x) (when x (case x (:newline (format out "~%")) (t (princ x out))))))
+    (let ((list (if key (mapcar key list) list)))
+      (sp pre)
+      (loop for x on (if test (remove-if-not test list) list)
+           do (funcall format-fn out (first x))
+           while (rest x) do (sp in))
+      (sp suf))))
+;;(format-list t '(1 2 3) #'(lambda (out x) (format out "~a" x)) :in ", ")
 
 (defun split-by-char (string char &optional remove-empty-string-p)
    "Returns a list of substrings of string divided by ONE CHAR each.
@@ -528,7 +556,7 @@ returns is the same as the return value of MEMBER-IF."
 (defun nsplit-list (item list &key (key #'identity) (test #'eql))
   "The single element compare version of nsplit-list-if."
   (nsplit-list-if #'(lambda (x) (funcall test item x)) list :key key))
-;;(nsplit-list 30 '(1 2 3 4 5) :test #'<)
+;;(nsplit-list 3 '(1 2 3 4 5) :test #'<)
 
 (defun split-list (item list &key (key #'identity) (test #'eql))
   "The single element compare version of nsplit-list-if."
@@ -820,6 +848,18 @@ is the same throughout TREE."
     res))
 ;;(unit-list 1 3 :unit 2 :zero 'zzzero)
 
+(defmethod row-major-index->index ((dimensions cons) row-major-index)
+  (loop for d in (butlast dimensions)
+	for n = row-major-index then remainder
+	for (index remainder) = (multiple-value-list (floor n d))
+	collect index into res
+	finally (return (rcons res remainder))))
+;;(loop for i below 6 collect (row-major-index->index '(2 3) i))
+
+(defmethod row-major-index->index ((x array) row-major-index)
+  (row-major-index->index (array-dimensions x) row-major-index))
+;;(loop for i below 6 collect (row-major-index->index (make-array '(2 3)) i))
+
 (defun array-row (array i)
   (make-array (rest (array-dimensions array))
     :displaced-to array
@@ -984,7 +1024,12 @@ If A, B, C are consecutive numbers, the delta for B is (- (/ (+ A C) 2) B)."
      (transpose-tree (progn ,@body))))
 ;;(with-transpose (it '((1 2 3) (a b c))) (sort it #'> :key #'first))
 
-(defun list-expand (list &optional (n 1) wrap)
+(defun expand-list (list &optional (n 1) wrap)
+  "Expands LIST with N elements in at both ends. If WRAP is nil, LIST
+is expanded at the frond and the end by increments defined as the
+numerical difference between the two first and two last elements in
+LIST, respectively. If WRAP is a number, LIST is expanding by cycling
+on a ring of length WRAP."
   (flet ((wrap (list x) (mapcar (bind #'+ x) list)))
     (if wrap
       ;;cyclic extension
@@ -993,24 +1038,31 @@ If A, B, C are consecutive numbers, the delta for B is (- (/ (+ A C) 2) B)."
 	(append (last list n) list (head list n)))
       ;;linear extension
       (let ((a (first list))
-	    (d (last-elt list)))
-	(if (> (length list) 1)
-	  (let ((b (second list))
-		(c (last-elt list 2)))
-	    (flatten* (list (- (* 2 a) b) list (- (* 2 d) c))))
-	  (flatten* (list (1- a) list (1+ d))))))))
-;;(list-expand '(1 2 3 5) 2)
-;;(list-expand '(1 2 3) 1 5)
+	    (b (last-elt list)))
+	(let ((deltas (if (> (length list) 1)
+			(list (- (second list) a) (- b (last-elt list 2)))
+			(list 1 1))))
+	  (destructuring-bind (df de) deltas
+	    (append (loop for i below n for x = (- a df) then (- x df) collect x)
+		    list
+		    (loop for i below n for x = (+ b de) then (+ x de) collect x))))))))
+;;(expand-list '(1 2 3 5) 2)
+;;(expand-list '(1 2 3) 2 5)
+;;(expand-list '(1 1 1))
 
-(defun tree-expand (tree dimension &optional (n 1) wrap)
-  "EXPANDS tree just like LIST-EXPAND in the specified DIMENSION.
-With DIMENSION set to 0 it is equivalent to LIST-EXPAND."
+(defun expand-tree (tree dimension &optional (n 1) wrap)
+  "EXPANDS tree just like EXPAND-LIST in the specified DIMENSION.
+With DIMENSION set to 0 it is equivalent to EXPAND-LIST."
   (case dimension
-    (0 (list-expand tree n wrap))
-    (1 (with-transpose (x tree) (list-expand x n wrap)))
-    (t (error "TREE-MIMIC-CIRCULARITY does not support DIMENSION > 1"))))
-;;(tree-expand '((1 2 3) (a b c)) 1)
-;;(tree-expand '((1 2 3) (11 12 13)) 1)
+    (0 (with-transpose (x tree) (expand-tree x 1 n wrap)))
+    (1 (loop for row in tree collect (expand-list row n wrap)))
+    (t (error "EXPAND-TREE does not support DIMENSION > 1"))))
+;;(expand-tree '((1 2 3) (11 12 13)) 0 2)
+
+(defun expand-sequence (sequence &optional (n 1) wrap)
+  "Generalization of EXPAND-LIST to sequences."
+  (with-tree (x sequence) (expand-list x n wrap)))
+;;(let ((v #(1 2 3 4))) (list (expand-sequence v) v))
 
 ;;; this one is currently not exported
 (defmacro with-list ((var sequence &optional res-type) &body body)

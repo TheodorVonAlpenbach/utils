@@ -5,8 +5,9 @@
 	   :normalize-radian
 	   :grid-interpolate
 	   :reshape-grid
-	   :gamma-function
+	   :gamma :upper-incomplete-gamma :lower-incomplete-gamma
 	   :wrapped-normal-distribution :wnd
+	   :variance
 	   :exp-safe :expt-safe
 	   :safe-op :safe-+ :safe-*
 	   :round-floating-point-underflow-to-zero
@@ -21,6 +22,13 @@
 	   :span-matrix
 	   :map-matrix
 	   :matrix-column
-	   :invert-matrix
+	   :matrix-inversion :matrix-transpose
 	   :matrix-product
-	   :variance))
+	   :matrix-distance
+	   :rank
+	   :matrix-difference
+	   :column->matrix :columns->matrix :rows->matrix
+	   :map-rows
+	   :matrix-row
+	   :submatrix
+	   :vector-inner-product))

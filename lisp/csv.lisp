@@ -1,6 +1,7 @@
 (defpackage :csv
   (:use :cl :mb-utils)
-  (:export :parse-csv :parse-csv-string :parse-csv-file
+  (:export :read-csv :parse-csv-string :read-csv-file
+	   :parse-csv :parse-csv-file
 	   :write-csv :csv-string :write-csv-file))
 
 (in-package :csv)
@@ -9,7 +10,7 @@
 (defparameter *row-separator* #\Newline)
 
 ;;; read
-(defun parse-csv (stream &key (column-separator *column-separator*) remove-empty-lines-p remove-empty-columns-p
+(defun read-csv (stream &key (column-separator *column-separator*) remove-empty-lines-p remove-empty-columns-p
 			   (from-line 0) to-line (columns t))
   "TODO: move to utils. Or load a common package. 
 Converts CSV content from STREAM to a list of list of strings.
@@ -20,16 +21,24 @@ For info abount CSV files, see http://en.wikipedia.org/wiki/Comma-separated_valu
 	collect (if (eql columns t)
 		  all-columns
 		  (apply #'mnth all-columns columns))))
-;;(eql (= 1 1) t)
 
 (defun parse-csv-string (string &rest args)
   "Converts CSV STRING to a list of list of strings. See PARSE-CSV for ARGS."
-  (with-input-from-string (s string) (apply #'parse-csv s args)))
+  (with-input-from-string (s string) (apply #'read-csv s args)))
 ;;(parse-csv-string (concat (list "a,b" "c,d") :in (string #\Newline)) :from-line 1 :columns '(0))
 
-(defun parse-csv-file (path &rest args)
+(defun read-csv-file (path &rest args)
   "Converts CSV content from path to a list of list of strings. See PARSE-CSV for ARGS."
-  (with-open-file (s path) (apply #'parse-csv s args)))
+  (with-open-file (s path) (apply #'read-csv s args)))
+
+;;; deprecated functions
+(defun parse-csv (&rest args)
+  (warn "PARSE-CSV is deprecated. Use READ-CSV instead.")
+  (apply #'read-csv args))
+
+(defun parse-csv-file (path &rest args)
+  (warn "PARSE-CSV is deprecated. Use READ-CSV-FILE instead.")
+  (apply #'read-csv-file args))
 ;;(subseq (parse-csv-file (merge-pathnames "data/EGINA_Seastates (on-site).csv" +egina-path+)) 0 10)
 
 ;;; write

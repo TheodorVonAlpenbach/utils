@@ -112,8 +112,8 @@ numbers."
 	  (mat+ (vec-copies index-point (length index-point)) offset-mat))))
 ;;(closest-index-points (closest-index-edges '(0 5) (grid-axes *test-grid*)))
 
-(defvar *rao-verbose* nil)
-;;(setf *rao-verbose* nil)
+(defvar *grid-verbose* nil)
+;;(setf *grid-verbose* nil)
 
 (defun interpolate (point reference-points reference-values)
   "Solves Xa = f, where X = (x1, x2, ..)^T is the result of
@@ -126,11 +126,11 @@ F(point), f1 = F(point + x1), f2 = (point + x2), .."
 	 (V (mapcar (bind #'vec- p0) p))
 ;;	 (fd (mapcar (bind #'- f0) f))
 	 (fd (mapcar #'(lambda (x) (safe-op #'- x f0)) f))
-	 (a (matrix-column (matrix-product (invert-matrix (tree->array V))
+	 (a (matrix-column (matrix-product (matrix-inversion (tree->array V))
 					   (tree->array (mapcar #'list fd)))))
 	 (b (safe-op #'- f0 (dot-product a p0)))
 	 (F^ (safe-op #'+ (dot-product a point) b)))
-    (when *rao-verbose*
+    (when *grid-verbose*
       (print  (list :point point :F^ F^ :p0 p0 :p p :V V :f0 f0 :f f :fd fd :a a :b b)))
       F^))
 ;;(grid-interpolate '(2 2 0) *test-grid*)
@@ -143,7 +143,7 @@ F(point), f1 = F(point + x1), f2 = (point + x2), .."
 	 (index-points (closest-index-points index-edges))
 	 (points (mapcar (bind #'index-point->grid-point (grid-axes grid)) index-points))
 	 (values (mapcar (bind #'index-point->grid-value (grid-data grid)) index-points)))
-    (when *rao-verbose* (print (list point index-edges index-points points values)))
+    (when *grid-verbose* (print (list point index-edges index-points points values)))
     (interpolate point points values)))
 ;;(grid-interpolate '(1 10) *test-grid*)
 ;;(trace grid-interpolate)
@@ -161,10 +161,10 @@ F(point), f1 = F(point + x1), f2 = (point + x2), .."
 cylinder with diameter CYCLE-LENGTH. Currently only DIMENSION 1 is
 supported."
   (assert (= dimension 1))
-  (copy-object
-      :data (with-tree (x (grid-data grid)) (tree-expand x 1))
+  (copy-object grid
+      :data (with-tree (x (grid-data grid)) (expand-tree x dimension))
       :axes (list (first (grid-axes grid))
-		  (expand-sequence (second (grid-axes grid)) 1 wrap-length))))
+		  (expand-sequence (second (grid-axes grid)) 1 diameter))))
 ;;(list-grid (reshape-rao (first *raos*) (new-domain)))
 ;;(grid-data (first *raos*))
 ;;(grid-data (reshape-rao (first *raos*) (new-domain)))
@@ -173,6 +173,8 @@ supported."
   "Returns a new grid of same type as GRID but with grid axes defined
 by NEW-AXES. The grid point values are calculated by local
 interpolation, see GRID-INTERPOLATE."
+  (when *grid-verbose*
+    (print (list-grid grid)))
   (if (equal (grid-axes grid) new-axes)
     grid
     (if diameter
@@ -182,3 +184,98 @@ interpolation, see GRID-INTERPOLATE."
 	:axes new-axes))))
 ;;(list-grid (reshape-grid *test-grid* '(#(0 .5 1) #(5 9))))
 ;;(list-grid *test-grid*)
+
+(defun subdivide-list (list)
+  (cons (first list)
+	(loop for (x y) in (pairs list)
+	      collect (/ (+ x y) 2)
+	      collect y)))
+;;(subdivide-list '(1 2 3))
+
+
+(defun subdivide (sequence)
+  (with-tree (x sequence) (subdivide-list x)))
+;;(subdivide #(1 2 3))
+
+(defun stretch-list (list &optional (factor 2))
+  (loop for x in list append (make-list factor :initial-element x)))
+
+(defun stretch (sequence &optional (factor 2))
+  (with-tree (x sequence) (stretch-list x factor)))
+;;(stretch #(1 2 3) 4) => #(1 1 1 1 2 2 2 2 3 3 3 3)
+
+(defun axis-point (axis ki) (elt axis ki))
+;;(axis-point '(1 2 3) 0)
+
+(defun grid-point (grid k)
+  (mapcar #'elt (grid-axes grid) k))
+;;(grid-point (make-grid #2A((1 2 3) (2 3 4)) '(#(1 2 3) #(1 2))) '(1 0))
+
+(defun grid-value (grid point)
+  (apply #'aref (grid-data grid) point))
+;;(grid-value (make-grid #2A((1 2 3) (2 3 4)) '(#(1 2 3) #(1 2))) '(1 0))
+
+(defun generate-sigmas (n)
+  "Special made for k-pairs. N shoud be even"
+  (let* ((sigma 1)
+	 (res (list -1)))
+    (dotimes (i n (cons 1 res))
+      (push (setf sigma (* -1 sigma)) res))))
+;;(generate-sigmas 6)
+
+(defun k-pairs (new-axis axis)
+  (loop with i = 0
+	with sigmas = (generate-sigmas (* 2 (1- (length axis))))
+	with sublist = (rcons (subdivide-list (coerce axis 'list)) most-positive-single-float)
+	for x in sublist
+	for k in (stretch-list (0-n (length axis)) 2)
+	for sigma in sigmas
+	append (loop while (and (< i (length new-axis))
+				(< (axis-point new-axis i) x))
+		     collect (list k sigma)
+		     do (incf i)
+		     do (print (list k sigma)))))
+;;(k-pairs #(-1 1 2 3 4 10) #(0 4))
+
+(defun all-k-pairs (new-grid grid)
+  (mapcar #'k-pairs (grid-axes new-grid) (grid-axes grid)))
+;;(all-k-pairs (make-grid #2A((1 2 3) (2 3 4)) '(#(1 2 3) #(1 2))) (make-grid #2A((1 2 3) (2 3 4)) '(#(1 2 3) #(1 2))))
+
+(defun interpolate-grid-point (new-grid grid k-new-grid &optional (all-k-pairs (all-k-pairs new-grid grid)))
+  (let* ((k-pairs (mapcar #'elt all-k-pairs k-new-grid))
+	 (k0 (mapcar #'car k-pairs))
+	 (x0 (grid-point grid k0))
+	 (ki-list (loop for (k sigma) in k-pairs
+			for i from 0
+			collect (let ((res (copy-list k0)))
+				  (incf (nth i res) sigma)
+				  res)))
+	 (xi-list (loop for ki in ki-list collect (grid-point grid ki)))
+	 (yi-list (loop for ki in ki-list collect (grid-value grid ki)))
+	 (x (grid-point new-grid k-new-grid))
+	 (y0 (grid-value grid k0)))
+    (+ y0 (loop for i from 0
+		for x_i in x
+		for x0_i in x0
+		for xi in xi-list
+		for xi_i = (elt xi i)
+		for yi in yi-list
+		for delta-xi = (- xi_i x0_i)
+		sum (/ (* (- x_i x0_i) (- yi y0))
+		       delta-xi)))))
+
+(defmethod rank ((x grid)) (rank (grid-data x)))
+
+(defun interpolate-spectrum (new-grid grid)
+  "Assume two dimensional grids"
+  (assert (= 2 (rank new-grid) (rank grid)))
+  (loop with data = (grid-data new-grid)
+	with all-k-pairs = (all-k-pairs new-grid grid)
+	with (n m) = (dimensions new-grid)
+	for i below n do
+	(loop for j below m do
+	      (setf (aref data i j)
+		    (interpolate-grid-point
+		     new-grid grid (list i j) all-k-pairs))))
+  new-grid)
+;;(list-grid (interpolate-spectrum (make-grid #2A((1 2 3) (2 3 4)) '(#(1 1.5) #(1 2 3))) (make-grid #2A((1 2 3) (2 3 4)) '(#(1 2) #(1 2 3)))))
