@@ -344,15 +344,6 @@ Destructive."
 	(push infix result) (push x result)))))
 ;;(infix-list '(1 2 3) 'qwe)
 
-(defun concat-old (list &key (pre "") (in "") (suf "") (test (constantly t)) (key #'identity))
-  "Concats strings in LIST adding prefix, suffix, and regular infixes.
-If not an element satisfies TEST then it is not inserted. Before
-insertion, KEY modifies the elements. Note that KEY manipulation does
-not affect TEST.
-IN may also be a function (fn i), taking an index argument, see `infix-list'."
-  (concatenate 'string pre (apply #'concatenate 'list (infix-list (mapcar key (copy-if test list)) in)) suf))
-;;(concat '(1 2 3) :key #'write-to-string :pre "<" :in "\n" :suf ">")
-
 ;;;; CONCAT is dead! Long live CONCAT! I have rewritten concat so that
 ;;;; it now relies on the more general write-list, which writes a list
 ;;;; to an arbitrary stream. concat then calls this function with
@@ -1029,3 +1020,38 @@ With DIMENSION set to 0 it is equivalent to LIST-EXPAND."
 	 (coerce (progn ,@body) (or ,res-type (class-of ,gsequence)))))))
 ;;(with-list (x '(1 2 3) 'vector) (rest x))
 
+(defun nthcdr* (list &optional (n 1))
+  "Same as NTH, but accepts negative arguments. If N < 0 then (nth* N
+  LIST) returns the Nth last element in LIST. In fact, if L is the
+  length of LIST, it returns always the Mth element in LIST, where 0
+  <= M < L and M is equal to N modulo L."
+  (nthcdr (mod n (length list)) list))
+
+(defun nrotate-list (list &optional (n 1))
+  (nconc (nthcdr* list n)
+	 (and (plusp (mod n (length list)))
+	      (butlast* list (- n)))))
+;;(setq l '(a b c d e))
+;;(nrotate-list l 7)
+
+(defun rotate-list (list &optional (n 1))
+  "Returns a list that is LIST rotated N times."
+  (nrotate-list (copy-list list) n))
+
+(defun rotations (list)
+  (loop for i below (length list)
+	collect (rotate-list list i)))
+;;(rotations '(a b c))
+;;(rotations '(a))
+
+(defun permutations (list)
+  (when list
+    (if (rest list)
+      (loop for l in (rotations list)
+	    append (loop for subperm in (permutations (rest l))
+			  collect (cons (first l) subperm)))
+      (list list))))
+;;(permutations '(a b c))
+
+(defun perm (&rest args) (permutations args))
+;;(perm 1 2 3)
