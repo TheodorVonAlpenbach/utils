@@ -6,10 +6,10 @@
 (in-package :mb-gnuplot)
 
 ;;; Move this to utils later
-(defmacro with-temporary-file ((stream &optional (prefix "/tmp/tmp")) &rest body)
+(defmacro with-temporary-file ((stream &optional (prefix )) &rest body)
   "Executes BODY with STREAM bound to a file stream to a newly created
 file. Returns the pathname of the stream together with the value of last form in BODY."
-  `(let ((,stream (posix:mkstemp ,prefix)))
+  `(let ((,stream (posix:mkstemp ,(or prefix "/tmp/tmp"))))
      (values (pathname ,stream)
 	     (prog1 (progn ,@body) (close ,stream)))))
 
@@ -85,9 +85,9 @@ TODO:
 ;;(write-data-1 t #'sqrt :resolution 10)
 ;;(trace write-data-1)
 
-(defun write-data (stream target &rest plist)
+(defun write-data (out target &rest plist)
   "Writes a data file based on TARGET."
-  (with-temporary-file (stream)
+  (with-temporary-file (stream (directory-namestring out))
     (if (atom target)
       (apply #'write-data-1 stream target plist)
       (apply #'write-data-1 stream (append (rest target) plist)))))
@@ -149,9 +149,10 @@ Here graph and plot is the same"
 ;;(write-margins '((1 3) (2 4)) t)
 
 (defun write-range (range &optional (out nil))
-  (format out "[~a:~a]" (first range) (second range)))
+  (format out "[~a:~a]" (or (first range) "*") (second range)))
 ;;(write-range '(2 3) t)
 ;;(write-property :xrange (write-range '(2 3) nil) t)
+;;(write-range '(nil 10))
 
 (defun gp-listify (x)
   (if (or (graph-p x) (line-p x))
@@ -171,11 +172,15 @@ STREAM. Here graph and plot is the same"
 		 :in ", ")))
 ;;(untrace graph-1)
 
-(defun write-matrix (grid)
+(defun write-matrix (x &optional prefix)
   "Writes a data file based on GRID"
-  (with-temporary-file (out)
-    (write-csv (if (arrayp grid) (array->tree grid) grid)
-	       out :column-separator #\Space)))
+  (with-temporary-file (out prefix)
+    (write-csv
+     (cond ((arrayp x) (array->tree x))
+	   ((mb-grid::grid-p x) (mb-grid::grid->gnuplot-matrix x))
+	   (t x))
+     out :column-separator #\Space)))
+;;(mb-grid::grid-p nil)
 
 (defun format-properties (p-list out)
   (loop for (k v) in (cut p-list)
@@ -191,6 +196,9 @@ STREAM. Here graph and plot is the same"
     (format-properties p-list out)
     (format out "set view map~%")
     (format out "splot '~a' nonuniform matrix with image~%" it)))
+;;(trace splot)
+;;(directory-namestring "~/projects/utils/lisp/graphics/bezier.lisp")
+;;(pathname-name "~/projects/utils/lisp/graphics/bezier.lisp")
 
 (defun splot-p (x)
   (when (consp x)
@@ -263,7 +271,7 @@ with N points."
   "Returns a gnuplot script for plotting unary FUNCTION from A to B
 with N points."
   (let* ((scriptpath (gp-path directory name "gp"))
-	(target (script scriptpath expression terminal)))
+	 (target (script scriptpath expression terminal)))
     (ext:execute "/usr/bin/gnuplot" scriptpath)
     (list :script scriptpath :target target)))
 ;;(gp:plot `(:p ,#'sqrt ,#'sq (:l (:d ,#'(lambda (x) (sq (sin x))) :x-range (0.01 1)) :title "Geir")))
