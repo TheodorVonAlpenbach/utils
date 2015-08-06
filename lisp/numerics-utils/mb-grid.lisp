@@ -13,9 +13,12 @@
   ((data :initarg :data :accessor grid-data :type array)
    (axes :initarg :axes :accessor grid-axes :type cons)))
 
+(defun grid-p (x) (typep x 'grid))
+
 (defmethod dimensions ((x grid)) (array-dimensions (grid-data x)))
 (defmethod dimension ((x grid)) (array-rank (grid-data x)))
 ;;(dimension (make-grid #(1 2 3) #(1 2 3)))
+;;(grid-p (make-grid #(1 2 3) #(1 2 3)))
 
 ;;(with-slots (data axes) (make-grid #(1 2 3) #(1 2 3)) data)
 
