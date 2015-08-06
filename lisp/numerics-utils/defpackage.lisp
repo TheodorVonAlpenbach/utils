@@ -5,6 +5,7 @@
 	   :normalize-radian
 	   :grid-interpolate
 	   :reshape-grid
+	   :grid-p
 	   :gamma :upper-incomplete-gamma :lower-incomplete-gamma
 	   :wrapped-normal-distribution :wnd
 	   :exp-safe :expt-safe
