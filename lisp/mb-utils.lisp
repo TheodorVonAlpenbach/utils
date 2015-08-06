@@ -46,7 +46,8 @@
    :dimensions
    :alias
    :with-transpose
-   :expand-list :expand-tree :expand-sequence))
+   :expand-list :expand-tree :expand-sequence
+   :deltas))
 
 (in-package :mb-utils)
 
@@ -730,10 +731,10 @@ is true. The latter option is the fastest in this implementation."
      while (and line (or (not end) (< i end)))
      if (not (and remove-empty-p (string= line "")))
      collect line))
-;;(read-text-file-lines "/home/MBe/projects/imms/data/rao/txt/RAO_FR85_LC78.txt" :end 1)
 
 (defun file->lines (filespec &rest args)
   (with-open-file (in filespec) (apply #'read-lines in args)))
+;;(file->lines "/home/MBe/projects/imms/data/rao/txt/RAO_FR85_LC78.txt" :end 1)
 
 (defun read-text-file-lines (&rest args)
   (warn "READ-TEXT-FILE-LINES is deprecated. Use FILE->LINES instead.")
