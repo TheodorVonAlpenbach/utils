@@ -8,6 +8,7 @@
 	   :grid-p
 	   :gamma :upper-incomplete-gamma :lower-incomplete-gamma
 	   :wrapped-normal-distribution :wnd
+	   :variance
 	   :exp-safe :expt-safe
 	   :safe-op :safe-+ :safe-*
 	   :round-floating-point-underflow-to-zero
