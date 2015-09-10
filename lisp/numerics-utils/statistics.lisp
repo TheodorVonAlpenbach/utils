@@ -15,27 +15,29 @@
   (+ (mod (- x min-radian) 2PI) min-radian))
 ;;(normalize-radian pi)
 
-(defun wrapped-normal-distribution (mu sigma)
+(defun wrapped-normal-distribution (mu sigma &optional (k-limit 10))
   "Returns WND for MU and SIGMA."
   (declare (float mu sigma h g d theta f) (fixnum k))
   (let* ((h (/ 1 SQRT-2 sigma))
 	 (g (* 2PI h))
-	 (d (* 1/SQRT-PI h))
-	 (eps (sqrt (- (log least-positive-short-float))))) ;see below
-;;    (print (list :h h :g g :d d :mu-normalized mu-normalized :eps eps))
+	 (d (* 1/SQRT-PI h)))
     (if (>= sigma 2PI)
       (constantly (/ 1 2PI))
       (lambda (theta)
-	(let* ((f (* (normalize-radian (- theta mu)) h))
-	       (k-limit (floor (/ (- eps (abs f)) g))))
-;;	  (print (list :theta theta :k-limit k-limit))
-	  (safe-* d (loop for k from (- k-limit) to k-limit
-		     sum (safe-op #'exp (- (sq (+ f (safe-* g k))))))))))))
-;;(funcall (wrapped-normal-distribution 3.6826447217080354073L0 0.59857875) (+ pi (* 2 pi)))
+	(let* ((f (* (normalize-radian (- theta mu)) h)))
+	  (flet ((addend (k) (safe-op #'exp (- (sq (+ f (safe-* g k)))))))
+	    (safe-* d (+ (addend 0)
+			 (loop for k from -1 above (- k-limit)
+			       for x = (addend k)
+			       while (not (zerop x)) sum x)
+			 (loop for k from 1 below k-limit
+			       for x = (addend k)
+			       while (not (zerop x)) sum x)))))))))
+;;(handles-outflow () (funcall (wrapped-normal-distribution 3.11366738555788 0.136511989704312) -2.8448865))
 ;;(gp::plot `((:l (:d ,(wrapped-normal-distribution -2.600540585471551 0.7) :x-values ,(list (- pi) pi)))))
 
 (defun wnd (&rest args) (apply #'wrapped-normal-distribution args))
-;;(funcall (wnd 0 1) (- pi))
+;;(handles-outflow () (funcall (wnd -0.136135681655558 0.349065850398866) 3.0455992))
 
 (defun rayleigh-distribution-function (sigma)
   "http://en.wikipedia.org/wiki/Rayleigh_distribution"
