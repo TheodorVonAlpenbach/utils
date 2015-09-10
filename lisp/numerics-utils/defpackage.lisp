@@ -26,7 +26,9 @@
 	   :matrix-inversion :matrix-transpose
 	   :matrix-product
 	   :matrix-distance
+	   :matrix-norm
 	   :rank
+	   :determinant
 	   :matrix-difference
 	   :column->matrix :columns->matrix :rows->matrix
 	   :map-rows
