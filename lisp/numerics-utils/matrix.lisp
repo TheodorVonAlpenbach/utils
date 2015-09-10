@@ -9,6 +9,17 @@
 ;;;; placed in mb-utils. The rest is found here.
 (in-package :numerics-utils)
 
+;;; some shortcuts
+(defun m- (&rest args) (apply #'matrix-difference args))
+(defun m* (&rest args) (reduce #'matrix-product args :from-end t))
+(defun m-1 (&rest args) (apply #'matrix-inversion args))
+(defun mT (&rest args) (apply #'matrix-transpose args))
+;;(m* #2a((1 2) (1 2)) #2a((1 2) (1 2)) #2a((1 2) (1 2)))
+
+(defun square-p (matrix)
+  (apply #'= (array-dimensions matrix)))
+;;(square-p (diagonal-matrix #(1 2 3 4)))
+
 (defun zeros (dimensions &optional (zero 0))
   (make-array dimensions :initial-element zero))
 ;;(zeros '(3 2))
@@ -23,6 +34,11 @@
 	  do (setf (aref res i i) (aref vec i)))
     res))
 ;;(diagonal-matrix #(1 2 3))
+
+(defun diagonal-vector (matrix)
+  "Returns the diagonal of MATRIX as a vector"
+  (loop for i below (array-dimension matrix 0) collect (aref matrix i i)))
+;;(diagonal-vector #2a((1 2) (3 4)))
 
 (defun identity-matrix (n &optional (one 1))
   (diagonal-matrix (make-array (list n) :initial-element one)))
@@ -57,7 +73,7 @@ This could perhaps be renamed to CONCATENATE-MATRIX-COLUMNS."
 (defun columns->matrix (columns)
   "COLUMNS is a sequence of sequences"
   (apply #'concatenate-matrix-columns (map 'list #'column->matrix columns)))
-;;(columns->matrix (list #(1 2) #(1 2)))
+;;(columns->matrix (list #(1 2)))
 
 (defun rows->matrix (rows) (matrix-transpose (columns->matrix rows)))
 
@@ -113,6 +129,10 @@ This could perhaps be renamed to CONCATENATE-MATRIX-COLUMNS."
       (unless (not c)
         (submatrix c :columns (a-b n (1- (* 2 n)))))))
 ;;(matrix-inversion #2A((1 2) (3 4)))
+;;(matrix-inversion #2A((4 4) (4 4)))
+
+(defun matrix-difference (matrix &rest matrices)
+  (apply #'map-array #'- matrix matrices))
 
 (defun matrix-product(a1 a2 &key (inner-fn #'safe-*) (outer-fn #'+))
   "Not exactly correct, but should work for square matrices"
@@ -182,7 +202,8 @@ see http://web.eecs.utk.edu/~dongarra/etemplates/node198.html"
 ;;(bidiagonalize mat)
 
 (defun singular-value-decompose (matrix)
-  (let (sigma u v) (values sigma u v)))
+  "Only a torso so far"
+  (let (sigma u v) (values sigma u v matrix)))
 ;;(singular-value-decompose matrix)
 
 (defun singular-values (matrix)
@@ -195,7 +216,6 @@ see http://web.eecs.utk.edu/~dongarra/etemplates/node198.html"
 	      sum (expt (row-major-aref matrix i) order))
 	(/ 1 order)))
 
-
 (defun scale-matrix (scalar matrix)
   (map-array (bind #'* scalar) matrix))
 ;;(scale-matrix 17 #(0 1 2))
@@ -204,6 +224,7 @@ see http://web.eecs.utk.edu/~dongarra/etemplates/node198.html"
   (cond ((and (consp norm) (eql (first norm) 'L))
 	 (L-norm matrix (second norm)))))
 ;;(matrix-norm (vector (coerce (sqrt 2) 'double-float) (coerce (sqrt 2) 'double-float)))
+;;(matrix-norm #(1 1))
 
 (defun normalize-matrix (matrix &optional (norm *default-norm*))
   "Not sure if this is useful for anything else than vectors"
@@ -226,20 +247,23 @@ see http://web.eecs.utk.edu/~dongarra/etemplates/node198.html"
    v))
 ;;(project-vector (vector (random 1.0) (random 1.0)) #(1 1))
 
-(defun matrix-difference (matrix &rest matrices)
-  (apply #'map-array #'- matrix matrices))
+(defun vector-length-squared (vector)
+  (loop for x across vector sum (* x x)))
+;;(vector-length-squared #(1 1))
 
-(defun m- (&rest args) (apply #'matrix-difference args))
-;;(m- #(1) #(1) #(1))
+(defun vector-length (vector)
+  (sqrt (vector-length-squared vector)))
+;;(vector-length #(1 1))
 
 (defun zero-vector-p (vector) (every #'zerop vector))
 
 (defun gram-schmidt (vectors &optional (norm-epsilon 1E-4))
+  "To be retested"
   (loop for a in vectors
 	for u = a then (apply #'m- a (mapcar (bind #'project-vector a 1) u-units))
 	when (> (matrix-norm u) norm-epsilon)
 	collect (normalize-matrix u) into u-units
-	finally return u-units))
+	finally (return u-units)))
 ;;(gram-schmidt (list #(1 0) #(1 0) #(1 1)))
 
 (defun gram-schmidt-test (&optional (vectors (list #(1 2 3) #(2 4 6) #(0 0 1))) (norm-epsilon 1E-4))
@@ -249,6 +273,156 @@ see http://web.eecs.utk.edu/~dongarra/etemplates/node198.html"
 	  for ip* = (if (< (abs ip) norm-epsilon) 0 ip)
 	  collect (list e1 e2 ip*))))
 ;;(gram-schmidt-test)
+
+(defun ur-decomposition (matrix)
+  (let ((q (columns->matrix (gram-schmidt (matrix-columns matrix)))))
+    (list q (matrix-product (matrix-transpose q) matrix))))
+;;(ur-decomposition (matrix-transpose #2a((12 6 -4) (-51 167 24) (4 -68 -41))))
+;;(ur-decomposition #2a((1 2) (3 4)))
+
+
+(defun lu-crout (A)
+  "Implementation of Crout matrix decomposition, see https://en.wikipedia.org/wiki/Crout_matrix_decomposition.
+This is a weak algorithm and can't handle necessary permutations. Use the LU-machinery below instead."
+  (let* ((n (array-dimension A 0))
+	 (U (identity-matrix n)) (L (zeros (list n n))))
+    (loop for j below n do
+	  (loop for i from j below n
+		for sum = (loop for k below j sum (* (aref L i k) (aref U k j)))
+		do (setf (aref L i j) (- (aref A i j) sum)))
+	  (loop for i from j below n
+		for sum = (loop for k below j sum (* (aref L j k) (aref U k i)))
+		do (when (zerop (aref L j j))
+		     (error "det(L) close to 0!\n Can't divide by 0...\n"))
+		do (setf (aref U j i) (/ (- (aref A j i) sum) (aref L j j)))))
+    (list L U)))
+;;(apply #'m* (lu-crout #2a((0 2 3) (4 5 6) (7 8 9))))
+;;(apply #'m* (lu-crout #2a((1 2 3) (0 5 6) (7 8 10))))
+;;(determinant #2a((0 2 3) (4 5 6) (7 8 9)))
+
+(defun lu-ls (a n &optional (dim (array-dimension a 0)))
+  "Returns the Ln vector (step n). Assumes necessary permutations have been done."
+  (loop for i from (1+ n) below dim
+	collect (- (/ (aref a i n) (aref a n n)))))
+;;(lu-ls #2a((1 2 3) (4 5 6) (7 8 9)) 0)
+
+(defun lu-pivot (a n &optional (dim (array-dimension a 0)))
+  "Returns pivot row number."
+  (loop for i from n below dim do
+	if (not (zerop (aref a i n)))
+	return (when (> i n) i)))
+;;(lu-pivot #2a((0 2 3) (4 5 6) (7 8 9)) 0)
+
+(defun lu-step (a n &optional (dim (array-dimension a 0)))
+  "Returns (L A P) No, I will return only the Ln-entries, pivots and
+the new A. I only need the U today, so the reconstruction of L can
+wait. The reconstruction of L based on the Ln-entries is trivial.
+Using the pivots one can deduce the permutation matrix P. Finally, one
+can reconstruct A = PLU.
+ 
+The calculation of each new A is also straightforward, by the way."
+  (let ((pivot-index (lu-pivot a n dim)))
+    (when pivot-index
+      (swap-rows a n pivot-index))
+    (let ((ls (lu-ls a n dim)))
+      (loop for i from (1+ n) below dim
+	    for l in ls do
+	    (loop for j below dim do
+		  (incf (aref a i j) (* l (aref a n j)))))
+      (list a ls pivot-index))))
+;;(determinant #2a((1 2 3) (0 5 6) (7 8 10)))
+;;(lu-step #2a((1 2) (3 4)) 0)
+;;(lu-step #2a((1 2 3) (4 5 6) (7 8 10)) 0)
+;;(lu-step #2A((1 2 3) (0 -3 -6) (0 -6 -11)) 1)
+;;(m* #2A((1 0 0) (4 1 0) (7 2 1)) #2A((1 2 3) (0 -3 -6) (0 0 1)))
+;;(swap-rows (identity-matrix 3) 0 1 :from 1)
+
+(defun lu-decomposition-1 (matrix)
+  (assert (square-p matrix))
+  (loop with nrows = (array-dimension matrix 0)
+	for step below (1- nrows)
+	for (a ls pivot-index) = (lu-step matrix step nrows) then (lu-step a step nrows)
+	collect (list a ls pivot-index)))
+;;(lu-decomposition-1 #2a((1 2) (3 4)))
+;;(mapcar #'third (lu-decomposition-1 #2a((0 2) (3 4))))
+
+(defun nswap (sequence i j)
+  "Swaps Ith and Jth element in SEQUENCE. Destructive."
+  (rotatef (elt sequence i) (elt sequence j))
+  sequence)
+
+(defun swap (sequence i j)
+  "Swaps Ith and Jth element in SEQUENCE."
+  (nswap (copy-seq sequence) i j))
+;;(swap #(0 1 2 3) 1 3)
+
+(defun swaps->permutation (swaps n)
+  (let ((res (0-n n)))
+    (loop for swap in swaps
+	  do (apply #'nswap res swap))
+    res))
+;;(swaps->permutation '((0 3) (1 2) (2 3)) 4)
+
+(defun permute-matrix (matrix permutation &optional (rowwise t))
+  "If rowwise is nil matrix is permuted columnwise.
+Note: as is, the method should perhaps be named PROJECT-MATRIX, as
+permutation is allowed to be any projection."
+  (with-tree (x matrix)
+    (if rowwise
+      (apply #'project x permutation)
+      (with-transpose (xT x) (apply #'project xT permutation)))))
+;;(permute-matrix (identity-matrix 3) '(0 2 1))
+
+(defun permutation-matrix (permutation)
+  (permute-matrix (identity-matrix (length permutation)) permutation))
+;;(permutation-matrix '(0 2 1))
+
+(defun swaps->permutation-matrix (swaps n)
+  (permutation-matrix (swaps->permutation swaps n)))
+;;(swaps->permutation-matrix '((1 2)) 3)
+
+(defun lu-l (lu &optional (n (1+ (length lu))))
+  "LU is the result from LU-DECOMPOSITION-1"
+  (let ((res (identity-matrix n)))
+    (loop for (nil ls nil) in lu
+	  for j from 0
+	  do (loop for l in ls
+		   for i from (1+ j)
+		   do (setf (aref res i j) (- l))))
+    res))
+;;(lu-decomposition #2a((0 5 6) (1 2 3) (7 8 10)))
+;;(lu-decomposition-1 #2a((0 5 6) (1 2 3) (7 8 10)))
+
+(defun lu-p (lu &optional (n (1+ (length lu))))
+  "LU is the result from LU-DECOMPOSITION-1"
+  (let ((swaps (loop for pivot-index in (mapcar #'third lu)
+		     for i from 0
+		     if pivot-index collect (list i pivot-index))))
+    (swaps->permutation-matrix swaps n)))
+
+(defun lu-decomposition (matrix)
+  "Returns P, L, U for matrix decomposition MATRIX = PLU.
+Not sure that this is right. Revise the P handling when necessary."
+  (let ((lu (lu-decomposition-1 matrix)))
+    (list (lu-p lu) (lu-l lu) (caar lu))))
+;;(lu-decomposition #2a((1 2) (3 4)))
+;;(apply #'m* (lu-decomposition #2a((1 2) (3 4))))
+;;(apply #'m* (lu-decomposition #2a((0 5 6) (1 2 3) (7 8 10))))
+
+(defmethod determinant ((matrix array))
+  (if (= (array-total-size matrix) 1)
+    (aref matrix 0 0) ;;special case
+    (let ((lu (lu-decomposition-1 matrix)))
+      (* (reduce #'* (diagonal-vector (caar lu)))
+	 (if (evenp (length (remove nil (mapcar #'third lu))))
+	   1 -1)))))
+;;(mapcar #'determinant '(#2A((2 4 6) (1 1 1) (2 2 3)) #2A((1 1 1) (2 4 6) (2 2 3))))
+
+(defmethod determinant ((vectors cons))
+  (determinant (columns->matrix vectors)))
+;;(mapcar #'determinant '((#(2 4 6) #(1 1 1) #(2 2 3)) (#(1 1 1) #(2 4 6) #(2 2 3))))
+;;(columns->matrix '(#(1 1)))
+;;(determinant '(#(1 1)))
 
 (defmethod rank ((vectors cons))
   "Returns the rank of MATRIX.
@@ -269,24 +443,8 @@ TODO: Use SINGULAR-VALUE-DECOMPOSE to calculate rank."
   (rows->matrix (mapcar fn (subseq (matrix-rows matrix) start end))))
 ;;(map-rows (bind #'scale-matrix 2 1) sing :start 1)
 
-;;; Simpex stuff. simplex is a list of points The main target for now
-;;; is to decide if a point is within a simplex Need to compute
-;;; determinant, and then I need some deep linear algebra functions
-(defun n-parallelepiped-volume (points)
-  (determinant points))
-
-(defun simplex-volume (simplex)
-  (/ (n-parallelepiped-volume simplex)
-     (faculty (length simplex))))
-
 (defun equal-signum-1 ()
   (mapcar #'signum numbers))
 
 (defun equal-signum (&rest numbers)
   (mapcar #'signum numbers))
-
-(defun within-simplex (x simplex &optional strictly-p)
-  (apply #'= (loop for i below (length simplex)
-		   for sgn = (signum (simplex-volume (replace-nth i x simplex)))
-		   if (not (and strictly-p (zerop sgn)))
-		   collect sgn)))
