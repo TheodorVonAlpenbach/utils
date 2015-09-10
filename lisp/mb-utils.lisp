@@ -37,7 +37,8 @@
    :tree-dimensions
    :tree->array :array->tree
    :generate-array
-   :array-row :array-rows
+   :unit-sequence
+   :array-row :array-rows :array-column
    :span-array :map-array
    :map-array-rows
    :array-reverse-rows
@@ -47,14 +48,27 @@
    :alias
    :with-transpose
    :expand-list :expand-tree :expand-sequence
-   :deltas))
+   :deltas
+   :replace-nth :nreplace-nth))
 
 (in-package :mb-utils)
 
-(defun average (sequence &key (accumulation-fn #'+))
-  (/ (reduce accumulation-fn sequence)
-     (length sequence)))
-;;(average (a-b 1 10 :type 'vector))
+(defun average (sequence &key (accumulation-fn #'+) weights (normalize-weights-p t) (weight-fn #'*))
+  "Returns average of the values in SEQUENCE summing with
+ACCUMULATION-FN If WEIGHTS are provided they must be of the same
+length as SEQUENCE, and then the weighed average of sequence and
+weighed is returned. By default weights are normalized by AVERAGE, but
+the normalization can be suppressed by setting NORMALIZE-WEIGHTS-P to
+nil"
+  (if weights
+    (reduce accumulation-fn
+	    (map 'list weight-fn
+		 sequence
+		 (if normalize-weights-p
+		   (mapcar (bind #'/ (reduce #'+ weights)) weights)
+		   weights)))
+    (/ (reduce accumulation-fn sequence) (length sequence))))
+;;(average (a-b 1 10 :type 'vector) :weights '(0 0 0 0 0 1 1 1 1 1))
 
 (defun remf* (plist key)
   "Returns a copy of PLIST where KEY and its associated value are removed."
@@ -304,8 +318,12 @@ TODO: string keys could also evalute to a list"
 ;;(a-b 2 -2 :length 10 :type 'vector :direction :auto :key #'sqrt)
 ;;(a-b 10 0 :type 'array :key #'(lambda (x) (list x (sq x))))
 
-(defun 0-n (n &rest args) (apply #'a-b 0 (1- n) args))
-;;(0-n 10)
+(defun 0-n (n &rest args)
+  "Returns sequence 0...N-1. If N is negative the sequence is descending.
+Use keywords to specify sequence type. See A-B for details on possible keywords."
+  (unless (zerop n)
+    (apply #'a-b 0 (1- (if (minusp n) (1+ n) n)) args)))
+;;(mapcar #'0-n '(-1 0 1 2))
 
 (defun abs- (x &optional (n 1))
   "Returns the number N integers closer to zero than X. If |X-N| > 0 the result is undefined."
@@ -425,13 +443,17 @@ string between them."
 (defun listify (x &optional (atom-test #'atom))
   (if (funcall atom-test x) (list x) x))
 
-(defun remove-nth (pos list &optional reverse)
+(defun remove-nth-list (pos list &optional reverse)
   (let ((positions (listify pos)))
     (loop for x in list
 	  for i from 0
 	  when (eql (not (null (find i positions))) reverse)
 	  collect x)))
 ;;(remove-nth '(1 2) '(a b c) nil)
+
+(defun remove-nth (pos sequence &optional reverse)
+  (coerce (remove-nth-list pos (coerce sequence 'list) reverse) (class-of sequence)))
+;;(remove-nth '(1 2) #(a b c) nil)
 
 (defun mbind-normalize-arguments (bound-arguments &optional bound-argument-positions)
   ";;listify
@@ -671,12 +693,8 @@ similar to `mapcar'"
 
 (defun mnth (list &rest positions)
   "Extracts the elements at POSITIONS from LIST"
-  (loop for x in list
-     for i from 0
-     while positions
-     if (= i (car positions))
-     collect x and do (pop positions)))
-;;(mnth (0-n 10) 2 5)
+  (loop for i in positions collect (nth i list)))
+;;(mnth (0-n 10) 5 2 7)
 
 (defun project (tree &rest positions)
   (mapcar #'(lambda (x) (apply #'mnth x positions)) tree))
@@ -705,8 +723,8 @@ is true. The latter option is the fastest in this implementation."
        ((not it))
      ,@body))
 
-(defmacro with-outfile ((out filespec) &body body)
-  `(with-open-file (,out ,filespec :direction :output :if-exists :supersede)
+(defmacro with-outfile ((out filespec &key (if-exists :supersede)) &body body)
+  `(with-open-file (,out ,filespec :direction :output :if-exists ,if-exists)
      ,@body))
 
 ;;; read text
@@ -842,12 +860,13 @@ is the same throughout TREE."
 ;;(parse-iso-dttm "2003-04-05T11:48")
 
 ;;;; array utils
-(defun unit-list (dimension length &key (unit 1) (zero 0))
+(defun unit-sequence (dimension length &key (unit 1) (zero 0) (type 'list))
   "Returns a Euclidian unit vector of LENGTH for DIMENSION as a list."
   (let ((res (make-list length :initial-element zero)))
     (setf (nth dimension res) unit)
-    res))
-;;(unit-list 1 3 :unit 2 :zero 'zzzero)
+    (if (eql type 'list) res (coerce res type))))
+;;(unit-sequence 1 3 :unit 2 :zero 'zzzero :type 'vector)
+;;(unit-sequence 1 4 :type 'vector)
 
 (defmethod row-major-index->index ((dimensions cons) row-major-index)
   (loop for d in (butlast dimensions)
@@ -861,16 +880,21 @@ is the same throughout TREE."
   (row-major-index->index (array-dimensions x) row-major-index))
 ;;(loop for i below 6 collect (row-major-index->index (make-array '(2 3)) i))
 
-(defun array-row (array i)
+(defun array-row (array &optional (i 0))
   (make-array (rest (array-dimensions array))
     :displaced-to array
-    :displaced-index-offset (apply #'array-row-major-index array (unit-list 0 (array-rank array) :unit i))))
+    :displaced-index-offset (apply #'array-row-major-index array (unit-sequence 0 (array-rank array) :unit i))))
 ;;(array-row #3A(((1 2) (3 4)) ((1 2) (3 4))) 1)
 
 (defun array-rows (array)
   (loop for i below (array-dimension array 0)
 	collect (array-row array i)))
 ;;(setf ewq #2A((1 2) (3 4))) (array-rows ewq)
+
+(defun array-column (array &optional (j 0) (from 0) (to (array-dimension array 0)))
+  "Returns column J in ARRAY from row FROM to row TO as a vector"
+  (coerce (loop for i from from below to collect (aref array i j)) 'vector))
+;;(array-column #2A((1 2) (3 4) (5 6)) 0 1 2)
 
 (defun generate-array (dimensions &optional (fn (lambda (i) i)))
   "Generates a new array of DIMENSIONS with unary function FN.
@@ -934,6 +958,7 @@ is (fn A1(I) A2(I) ...), I being a row major index."
   (generate-array (and arrays (array-dimensions (first arrays)))
 		  (lambda (i) (apply fn (mapcar (bind #'row-major-aref i) arrays)))))
 ;;(map-array #'+ #3A(((101 2) (3 4)) ((1 2) (3 4))) #3A(((1 2) (3 4)) ((1 2) (3 4))))
+;;(map-array (bind #'* 2) #3A(((101 2) (3 4)) ((1 2) (3 4))))
 
 (defun map-array-rows (fn 2a &optional (type 'vector))
   (coerce (mapcar fn (array-rows 2a)) type))
@@ -965,12 +990,13 @@ is (fn A1(I) A2(I) ...), I being a row major index."
 ;;(array-nreverse-rows (tree->array '((a b) (c d) (e f))))
 ;;(time (progn (array-nreverse-rows (make-array '(1000 1000))) 'ok))
 
-(defun swap-rows (a i1 i2)
+(defun swap-rows (a i1 i2 &key (from 0) to)
   "Swaps rows I1 and I2 in two-dimensional array A. Destructive."
-  (loop for j below (array-dimension a 1)
-	do (rotatef (aref a i1 j) (aref a i2 j)))
+  (when (/= i1 i2)
+    (loop for j from from below (or to (array-dimension a 1))
+	  do (rotatef (aref a i1 j) (aref a i2 j))))
   a)
-;;(swap-rows (identity-matrix 3) 0 1)
+;;(let ((a #2a((1 2 3) (2 3 4) (4 5 6)))) (list (swap-rows a 0 1) a))
 
 (defmacro alias (new-name prev-name)
   "From On Lisp"
@@ -1108,3 +1134,13 @@ With DIMENSION set to 0 it is equivalent to EXPAND-LIST."
 
 (defun perm (&rest args) (permutations args))
 ;;(perm 1 2 3)
+
+(defun nreplace-nth (n new-value sequence)
+  "Destructive"
+  (setf (elt sequence n) new-value)
+  sequence)
+;;(let ((s '(0 1 2))) (list (nreplace-nth 1 'qwe s) s))
+
+(defun replace-nth (n new-value sequence)
+  (nreplace-nth n new-value (copy-seq sequence)))
+;;(let ((s '(0 1 2))) (list (replace-nth 1 'qwe s) s))
