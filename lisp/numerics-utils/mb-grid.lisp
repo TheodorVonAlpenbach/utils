@@ -3,7 +3,7 @@
   (:export :grid :make-grid :grid-data :grid-axes
 	   :list-grid :grid-axes* :span-grid :map-grid
 	   :gnuplot-matrix->grid :grid->gnuplot-matrix
-	   :import-grid :export-grid
+	   :import-grid :export-grid :write-grid
 	   :with-grid-data))
 
 (in-package :mb-grid)
@@ -48,7 +48,7 @@ each axis to a sequence of this TYPE"
 
 (defmethod span-grid (fn axes)
   (make-grid (apply #'span-array fn axes) axes))
-;;(list-grid (span-grid (lambda (&rest p) (sqrt (reduce #'+ p))) '(#(0 1 2) #(5 10))))
+;;(list-grid (span-grid (lambda (&rest p) (let ((r (sqrt (reduce #'+ (mapcar #'sq p))))) (if (> r 1) 0 (cos r)))) '(#(-1 -1/2 0 1/2 1) #(-1 -1/2 0 1/2 1))))
 
 (defun map-grid (fn &rest grids)
   "Assumes all grids have the same axes"
@@ -72,6 +72,11 @@ splot 'file' nonuniform matrix. See gnuplot doc for more"
 	     (list (map 'vector #'first (rest matrix))
 		   (coerce (rest (first matrix)) 'vector))))
 ;;(list-grid (gnuplot-matrix->grid '((nil 1 2 3) (0.1 2 3 4) (0.2 3 4 5) (0.3 4 5 6))))
+
+(defmethod write-grid ((x grid) stream &rest args)
+  "Exports GRID to csv format and writes it to FILENAME. See WRITE-CSV for ARGS"
+  (apply #'write-csv (grid->gnuplot-matrix x) stream args))
+;;(write-grid (span-grid #'+ '(#(0 1 2) #(5 10))) t)
 
 (defun export-grid (grid filename &rest args)
   "Exports GRID to csv format and writes it to FILENAME. See WRITE-CSV for ARGS"
@@ -138,4 +143,3 @@ DATA-TYPE in BODY."
   (assert (= (dimension x) 2))
   (make-grid (matrix-transpose (grid-data x)) (rotate (grid-axes x))))
 ;;(list-grid (transpose-grid (make-grid #2A((1 2 3) (2 3 4)) '(#(1 2 3) #(1 2)))))
-
