@@ -6,7 +6,7 @@
    :listify :list<
    :sq
    :a-b :0-n :abs- :abs+ :string-case :cut :cut-if :nor
-   :awhen :aif :it :awhile
+   :awhen :aif :it :awhile :acond
    :mnth :project
    :nth* :pop-list
    :rcons
@@ -32,7 +32,7 @@
    :read-text-file :read-text-file-lines ;;deprecated methods
    :sequence-index-boundary
    :win32-homepath
-   :parse-iso-dttm :parse-iso-date :parse-iso-time
+   :parse-iso-dttm :parse-iso-date :parse-iso-time :iso-time
    :tree->value-index-tuples
    :tree-dimensions
    :tree->array :array->tree
@@ -369,6 +369,16 @@ Destructive."
   `(aif ,test-form
         (progn ,@body)))
 
+(defmacro acond (&rest clauses)
+  (if (null clauses)
+      nil
+      (let ((cl1 (car clauses))
+            (sym (gensym)))
+        `(let ((,sym ,(car cl1)))
+           (if ,sym
+               (let ((it ,sym)) ,@(cdr cl1))
+               (acond ,@(cdr clauses)))))))
+
 (defun copy-if (test sequence &rest args)
   (apply #'remove-if (complement test) sequence args))
 ;;(copy-if #'oddp '(1 2 3) :key #'1+)
@@ -395,11 +405,13 @@ Destructive."
 ;;;; APPLY (currently in my clisp version, the limit is 4096). There
 ;;;; is no such restriction in the new concat (or rather, write-list).
 ;;;; And INFIX-LIST is now obsolete, as far as I can see.
-(defun write-list (list stream &key pre in suf test key)
-  (let ((list (if key (mapcar key list) list)))
-    (format stream (concatenate 'string "~@[~a~]~{~a" (format nil "~@[~~^~a~]" in) "~}~@[~a~]")
-	    pre (if test (copy-if test list) list) suf)))
+(defun write-list (list out &key pre in suf test key)
+  (flet ((sp (x) (when x (case x (:newline (format nil "~%")) (t (format nil x))))))
+    (let ((list (if key (mapcar key list) list)))
+      (format out (concatenate 'string "~@[~a~]~{~a" (format nil "~@[~~^~a~]" (sp in)) "~}~@[~a~]")
+	(sp pre) (if test (copy-if test list) list) (sp suf)))))
 ;;(time (progn (write-list (a-b 0 10000) nil :in ", " :pre "<<" :suf ">>" :test #'oddp :key #'1+) :fine))
+;;(write-list (a-b 0 10) nil :in :newline :pre "<<" :suf ">>" :test #'oddp :key #'1+)
 
 (defun concat (list &rest args) (apply #'write-list list nil args))
 ;;(time (progn (concat (a-b 0 100000) :in ", " :pre "<<" :suf ">>" :test #'oddp :key #'1+) :fine))
@@ -633,7 +645,9 @@ tons of data, and we only want to copy the rest X
 \(copy-object x :elements nil)
 
 is not only a code shortcut, but also saves time and memory."
-  (apply #'make-instance (type-of x) (apply #'copy-object-initarg-plist x supersede-plist)))
+  (when x
+    (apply #'make-instance (type-of x)
+	   (apply #'copy-object-initarg-plist x supersede-plist))))
 ;;(macroexpand-1 '(copy-object x (a 123)))
 ;;(foobar-list (copy-object x :a 123))
 ;;(foobar-b x)
@@ -858,6 +872,22 @@ is the same throughout TREE."
     (nconc (parse-iso-date iso-date)
 	   (parse-iso-time iso-time))))
 ;;(parse-iso-dttm "2003-04-05T11:48")
+
+(defun iso-time (&key (universal-time (get-universal-time)) (format :full-iso))
+  (multiple-value-bind (s mi h d mo y dlp z)
+      (decode-universal-time universal-time)
+    (if (stringp format)
+      (format nil format y mo d h mi s)
+      (case format
+	(:iso-dttm (format nil "~4,'0d-~2,'0d-~2,'0dT~2,'0d:~2,'0d:~2,'0d" y mo d h mi s))
+	(:iso-dttm-sans-T (format nil "~4,'0d-~2,'0d-~2,'0d ~2,'0d:~2,'0d:~2,'0d" y mo d h mi s))
+	(:iso-dttm-file (format nil "~4,'0d-~2,'0d-~2,'0dT~2,'0d-~2,'0d-~2,'0d" y mo d h mi s))
+	(:iso-date (format nil "~4,'0d-~2,'0d-~2,'0d" y mo d))
+	(:iso-time (format nil "~2,'0d:~2,'0d:~2,'0d" h mi s))
+	(:iso-time-sans-seconds (format nil "~2,'0d:~2,'0d" h mi))
+	(t (format nil "~4,'0d-~2,'0d-~2,'0dT~2,'0d:~2,'0d:~2,'0d" y mo d h mi s))))))
+;;(iso-time :format "~4,'0d-~2,'0d-~2,'0d ~2,'0d:~2,'0d:~2,'0d Z")
+;;(iso-time)
 
 ;;;; array utils
 (defun unit-sequence (dimension length &key (unit 1) (zero 0) (type 'list))
