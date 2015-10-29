@@ -12,6 +12,7 @@
 (defclass grid ()
   ((data :initarg :data :accessor grid-data :type array)
    (axes :initarg :axes :accessor grid-axes :type cons)))
+;;(with-slots ((d axes)) (make-instance 'grid :data #(1) :axes #(1)) d)
 
 (defun grid-p (x) (typep x 'grid))
 
@@ -25,9 +26,15 @@
 (defun make-grid (data axes)
   (make-instance 'grid :data data :axes axes))
 
+(defun test-grid (&optional (m 3) (n 3))
+  (let ((gx (a-b 1 m :type 'vector))
+	(gy (a-b 1 n :type 'vector)))
+  (span-grid #'* (list gx gy))))
+;;(test-grid)
+
 (defun list-grid (grid)
   (list :data (grid-data grid) :axes (grid-axes grid)))
-;;(list-grid (make-grid #(1 2 3) #(1 2 3)))
+;;(list-grid (test-grid 2 2))
 
 ;;; Methods on simple list grid: (data axes)
 (defmethod grid-data ((grid cons))
@@ -51,18 +58,39 @@ each axis to a sequence of this TYPE"
 ;;(list-grid (span-grid (lambda (&rest p) (let ((r (sqrt (reduce #'+ (mapcar #'sq p))))) (if (> r 1) 0 (cos r)))) '(#(-1 -1/2 0 1/2 1) #(-1 -1/2 0 1/2 1))))
 
 (defun map-grid (fn &rest grids)
-  "Assumes all grids have the same axes"
-  (make-grid (apply #'map-array fn (mapcar #'grid-data grids)) (grid-axes (first grids))))
+  "Assumes all grids have the same axes (as the first grid)."
+  (copy-object (first grids) :data (apply #'map-array fn (mapcar #'grid-data grids))))
 ;;(setf qwe (span-grid (lambda (&rest p) (sqrt (reduce #'+ p))) '(#(0 1 2) #(5 10))))
 ;;(list-grid (map-grid (bind #'+ 17) qwe))
 ;;(list-grid (map-grid #'+ qwe qwe))
+
+(defparameter *gnuplot-matrix-origo* :number-of-columns
+  "Specifies how the value of a gnuplot matrix' upper left entry
+should be calculated. The default is :NUMBER-OF-COLUMNS, which defines
+the entry to be the number of columns of the data part of the matrix.
+Other values that should be supported by gnuplot matrix related functions, are
+* FN (a unary function to be called with grid as single argument)
+* X (an atom value)")
+
+(defmethod gnuplot-matrix-info-entry ((x grid))
+  (if (functionp *gnuplot-matrix-origo*)
+    (funcall *gnuplot-matrix-origo* x)
+    (case *gnuplot-matrix-origo*
+      (:number-of-columns (length (second (grid-axes x))))
+      (t *gnuplot-matrix-origo*))))
+
+(defun test-gnuplot-matrix-info-entry (&optional (grid (test-grid)))
+  (loop for x in (list :number-of-columns (iso-time) (lambda (x) (iso-time)))
+	collect (let ((*gnuplot-matrix-origo* x))
+		  (gnuplot-matrix-info-entry grid))))
+;;(test-gnuplot-matrix-info-entry)
 
 (defun grid->gnuplot-matrix (grid)
   "Converts grid to the layout expected by gnuplot for splotting with a nonuniform matrix.
 splot 'file' nonuniform matrix. See gnuplot doc for more"
   (assert (= (dimension grid) 2))
   (destructuring-bind (row-axis column-axis) (grid-axes* grid 'list)
-    (cons (cons (length column-axis) column-axis)
+    (cons (cons (gnuplot-matrix-info-entry grid) column-axis)
 	  (mapcar #'cons row-axis (array->tree (grid-data grid))))))
 ;;(grid->gnuplot-matrix (gnuplot-matrix->grid '((nil 1 2 3) (0.1 2 3 4) (0.2 3 4 5) (0.3 4 5 6))))
 ;;(grid-data (egina::sort-grid-columns egina::qwe))
