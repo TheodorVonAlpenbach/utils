@@ -3,6 +3,6 @@
   :author "Mats Bergstrrøm <mats@contango.no>"
   :version "0.9.1"
   :licence "GNU"
-  :depends-on (:mb-utils :csv)
+  :depends-on (:mb-utils :csv :mb-grid)
   :components
   ((:cl-source-file "mb-gnuplot")))
