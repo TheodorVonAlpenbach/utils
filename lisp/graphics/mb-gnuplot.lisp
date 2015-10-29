@@ -1,6 +1,6 @@
 (defpackage :mb-gnuplot
   (:nicknames :gp)
-  (:use :common-lisp :mb-utils :csv)
+  (:use :common-lisp :mb-utils :csv :mb-grid)
   (:export :plot))
 
 (in-package :mb-gnuplot)
@@ -52,15 +52,18 @@ TODO: Handle n-ary functions and generalize X-VALUES to N dimensions."
 	do (format stream "~f~T~f~%" x (funcall function x))))
 ;;(trace write-function)
 
-(defun write-2d-array (stream array)
+(defun write-points (stream points)
   "Returns the filename containing y-values as the second #\TAB delimited column.
 The first column currently only contains consecutive integers running from 0.
 TODO: 
 1. allow N dimensional array, where the Nth row contains data in the Nth dimension.
 2. only write points where the first dimension is within x-values.
 3. allow y-values, z-values etc, and modify task 2 accordingly"
-  (loop for (x y) in (array->tree array)
-	do (format stream "~f~T~f~%" x y)))
+  (loop for (x y) in points do (format stream "~f~T~f~%" x y)))
+
+(defun write-2d-array (stream array)
+  "See write-2d-list"
+  (write-points stream (array->tree array)))
 
 (defun write-array (stream y-values &key x-values x-range)
   "Returns the filename containing y-values as the second #\TAB delimited column.
@@ -76,11 +79,20 @@ TODO:
 	  do (format stream "~f~T~f~%" x y))))
 ;;(write-array t #2A((1 2)))
 
+(defun write-1d-grid (stream grid)
+  (warn "kilroy")
+  (write-2d-list
+   (transpose-tree
+    (list (coerce (grid-data grid) 'list)
+	  (coerce (first (grid-axes grid)) 'list)))))
+
 (defun write-data-1 (stream target &rest plist)
   "TARGET should be either a function or an array"
   (typecase target
     (function (apply #'write-function stream target plist))
     (array (apply #'write-array stream target plist))
+    (mb-grid::grid (apply #'write-array stream (mb-grid::grid-data target) :x-values (mb-grid::grid-axes target) plist))
+    (mb-grid::grid (apply #'write-1d-grid stream target plist))
     (t (error "Unknown type ~a for target ~a" (type-of target) target))))
 ;;(write-data-1 t #'sqrt :resolution 10)
 ;;(trace write-data-1)
@@ -212,6 +224,11 @@ STREAM. Here graph and plot is the same"
 	   (eql (first expression) :g))))
 ;;(untrace graph-p)
 
+(defun verbatim-p (expression)
+  (or (stringp expression)
+      (and (consp expression)
+	   (eql (first expression) :v))))
+
 (defun graph (out expression)
   "Converts GP-LINES and title to gnuplot string and writes it to
 STREAM. Here graph and plot is the same"
@@ -220,14 +237,17 @@ STREAM. Here graph and plot is the same"
       (if (eql it :atom)
 	(graph-1 out expression)
 	(apply #'graph-1 out (rest expression)))
-      ;; do the :ATOM thing here as well
-      (if (splot-p expression)
-	(apply #'splot out (rest expression))
-	(graph-1 out expression)))))
+      ;; do the :ATOM thing here as well (why?)
+      (cond
+	((splot-p expression)
+	 (apply #'splot out (rest expression)))
+	((verbatim-p expression)
+	 (format out (concat (rest expression) :in :newline)))
+	(t (graph-1 out expression))))))
 ;;(graph t `((:l (:d ,#'sqrt :x-values (0 2))) (:l (:d ,#'sqrt :x-values (0 2)))))
 ;;(graph t `(:d ,#'sqrt :x-values (0 2)))
 ;;(graph t `(,#'sqrt ,#'sqrt))
-;;(trace graph)
+;;(graph t `(:v "qwe"))
 
 (defun key->gp-name (key)
   (string-downcase (symbol-name key)))
