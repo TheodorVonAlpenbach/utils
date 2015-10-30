@@ -655,7 +655,9 @@ is not only a code shortcut, but also saves time and memory."
 (defun copy-object-to (x type &rest supersede-plist)
   "Same as copy-object, but the result can be of another compatible
 type, typically a subclass of X's class. See copy-object for details
-about the copying process."
+about the copying process.
+Note! If TYPE is a class with slots without :initform, this method fails.
+Perhaps this should be handled?"
   (apply #'copy-object (apply #'make-instance type (copy-object-initarg-plist x)) supersede-plist))
 ;;(macroexpand-1 (foobar-list (copy-object-to y 'foobar :a 321 :b 123))
 ;;(copy-object-initarg-plist y :b 14)
