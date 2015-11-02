@@ -57,12 +57,6 @@
 	   (gequal (end x) (start y)))))
 ;;(gequal (make-segment '(1 0) '(0 0)) (make-segment '(0 0) '(1 0)))
 
-(defgeneric diameter2 (x))
-(defmethod diameter2 ((x segment)) (inner-product x))
-;;(diameter2 (make-segment '(1 0) '(0 0)))
-
-(defgeneric diameter (x))
-
 (defmethod inner-product ((x cons) &optional (y x))
   (reduce #'+ (mapcar #'* x y)))
 ;;(inner-product '(1 2))
