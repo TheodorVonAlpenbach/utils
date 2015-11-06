@@ -1,5 +1,8 @@
 (in-package :topology)
 
+(defun geometry-p (x) (typep x 'geometry))
+;;(mapcar #'geometry-p (list '(1 2) (make-point '(1 2))))
+
 (defclass geometry () ())
 
 (defclass multi-geometry (geometry)
@@ -57,24 +60,6 @@
   (list (start x) (end x)))
 ;;(points (make-segment '(1 2) '(2 4)))
 
-(defmethod p- ((p cons) &rest points)
-  (apply #'mapcar #'- p points))
-;;(p- '(1 0) '(0 1))
-
-(defmethod p- ((x point) &rest points)
-  (apply #'p- (coordinates x) (mapcar #'coordinates points)))
-;;(p- (make-point '(1 0)) (make-point '(0 1)))
-
-(defmethod segment-vector ((x segment))
-  "Returns the vector corresponding to segment as a POINT"
-  (p- (end x) (start x)))
-;;(segment-vector (make-segment '(1 0) '(0 1)))
-
-(defmethod segment-point ((x segment))
-  "Returns the vector corresponding to segment as a POINT"
-  (make-point (segment-vector x)))
-;;(segment-point (make-segment '(1 0) '(0 1)))
-
 (defclass polyline (geometry)
   ((segments :initarg :segments :accessor segments :type list)))
 
@@ -129,3 +114,69 @@
 (defmethod print-object ((x triangle) stream)
   (print-unreadable-object (x stream :type t)
     (princ (mapcar #'coordinates (points (boundary x))) stream)))
+
+(defclass ellipse (geometry)
+  ((major-axis :initarg :major-axis :accessor major-axis :type segment)
+   (minor-diameter :initarg :minor-diameter :accessor minor-diameter :type number)))
+
+(defmethod make-ellipse ((major-axis segment) (minor-diameter number))
+  (make-instance 'ellipse :major-axis major-axis :minor-diameter minor-diameter))
+;;(make-ellipse (make-segment '(0 -2) '(0 2)) 2)
+
+(defmethod make-ellipse ((major-axis segment) (minor-axis segment))
+  (make-instance 'ellipse :major-axis major-axis :minor-diameter (diameter minor-axis)))
+
+(defmethod rotate ((p cons) (theta number))
+  (let ((c (cos theta)) (s (sin theta)))
+    (destructuring-bind (x y) p
+      (list (- (* x c) (* y s)) (+ (* x s) (* y c))))))
+;;(rotate '(1 0) (/ pi 2))
+
+(defmethod rotate ((x point) (y number))
+  (make-point (rotate (coordinates x) y)))
+;;(rotate (make-point '(1 0)) pi)
+
+(defmethod rotate ((x segment) (y number))
+  (make-segment (rotate (start x) y) (rotate (end x) y)))
+;;(rotate (make-segment '(-1 0) '(1 0)) (/ pi 2))
+
+(defmethod rotate-around (g theta (around point))
+  (g+ (rotate (g- g around) theta) around))
+;;(rotate-around (make-segment '(-1 0) '(1 0)) (/ pi 2) (make-point '(-1 0)))
+
+(defmethod scale (g c &optional at)
+  (if at (g+ (g* (g- g at) c) at) (g* g c)))
+;;(scale (make-segment '(-1 0) '(1 0)) 2 '(1 0))
+
+(defmethod minor-axis ((x ellipse))
+  (scale (rotate-around (major-axis x) (/ pi 2) (centre x))
+	 (/ (minor-diameter x) (norm (major-axis x)))
+	 (centre x)))
+;;(minor-axis (make-ellipse (make-segment '(0 -2) '(0 2)) 2))
+
+(defmethod major-radius ((x ellipse)) (/ (diameter x) 2))
+(defmethod minor-radius ((x ellipse)) (/ (minor-diameter x) 2))
+;;(minor-radius (make-ellipse (make-segment '(0 -2) '(0 2)) 2))
+
+(defmethod radii ((x ellipse)) (list (major-radius x) (minor-radius x)))
+;;(radii (make-ellipse (make-segment '(0 -2) '(0 2)) 2))
+
+(defun origo () (make-point '(0 0)))
+
+(defmethod make-segment-origo ((r number) &optional orientation center)
+  "ORIENTATION is the angle from x-axis to major-axis. Default
+ORIENTATION is 0. Default CENTER is (ORIGO)"
+  (let ((s (make-segment (list (- r) 0) (list r 0))))
+    (when orientation (setf s (rotate s orientation)))
+    (when center (g+ s center))
+    s))
+;;(make-segment-origo 1 (/ pi 2) '(1 1))
+(trace make-segment-origo)
+
+(defmethod make-ellipse-origo (major-radius minor-radius &optional orientation center)
+  "ORIENTATION is the angle from x-axis to major-axis"
+  (make-ellipse (make-segment-origo major-radius orientation center) (* 2 minor-radius)))
+;;(make-ellipse-origo 2 1)
+
+(defmethod points ((x ellipse))
+  (append (points (major-axis x)) (points (minor-axis x))))
