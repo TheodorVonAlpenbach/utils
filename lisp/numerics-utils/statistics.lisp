@@ -13,7 +13,7 @@
 
 (defun normalize-radian (x &optional (min-radian (- pi)))
   (+ (mod (- x min-radian) 2PI) min-radian))
-;;(normalize-radian pi)
+;;(mapcar #'normalize-radian (a-b (- (* 2 pi)) (* 2 pi) :step 0.1))
 
 (defun wrapped-normal-distribution (mu sigma &optional (k-limit 10))
   "Returns WND for MU and SIGMA."
@@ -64,9 +64,15 @@
 (defun variance (sequence) (variance-vector (coerce sequence 'vector)))
 (defun stdev (sequence) (sqrt (variance sequence)))
 
-(defun random-normal-fn (mu sigma &optional (n 12))
+(defconstant +1sigma+ 0.682689492)
+
+(defun random-normal-fn (mu &optional (sigma +1sigma+) (n 12))
   "Returns a function that generates values that are normal distributed"
   (let ((n/2 (/ n 2)))
     (lambda () (+ mu (* sigma (- (loop repeat 12 sum (random 1.0)) n/2))))))
-;;(stdev (loop with fn = (random-normal-fn 0 PI) repeat 100000 collect (funcall fn)))
+;;(stdev (loop with fn = (random-normal-fn 0) repeat 10000 collect (funcall fn)))
+
+(defun random-normal (&rest args) (funcall (apply #'random-normal-fn args)))
+;;(loop for i below 10 collect (random-normal 1))
+
 
