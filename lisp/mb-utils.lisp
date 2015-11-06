@@ -361,6 +361,16 @@ Destructive."
   (ncut (copy-list list) n include-remainder))
 ;;(let ((qwe '(1 2 3 4 5 6))) (values (cut qwe) qwe))
 
+(defun interleave-sequences (sequences &optional (type (class-of (first sequences))))
+  (coerce (loop for i below (reduce #'max sequences :key #'length) append
+		(loop for s in sequences collect (elt s i)))
+	  type))
+;;(interleave-sequences '(#(a b c) #(d e f)))
+
+(defun interleave (sequence &rest sequences)
+  (interleave-sequences (cons sequence sequences)))
+;;(interleave #(a b c) #(d e f))
+
 (defmacro aif (test-form then-form &optional else-form)
   `(let ((it ,test-form))
      (if it ,then-form ,else-form)))
@@ -878,6 +888,7 @@ is the same throughout TREE."
 (defun iso-time (&key (universal-time (get-universal-time)) (format :full-iso))
   (multiple-value-bind (s mi h d mo y dlp z)
       (decode-universal-time universal-time)
+    (declare (ignore dlp z))
     (if (stringp format)
       (format nil format y mo d h mi s)
       (case format
