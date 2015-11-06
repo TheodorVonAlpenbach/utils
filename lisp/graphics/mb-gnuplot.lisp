@@ -274,7 +274,7 @@ STREAM. Here graph and plot is the same"
   (terpri out))
 ;;(write-terminal '(:latex :fontsize 6) t)
 
-(defun script (scriptpath expression terminal)
+(defun script (scriptpath expression terminal &key aspect-ratio)
   "Returns a gnuplot script for plotting unary FUNCTION from A to B
 with N points."
   (with-open-file (out scriptpath :direction :output :if-exists :supersede)
@@ -282,19 +282,22 @@ with N points."
 	   (target (namestring (make-pathname :type type :defaults out))))
       (write-terminal terminal out)
       (format out "set output '~a'~%" target)
+      (when aspect-ratio
+	(if (eql aspect-ratio :square)
+	  (format out "set size square~%")
+	  (warn "Aspect ratio ~a is not yet supported" aspect-ratio)))
       (graph out expression)
       target)))
 ;;(script nil `(:g ,#'sqrt ,#'sqrt) :pdf)
 ;;(trace script)
 
-(defun plot (expression &key directory name (terminal :pdf) margins)
+(defun plot (expression &key directory name (terminal :pdf) margins aspect-ratio)
   "Returns a gnuplot script for plotting unary FUNCTION from A to B
 with N points."
   (let* ((scriptpath (gp-path directory name "gp"))
-	 (target (script scriptpath expression terminal)))
+	 (target (script scriptpath expression terminal :aspect-ratio aspect-ratio)))
     (ext:execute "/usr/bin/gnuplot" scriptpath)
     (list :script scriptpath :target target)))
-;;(gp:plot `(:p ,#'sqrt ,#'sq (:l (:d ,#'(lambda (x) (sq (sin x))) :x-range (0.01 1)) :title "Geir")))
 ;;(gp:plot `(:l (:d ,#'sqrt :resolution 10) :with :linespoints))
 ;;(gp:plot `((:l (:d ,(lambda (x) (sq x)) :x-values (0 1) :resolution 10) :with :linespoints) (:l (:d ,(lambda (x) (- 2 (sq x))) :x-values (1 2) :resolution 10) :with :linespoints)))
 
