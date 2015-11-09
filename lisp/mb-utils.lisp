@@ -5,8 +5,9 @@
    :remf* :popf
    :listify :list<
    :sq
-   :a-b :0-n :abs- :abs+ :string-case :cut :cut-if :nor
-   :awhen :aif :it :awhile :acond
+   :a-b :0-n :abs- :abs+ :string-case
+   :cut :cut-if
+   :nor :awhen :aif :it :awhile :acond
    :mnth :project
    :nth* :pop-list
    :rcons
@@ -23,7 +24,7 @@
    :minimum :maximum
    :transpose-tree :flatten* :maptree :with-tree
    :flank
-   :group :pairs :tuples :combinations
+   :group :pairs :tuples :combinations :interleave
    :boundaries
    :with-gensyms
    :with-outfile
@@ -725,6 +726,7 @@ similar to `mapcar'"
 (defun project (tree &rest positions)
   (mapcar #'(lambda (x) (apply #'mnth x positions)) tree))
 ;;(project '((a b c) (d e f)) 0 2)
+;;(mnth '(a b c) 0 2)
 
 (defun list-insert (x n list)
   "Inserts element X at position N in LIST"
