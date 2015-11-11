@@ -171,7 +171,6 @@ ORIENTATION is 0. Default CENTER is (ORIGO)"
     (when center (g+ s center))
     s))
 ;;(make-segment-origo 1 (/ pi 2) '(1 1))
-(trace make-segment-origo)
 
 (defmethod make-ellipse-origo (major-radius minor-radius &optional orientation center)
   "ORIENTATION is the angle from x-axis to major-axis"
