@@ -78,12 +78,11 @@ closest to P2, if positive closest to P1."
 ;;;DISTANCE2
 (defgeneric distance2 (x y))
 (defmethod distance2 ((x cons) (y (eql nil))) (reduce #'+ (mapcar #'sq x)))
-(defmethod distance2 ((x cons) (y cons)) (distance2 (g- x y)))
+(defmethod distance2 ((x cons) (y cons)) (distance2 (g- x y) nil))
 (defmethod distance2 ((x point) (y point)) (distance2 (coordinates x) (coordinates y)))
 
 (defmethod distance2 ((x point) (y segment))
-  (let ((d2-x-ya (distance2 x (start y)))
-	(c (projection-parameter x y)))
+  (let ((c (projection-parameter x y)))
     (if (<= 0 c 1)
       ;; the projection of X on segment Y is WITHIN Y
       (- (distance2 x (start y)) (* (sq c) (inner-product y)))
