@@ -245,7 +245,7 @@ interpolation, see GRID-INTERPOLATE."
   (let* ((k-pairs (mapcar #'elt all-k-pairs k-new-grid))
 	 (k0 (mapcar #'car k-pairs))
 	 (x0 (grid-point grid k0))
-	 (ki-list (loop for (k sigma) in k-pairs
+	 (ki-list (loop for (nil sigma) in k-pairs
 			for i from 0
 			collect (let ((res (copy-list k0)))
 				  (incf (nth i res) sigma)
