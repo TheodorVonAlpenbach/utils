@@ -59,19 +59,6 @@
 (defmethod centre ((x ellipse)) (centre (major-axis x)))
 ;;(centre (make-ellipse (make-segment '(0 -2) '(0 3)) 1))
 
-;;; gtest is prepares a new implementation of distance (for example)
-;;; taking advantage of generalization of optional argument,
-;;; especially the nil value of it
-;;; doesn't seem to work
-(defgeneric gtest (x &optional y))
-(defmethod gtest ((x cons) &optional (y nil)) (reduce #'+ x :key #'sq))
-;;(gtest '(1 1))
-(defmethod gtest ((x point) &optional (y point))
-  (distance x y))
-(defmethod gtest ((x point) &optional (y (eql nil)))
-  (distance x y))
-;;(gtest (make-point '(1 0)) (make-point '(0 1)))
-
 ;;; DIRECTION
 (defmethod direction (x) x) ;default
 (defmethod direction ((x segment)) (g- (end x) (start x)))
@@ -81,9 +68,9 @@
 (defmethod inner-product ((x cons) (y cons)) (reduce #'+ (mapcar #'* x y)))
 (defmethod inner-product ((x point) (y point)) (inner-product (coordinates x) (coordinates y)))
 (defmethod inner-product ((x segment) (y segment)) (inner-product (direction x) (direction y)))
-(defmethod inner-product ((x cons) (y (eql nil))) (first x))
-(defmethod inner-product ((x point) (y (eql nil))) (first (coordinates x)))
-(defmethod inner-product ((x segment) (y (eql nil))) (inner-product (direction x)))
+(defmethod inner-product ((x cons) (y (eql nil))) (declare (ignore y)) (first x))
+(defmethod inner-product ((x point) (y (eql nil))) (declare (ignore y)) (first (coordinates x)))
+(defmethod inner-product ((x segment) (y (eql nil))) (inner-product (direction x) y)) ;; could make (direction nil) return nil and skip this generic function
 ;;(inner-product (make-segment '(0 0) '(1 0)) nil)
 
 ;;; NORM2, NORM and NORMALIZE

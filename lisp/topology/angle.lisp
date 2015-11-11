@@ -14,7 +14,7 @@ NUMERICS-UTILS::DETERMINANT."
 
 (defmethod cross-product ((x point) (y point)) (cross-product (coordinates x) (coordinates y)))
 (defmethod cross-product ((x segment) (y segment)) (cross-product (direction x) (direction y)))
-(defmethod cross-product ((x segment) (y point)) (cross-product (direction x) (p- y (start x))))
+(defmethod cross-product ((x segment) (y point)) (cross-product (direction x) (g- y (start x))))
 
 (defmethod cross-product ((x cons) (y (eql nil))) (second x))
 (defmethod cross-product ((x point) (y (eql nil))) (second (coordinates x)))

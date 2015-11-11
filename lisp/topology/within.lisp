@@ -66,8 +66,8 @@ If the result is 1 the projection equals P1, if 0 it is equal to P2.
 Other values in [0 1] gives the position on the segment accordingly.
 If negative, the projection is on the continuation of the segment
 closest to P2, if positive closest to P1."
-  (let ((p12 (p- p2 p1)))
-    (/ (inner-product (p- p p1) p12) (inner-product p12 nil))))
+  (let ((p12 (g- p2 p1)))
+    (/ (inner-product (g- p p1) p12) (inner-product p12 nil))))
 ;;(projection-parameter (make-point '(1 1)) (make-point '(0 0)) (make-point '(2 0)))
 
 (defmethod projection-parameter ((p point) (s segment))
@@ -76,6 +76,8 @@ closest to P2, if positive closest to P1."
 ;;(projection-parameter (make-point '(1 1)) (make-segment '(0 0) '(2 0)))
 
 ;;;DISTANCE2
+;; TODO instead of (distance2 x nil), check if diameter2 is the same. In that case this should be used instead, since it is so much clearer
+;; Move distance a separate module
 (defgeneric distance2 (x y))
 (defmethod distance2 ((x cons) (y (eql nil))) (reduce #'+ (mapcar #'sq x)))
 (defmethod distance2 ((x cons) (y cons)) (distance2 (g- x y) nil))
@@ -85,7 +87,7 @@ closest to P2, if positive closest to P1."
   (let ((c (projection-parameter x y)))
     (if (<= 0 c 1)
       ;; the projection of X on segment Y is WITHIN Y
-      (- (distance2 x (start y)) (* (sq c) (inner-product y)))
+      (- (distance2 x (start y)) (* (sq c) (diameter2 y)))
       ;; projection of X is outside Y
       (min (distance2 x (start y)) (distance2 x (end y))))))
 ;;(distance2 (make-point '(-1 -1)) (make-segment '(0 0) '(1 0)))
