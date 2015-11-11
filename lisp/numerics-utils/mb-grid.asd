@@ -3,7 +3,7 @@
   :author "Mats Bergstrrøm <mbe@lightstructures.no>"
   :version "0.9.1"
   :licence "BSD"
-  :depends-on (:mb-utils :numerics-utils :csv :parse-number)
+  :depends-on (:parse-number :mb-utils :numerics-utils :csv)
   :components
   ((:cl-source-file "mb-grid")
    (:cl-source-file "grid-interpolation" :depends-on ("mb-grid"))))
