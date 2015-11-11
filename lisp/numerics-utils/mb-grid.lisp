@@ -1,5 +1,5 @@
 (defpackage :mb-grid
-  (:use :cl :mb-utils :numerics-utils :csv)
+  (:use :cl :parse-number :mb-utils :numerics-utils :csv)
   (:export :grid :make-grid :grid-data :grid-axes
 	   :list-grid :grid-axes* :span-grid :map-grid
 	   :gnuplot-matrix->grid :grid->gnuplot-matrix
@@ -80,7 +80,7 @@ Other values that should be supported by gnuplot matrix related functions, are
       (t *gnuplot-matrix-origo*))))
 
 (defun test-gnuplot-matrix-info-entry (&optional (grid (test-grid)))
-  (loop for x in (list :number-of-columns (iso-time) (lambda (x) (iso-time)))
+  (loop for x in (list :number-of-columns (iso-time) (lambda (x) (declare (ignore x)) (iso-time)))
 	collect (let ((*gnuplot-matrix-origo* x))
 		  (gnuplot-matrix-info-entry grid))))
 ;;(test-gnuplot-matrix-info-entry)
@@ -115,7 +115,7 @@ splot 'file' nonuniform matrix. See gnuplot doc for more"
   "Imports and parses a grid object from csv like formatted file FILENAME.
 The format may be tuned. See READ-CSV-FILE for ARGS"
   (flet ((parse-number (x)
-	   (handler-case (parse-number::parse-number x)
+	   (handler-case (parse-number x)
 	     (floating-point-underflow () 0))))
     (gnuplot-matrix->grid (maptree #'parse-number (apply #'read-csv-file filename args)))))
 ;;(list-grid (import-grid "~/tmp/test.csv"))
