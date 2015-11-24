@@ -723,10 +723,21 @@ similar to `mapcar'"
   (loop for i in positions collect (nth i list)))
 ;;(mnth (0-n 10) 5 2 7)
 
-(defun project (tree &rest positions)
+(defun melt (sequence &rest positions)
+  "Extracts the elements at POSITIONS from SEQUENCE"
+  (coerce (apply #'mnth (coerce sequence 'list) positions) (class-of sequence)))
+;;(melt (0-n 10 :type 'vector) 5 2 7)
+
+(defun project-list (tree &rest positions)
   (mapcar #'(lambda (x) (apply #'mnth x positions)) tree))
-;;(project '((a b c) (d e f)) 0 2)
-;;(mnth '(a b c) 0 2)
+;;(project-list '((a b c) (d e f)) 0 2)
+
+(defun project (seq-tree &rest positions)
+  "SEQ-TREE is a sequence of sequences"
+  (coerce (loop for x in (coerce seq-tree 'list)
+		collect (apply #'melt x positions))
+	  (class-of seq-tree)))
+;;(project #(#(a b c) (d e f)) 0 2)
 
 (defun list-insert (x n list)
   "Inserts element X at position N in LIST"
