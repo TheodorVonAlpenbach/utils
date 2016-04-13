@@ -8,7 +8,8 @@
    :a-b :0-n :abs- :abs+ :string-case
    :cut :cut-if
    :nor :awhen :aif :it :awhile :acond
-   :mnth :project
+   :mnth :melt
+   :project
    :nth* :pop-list
    :rcons
    :copy-if :infix-list
