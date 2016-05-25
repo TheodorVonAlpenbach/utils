@@ -1,5 +1,5 @@
 (defpackage :geometry
-    (:use :common-lisp :utils)
+    (:use :common-lisp :mb-utils)
     (:export 
      :equal-geometry
      :interval :make-interval :boundary :interval-length :left-boundary :right-boundary
