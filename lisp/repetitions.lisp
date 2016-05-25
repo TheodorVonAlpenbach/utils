@@ -10,11 +10,8 @@
 ;;;; the standard keyword arguments for sequences, key and test, in
 ;;;; addition to min-length. The min-length ensures that only
 ;;;; repetitions of minimum min-length is returned.
-
-(require "utils")
-
 (defpackage :repetitions
-    (:use :common-lisp :utils)
+    (:use :common-lisp :mb-utils)
     (:export :repetitions))
 
 (in-package :repetitions)
@@ -150,5 +147,3 @@ U. Finally the U-OFFSET must be added."
 ;;(time (test-repetitions :min-length 1))
 
 ;;(length (repetitions (buffer-string-no-properties) :min-length 7))
-
-(provide "repetitions")
