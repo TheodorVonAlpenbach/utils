@@ -216,7 +216,7 @@ according to TEST and KEY."
 	collect (subseq list a b) into res
 	finally (return (nconc res (list (subseq list a))))))
 ;;(group '(a a b a b) :test #'equal)
-;;(group '((1 2) (1 3) (1 2)) :test #'equal)
+;;(group '(((1) (2)) ((1) (2)) ((1) (3)) ((1) (2))) :test #'equal)
 ;;(group '(nil nil nil) :test #'equal)
 
 (defun accumulate-sorted-list (list &optional (test #'eql) (min-occurences 1))
@@ -467,17 +467,24 @@ string between them."
 (defun listify (x &optional (atom-test #'atom))
   (if (funcall atom-test x) (list x) x))
 
-(defun remove-nth-list (pos list &optional reverse)
-  (let ((positions (listify pos)))
+(defun remove-nth-list (positions list &optional inverse)
+    "Remove elements in SEQUENCE at POSITIONS.
+Same as REMOVE-NTH, but for lists only."
+  (let ((positions (listify positions)))
     (loop for x in list
 	  for i from 0
-	  when (eql (not (null (find i positions))) reverse)
+	  when (eql (not (null (find i positions))) inverse)
 	  collect x)))
-;;(remove-nth '(1 2) '(a b c) nil)
+;;(remove-nth-list '(1) '(a b c d e) t)
 
-(defun remove-nth (pos sequence &optional reverse)
-  (coerce (remove-nth-list pos (coerce sequence 'list) reverse) (class-of sequence)))
+(defun remove-nth (positions sequence &optional inverse)
+  "Remove elements in SEQUENCE at POSITIONS.
+POSITIONS can be either an integer or a list of integers. If INVERSE
+is not NIL, it removes elements that are not in POSITIONS"
+  (coerce (remove-nth-list positions (coerce sequence 'list) inverse)
+	  (class-of sequence)))
 ;;(remove-nth '(1 2) #(a b c) nil)
+;;(remove-nth '(1 2) "abcd" t)
 
 (defun mbind-normalize-arguments (bound-arguments &optional bound-argument-positions)
   ";;listify
