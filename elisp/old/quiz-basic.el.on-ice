@@ -1,0 +1,24 @@
+(defun quiz-item-prefix (item) (second (assoc item *quiz-items-long*)))
+;;(quiz-item-prefix :answer)
+
+(defun* quiz-item (item n &optional (string ""))
+  (format "%s%d: %s\n" (quiz-item-prefix item) n string))
+;;(quiz-item :question 1)
+
+;;short-cuts
+(defun* quiz-item-q (n &optional (string "")) (quiz-item :question n string))
+(defun* quiz-item-a (n &optional (string "")) (quiz-item :answer n string))
+(defun* quiz-item-s (n &optional (string "")) (quiz-item :source n string))
+;;(quiz-item-s 10 "qwe\n")
+
+(defun* quiz-regexp-item-start (&key (items-short *quiz-items-short*) (forward t))
+  "Returns a regular expression that matches the beginning of a
+q-item. If FORWARD is nil it returns instead an expression that
+matches the end of a q-item. ITEMS specifies which types of q-items
+that are recognized."
+  (if forward 
+    (format "^[%s][0-9]+: " items-short)
+    (format "^\n*[%s][0-9]+: " items-short)))
+;;(quiz-regexp-item-start :forward t)
+
+(provide 'quiz-basic)

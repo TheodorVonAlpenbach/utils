@@ -1,0 +1,288 @@
+2012-06-11
+* Description of the download/refresh/proxy logic
+  Each operation should have an after method
+
+2006-03-15
+* kutte ut klipp og lim når man browser, i hvert fall fra lokal/proxy
+  side. Stygt å bruke så mye unødvendig clipboard/kill-ring.
+
+
+2001-10-19
+o load silent all urls in one region
+x make the region load more stable
+  - save after each load
+  - exception handling if error in one subload
+o add interactive db save
+
+2001-10-16
+o stored ugly url strings in lpdb. Wrote #'STRING-REMOVE-PROPS for
+  removing text properties.
+
+2001-10-11
+* hash table for file names
+  NB! This is maybe not possible 
+  (equal (setf (gethash "a" ht) 'a) (gethash "a" ht))
+  => nil
+  Maybe I should use list sorted on urls instead
+* unique encoding for url -> legal filename (win32)
+* directory for stored files _only_ (easier cleaning)
+
+o first step: use hash tables (2001-10-16t00:42)
+  o unique id counter slot for lpdb object (2001-10-15)
+  o read, write hash table
+
+2001-08-16
+o corrected highlight mode again. Added a last decisive `$' at the end
+  of the generated regexp in #'lynx-references-in-proxy.
+
+2001-08-13
+o urlname -> url-name
+o Aftenposten introduced a new system:
+  ...innenriks/article.jhtml?articleID=172555 etc. Changed url-name
+  because of this.
+
+2001-08-09
+o Added clean commands: c a (#'LYNX-PROXY-CLEAN-ALL), and c A
+  (#'LYNX-PROXY-CLEAN-AFTENPOSTEN). Also, made sure that highlighting
+  was updated.
+* inhibit auto-save for proxy files. They are now stored as eg. 1-foo,
+  and 1-foo~. And the clean methods do not assume backups exist.
+
+2001-06-07
+* Colour specially after 'q' is pressed and corresponding site is not
+  downloaded to proxy yet.
+
+2001-05-15
+* lpdb must be a hashtable instead of a list (or at least a sorted
+  list). Note that this change will inflict the current generation of
+  indices.
+
+2001-05-04
+* connect a document with language and connect a corresponding
+  dictionary to it
+* scratch machinary
+
+2001-05-03
+* delete ~-files and generally files not in lpdb anylonger
+* when lots of sites are downloaded at once (background processes),
+  errors often occur. It seems to be some kind of clash in the
+  asynchronous processes, especially in connection with the "writing to
+  file"-part
+
+  Moved old items (tired of looking for them)
+  ==========================================
+? control html (title, ads, pictures)
+* readonly, editing with recursive edit or some "twin mode"
+* forward method, ie. the counterpart of `goto-last'
+* (2000-07-26) handle <selection>s (especially for dict)
+? bind L to (lynx-show-latest) 2001-04-17: probably lynx-show-last,
+  which is ok (2000-08-21)
+
+2001-04-27
+* introduce a hash table urls tallying the hits of each url. This can
+  be used to generate favorites.
+
+2001-04-25
+o lynx makes relative reference like this:
+  url	        proxy-file      lynx-ref
+  foo.no	/1-foo.no	P/uriks
+  foo.no/uriks /2-uriks		P/../iriks -> iriks
+  foo.no/iriks /3-iriks		^^^^^^^^^^^^^^^^^^^
+  Do something about it!
+  2001-04-26: ok, wrote `expand-file-name*' which handles for example
+  a/b/../c -> a/c
+
+2001-04-19
+* hide reference section
+* hide module (references, commercials ...); hide/unhide
+* cleanup, documentation
+
+2001-04-17
+o highlight references stored in lpdb
+
+2001-04-11
+o split lynx.el into lynx-favourites, lynx-proxy, lynx-utils
+* indicate somehow that there exist a scratch file corresponding to
+  url. Or simply just show it when it exists.
+o instead of indices, invent some other system for storing urls
+  uniquely (the problem is that '/' cannot be safely used in
+  filenames.) 2001-04-17: No I use new entry format (structs)
+o proxy is not stored properly after emacs exits.
+o start using structs instead of (third it) etc 2001-04-17
+
+2001-03-12
+o remove lynx-processed buffer-file from proxy. Only html is ok. Lynx
+  uses no time on conversion.
+o highlight referanse-regexps
+o laste flere sider i proxyen samtidig: Klikke på referanse gjør at
+  emacs starter en asynkron lynx-prosess hvor siden hentes,
+  prosesseres og legges i proxy. 2001-04-17: background loading ok.
+! see drawer for drawing
+
+2000-11-20
+o option to start lynx in other window
+
+2000-08-21
+o lynx-history-db: db, show, goto
+o bind H to lynx-show-history (new interpretation)
+
+2000-08-16
+o favourites: db, show, add, goto, 2000-08-16: ok
+
+2000-06-09
+o make lynx mode a proper mode, see info node Major Mode Convetions
+  - font-lock: line 87
+  - imenu?! no
+  - etc no
+
+2000-06-02
+o added keys "i" (message current url) and "i" (message url-ref at
+  point)
+o when point is at lynx-ref-regexp then the previous ref is followed,
+  ie. [13], [13], [13], [13] goes to ref 12. But [13] is ok.
+  |   ^      ^      ^      ^                         ^
+
+
+2000-05-25
+o refresh must be proper (note use of EQUAL on strings)
+o add some buffer state variables in proxy: last should not merely
+  show you last visited site, but the buffer should appear as it was,
+  point and buffer center.
+
+1805
+o read proxy-db on start
+o save proxy-db, prompt when quitting emacs
+o add scratch/memo/? file to proxy-db! (ingenious!)
+o save site-buffer-pos
+o delete site-files from proxy-db before refreshing site (disabling proxy)
+o number/ref search: type [1 2 RET] and goto ref 12 site
+o proxy server
+  o DB -> lynx-PDB
+  o share with explorer? No, not feasible
+  (C:\WINNT\Profiles\mb\Local Settings\Temporary Internet Files)
+o favorites
+
+DONE
+o there is a problem with dumping the source my machine): when lynx
+  parses the dumped source, it replaces local references with
+  non-existing references on my machine. Not good. So I have to (I
+  think) dump both source and lynx parsed file together on my machine. 1805
+o let the loading proceed in background (used start-process) 1805
+o smoother insert of loaded site. Now the site is inserted as fast as
+  possible. Instead, the site should be loaded to temporary file and
+  inserted into *lynx* only when the loading is complete. This feature
+  can (should?) of course be combined with the proxy server. 
+1805
+
+298 NOK  60 doser
+EPA 259
+DHA 667
+
+2016-02-10
+Ok, så jeg ønsker å ta trikken fra Sofienberg til Blindern.
+
+Generell algoritme
+==================
+
+1. Finn id for holdeplass Sofienberg
+place/getplaces/sofienberg
+==> 3010533, Sofienberg
+
+2. For Blindern
+place/getplaces/blindern
+får en lang liste, velger
+==> 3010365, Universitetet Blindern
+
+3. Bruk ID-ene, og finn reiseforslag (TravelProposal)
+travel/gettravels?fromplace=3012070&toplace=3010365&isafter=100220161526
+
+4. Nå begynner moroa. Reiseforslagene fra 3 er ikke i sanntid.
+Men de gir indikasjoner på hvordan man kan komme seg relativt
+greit fra A til Å.
+
+Vi må derfor søke alle sanntider som er involvert i forslagene.
+Her kan man operere med en parameter number-of-lookaheads (eller
+search-depth) som i første versjon settes til 1, dvs at vi bare
+undersøker sanntidene til delreise 1 av hver av
+reisene.
+
+5. Bruker monitorerer valgene han får opp, men han går mot holdeplass.
+Når han har steget om bord, klikker han på symbolet OK (eller noe)
+tilhørende reisen han har valgt.
+
+6. Systemet antar nå at brukeren følger dette reiseforslaget, og kan
+anta hva neste delreis(er) er. Systemet begynner å vise sanntider for
+de relevante avgangene.
+
+
+Som en bonus. Kan man nå la systemet rekalkulere beste reise.
+Varianter blir
+A  Bare gjør som over (simple)
+B  Beregn beste reiser fra inneværende delreises endeholdeplass og til
+   sluttmål.
+C  Beregn beste ruter fra alle inneværende delreises holdeplasser frem
+   til endeholdeplass og frem til sluttmål.
+
+7. Resten er bare en loop helt til systemet mener at man er fremme
+   eller bare kan gå resten.
+
+
+Spesialiseringer
+================
+
+1. Brukersted («my places»):
+o Navn (f eks «Hjemme», «Jobb», «Blindern», etc)
+o Holdeplasser
+
+Veldig enkelt objekt som identifiserer et gitt sted med bestemte
+holdeplasser.
+
+Eksempel
+Jobb
+  Bryn Tog
+  Bryn T-bane
+  Klosterheim
+  Teisen skole
+  Tveten bru
+
+Hjem
+  Sofienberg
+  ...
+
+Barnehage
+  Helgesens gate
+  Sofienberg
+  ...  
+
+2. Reiser («my travels»)
+o A (Fra Brukersted)
+o B (Til Brukersted)
+o Delreiser
+
+Her kan man hardkode de mulige delreisene fra A til B. Dette gjør nok
+prosesseringen raskere (selv om jeg ikke tror tid blir noe problem
+uansett). Men viktigere er at man kan spesifisere ulike reisemåter som
+ruters API vanskelig klarer å finne. For eksempel ha som vane å drikke
+en kopp kaffe på vei til jobb, og kaffebaren ligger mellom to
+delreiser som ruterappen ikke ville ha koblet fordi det ikke ville
+resultere i optimal reise.
+
+Eksempel
+Hjem-Jobb
+  (21, 28)--Helsfyr--(68, 76) #legg merke til shortcutten (·, ·, ...)
+  (6, 1)--Tøyen T--(***)
+
+Man bør på ett eller annet sted kunne legge inn omstigningstider, for
+eksempel at det tar ca 2 min å skifte perrong på Tøyen T.
+
+Defs
+travel (ride1 ride2 ...) ;; reise, delreise1, delreise2 etc
+
+http://reisapi.ruter.no/
+http://reisapi.ruter.no/travel/gettravels?fromplace=3012070&toplace=3012070&isafter=100220161526
+http://reisapi.ruter.no/place/getplaces/blindern
+
+Refs
+https://www.facebook.com/RuterLabs/?fref=nf
+
+X (Origanum majorana) er en ettårig, grønn krydderplante i leppeblomstfamilien, i nær slekt med oregano.

@@ -1,0 +1,26 @@
+(defun shrink-frame (arg &optional side frame)
+  (interactive "P")
+  (unless arg (setq arg 1))
+  (unless frame (setq frame (selected-frame)))
+  (if (not side)
+    (set-frame-height (selected-frame)
+		    (- (frame-height) arg))
+    (set-frame-width (selected-frame)
+		     (- (frame-width) arg))))
+;;(shrink-frame -10 nil nil)
+;;(set-frame-height (selected-frame) (+ (frame-height) 1))
+
+(defun enlarge-frame (arg &optional frame)
+  (interactive "P") 
+  (shrink-frame (- (or arg 1)) nil frame))
+
+(defun shrink-frame-horizontally (arg &optional frame)
+  (interactive "P") 
+  (shrink-frame arg t frame))
+
+(defun enlarge-frame-horizontally (arg &optional frame)
+  (interactive "P") 
+  (shrink-frame (- (or arg 1)) t frame))
+;;(enlarge-frame 1)
+
+(provide 'mb-frames)

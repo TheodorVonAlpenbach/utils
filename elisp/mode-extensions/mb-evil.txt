@@ -1,0 +1,79 @@
+test
+11:47 Looked into evil-lisp-state. It is nicely done, adding a useful
+      new state to Evil. However, it is based on smart+parens, which
+      at first glance, seems a bit inferior to paredit, in my opinion.
+      (Btw, see
+      https://github.com/Fuco1/smartparens/wiki/Paredit-and-smartparens
+      for a more thorough discussion.) Moreover, the key bindings are
+      not so mnemonically chosen as I would have preferred, but, ok,
+      it's not at all critical. But the state is almost completely
+      detached from the canonical idioms of VI.
+
+      I think the proper way to integrate smart-parens and paredit
+      with evil, is to use functionality in these two modes and define
+      new evil movements. Then, deletion, yanking, changing etc, will
+      derive from these movements in the regular way.
+
+      Then, one should define some new transformations. Here ideas
+      could be taken from smart-parens and paredit. One example I can
+      think of is move-sexp (not the cursor!). It moves the sexp at
+      cursor (what "at cursor" means must of course be defined) to the
+      position defined by motion. This is an operation that could be
+      included in plain evil-mode-normal-state as well. For instance,
+      get-sexp with motion backward-sexp is the same as
+      transpose-sexp.
+
+      Other operations involving motion (sexp means the current sexp
+      at point, or current region; mpoint here means the point after
+      the underlying motion has been invisibly executed; msexp means
+      sexp at mpoint):
+
+      Operation	      	    Description		Equivalent
+      get		    Move msexp to point
+      put		    Move sexp to mpoint
+      drag		    Move both point and sexp to mpoint
+      swap		    Transpose sexp and msexp
+      push		    Move msexp down-list towards point
+      push-back		    Move msexp down-list + other-sexp-end
+      
+
+      Furthermore
+      
+      Move	      Motion			Equivalent		Comment
+      1 move-sexp     1 up-list-forward		barf-forward		when placed at an end-sexp
+      1 move-sexp     
+ass
+
+It would be interesting to see if somebody has written an essay on
+text editing from a mathematical perspective. At least, I should check
+it out. Because there are some nice patterns here.
+
+First, there is two main views on the cursor. The cursor can be
+treated sequentially, like in standard Emacs, or more topologically,
+like in VI. Both views make sense.
+
+The sequential view is typical for many treatments of sequences as a
+data structure. E.g. (subseq list from to). Here from is the position
+of the first element in the subsequence, while to is the position of
+the element AFTER the last element in the subsequence.
+
+The nuissance with the sequential view, is that it is assymetrical.
+Given one operation, say, forward-word, the reverse operation is not
+the mirror operation.
+
+However, in the topological view, the characters are treated the same
+in both directions. Hence a substring has two boundaries, left and
+right. Every directional operation OP can be reversed by reversing the
+whold buffer string (moving point to its new mirrored position),
+performing OP, and reversing the whold buffer string again. Of course,
+this is not how you would implement it, but it should work, and you
+have an algorithmic description for free! (But for local operations it
+could be doable.)
+
+There are two kinds of boundaries: just-inside and just-ouside. VI
+provides motion operators that move on just-inside: e<->b and w<->ge
+are examples of two topological pairs. Another pair of pairs is i<->a
+and I<->A, where i/I is an operation most likely to be performed at
+the beginning of a word/line, while a/A is typically performat at the
+end of it.
+

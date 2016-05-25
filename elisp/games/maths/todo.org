@@ -1,0 +1,51 @@
+* DONE prevent same task to be given twice in some time period
+** TODO Also, not again after N tasks.
+* Finer levels, perhaps abandon the current ordering
+  even abandon level alltogether
+Instead, for estimating a suitable task level, define argument
+/categories/:
+For addition, 
++ onedigit + onedigit < 10
++ onedigit + onedigit >= 10
++ twodigit + onedigit pluss the reflection
++ twodigit + twodigit
++ etc
+
+Now, the categories serves two purposes. First, they can be used to
+limit the possible tasks for matching a certain rating. The program
+keeps track of the average task rating within each category. The
+category with an average rating closest to the desired rating is
+chosen, and a task is generated from this category.
+Second, categories can be used to mask certain tasks alltogether for a
+user. Small children who has not yet learned multiplication, for
+instance, should not tasks from the multiplication categoeries.
+
+Example of a category definition
+(defcategory +1+1+1 ((a (integer 0 9)) (b (integer 0 (- 9 a))))
+  "Two one-digit non-negative integers that add to another one-digit
+non-negative integer")
+(defcategory ((a (range 1 9)) (b (range (- 10 a) 9))))
+(defcategory ((a (range 10 99)) (b (range 0 9)))
+  :reflection)
+(defcategory ((a (range 10 99)) (b (range 10 99))))
+
+Macro expansion. Defcategory defines two functions draw-xxx and xxx-p
+and adds the list (xxx draw-xxx xxx-p) to *maths-categories*
+
+(defcategory +1+1+1 ((a (integer 0 9)) (b (integer 0 (- 9 a))))
+  "Two one-digit non-negative integers that add to another one-digit
+non-negative integer")
+
+--->
+
+(defun draw-+1+1+1 ()
+  (let* ((a (random-integer 0 9))
+	 (b (random-integer 0 (- 9 a))))
+    (list a b)))
+
+(defun +1+1+1-p (a b)
+  (and (cl-typep a (list 'integer 0 9))
+       (cl-typep b (list 'integer 0 (- 9 a)))))
+
+;;(loop repeat 100 always (apply #'+1+1+1-p (draw-+1+1+1)))
+

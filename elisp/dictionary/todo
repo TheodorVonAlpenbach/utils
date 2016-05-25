@@ -1,0 +1,98 @@
+2000-12-29
+! defines _intermap_ (to distinguish from ordinary (key-)map).
+  Intermap signifies "interactive map", ie. emacs starts some
+  graphical browser (currently internet explorer, arrgh) which
+  displays some map corresponding to some arguments given via emacs.
+! defines _district_: some subset of the earth's surface. ('Region' is
+  perhaps better, but this term causes confusion with the homonymous
+  emacs-term.)
+* find a db containing places on earth, or just use mapquest (somehow)
+o introduced intermap.el (interactive maps)
+* string-to-intermap
+! http://shiva.pub.getty.edu/tgn_browser/
+
+2000-09-05
+o handles one more entry style in ls. 2000-09-05: ok
+o remove last empty line in ectaco dictionaries. 2000-09-05: ok. NB,
+  the problem was that I got error with regexp "\n\n", while the true
+  string was "\n[spaces or tabs]\n[spaces or tabs]". I think I've had
+  this problem before as well, but I've forgotten where. Well, some
+  time I'll find out.
+o reverse order of summary. 2000-09-05: ok.
+
+2000-08-21
+o add nice feature, "see 'word'", where word is in proxy. This is
+  useful when a word does not exist in the dictionary (usually because
+  the word is not a lexem.) 2000-09-05: ok, instead of a prepending
+  "see ", I appended a " <==".
+
+* clean up the lookup interactives (there is only one necessary). Use
+  nice defaults!
+
+2000-08-17
+* remove the lynx references from lsmorph.
+
+2000-08-16
+o add url-enconding (lynx-stuff) for Norweigian letters. 2000-08-16:
+  ok.
+
+2000-08-09
+o an additional date entry for last lookup (used with proxy). This is
+  important in order to summarize lately looked up words from the
+  proxy. ok, 2000-08-11
+x in the summary buffer, print more meta info: the dic, the dates etc
+  for each entry. ok, 2000-08-11, but can be better. 2000-09-05: made
+  the separation string look nicer, with the lookup word centered on
+  it. NB, the centering technique using REPLACE!
+
+2000-08-02
+o lookup proxy C-c d p 2000-08-02: ok, I also provided a nice little
+  feature: the cursor is moved to the end of the word found near
+  point. This should be the default in my opinion. Also, as mentioned
+  in the doc string, since this interactive macro is used several
+  places and is 2/3 of the whole function, it is convenient to write a
+  macro for this.
+* introduce *dic-fail-filters*, an assoc list of (dic regexp), where
+  REGEXP is to be compared to the lookup string in DIC. If there is a
+  match, the lookup is regarded as failed (eg. "could not find an
+  entry...").
+* the lookup proxy interactive completion should only show the ok
+  entries. Use *dic-fail-filters* to this end.
+
+2000-08-01
+x (dic-info &optional (dic *dic-current*) &key time-extension): 
+  prints number of entries, entries sorted, number of failed enties
+  (using regexp-string for each dic) ==> C-c d C-i.
+
+2000-07-28
+o add query feature 'dic-show-lookups 2000-07-28: ok. In order to do
+  this, I also implemented a time library (mb-utils-time). Very nice
+  implemented, actually, considered being the first try.
+
+2000-07-26
+o when entries are not found in mw, the suggestions are shown instead.
+* show lookup entry in mode line (use local variable mode-line-format)
+
+o include entry in help buffer title line
+o proxy for all dictionaries
+o legge inn http://www.ectaco.com/online/diction.php3?lang=6
+
+2000-07-18
+* the different dictionaries must be separated in the proxy
+* it should be possible to edit the entries
+o add date entry 2000-07-28: ok, but not checked
+* sort the entires from
+  http://www.ectaco.com/online/diction.php3?lang=6
+* there's a lot of "no matches found". These lookup entries could be
+  treated separately.
+o the minibuffer should behave the as when changing dictionary. Easy.
+  2000-07-18: not so easy, but an instructive excercise
+o ignore case -> convert to lower case? 2000-07-28: ok w -> (downcase
+  w), both for lookup and deletion
+o there is now one buffer for each lookup. Should be only one for each
+  dictionary? 2000-07-26: Changed back to one buffer for each
+  dictionary only.
+o the dic-lookup-interactive should provide the dictionary name in
+  prompt (first try failed). 2000-08-17: ok. Also, the minibuffer
+  handling has become much more elegant by using completion from
+  proxy.

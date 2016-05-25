@@ -1,0 +1,16 @@
+(defun buffer-replace (string1 string2)
+  (save-excursion
+    (goto-char (point-min))
+    (while (re-search-forward string1 nil t)
+    (replace-match string2 t))))
+
+(defun buffer-replace-multi (strings1 strings2)
+  (loop for string1 in strings1
+	for string2 in strings2
+	do (buffer-replace string1 string2)))
+
+(defun quiz-clean-up-mule-shit ()
+  (interactive)
+  (buffer-replace-multi
+   '("Ã¥" "Ã¸" "Â«" "Â»" "Ã¶" "Ã¦") 
+   '("å" "ø" "«" "»" "ö" "æ")))

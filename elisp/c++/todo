@@ -1,0 +1,30 @@
+2000-10-10
+o gjorde om alle filene til require/provide-par (prefiks c++)
+
+(defvar c++-miljoe-oenskeliste 
+  '(
+    "gå til deklarasjon/definisjon av variabel"
+    "gå til definisjon av funksjon"
+    "gå til deklarasjon av funksjon (alltid h-fil)"
+    "finne alle forekomster av en klasse, funksjon, variabel etc"
+    "lister av alle h-filer (kategorisert som f.eks. system, biblioteker,
+prosjektlokale)"
+    "automatisk generering av inklusjoner (kan beregnes av det
+ovenstående?)"
+    "ornde rekkefølgen av funksjoner i cpp etter rekkefølgen i h eller
+omvendt"
+    "generering av ny klasse ut fra navn"
+    "parse en definert «dokumentasjonsbolk» (som f.eks. kan ha standard
+plass i et prosjekt)"
+    "generere html-dokumentasjon (kun for eksterne brukere = hoi polloi som
+antas ikke å beherske emacs)"
+    "sjekke kodestandard forøvrig"
+    "generere funktorer utfra bruk: Bar b; for_each(..., Foo(b)); -> class
+Foo : ... { const Bar& b_; Foo(const Bar& b) : b_(b) {} ...};"
+    "generere funksjoner utfra bruk"
+    "slette funksjon, klasse etc og all tilhørende innflytelse i en
+jafs (hvis mulig)"
+    "automatisk sjekk om funksjonen kan eller ikke kan være const"
+    "automatisk generering av en del standardting som copyctor, dtor etc"
+))
+

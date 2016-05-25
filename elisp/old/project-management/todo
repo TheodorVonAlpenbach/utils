@@ -1,0 +1,57 @@
+2000-09-28
+! long time no see 
+o added some new time utilities
+
+2000-09-07
+* good timeline view (zoom levels: )
+  different projects (here: =tasks) easily in same db: big, small,
+  private, tx
+  good print
+  relations between projects
+  search, queries, sort
+
+2000-08-16
+* creating a project management system
+  - three levels: project, subproject, task
+  - a task consists of a todolist. Each todo-item i checked with a
+    finished-date.
+  - use the time utility
+
+* (pm-show-tasks (sub-project) 
+   "ID SHORTNAME FINISHED (0 -- 100 %) DURATION DEADLINE")
+* (pm-show-tasks-2 (sub-project) 
+   "ID SHORTNAME FINISHED (0 -- 100 %) ----------------->")
+* (edit-list-item () (interactice) "edits list item in temporary buffer")
+ 
+Vi må ha et prosjektstyringssystem. En database av arbeidsoppgaver er
+kanskje godt nok. Dette kan stuntimplementeres i emacs (igjen et
+helvetes problem at emacs ikke har grafikk):
+
+'(CLASSIFICATION TITLE³ INTERVAL DURATIONª RESPONSIBLE² AUTHOR² TODO
+WRITTEN¹ LAST-MODIFIED¹) 
+
+CLASSIFICATION is a pair '(TYPE SUPER³), where TYPE is one of s
+(subproject), w (work task), and SUPER is the title of the (sub)
+project to which the current work tast belongs.
+
+INTERVAL is a pair '(AFTER¹ BEFORE¹) where AFTER and BEFORE limit the
+extension of the work task in time. Thus, DURATION may never exceed
+BEFORE - AFTER.
+
+TODO is a list of todo-items, where each todo-item is a
+'(FINISHED¹ DESCRIPTION-STRING³). The FINISHED date is pushed when
+todo item is finished.
+
+1 An iso-date (eg. 2000-08-06).
+2 One of tks, evds, lbs, mb.
+3 A string
+ª Unit is 1 day.
+
+Eksempler (det vil si de første jeg har lagt inn):
+((s "") "employment" (2000-08-06 2000-09-01) 5 mb mb TODO 2000-08-07 2000-08-07) 
+((s "") "tilleggssøknad?" (2000-08-06 2000-08-09) 5 mb mb (("Avklare med Egbert om (f eks) tilleggssøknad.")) 2000-08-07 2000-08-07)
+((s "") "stepstonesøknad" (2000-08-06 2000-08-14) 5 lbs mb (("Skrive generell søknad")) 2000-08-07 2000-08-07)
+((s "") "nyhetsgruppesøknad" (2000-08-06 2000-08-14) 5 lbs mb (("no.annonser.it.unix")) 2000-08-07 2000-08-07)
+((s "") "nyhetsgruppesøknad" (2000-08-06 2000-08-14) 5 lbs mb (("no.annonser.it.diverse")) 2000-08-07 2000-08-07)
+((s "") "stepstonesøknad" (2000-08-06 2000-08-14) 5 lbs mb (("Skaffe tilgang til tavlen") ("skrive tavlesøknad (bør være noe annerledes enn andre søknader, da studenter er målgruppen)") ("Sett opp søknad på tavlen")) 2000-08-07 2000-08-07)
+

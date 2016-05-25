@@ -1,0 +1,30 @@
+Have to work on this a bit... but the outline should be clear
+
+Silecnce
+	Define
+
+Sound	
+	Non-silence time period
+
+Sound source (or just source)
+	Entity capable of producing sounds.
+	
+
+Simple sound source (or just source)
+       Sound source capable of producing only one particular frequency
+       (spectre) at a time
+       Examples: a piano key, trumpet, human voice
+
+Composite sound source (or just composite source)
+       Sound source composed of several simple sound sources. 
+       Example: piano, flute, violin, timpani
+
+Sound element (or just sound)
+	Non silent time period where all frequencies are produced by
+	one sound source entity
+
+Simple sound element (or just sound)
+       Sound element produced by a simple sound source
+
+Composite sound element	(or just composite sound)
+       Sound element produced by a composite sound source

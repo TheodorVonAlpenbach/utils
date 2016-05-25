@@ -1,0 +1,18 @@
+(defun* mb-send-mail-postie (&key (subject "no subject")
+			   no-message
+			   (message "no text")
+			   (to "mbe@fleximap.com")
+			   cc bcc reply-to
+			   (from "mbe@fleximap.com")
+			   (host "mail.infowiz.no"))
+  "The mother of all send mail functions."
+  (start-process-shell-command
+   "postie" "*postie*" "e:/unix/www/postie/postie.exe"
+   (concat "-host:" host) 
+   (concat "-s:\"" subject "\"")
+   (and to (concat "-to:" (mb-make-arglist-string to))) 
+   (and cc (concat "-cc:" (mb-make-arglist-string cc))) 
+   (and bcc (concat "-bcc:" (mb-make-arglist-string bcc)))
+   (and reply-to (concat "-replyto:" reply-to))
+   (concat "-from:" from)
+   (if no-message "-nomsg" (concat "-msg:\"" message "\""))))

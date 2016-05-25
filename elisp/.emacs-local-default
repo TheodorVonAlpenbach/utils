@@ -1,0 +1,44 @@
+(set-frame-font "--Courier New-normal-normal-normal-mono-13-*-*-*-c-*-iso8859-1")
+
+;; Sentences, see info node Sentences
+(setq sentence-end "[.?!][]\"')]*\\($\\|\t\\| \\)[ \t\n]*")
+(setq sentence-end-double-space nil)
+
+;; news
+(setq gnus-select-method '(nntp "news.online.no"))
+(setq user-full-name "Mats Bergstrøm")
+
+;; tags
+(setq tags-file-name nil)
+(setq tags-table-list (list *mb-lisp-dir* +home-dir+))
+
+;; lynx
+(setq *lynx-proxy-dir* (concat *local-data-dir* "lynx-proxy/"))
+(setq *lynx-auth* "")
+
+;; diary file (mandatory to use #'calendar)
+(setq diary-file (setq diary-file (concat *local-data-dir* "office/diary")))
+
+;; load favourite files (note that nil/t means position cursor at top/bottom)
+(setq *my-favourites*
+      `((,*mb-lisp-dir* ".emacs")
+	(,*mb-lisp-dir* ".emacs-local-default" t)
+	(,*mb-lisp-dir* ".emacs-local-default" t)
+	(,*mb-lisp-dir* "utils/mb-utils-strings.el")
+
+	(,*shared-data-dir* "adresser.txt")
+	(,*shared-data-dir* "arbeidslog" t)
+
+	("/cygdrive/c/Users/eier/Projects/LS/" "LS-notes.org" t)))
+
+;;scheme
+(setf scheme-program-name "guile")
+
+;; lisp
+(setf inferior-lisp-program (concat *cygwin-home* "bin/clisp.exe"))
+(setf *clisp-dir* (concat *my-home* "clisp/"))
+(setf *mb-hyperspec-function* #'browse-url)
+(setf *mb-hyperspec-root* (concat *my-home* "doc/HyperSpec/")))
+
+;; dot
+(setf *dot-dir* "c:/Program Files/Graphviz2.30/bin/")

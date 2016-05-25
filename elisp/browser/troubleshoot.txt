@@ -1,0 +1,34 @@
+1 Firewall
+==========
+Symptoms:
+· Blank window
+· Proxy file contains 0 kB in explorer
+· Expression (start-process-shell-command "lynx" "qwe" "lynx" "-source" "http://www.aftenposten.no/nyheter/siste100/")
+  returns the following message in buffer "qwe":
+«Looking up <url>
+Making HTTP connection to www.aftenposten.no
+Alert!: Unable to connect to remote host.
+
+lynx: Can't access startfile http://www.aftenposten.no/nyheter/siste100/
+
+Process lynx exited abnormally with code 1»
+· lynx doesn't start in cygwin either
+
+Solution:
+· Delete all lynx protection in firewall
+
+
+2 Crash
+=======
+
+If there are more than two lynx jobs at the same time, something has
+gone wrong with the jobs stack. Probably one job is hanging, and a
+user request forces lynx to pop another job off the stack.
+
+This is not good even if it should not necessarily lead to error.
+However, a safer approach is to tag each job with a state mark, e.g.
+«in progress», «in queue», «finished». In case of hanging processes, a
+timestamp could be provided as well. (How about two parameters both
+nil at job create. The the first is set to start time of lynx
+processing, the other still being nil. When the processed is finished,
+the second is also timestamped.)

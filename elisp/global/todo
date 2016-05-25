@@ -1,0 +1,34 @@
+2000-09-19
+* Script for updating mb-lisp, includes
+
+1) tar (--create)
+   · tar-ed mblisp directory (yes, that will be two tars)
+   · .emacs, .emacs-local
+   · db-dict
+   · favorites
+   · adresser
+   · neworder-diary (backup)   
+
+2) mail this to myself, lbs, lhs (using eg. blat)
+
+3) make new tags table (including .emacs and .emacs-local)
+
+---
+
+Script for installing mb-list
+
+1) download new install package from mail
+
+2) tar (--extract)
+   · locate install package using a local variable (.emacs-local)
+   · choose proper extracion target using the directory varibles in
+     .emacs and .emacs-local.
+
+3) make new tags table (including .emacs and .emacs-local)
+   
+4) (in future) instead of to merely overwrite old file, some should
+   be merged: dict.db, favourites.db, adresses.txt etc
+
+
+2000-08-21
+* insert-expression should have as default the sexp-at-point

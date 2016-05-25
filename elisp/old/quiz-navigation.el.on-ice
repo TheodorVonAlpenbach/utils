@@ -1,0 +1,146 @@
+;;;   Å∑ q-file/q-buffer (quiz buffer or summary quiz buffer)
+;;;   Å∑ q-list (entire quiz-buffer or region of summary buffer)
+;;;   Å∑ q-question (entity containing at least a q-item, separated by at least one blank line)
+;;;   Å∑ q-item (either Q (mandatory), A, S by now; later I might add C
+;;;     for comment, T: for the durations of the validity)
+
+;;; q-list
+(require 'quiz-basic)
+
+(defun quiz-beginning-of-list ()
+  "Beginning of list is a header"
+  (error "Not implemented"))
+
+(defun quiz-end-of-list ()
+  "End of list is before next header or end of buffer."
+  (error "Not implemented"))
+
+;;; q-item
+(defun* quiz-regexp-item-start-old (&optional (items-short *quiz-items-short*))
+  (format "^[%s][0-9]+: " items-short))
+;;(quiz-regexp-item-start "QASCD")
+
+(defun* quiz-forward-item-1 (&optional (n 1) (items-short *quiz-items-short*))
+  "TODO: finish n < 0"
+  (cond
+   ((> n 0)
+    (beginning-of-line 2)
+    (forward-char 1)
+    (while (and (> n 0)
+		(re-search-forward (quiz-regexp-item-start items-short) nil t))
+      (decf n))
+    (beginning-of-line)
+    (re-search-backward "\\S-"))
+   ((< n 0))))
+
+(defun* quiz-forward-question (&optional (n 1))
+  "Moves cursor to the next q-question beginning."
+  (interactive "p")
+  (end-of-line)
+  (while (and (> n 0)
+	      (re-search-forward (quiz-regexp-item-start :items "Q" :forward t) nil t))
+    (decf n))
+  (if (zerop n)
+    (beginning-of-line)
+    (goto-char (point-max))))
+
+(defun* quiz-backward-question (&optional (n 1))
+  (interactive "p")
+  (quiz-forward-question (-n)))
+
+(defun quiz-goto-question (n)
+  "Starts at beginning of q-list and moves cursor to the beginning of
+the first q-question labeled N"
+  (error "Not implemented"))
+
+;;; q-item
+(defun quiz-forward-item ()
+  (re-search-forward (quiz-regexp-item-start) nil nil))
+
+(defun quiz-backward-item ()
+  (error "Not implemented"))
+
+(defun quiz-goto-item ()
+  (error "Not implemented"))
+
+(defun quiz-beginning-of-item ()
+  (error "Not implemented"))
+
+(defun quiz-end-of-item ()
+  (error "Not implemented"))
+
+(defun quiz-beginning-of-item-text ()
+  (error "Not implemented"))
+
+;;;;;;;;
+
+
+(defun quiz-item-beg-regexp (item) (format "^%s[0-9]+: " (quiz-item-prefix item)))
+;;(quiz-item-beg-regexp :question)
+
+(defun* quiz-current-item-region-start (&optional (items-short *quiz-items-short*))
+  (save-excursion
+    (end-of-line)
+    (re-search-backward (quiz-regexp-item-start :items-short items-short :forward t) nil t)))
+
+(defun* quiz-current-item-region-end (&optional (items-short *quiz-items-short*))
+  (save-excursion
+    (if (re-search-forward (quiz-regexp-item-start :items-short items-short :forward t) nil t)
+      (re-search-backward (quiz-regexp-item-start :items-short items-short :forward nil) nil t)
+      (point-max))))
+
+(defun quiz-goto-question-end ()
+  "Moves point to end of current question section."
+  (re-search-forward "\n\\s-*$" nil t 1))
+
+(defun* quiz-question-end (&optional (point (point)))
+  (quiz-save-excursion point
+    (quiz-goto-question-end)))
+
+(defun* quiz-goto-item-start ()
+  "Returns the position of the start of the current item"
+  (interactive)
+  (end-of-line)
+  (re-search-backward (quiz-regexp-item-start) nil t))
+
+(defun* quiz-item-start (&optional (item "") (point (point)))
+  "Returns the position of the start of the given item region."
+  (quiz-save-excursion point
+    (quiz-goto-item-start item)))
+
+(defun quiz-current-item ()
+  (quiz-goto-item-start)
+  (char-to-string (char-after)))
+
+(defun* quiz-goto-item-end (&optional (item ""))
+  (when (empty-string-p item) 
+    (setq item (quiz-current-item)))
+  (end-of-line)
+  (if (re-search-forward (quiz-regexp-item-start) nil t)
+    (beginning-of-line)
+    (point-max))
+  (and (= (char-after) ?Q)
+       (= (char-before) 10)
+       (previous-line 1)))
+
+(defun* quiz-item-end (&optional (item "") (point (point)))
+  (quiz-save-excursion point
+    (quiz-goto-item-end item)))
+
+(defun* quiz-beginning-of-item (position &optional (item ""))
+  "Leaps to beginning of the given ITEM text in the current question
+section. Returns the result position or nil if ITEM does not exists in
+the current q-question. If POSITION is nil point is set at beginning
+of the given ITEM text. Else if POSITION is :NUMBER, point is set at
+first item number char. Else point is set at beginning of ITEM. If
+ITEM is not given or \"\", the item at point is used."
+  (interactive "P")
+  (and (quiz-goto-item-start item)
+       (if (not position) 
+	 (forward-char (quiz-hanging-column))
+	 (and (eq position :number)
+	      (< (point) (point-max))
+	      (forward-char 1)))))
+;;(quiz-beginning-of-item :number)
+
+(provide 'quiz-navigation)

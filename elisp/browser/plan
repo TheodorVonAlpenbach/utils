@@ -1,0 +1,73 @@
+in lpdb y/n
+local	y/n
+refresh	y/n
+view	y/n
+
+actions:
+v	view file
+d	download
+n	new entry
+
+in-lpdb	 local	refresh	  view   action
+y	 y	y	  y	 v
+y	 y	y	  n	 nothing
+y	 y	n	  y	 v
+y	 y	n	  n	 nothing
+
+y	 n	y	  y	 dv
+y	 n	y	  n	 d
+y	 n	n	  y	 v
+y	 n	n	  n	 nothing
+
+n	 y	y	  y	 nv
+n	 y	y	  n	 n
+n	 y	n	  y	 nv
+n	 y	n	  n	 n
+
+n 	 n	y	  y	 ndv
+n	 n	y	  n	 nd
+n	 n	n	  y	 nv
+n	 n	n	  n	 n
+
+simplifies into
+(if in-lpdb (new-entry))
+
+local	refresh	  view   action
+y	y	  y	 v
+y	y	  n	 nothing
+y	n	  y	 v
+y	n	  n	 nothing
+
+n	y	  y	 dv
+n	y	  n	 d
+n	n	  y	 v
+n	n	  n	 nothing
+
+simplifies into 
+(if local 
+  (if refresh view)
+  ... else as below)
+
+refresh	  view   action
+y	  y	 dv
+y	  n	 d
+n	  y	 v
+n	  n	 nothing
+
+simplifies into
+
+(if refresh
+  (async-process-with-sentinel-that-recalls-me-when-finnished)
+  (if view (view-lpdb-file)))
+
+Conclusion of algorithm
+
+(if in-lpdb (new-entry))
+(if local 
+  (if refresh 
+    view
+    (if refresh
+      (async-process-with-sentinel-that-recalls-me-when-finnished)
+      (if view 
+	(view-lpdb-file)))))
+

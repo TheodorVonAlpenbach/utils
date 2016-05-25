@@ -1,0 +1,118 @@
+Plan
+====
+
+Modules:
+
+Lilypond-parser (fuller than present) ==> lilypond object (in elisp)
+Midi-parser (see the cliki) ==> midi object (in clisp or elisp if portable)
+
+Other:
+Better lilypond-mode
+ * compile-region
+ * kill existing processes
+ * directly to midi and Adobe
+
+* handle æøå
+* 
+
+
+
+(chord) root
+(chord) factor ((chord:) root, third, fifth, sixth, seventh, ninth, eleventh)
+nonchord tone (opposite of chord factor)
+root position (=grunnstilling)
+normal form (= root position)
+inverted form (/= normal form)
+first, second third etc inversion
+triad
+inversion (omvending)
+revoice 
+
+!pitch-class (i stedet for diatonic-order, som burde heller stå for trinnet i gjeldene tonearts-skala)
+!change octave
+
+select ma.name as agreement, ma.market_place_name as market, c.name as partner from MSTR_AGRMNT_PRODS_AND_MRKTS ma, company c
+where ma.partner_id = c.company_id
+and ma.effective_date < sysdate
+and ma.expiry_date > sysdate
+
+Objects
+file
+buffer
+lilypond-file
+lilypond-score-collection
+lilypond-score
+ - staffs etc
+ - layout
+ - midi
+
+ ls-choral
+ ls-choral-absolute-form
+ ls-choral-relative-form
+
+choral (c) (analysis format, generic, could be parsed from several source types)
+ c-lilypond-score
+ c-key
+ c-harmonies
+ c-chords
+ c-chord (position)
+
+harmony
+ h-soprano
+ h-alto
+ h-tenor
+ h-bass
+ h-of-voice (0-3 i.e sop-bas - returns note)
+
+key
+ - k-pitch-class (0-11)
+ - k-mode ('minor 'major)
+
+position
+ - p-bar
+ - p-beat (within bar)
+ - p-subbeat (within beat)
+ - p-nth
+
+chord
+ - ch-name (root + type)
+ - ch-root (pitch-class)
+ - ch-chordtype
+ - ch-function
+
+function (degree inversion (terses))
+ - f-name
+ - f-degree
+ - f-inversion
+
+pitch (string: e.g. feses2 or a list '(69 1) meaning (a1 +#) -> ais1 or (69 -2) -> aeses1)
+ - p-name (lilypond-name)
+ - p-value (ANSI integer)
+ - p-pitch-class
+ - p-octave
+
+chordtype (see table alreay made (from wikipedia))
+
+function-class ()
+
+terses (list of integers)
+e.gs. 
+(0 0 nil 0) omitted fifth in a seventh chord
+(0 1 0)     high alterated terse
+      
+
+
+
+    *
+
+           user_pref("network.protocol-handler.app.textedit", "lilypond-invoke-editor");
+           user_pref("network.protocol-handler.warn-external.textedit", false);
+
+The program lilypond-invoke-editor is a small helper program. It tests the environment variable EDITOR for the following patterns,
+
+emacs
+    this will invoke
+
+         emacsclient --no-wait +line:column file
+
+

@@ -1,0 +1,483 @@
+(require 'shell)
+(require 'mb-utils-div)
+(require 'mb-utils-io)
+(require 'mb-utils-strings)
+(require 'mb-indent)
+(require 'mb-locale)
+(require 'lynx-utils)
+(require 'lynx-proxy)
+(require 'lynx-favorites)
+(require 'lynx-aftenposten)
+
+(defconst *lynx-buffer* "*Lynx*")
+(defvar *lynx-highlight-always* nil)
+(defvar *lynx-current-url* ())
+(defvar *lynx-home-url* "http://www.aftenposten.no")
+(defvar *lynx-history* ())
+(defconst *lynx-proxy-tmp* (concat *lynx-proxy-dir* "lynx.tmp"))
+(defconst *lynx-proxy-db-file* (concat *lynx-proxy-dir* ".proxy-db"))
+(defvar *lynx-proxy-db*
+  (make-lynx-proxy-db)
+  "Lisp object representation of a proxy database. '(ITEM1 ITEM2 ...),
+ where each item is a list of form '(URL LYNX-FILE POINT). LYNX-FILE is
+ the result of 'lynx.exe -dump URL', where URL is a normal http url.
+ POINT is the point position in the *Lynx* buffer the last time the
+ LYNX-FILE was visited. This incurs smoother effect of some navigate
+ functions, for instance LYNX-GOTO-LAST.
+ ")
+;;(setq *lynx-proxy-db* (make-lynx-proxy-db))
+;;(defun ewq () (interactive) (setq *lynx-proxy-db* (make-lynx-proxy-db)))
+
+(defconst *lynx-prog* (concat *lynx-path* "/lynx.exe"))
+(defconst *lynx-config* (concat "-cfg=" *lynx-path* "/lynx.cfg"))
+
+(defvar *lynx-url-jobs* ()
+  "Stack with elements on form (url refreshp), where URL is where to
+fetch the file, and REFRESHP tells whether the data should be
+refreshed if it exist.")
+
+(provide 'lynx)
+
+(defun lynx-mode () "Major mode for browsing urls with lynx. Creates a
+   new lynx-mode buffer for each browse. At visit, the buffer is
+   parsed, the url-refs are collected in file local varible local-url-refs
+   (or something) and highlighted. The refs should be easy visited by
+   either scroll with TAB + RET, or prefix + command.
+
+   Later: 1. max-number of lynxbuffers; 2. history
+
+ \\{lynx-mode-map}
+ \\<lynx-mode-map>"
+       (interactive)
+       (kill-all-local-variables)
+       (use-local-map lynx-mode-map)
+       (setq local-abbrev-table text-mode-abbrev-table)
+       (setq major-mode 'lynx-mode)
+       (setq mode-name "Lynx mode")
+       (setq buffer-offer-save t)	;but why?
+       (set (make-local-variable 'font-lock-defaults) '(lynx-font-lock-keywords))
+       (set (make-local-variable 'lynx-local-url-refs) ())
+       (set (make-local-variable '*lynx-current-url*) nil)
+       (set (make-local-variable 'lynx-current-proxy-refs-regexp) ())
+       (set (make-local-variable '*lynx-history*) ())
+       (set (make-local-variable '*lynx-home-url*) *lynx-home-url*)
+       (set (make-local-variable '*lynx-url-jobs*) *lynx-url-jobs*)
+       (setf fill-prefix "   ")
+       (make-local-hook 'lynx-mode-hook)
+       (run-hooks 'text-mode-hook 'lynx-mode-hook))
+(put 'lynx-mode 'font-lock-defaults '(lynx-font-lock-keywords))
+
+(defvar lynx-font-lock-keywords		;(nil! lynx-font-lock-keywords)
+  (purecopy
+   (list (list *lynx-ref-regexp* 0 font-lock-variable-name-face 'append)
+	 (list 'lynx-match-proxy-ref 0 font-lock-keyword-face 'prepend)))
+  "Additional expressions to highlight in Lynx mode.")
+
+(defun lynx-match-proxy-ref (bound)
+  "Searches forward to POINT for lynx references in proxy. Used by
+ `font-lock-mode'."
+  (re-search-forward lynx-current-proxy-refs-regexp bound t))
+;;(cancel-debug-on-entry 'lynx-match-proxy-ref)
+
+(defun* lynx-interactive ()
+  "Reads url from command line."
+  `(,(let ((completion-ignore-case t)
+	   (default (first *lynx-favorites*)))
+	  (completing-read "sURL: " *lynx-favorites* nil t
+			   (cons default (length default))))))
+;; mode map
+(defvar lynx-mode-map ()
+  "Keymap used in lynx mode.")
+(when (not lynx-mode-map)		;(nil! lynx-mode-map)
+  (let ((map (make-sparse-keymap))
+	(print-map (make-sparse-keymap))
+	(goto-map (make-sparse-keymap))
+	(load-map (make-sparse-keymap))
+	(edit-map (make-sparse-keymap))
+	(clear-map (make-sparse-keymap)) ;ie. delete map
+	(add-map (make-sparse-keymap))
+	(save-map (make-sparse-keymap)))
+
+    ;; goto map
+    (define-key goto-map "g" #'lynx-aftenposten-goto-article-begin)
+    (define-key goto-map "f" #'lynx-goto-favorite)
+    (define-key goto-map "h" #'lynx-goto-home)
+    (define-key goto-map "l" #'lynx-goto-last)
+    (define-key goto-map "u" #'lynx-browse)
+    (define-key goto-map "s" #'lynx-browse-silent)
+    (define-key goto-map "U" #'lynx-browse-no-proxy)
+    (define-key goto-map "n" #'lynx-goto-url-with-ref)
+
+    ;; load map
+    (define-key load-map "r" #'lynx-browse-silent-urls-in-region)
+
+    ;; print map
+    (define-key print-map "u"
+      '(lambda () (interactive) "Print current url."
+	(lynx-print *lynx-current-url*)))
+    (define-key print-map "U" 
+      '(lambda () (interactive) "Print url referred to at point."
+	(message "%s" (lynx-url-from-reference (lynx-reference-active-at-point)))))
+    (define-key print-map "h"
+      '(lambda () (interactive) "Print history of visited sites."
+	(lynx-print *lynx-history*)))
+    (define-key print-map "d"
+      '(lambda () (interactive) "Print proxy database."
+	(lynx-print *lynx-proxy-db*)))
+    (define-key print-map "f" #'lynx-print-favorites)
+    (define-key print-map "e" #'lynx-print-current-entry)
+    (define-key print-map "E" #'lynx-print-entry-at-point)
+
+    ;; edit map
+    (define-key edit-map "s" #'lynx-proxy-find-file-scratch)
+
+    ;; clear proxy map
+    (define-key clear-map "d" #'lynx-proxy-clear-all)
+    (define-key clear-map "A" #'lynx-proxy-clear-aftenposten)
+    (define-key clear-map "f" #'lynx-delete-favorite)
+
+    ;; add map
+    (define-key add-map "f" #'lynx-add-favorite)
+
+    ;; save map
+    (define-key save-map "d" #'lynx-proxy-save-db)
+    (define-key save-map "f" #'lynx-save-favorites)
+
+    ;; map
+    (define-key map "g" goto-map)
+    (define-key map "l" load-map)
+    (define-key map "p" print-map)
+    (define-key map "e" edit-map)
+    (define-key map "c" clear-map)
+    (define-key map "a" add-map)
+    (define-key map "s" save-map)
+    (define-key map "d" *dic-map*) ; *DIC-MAP* is defined in dictionary.el
+    (define-key map "m" #'lynx-mail-region)
+    (define-key map "k" #'lynx-insert-region-in-quiz-outline)
+    (define-key map [(shift tab)] #'backward-lynx-reference)
+    (define-key map "\t" #'forward-lynx-reference)
+    (define-key map ">" #'forward-lynx-reference)
+    (define-key map "<" #'backward-lynx-reference)
+    (define-key map " " #'lynx-browse-url-at-point)
+    (define-key map "q" #'lynx-browse-silent-url-at-point)
+    (define-key map "Q" #'lynx-refresh-silent-url-at-point)
+    (define-key map "r" #'lynx-refresh)
+    ;; forward to anther browser (currently ie)
+    (define-key map "b"
+      #'(lambda ()
+	  (interactive)
+	  (browse-url *lynx-current-url*)))
+
+    (setq lynx-mode-map map)))
+
+;; When a lynx buffer is killed, make sure the associated db
+;; is killed too.
+(defun lynx-kill-buffer ()
+  (when (eql major-mode 'lynx-mode)
+    (lynx-save-favorites)
+    (lynx-proxy-save-db)))
+(add-hook 'kill-buffer-hook 'lynx-kill-buffer)
+
+(defun lynx-print (var) 
+  (interactive "vVariable: ")
+  "Prints variable VAR in temporary buffer *lynx-info*."
+  (with-output-to-temp-buffer "*lynx-info*" (princ var)))
+
+(defun desc-var (var) ""
+       (interactive "SVariable: ")
+       (message (setf var var)))
+
+(defun* lynx (&optional url other-window)
+  "Invokes lynx with START-URL and enters lynx-mode. Starts in OTHER-WINDOW
+ if this option is non-nil."
+  (interactive)
+  (if other-window
+    (switch-to-buffer-other-window (get-buffer-create *lynx-buffer*))
+    (switch-to-buffer (get-buffer-create *lynx-buffer*)))
+  (if (not (eq major-mode 'lynx-mode))
+    (progn
+      (lynx-mode)
+      (lynx-proxy-read-db)
+      (lynx-read-favorites)
+      (lynx-browse (or url *lynx-home-url*)))
+    (when url
+      (lynx-browse url))))
+;;(lynx "c:/unix/doc/HyperSpec/Body/fun_zerop.html" t)
+
+(defun lynx-update-proxy-refs-regexp ()
+  "Updates 'LYNX-CURRENT-PROXY-REFS-REGEXP."
+  (setq lynx-current-proxy-refs-regexp
+	(concat* (lynx-references-in-proxy) 
+		 :pre "\\[\\(" :in "\\]\\|" :suf "\\]\\)")))
+
+(defun* lynx-before-print-html (&optional (url *lynx-current-url*))
+  "Make this a hook later."
+  (if (string-match "www\\.aftenposten\\.no" url)
+    (lynx-aftenposten-goto-article-begin)))
+
+(defun* lynx-print-html (file &key pos (buffer *lynx-buffer*))
+  "Processes html in FILE with Lynx and flushes output to buffer."
+  (with-buffer* buffer
+    (blank-buffer)
+    (font-lock-mode -1)
+    (call-process *lynx-prog* nil buffer t *lynx-config* "-dump" file "-force_html")
+    (lynx-update-proxy-refs-regexp)
+    (font-lock-mode)
+    (if (zerop pos)
+      (lynx-before-print-html)
+      (goto-char pos))))
+					;(lynx-print-html "c:/unix/clisp/doc/clisp.html" :buffer (get-buffer-create "out"))
+
+(defun lynx-update-lpdb-sentinel (entry) 
+  "TODO: assure that process was ok."
+  (lexical-let ((entry entry))
+    (function
+     (lambda (process event)
+      (unless (string= event "finished\n")
+	(error "Unknown event: %s" event))
+      (with-file (lpe-abs-filename entry)
+	(html-subst (lpe-url entry)))
+      (lynx-print-html (lpe-abs-filename entry) :pos (lpe-point entry))))))
+;;(debug-on-entry 'html-subst)
+
+(defun lynx-update-lpdb-sentinel-new (entry) 
+  "TODO: assure that process was ok."
+  (lexical-let ((entry entry))
+    (function
+     (lambda (process event)
+      (if (string= event "finished\n")
+	(progn
+	  (with-file (lpe-abs-filename entry)
+	    (html-subst (lpe-url entry)))
+	  (with-buffer *lynx-buffer*
+	    (lynx-update-proxy-refs-regexp)
+	    (font-lock-fontify-block))
+	  (message "Received data from %s!" (lpe-url entry)))
+	;; else flag an error
+	(message "Loading of entry %S failed. Continuing..." entry))
+      (lynx-browse-new)))))
+
+(defun* lynx-download (url file &key (type :source))
+  "Downloads www page at URL and stores result in FILE. Asynchronous
+process. Returns the process of #'START-PROCESS-SHELL-COMMAND. TYPE
+may be either the default :SOURCE or :DUMP."
+  (start-process-shell-command 
+   "lynx" nil *lynx-prog* 
+   (case type
+     (:source "-source")
+     (:dump "-dump"))
+   *lynx-config* url ">" file))
+
+(defun* lynx-download-to-buffer (url &optional (buffer (current-buffer)))
+  "Not finished. Difficult with all these sentinels."
+  (with-temp-file* file
+    (set-process-sentinel
+     (lynx-download url file :type :dump)
+     #'(lambda (process event)
+	 (unless (string= event "finished\n")
+	   (error "Unknown event: %s" event))
+	 (lynx-download :pos (lpe-point entry))))))
+
+(defun* lynx-update-lpdb (entry)
+  (message "Downloading from %s..." (lpe-url entry))
+  (lynx-download (lpe-url entry) (lpe-abs-filename entry)))
+
+(defun lynx-print-entry (entry)
+  (lynx-print-html (lpe-abs-filename entry) :pos (lpe-point entry)))
+
+(defun lynx-update-lpdb-and-print-html (entry)
+  (if (lpe-local-p entry)
+    (lynx-print-entry entry)
+    (set-process-sentinel
+     (lynx-update-lpdb entry)
+     (lynx-update-lpdb-sentinel entry))))
+
+(defun lynx-browse (url)
+  "Loads site at URL into current buffer (and deletes old site
+ content) using proxy-db. Later: If option REFRESH is non-nil proxy is
+ omitted."
+  (interactive "sURL: ")
+  (with-buffer* *lynx-buffer*
+    (unless (string= *lynx-current-url* url)
+      (awhen (lpdb-entry *lynx-current-url*)
+	(setf (lpe-point it) (point)))
+      (setq *lynx-current-url* url)
+      (push *lynx-current-url* *lynx-history*)
+      (aif (lpdb-entry url)
+	(lynx-print-entry it)
+	(lynx-update-lpdb-and-print-html (lpdb-new-entry url))))))
+;;(cancel-debug-on-entry 'lynx-browse)
+;;(regexp-opt-depth (concat* '(1 2 10 100) :pre "\\[\\(" :in "\\]\\|" :suf "\\]\\)"))
+
+
+(defun lynx-fetch-external-http-background (urls)
+  "Loads external https at URLS (a single url or a list of urls) into
+ LPDB in background processes (if not there already). TODO: allow
+ refreshing."
+  (interactive "sURL: ")
+  (when (atom urls)
+    (setq urls (list urls)))
+  (dolist (url urls)
+    (unless (or (lpdb-entry url) (local-url-p url))
+      (lynx-update-lpdb (lpdb-new-entry url)))))
+
+(defun lynx-update-lpdb-sentinel-silent (entry) 
+  "TODO: assure that process was ok."
+  (lexical-let ((entry entry))
+    (function
+     (lambda (process event)
+      (with-file (lpe-abs-filename entry)
+	(html-subst (lpe-url entry)))
+      (with-buffer *lynx-buffer*
+	(lynx-update-proxy-refs-regexp)
+	(font-lock-fontify-block))))))
+
+(defun lynx-browse-silent (url)
+  "Loads external https at URL into LPDB in background processes (if
+ not there already). TODO: allow refreshing."
+  (interactive "sURL: ")
+  (unless (or (lpdb-entry url)
+	      (local-url-p url))
+    (let ((entry (lpdb-new-entry url)))
+      (set-process-sentinel
+       (lynx-update-lpdb entry)
+       (lynx-update-lpdb-sentinel-silent entry)))))
+
+(defun lynx-browse-new ()
+  "Looks at *LYNX-URL-JOBS*. Creates processes and corresponding
+sentinels for loading the urls in queue. See #'LYNX-BROWSE-SILENT."
+  ;; skip already loaded urls
+  (while (and *lynx-url-jobs*
+	      (or (local-url-p (first (first *lynx-url-jobs*)))
+		  (and (lpdb-entry (first (first *lynx-url-jobs*)))
+		       (not (second (first *lynx-url-jobs*))))))
+    (pop *lynx-url-jobs*))
+
+  ;; load new http and hand the rest urls to the sentinel to process further
+  (unless (null *lynx-url-jobs*)
+    (let ((entry (lpdb-new-entry (first (first *lynx-url-jobs*)))))
+      (set-process-sentinel
+       (lynx-update-lpdb entry)
+       (lynx-update-lpdb-sentinel-new entry)))))
+
+(defun lynx-refresh-silent (url)
+  "Refreshes external https at URL into LPDB in background processes
+(if not there already)."
+  (interactive "sURL: ")
+  (awhen (lpdb-entry url) ;returns entry
+    (set-process-sentinel
+     (lynx-update-lpdb it)
+     (lynx-update-lpdb-sentinel-silent it))))
+
+(defun lynx-browse-no-proxy (url)
+  "TODO: make this an asynchronous process."
+  (interactive "sURL: ")
+  (with-buffer (get-buffer-create *lynx-buffer*)
+    (goto-char 1)
+    (call-process *lynx-prog* nil *lynx-buffer* t *lynx-config*
+		  "-dump" url "-force_html")
+    (blank-buffer :start (point))))
+
+(defun* lynx-refresh ()
+  (interactive)
+  (lynx-update-lpdb-and-print-html (lpdb-new-entry *lynx-current-url*)))
+
+;;; navigatation methods
+(defun lynx-goto-home ()
+  "Loads home site"
+  (interactive)
+  (lynx-browse *lynx-home-url*))
+
+(defun lynx-goto-last ()
+  "Loads last visited site"
+  (interactive)
+  (when (<= (length *lynx-history*) 1)
+    (error "This is the first site node you visited."))
+  ;; pop 2 because lynx-browse push new url on history
+  (lynx-browse (pop* *lynx-history* 2)))
+;(cancel-debug-on-entry 'lynx-goto-last)
+
+(defun lynx-goto-ref (ref)
+  "Goes to cite [REF]."
+  (interactive "nRef: ")
+  (lynx-browse (lynx-url-from-reference ref)))
+
+(defun lynx-url-at-point ()
+  "Returns url referenced at point."
+  (interactive)
+  (lynx-url-from-reference (lynx-reference-active-at-point)))
+
+(defun lynx-urls-in-region (beg end)
+  "Returns list of all urls referenced in region."
+  (interactive "r")
+  (mapcar #'lynx-url-from-reference (lynx-references-in-region beg end)))
+
+(defun lynx-browse-url-at-point ()
+  "Goes to cite referenced at point."
+  (interactive)
+  (lynx-browse (lynx-url-at-point)))
+
+(defun lynx-browse-silent-url-at-point ()
+  "Goes to cite referenced at point."
+  (interactive)
+  (lynx-browse-silent-urls (list (lynx-url-at-point))))
+
+(defun lynx-browse-silent-urls (urls)
+  "Goes to cite referenced at point."
+  (loop for url in urls do
+	(push (list url nil) *lynx-url-jobs*))
+  (lynx-browse-new))
+
+(defun lynx-browse-silent-urls-in-region (beg end)
+  "Goes to cite referenced at point."
+  (interactive "r")
+  (lynx-browse-silent-urls (lynx-urls-in-region beg end)))
+
+(defun lynx-refresh-silent-url-at-point ()
+  "Goes to cite referenced at point."
+  (interactive)
+  (lynx-refresh-silent (lynx-url-at-point)))
+
+;;; print methods
+(defun lpe-print (url)
+  "Prints lpdb entry corresponding to URL to help buffer."
+  (with-output-to-temp-buffer "*lynx-entry*" 
+    (princ (or (lpdb-entry url) "Not in proxy db."))))
+
+(defun lynx-print-entry-at-point ()
+  "Prints lpdb entry corresponding to url at point."
+  (interactive)
+  (lpe-print (lynx-url-at-point)))
+
+(defun lynx-print-current-entry ()
+  "Prints lpdb entry corresponding to current url."
+  (interactive)
+  (lpe-print *lynx-current-url*))
+  
+;;; post methods
+(defun* lynx-request-post (url &key string args (name "lynx-post")
+			       (buffer "*lynx-buffer*"))
+  "Call lynx with form post arguments"
+  (when (not string) 
+    (setq string (concat* (mapcar #'(lambda (x)
+				      (concat (first x) "=" (second x)))
+				  args) 
+			  :in "&")))
+  (start-process-shell-command
+   name buffer
+   "echo -e " (concat "\"" string "\n---\n\"")  " | " 
+   *lynx-prog* "-dump" *lynx-config* url "-post_data"))
+
+(defun* lynx-download-synch (url filename &key (type :source) (reload nil)
+				 (width (if (lynx-aftenposten-article-p url) 50 80)))
+  "Synchronous version of lynx-download."
+  (call-process "lynx" nil *lynx-prog*
+		(case type
+		  (:source "-source")
+		  (:dump "-dump"))
+		"-reload"
+		(format "-width=%d" width)
+		*lynx-config* *lynx-auth* 
+		url ">" (format "\"%s\"" filename)))
+
+

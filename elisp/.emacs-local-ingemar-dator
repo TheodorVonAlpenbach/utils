@@ -1,0 +1,92 @@
+;(fit-frame-to-buffer nil 50 170)
+(set-frame-position (selected-frame) 0 0)
+(if window-system
+      (set-frame-size (selected-frame) 80 24))(set-frame-font "--Courier New-normal-normal-normal-mono-13-*-*-*-c-*-iso8859-1")
+;;"-*-*-r-*-*-13-*-*-*-c-*-*-iso8859-1"
+(defvar *mb-hyperspec-root* nil)
+(defvar *mb-hyperspec-function* nil)
+
+;; usually copied from .emacs
+(require 'cl)
+
+(setf 
+ ;; div local 
+ *my-home* "c:/Users/eier/Documents/"
+ *local-data-dir* (concat *my-home* "data/")
+ *project-home* (concat *my-home* "projects/")
+ *my-favourites* ()
+
+ ;; emacs
+ *emacs-home* "c:/emacs-22.1/"
+ *emacs-info-dir* (concat *emacs-home* "info/")
+ *site-info-dir* (concat *emacs-home* "site-info/")
+
+ ;; cygwin
+ *cygwin-home* "c:/cygwin/"
+ *cygwin-bin* "c:/cygwin/bin/"
+ *cygwin-info-dir* (concat *cygwin-home* "usr/info/")
+
+ ;; lilypond
+;; *lilypond-home*  (concat *cygwin-home* "usr/share/lilypond/2.14.1/") 
+
+ ;; dot
+ *dot-dir* "c:/Program Files/Graphviz2.30/bin/"
+
+ ;; lisp
+ inferior-lisp-program (concat *cygwin-home* "bin/clisp.exe")
+ *clisp-dir* (concat *my-home* "clisp/")
+ *mb-hyperspec-function* #'browse-url
+ *mb-hyperspec-root* (concat *my-home* "doc/HyperSpec/"))
+
+;; Sentences, see info node Sentences
+(setq sentence-end "[.?!][]\"')]*\\($\\|\t\\| \\)[ \t\n]*")
+(setq sentence-end-double-space nil)
+
+;; lisp
+(setq *abbrevs-dir* *my-home*)
+
+;; news
+(setq gnus-select-method '(nntp "news.online.no"))
+(setq user-full-name "Mats Bergstrøm")
+
+;; tags
+(setq tags-file-name nil)
+(setq tags-table-list
+      `(,(concat *mb-lisp-dir*)))
+
+;; lynx
+(setq *lynx-proxy-dir* (concat *local-data-dir* "lynx-proxy/"))
+(setq *lynx-auth* "")
+
+;; diary file (mandatory to use #'calendar)
+(setq diary-file (setq diary-file (concat *local-data-dir* "office/diary")))
+
+;; load favourite files (note that nil/t means position cursor at top/bottom)
+(setq *my-favourites*
+      `((,*mb-lisp-dir* ".emacs")
+	(,*mb-lisp-dir* ".emacs-local-theodor-pc" t)
+	(,*mb-lisp-dir* "browser/lynx.el")
+	(,*mb-lisp-dir* "utils/mb-utils-math.el")
+	(,*mb-lisp-dir* "scheme/loop.scm")
+	(,*mb-lisp-dir* "music-analyzer/lilypond-parser.el")
+	(,*mb-lisp-dir* "music-analyzer/demo.el")
+	(,*mb-lisp-dir* "midi/midi-file.el" nil)
+	(,*mb-lisp-dir* "chess/chess-position.el" nil)
+
+	(,*shared-projects-dir* "UiO/Var-2013/MUS3090/plan.txt")
+	(,*shared-projects-dir* "UiO/Var-2013/MUS3090/oppgave.txt")
+
+	(,*shared-data-dir* "adresser.txt")
+	(,*shared-data-dir* "arbeidslog" t)))
+
+;;; shell settings
+;;scheme
+(setq scheme-program-name "guile")
+
+;;lilypond
+(setq shell-file-name (concat *cygwin-home* "bin/bash.exe"))
+ ;default is not defined
+
+;;lynx: use emacs default
+(setq shell-file-name (concat *emacs-home* "bin/cmdproxy.exe"))
+(setq explicit-shell-file-name shell-file-name) ;default is "C:/emacs-22.1/bin/cmdproxy.exe"

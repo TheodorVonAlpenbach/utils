@@ -1,0 +1,26 @@
+(require 'quiz-basic)
+
+(defun* quiz-insert-empty-question ()
+  (interactive)
+  (quiz-insert-question "" "" "" (current-buffer))
+  (quiz-forward-item))
+
+(defun* quiz-insert-question-base (question answer source &optional (point (point)))
+  "TODO: get behaviour from #'LYNX-INSERT-REGION-IN-QUIZ-OUTLINE"
+  (goto-char point)
+    (let ((n (quiz-read-n-prev-question)))
+      (delete-blank-lines)
+      (unless (<= n 1) (newline))
+      (insert (quiz-item-q n question))
+      (insert (quiz-item-a n answer))
+      (insert (quiz-item-s n source)))
+    (newline)
+    (point))
+
+(defun* quiz-insert-question (question answer source &optional (buffer (quiz-get-buffer)) (point (point-max)))
+  "TODO: get behaviour from #'LYNX-INSERT-REGION-IN-QUIZ-OUTLINE"
+  (with-buffer buffer
+    (quiz-insert-question-base question answer source point)))
+;;(quiz-insert-question "qwe" "ewq" "")
+
+(provide 'quiz-insert)

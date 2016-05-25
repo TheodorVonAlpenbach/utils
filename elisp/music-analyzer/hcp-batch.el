@@ -1,0 +1,1 @@
+(cp-check-print (cp-test))

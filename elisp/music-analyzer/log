@@ -1,0 +1,14 @@
+2012-01-12
+Implemented spc-closest-pitch-class, the core function for converting
+set pitch class to a true pitch class.
+
+2012-02-01
+Implemented Grinde's first rule for 1st species Bach counterpoint.
+
+2012-02-02
+Wrote
+alias mbtags 'c:/emacs-22.1/bin/etags.exe c:/emacs-22.1/site-lisp/mb-lisp/*/*.el -o c:/emacs-22.1/site-lisp/mb-lisp/TAGS'
+and
+eshell/mbgrep (in mu-utils.el)
+nice.
+

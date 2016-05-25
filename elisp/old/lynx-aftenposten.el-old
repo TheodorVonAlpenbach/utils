@@ -1,0 +1,30 @@
+(defun lynx-aftenposten-goto-article-begin ()
+  (interactive)
+  (goto-char (point-min))
+  (cond
+    ((re-search-forward "   De siste nyhetene" nil t)
+     (beginning-of-line))
+    ((or (re-search-forward "   De 10 siste sakene" nil t)
+	 (re-search-forward "   Oppdatert *[0-9]+" nil t))
+     (forward-paragraph 1)))
+  (recenter 1))
+
+(defun lynx-proxy-clear-aftenposten (n)
+  "If prefix is given, the whole aftenposten is cleared."
+  (interactive "P")
+  (lynx-proxy-clear-db
+   :regexp "www\\.aftenposten\\.no/.*/$"
+   :time (now :hour -12))
+  (lynx-proxy-clear-db
+   :regexp "www\\.aftenposten\\.no/nyheter/.*"
+   :time (now :day -1))
+  (when n
+      (lynx-proxy-clear-db
+   :regexp "www\\.aftenposten\\.no"
+   :time (now :day -2)))
+  (lynx-update-proxy-refs-regexp)
+  (font-lock-fontify-block))
+;;(lpe-abs-filename [cl-struct-lynx-proxy-entry "http://www.aftenposten.no/nyheter/iriks/oslo/" 2 3221])
+;;(string-match "www\\.aftenposten\\.no/.*/$" "http://www.aftenposten.no/kul_und/")
+  
+(provide 'lynx-aftenposten)

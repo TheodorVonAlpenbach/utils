@@ -1,0 +1,8 @@
+Variable conventions
+
+id
+an entity identifier
+
+ldobj
+Object that is either a true database, table, schema or column object,
+or an identifier for such an object.

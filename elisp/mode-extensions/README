@@ -1,0 +1,93 @@
+States
+======
+
+There are three differnt topological states for the cursor with respect to
+sexps:
+
+WITHIN-SEXP
+cursor is before a character belonging to sexp. This includes the two
+sexp-boundaries.
+
+BEGIN-SEXP
+cursor is before the first character of the sexp.
+
+END-SEXP
+cursor is before the last character of the sexp.
+
+Other useful states are possible, but they can be derived from these three.
+
+OUTSIDE-SEXP
+not within-sexp
+
+ON-BOUNDARY-SEXP
+begin-sexp or end-sexp
+
+INTERIOR-SEXP
+within-sexp, but not on-boundary-sexp
+
+etc.
+
+Example:
+
+  BEGIN-SEXP
+  |     END-SEXP
+  |     |
+  v     v
+  (qwerty)
+   ^^^^^^
+   ||||||
+   INTERIOR-SEXP
+   
+
+Movements
+=========
+
+Only two first of the following movements must be defined from
+standard Emacs' movements. The other should be derived from these two
+first. And even these two basic sexp movements use themselves whenever
+they can. The movement system in VI is fundamentally different from
+the arrayic design of Emacs, so every bit of VI idiosynchratic code
+should be shared as much as possible.
+ 
+
+BACKWARD-SEXP-BEGIN
+This corresponds to the VIM movement 'b'.
+
+end-sexp:
+(forward-char 1) (backward-sexp n) 
+
+else:
+(backward-sexp n)
+
+
+FORWARD-SEXP-END
+This corresponds to the VIM movement 'e'.
+
+end-sexp:
+(forward-char 1) (forward-sexp n) (backward-char 1)
+
+else
+(forward-sexp n) (backward-char 1)
+
+
+FORWARD-SEXP-BEGIN
+This corresponds to the VIM movement 'w', and for words (which of
+course is a special form of a sexp) the behaviour is identical.
+
+(end-sexp or outside-sexp):
+(forward-sexp-end n) (backward-sexp-begin 1)
+
+else
+(forward-sexp-end (1+ n)) (backward-sexp-begin 1)
+
+BACKWARD-SEXP-END
+This does not correspond to any standard VIM movement, but some
+implementations puts this movement on 'ge'. It is the backward
+counterpart of 'e'. It means go to the end-sexp position on the
+previous sexp.
+
+(begin-sexp or outside-sexp):
+(backward-sexp-begin n) (forward-sexp-end 1)
+
+else
+(backward-sexp-begin (1+ n)) (forward-sexp-end 1)

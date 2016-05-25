@@ -1,0 +1,223 @@
+;;;; Updated by Mats Bergstrøm 2005-02-08
+;;;;
+;;;; For FTP manual, see http://www.ucalgary.ca/~physed/mmi/ftp-manual.html
+
+;;;; x step 1: establish primitive GUI: find-file, save-buffer
+;;;; * step 2: make primitives stable concerning connection termination
+;;;; * step 3: add completion
+
+(require 'comint) ;;obsolete?
+
+(defconst netrc-filename "c:/.netrc")
+(defconst mb-ftp-process "ftp")
+(defconst mb-ftp-process-args (list "-i" "-n" "-v" "-g" "-d"))
+(defconst mb-ftp-tmp-file (concat *mb-lisp-path* "ftp/tmp/ftp-tmpfile"))
+
+;;; FTP comint process settings
+(add-hook 'comint-output-filter-functions #'comint-strip-ctrl-m)
+
+(defun ftp-get-process (hostname)
+  (or (get-process hostname)
+      (let ((process (apply #'start-process hostname hostname mb-ftp-process mb-ftp-process-args)))
+;;		 (set-process-sentinel process #'ftp-sentinel)
+		 (set-process-filter process #'ftp-process-filter)
+		 process)))
+;;(ftp-get-process "ftps8.brinkster.com")
+
+;;; .netrc and host utils
+(defun parse-netrc ()
+  "Simplified. Looks for `machine <domain> login <username> password
+<password>'. Supports only the \"machine\", \"login\", \"password\"
+keywords."
+  (mapcar #'(lambda (x) (mapcar #'second x)) 
+		   (group-list (group-list (split-string (file-string netrc-filename)) 2) 3)))
+;;(parse-netrc)
+
+(defun ftp-find-host (hostname) 
+  "Returns tuple \(hostname user password\) for host HOSTNAME."
+  (let ((host (assoc hostname (parse-netrc))))
+    (unless host (unless  (error "Couldn't find host %s" host)))
+    host))
+
+(defun ftp-parse-url (url) (split-string url ":"))
+(defun ftp-url (process path) (format "%s:%s" (ftp-hostname process) path))
+(defun ftp-hostname (process) (process-name process))
+(defun ftp-user (process) (second (ftp-find-host (ftp-hostname process))))
+(defun ftp-password (process) (third (ftp-find-host (ftp-hostname process))))
+(defun ftp-sentinel (process state))
+;;(ftp-find-host "ftps8.brinkster.com")
+;;(ftp-user (ftp-get-process "ftps8.brinkster.com"))
+;;(ftp-password (ftp-get-process "ftps8.brinkster.com"))
+
+;;; FTP commands
+(defun ftp-ensure-login (process)
+  (when (ftp-disconnected-p process)
+    (ftp-open process)
+    (ftp-login process)))
+
+(defun ftp-disconnected-string-p (process-string)
+  (or (string-match "Not connected" process-string)
+      (string-match "421 Timeout" process-string)))
+
+(defun* ftp-wait (process &optional (command "UNKNOWN") (n -1) (timeout 5) (timeout-msecs 0))
+  "Same as `accept-process-output' but with debug info in process buffer."
+  (goto-char (point-max))
+  (insert (message "%s for %s (%d)\n" "WAIT" (upcase command) n))
+  (accept-process-output process timeout timeout-msecs))
+
+(defun ftp-process-filter-old (process output)
+  (message "ftp-process-filter received output: '%s'" output)
+  (with-buffer* (process-buffer process)
+    (goto-char (point-max))
+    (insert (format "---  %s ---\n" (iso-time :with-seconds t)))
+    (insert output)))
+
+(defun ftp-process-filter (process output)
+  ;;(message "ftp-process-filter received output: '%s'" output)
+  (with-buffer* (process-buffer process)
+    (goto-char (point-max))
+    (insert (format "---  %s ---\n" (iso-time :with-seconds t)))
+    (insert output)
+    (insert "\n")
+    (when (or (string-match "Connected to ftps8.brinkster.com" output)
+	      (string-match "--->" output)
+	      (string-match "150 Opening ASCII mode data connection" output))
+      (ftp-wait process))))
+
+(defun* ftp-send-command* (process command &optional argument-list (num-outputs 1) 
+				   (auto-relogin-p t) (timeout nil) (timeout-msecs 1000))
+  "Sends COMMAND with optional ARGUMENT-LIST to running ftp PROCESS.
+For TIMEOUT and TIMEOUT-MSECS, see `accept-process-output'. TODO: make
+sure ftp process is logged in."
+  ;;(when ensure-login-p (ftp-ensure-login process))
+  (message "%s\n" (upcase command))
+  (with-buffer (process-buffer process)
+    (goto-char (point-max))
+    (insert (message "%s\n" (upcase command)))
+    (let ((process-string (format "%s %s\n" command (concat* argument-list :in " ")))
+		   (point (point-max)))
+      (message process-string)
+      (process-send-string process process-string)
+      (ftp-wait process command 1)
+      ;; 
+      (when (and auto-relogin-p
+	       (ftp-disconnected-string-p (buffer-substring point (point))))
+	(ftp-relogin process)
+	(message "%s\n" (upcase command))
+	(process-send-string process process-string)
+	(ftp-wait process command))
+      ;;
+      (buffer-substring point (point)))))
+
+(defun* ftp-send-command*-old (process command &optional argument-list (num-outputs 1) 
+				   (auto-relogin-p t) (timeout nil) (timeout-msecs 1000))
+  "Sends COMMAND with optional ARGUMENT-LIST to running ftp PROCESS.
+For TIMEOUT and TIMEOUT-MSECS, see `accept-process-output'. TODO: make
+sure ftp process is logged in."
+  ;;(when ensure-login-p (ftp-ensure-login process))
+  (message "%s\n" (upcase command))
+  (with-buffer (process-buffer process)
+    (goto-char (point-max))
+    (insert (message "%s\n" (upcase command)))
+    (let ((process-string (format "%s %s\n" command (concat* argument-list :in " ")))
+		   (point (point-max)))
+      (message process-string)
+      (process-send-string process process-string)
+      (ftp-wait process command 1)
+      (if (and auto-relogin-p
+	       (ftp-disconnected-string-p (buffer-substring point (point))))
+	(progn
+	  (ftp-relogin process)
+	  (process-send-string process process-string)
+	  (loop for i from 1 to num-outputs do (ftp-wait process command i)))
+	;;else
+	(loop for i from 2 to num-outputs do (ftp-wait process command i)))
+      (buffer-substring point (point)))))
+
+(defun* ftp-send-command (process command &optional argument-list (num-outputs 1) 
+				  (auto-relogin-p t) (timeout nil) (timeout-msecs 1000))
+  "Sends COMMAND with optional ARGUMENT-LIST to running ftp PROCESS.
+For TIMEOUT and TIMEOUT-MSECS, see `accept-process-output'. TODO: make
+sure ftp process is logged in."
+  (ftp-send-command* process command argument-list num-outputs auto-relogin-p timeout timeout-msecs))
+
+(defun ftp-status (process)
+  "Returns 'disconnected, 'connected, 'logged-in. Assumes no-on"
+  (let ((return-string (ftp-send-command process "status" () 1 nil)))
+    ;;(message return-string)
+    (cond ((string-match "^Not connected" return-string) 'disconnected)
+	  ((string-match "use disconnect first" return-string) 'logged-out)
+	  ((string-match "^Connected to" return-string) 'connected)
+	  (t 'unknown))))
+
+(defun ftp-disconnected-p (process) (eq (ftp-status process) 'disconnected))
+(defun ftp-logged-out-p (process) (eq (ftp-status process) 'logged-out))
+
+(defun* ftp-disconnect (process &optional (auto-relogin-p t))
+  (ftp-send-command process "disconnect" (list (ftp-hostname process)) 1 auto-relogin-p))
+(defun* ftp-open (process &optional (auto-relogin-p t))
+  (ftp-send-command process "open" (list (ftp-hostname process)) 1 auto-relogin-p))
+(defun* ftp-login (process &optional (auto-relogin-p t))
+  (ftp-send-command process "user" (list (ftp-user process) (ftp-password process)) 1 auto-relogin-p))
+
+(defun ftp-relogin (process)
+  (ftp-disconnect process nil)
+  (ftp-open process nil)
+  (ftp-login process nil))
+
+(defun* ftp-ls (process &optional (path "")) (ftp-send-command process "ls" (list path) 3))
+(defun ftp-get (process path local-path) (ftp-send-command process "get" (list path local-path) 5))
+(defun ftp-put (process local-path path) (ftp-send-command process "put" (list local-path path)))
+(defun ftp-put-1 (process local-path) (ftp-send-command process "put" (list local-path)))
+
+;;(ftp-status (ftp-get-process "ftps8.brinkster.com"))
+;;(ftp-open (ftp-get-process "ftps8.brinkster.com") nil)
+;;(ftp-login (ftp-get-process "ftps8.brinkster.com") nil)
+;;(ftp-disconnect (ftp-get-process "ftps8.brinkster.com") nil)
+;;(ftp-disconnected-p (ftp-get-process "ftps8.brinkster.com"))
+;;(ftp-logged-out-p (ftp-get-process "ftps8.brinkster.com"))
+;;(ftp-ls (ftp-get-process "ftps8.brinkster.com"))
+;;(ftp-filename-p (ftp-get-process "ftps8.brinkster.com") "doc/bugs/2004-11-18.txt")
+;;(ftp-get (ftp-get-process "ftps8.brinkster.com") "doc/bugs/2004-11-18.txt" mb-ftp-tmp-file)
+;;(ftp-find-file* (ftp-get-process "ftps8.brinkster.com") "doc/bugs/2004-11-18.txt")
+;;(ftp-put (ftp-get-process "ftps8.brinkster.com") "c:/unix/emacs-21.2/site-lisp/mb-lisp/ftp/mb-ftp.el" "doc/bugs/mb-ftp.el")
+
+(defun ftp-find-file* (process path)
+  ;;  (unless (ftp-filename-p process path) (error "File %s on host %s does not exist!" path (ftp-hostname process)))
+  (ftp-get process path mb-ftp-tmp-file)
+  (let ((url (ftp-url process path)))
+    (message "url: %s" url)
+    (with-buffer (find-file mb-ftp-tmp-file)
+      (set (make-local-variable 'ftp-url) url))))
+
+(defun ftp-find-file (url)
+  "TODO: check login, otherwise we risk waiting in wain by giving the
+3 arg. Check buffer is not already open"
+  (interactive "")
+  (let ((hostname-and-path (ftp-parse-url url)))
+    (ftp-find-file* (ftp-get-process (first hostname-and-path))
+		 		     (second hostname-and-path))))
+;;(ftp-find-file "ftps8.brinkster.com:webroot/munkholmserien.asp")
+
+(defun ftp-save-buffer ()
+  "TODO: see ftp-find-file"
+  (interactive "")
+  (if ftp-url 
+    (when (buffer-modified-p)
+      (let ((hostname-and-path (ftp-parse-url ftp-url))
+	    (local-filename buffer-file-name))
+	(message "Saving buffer %s to %s" (buffer-name) (second hostname-and-path))
+	(ftp-put (ftp-get-process (first hostname-and-path)) (buffer-file-name) (second hostname-and-path))
+	(not-modified)))))
+
+(defun ftp-save-buffer-as (url)
+  "TODO: see ftp-find-file"
+  (interactive (format "sRemote path (%s) : " (if (local-variable-p 'ftp-url) ftp-url "no default")))
+  (let ((hostname-and-path (ftp-parse-url url))
+	(local-filename buffer-file-name))
+	(message "Saving buffer %s to %s" (buffer-name) (second hostname-and-path))
+	(ftp-put (ftp-get-process (first hostname-and-path)) (buffer-file-name) (second hostname-and-path))
+	(not-modified)))
+;;(ftp-put (ftp-get-process "ftps8.brinkster.com") "c:/unix/emacs-21.2/site-lisp/mb-lisp/ftp/mb-ftp.el" "Mats/mb-ftp.el")
+
+(provide 'mb-ftp)

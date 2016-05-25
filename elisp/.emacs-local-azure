@@ -1,0 +1,64 @@
+(set-frame-font "--Courier New-normal-normal-normal-mono-13-*-*-*-c-*-iso8859-1")
+;;(set-frame-size (selected-frame) 120 61)
+;;(set-frame-position (selected-frame) 0 0)
+
+;; Local elisp load paths
+(setf *local-load-paths* '("~/sources/imms/src/elisp/"
+			   "~/projects/lsconfig/"))
+
+;; Sentences, see info node Sentences
+(setf sentence-end "[.?!][]\"')]*\\($\\|\t\\| \\)[ \t\n]*")
+(setf sentence-end-double-space nil)
+
+;; news
+(setf gnus-select-method '(nntp "news.online.no"))
+(setf user-full-name "Mats Bergstrøm")
+
+;; tags
+(setf tags-file-name nil)
+(setf tags-table-list (list *mb-lisp-dir*))
+
+;; lynx
+(setf *lynx-proxy-dir* (expand-file-name "lynx-proxy" *local-data-dir*))
+(setf *lynx-auth* "")
+
+;; diary file (mandatory to use #'calendar)
+(setf diary-file (setf diary-file (expand-file-name "office/diary" *local-data-dir*)))
+
+;; load favourite files (note that nil/t means position cursor at top/bottom)
+(setf *my-favourites*
+      `((,*mb-lisp-dir* ".emacs")
+	(,*mb-lisp-dir* "utils/mb-utils-strings.el")
+	(,*mb-lisp-dir* "utils/mb-sequences.el")
+	(,*mb-lisp-dir* "lisp/mb-indent.el")
+	(,*mb-lisp-dir* "external/scilab/mbscilab.el")
+	(,*mb-lisp-dir* "mode-extensions/mb-lisp.el")
+	(,*mb-lisp-dir* "mode-extensions/mb-octave.el")
+	(,*mb-lisp-dir* "mode-extensions/mb-tex.el")
+	(,*mb-lisp-dir* "browser/lynx.el")
+	(,*mb-lisp-dir* "browser/lynx-aftenposten.el")
+	(,*mb-lisp-dir* "quiz/qp.el")
+
+	(,+home-dir+ "doc/log.org" :point :end :keyboard :no)
+	(,+home-dir+ "doc/todo.org" :point :end :keyboard :no)
+	(,+home-dir+ "projects/utils/lisp/mb-utils.lisp")
+	(,+home-dir+ "projects/lsconfig/lsconf-mode.el")
+
+	(,+home-dir+ "sources/imms/src/cpp/TimeSeries/TimeSeries.cpp")
+	(,+home-dir+ "sources/imms/src/lisp/egina/egina-wave.lisp")
+	(,+home-dir+ "sources/imms/src/lisp/wave/wave.lisp")
+	
+	(,*shared-data-dir* "adresser.txt" :read-only t)
+	(,*shared-data-dir* "arbeidslog" :point :end :keyboard :no)
+	(,*shared-data-dir* "LS.el")
+	(,*shared-data-dir* "ferskvare" :point :end :keyboard :no)
+	(,*shared-data-dir* "LS-notes.org" :point :end :keyboard :no)))
+
+;;scheme
+(setf scheme-program-name "guile")
+
+;; lisp
+(setf inferior-lisp-program "clisp")
+
+;; dot
+(setf *dot-dir* "c:/Program Files/Graphviz2.30/bin/")

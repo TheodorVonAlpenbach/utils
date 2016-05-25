@@ -1,0 +1,66 @@
+(require 'wave-parser)
+(require 'mb-lists)
+
+(defsubst wave-copy (wav) 
+  (copy-tree wav))
+
+(defun wave-header (wav)
+  (loop for (p . v) in (reverse wav)
+	while (neq p :samples)
+	collect (list p v)))
+;;(wave-header wav)
+
+(defun* wave-position (wav x &optional (unit :second))
+  (* (wave-sample-rate wav) x))
+
+(defun* wave-channels-1 (wav) 
+  (unzip (wave-samples wav) (wave-num-channels wav)))
+;;(wave-channels-1 wav)
+
+(require 'mb-utils-div)
+(defun* wave-channels (wav &key (from 0) (to) (unit :second) (channels t)) 
+  (loop for ch in (project (wave-channels-1 wav) channels)
+	collect (subseq ch (wave-position wav from unit) (and to (wave-position wav to unit)))))
+;;(wave-channels wav)
+
+(defun* setf-wave-channels (wav channels)
+  (let* ((new-samples (mapcar #'round (apply #'zip channels)))
+	 (new-data-size (* (/ (wave-bits-per-sample wav) 8)
+			      (length new-samples)))
+	 (data-size-diff (- (wave-data-size wav) new-data-size)))
+    (decf (wave-size wav) data-size-diff)
+    (setf (wave-data-size wav) new-data-size)
+    (setf (wave-samples wav) new-samples)))
+;;(setf ragtime (read-wave-file "/cygdrive/c/Users/eier/Documents/MATLAB/lyder/ragtime.wav"))
+;;(setf ragtime-init (wave-copy ragtime))
+;;(setf-wave-channels ragtime-init (wave-channels ragtime :to 1))
+;;(write-wave-file ragtime-init "/cygdrive/c/Users/eier/Documents/MATLAB/lyder/ragtime-init.wav")
+;;(loop for x in (list ragtime ragtime-init) collect (wave-data-size x) collect (wave-size x))
+;;(length (wave-samples new-ragtime))
+
+;;(setf flute (read-wave-file "/cygdrive/c/Users/eier/Documents/MATLAB/lyder/flute.wav"))
+;;(setf flute-init (wave-copy flute))
+;;(setf-wave-channels flute-init (wave-channels flute :to 0.5))
+;;(write-wave-file flute-init "/cygdrive/c/Users/eier/Documents/MATLAB/lyder/flute4.wav")
+;;(loop for x in (list flute flute-init) collect (wave-data-size x) collect (wave-size x))
+;;(wave-size flute)
+
+;;(write-wave-file ragtime "/cygdrive/c/Users/eier/Documents/MATLAB/lyder/ragtime2")
+
+
+(defun wave-channel (wav channel)
+  (nth channel (wave-channels wav)))
+
+(defun wave-channel (wav channel)
+  (nth channel (wave-channels wav)))
+;;(length (wave-channel flute 0))
+
+(defun test-flute-difference ()
+  (let* ((file1 "/cygdrive/c/Users/eier/Documents/MATLAB/lyder/flute.wav")
+	 (file2 "/cygdrive/c/Users/eier/Documents/MATLAB/lyder/flute2.wav")
+	 (flute1 (read-wave-file file1))
+	 (flute2 (read-wave-file file2))
+	 (flutes (mapcar #'nreverse (list flute1 flute2)))
+	 (samples (loop for x in flutes collect (mapcar #'cdar (wave-samples x)))))
+    (equal flute1 flute2)))
+;;(test-flute-difference)

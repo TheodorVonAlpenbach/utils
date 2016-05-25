@@ -1,0 +1,34 @@
+SET PITCH CLASS
+one of 0..11 where 
+0  represents all pitch classes enharmonic to C,
+1  represents all pitch classes enharmonic to C#
+...
+11 represents all pitch classes enharmonic to B
+
+SET INTERVAL
+the distance between two set pitch classes modulo 12
+
+SET CHORD
+a chord consisting of set pitch classes (instead of pitch classes)
+
+(set chord) SKELETON
+given a set chord, sc, the /skeleton/ of sc is a list of the distinct
+set intervals from sc's root to sc's set pitch classes. A skeleton is
+usually ordered and non-trivial. 
+
+TRIVIAL skeleton
+A skeleton where the first trivial set interval (0) is included.
+
+ORDERED skeleton
+A sorted skeleton (least set interval first).
+
+skeleton Nth INVERSION
+The resulting skeleton of the NTH inversion of the chord corresponding
+to the original skeleton.
+
+http://en.wikipedia.org/wiki/Tonicization
+http://en.wikipedia.org/wiki/Secondary_dominant
+http://en.wikipedia.org/wiki/Mediant
+http://en.wikipedia.org/wiki/Chromatic_mediant (6 stk)
+herav Diatonisk mediant (2 stk)
+http://en.wikipedia.org/wiki/Borrowed_chord
