@@ -320,7 +320,7 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 		  (auto-fill-mode -1)))
 	 (awhen (getf (rest (rest x)) :hook)
 		(funcall it)))))
- *my-favourites*)
+ *my-favorites*)
 
 ;;(require 'elkem ".elkem")
 ;;(set-locals-arbeidslog)
@@ -442,7 +442,8 @@ A unit test is a line prefixed by ';;(' and of the form given by
 (require 'server)
 (unless (server-running-p) (server-start))
 
-(with-buffer "arbeidslog"
-  (setf fill-paragraph-function #'fill-time-paragraph))
+(awhen (get-buffer "arbeidslog")
+  (with-buffer it
+    (setf fill-paragraph-function #'fill-time-paragraph)))
 
 (pushnew "\\.\\(dvi\\|aux\\|out\\|bbl\\|blg\\)\\'" ido-ignore-files)
