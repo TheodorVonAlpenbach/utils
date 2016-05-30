@@ -52,6 +52,7 @@
 (define-key global-map [(control c) (meta <)] 'first-error)
 
 ;; Buffer swaps
+(require 'smart-swap)
 (define-key global-map [(f11)] #'(lambda () (interactive) (switch-to-buffer (other-buffer))))
 (define-key global-map [(S-f11)] #'bury-buffer)
 (define-key global-map [(M-f11)] #'smart-swap)
@@ -60,8 +61,7 @@
 (define-key global-map [(control tab)] #'other-window)
 (define-key global-map [(shift control tab)] #'(lambda () (interactive) (other-window -1)))
 
-;; Useful file swap
-(require 'mb-files)
+;; Radio playlists
 (define-key global-map [(f9)] 'radio-playlist) ;earlier 'swap-l-y-file
 (define-key global-map [(shift f9)] '-playlist) ;earlier 'swap-l-y-file
 
