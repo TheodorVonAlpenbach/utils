@@ -25,8 +25,13 @@
 ;; diary file (mandatory to use #'calendar)
 (setf diary-file (setf diary-file (expand-file-name "office/diary" *local-data-dir*)))
 
-;; load favourite files (note that nil/t means position cursor at top/bottom)
-(setf *my-favourites*
+;; load favorite files (note that nil/t means position cursor at top/bottom)
+;; but first we have to get rid of the tramp file, which may block ssh:
+(let ((tramp-file "~/.emacs.d/tramp"))
+  (when (file-exists-p tramp-file)
+    (delete-file tramp-file)))
+
+(setf *my-favorites*
       `((,+mb-lisp-dir+ ".emacs")
 	(,+mb-lisp-dir+ "utils/mb-utils-strings.el")
 	(,+mb-lisp-dir+ "utils/mb-sequences.el")
@@ -40,19 +45,19 @@
 	(,+mb-lisp-dir+ "quiz/qp.el")
 
 	(,+home-dir+ "doc/log.org" :point :end :keyboard :no)
-	(,+home-dir+ "doc/todo.org" :point :end :keyboard :no)
 	(,+home-dir+ "projects/utils/lisp/mb-utils.lisp")
-	(,+home-dir+ "projects/lsconfig/lsconf-mode.el")
 
+	(,+home-dir+ "sources/elisp/lsconfig/lsconf-mode.el")
 	(,+home-dir+ "sources/imms/src/cpp/TimeSeries/TimeSeries.cpp")
 	(,+home-dir+ "sources/imms/src/lisp/egina/egina-wave.lisp")
 	(,+home-dir+ "sources/imms/src/lisp/wave/wave.lisp")
 	
-	(,*shared-data-dir* "adresser.txt" :read-only t)
-	(,*shared-data-dir* "arbeidslog" :point :end :keyboard :no)
-	(,*shared-data-dir* "LS.el")
 	(,*shared-data-dir* "ferskvare" :point :end :keyboard :no)
-	(,*shared-data-dir* "LS-notes.org" :point :end :keyboard :no)))
+
+	("/ssh:sil:~/doc" "LS-notes.org" :point :end :keyboard :no)
+	("/ssh:sil:~/doc" "arbeidslog" :point :end :keyboard :no)
+	("/ssh:sil:~/doc" "adresser.txt" :keyboard :no)
+	("/ssh:sil:~/doc" "todo.org" :keyboard :no)))
 
 ;;scheme
 (setf scheme-program-name "guile")
