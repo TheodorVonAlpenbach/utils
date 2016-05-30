@@ -60,4 +60,23 @@ signaled otherwise), and this character is passed to
 				 (t default-color))))
 		(set-face-background 'mode-line (car color))
 		(set-face-foreground 'mode-line (cdr color))))))
+
+;; move to mode ext
+;; (loop for (mode . state) in '((inferior-emacs-lisp-mode . emacs)
+;;                               (inferior-lisp-mode . emacs)
+;;                               (inferior-octave-mode . emacs)
+;;                               (shell-mode . emacs)
+;;                               (git-commit-mode . emacs)
+;;                               (git-rebase-mode . emacs)
+;;                               (term-mode . emacs)
+;;                               (help-mode . emacs)
+;;                               (helm-grep-mode . emacs)
+;;                               (grep-mode . emacs)
+;;                               (bc-menu-mode . emacs)
+;;                               (magit-branch-manager-mode . emacs)
+;;                               (rdictcc-buffer-mode . emacs)
+;;                               (dired-mode . emacs)
+;;                               (wdired-mode . normal))
+;;       do (evil-set-initial-state mode state))
+
 (provide 'mb-evil)
