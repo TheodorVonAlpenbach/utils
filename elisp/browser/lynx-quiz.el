@@ -1,4 +1,4 @@
-(require 'quiz (expand-file-name "quiz/quiz.el" *mb-lisp-dir*))
+(require 'quiz (expand-file-name "quiz/quiz.el" +mb-lisp-dir+))
 (require 'mb-utils-math)
 (require 'mb-buffer)
 
