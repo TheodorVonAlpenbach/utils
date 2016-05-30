@@ -43,7 +43,7 @@
 	;; (,+home-dir+ "doc/log.org" :point :end :keyboard :no)
 	;; (,+home-dir+ "doc/todo.org" :point :end :keyboard :no)
 	(,+home-dir+ "projects/utils/lisp/mb-utils.lisp")
-	;; (,+home-dir+ "projects/lsconfig/lsconf-mode.el")
+	(,+home-dir+ "projects/lsconfig/lsconf-mode.el")
 
 	;; (,+home-dir+ "sources/imms/src/cpp/TimeSeries/TimeSeries.cpp")
 	;; (,+home-dir+ "sources/imms/src/lisp/egina/egina-wave.lisp")
