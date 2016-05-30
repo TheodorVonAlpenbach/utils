@@ -16,7 +16,7 @@
 
 ;; tags
 (setf tags-file-name nil)
-(setf tags-table-list (list *mb-lisp-dir*))
+(setf tags-table-list (list +mb-lisp-dir+))
 
 ;; lynx
 (setf *lynx-proxy-dir* (expand-file-name "lynx-proxy" *local-data-dir*))
@@ -27,17 +27,17 @@
 
 ;; load favourite files (note that nil/t means position cursor at top/bottom)
 (setf *my-favourites*
-      `((,*mb-lisp-dir* ".emacs")
-	(,*mb-lisp-dir* "utils/mb-utils-strings.el")
-	(,*mb-lisp-dir* "utils/mb-sequences.el")
-	(,*mb-lisp-dir* "lisp/mb-indent.el")
-	(,*mb-lisp-dir* "external/scilab/mbscilab.el")
-	(,*mb-lisp-dir* "mode-extensions/mb-lisp.el")
-	(,*mb-lisp-dir* "mode-extensions/mb-octave.el")
-	(,*mb-lisp-dir* "mode-extensions/mb-tex.el")
-	(,*mb-lisp-dir* "browser/lynx.el")
-	(,*mb-lisp-dir* "browser/lynx-aftenposten.el")
-	(,*mb-lisp-dir* "quiz/qp.el")
+      `((,+mb-lisp-dir+ ".emacs")
+	(,+mb-lisp-dir+ "utils/mb-utils-strings.el")
+	(,+mb-lisp-dir+ "utils/mb-sequences.el")
+	(,+mb-lisp-dir+ "lisp/mb-indent.el")
+	(,+mb-lisp-dir+ "external/scilab/mbscilab.el")
+	(,+mb-lisp-dir+ "mode-extensions/mb-lisp.el")
+	(,+mb-lisp-dir+ "mode-extensions/mb-octave.el")
+	(,+mb-lisp-dir+ "mode-extensions/mb-tex.el")
+	(,+mb-lisp-dir+ "browser/lynx.el")
+	(,+mb-lisp-dir+ "browser/lynx-aftenposten.el")
+	(,+mb-lisp-dir+ "quiz/qp.el")
 
 	(,+home-dir+ "doc/log.org" :point :end :keyboard :no)
 	(,+home-dir+ "doc/todo.org" :point :end :keyboard :no)
