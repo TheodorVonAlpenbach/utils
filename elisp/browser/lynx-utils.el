@@ -198,7 +198,7 @@ urls. Eg. /foo -> http://www.bar.com/foo."
 ;;(all-completions "ab" '(("ab") ("ac")))
 ;;(try-completion "ab" '(("a") ("ac")))
 
-(require 'mb-mail)
+;;(require 'mb-mail)
 (defun lynx-mail-region (begin end refresh)
   "Insert region as the text in a new message."
   (interactive "r\nP")
