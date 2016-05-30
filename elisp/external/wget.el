@@ -10,6 +10,14 @@ synchronously. See `call-process' for more control of processes"
     (buffer-string-no-properties)))
 ;;(call-process* "file" (expand-file-name (format "~/data/musedata/mozart/K%03d.zip" 80)))
 
+(defun call-process-shell-command* (command &rest args)
+  "Same as `call-process*' but calling
+`call-process-shell-command' instead of `call-process'"
+  (with-temp-buffer
+    (apply #'call-process-shell-command command nil (current-buffer) nil args)
+    (buffer-string-no-properties)))
+;;(call-process-shell-command* "ls")
+
 ;;;; Wget methods
 (defun wget-unique-filename ()
   "Creates a quasi unique filename based on current time with resolution of a microsecond.
