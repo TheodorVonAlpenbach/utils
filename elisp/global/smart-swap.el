@@ -49,5 +49,5 @@
       (find-file it)
       (message "Couldn't find swap target for current file")))
 
-(provide 'mb-files)
+(provide 'smart-swap)
 
