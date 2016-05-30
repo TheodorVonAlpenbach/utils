@@ -41,7 +41,7 @@
 ;;(win32-user-profile)
 
 (defconst +win32-home-dir+
-  (if (string= (getenv "COMPUTERNAME") "NPXMBE")
+  (if (string= system-name "NPXMBE")
       (format "%s/Documents and Settings/matsb" +win32-root+)
     (win32-user-profile)))
 
@@ -51,10 +51,10 @@
     (:win32 +win32-home-dir+)))
 
 (defconst +shared-dir+
-  (if (string= (getenv "COMPUTERNAME") "NPXMBE")
+  (if (string= system-name "NPXMBE")
       (expand-file-name "/My Documents/Google Drive/" +win32-home-dir+)
     (expand-file-name "Google Drive" +win32-home-dir+)))
-;;(getenv "COMPUTERNAME")
+;;system-name
 
 (cl-defun cygpath (path &optional (type :win32))
   "This should definitetly be moved somewhere else."
@@ -79,16 +79,21 @@
 This is always the parent directory to the .emacs directory.
 This directory is shared, see `+shared-dir+'")
 
-(defvar *mb-lisp-dir* (expand-file-name "mb-lisp" *site-lisp-dir*)
+(defconst +mb-lisp-dir+ "~/projects/utils/elisp"
   "Default directory for mb-lisp files.")
 
 (defvar *local-load-paths* nil
   "Additional local load paths. Should be defined in .emacs-local-***.")
 
 (defun mb-emacs-local-filename ()
-  (let* ((path (expand-file-name (concat ".emacs-local-" (downcase (getenv "COMPUTERNAME"))) *mb-lisp-dir*)))
+  (let* ((path (expand-file-name
+		(format ".emacs-local-%s-%s"
+			system-name
+			(substring (symbol-name (emacs-os)) 1))
+		+mb-lisp-dir+)))
     (if (file-exists-p path)
-	path (expand-file-name ".emacs-local-default" *mb-lisp-dir*))))
+      path
+      (expand-file-name ".emacs-local-default" +mb-lisp-dir+))))
 ;;(mb-emacs-local-filename)
 
 (defconst +emacs-local+ (mb-emacs-local-filename)
@@ -151,11 +156,13 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 ;; path
 (loop for x in (nconc 
 		*local-load-paths*
-		(directory-files *mb-lisp-dir* t)
+		(cl-remove "old" (directory-files +mb-lisp-dir+ t)
+			   :key #'file-name-nondirectory
+			   :test #'string=)
 		(directory-files (expand-file-name ".emacs.d/elpa" +home-dir+) t)
 		(list
-		 (expand-file-name "games/maths" *mb-lisp-dir*)
-		 (expand-file-name "external/scilab" *mb-lisp-dir*)
+		 (expand-file-name "games/maths" +mb-lisp-dir+)
+		 (expand-file-name "external/scilab" +mb-lisp-dir+)
 		 *site-lisp-dir*))
       if (and (file-directory-p x) (not (member x load-path)))
       collect x into res
@@ -164,12 +171,9 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 ;; smartparens
 (add-to-list 'load-path "~/.emacs.d/smartparens-master")
 
-;;gnuplot mode
-(require 'gnuplot-mode)
-
 ;;paredit
-(require 'paredit)
-(require 'mb-evil)
+;;(require 'paredit)
+;;(require 'mb-evil)
 
 ;; slime
 ;;(add-to-list 'load-path (concat *site-lisp-dir* "slime/")) ; your SLIME directory
@@ -299,23 +303,24 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 (add-hook 'octave-mode-hook 'mb-visit-tags-table)
 
 ;; finding favourites
-(mapcar #'(lambda (x) 
-	    (save-excursion
-	      (let ((path (expand-file-name (second x) (first x)))) 	     
-		(find-file path)
-		(awhen (getf (rest (rest x)) :point)
-		  (goto-char (case it (:end (point-max)) (t it))))
-		(awhen (getf (rest (rest x)) :keyboard)
-		  (case it 
-		    (:no (activate-input-method 'norwegian-keyboard))))
-		(awhen (getf (rest (rest x)) :read-only)
-		  (toggle-read-only 1))
-		(awhen (getf (rest (rest x)) :read-only :none)
-		  (when (eql it :none)
-		    (auto-fill-mode -1)))
-		(awhen (getf (rest (rest x)) :hook)
-		  (funcall it)))))
-  *my-favourites*)
+(mapcar
+ #'(lambda (x) 
+     (save-excursion
+       (let ((path (expand-file-name (second x) (first x)))) 	     
+	 (find-file path)
+	 (awhen (getf (rest (rest x)) :point)
+		(goto-char (case it (:end (point-max)) (t it))))
+	 (awhen (getf (rest (rest x)) :keyboard)
+		(case it 
+		  (:no (activate-input-method 'norwegian-keyboard))))
+	 (awhen (getf (rest (rest x)) :read-only)
+		(toggle-read-only 1))
+	 (awhen (getf (rest (rest x)) :read-only :none)
+		(when (eql it :none)
+		  (auto-fill-mode -1)))
+	 (awhen (getf (rest (rest x)) :hook)
+		(funcall it)))))
+ *my-favourites*)
 
 ;;(require 'elkem ".elkem")
 ;;(set-locals-arbeidslog)
@@ -387,7 +392,6 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 
 (add-to-list 'Info-default-directory-list (expand-file-name ".emacs.d/info" +home-dir+))
 (add-to-list 'Info-additional-directory-list (expand-file-name ".emacs.d/info" +home-dir+))
-(require 'clhs)
 
 (defun unit-test-regexp (fn-name)
   (format ";;(.*%s") fn-name)
@@ -437,23 +441,6 @@ A unit test is a line prefixed by ';;(' and of the form given by
 ;;; Make this emacs the client server
 (require 'server)
 (unless (server-running-p) (server-start))
-
-(loop for (mode . state) in '((inferior-emacs-lisp-mode . emacs)
-                              (inferior-lisp-mode . emacs)
-                              (inferior-octave-mode . emacs)
-                              (shell-mode . emacs)
-                              (git-commit-mode . emacs)
-                              (git-rebase-mode . emacs)
-                              (term-mode . emacs)
-                              (help-mode . emacs)
-                              (helm-grep-mode . emacs)
-                              (grep-mode . emacs)
-                              (bc-menu-mode . emacs)
-                              (magit-branch-manager-mode . emacs)
-                              (rdictcc-buffer-mode . emacs)
-                              (dired-mode . emacs)
-                              (wdired-mode . normal))
-      do (evil-set-initial-state mode state))
 
 (with-buffer "arbeidslog"
   (setf fill-paragraph-function #'fill-time-paragraph))
