@@ -4,7 +4,7 @@
 
 ;; Local elisp load paths
 (setf *local-load-paths* '("~/sources/imms/src/elisp/"
-			   "~/projects/lsconfig/"))
+			   "~/sources/elisp/lsconfig/"))
 
 ;; Sentences, see info node Sentences
 (setf sentence-end "[.?!][]\"')]*\\($\\|\t\\| \\)[ \t\n]*")
