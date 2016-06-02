@@ -1,7 +1,6 @@
 (require 'ert)
 (require 'mb-sequences)
 
-;;;; ls-assignment
 (ert-deftest test-copy-if ()
   "Test of copy-if"
   ;; test types
@@ -19,3 +18,8 @@
   (should (equal (length (copy-if #'always "12345" :count 1)) 1))
   (should (equal (length (copy-if #'always "12345" :count 5)) 5))
   (should (equal (length (copy-if #'always "12345")) 5)))
+
+(ert-deftest test-nminimum-nokey ()
+  "Test of nminimum-nokey"
+  (should (equal (nminimum-nokey [5118 5002 5116] #'<) '(5002 1)))
+  (should (equal (nminimum-nokey [5118 5002 5116] #'>) '(5118 0))))
