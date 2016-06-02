@@ -161,13 +161,13 @@ This is a destructive function; it reuses the storage of SEQ if possible.
   (apply #'nminimums (copy-sequence cl-seq) cl-pred cl-keys))
 ;;(minimums '(1 2 3 0 4 0 5) #'<)
 
-(cl-defun nminimum-nokey (seq test)
+(cl-defun nminimum-nokey (vec test)
   "Helper for `nminimum'. Same as nminimum, but without key and from-end.
 This function is not intended for use."
-  (loop with min = (elt seq 0)
+  (loop with min = (elt vec 0)
 	with pos = 0
-	for i from 1
-	for x across seq
+	for i from 0
+	for x across vec
 	when (funcall test x min)
 	do (setf min x pos i)
 	finally (return (values min pos))))
@@ -205,7 +205,7 @@ respectively.
 (cl-defun min-element (&rest args)
   "Returns minimum element in SEQUENCE
 \nKeywords supported:  :test :key :start :end :from-end
-\n(fn SEQ PREDICATE [KEYWORD VALUE]...)"
+\n(fn SEQ [KEYWORD VALUE]...)"
   (first (apply #'minimum args)))
 ;;(min-element '(1 2 1 3) :key #'1+)
 
