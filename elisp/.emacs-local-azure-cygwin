@@ -43,6 +43,7 @@
 	(,+mb-lisp-dir+ "browser/lynx.el")
 	(,+mb-lisp-dir+ "browser/lynx-aftenposten.el")
 	(,+mb-lisp-dir+ "quiz/qp.el")
+	(,+mb-lisp-dir+ "global/LS.el")
 
 	(,+home-dir+ "doc/log.org" :point :end :keyboard :no)
 	(,+home-dir+ "projects/utils/lisp/mb-utils.lisp")
