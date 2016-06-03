@@ -3,6 +3,7 @@
 ;; c:/Documents and Settings/matsb/Application Data/.emacs
 
 ;;; Classic global settingss
+(eldoc-mode)
 (setf debug-on-error t)
 (tool-bar-mode -1)
 (setq inhibit-startup-message t)
@@ -58,13 +59,15 @@
 
 (cl-defun cygpath (path &optional (type :win32))
   "This should definitetly be moved somewhere else."
-  (let ((ctype (case type
-		 (:dos "dos")
-		 (:win32 "windows")
-		 (:unix "unix")
-		 (:mixed "mixed")
-		 (t "windows"))))
-    (string-trim (call-process* "cygpath" "--type" ctype (expand-file-name path)))))
+  (if (cygwin-emacs-p)
+    (let ((ctype (case type
+		   (:dos "dos")
+		   (:win32 "windows")
+		   (:unix "unix")
+		   (:mixed "mixed")
+		   (t "windows"))))
+      (string-trim (call-process* "cygpath" "--type" ctype (expand-file-name path))))
+    path))
 ;;(cygpath "/cygdrive/c/Users/MBe.azure/AppData/Roaming/Scilab/scilab-5.5.1/" :unix)
 
 ;;;; global defaults (can be overrided in .emacs-local)
@@ -432,7 +435,6 @@ A unit test is a line prefixed by ';;(' and of the form given by
     (find-file (match-string 1 curline))
     (goto-char (string-to-number (match-string 2 curline)))))
 
-(eldoc-mode)
 ;;(require 'pcvs)
 (require 'mb-tex)
 (require 'mb-octave)
