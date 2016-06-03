@@ -1,21 +1,41 @@
-(require 'evil)
+;;;; My evil adaptations
+;;;; See also http://wikemacs.org/wiki/Evil
 
+;;;; I want 'df' to be key chord for leaving insert state.
+;;;; In normal mode I want 'vn' (or something) to be ido-switch-buffer.
+;;;; In normal mode I want 'vs' (or something) to be smart-swap.
+;;;; For some buffers, I want to switch to Norwegian keyboard in
+;;;; insert state.
+;;;; For some modes, I want normal Emacs behavior.
+;;;; Also, I want colors to indicate state
+
+;;;; All of these wishes have been fullfilled with the implementation
+;;;; below. Also, I have managed to use evil-cleverparens for lisp
+
+;;;; TODO: auto loading of this file
+;;;; TODO: auto loading of evil-cleverparens for lisp modes
+;;;; TODO: tweek keys. L <--> l and H <--> h in evil-cleverparens.
+
+;;;; Also useful to look at key bindings in ~/.emacs.d/elpa/evil-20160525.1148/evil-maps.el
+(require 'evil)
+(require 'evil-cleverparens)
+(require 'evil-cleverparens-text-objects)
+(require 'evil-org)
+
+(evil-mode 1)
+(setf evil-move-beyond-eol t)
 (define-key global-map "\M-x" 'execute-extended-command)
 (define-key evil-normal-state-map "\M-x" 'execute-extended-command)
 
 (require 'key-chord)
+(key-chord-mode 1)
 (key-chord-define evil-insert-state-map "df" 'evil-normal-state)
-;;(key-chord-mode t)
+(key-chord-define evil-normal-state-map "vn" 'ido-switch-buffer)
+(key-chord-define evil-normal-state-map "vs" 'smart-swap)
 
-;; (sp-pair "'" nil :actions :rem)
-;; (require 'evil-lisp-state)
-;; (evil-leader/set-leader "<SPC>")
-;; (global-evil-leader-mode)
-;; (evil-mode 1)
-
-;; (dolist (mm evil-lisp-state-major-modes)
-;;   (evil-leader/set-key-for-mode mm "<SPC>" 'scroll-up-command)
-;; )
+(defun mb-normal-state-init ()
+  (key-chord-mode 1))
+;;(add-hook 'evil-normal-state-entry-hook 'mb-normal-state-init)
 
 (defun quailify-key-chord-input-method (result)
   "Modifies if necessary the RESULT of `key-chord-input-method'
@@ -34,20 +54,25 @@ signaled otherwise), and this character is passed to
       (error "Unexpected output from KEY-CHORD-INPUT-METHOD: %S" result))))
 
 (defun mb-insert-state-init ()
-  (key-chord-mode t)
-    (when (member (buffer-name) '("arbeidslog" "todo.org" "log.org"))
-      (activate-input-method 'norwegian-keyboard)
+  (key-chord-mode 1)
+  (when (member (buffer-name) '("arbeidslog" "todo.org" "log.org"))
+    (activate-input-method 'norwegian-keyboard)
     ;; now, activate-input-method overrides input-method-function, so therfore:
     (setq input-method-function 'key-chord-input-method)
-    (advice-add #'key-chord-input-method :filter-return #'quailify-key-chord-input-method)))
+    (advice-add #'key-chord-input-method :filter-return #'quailify-key-chord-input-method)
+    ))
 
 (defun mb-insert-state-cleanup ()
-  (key-chord-mode nil)
+  ;;(key-chord-define evil-insert-state-map "df" 'evil-normal-state)
   (setq input-method-function nil)
-  (advice-remove #'key-chord-input-method #'quailify-key-chord-input-method))
+  (advice-remove #'key-chord-input-method #'quailify-key-chord-input-method)
+  )
 
-(add-hook 'evil-insert-state-entry-hook 'mb-insert-state-init)
-(add-hook 'evil-insert-state-exit-hook 'mb-insert-state-cleanup)
+;;(add-hook 'evil-insert-state-entry-hook 'mb-insert-state-init)
+;;(remove-hook 'evil-insert-state-entry-hook 'mb-insert-state-init)
+;; evil-insert-state-exit-hook
+;;(add-hook 'evil-insert-state-exit-hook 'mb-insert-state-cleanup)
+;;(remove-hook 'evil-insert-state-exit-hook 'mb-insert-state-cleanup)
 
 (lexical-let ((default-color (cons (face-background 'mode-line)
 				   (face-foreground 'mode-line))))
@@ -62,21 +87,35 @@ signaled otherwise), and this character is passed to
 		(set-face-foreground 'mode-line (cdr color))))))
 
 ;; move to mode ext
-;; (loop for (mode . state) in '((inferior-emacs-lisp-mode . emacs)
-;;                               (inferior-lisp-mode . emacs)
-;;                               (inferior-octave-mode . emacs)
-;;                               (shell-mode . emacs)
-;;                               (git-commit-mode . emacs)
-;;                               (git-rebase-mode . emacs)
-;;                               (term-mode . emacs)
-;;                               (help-mode . emacs)
-;;                               (helm-grep-mode . emacs)
-;;                               (grep-mode . emacs)
-;;                               (bc-menu-mode . emacs)
-;;                               (magit-branch-manager-mode . emacs)
-;;                               (rdictcc-buffer-mode . emacs)
-;;                               (dired-mode . emacs)
-;;                               (wdired-mode . normal))
-;;       do (evil-set-initial-state mode state))
+(loop for (mode . state) in '((inferior-emacs-lisp-mode . emacs)
+                              (inferior-lisp-mode . emacs)
+                              (inferior-octave-mode . emacs)
+                              (shell-mode . emacs)
+                              (git-commit-mode . emacs)
+                              (git-rebase-mode . emacs)
+                              (term-mode . emacs)
+                              (help-mode . emacs)
+                              (helm-grep-mode . emacs)
+                              (grep-mode . emacs)
+                              (bc-menu-mode . emacs)
+                              (magit-branch-manager-mode . emacs)
+                              (rdictcc-buffer-mode . emacs)
+                              (dired-mode . emacs)
+                              (wdired-mode . normal))
+      do (evil-set-initial-state mode state))
+
+
+(defun alf/key-chord-undefine (keys)
+  "Undefine the key chord identified by KEYS.
+This should be done by key-chord-unset-global, however that
+does not work for me."
+  (let ((key1 (logand 255 (aref keys 0)))
+        (key2 (logand 255 (aref keys 1))))
+    (if (eq key1 key2)
+        (global-unset-key (vector 'key-chord key1 key2))
+      ;; else
+      (global-unset-key (vector 'key-chord key1 key2))
+      (global-unset-key (vector 'key-chord key2 key1)))))
+;;(alf/key-chord-undefine "df")
 
 (provide 'mb-evil)
