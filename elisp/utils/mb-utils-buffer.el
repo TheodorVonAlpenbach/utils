@@ -304,22 +304,20 @@ see `bol'"
 	(fill-paragraph-function nil))
     (fill-paragraph)))
 
-;;;; time paragraphs (used by LS-notes and arbeidslog)
-;;;; time paragraphs:
+;;;; time paragraphs (used arbeidslog, for instance):
+(defconst time-paragraph-start (format "^%s " (iso-time-regexp)))
+
 (defun in-time-paragraph-p ()
-  "Returns non-nil iff point is in the Octave documentation.
-Currently only the documentation of the main function is
-supported. To implement the general version we need to know if we
-are between functions."
+  "Returns non-nil iff point is in a time paragraph."
   (save-excursion
-    (string-match (format "^%s " (iso-time-regexp)) (paragraph-string))))
+    (string-match time-paragraph-start (paragraph-string))))
 
 (defun fill-time-paragraph (&optional justify region)
   "A fill-paragraph-function suited for time paragraphs.
 See arbeidslog for an example of a time paragraph"
   (interactive)
   (if (in-time-paragraph-p)
-    (progn
+    (let ((paragraph-start time-paragraph-start))
       (flatten-paragraph)
       (let ((fill-prefix "      ")
 	    (fill-paragraph-function nil))
