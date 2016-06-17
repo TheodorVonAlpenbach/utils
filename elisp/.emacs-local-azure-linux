@@ -6,6 +6,8 @@
 (setf *local-load-paths* '("~/sources/imms/src/elisp/"
 			   "~/sources/elisp/lsconfig/"))
 
+(setf *local-requires* '(lsconf-mode))
+
 ;; Sentences, see info node Sentences
 (setf sentence-end "[.?!][]\"')]*\\($\\|\t\\| \\)[ \t\n]*")
 (setf sentence-end-double-space nil)
@@ -43,6 +45,9 @@
 	(,+mb-lisp-dir+ "quiz/qp.el")
 	(,+mb-lisp-dir+ "global/LS.el")
 
+	;; local scripts
+	(,+home-dir+ "bin/ilmctrl.py")
+	
 	;; common lisp utils
 	(,+home-dir+ "projects/utils/lisp/mb-utils.lisp")
 
@@ -53,10 +58,10 @@
 	(,+home-dir+ "sources/imms/src/lisp/wave/wave.lisp")
 
 	;; remote files (shared with windows)
-	("/ssh:sil:~/doc" "arbeidslog" :point :end :keyboard :no)
+	("/ssh:sil:~/doc" "arbeidslog" :point :end :keyboard :no :time-paragraphs t)
 	("/ssh:sil:~/doc" "adresser.txt" :keyboard :no)
 	("/ssh:sil:~/doc" "todo.org" :keyboard :no)
-	("/ssh:sil:~/doc" "LS-notes.org" :point :end :keyboard :no)))
+	("/ssh:sil:~/doc" "LS-notes.org" :point :end :keyboard :no :time-paragraphs t)))
 ;;(find-file "/ssh:sil:~/doc")
 
 ;;scheme
