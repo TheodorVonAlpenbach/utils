@@ -174,17 +174,7 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 ;; smartparens
 (add-to-list 'load-path "~/.emacs.d/smartparens-master")
 
-;;paredit
-;;(require 'paredit)
-;;(require 'mb-evil)
-
-;; slime
-;;(add-to-list 'load-path (concat *site-lisp-dir* "slime/")) ; your SLIME directory
-;;(require 'slime)
-;;(slime-setup)
-
-;;(autoload 'php-mode "php-mode" "Major mode for editing php code." t)
-;;(autoload 'backus-naur-mode "backus-naur-mode" "Major mode for editing BNF definitions." t)
+;; Move this to mode-extensions 
 (autoload 'LilyPond-mode "lilypond-mode" "Major mode for editing BNF definitions." t)
 (autoload 'mbscilab-mode "scilab-mode" "Major mode for editing Scilab files." t)
 
@@ -192,7 +182,7 @@ Not in use. Projects should be shared, at least until we are up and running Git.
        '(("\\.h$\\|\\.cpp$" . c++-mode)	; first overules of original alist
 	 ("\\.\\(lisp\\|asd\\)$" . mb-lisp-mode)
 	 ("\\.el$\\|\\.emacs$\\|\\.emacs-local-" . emacs-lisp-mode)
-	 ("\\.bash\\(rc\\|_profile\\)\\|\\.sh$" . sh-mode)
+	 ("\\.bash\\(rc\\|_profile\\)\\|\\.sh\\|\\.profile$" . sh-mode)
 	 ("\\.emacs-local-" . emacs-lisp-mode) ; then safe additions
 	 ("\\.pdmkvars$" . makefile-mode)
 	 ("\\.pdmkroot$" . makefile-mode)
@@ -260,16 +250,16 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 ;; autoload?
 
 (loop for m in (append '(global-map
-;;			 lisp-map
 			 elisp-map
 			 mb-things
 			 radio-playlists
 			 mb-lisp
+			 mb-python
+			 mb-octave
 			 list-db
 			 mbscilab
 			 dic-map
-			 ;; maths
-			 )
+			 mb-indent)
 		       *local-requires*)
       do (require m))
 ;;(require 'radio-playlists)
@@ -322,11 +312,11 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 		(when (eql it :none)
 		  (auto-fill-mode -1)))
 	 (awhen (getf (rest (rest x)) :hook)
-		(funcall it)))))
+		(funcall it))
+	 (awhen (getf (rest (rest x)) :time-paragraphs)
+		(setf fill-paragraph-function #'fill-time-paragraph)))))
  *my-favorites*)
 
-;;(require 'elkem ".elkem")
-;;(set-locals-arbeidslog)
 (require 'qp)
 
 ;;;; Stuff for debugging init phase
@@ -443,9 +433,5 @@ A unit test is a line prefixed by ';;(' and of the form given by
 ;;; Make this emacs the client server
 (require 'server)
 (unless (server-running-p) (server-start))
-
-(awhen (get-buffer "arbeidslog")
-  (with-buffer it
-    (setf fill-paragraph-function #'fill-time-paragraph)))
 
 (pushnew "\\.\\(dvi\\|aux\\|out\\|bbl\\|blg\\)\\'" ido-ignore-files)
