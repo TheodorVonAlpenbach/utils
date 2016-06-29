@@ -26,12 +26,49 @@
 (setf evil-move-beyond-eol t)
 (define-key global-map "\M-x" 'execute-extended-command)
 (define-key evil-normal-state-map "\M-x" 'execute-extended-command)
+(define-key evil-normal-state-map " " 'scroll-up-command)
+
+(add-hook 'emacs-lisp-mode-hook #'evil-cleverparens-mode)
 
 (require 'key-chord)
 (key-chord-mode 1)
 (key-chord-define evil-insert-state-map "df" 'evil-normal-state)
 (key-chord-define evil-normal-state-map "vn" 'ido-switch-buffer)
 (key-chord-define evil-normal-state-map "vs" 'smart-swap)
+
+;; TODO: move these two defuns elsewhere
+(defun eval-form ()
+  (interactive)
+  (save-excursion
+    (evil-cp-up-sexp 1)
+    (forward-char 1)
+    (eval-last-sexp nil)))
+
+(defun eval-current-sexp ()
+  (interactive)
+  (save-excursion
+    (forward-sexp 1)
+    (eval-last-sexp nil)))
+;;(+ (+ 111 2) 3)
+
+(defun eval-defun-test ()
+  (interactive)
+  (eval-defun nil)
+  (evil-cp-end-of-defun)
+  (eol :offset 1)
+  (eval-last-sexp nil))
+;;(eval-defun-test)
+
+(let ((eval-map (make-sparse-keymap)))
+  (key-chord-define evil-normal-state-map "kj" eval-map)
+  (define-key eval-map "d" #'eval-defun)
+  (define-key eval-map "b" #'eval-buffer)
+  (define-key eval-map "r" #'eval-region)
+  (define-key eval-map "l" #'eval-last-sexp)
+  (define-key eval-map "f" #'eval-form)
+  (define-key eval-map "c" #'eval-current-sexp)
+  (define-key eval-map "t" #'eval-defun-test))
+
 
 (defun mb-normal-state-init ()
   (key-chord-mode 1))
