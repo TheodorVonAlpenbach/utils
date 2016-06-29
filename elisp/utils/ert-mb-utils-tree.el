@@ -1,0 +1,16 @@
+(require 'ert)
+(require 'mb-utils-tree)
+
+(ert-deftest test-copy-tree ()
+  "Test of nminimum-nokey"
+  (should (equal (copy-tree nil) nil))
+  (should (equal (copy-tree 1) 1))
+  (let ((x '(1)))
+    (should (equal x (copy-tree x)))
+    (should (not (eql x (copy-tree x)))))
+  (let* ((x '(1 . 2))
+	(cx (copy-tree x)))
+    (should (equal x cx))
+    (should (not (eql x cx)))
+    (setf (car x) 2)
+    (should (not (equal x cx)))))
