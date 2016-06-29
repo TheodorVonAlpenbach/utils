@@ -259,6 +259,7 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 			 list-db
 			 mbscilab
 			 dic-map
+			 evil
 			 mb-indent)
 		       *local-requires*)
       do (require m))
