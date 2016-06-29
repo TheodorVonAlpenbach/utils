@@ -377,6 +377,10 @@ IN may also be a function (fn i), taking an index argument, see `infix-list'."
 ;(concat* '("1" "2" "3") :in "\n" :indent-string ">>")
 ;;(concat* '("" "" "3") :in "\n" :indent-string ">>")
 
+(defun lines-to-string (lines)
+  (concat* lines :in "\n"))
+;;(lines-to-string '("first" "next" "last"))
+
 (defun string-to-lines (string &optional remove-empty-p)
   "Returns a list of strings, each string being line substring in
 STRING."
