@@ -169,6 +169,10 @@ Note that line numbers and paragraph numbers (check) starts from base 0."
     (goto-char point)
     (insert thing)))
 
+(defun overwrite-region (string beg end &optional buffer)
+  (kill-region beg end)
+  (insert-at string beg))
+
 (defun next-line-point () "Return position of point after nextline"
   (save-excursion
     (next-line 1)
