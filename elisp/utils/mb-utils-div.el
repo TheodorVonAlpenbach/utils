@@ -73,8 +73,16 @@ If no arguments is given, t is returned."
 (defmacro nand (&rest conditions) "Nand." `(not (and ,@conditions)))
 (defmacro nor (&rest conditions) "Nor." `(not (or ,@conditions)))
 (def-edebug-spec nor t)
-(defmacro xor (a b) "Exclusive or." `(if ,a (not ,b) ,b))
-(defmacro xnor (a b) "Exclusive nor." `(not (xor ,a ,b)))
+
+(defun xor (&rest conditions)
+  "Return nil iff there are an even number of conditions that evaluates to nil."
+  (oddp (count nil conditions)))
+;;(xor t nil t)
+
+(defmacro xnor (&rest conditions)
+  "Return nil iff there are an even number of conditions that evaluates to non nil."
+  (oddp (count-if (complement #'null) conditions)))
+;;(xnor t t nil)
 
 ;; push/pop
 (cl-defmacro pop* (place &optional (n 1) reverse)
@@ -185,8 +193,8 @@ simplicity:
 
 TODO: implement this. Probably involves some macro magic"
   (lexical-let ((f function)
-		(fargs (llist fixed-arguments))
-		(positions (llist fixed-argument-positions)))
+		(fargs (listify fixed-arguments))
+		(positions (listify fixed-argument-positions)))
     (function 
      (lambda (&rest args)
        (let* ((args* (copy-list args))
@@ -391,8 +399,8 @@ ELT B))."
   "Project SEQUENCE according to PROJECTION-ARGS."
   (coerce (mapcar #'(lambda (x) (project x projection-args)) sequence)
 	  (type-of-super sequence)))
-;;(project-sequence '("01" "09") (list 1))
-;;(mapcar #'first (project-sequence '((1 2 3) (1 2 3)) 1))
+;;(project-sequence '("01" "09") 1)
+;;(mapcar #'first (project-sequence '((1 2 3) (4 5 6)) 1 2))
 
 (cl-defmacro dolines ((line string &optional result) body)
   "(dolines (LINE STRING [RESULT]) BODY...): loop over lines in a
