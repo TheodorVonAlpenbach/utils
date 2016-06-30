@@ -249,7 +249,8 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 ;; files. Also, the files should be byte-compiled too.
 ;; autoload?
 
-(loop for m in (append '(global-map
+(loop for m in (append '(mb-evil
+			 global-map
 			 elisp-map
 			 mb-things
 			 radio-playlists
@@ -259,7 +260,6 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 			 list-db
 			 mbscilab
 			 dic-map
-			 evil
 			 mb-indent)
 		       *local-requires*)
       do (require m))
