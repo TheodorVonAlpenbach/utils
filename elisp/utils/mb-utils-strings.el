@@ -284,7 +284,7 @@ NEWSTRING."
     (while (re-search-forward regexp nil t)
       (replace-match newstring nil nil))
     (buffer-string)))
-;(string-replace (setq string-replace-test-string "ababab") "b" "c")
+;;(string-replace (setq string-replace-test-string "ababab") "b" "c")
 
 (defun substitute-string (string subst-string from to)
   "Removes substring [FROM TO) from STRING and inserts
