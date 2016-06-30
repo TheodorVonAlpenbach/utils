@@ -1,6 +1,3 @@
-;;(require 'lisp-config)
-(require 'cl-indent)
-
 ;;;; Lisp indentation.
 
 ;;;; The main idea is to let general-lisp-indent-function be the
@@ -37,6 +34,9 @@
 ;;     b          c	       d)                 d)    
 ;;   c            d)
 ;;   d)         
+
+;;(require 'lisp-config)
+(require 'cl-indent)
 
 (load-library "cl-indent")
 ;;(setq lisp-indent-function #'general-lisp-indent-function) probably bad new proposal
@@ -96,7 +96,8 @@ SYMBOL can be a symbol or a list of symbols. See function
 
 (cl-indent '(do-lines defmethod with-infile defclass with-outfile
 	     read-csv string-replace-intv remove*
-	     put-text-property do-tuples/o draw)
+	     put-text-property do-tuples/o draw
+	     substitute-if)
   'prog2)
 
 (cl-indent '(for define-derived-mode defun-ajax)
