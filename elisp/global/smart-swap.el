@@ -50,4 +50,3 @@
       (message "Couldn't find swap target for current file")))
 
 (provide 'smart-swap)
-
