@@ -1,7 +1,8 @@
 ;;; Swap files. For older versions, see archive.
 
 (defconst +smart-swaps+
-  '((tex pdf)
+  '((("\\(.emacs\\)$" 1) ".emacs-local-azure-cygwin")
+    (tex pdf)
     (ly pdf)
     (gp pdf)
     (cpp h :search 1)
@@ -18,7 +19,10 @@
 ;;(substitute-extension (buffer-file-name) 'ly)
 
 (defun expand-swap-target (expr)
-  (cond	((symbolp expr) (substitute-extension (buffer-file-name) expr))
+  (cond	((symbolp expr)
+	 (substitute-extension (buffer-file-name) expr))
+	((stringp expr)
+	 expr)
 	((consp expr)
 	 (string-match* (first expr) (buffer-string-no-properties) :num (second expr)))))
 ;;(swap-target '("filename='\\(.*\\)'" 1))
