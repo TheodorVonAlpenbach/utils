@@ -38,6 +38,7 @@
 	(,+mb-lisp-dir+ "lisp/mb-indent.el")
 	(,+mb-lisp-dir+ "external/scilab/mbscilab.el")
 	(,+mb-lisp-dir+ "mode-extensions/mb-lisp.el")
+	(,+mb-lisp-dir+ "mode-extensions/mb-evil.el")
 	(,+mb-lisp-dir+ "mode-extensions/mb-octave.el")
 	(,+mb-lisp-dir+ "mode-extensions/mb-tex.el")
 	(,+mb-lisp-dir+ "browser/lynx.el")
