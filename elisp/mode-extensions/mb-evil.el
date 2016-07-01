@@ -20,7 +20,7 @@
 (require 'evil)
 (require 'evil-cleverparens)
 (require 'evil-cleverparens-text-objects)
-(require 'evil-org)
+;;(require 'evil-org) ; does not work
 
 (evil-mode 1)
 (setf evil-move-beyond-eol t)
