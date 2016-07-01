@@ -100,26 +100,22 @@ signaled otherwise), and this character is passed to
       (quail-input-method (first result))
       (error "Unexpected output from KEY-CHORD-INPUT-METHOD: %S" result))))
 
+(defun mb-key-chord-advice (x)
+  (setq input-method-function 'key-chord-input-method))
+;; activate-input-method overrides input-method-function, so therfore:
+(advice-add #'activate-input-method :after #'mb-key-chord-advice)
+
 (defun mb-insert-state-init ()
-  (key-chord-mode 1)
+  ;;(key-chord-mode 1)
   (when (member (buffer-name) '("arbeidslog" "todo.org" "log.org"))
-    (activate-input-method 'norwegian-keyboard)
-    ;; now, activate-input-method overrides input-method-function, so therfore:
-    (setq input-method-function 'key-chord-input-method)
-    (advice-add #'key-chord-input-method :filter-return #'quailify-key-chord-input-method)
-    ))
+    (activate-input-method 'norwegian-keyboard))
+  (advice-add #'key-chord-input-method
+	      :filter-return #'quailify-key-chord-input-method))
+(add-hook 'evil-insert-state-entry-hook #'mb-insert-state-init)
 
 (defun mb-insert-state-cleanup ()
-  ;;(key-chord-define evil-insert-state-map "df" 'evil-normal-state)
-  (setq input-method-function nil)
-  (advice-remove #'key-chord-input-method #'quailify-key-chord-input-method)
-  )
-
-;;(add-hook 'evil-insert-state-entry-hook 'mb-insert-state-init)
-;;(remove-hook 'evil-insert-state-entry-hook 'mb-insert-state-init)
-;; evil-insert-state-exit-hook
-;;(add-hook 'evil-insert-state-exit-hook 'mb-insert-state-cleanup)
-;;(remove-hook 'evil-insert-state-exit-hook 'mb-insert-state-cleanup)
+  (advice-remove #'key-chord-input-method #'quailify-key-chord-input-method))
+(add-hook 'evil-insert-state-exit-hook #'mb-insert-state-cleanup)
 
 (lexical-let ((default-color (cons (face-background 'mode-line)
 				   (face-foreground 'mode-line))))
