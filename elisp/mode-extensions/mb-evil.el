@@ -85,16 +85,22 @@
 ;;(add-hook 'evil-normal-state-entry-hook 'mb-normal-state-init)
 
 (defun quailify-key-chord-input-method (result)
-  "Modifies if necessary the RESULT of `key-chord-input-method'
+  "Modify the RESULT of `key-chord-input-method'.
 If RESULT is a key-chord, i.e. it is a list on the form
 \(KEYCHORD CHAR1 CHAR2 ...\), RESULT is returned unmodified. If
 not, RESULT should be a list of one character (an error is
-signaled otherwise), and this character is passed to
-`quail-input-method' which result is finally returned."
-  (if (and (listp result)
-	   (> (length result) 2)
-	   (eql (first result) 'key-chord))
+signaled otherwise). In this case, if `current-input-method' is
+\"norwegian-keyboard\", this character is passed to
+`quail-input-method' which result is returned. If
+`current-input-method' is nil \(or another language the the above
+mentioned\) RESULT is returned unmodified."
+  (if (or (not current-input-method)
+	  (string/= current-input-method "norwegian-keyboard")
+	  (and (listp result)
+	       (> (length result) 2)
+	       (eql (first result) 'key-chord)))
     result
+    ;; else translate RESULT with quail:
     (if (and (listp result)
 	     (= (length result) 1))
       (quail-input-method (first result))
