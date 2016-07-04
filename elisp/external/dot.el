@@ -8,7 +8,7 @@ where each element defines a dot node property \(name . value)"
 ;;(dot-node-base 'n '((label . "nodeName") (fillcolor . yellow) (style . filled)))
 
 (defconst *dot-dir* (concat *local-data-dir* "dot/"))
-(defun* dot-node (identifier &optional name (color "white") (style "filled"))
+(cl-defun dot-node (identifier &optional name (color "white") (style "filled"))
   (dot-node-base identifier (list (cons 'label name)
 				  (cons 'fillcolor color)
 				  (cons 'style style))))
@@ -18,7 +18,7 @@ where each element defines a dot node property \(name . value)"
   (format "%s -> %s;" parent-identifier child-identifier))
 ;;(dot-relation "A" "B")
 
-(defun* dot-statements-from-tree (tree &optional (node-address ()))
+(cl-defun dot-statements-from-tree (tree &optional (node-address ()))
   (let* ((identifier (concat* node-address :in "" :key #'char-to-string))
 	 (parent-identifier (concat* (butlast node-address) :in "" :key #'char-to-string))
 	 (node (if node-address (dot-node identifier (sstring tree))))
@@ -37,17 +37,21 @@ where each element defines a dot node property \(name . value)"
 ;;;; printing
 (defun dot-tmp-path (dot-string)
   (concat temporary-file-directory (md5 dot-string)))
+;;(dot-tmp-path "qwe")
 
-(defun* dot-to-png (dot-string &optional (tmp-path (dot-tmp-path dot-string)))
+(cl-defun dot-to-png (dot-string &key (path (dot-tmp-path dot-string)))
   "Returns path to generated PNG file"
-  (string-to-file dot-string tmp-path)
-  (let ((res (call-process "dot.exe" nil "*qwe*" nil tmp-path "-Tpng" "-O")))
+  (string-to-file dot-string path)
+  (let ((res (call-process "dot.exe" nil "*qwe*" nil path "-Tpng" "-O")))
     (if (zerop res)
-      (concat tmp-path ".png")
-      (error "Couldn't compile .dot file %s. See *qwe* for reason." tmp-path))))
+      (concat path ".png")
+      (error "Couldn't compile .dot file %s. See *qwe* for reason." path))))
+;;(dot-to-png (dot-string (dot-statements-from-tree '((c f) g c))))
 
-(defun* dot-view (dot-string &optional (tmp-path (dot-tmp-path dot-string)))
-  (png-view (dot-to-png dot-string tmp-path)))
+(cl-defun dot-view (dot-string &key (path (dot-tmp-path dot-string)))
+  (png-view (dot-to-png dot-string :path path)))
+;;(dot-view (dot-string (dot-statements-from-tree '(((c f) g c)))))
+;;(dot-view (file-string "~/projects/dot/CHESS-process.gv"))
 
 (defun png-view (filename)
   (browse-url filename))
