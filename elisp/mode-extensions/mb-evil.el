@@ -77,6 +77,7 @@
   (define-key eval-map "l" #'eval-last-sexp)
   (define-key eval-map "f" #'eval-form)
   (define-key eval-map "c" #'eval-current-sexp)
+  (define-key eval-map "e" #'eval-expression)
   (define-key eval-map "t" #'eval-defun-test))
 
 
