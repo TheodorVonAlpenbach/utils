@@ -3,6 +3,7 @@
 (require 'mu-general)
 (require 'gchord)
 (require 'segmentation)
+(require 'dot)
 
 (defun dch-valid-schord (schord)
   (awhen (schosk-info-chord-type (schordx-to-schosk-info (schord-to-schordx schord)))
@@ -199,38 +200,6 @@ where each element defines a dot node property \(name . value)"
 ;;(dch-tree-view '(((7 10 2) dominant (((2 6 9 0) leaf) ((7 10 2) leaf)))))
 ;;(dch-tree-view (dch-test-tree))
 ;;(dch-tree-to-dot-string (dch-test-tree))
-
-;;;; dot utils
-(defconst *dot-dir* (concat *local-data-dir* "dot/"))
-
-(defun dot-tmp-path (dot-string)
-  (concat temporary-file-directory (md5 dot-string)))
-
-(defun dot-file-to-pgn (path)
-  (let ((res (call-process "dot" nil "*qwe*" nil path "-Tpng" "-O")))
-    (if (zerop res)
-      (concat path ".png")
-      (error "Couldn't compile .dot file %s. See *qwe* for reason." path))))
-;;(dot-file-to-pgn "c:/Users/Theodor/Documents/data/dot/test.dot")
-
-(defun* dot-to-png (dot-string &optional (tmp-path (dot-tmp-path dot-string)))
-  "Returns path to generated PNG file"
-  (string-to-file dot-string tmp-path)
-  (let ((res (call-process "dot" nil "*qwe*" nil tmp-path "-Tpng" "-O")))
-    (if (zerop res)
-      (concat tmp-path ".png")
-      (error "Couldn't compile .dot file %s. See *qwe* for reason." tmp-path))))
-;;(dot-to-png "")
-
-(defun png-view (filename)
-  (browse-url filename))
-;;(png-view "c:/Users/Theodor/Documents/data/dot/test.dot.png")
-(defun pdf-view (filename)
-  (browse-url filename))
-
-(defun* dot-view (dot-string &optional (tmp-path (dot-tmp-path dot-string)))
-  (png-view (dot-to-png dot-string tmp-path)))
-;;(dot-view (file-to-string (concat *local-data-dir* "dot/test.dot")))
 
 ;;;; Conversion to chromes (pitch classes)
 (defun dch-sc-to-chrome-node (sc-node parent-chord)
