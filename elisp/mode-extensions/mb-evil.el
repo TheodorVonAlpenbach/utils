@@ -37,13 +37,56 @@
 (key-chord-define evil-normal-state-map ";j" 'save-buffer)
 (key-chord-define evil-normal-state-map "vn" 'ido-switch-buffer)
 
+(defun ffap-read-file-or-url-no-prompt (prompt guess)
+  "Same as `ffap-read-file-or-url' but without prompting."
+  (or guess (setq guess default-directory))
+  (let (dir)
+    (unless (ffap-url-p guess)
+      (unless (ffap-file-remote-p guess)
+	(setq guess
+	      (abbreviate-file-name (expand-file-name guess))))
+      (setq dir (file-name-directory guess)))
+    (or (ffap-url-p guess)
+	(substitute-in-file-name guess))))
+
+(defun ffap-no-prompt (&optional filename)
+  "Same as `ffap' but without prompting."
+  (interactive)
+  (advice-add #'ffap-read-file-or-url :override #'ffap-read-file-or-url-no-prompt)
+  (ffap filename)
+  (advice-remove #'ffap-read-file-or-url #'ffap-read-file-or-url-no-prompt))
+
+(defun ffap-previous ()
+  (interactive)
+  (ffap-next t))
+
+(defun rotate-windows ()
+  "Rotate windows."
+  (interactive)
+  (loop with buffers = (loop for w in (window-list) collect (window-buffer w))
+	for b in (rotate-list buffers)
+	for w in (window-list)
+	do (set-window-buffer w b)))
+;;(rotate-windows)
+
 (let ((swap-map (make-sparse-keymap)))
   (key-chord-define evil-normal-state-map "vo" swap-map)
   (define-key swap-map "v" #'(lambda () (interactive) (switch-to-buffer (other-buffer))))
   (define-key swap-map "s" #'smart-swap)
   (define-key swap-map "b" #'bury-buffer)
   (define-key swap-map "B" #'unbury-buffer)
-  (define-key swap-map "o" #'other-window))
+  (define-key swap-map "o" #'other-window)
+  (define-key swap-map "r" #'rotate-windows)
+  (define-key swap-map "f" #'find-file)
+  (define-key swap-map "a" #'ffap-no-prompt)
+  (define-key swap-map "n" #'ffap-next)
+  (define-key swap-map "N" #'ffap-previous)
+  (define-key swap-map "k" #'kill-buffer))
+
+(let ((insert-map (make-sparse-keymap)))
+  (key-chord-define evil-normal-state-map "vi" insert-map)
+  (define-key insert-map "d" #'insert-date)
+  (define-key insert-map "t" #'insert-time))
 
 ;; TODO: move these two defuns elsewhere
 (defun eval-form ()
