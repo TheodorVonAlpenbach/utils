@@ -599,4 +599,19 @@ consider `buffer-substring-no-properties'"
 	   (if (zerop (mod n 1000)) "" (concat " " (integer-to-literary-string (mod n 1000))))))))
 ;;(mapcar (bind #'integer-to-literary-string nil) (list 21 99 100 100003 most-positive-fixnum))
 
+(defconst +password-special-characters+
+  " !\"#$%&'()*+,-./:;<=>?@[\]^_`{|}~")
+
+(defconst +password-alphanum-characters+
+  (cl-flet ((charexp (from-char to-char)
+	      (loop for c from from-char to to-char collect c)))
+    (apply #'string (append (charexp ?0 ?9) (charexp ?A ?Z) (charexp ?a ?z)))))
+
+(defconst +password-all-characters+
+  (concat +password-special-characters+ +password-alphanum-characters+))
+
+(cl-defun random-string (length &optional (characters +password-alphanum-characters+) seed)
+  (project characters (random-integers length 0 (length characters) seed)))
+;;(random-string 8)"ji5toWVN"
+
 (provide 'mb-utils-strings)
