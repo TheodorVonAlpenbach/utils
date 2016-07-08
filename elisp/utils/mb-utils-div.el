@@ -393,7 +393,7 @@ ELT B))."
 	    (type-of-super sequence))))
 ;;(project '(a b c) '(1 0 2 1))
 ;;(project '(a b c) t)
-;;(project '(a b c) '(2))
+;;(project "abc" '(2))
 
 (defun project-sequence (sequence &rest projection-args)
   "Project SEQUENCE according to PROJECTION-ARGS."
