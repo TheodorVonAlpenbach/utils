@@ -103,10 +103,11 @@
     (eval-last-sexp nil)))
 ;;(+ (+ 111 2) 3)
 
-(defun eval-defun-test ()
+(defun eval-defun-test (&optional no-eval-p)
   (interactive)
   (save-excursion
-    (eval-defun nil)
+    (unless no-eval-p
+      (eval-defun nil))
     (evil-cp-end-of-defun)
     (eol :offset 1)
     (eval-last-sexp nil)))
@@ -121,7 +122,8 @@
   (define-key eval-map "f" #'eval-form)
   (define-key eval-map "c" #'eval-current-sexp)
   (define-key eval-map "e" #'eval-expression)
-  (define-key eval-map "t" #'eval-defun-test))
+  (define-key eval-map "t" #'eval-defun-test)
+  (define-key eval-map "T" #'(lambda () (interactive) (eval-defun-test t))))
 
 
 (defun mb-normal-state-init ()
