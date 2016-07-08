@@ -621,6 +621,11 @@ behavior when the argument is not an integer"
      a))
 ;;(loop for i below 100000 count (= (random-integer 1 3) 3))
 
+(cl-defun random-integers (n &optional (a 0) (b 1) seed)
+  (when seed (random t))
+  (loop repeat n collect (random-integer a b)))
+;;(random-integers 10 1 3 t)
+
 (cl-defun random* (&optional (a 0) (b 1) (integerp nil) seed)
   (if integerp
     (random-integer a b seed)
