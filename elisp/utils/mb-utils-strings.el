@@ -600,18 +600,29 @@ consider `buffer-substring-no-properties'"
 ;;(mapcar (bind #'integer-to-literary-string nil) (list 21 99 100 100003 most-positive-fixnum))
 
 (defconst +password-special-characters+
-  " !\"#$%&'()*+,-./:;<=>?@[\]^_`{|}~")
+  " !\"#$%&'()*+,-./:;<=>?@[\]^_`{|}~"
+  "A string consisting of all non-alphanumeric characters
+commonly used in passwords")
 
 (defconst +password-alphanum-characters+
   (cl-flet ((charexp (from-char to-char)
 	      (loop for c from from-char to to-char collect c)))
-    (apply #'string (append (charexp ?0 ?9) (charexp ?A ?Z) (charexp ?a ?z)))))
+    (apply #'string (append (charexp ?0 ?9) (charexp ?A ?Z) (charexp ?a ?z))))
+  "A string consisting of all alphanumeric characters.")
 
 (defconst +password-all-characters+
-  (concat +password-special-characters+ +password-alphanum-characters+))
+  (concat +password-special-characters+ +password-alphanum-characters+)
+  "A string consisting of all characters commonly used in passwords.")
 
-(cl-defun random-string (length &optional (characters +password-alphanum-characters+) seed)
+(cl-defun random-string (length &optional
+				(characters +password-alphanum-characters+)
+				seed)
+  "Returns a string of lenght LENGHT consisting of random characters.
+The characters are randomly drawn from characters in the string
+CHARACTERS. If this optional parameter is not provided
++PASSWORD-ALPHANUM-CHARACTERS+ is used as default. For optional
+parameter SEED, see `random-integers'."
   (project characters (random-integers length 0 (length characters) seed)))
-;;(random-string 8)"ji5toWVN"
+;;(random-string 8)
 
 (provide 'mb-utils-strings)
