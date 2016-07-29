@@ -253,4 +253,23 @@ If A, B, C are consecutive numbers, the delta for B is (- (/ (+ A C) 2) B)."
   (coerce (deltas-list (coerce sequence 'list)) (type-of sequence)))
 ;;(deltas (vector 0 5 10 14 17 20 22))
 
+(defun center (sequence k &optional right)
+  "Return SEQUENCE's central subsequence of length K.
+If the parity of SEQUENCE's length and K differs, the result
+cannot be perfectly centered. By default, the returned center
+will be offset to the left:
+
+\(center \"01234\" 2\) ==> \"12\"
+
+If optional parameter RIGHT is not nil, the center will be offset
+to the right:
+
+\(center \"01234\" 2 t\) ==> \"23\""
+  (let ((n (length sequence)))
+    (if (> k n)
+      (error "Required center too long for sequence argument")
+      (let ((a (first (funcall (if right #'cl-ceiling #'cl-floor) (- n k) 2))))
+	(subseq sequence a (+ a k))))))
+;;(loop with s = "01234" for k to (length s) collect (center s k t))
+
 (provide 'mb-sequences)
