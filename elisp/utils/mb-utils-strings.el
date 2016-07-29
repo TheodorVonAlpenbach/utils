@@ -625,4 +625,45 @@ parameter SEED, see `random-integers'."
   (project characters (random-integers length 0 (length characters) seed)))
 ;;(random-string 8)
 
+;;; Binary string game (BSG) from a Gad Saad video: To sides plays
+;;; with a binary string, e.g. 010010. You make a move by removing
+;;; either one of the end digits. The sides alternate making a single
+;;; move. Eventually there must be one digit left. The side making
+;;; this last, forced move wins iff the last digit is 1.
+(defun bsg-legal-p (string)
+  (and (stringp string)
+       (string-match "^[01]+$" string)))
+;;(mapcar #'bsg-legal-p '(nil 1 "" "1" "0" "01" "10101" "101013"))
+
+(defun bsg-lost-p (string)
+  "Return nil iff STRING is a theoretically won position.
+A position is lost iff its perfect center substring is either 0,
+11, or 010."
+  (let ((n (length string)))
+    (if (oddp n)
+      (or (string= (center string 1) "0")
+	  (and (> n 1)
+	       (string= (center string 3) "010")))
+      (string= (center string 2) "11"))))
+;;(mapcar #'bsg-lost-p '("0" "010" "11"))
+
+(defun bsg-move (string)
+  "Make a move in the BSG game.
+The result is a pair \(MOVE NEW-STRING\), where MOVE is
+either :left or :right, and indicates from which end of STRING a
+bit has been removed. NEW-STRING is the modified STRING after the
+move has beed made.
+
+If STRING contains only one bit the function only tells if
+you (the other player) win or lose."
+  (if (bsg-legal-p string)
+    (if (= (length string) 1)
+      (message "You %s!" (if (= (char string 0) ?0) "win" "lose"))
+      (let ((left-move (substring string 1)))
+       (if (bsg-lost-p left-move)
+	 (list :left left-move)
+	 (list :right (substring string 0 -1)))))
+    (error "%s is not a legal BSG string!")))
+;;(bsg-move "101")
+
 (provide 'mb-utils-strings)
