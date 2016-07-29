@@ -48,6 +48,9 @@ where each element defines a dot node property \(name . value)"
       (error "Couldn't compile .dot file %s. See *qwe* for reason." path))))
 ;;(dot-to-png (dot-string (dot-statements-from-tree '((c f) g c))))
 
+(defun dot-view-file (path)
+  (png-view (dot-to-png (file-string path))))
+
 (cl-defun dot-view (dot-string &key (path (dot-tmp-path dot-string)))
   (png-view (dot-to-png dot-string :path path)))
 ;;(dot-view (dot-string (dot-statements-from-tree '(((c f) g c)))))
