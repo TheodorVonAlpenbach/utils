@@ -18,7 +18,7 @@
 
 ;; tags
 (setf tags-file-name nil)
-(setf tags-table-list (list +mb-lisp-dir+))
+(setf tags-table-list '("~/.MBTAGS"))
 
 ;; lynx
 (setf *lynx-proxy-dir* (expand-file-name "lynx-proxy" *local-data-dir*))
@@ -58,10 +58,11 @@
 	
 	(,*shared-data-dir* "ferskvare" :point :end :keyboard :no)
 
-	("/ssh:sil:~/doc" "arbeidslog" :point :end :keyboard :no :time-paragraphs t)
-	("/ssh:sil:~/doc" "adresser.txt" :keyboard :no)
-	("/ssh:sil:~/doc" "todo.org" :keyboard :no)
-	("/ssh:sil:~/doc" "LS-notes.org" :point :end :keyboard :no :time-paragraphs t)))
+	;; ("/ssh:sil:~/doc" "arbeidslog" :point :end :keyboard :no :time-paragraphs t)
+	;; ("/ssh:sil:~/doc" "adresser.txt" :keyboard :no)
+	;; ("/ssh:sil:~/doc" "todo.org" :keyboard :no)
+	;; ("/ssh:sil:~/doc" "LS-notes.org" :point :end :keyboard :no :time-paragraphs t)
+	))
 
 ;;scheme
 (setf scheme-program-name "guile")
