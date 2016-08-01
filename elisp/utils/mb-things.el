@@ -1,7 +1,7 @@
 (require 'mb-utils-div)
 
 (defmacro defthing (name regexp)
-  (let* ((symbol (eval name))		;perhaps unnecessary
+  (let* ((symbol (ssymbol name))		;perhaps unnecessary
 	 (bounds (gensym))
 	 (n (gensym))
 	 (point (gensym))
@@ -93,10 +93,12 @@ must be a member of a cycle preceding the cycle of the latter.")
 	   :suf (concat "\\s-w*" *iso-date*)))
 
 ;; Define cyclic things for each list element in *CYCLIC-THINGS*
-(loop for x in *cyclic-things*
-      for name = (first x)
-      for regexp = (regexp-opt (second x))
-      do (defthing name regexp))
+;; Can't do this in a loop because the macro must take a symbol directly
+(defthing 'weekday (regexp-opt (second (assoc 'weekday *cyclic-things*))))
+(defthing 'ukedag (regexp-opt (second (assoc 'ukedag *cyclic-things*))))
+(defthing 'month-short (regexp-opt (second (assoc 'month-short *cyclic-things*))))
+(defthing 'month (regexp-opt (second (assoc 'month *cyclic-things*))))
+(defthing 'måned (regexp-opt (second (assoc 'måned *cyclic-things*))))
 
 ;; Define every leaf node in *CYCLIC-THINGS* as a 'CYCLIC thing
 (defthing 'cyclic (regexp-opt (mapcan #'second (copy-tree *cyclic-things*))))
