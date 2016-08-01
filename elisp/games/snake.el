@@ -1,0 +1,57 @@
+(defvar *current-direction* :east)
+;;(setf *current-direction* :south)
+(defvar *sn-current-status* :not-playing)
+(defvar *sn-buffer* "*SNAKE*")
+(defvar *sn-canvas* '(30 . 10))
+
+(defun get-sn-buffer ()
+  (get-buffer-create *sn-buffer*))
+;;(get-sn-buffer)
+
+(defun sn-quit ()
+  (interactive)
+  (setf *current-status* nil))
+
+(defun sn-draw-canvas (canvas)
+  (destructuring-bind (w . h) canvas
+    (let ((horizontal-frame-bar (make-string (+ 2 w) ?#)))
+      (with-buffer (get-sn-buffer)
+	(insert horizontal-frame-bar)
+	(newline)
+	(loop with intermediate-frame-line = (format "#%s#\n" (make-string w ? ))
+	      for i below h
+	      do (insert intermediate-frame-line))
+	(insert horizontal-frame-bar)))))
+;;(sn-draw-canvas '(30 . 10))
+
+(defun sn-move (start-point tail direction)
+  (with-buffer (get-sn-buffer)
+    (overwrite-mode)
+    (goto-char start-point)
+    (delete-char 1)
+    (insert ? )
+    (let ((new-head (+ start-point
+		       (case direction
+			 (:east 1) (:west -1)
+			 (:south (+ 3 (car *sn-canvas*)))
+			 (:north (- (+ 2 (car *sn-canvas*))))))))
+      (goto-char new-head)
+      (delete-char 1)
+      (insert ?o)
+      (redisplay t)
+      new-head)))
+;;(sn-move 105 nil :east)
+
+(defun snake ()
+  (interactive)
+  (let ((start-point 40)
+	(start-tempo 1)
+	(tail nil))
+    (setf *sn-current-status* :playing)
+    (loop for point = start-point then (sn-move point nil *current-direction*)
+	  while (eql *sn-current-status* :playing)
+	  do (sleep-for 1))))
+;;(snake)
+
+;;(progn (insert ?a) (sleep-for 1) (insert ?a))
+;; (progn (insert-char ?a) (redisplay t) (sleep-for 0 111) (insert ?a))
