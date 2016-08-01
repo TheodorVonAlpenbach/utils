@@ -605,6 +605,15 @@ converted to optional argument NIL-STRING."
     nil-string))
 ;;(loop for x in '(nil :qwe qwe "qwe" 123 -1 (:read 2 3)) collect (sstring x 0 t))
 
+(defun ssymbol (symbol-designator)
+  (cond
+    ((symbolp symbol-designator) symbol-designator)
+    ((stringp symbol-designator) (intern-soft symbol-designator))
+    ((and (consp symbol-designator)
+	  (eql (first symbol-designator) 'quote)
+	  (eval symbol-designator)))))
+;;(mapcar #'ssymbol (list "qwe" '(quote qwe) 'qwe))
+
 (defun iintern (symbol-name)
   (if (stringp symbol-name)
     (if (empty-string-p symbol-name)
