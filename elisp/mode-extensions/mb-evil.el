@@ -79,6 +79,7 @@
   (define-key swap-map "c" #'rotate-windows)
   (define-key swap-map "r" #'revert-buffer)
   (define-key swap-map "f" #'find-file)
+  (define-key swap-map "F" #'find-file-read-only)
   (define-key swap-map "a" #'ffap-no-prompt)
   (define-key swap-map "n" #'ffap-next)
   (define-key swap-map "N" #'ffap-previous)
