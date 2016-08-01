@@ -214,4 +214,10 @@ does not work for me."
       (global-unset-key (vector 'key-chord key2 key1)))))
 ;;(alf/key-chord-undefine "df")
 
+(evil-define-text-object mb-evil-buffer (count &optional beg end type)
+  "Smartparens sexp object."
+  (evil-range (point-min) (point-max) 'inclusive :expanded t))
+
+(define-key evil-outer-text-objects-map "g" #'mb-evil-buffer)
+
 (provide 'mb-evil)
