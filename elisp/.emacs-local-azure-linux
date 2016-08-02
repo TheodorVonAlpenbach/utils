@@ -27,11 +27,8 @@
 ;; diary file (mandatory to use #'calendar)
 (setf diary-file (setf diary-file (expand-file-name "office/diary" *local-data-dir*)))
 
-;; load favorite files (note that nil/t means position cursor at top/bottom)
-;; but first we have to get rid of the tramp file, which may block ssh:
-(let ((tramp-file "~/.emacs.d/tramp"))
-  (when (file-exists-p tramp-file)
-    (delete-file tramp-file)))
+(defconst lsdoc-dir "/ls/gold/u1/mbe/doc"
+  "Mounted silver doc directory")
 
 (setf *my-favorites*
       `((,+mb-lisp-dir+ ".emacs")
@@ -59,10 +56,10 @@
 	(,+home-dir+ "sources/imms/src/lisp/wave/wave.lisp")
 
 	;; remote files (shared with windows)
-	("/ssh:sil:~/doc" "arbeidslog" :point :end :keyboard :no :time-paragraphs t)
-	("/ssh:sil:~/doc" "adresser.txt" :keyboard :no)
-	("/ssh:sil:~/doc" "todo.org" :keyboard :no)
-	("/ssh:sil:~/doc" "LS-notes.org" :point :end :keyboard :no :time-paragraphs t)))
+	(,lsdoc-dir "arbeidslog" :point :end :keyboard :no :time-paragraphs t)
+	(,lsdoc-dir "adresser.txt" :keyboard :no)
+	(,lsdoc-dir "todo.org" :keyboard :no)
+	(,lsdoc-dir "LS-notes.org" :point :end :keyboard :no :time-paragraphs t)))
 ;;(find-file "/ssh:sil:~/doc")
 
 ;;scheme
