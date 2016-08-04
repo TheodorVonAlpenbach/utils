@@ -25,6 +25,7 @@
 (evil-mode 1)
 (setf evil-move-beyond-eol t)
 (add-hook 'emacs-lisp-mode-hook #'evil-cleverparens-mode)
+(add-hook 'lisp-mode-hook #'evil-cleverparens-mode)
 
 ;;; Finally, need to revert .emacs* buffers since they have not yet been
 ;;; hooked by the functionality loaded here
