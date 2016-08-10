@@ -122,10 +122,23 @@
     (eval-last-sexp nil)))
 ;;(eval-defun-test)
 
+(defun gp-eval-buffer ()
+  (interactive)
+  (gnuplot-run-buffer)
+  (let ((filename (string-match* "set[\t ]+output[\t ]+['\"]\\([^'\"]*\\)"
+		    (buffer-string-no-properties) :num 1)))
+    (find-file-other-window filename)))
+
+(defun mb-eval-buffer (&optional args)
+  (interactive)
+  (case major-mode
+    (emacs-lisp-mode (apply #'eval-buffer args))
+    (gnuplot-mode (gp-eval-buffer))))
+
 (let ((eval-map (make-sparse-keymap)))
   (key-chord-define evil-normal-state-map "kj" eval-map)
   (define-key eval-map "d" #'eval-defun)
-  (define-key eval-map "b" #'eval-buffer)
+  (define-key eval-map "b" #'mb-eval-buffer)
   (define-key eval-map "r" #'eval-region)
   (define-key eval-map "l" #'eval-last-sexp)
   (define-key eval-map "f" #'eval-form)
