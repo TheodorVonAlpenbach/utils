@@ -328,4 +328,16 @@ See arbeidslog for an example of a time paragraph"
 	(fill-paragraph justify region)))
     (fill-paragraph justify region)))
 
+(defun rotate-words (beg end)
+  (interactive "r")
+  (let ((n (count-words beg end)))
+    (message "%d words!" n)
+    (when (plusp n)
+      (save-excursion
+	(goto-char beg)
+	(forward-word 1)
+	(loop for i from (1- n) downto 1
+	      do (transpose-words i)
+	      do (backward-word i))))))
+
 (provide 'mb-utils-buffer)
