@@ -328,10 +328,12 @@ See arbeidslog for an example of a time paragraph"
 	(fill-paragraph justify region)))
     (fill-paragraph justify region)))
 
-(defun rotate-words (beg end)
-  (interactive "r")
+
+
+(defun reverse-words-1 (beg end)
+  "Reverse words in region from BEG to END.
+Helper function for `reverse-words'."
   (let ((n (count-words beg end)))
-    (message "%d words!" n)
     (when (plusp n)
       (save-excursion
 	(goto-char beg)
@@ -339,5 +341,16 @@ See arbeidslog for an example of a time paragraph"
 	(loop for i from (1- n) downto 1
 	      do (transpose-words i)
 	      do (backward-word i))))))
+
+(cl-defun reverse-words (&optional (n 1))
+  "Reverse words in active region.
+If region is not active this function is equivalent with
+`transpose-words'."
+  (interactive "^p")
+  (if (use-region-p)
+    (reverse-words-1 (region-beginning) (region-end))
+    (transpose-words n)))
+
+(define-key global-map "\M-t" #'reverse-words)
 
 (provide 'mb-utils-buffer)
