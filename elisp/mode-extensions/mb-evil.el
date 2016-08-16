@@ -41,6 +41,7 @@
 (require 'key-chord)
 (key-chord-mode 1)
 (key-chord-define evil-insert-state-map "df" 'evil-normal-state)
+(key-chord-define evil-insert-state-map "f;" 'yank)
 (key-chord-define evil-normal-state-map ";j" 'save-buffer)
 (key-chord-define evil-normal-state-map "vn" 'ido-switch-buffer)
 
