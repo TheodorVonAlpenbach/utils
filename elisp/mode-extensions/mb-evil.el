@@ -33,9 +33,31 @@
       do (with-current-buffer b (revert-buffer nil t)))
 
 ;;; Keyboard shortcuts
+(defun evil-key-chord-define (state keymap key def &rest bindings)
+  "Bind KEY to DEF in evil STATE in keymap.
+STATE can take the same values as in `evil-define-key'."
+  (let ((aux-maps
+         (cond ((listp state)
+                (mapcar
+                 (lambda (st)
+                   (evil-get-auxiliary-keymap keymap st t))
+                 state))
+               (state
+                (list (evil-get-auxiliary-keymap keymap state t)))
+               (t
+                (list keymap)))))
+    (while key
+      (dolist (map aux-maps)
+	(key-chord-define map key def))
+      (setq key (pop bindings)
+            def (pop bindings)))
+    ;; ensure the prompt string comes first
+    (dolist (map aux-maps)
+      (evil-set-keymap-prompt map (keymap-prompt map)))))
+
 (define-key global-map "\M-x" 'execute-extended-command)
 (define-key evil-normal-state-map "\M-x" 'execute-extended-command)
-(define-key evil-normal-state-map " " 'scroll-up-command)
+(evil-define-key '(normal visual) global-map " " 'scroll-up-command)
 (define-key evil-normal-state-map [return] 'scroll-down-command)
 
 (require 'key-chord)
@@ -43,7 +65,7 @@
 (key-chord-define evil-insert-state-map "df" 'evil-normal-state)
 (key-chord-define evil-insert-state-map "f;" 'yank)
 (key-chord-define evil-normal-state-map ";j" 'save-buffer)
-(key-chord-define evil-normal-state-map "vn" 'ido-switch-buffer)
+(evil-key-chord-define '(normal visual motion) global-map "vn" 'ido-switch-buffer)
 
 (defun ffap-read-file-or-url-no-prompt (prompt guess)
   "Same as `ffap-read-file-or-url' but without prompting."
@@ -78,7 +100,7 @@
 ;;(rotate-windows)
 
 (let ((swap-map (make-sparse-keymap)))
-  (key-chord-define evil-normal-state-map "vo" swap-map)
+  (evil-key-chord-define '(normal motion) global-map "vo" swap-map)
   (define-key swap-map "v" #'(lambda () (interactive) (switch-to-buffer (other-buffer))))
   (define-key swap-map "s" #'smart-swap)
   (define-key swap-map "b" #'bury-buffer)
@@ -242,4 +264,40 @@ does not work for me."
 
 (define-key evil-outer-text-objects-map "g" #'mb-evil-buffer)
 
+(evil-define-operator evil-yank-line (beg end type register yank-handler)
+  "Yank to end of line.
+MB: I have overrided the original evil-yank-line to comform to
+evil-delete-line. I.e. Y yanks the same region as C changes (and
+D deletes). 
+
+This function is simply a clone of `evil-delete-line', with every
+occurence of 'delete' replaced with 'yank'."
+  :motion nil
+  :keep-visual t
+  (interactive "<R><x>")
+  ;; act linewise in Visual state
+  (let* ((beg (or beg (point)))
+         (end (or end beg)))
+    (when (evil-visual-state-p)
+      (unless (memq type '(line block))
+        (let ((range (evil-expand beg end 'line)))
+          (setq beg (evil-range-beginning range)
+                end (evil-range-end range)
+                type (evil-type range))))
+      (evil-exit-visual-state))
+    (cond
+     ((eq type 'block)
+      ;; equivalent to $d, i.e., we use the block-to-eol selection and
+      ;; call `evil-yank'. In this case we fake the call to
+      ;; `evil-end-of-line' by setting `temporary-goal-column' and
+      ;; `last-command' appropriately as `evil-end-of-line' would do.
+      (let ((temporary-goal-column most-positive-fixnum)
+            (last-command 'next-line))
+        (evil-yank beg end 'block register yank-handler)))
+     ((eq type 'line)
+      (evil-yank beg end type register yank-handler))
+     (t
+      (evil-yank beg (line-end-position) type register yank-handler)))))
+
 (provide 'mb-evil)
+
