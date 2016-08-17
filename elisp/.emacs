@@ -149,6 +149,8 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 (find-file +emacs-local+)
 (emacs-lisp-mode)
 
+(find-file (expand-file-name ".emacs" (file-name-directory +emacs-local+)))
+
 ;;; non standard packages
 (require 'package)
 (loop for x in '(("marmalade" . "http://marmalade-repo.org/packages/")
@@ -248,7 +250,6 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 ;; My lisp, finally everything in .emacs should be split into similar
 ;; files. Also, the files should be byte-compiled too.
 ;; autoload?
-
 (loop for m in (append '(mb-evil
 			 global-map
 			 elisp-map
@@ -260,10 +261,32 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 			 list-db
 			 mbscilab
 			 dic-map
-			 mb-indent)
+			 mb-indent
+			 qp)
 		       *local-requires*)
       do (require m))
-;;(require 'radio-playlists)
+
+;; finding favourites
+(mapcar
+ #'(lambda (x) 
+     (save-excursion
+       (let ((path (expand-file-name (second x) (first x)))) 	     
+	 (find-file path)
+	 (awhen (getf (rest (rest x)) :point)
+		(goto-char (case it (:end (point-max)) (t it))))
+	 (awhen (getf (rest (rest x)) :keyboard)
+		(case it 
+		  (:no (activate-input-method 'norwegian-keyboard))))
+	 (awhen (getf (rest (rest x)) :read-only)
+		(toggle-read-only 1))
+	 (awhen (getf (rest (rest x)) :read-only :none)
+		(when (eql it :none)
+		  (auto-fill-mode -1)))
+	 (awhen (getf (rest (rest x)) :hook)
+		(funcall it))
+	 (awhen (getf (rest (rest x)) :time-paragraphs)
+		(setf fill-paragraph-function #'fill-time-paragraph)))))
+ *my-favorites*)
 
 (custom-set-variables
  '(temp-buffer-resize-mode t)
@@ -295,30 +318,6 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 (add-hook 'lisp-mode-hook 'mb-visit-tags-table) ;caters for mb-lisp-mode-hook as well
 (add-hook 'mbscilab-mode-hook 'mb-visit-tags-table)
 (add-hook 'octave-mode-hook 'mb-visit-tags-table)
-
-;; finding favourites
-(mapcar
- #'(lambda (x) 
-     (save-excursion
-       (let ((path (expand-file-name (second x) (first x)))) 	     
-	 (find-file path)
-	 (awhen (getf (rest (rest x)) :point)
-		(goto-char (case it (:end (point-max)) (t it))))
-	 (awhen (getf (rest (rest x)) :keyboard)
-		(case it 
-		  (:no (activate-input-method 'norwegian-keyboard))))
-	 (awhen (getf (rest (rest x)) :read-only)
-		(toggle-read-only 1))
-	 (awhen (getf (rest (rest x)) :read-only :none)
-		(when (eql it :none)
-		  (auto-fill-mode -1)))
-	 (awhen (getf (rest (rest x)) :hook)
-		(funcall it))
-	 (awhen (getf (rest (rest x)) :time-paragraphs)
-		(setf fill-paragraph-function #'fill-time-paragraph)))))
- *my-favorites*)
-
-(require 'qp)
 
 ;;;; Stuff for debugging init phase
 (cl-defun disperse-log-messages-in-buffer (&optional (base-message "qwe"))
