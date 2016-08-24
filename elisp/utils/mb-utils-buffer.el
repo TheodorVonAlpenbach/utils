@@ -178,6 +178,14 @@ Note that line numbers and paragraph numbers (check) starts from base 0."
     (next-line 1)
     (point)))
 
+(cl-defun bos (&optional (n 1))
+  "Move POINT back N sexps and return point"
+  (backward-sexp n) (point))
+
+(cl-defun eos (&optional (n 1))
+  "Move POINT forward N sexps and return point"
+  (forward-sexp n) (point))
+
 (defalias 'region-string 'buffer-substring-no-properties)
 ;;(region-string 1 100)
 
@@ -258,7 +266,9 @@ lines."
 	  (eol :linum (and linums (reduce #'max (listify linums)))))))
 ;;(line-as-region)
 
-(cl-defun line-string (&key to-point from-point restrict-to-current-field with-properties (point (point)))
+(cl-defun line-string (&key to-point from-point
+			    restrict-to-current-field
+			    with-properties (point (point)))
   "Return a string of the line containing point.
 If TO-POINT is true, only the part of line before `point' is
 returned. If FROM-POINT is true, only the part of line after
@@ -327,9 +337,7 @@ See arbeidslog for an example of a time paragraph"
 	    (fill-paragraph-function nil))
 	(fill-paragraph justify region)))
     (fill-paragraph justify region)))
-
-
-
+ 
 (defun reverse-words-1 (beg end)
   "Reverse words in region from BEG to END.
 Helper function for `reverse-words'."
