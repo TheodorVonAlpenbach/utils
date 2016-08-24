@@ -192,6 +192,7 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 	 ("\\.gp$" . gnuplot-mode)
 	 ("Makefile$" . makefile-mode)
 	 ("\\.m$" . octave-mode)
+	 ("\\.py$" . python-mode)
 	 ("\\.ora$" . text-mode)
 	 ("\\.xml$" . text-mode)
 	 ("\\.o$" . hexl-mode)
