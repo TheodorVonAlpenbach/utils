@@ -15,6 +15,7 @@
 ;;;; TODO: auto loading of this file
 ;;;; TODO: auto loading of evil-cleverparens for lisp modes
 ;;;; TODO: tweek keys. L <--> l and H <--> h in evil-cleverparens.
+;;;; TODO: norsk i insert-mode og overwrite-mode
 
 ;;;; Also useful to look at key bindings in ~/.emacs.d/elpa/evil-20160525.1148/evil-maps.el
 (require 'evil)
@@ -60,8 +61,15 @@ STATE can take the same values as in `evil-define-key'."
 (evil-define-key '(normal visual) global-map " " 'scroll-up-command)
 (define-key evil-normal-state-map [return] 'scroll-down-command)
 
+(defun evil-move-past-close ()
+  "Is made for insert state."
+  (interactive)
+  (up-list 1)
+  (insert " "))
+
 (require 'key-chord)
 (key-chord-mode 1)
+(key-chord-define evil-insert-state-map "dg" 'evil-move-past-close)
 (key-chord-define evil-insert-state-map "df" 'evil-normal-state)
 (key-chord-define evil-insert-state-map "f;" 'yank)
 (key-chord-define evil-normal-state-map ";j" 'save-buffer)
@@ -113,6 +121,7 @@ STATE can take the same values as in `evil-define-key'."
   (define-key swap-map "a" #'ffap-no-prompt)
   (define-key swap-map "n" #'ffap-next)
   (define-key swap-map "N" #'ffap-previous)
+  (define-key swap-map "d" #'(lambda () (interactive) (kill-buffer (current-buffer))))
   (define-key swap-map "k" #'kill-buffer))
 
 (let ((insert-map (make-sparse-keymap)))
@@ -121,12 +130,27 @@ STATE can take the same values as in `evil-define-key'."
   (define-key insert-map "t" #'insert-time))
 
 ;; TODO: move these two defuns elsewhere
+(defun mb-eval-string (string &rest args)
+  (case major-mode
+    (mb-lisp-mode (apply #'mb-lisp-eval-1 string args))
+    (emacs-lisp-mode (eval (read string)))))
+;;(mb-eval-string "(+ 2 2)")
+
+
 (defun eval-form ()
   (interactive)
   (save-excursion
     (evil-cp-up-sexp 1)
     (forward-char 1)
     (eval-last-sexp nil)))
+
+(defun mb-eval-last-sexp (&rest args)
+  (interactive)
+  (case major-mode
+    (emacs-lisp-mode (apply #'eval-last-sexp args))
+    (python-mode (apply #'python-shell-send-region
+			(mb-python-last-sexp-region)))
+    (t (mb-eval-region (last-sexp-region)))))
 
 (defun eval-current-sexp ()
   (interactive)
@@ -156,14 +180,15 @@ STATE can take the same values as in `evil-define-key'."
   (interactive)
   (case major-mode
     (emacs-lisp-mode (apply #'eval-buffer args))
-    (gnuplot-mode (gp-eval-buffer))))
+    (gnuplot-mode (gp-eval-buffer))
+    (mb-lisp-mode (mb-lisp-eval-buffer))))
 
 (let ((eval-map (make-sparse-keymap)))
   (key-chord-define evil-normal-state-map "kj" eval-map)
   (define-key eval-map "d" #'eval-defun)
   (define-key eval-map "b" #'mb-eval-buffer)
   (define-key eval-map "r" #'eval-region)
-  (define-key eval-map "l" #'eval-last-sexp)
+  (define-key eval-map "l" #'mb-eval-last-sexp)
   (define-key eval-map "f" #'eval-form)
   (define-key eval-map "c" #'eval-current-sexp)
   (define-key eval-map "e" #'eval-expression)
