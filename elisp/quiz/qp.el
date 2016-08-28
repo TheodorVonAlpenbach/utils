@@ -112,7 +112,7 @@
     (:css-old "qpstyleTAB.css" "webroot")
     (:css "qpstyleTAB.css" "webroot/styles")))
 (defconst +qp-asp-items+ '(:0101 :0102 :0103 :0104 :0105))
-;;(qp-upload :css)
+;;(qp-download :tables)
 
 (defun qp-asp-item-entry (keyword)
   (when (cl-find keyword +qp-asp-items+)
@@ -162,7 +162,7 @@
 ;;;; Table handling
 
 ;;; General config
-(defconst qp-season '(25 "Allmennquiz"))
+(defconst qp-season '(26 "Allmennquiz"))
 (defun qp-season-number () (number-to-string (first qp-season)))
 (defun qp-season-name () (second qp-season))
 
