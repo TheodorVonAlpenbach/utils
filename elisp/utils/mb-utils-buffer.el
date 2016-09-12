@@ -170,8 +170,15 @@ Note that line numbers and paragraph numbers (check) starts from base 0."
     (insert thing)))
 
 (defun overwrite-region (string beg end &optional buffer)
-  (kill-region beg end)
-  (insert-at string beg))
+  (with-current-buffer (or buffer (current-buffer))
+    (kill-region beg end)
+    (insert-at string beg)))
+
+(cl-defun overwrite-line (line linum &optional (buffer (current-buffer)))
+  (destructuring-bind (beg end) (line-region linum buffer)
+    (overwrite-region line beg end buffer)))
+;;(overwrite-line "newline" 2 "*scratch*")
+;;(overwrite-line "newline" 2)
 
 (defun next-line-point () "Return position of point after nextline"
   (save-excursion
@@ -264,7 +271,7 @@ lines."
   (with-buffer buffer
     (list (bol :linum (and linums (reduce #'min (listify linums))))
 	  (eol :linum (and linums (reduce #'max (listify linums)))))))
-;;(line-as-region)
+;;(line-region)
 
 (cl-defun line-string (&key to-point from-point
 			    restrict-to-current-field
