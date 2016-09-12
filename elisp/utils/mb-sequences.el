@@ -202,11 +202,11 @@ respectively.
   (second (apply #'minimum args)))
 ;;(min-position '(1 2 1 3) :key #'1+ :from-end t)
 
-(cl-defun min-element (&rest args)
+(cl-defun min-element (sequence &rest args)
   "Returns minimum element in SEQUENCE
 \nKeywords supported:  :test :key :start :end :from-end
 \n(fn SEQ [KEYWORD VALUE]...)"
-  (first (apply #'minimum args)))
+  (first (apply #'minimum sequence args)))
 ;;(min-element '(1 2 1 3) :key #'1+)
 
 (cl-defun list< (list1 list2 &key (test #'<) (key #'identity))
