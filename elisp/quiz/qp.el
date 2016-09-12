@@ -169,9 +169,10 @@
 
 ;;; Customer config
 (defconst +qp-customers+
-  `((burums "Fru Burums (Oslo)" mandag (1 2) "Burums")
+  `((burums "Fru Burums (Oslo)" mandag
+	    ,(if (eql (emacs-os) :linux) '(0 4)  '(1 5)) "Burums")
     (burums "Fru Burums (Oslo)" mandag (4 5) "Burums")
-    (burums "Fru Burums (Oslo)" mandag (1 5) "Burums") ;;highbury style
+    (burums "Fru Burums (Oslo)" mandag (1 2) "Burums") ;;highbury style
     (burums "Fru Burums (Oslo)" mandag "\\(.*\\) \\([[:digit:]]+\\)$" "Burums") 
     (vertshuset "Vålerenga Verthus (Oslo)" tirsdag (5 6 0) "Vålerenga")
     (highbury "Highbury (Oslo)" torsdag
@@ -185,8 +186,19 @@
   "Whats the third number number?
 Format is (tag pubstring day columns pubregexp)")
 
-(defun qp-customers () (cl-remove-duplicates +qp-customers+ :key #'first :from-end t))
-;;(qp-customers)
+(defun qp-customers (&optional max-column)
+  "Returns a list of qp-customers, and only one entry for each pub.
+If MAX-COLUMN is an integer, then first delete all entries
+calling for a greater number of columns than max-column."
+  
+  (cl-remove-duplicates
+   (if (integerp max-column)
+     (cl-remove-if #'(lambda (x)
+		       (and (listp x) (< (reduce #'max x) max-column)))
+		   +qp-customers+ :key #'qp-customer-columns)
+     +qp-customers+)
+   :key #'first :from-end t))
+;;(qp-customers 3)
 
 (defalias 'qp-customer-pub 'first)
 (defalias 'qp-customer-pub-name 'second)
@@ -198,6 +210,7 @@ Format is (tag pubstring day columns pubregexp)")
 (defsubst qp-customer-round-column (x) (third (qp-customer-columns-list x))) ;optional
 (defalias 'qp-customer-pub-regexp 'fifth)
 ;;(qp-customer-columns (first (qp-customers)))
+;;(qp-customer-score-column (first (qp-customers)))
 ;;(qp-customer-round-column (first (qp-customers)))
 
 ;;; Customer entry
@@ -283,8 +296,10 @@ Iff ALLOW-OVERLAP-P is true then overlapping matches are counted"
 ;;(count-matches-in-string "aa" "aaabaaa" nil)
 
 (cl-defun qp-guess-customer-tag (data &optional (limit 5))
-  (let ((numlines (count 10 data)))
-    (loop for (tag x y z regexp) in (qp-customers)
+  (let* ((lines (string-lines data))
+	 (numlines (length lines))
+	 (numcols (count 13 (first lines))))
+    (loop for (tag x y z regexp) in (qp-customers numcols)
 	  if (> (count-matches-in-string regexp data)
 		(min limit (/ numlines 2)))
 	  return tag)))
@@ -305,7 +320,10 @@ For LIMIT, see qp-guess-customer-tag."
   "Customer is ..."
   (with-buffer (qp-filename :results)
     (goto-char (point-max))
-    (when (re-search-backward (format "%s\t\\([[:digit:]]+\\)\t[^\t]*\t[^\t]*\t%s\t" (qp-season-number) (qp-customer-pub-name customer)))
+    (when (re-search-backward
+	   (format "%s\t\\([[:digit:]]+\\)\t[^\t]*\t[^\t]*\t%s\t"
+	     (qp-season-number) (qp-customer-pub-name customer))
+	   nil t)
       (let ((res (string-to-number (match-string 1))))
 	(when (plusp res) (number-to-string (1+ res)))))))
 ;;(qp-guess-round (first (qp-customers)))
