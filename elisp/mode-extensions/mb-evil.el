@@ -60,6 +60,9 @@ STATE can take the same values as in `evil-define-key'."
 (define-key evil-normal-state-map "\M-x" 'execute-extended-command)
 (evil-define-key '(normal visual) global-map " " 'scroll-up-command)
 (define-key evil-normal-state-map [return] 'scroll-down-command)
+;;(evil-define-key '(motion) global-map [tab] #'forward-button)
+;;(evil-define-key '(normal) global-map [tab] #'self-insert-command)
+;;(define-key global-map [tab] #'self-insert-command)
 
 (defun evil-move-past-close ()
   "Is made for insert state."
@@ -94,6 +97,12 @@ STATE can take the same values as in `evil-define-key'."
   (ffap filename)
   (advice-remove #'ffap-read-file-or-url #'ffap-read-file-or-url-no-prompt))
 
+(defun ffap-no-prompt-read-only (&optional filename)
+  "Same as `ffap-no-prompt' with read only mode."
+  (interactive)
+  (ffap-no-prompt filename)
+  (setf buffer-read-only t))
+
 (defun ffap-previous ()
   (interactive)
   (ffap-next t))
@@ -119,6 +128,7 @@ STATE can take the same values as in `evil-define-key'."
   (define-key swap-map "f" #'find-file)
   (define-key swap-map "F" #'find-file-read-only)
   (define-key swap-map "a" #'ffap-no-prompt)
+  (define-key swap-map "A" #'ffap-no-prompt-read-only)
   (define-key swap-map "n" #'ffap-next)
   (define-key swap-map "N" #'ffap-previous)
   (define-key swap-map "d" #'(lambda () (interactive) (kill-buffer (current-buffer))))
@@ -147,10 +157,10 @@ STATE can take the same values as in `evil-define-key'."
 (defun mb-eval-last-sexp (&rest args)
   (interactive)
   (case major-mode
-    (emacs-lisp-mode (apply #'eval-last-sexp args))
+    (emacs-lisp-mode (eval-last-sexp args))
     (python-mode (apply #'python-shell-send-region
 			(mb-python-last-sexp-region)))
-    (t (mb-eval-region (last-sexp-region)))))
+    (t (apply #'mb-eval-region (last-sexp-region) args))))
 
 (defun eval-current-sexp ()
   (interactive)
