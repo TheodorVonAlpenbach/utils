@@ -116,6 +116,24 @@ STATE can take the same values as in `evil-define-key'."
 	do (set-window-buffer w b)))
 ;;(rotate-windows)
 
+(defun find-tag-no-prompt ()
+  (interactive)
+  (let* ((tagname (find-tag-default))
+	 (buf (find-tag-noselect tagname))
+	 (pos (with-current-buffer buf (point))))
+    (condition-case nil
+	(switch-to-buffer buf)
+      (error (pop-to-buffer buf)))
+    (goto-char pos)))
+;;(find-tag-no-prompt)
+
+(defun find-tag-no-prompt-read-only ()
+  (interactive)
+  (let ((n (length (buffer-list))))
+    (find-tag-no-prompt)
+    (when (> (length (buffer-list)) n)
+      (setf buffer-read-only t))))
+
 (let ((swap-map (make-sparse-keymap)))
   (evil-key-chord-define '(normal motion) global-map "vo" swap-map)
   (define-key swap-map "v" #'(lambda () (interactive) (switch-to-buffer (other-buffer))))
@@ -125,6 +143,8 @@ STATE can take the same values as in `evil-define-key'."
   (define-key swap-map "o" #'other-window)
   (define-key swap-map "c" #'rotate-windows)
   (define-key swap-map "r" #'revert-buffer)
+  (define-key swap-map "T" #'find-tag-no-prompt)
+  (define-key swap-map "t" #'find-tag-no-prompt-read-only)
   (define-key swap-map "f" #'find-file)
   (define-key swap-map "F" #'find-file-read-only)
   (define-key swap-map "a" #'ffap-no-prompt)
@@ -149,10 +169,13 @@ STATE can take the same values as in `evil-define-key'."
 
 (defun eval-form ()
   (interactive)
-  (save-excursion
-    (evil-cp-up-sexp 1)
-    (forward-char 1)
-    (eval-last-sexp nil)))
+  (case major-mode
+    ((emacs-lisp-mode mb-lisp-mode)
+     (save-excursion
+       (evil-cp-up-sexp 1)
+       (forward-char 1)
+       (eval-last-sexp nil)))
+    (octave-mode (octave-send-block))))
 
 (defun mb-eval-last-sexp (&rest args)
   (interactive)
@@ -164,19 +187,33 @@ STATE can take the same values as in `evil-define-key'."
 
 (defun eval-current-sexp ()
   (interactive)
-  (save-excursion
-    (forward-sexp 1)
-    (eval-last-sexp nil)))
+  (case major-mode
+    ((emacs-lisp-mode mb-lisp-mode)
+     (save-excursion
+      (forward-sexp 1)
+      (eval-last-sexp nil)))
+    (octave-mode
+     (save-excursion
+       (octave-send-string
+	(string-match* "#*\\([^#]*\\)" (line-string) :num 1))))))
 ;;(+ (+ 111 2) 3)
 
 (defun eval-defun-test (&optional no-eval-p)
   (interactive)
-  (save-excursion
-    (unless no-eval-p
-      (eval-defun nil))
-    (evil-cp-end-of-defun)
-    (eol :offset 1)
-    (eval-last-sexp nil)))
+  (case major-mode
+    ((emacs-lisp-mode mb-lisp-mode)
+     (save-excursion
+     (unless no-eval-p
+       (eval-defun nil))
+     (evil-cp-end-of-defun)
+     (eol :offset 1)
+     (eval-last-sexp nil)))
+    (octave-mode
+     (save-excursion
+       (unless no-eval-p
+	 (octave-send-defun))
+       (end-of-defun)
+       (eval-current-sexp)))))
 ;;(eval-defun-test)
 
 (defun gp-eval-buffer ()
@@ -191,11 +228,18 @@ STATE can take the same values as in `evil-define-key'."
   (case major-mode
     (emacs-lisp-mode (apply #'eval-buffer args))
     (gnuplot-mode (gp-eval-buffer))
-    (mb-lisp-mode (mb-lisp-eval-buffer))))
+    (mb-lisp-mode (mb-lisp-eval-buffer))
+    (octave-mode (octave-send-buffer))))
+
+(defun mb-eval-defun ()
+  (interactive)
+  (case major-mode
+    (emacs-lisp-mode (eval-defun nil))
+    (octave-mode (octave-send-defun))))
 
 (let ((eval-map (make-sparse-keymap)))
   (key-chord-define evil-normal-state-map "kj" eval-map)
-  (define-key eval-map "d" #'eval-defun)
+  (define-key eval-map "d" #'mb-eval-defun)
   (define-key eval-map "b" #'mb-eval-buffer)
   (define-key eval-map "r" #'eval-region)
   (define-key eval-map "l" #'mb-eval-last-sexp)
