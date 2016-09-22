@@ -18,7 +18,7 @@
 
 ;; tags
 (setf tags-file-name nil)
-(setf tags-table-list (list +mb-lisp-dir+))
+(pushnew "~/.MBTAGS" tags-table-list)
 
 ;; lynx
 (setf *lynx-proxy-dir* (expand-file-name "lynx-proxy" *local-data-dir*))
