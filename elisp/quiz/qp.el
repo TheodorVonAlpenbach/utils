@@ -172,7 +172,8 @@
   `((burums "Fru Burums (Oslo)" mandag
 	    ,(if (eql (emacs-os) :linux) '(0 4)  '(1 5)) "Burums")
     (burums "Fru Burums (Oslo)" mandag (4 5) "Burums")
-    (burums "Fru Burums (Oslo)" mandag (1 2) "Burums") ;;highbury style
+    (burums "Fru Burums (Oslo)" mandag (1 2) "Burums")
+    (burums "Fru Burums (Oslo)" mandag (1 5) "Burums") ;;highbury style
     (burums "Fru Burums (Oslo)" mandag "\\(.*\\) \\([[:digit:]]+\\)$" "Burums") 
     (vertshuset "Vålerenga Verthus (Oslo)" tirsdag (5 6 0) "Vålerenga")
     (highbury "Highbury (Oslo)" torsdag
@@ -276,7 +277,7 @@ Otherwise it is column based."
     (destructuring-bind (team-name team-score) it
       (and (not (empty-string-p team-name))	
 	 (not (empty-string-p team-score))
- 	 (not (zerop (string-to-number team-score)))
+	 (not (zerop (string-to-number team-score)))
 	 (list (qp-season-number)
 	       round
 	       (qp-customer-day customer)
