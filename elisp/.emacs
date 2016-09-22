@@ -191,7 +191,7 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 	 ("\\.bmp$" . hexl-mode)
 	 ("\\.gp$" . gnuplot-mode)
 	 ("Makefile$" . makefile-mode)
-	 ("\\.m$" . octave-mode)
+	 ("\\.m$\\|\\.octaverc" . octave-mode)
 	 ("\\.py$" . python-mode)
 	 ("\\.ora$" . text-mode)
 	 ("\\.xml$" . text-mode)
