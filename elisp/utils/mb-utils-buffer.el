@@ -345,6 +345,26 @@ See arbeidslog for an example of a time paragraph"
 	(fill-paragraph justify region)))
     (fill-paragraph justify region)))
  
+(cl-defun rotate-words-1 (beg end &optional (n 1))
+  "Rotate words in region from BEG to END N times.
+N is optional, and is 1 by default."
+  (let ((nwords (count-words beg end)))
+    (when (plusp nwords)
+      (save-excursion
+	(loop repeat (mod (- n) nwords)
+	  do (goto-char beg)
+	  do (forward-word 1)
+	  do (transpose-words (1- nwords)))))))
+
+(cl-defun rotate-words (&optional (n 1))
+  "Rotate words in active region.
+If region is not active this function is equivalent with
+`transpose-words'."
+  (interactive "^p")
+  (if (use-region-p)
+    (rotate-words-1 (region-beginning) (region-end) n)
+    (transpose-words n)))
+
 (defun reverse-words-1 (beg end)
   "Reverse words in region from BEG to END.
 Helper function for `reverse-words'."
@@ -352,10 +372,9 @@ Helper function for `reverse-words'."
     (when (plusp n)
       (save-excursion
 	(goto-char beg)
-	(forward-word 1)
 	(loop for i from (1- n) downto 1
-	      do (transpose-words i)
-	      do (backward-word i))))))
+	      do (rotate-words-1 (point) end 1)
+	      do (forward-word 1))))))
 
 (cl-defun reverse-words (&optional (n 1))
   "Reverse words in active region.
@@ -366,6 +385,10 @@ If region is not active this function is equivalent with
     (reverse-words-1 (region-beginning) (region-end))
     (transpose-words n)))
 
+
 (define-key global-map "\M-t" #'reverse-words)
 
+(defalias 'reverse-lines #'reverse-region)
+
 (provide 'mb-utils-buffer)
+
