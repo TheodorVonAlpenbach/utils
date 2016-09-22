@@ -194,11 +194,15 @@ calling for a greater number of columns than max-column."
   (cl-remove-duplicates
    (if (integerp max-column)
      (cl-remove-if #'(lambda (x)
-		       (and (listp x) (< (reduce #'max x) max-column)))
+		       (and (listp x) (> (reduce #'max x) max-column)))
 		   +qp-customers+ :key #'qp-customer-columns)
      +qp-customers+)
    :key #'first :from-end t))
 ;;(qp-customers 3)
+
+(defun qp-customer (tag &optional max-column)
+  (find tag (qp-customers max-column) :key #'first))
+;;(qp-customer 'burums 2)
 
 (defalias 'qp-customer-pub 'first)
 (defalias 'qp-customer-pub-name 'second)
@@ -247,6 +251,7 @@ Otherwise it is column based."
 (defun qp-customer-round (customer entry)
   (let ((column (qp-customer-round-column customer)))
     (when (integerp column) (nth column entry))))
+;;(qp-customer-round (car +qp-customers+) '(1))
 
 ;;; Table entry
 (defun qp-table-entry-to-string (entry)
@@ -271,7 +276,7 @@ Otherwise it is column based."
     (destructuring-bind (team-name team-score) it
       (and (not (empty-string-p team-name))	
 	 (not (empty-string-p team-score))
-	 (not (zerop (string-to-number team-score)))
+ 	 (not (zerop (string-to-number team-score)))
 	 (list (qp-season-number)
 	       round
 	       (qp-customer-day customer)
@@ -298,7 +303,7 @@ Iff ALLOW-OVERLAP-P is true then overlapping matches are counted"
 (cl-defun qp-guess-customer-tag (data &optional (limit 5))
   (let* ((lines (string-lines data))
 	 (numlines (length lines))
-	 (numcols (count 13 (first lines))))
+	 (numcols (count 9 (first lines))))
     (loop for (tag x y z regexp) in (qp-customers numcols)
 	  if (> (count-matches-in-string regexp data)
 		(min limit (/ numlines 2)))
@@ -328,11 +333,12 @@ For LIMIT, see qp-guess-customer-tag."
 	(when (plusp res) (number-to-string (1+ res)))))))
 ;;(qp-guess-round (first (qp-customers)))
 
-(defun qp-set-round (customer customer-entry)
+(defun qp-set-round (customer-tag customer-entry)
   "Set current round"
-  (or (qp-customer-round customer customer-entry)
+  (let ((customer (qp-customer customer-tag customer-entry)))
+    (or (qp-customer-round customer customer-entry)
       (qp-guess-round customer)
-      (number-to-string (read-minibuffer "Round: "))))
+      (number-to-string (read-minibuffer "Round: ")))))
 
 (defun qp-legal-table-entries-p (tes)
   (and tes (consp tes)
@@ -341,21 +347,24 @@ For LIMIT, see qp-guess-customer-tag."
 	     always (integerp (read x)))))
 ;;(qp-legal-table-entries-p '(("0" "1" "2a" "3a" "4a" "5a" "6") ("0" "1" "2a" "3a" "4a" "5a" "6")))
 
-(defun qp-customer (tag) (find tag +qp-customers+ :key #'first))
-;;(qp-customer 'burums)
-
 (defun qp-customer-results-to-table-buffer (beg end)
   "TODO: Fix encoding. The region somehow must be converted from utf8 (?) to iso-8859-1."
   (interactive "r")
   ;; (error "Called with customer '%S' in region from %d to %d" customer beg end)
-  (let* ((customer-tag (qp-get-customer-tag (buffer-substring-no-properties beg end)))
+  (let* ((customer-tag (qp-get-customer-tag
+			(buffer-substring-no-properties beg end)))
 	 (customer-entries (qp-customer-entries-from-region beg end))
-	 (round (qp-set-round (qp-customer customer-tag) (first customer-entries)))
+	 (round (qp-set-round customer-tag (first customer-entries)))
 	 (table-buffer (qp-filename :results))
-	 (table-entries (loop with customers = (copy-if (bind #'eql customer-tag) +qp-customers+ :key #'first)
-			      for customer in customers
-			      for tes = (qp-customer-entries-to-table-entries customer customer-entries round)
-			      if (qp-legal-table-entries-p tes) return tes)))
+	 (table-entries
+	  (loop with max-column = (length (first customer-entries))
+		with customers = (copy-if (bind #'eql customer-tag)
+					  (qp-customers max-column)
+					  :key #'first)
+		for customer in customers
+		for tes = (qp-customer-entries-to-table-entries
+			   customer customer-entries round)
+		if (qp-legal-table-entries-p tes) return tes)))
     (qp-insert-table-entries table-entries table-buffer)
     (switch-to-buffer table-buffer)))
 ;;(copy-if (bind #'eql 'burums) +qp-customers+ :key #'first)
