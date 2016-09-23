@@ -129,24 +129,6 @@
 		   (/   0.120858003e-2 (+ z 5.0))
 		   (/  -0.536382e-5    (+ z 6.0))))))))
 
-#|
-
-(exp (fgammln 12.0))
-(gammln 2.0)
-(exp (gammln 6.0))
-
-(round (exp (gammln  3.0d0)))
-(round (exp (gammln  6.0d0)))
-(round (exp (gammln 10.0d0)))
-
-(list (gammln 1.500d0) -0.1207822376)
-(list (gammln 1.825d0) -0.0637301353)
-
-(list (gammln -3.2   ) (log (gamma-function-nbs -3.2)))
-
-|#
-
-
 ;;;; Gamma Function and Log Gamma Function
 
 (defun gamma-function (a)
@@ -163,18 +145,6 @@
     (single-float       (fgammln        a ))
     (otherwise           (gammln        a ))))
 
-
-;;;; Reciprocal of the gamma-function
-
-;;; NBS 6.1.34
-;;;   claims |z| < inf, but don't specify accuracy
-;;;     I restrict |z| < 1
-;;;
-;;; from gamma recurrence relations,
-;;;   (gfi 1+z) = (gfi z) / z
-;;;   (gfi z) = (gfi z-1) / z-1
-;;;   (gfi z) = z (gfi 1+z)
-;;;
 (proclaim '(ftype (function (float) float) gamma-function-reciprocal))
 
 (defun gamma-function-reciprocal (z)
@@ -211,71 +181,7 @@
 	       +0.0000000000000001		;26
 	       ))))
 
-
-;;;; Incomplete Gamma-Function
-
-;;; *** DOES NOT WORK -- gamma* not total & does not produce correct answers
-;;; *** GAMMA-INCOMPLETE bombs on large x
-
-;;; NBS 6.5.4
-;;;   \gamma^*(a,x) is a single valued analytic function with no finite singularities
-;;;   \gamma^*(a,x) = { x^{-a} \over \Gamma(a) } \gamma(a,x)
-;;; NBS 6.5.14
-;;;   (gamma* -n x) = (expt x n)
-;;; NBS 6.5.29
-;;;   \gamma^*(a,x) = (*$ (/$ 1.0 (gamma a))
-;;;                      (sigma (n 0 inf) (/$ (expt (- z) n) (+ a n) n!)))
-;;;
-#|
-(proclaim '(ftype (function (float float) float) gamma* gamma*aux))
-|#
-;;; gamma*aux(a,x) = \Gamma(a) \gamma(a,x)
-#|
-(defun gamma*aux (a z)				; *** GROSS ROUNDOFF ERRORS
-  ;; a > 0 if a is an integer
-  (do ((n    0.0 (1+ n))
-       (term 1.0
-	     (/ (* term (- z))
-		(+ n 1.0)))
-       (sum  0.0))
-      ((progn (setq sum (+ sum (/ term (+ a n))))
-	      (< (abs (/ term (+ a n))) 1.0E-7))
-       sum)
-    (declare (float n term sum))
-    ))
-
-(defun gamma* (a z)
-  (/ (gamma*aux a z) (gamma-function a)))
-|#
-;;; NBS 6.5.4 implies
-;;;   \gamma(a,x) = {\Gamma(a) \over x^{-a}} \gamma^*(a,x)
-;;;   \gamma(a,x) =  \Gamma(a)       x^{ a}  \gamma^*(a,x)
-;;; NBS 6.5.22
-;;;   \gamma(a+1,x) = a \gamma(a,x) - x^{a} e^{-x}
-;;;     \gamma(a,x) = (\gamma(a+1,x)  + x^{a} e^{-x}) / a
-#|
-(defun gamma-function-incomplete (a x)
-  (if (< a 1.0)
-      (/ (+ (gamma-function-incomplete (+ a 1.0) x)
-	    (* (expt x a) (exp (- x))))
-	 a)
-      (* (expt x a) (gamma*aux a x))))
-|#
-;;; NBS 6.5.31
-;;;	x > 0      |a| < inf
-;;; (GAMMA a x) = (exp -x) * (expt x a) *
-;;;      (continued-fraction (1 / x+)
-;;;			     (1-a / 1+) (1 / x+)
-;;;			     (2-a / 1+) (2 / x+)
-;;;			     . . .)
-;;; this GAMMA is really a tail
-;;; (GAMMA a x) = (gamma-function a) - (gamma a x)
-;;;		= (integral x to inf of (exp -t)(expt t a-1) dt)
-;;; (gamma a+1 x) = a (gamma a x) - (exp -x) (expt x a)
-;;; note distinction of LARGE and small gammas
-
-
-;;http://rosettacode.org/wiki/Gamma_function
+;; http://rosettacode.org/wiki/Gamma_function
 (defun upper-incomplete-gamma (a x)
   "Returns Integral(t**(a-1)*e**-t, t = x..inf)"
   (when (or (> a 171) (< x 0))
@@ -304,3 +210,14 @@
   (- (gamma a) (upper-incomplete-gamma a x)))
 ;;(upper-incomplete-gamma 0.5 5)
 
+(defun incomplete-gamma (a x1 x2)
+  "Returns Integral(t**(a-1)*e**-t, t = x1..x2)"
+  (if (eql x2 :infinity)
+    (if (zerop x1)
+      (gamma a)
+      (upper-incomplete-gamma a x1))
+    (if (zerop x1)
+      (lower-incomplete-gamma a x2)
+      (- (upper-incomplete-gamma a x1)
+	 (upper-incomplete-gamma a x2)))))
+;;(incomplete-gamma pi 0 :infinity)
