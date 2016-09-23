@@ -637,12 +637,21 @@ pair in plist is on the form INITARG VALUE, where VALUE is the current
 slot value in X for the slot that corresponds to INITARG. If
 SUPERSEDE-PLIST also contains a INITARG symbol, the following value
 will superesede the value from X."
+  #+clisp
   (loop for metaslot in (clos:class-slots (find-class (type-of x)))
 	for slot-name = (clos:slot-definition-name metaslot)
 	for slot-initarg = (first (clos:slot-definition-initargs metaslot))
 	for slot-value = (getf supersede-plist slot-initarg (slot-value x slot-name))
 	collect slot-initarg
-	collect slot-value))
+	collect slot-value)
+  #+sbcl
+  (loop for metaslot in (sb-mop:class-slots (find-class (type-of x)))
+	for slot-name = (sb-mop:slot-definition-name metaslot)
+	for slot-initarg = (first (sb-mop:slot-definition-initargs metaslot))
+	for slot-value = (getf supersede-plist slot-initarg (slot-value x slot-name))
+	collect slot-initarg
+	collect slot-value)
+  #-(or clisp sbcl) (error "Not implemented"))
 ;;(copy-object-initarg-plist x :a 1 :b nil)
 
 (defun copy-object (x &rest supersede-plist)
@@ -886,7 +895,14 @@ is the same throughout TREE."
 ;;(windows-path->unix-path (ext:getenv "HOMEPATH"))
 
 (defun win32-homepath ()
-  (format nil "/cygdrive/c/~a/" (windows-path->unix-path (ext:getenv "HOMEPATH"))))
+  (format nil "/cygdrive/c/~a/"
+	  (windows-path->unix-path
+	   #+clisp
+	   (ext:getenv "HOMEPATH")
+	   #+sbcl
+	   (posix-getenv "HOME")
+	   #-(or clisp sbcl)
+	   (error "Not implemented"))))
 ;;(merge-pathnames "Google Drive/Contango-MB/Light Structures" (win32-homepath))
 
 (defun list< (list1 list2 &optional (lt #'<))
