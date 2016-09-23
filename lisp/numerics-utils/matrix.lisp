@@ -308,7 +308,7 @@ This is a weak algorithm and can't handle necessary permutations. Use the LU-mac
 
 (defun lu-pivot (a n &optional (dim (array-dimension a 0)))
   "Returns pivot row number."
-  (loop for i from n below dim do
+  (loop for i from n below dim
 	if (not (zerop (aref a i n)))
 	return (when (> i n) i)))
 ;;(lu-pivot #2a((0 2 3) (4 5 6) (7 8 9)) 0)
