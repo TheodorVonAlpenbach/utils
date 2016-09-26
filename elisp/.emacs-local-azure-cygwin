@@ -59,10 +59,10 @@
 	
 	(,*shared-data-dir* "ferskvare" :point :end :keyboard :no)
 
-	("/ssh:sil:~/doc" "arbeidslog-new" :point :end :keyboard :no :time-paragraphs t)
-	("/ssh:sil:~/doc" "adresser.txt" :keyboard :no)
-	("/ssh:sil:~/doc" "todo.org" :keyboard :no)
-	("/ssh:sil:~/doc" "LS-notes.org" :point :end :keyboard :no :time-paragraphs t)
+	("/ssh:ssh:~/doc" "arbeidslog-new" :point :end :keyboard :no :time-paragraphs t)
+	("/ssh:ssh:~/doc" "adresser.txt" :keyboard :no)
+	("/ssh:ssh:~/doc" "todo.org" :keyboard :no)
+	("/ssh:ssh:~/doc" "LS-notes.org" :point :end :keyboard :no :time-paragraphs t)
 	))
 
 ;;scheme
