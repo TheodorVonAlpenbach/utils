@@ -403,4 +403,23 @@ and copies it to clipboard"
 (define-key qp-res-map "c" #'qp-copy-mail-body-to-clipboard)
 (define-key qp-res-map "n" #'qp-copy-news-and-sudden-death-questions-to-clipboard)
 
+;;; utils for finding the current round number from date
+(cl-defun qp-current-round (&optional (date-or-week (week-number))
+				      (first-round-week 34))
+  "Returns the round number for DATE-OR-WEEK.
+This argument parameter is either an integer representing the
+current week number. Or it is a string, which must be parseable
+by the mb-time library. DATE-OR-WEEK is optional: if it is not
+provided, the function returns the round of the current week.
+
+A second optional argument, FIRST-ROUND-WEEK, lets you change the
+week number of the first round."
+  (if (integerp date-or-week)
+    ;; week number
+    (- date-or-week first-round-week -1)
+    ;; date string
+    (qp-current-round (week-number date-or-week))))
+;;(mapcar #'qp-current-round (list 38 "2016-09-22" "2016-09-15"))
+;;(qp-current-round)
+
 (provide 'qp)
