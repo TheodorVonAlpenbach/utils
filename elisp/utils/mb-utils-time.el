@@ -545,9 +545,10 @@ This function is mainly a helper for `week-number'"
 	    (values 53 year)))))))
 ;;(week-number-1 '1993-01-03)
 
-(defun week-number (time-designator)
+(cl-defun week-number (&optional (time-designator (now)))
   (first (week-number-1 time-designator)))
 ;;(week-number '2009-12-31)
+;;(week-number)
 
 (defun week-year (time-designator)
   (let* ((time (parse-time time-designator))
