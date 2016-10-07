@@ -239,11 +239,17 @@ STATE can take the same values as in `evil-define-key'."
     (emacs-lisp-mode (eval-defun nil))
     (octave-mode (octave-send-defun))))
 
+(defun mb-eval-region (start end &optional printflag read-function)
+  (interactive "r")
+  (case major-mode
+    (emacs-lisp-mode (eval-region start end printflag read-function))
+    (octave-mode (octave-send-region start end))))
+
 (let ((eval-map (make-sparse-keymap)))
   (key-chord-define evil-normal-state-map "kj" eval-map)
   (define-key eval-map "d" #'mb-eval-defun)
   (define-key eval-map "b" #'mb-eval-buffer)
-  (define-key eval-map "r" #'eval-region)
+  (define-key eval-map "r" #'mb-eval-region)
   (define-key eval-map "l" #'mb-eval-last-sexp)
   (define-key eval-map "f" #'eval-form)
   (define-key eval-map "c" #'eval-current-sexp)
