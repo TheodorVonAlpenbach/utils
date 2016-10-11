@@ -22,13 +22,16 @@
 (require 'evil-cleverparens)
 (require 'evil-cleverparens-text-objects)
 ;;(require 'evil-org) ; does not work
+
 (require 'evil-exchange)
+(setf evil-exchange-key "go")
+(setf evil-exchange-cancel-key "gO")
+(evil-exchange-install)
 
 (evil-mode 1)
 (setf evil-move-beyond-eol t)
 (add-hook 'emacs-lisp-mode-hook #'evil-cleverparens-mode)
 (add-hook 'lisp-mode-hook #'evil-cleverparens-mode)
-(evil-exchange-install)
 
 ;;; Finally, need to revert .emacs* buffers since they have not yet been
 ;;; hooked by the functionality loaded here
