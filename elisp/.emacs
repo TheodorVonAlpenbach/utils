@@ -189,6 +189,8 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 	 ("\\.pdmkvars$" . makefile-mode)
 	 ("\\.pdmkroot$" . makefile-mode)
 	 ("\\.bmp$" . hexl-mode)
+	 ("\\.mf$" . metafont-mode)
+	 ("\\.dvi$" . doc-view-mode)
 	 ("\\.gp$" . gnuplot-mode)
 	 ("Makefile$" . makefile-mode)
 	 ("\\.m$\\|\\.octaverc" . octave-mode)
