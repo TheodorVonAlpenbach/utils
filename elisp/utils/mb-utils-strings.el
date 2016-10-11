@@ -43,7 +43,7 @@ case-table."
        (string-match-exact "[0-9]+" string)))
 ;;(mapcar #'integer-string-p '("123" 123 "a"))
 
-(defun integer-to-string (string)
+(defun string-to-integer (string)
   "Similar to `number-to-string', but returns nil (not 0) if the
 STRING is not an integer, otherwise returns the resulting integer."
   (and (integer-string-p string)
