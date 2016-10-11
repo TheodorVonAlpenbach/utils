@@ -8,7 +8,7 @@ synchronously. See `call-process' for more control of processes"
   (with-temp-buffer
     (apply #'call-process program nil (current-buffer) nil args)
     (buffer-string-no-properties)))
-;;(call-process* "file" (expand-file-name (format "~/data/musedata/mozart/K%03d.zip" 80)))
+;;(call-process* "file" (expand-file-name "~/projects/utils/elisp/external/excel.el"))
 
 (defun call-process-shell-command* (command &rest args)
   "Same as `call-process*' but calling
