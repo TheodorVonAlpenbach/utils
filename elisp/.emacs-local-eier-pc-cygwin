@@ -13,7 +13,7 @@
 
 ;; tags
 (setf tags-file-name nil)
-(setf tags-table-list (list +mb-lisp-dir+))
+(setf tags-table-list (list (expand-file-name "~/.MBTAGS")))
 
 ;; lynx
 (setf *lynx-proxy-dir* (expand-file-name "lynx-proxy" *local-data-dir*))
@@ -45,7 +45,7 @@
 
 	(,+home-dir+ "projects/utils/lisp/mb-utils.lisp")
 
-;;	(,*shared-data-dir* "ferskvare" :point :end :keyboard :no)
+	(,*shared-data-dir* "ferskvare" :point :end :keyboard :no)
 ;;	(,*shared-data-dir* "arbeidslog" :point :end :keyboard :no)
 
 	("/ssh:ssh:~/doc" "arbeidslog" :point :end :keyboard :no :time-paragraphs t)
