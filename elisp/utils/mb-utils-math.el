@@ -1,3 +1,21 @@
+(defun sinh (x) (/ (- (exp x) (exp (- x))) 2))
+(defun cosh (x) (/ (+ (exp x) (exp (- x))) 2))
+(defun tanh (x) (let ((y (exp (* 2 x)))) (/ (1- y) (1+ y))))
+;;(+ (sinh pi) (cosh pi) (- (exp pi)))
+;;(- (tanh 1) (/ (sinh 1) (cosh 1)))
+
+(defmacro define-degree-trigonometry (fns)
+  `(let ((c ,(/ pi 180.0)))
+     ,@(loop for fn in fns
+	     collect `(defun ,(intern (concat (sstring fn) "d")) (d)
+			(,fn (* degrees-to-radians d)))
+	     collect `(defun ,(intern (concat "a" (sstring fn) "d")) (r)
+			(* radians-to-degrees
+			   (,(intern (concat "a" (sstring fn))) r))))))
+(define-degree-trigonometry (cos sin tan))
+;;(loop for fn in '(sind cosd tand) collect (funcall fn 45))
+;;(list (asind 0.5) (acosd 0.5) (atand 1))
+
 (defun sq (x) (* x x))
 
 (defun between= (x a b)
