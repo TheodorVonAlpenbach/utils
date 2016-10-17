@@ -54,4 +54,16 @@ see `file-name-alter'"
   (file-name-alter filename (concat (file-name-sans-extension filename) suffix) inherit-extension nil))
 ;;(file-name-append "c:/Documents and Settings/matsb/My Documents/projects/UiO/Var-2012/2270-Satslaere2B/obligatorisk2.midi" "-100")
 
+(cl-defun file-name-add-extension (filename extension
+				&optional (extension-separator "."))
+  "Append EXTENSION to FILENAME using EXTENSION-SEPARATOR."
+  (format "%s%s%s" filename extension-separator extension))
+;;(file-name-add-extension "qwe/qwe" "txt")
+
+(defun file-name-change-extension (filename new-extension)
+  "Return FILENAME with NEW-EXTENSION."
+  (file-name-add-extension
+   (file-name-sans-extension filename) new-extension))
+;;(file-name-change-extension "qwe/qwe.txt" "cpp")
+
 (provide 'mb-utils-file)
