@@ -437,4 +437,6 @@ A unit test is a line prefixed by ';;(' and of the form given by
 (require 'server)
 (unless (server-running-p) (server-start))
 
+;; ignore some tex output files
 (pushnew "\\.\\(dvi\\|aux\\|out\\|bbl\\|blg\\)\\'" ido-ignore-files)
+(pushnew "\\.\\([0-9]*gf\\|pk\\)\\'" ido-ignore-files)
