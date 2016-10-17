@@ -83,7 +83,7 @@ SYMBOL can be a symbol or a list of symbols. See function
 (cl-indent '(with-temp-file* unwind-protect)
   'progn)
 
-(cl-indent '(aif if anif> anwhen read-string with-buffer
+(cl-indent '(aif if anif> awhen read-string with-buffer
 	     substring-intv quiz-save-excursion q-try
 	     subseq concatenate with-out-file length*
 	     handles-outflow ly-function ly-context copy-object
