@@ -213,6 +213,7 @@ STATE can take the same values as in `evil-define-key'."
      (evil-cp-end-of-defun)
      (eol :offset 1)
      (eval-last-sexp nil)))
+    (metafont-mode (meta-eval-buffer))
     (octave-mode
      (save-excursion
        (unless no-eval-p
@@ -234,6 +235,7 @@ STATE can take the same values as in `evil-define-key'."
     (emacs-lisp-mode (apply #'eval-buffer args))
     (gnuplot-mode (gp-eval-buffer))
     (mb-lisp-mode (mb-lisp-eval-buffer))
+    (metafont-mode (meta-compile-file (buffer-file-name)))
     (octave-mode (octave-send-buffer))))
 
 (defun mb-eval-defun ()
