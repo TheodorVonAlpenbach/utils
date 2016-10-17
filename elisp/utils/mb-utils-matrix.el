@@ -59,7 +59,7 @@
 
 (defun vec-direction (v)
   (vec-scalar-mult v (/ 1.0 (vec-length v))))
-;;(vec-length (vec-direction '(3 4)))
+;;(vec-direction (vec-direction '(3 4)))
 
 (defun vec-dyadic-product (v1 v2)
   (mapcar (bind #'vec-scalar-mult v2 1) v1))
@@ -68,6 +68,17 @@
 (defun vec-distance (v1 v2)
   (vec-length (vec-subtract v1 v2)))
 ;;(vec-distance '(0 0) '(1 1))
+
+(defun vec-curl (v1 v2)
+  (- (* (first v1) (second v2)) (* (second v1) (first v2))))
+;;(vec-curl '(1 0) '(1 0))
+
+(defun vec-angle (v1 v2)
+  (let ((sp (scalar-product (vec-direction v1) (vec-direction v2))))
+    (if (minusp (vec-curl v1 v2))
+      (- (* 2 pi) (acos sp))
+      (acos sp))))
+;;(vec-angle '(1 0) '(1 -0.01))
 
 ;;; vec-mat operators
 (defun mat-vec-mult (m v)
