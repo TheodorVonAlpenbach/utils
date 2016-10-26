@@ -33,12 +33,12 @@
     (c-indent-line-or-region)
     (insert "\n")))
 
-(defun* php-insert-log-symbol-at-point (&optional (method #'php-insert-echo-log-string))
+(cl-defun php-insert-log-symbol-at-point (&optional (method #'php-insert-echo-log-string))
   "Inserts an log from symbol at point"
   (funcall method (symbol-at-point)))
 ;;(php-insert-log-symbol-at-point nil)
 
-(defun* php-insert-log-region (&optional (method #'php-insert-echo-log-string))
+(cl-defun php-insert-log-region (&optional (method #'php-insert-echo-log-string))
   "Inserts an log from active region string"
   (funcall method
    (buffer-substring-no-properties (region-beginning) (region-end))))
@@ -51,7 +51,7 @@
   (c-indent-line-or-region)
   (insert "\n"))
 
-(defun* php-insert-log (&optional (method #'php-insert-Logger-string))
+(cl-defun php-insert-log (&optional (method #'php-insert-Logger-string))
   (interactive "")
   (save-excursion
     (if (use-region-p)
@@ -179,20 +179,20 @@ article in ENVIRONMENT."
     (:prod (error))))
 ;;(lab-base-url-archived-article :stage)
 
-(defun* open-tv2-escenic-html (id &key (debug nil) (environment :vbox))
+(cl-defun open-tv2-escenic-html (id &key (debug nil) (environment :vbox))
   "ENVIRONMENT is one of :VBOX (default), :DEV, :STAGE, :PROD."
   (let* ((debug-http-query-parameter (if debug "&XDEBUG_SESSION_START=1" ""))
 	 (base-url (lab-base-url-archived-article environment))
 	 (url (format "%s/%s?tv2escenic%s" base-url id debug-http-query-parameter)))
     (browse-url url)))
 
-(defun* tv2-escenic-directory (&optional (environment :vbox))
+(cl-defun tv2-escenic-directory (&optional (environment :vbox))
   (case environment
     (:vbox "/cygdrive/c/Users/mat_ber/Documents/WinShare/labrador2.git/escenic_storage/published")
     (:dev "/www/publish/customers/tv2/stage/escenic_storage/published")
     (t (error "Environment %S is not supported!" environment))) )
 
-(defun* open-tv2-escenic-xml (id &key (environment :vbox))
+(cl-defun open-tv2-escenic-xml (id &key (environment :vbox))
   "TODO: encodings"
   (let* ((buffer-name (format "*%d.xml (%s)*" id (upcase (substring (symbol-name environment) 1))))
 	 (sub-dir-number (/ id 10000))
@@ -213,7 +213,7 @@ article in ENVIRONMENT."
     (goto-char 1)))
 ;;(open-tv2-escenic-xml 3204370 :environment :dev)
 
-(defun* tv2-get-ids (&optional (environment :vbox))
+(cl-defun tv2-get-ids (&optional (environment :vbox))
   (let* ((dir (tv2-escenic-directory environment))
 	 (files (case environment
 		  (:vbox (shell-command-to-string (format "find %s -type f" dir)))
