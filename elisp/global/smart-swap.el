@@ -1,8 +1,12 @@
 ;;; Swap files. For older versions, see archive.
 
+(defconst +simple-swaps+
+  '((".emacs" ".emacs-local-azure-cygwin" "~/projects/utils/elisp/")
+    (".emacs" ".emacs-local-azure-linux" "~/projects/utils/elisp/"))
+  "TODO: enable :search")
+
 (defconst +smart-swaps+
-  '((("\\(.emacs\\)$" 1) ".emacs-local-azure-cygwin")
-    (tex pdf)
+  '((tex pdf)
     (ly pdf)
     (gp pdf)
     (cpp h :search 1)
@@ -49,8 +53,24 @@
 (cl-defun smart-swap (&optional (swaps +smart-swaps+))
   "Swaps to file as defined in SWAPS"
   (interactive)
-  (aif (smart-swap-find-target swaps)
-      (find-file it)
-      (message "Couldn't find swap target for current file")))
+  (or (simple-swap)
+      (aif (smart-swap-find-target swaps)
+	(find-file it)
+	(message "Couldn't find swap target for current file"))))
+
+(defun simple-swap-1 (fn1 fn2)
+  (let ((bfn (buffer-file-name (current-buffer))))
+    (if (string= fn1 bfn)
+     (find-file fn2)
+     (if (string= bfn fn2)
+       (find-file fn1)))))
+
+(cl-defun simple-swap (&optional (swaps +simple-swaps+))
+  (interactive)
+  (loop for (f1 f2 d) in swaps
+	for fn1 = (expand-file-name f1 d)
+	for fn2 = (expand-file-name f2 d)
+	do (simple-swap-1 fn1 fn2)))
+;;(simple-swap)
 
 (provide 'smart-swap)
