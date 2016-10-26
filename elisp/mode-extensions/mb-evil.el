@@ -32,6 +32,7 @@
 (setf evil-move-beyond-eol t)
 (add-hook 'emacs-lisp-mode-hook #'evil-cleverparens-mode)
 (add-hook 'lisp-mode-hook #'evil-cleverparens-mode)
+(setf evil-cleverparens-swap-move-by-word-and-symbol t)
 
 ;;; Finally, need to revert .emacs* buffers since they have not yet been
 ;;; hooked by the functionality loaded here
@@ -165,6 +166,8 @@ STATE can take the same values as in `evil-define-key'."
   (define-key insert-map "t" #'insert-time))
 
 ;; TODO: move these two defuns elsewhere
+(require 'mb-metafont)
+
 (defun mb-eval-string (string &rest args)
   (case major-mode
     (mb-lisp-mode (apply #'mb-lisp-eval-1 string args))
