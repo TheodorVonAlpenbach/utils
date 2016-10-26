@@ -26,7 +26,8 @@
 
 (cl-defun meta-compile-file (filename &optional (show-buffer-p t))
   (call-process "mf" nil "*Metafont-compilation*" nil
-		(format "\\mode=ljfour; mode_setup; input %s" filename))
+		filename)
+		;; (format "\\mode=ljfour; mode_setup; input %s" filename)
   (prog1 (meta-check-compilation)
     (when show-buffer-p
       (switch-to-buffer-other-window (meta-compilation-buffer))

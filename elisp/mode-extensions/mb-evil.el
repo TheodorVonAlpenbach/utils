@@ -165,6 +165,8 @@ STATE can take the same values as in `evil-define-key'."
   (define-key insert-map "d" #'insert-date)
   (define-key insert-map "t" #'insert-time))
 
+(require 'mb-metafont)
+
 ;; TODO: move these two defuns elsewhere
 (require 'mb-metafont)
 
