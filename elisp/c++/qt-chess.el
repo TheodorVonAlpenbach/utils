@@ -36,7 +36,8 @@
 ;;(nilf c-mode-common-hook)
 
 (defun clean-chess-code-test-string-ops ()
-  (cons "=" (loop for op2 in '(= + - * / % & | ^ < > !)
+  (append (split-string "=+-*/" "" t)
+	  (loop for op2 in '(= + - * / % & | ^ < > !)
 		  collect (format "%S=" op2))))
 ;;(clean-chess-code-test-string-ops)
 
@@ -68,6 +69,9 @@
 	   ("\\([^=+*/%&|^<>!-]\\)=\\([^=]\\)" "\\1 = \\2")
 	   ;; ensure spaces around ==, =+, =! operators
 	   ("\\([=+\\*/%&|^<>!-]=\\)" " \\1 ")
+	   ;; ensure spaces around +, -, / (but not *, too difficult at the moment)
+	   ("\\([])[:alnum:]]\\)[[:space:]]*\\([-+/]\\)[[:space:]]*\\([[:alnum:]([]\\)"
+	    "\\1 \\2 \\3")
 	   ;; remove double spaces
 	   ("[ \t]+" " ")
 	   ("{\\([^}[[:space:]\n]\\)" "{ \\1")
