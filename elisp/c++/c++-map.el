@@ -9,7 +9,7 @@
 (require 'c++-debug)
 (require 'c++-method)
 
-(define-key c++-mode-map "\C-cc" 'mb-make)
+;;(define-key c++-mode-map "\C-cc" 'mb-make)
 ;; map for additions
 (setq c++-mode-insert-map (make-sparse-keymap "Insert"))
 (define-key c++-mode-map "\C-ci" c++-mode-insert-map)
@@ -25,6 +25,6 @@
 (define-key c++-mode-insert-map "s" 'c++-insert-set-method)
 (define-key c++-mode-insert-map "m" 'c++-insert-method)
 (define-key c++-mode-map [(meta \()] 'c++-insert-parentheses)
-(define-key c++-mode-map [(f11)] #'(lambda (beg end) (interactive "r") (c++-std-ify-region 5)))
+;;(define-key c++-mode-map [(f11)] #'(lambda (beg end) (interactive "r") (c++-std-ify-region 5)))
 
 (provide 'c++-map)
