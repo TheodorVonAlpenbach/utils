@@ -84,6 +84,21 @@ STATE can take the same values as in `evil-define-key'."
 (key-chord-define evil-normal-state-map ";j" 'save-buffer)
 (evil-key-chord-define '(normal visual motion) global-map "vn" 'ido-switch-buffer)
 
+(evil-define-motion evil-goto-line-keep-column (count)
+  "Go to the first non-blank character of line COUNT.
+By default the last line."
+  :jump t
+  :type line
+  (let ((column (current-column)))
+    (if (null count)
+      (with-no-warnings (end-of-buffer))
+      (forward-line (- count (line-number-at-pos))))
+    (eol)
+    (let ((c (current-column)))
+      (loop while (> (current-column) column) do (backward-char)))))
+
+(evil-key-chord-define '(normal visual motion) global-map "GG" 'evil-goto-line-keep-column)
+
 (defun ffap-read-file-or-url-no-prompt (prompt guess)
   "Same as `ffap-read-file-or-url' but without prompting."
   (or guess (setq guess default-directory))
@@ -397,4 +412,3 @@ occurence of 'delete' replaced with 'yank'."
       (evil-yank beg (line-end-position) type register yank-handler)))))
 
 (provide 'mb-evil)
-
