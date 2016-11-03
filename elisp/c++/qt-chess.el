@@ -25,7 +25,6 @@
     one-liner-defun)
    (defun-open . 0)))
 
-
 (defun chess-hook ()
   (when (chess-file-p (current-buffer))
     (setf c-default-style "qt-gnu")
@@ -123,12 +122,20 @@
   (backward-char 1)
   (newline)
   (insert " ")
-  (bol :offset 3))
+  (bol :offset 3)
+  (newline 3))
 
 (defun find-qt3-brother ()
   (interactive)
   (find-file-read-only
    (replace-regexp-in-string "/chess/" "/qt4-chess/" (buffer-file-name))))
 ;;(find-qt3-brother)
+
+(define-key evil-normal-state-map "ga" 'what-cursor-position)
+
+(let ((qt-map (make-sparse-keymap)))
+  (define-key evil-normal-state-map "gh" qt-map)
+  (define-key qt-map "g" #'chess-goto-error)
+  (define-key qt-map "i" #'chess-insert-error)) 
 
 (provide 'qt-chess)
