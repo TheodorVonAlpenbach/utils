@@ -17,8 +17,9 @@
 (setf user-full-name "Mats Bergstrøm")
 
 ;; tags
-(setf tags-file-name nil)
-(pushnew "~/.MBTAGS" tags-table-list)
+(setf tags-table-list
+      (cl-nunion '("~/.MBTAGS" "~/.CTAGS" "~/.OTAGS" "~/.SCITAGS" "~/.CLTAGS")
+		 tags-table-list :test #'string=))
 
 ;; lynx
 (setf *lynx-proxy-dir* (expand-file-name "lynx-proxy" *local-data-dir*))
