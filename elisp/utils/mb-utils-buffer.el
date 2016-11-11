@@ -420,5 +420,16 @@ emacs-shortcut-to-switch-from-a-horizontal-split-to-a-vertical-split-in-one-move
 
 (global-set-key (kbd "C-x |") 'toggle-window-split)
 
+(defun just-one-blank-line (&optional n)
+  "Delete all blank lines above and below current leaving one blank line
+\\(or N blank lines\\).
+Should this method be interactive?"
+  (newline 3)
+  (previous-line 1)
+  (delete-blank-lines)
+  (when (and n (numberp n) (plusp n))
+    (newline (* 2 (1- n)))
+    (previous-line (1- n))))
+
 (provide 'mb-utils-buffer)
 
