@@ -253,7 +253,7 @@ By default the last line."
   (interactive)
   (case major-mode
     (emacs-lisp-mode (apply #'eval-buffer args))
-    (gnuplot-mode (gp-eval-buffer))
+    (gnuplot-mode (gnuplot-send-buffer-to-gnuplot))
     (mb-lisp-mode (mb-lisp-eval-buffer))
     (metafont-mode (meta-compile-file (buffer-file-name)))
     (octave-mode (octave-send-buffer))))
