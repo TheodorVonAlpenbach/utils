@@ -112,7 +112,7 @@
 
 (defun chess-insert-error ()
   (interactive)
-  (bol)
+  (just-one-blank-line 2)
   (insert "** ")
   (evil-paste-before 1)
   (bol)
@@ -123,7 +123,9 @@
   (newline)
   (insert " ")
   (bol :offset 3)
-  (newline 3))
+  (delete-blank-lines)
+  (newline)
+  (org-kill-line))
 
 (defun find-qt3-brother ()
   (interactive)
@@ -131,11 +133,29 @@
    (replace-regexp-in-string "/chess/" "/qt4-chess/" (buffer-file-name))))
 ;;(find-qt3-brother)
 
+(defun bow ()
+  (awhen (bounds-of-thing-at-point 'word)
+    (goto-char (car it))))
+
+(defun eow ()
+  (awhen (bounds-of-thing-at-point 'word)
+    (goto-char (cdr it))))
+
+(defun qt-latin1 ()
+  "Append the common toLatin1().data() string to a QString variable."
+  (interactive)
+  (eow)
+  (insert ".toLatin1().data()"))
+
 (define-key evil-normal-state-map "ga" 'what-cursor-position)
 
 (let ((qt-map (make-sparse-keymap)))
-  (define-key evil-normal-state-map "gh" qt-map)
+  (evil-key-chord-define '(normal motion) global-map "gh" qt-map)
+  (define-key qt-map "c" #'clean-chess-code)
+  (define-key qt-map "f" #'find-qt3-brother)
   (define-key qt-map "g" #'chess-goto-error)
-  (define-key qt-map "i" #'chess-insert-error)) 
+  (define-key qt-map "h" #'qt-help)
+  (define-key qt-map "i" #'chess-insert-error)
+  (define-key qt-map "l" #'qt-latin1))
 
 (provide 'qt-chess)
