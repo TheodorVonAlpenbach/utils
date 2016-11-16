@@ -1,0 +1,7 @@
+(defun scratches ()
+  (setf a 'a)
+  (setf b 'b)
+  (setf rels nil)
+  (push '(a = b) rels)
+  (setf b 2)
+  (simplify rels))
