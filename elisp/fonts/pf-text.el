@@ -1,5 +1,6 @@
 (defun pft-closed-path (subpaths)
   ())
+
 (defun pft-bezier3 (p1 c1 c2 p2)
   "Writes cubic bezier to pft format"
   ())
@@ -11,7 +12,10 @@
 
 (defun bcircle ()
   "http://spencermortensen.com/articles/bezier-circle/"
-  nil)
+  ())
+
+(defun cserif (corner right-dir left-dir)
+  ())
 
 (defun pft-area (path &rest holes)
   )
@@ -53,3 +57,11 @@
 	    (cserif z18 inner-rleg (ldir))
 	    (cserif z3 (rdir) rleg))
 	   (pft-path z4 z5 z6)))))
+
+(defun bcircle-optimal-d (n)
+  "Returns optimal distance to control points given that
+The end points and min point lies on the unit circle."
+  (* (/ 4 3.0) (tan (/ pi (* 2 n)))))
+;;(bcircle-optimal-d 4)
+;;(- (sqrt 2) 1)
+;;(tan (/ pi 8))
