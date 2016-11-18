@@ -242,14 +242,23 @@
 	  (ak-at (string-trim time))
 	  (sr-at (string-trim time))))
       ;;else is now buffer
-      (let* ((lines (string-to-lines (buffer-string-no-properties)))
+      (let* ((info (maptree #'string-trim
+		     (parse-csv-string (buffer-string-no-properties) ":")))
 	     (n (line-number-at-pos))
-	     (search-string (concat* (rest (head n lines)) :in " ")))
+	     (search-string (concat* (mapcar #'second (rest (head n info))) :in " ")))
 	(browse-url (google-url search-string))))))
 ;;(help-follow)
 
 (lexical-let ((radio-playlist-functions '(sr-now sr-latest ak-now ak-latest))
-	      (current-playlist 'ak-latest))
+	      (current-playlist 'ak-latest)
+	      (current-now 'ak-now))
+  (defun radio-read-playlist ()
+    (intern-soft
+     (completing-read
+      "Select radio-channel: "
+      (mapcar #'symbol-name radio-playlist-functions)
+      nil t)))
+
   (defun radio-playlist (prefix)
     (interactive "P")
     "Can be called with F9"
@@ -258,6 +267,12 @@
 	    (intern-soft (completing-read "Select radio-channel: "
 					  (mapcar #'symbol-name radio-playlist-functions)
 					  nil t))))
-    (funcall current-playlist)))
+    (funcall current-playlist))
+  (defun radio-now (prefix)
+    (interactive "P")
+    "Can be called with F9"
+    (when prefix
+      (setq current-now (radio-read-playlist)))
+    (funcall current-now)))
 
 (provide 'radio-playlists)
