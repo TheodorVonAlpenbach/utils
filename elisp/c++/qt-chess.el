@@ -28,6 +28,7 @@
 (defun chess-hook ()
   (when (chess-file-p (current-buffer))
     (setf c-default-style "qt-gnu")
+    (setf c-electric-brace t)
     (setf indent-tabs-mode nil)
     (linum-mode 1)))
 
