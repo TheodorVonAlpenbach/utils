@@ -163,6 +163,7 @@ By default the last line."
   (define-key swap-map "B" #'unbury-buffer)
   (define-key swap-map "o" #'other-window)
   (define-key swap-map "c" #'rotate-windows)
+  (define-key swap-map "D" #'delete-window)
   (define-key swap-map "r" #'revert-buffer)
   (define-key swap-map "T" #'find-tag-no-prompt)
   (define-key swap-map "t" #'find-tag-no-prompt-read-only)
@@ -256,7 +257,8 @@ By default the last line."
     (gnuplot-mode (gnuplot-send-buffer-to-gnuplot))
     (mb-lisp-mode (mb-lisp-eval-buffer))
     (metafont-mode (meta-compile-file (buffer-file-name)))
-    (octave-mode (octave-send-buffer))))
+    (octave-mode (octave-send-buffer))
+    ((c++-mode cc-mode) (compile "make -k"))))
 
 (defun mb-eval-defun ()
   (interactive)
