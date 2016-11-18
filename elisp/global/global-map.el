@@ -62,8 +62,8 @@
 (define-key global-map [(shift control tab)] #'(lambda () (interactive) (other-window -1)))
 
 ;; Radio playlists
-(define-key global-map [(f9)] 'radio-playlist) ;earlier 'swap-l-y-file
-(define-key global-map [(shift f9)] '-playlist) ;earlier 'swap-l-y-file
+(define-key global-map [(f9)] #'radio-playlist) ;earlier 'swap-l-y-file
+(define-key global-map [(shift f9)] #'radio-now) ;earlier 'swap-l-y-file
 
 ;; Misc use of define-key define-key global-map
 (define-key global-map [(shift f8)] 'goto-line)
