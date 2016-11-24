@@ -157,6 +157,10 @@ function at point and LINUM is the current line number."
       (mb-octave-unset-breakpoint)
       (mb-octave-set-breakpoint))))
 
+(defun octave-list-all-breakpoints ()
+  (interactive)
+  (octave-send-string "dbstatus"))
+
 (defun octave-step ()
   (interactive)
   (octave-send-string "dbstep")
@@ -251,6 +255,7 @@ are between functions."
 (define-key octave-mode-map [(f5)] #'octave-run)
 (define-key octave-mode-map [(f9)] #'octave-toggle-breakpoint)
 (define-key octave-mode-map [(ctrl f9)] #'octave-clear-all-breakpoints)
+(define-key octave-mode-map [(meta f9)] #'octave-list-all-breakpoints)
 (define-key octave-mode-map [(f10)] #'octave-step)
 (define-key octave-mode-map [(ctrl f5)] #'octave-quit-debug)
 (define-key octave-mode-map [(ctrl f10)] #'octave-step-in)
