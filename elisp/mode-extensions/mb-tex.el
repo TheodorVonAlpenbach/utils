@@ -58,7 +58,7 @@ at work."
 (defun mode-help-follow-mode-advice ()
   (save-excursion
     (other-window 1)
-    (re-search-forward ":override advice: ")
+    (re-search-forward ":override advice: " nil t)
     (forward-char 1)
     (push-button)))
 
