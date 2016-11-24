@@ -10,7 +10,8 @@
 ;;(in-directory-p "~/bin/mbtags.sh" "~/")
 
 (cl-defun chess-file-p (buffer &optional (chess-dir "~/projects/chess/"))
-  (in-directory-p (buffer-file-name buffer) chess-dir))
+  (or (in-directory-p (buffer-file-name buffer) chess-dir)
+      (in-directory-p (buffer-file-name buffer) "~/sources/CHESS/Integrate")))
 ;;(chess-file-p (get-buffer "ChServerSocket.h"))
 ;;(chess-file-p (current-buffer))
 
