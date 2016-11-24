@@ -258,6 +258,7 @@ By default the last line."
     (mb-lisp-mode (mb-lisp-eval-buffer))
     (metafont-mode (meta-compile-file (buffer-file-name)))
     (octave-mode (octave-send-buffer))
+    (python-mode (python-shell-send-buffer nil))
     ((c++-mode cc-mode) (compile "make -k"))))
 
 (defun mb-eval-defun ()
@@ -270,6 +271,7 @@ By default the last line."
   (interactive "r")
   (case major-mode
     (emacs-lisp-mode (eval-region start end printflag read-function))
+    (python-mode (python-shell-send-region start end nil))
     (octave-mode (octave-send-region start end))))
 
 (let ((eval-map (make-sparse-keymap)))
