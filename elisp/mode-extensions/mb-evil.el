@@ -274,10 +274,15 @@ By default the last line."
     (python-mode (python-shell-send-region start end nil))
     (octave-mode (octave-send-region start end))))
 
+(defun mb-eval-region-from-point (&optional printflag read-function)
+  (interactive "r")
+  (mb-eval-region (bol*) (point-max) printflag read-function))
+
 (let ((eval-map (make-sparse-keymap)))
   (key-chord-define evil-normal-state-map "kj" eval-map)
   (define-key eval-map "d" #'mb-eval-defun)
   (define-key eval-map "b" #'mb-eval-buffer)
+  (define-key eval-map "s" #'mb-eval-region-from-point)
   (define-key eval-map "r" #'mb-eval-region)
   (define-key eval-map "l" #'mb-eval-last-sexp)
   (define-key eval-map "f" #'eval-form)
