@@ -255,6 +255,10 @@ point to the current field, see `beginning-of-line'"
     (point)))
 ;;(bol :linum nil)
 
+(defun bol* (&rest args)
+  "Return the same as `bol' without moving the POINT."
+  (save-excursion (apply #'bol args)))
+
 (cl-defun eol (&key linum (offset 0) restrict-to-current-field)
   "Move point to the end of the current line and returns its value.
 For RESTRICT-TO-CURRENT-FIELD, see `bol'."
