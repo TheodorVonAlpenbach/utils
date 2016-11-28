@@ -2,3 +2,5 @@
 *#
 *.#*
 TAGS
+*octave-workspace
+*.pyc
