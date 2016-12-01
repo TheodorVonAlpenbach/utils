@@ -186,6 +186,20 @@ By default the last line."
 ;; TODO: move these two defuns elsewhere
 (require 'mb-metafont)
 
+(defun minor-mode-p (mode)
+  "Check if symbol MODE is an active minor-mode in the current buffer."
+  (condition-case nil
+      (and (symbolp mode)
+	   (symbol-value mode)
+	   (find mode minor-mode-list))
+    (error nil)))
+;;(mapcar #'minor-mode-p '(slime-mode undo-tree-mode))
+
+(defun slime-p ()
+  "Return nil iff slime-mode is not active"
+  (minor-mode-p 'slime-mode))
+;;(slime-p)
+
 (defun mb-eval-string (string &rest args)
   (case major-mode
     (mb-lisp-mode (apply #'mb-lisp-eval-1 string args))
@@ -207,6 +221,10 @@ By default the last line."
   (interactive)
   (case major-mode
     (emacs-lisp-mode (eval-last-sexp args))
+    (mb-lisp-mode
+     (if args
+       (slime-pprint-eval-last-expression)
+       (slime-eval-last-expression)))
     (python-mode (apply #'python-shell-send-region
 			(mb-python-last-sexp-region)))
     (t (apply #'mb-eval-region (last-sexp-region) args))))
@@ -230,10 +248,10 @@ By default the last line."
     ((emacs-lisp-mode mb-lisp-mode)
      (save-excursion
      (unless no-eval-p
-       (eval-defun nil))
+       (mb-eval-defun))
      (evil-cp-end-of-defun)
      (eol :offset 1)
-     (eval-last-sexp nil)))
+     (mb-eval-last-sexp)))
     (metafont-mode (meta-eval-buffer))
     (octave-mode
      (save-excursion
@@ -255,7 +273,9 @@ By default the last line."
   (case major-mode
     (emacs-lisp-mode (apply #'eval-buffer args))
     (gnuplot-mode (gnuplot-send-buffer-to-gnuplot))
-    (mb-lisp-mode (mb-lisp-eval-buffer))
+    (mb-lisp-mode (if (slime-p)
+		    (slime-compile-and-load-file)
+		    (mb-lisp-eval-buffer)))
     (metafont-mode (meta-compile-file (buffer-file-name)))
     (octave-mode (octave-send-buffer))
     (python-mode (python-shell-send-buffer nil))
@@ -265,6 +285,9 @@ By default the last line."
   (interactive)
   (case major-mode
     (emacs-lisp-mode (eval-defun nil))
+    (mb-lisp-mode
+     (when (slime-p)
+       (slime-eval-defun)))
     (octave-mode (octave-send-defun))))
 
 (defun mb-eval-region (start end &optional printflag read-function)
