@@ -44,7 +44,7 @@
 	  do (setq acc (list elt)) and
 	  do (setq current (funcall key elt))
 	  finally return (nconc res (list acc)))))
-;;(group-adjacent '("ab" "ac" "b") :key #'first-elt :test #'char=)(("ab" "ac") ("b"))
+;;(group-adjacent '("ab" "ac" "b") :key #'first-elt :test #'char=)
 ;;(group-adjacent '("") :key #'first-elt :test #'char=)
 
 (defun factor-strings (strings)
