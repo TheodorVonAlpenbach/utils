@@ -364,9 +364,16 @@ Destructive."
 ;;(let ((qwe '(1 2 3 4 5 6))) (values (cut qwe) qwe))
 
 (defun interleave-sequences (sequences &optional (type (class-of (first sequences))))
-  (coerce (loop for i below (reduce #'max sequences :key #'length) append
-		(loop for s in sequences collect (elt s i)))
-	  type))
+  (let* ((lengths (mapcar #'length sequences))
+	 (max (reduce #'max lengths))
+	 (min (reduce #'min lengths)))
+    (unless (apply #'>= lengths)
+      (warn "Lengths of sequences increases. Some elements will not be interleaved."))
+    (unless (<= (- max min) 1)
+      (warn "Lengths of sequences differs more than 1. Some elements will not be interleaved."))
+    (coerce (loop for i below min append
+		  (loop for s in sequences collect (elt s i)))
+	    type)))
 ;;(interleave-sequences '(#(a b c) #(d e f)))
 
 (defun interleave (sequence &rest sequences)
