@@ -18,7 +18,7 @@
 
 ;; tags
 (setf tags-table-list
-      (cl-nunion '("~/.MBTAGS" "~/.CTAGS" "~/.OTAGS" "~/.SCITAGS" "~/.CLTAGS")
+      (cl-nunion '("~/.MBTAGS" "~/.CTAGS" "~/.OTAGS" "~/.CLTAGS")
 		 tags-table-list :test #'string=))
 
 ;; lynx
