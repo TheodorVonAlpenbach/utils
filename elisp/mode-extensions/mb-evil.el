@@ -245,7 +245,7 @@ By default the last line."
 (defun eval-defun-test (&optional no-eval-p)
   (interactive)
   (case major-mode
-    ((emacs-lisp-mode mb-lisp-mode)
+    ((emacs-lisp-mode mb-lisp-mode python-mode)
      (save-excursion
      (unless no-eval-p
        (mb-eval-defun))
@@ -288,7 +288,8 @@ By default the last line."
     (mb-lisp-mode
      (when (slime-p)
        (slime-eval-defun)))
-    (octave-mode (octave-send-defun))))
+    (octave-mode (octave-send-defun))
+    (python-mode (apply #'python-shell-send-region (mb-python-defun-region)))))
 
 (defun mb-eval-region (start end &optional printflag read-function)
   (interactive "r")
