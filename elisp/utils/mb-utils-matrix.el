@@ -80,6 +80,12 @@
       (acos sp))))
 ;;(vec-angle '(1 0) '(1 -0.01))
 
+;;; mat queries
+(defun mat-rows (m) (length m))
+(defun mat-columns (m) (length (first m)))
+(defun mat-dimension (m) (list (mat-rows m) (mat-columns m)))
+;;(mat-dimension (mat-test))
+
 ;;; vec-mat operators
 (defun mat-vec-mult (m v)
   (mapcar #'(lambda (row) (scalar-product row v)) m))
@@ -96,6 +102,22 @@
 (defun frobenius-norm (m)
   (vec-sum (mapcar #'vec-sum (hadamard-product m m))))
 ;;(frobenius-norm (mat-subtract (mat-test) (mat-test)))
+
+(defun vec-pseudo-inverse (v)
+  "Returns the pseudo inverse of a vector.
+v+ = v'/(v'v)"
+  (vec-scalar-mult v (/ 1.0 (vec-sqr v))))
+;;(vec-pseudo-inverse '(1 2))
+
+(defun mat-pseudo-inverse (m)
+  "Returns the pseudo inverse of a matrix.
+v+ = v'/(v'v)"
+  (if (= (mat-rows m) 1)
+    (transpose (list (vec-pseudo-inverse (car m))))
+    (if (= (mat-columns m) 1)
+      (list (vec-pseudo-inverse (car (transpose m)))))))
+;;(mat-pseudo-inverse '((1 2)))
+;;(mat-pseudo-inverse '((1) (2)))
 
 (defun mat-scalar-mult (matrix scalar)
   (mapcar (bind #'vec-scalar-mult scalar) matrix))
