@@ -562,4 +562,20 @@ consisting of each floats neighbouring mid-points."
 	    ivs)))
 ;;(randomize-elements (vector -4.0 -3.0 -1.0))
 
+(defun group-consequtive-integers (integers &optional sorted-p)
+  "Group list of INTEGERS into lists of consequtive integers.
+E.g. '(1 2 3 6 7 8 11) ==> '((1 2 3) (6 7 8) (11)).
+
+If SORTED-P is not nil, the function assumes that INTEGERS are
+sorted with #'<.
+
+The function assumes that there are no duplicates in INTEGERS."
+  (let ((sintegers (if sorted-p
+		     integers
+		     (cl-sort integers #'<))))
+    (group sintegers :test #'(lambda (x y)
+			       (or (= (1+ x) y)
+				   (= (1- x) y))))))
+;;(group-consequtive-integers '(1 2 3 6 7 8 11))
+
 (provide 'mb-lists)
