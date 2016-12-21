@@ -4,10 +4,17 @@
   (setq-local parens-require-spaces nil))
    
 (defun mb-python-last-sexp-region ()
-  (save-excursion
-    (nreverse
-     (list (point)
-	   (1+ (re-search-backward "[[:space:]][^[:space:]]+"))))))
+  (let ((end (point)))
+    (re-search-backward "[][:alnum:])]")
+    (forward-char 1)
+    (backward-sexp 1)
+    (when (looking-at "(")
+      (backward-sexp 1))
+    (list (point) end)))
+
+(defun mb-python-defun-region ()
+  "Return the region of the current Python defun."
+  (list (bod*) (eod*)))
 
 (add-hook 'python-mode-hook #'set-mb-python-locals)
 
