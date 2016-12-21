@@ -224,10 +224,19 @@ mode in Emacs."
     (switch-to-buffer it)
     (info "(octave.info)Top" "*Octave-info*")))
 
+(defun regexp-or (&rest regexps)
+  "Join together REGEXPS with \\| (OR)."
+  (concat* regexps :in "\\|" :key #'(lambda (x) (format "\\(%s\\)" x))))
+;;(regexp-or "abc" "def")
+
 (defun octave-fill-documentation-paragraph ()
   "Fills an Octave documentation paragraph.
 This functionality is not well covered by octave-fill-paragraph"
   (let ((fill-prefix "## ")
+	(paragraph-separate (regexp-or paragraph-separate
+				       "## -*- texinfo -*-"
+				       "## @seealso"
+				       "## @deftypefn"))
 	(fill-paragraph-function nil))
     (fill-paragraph)))
 
