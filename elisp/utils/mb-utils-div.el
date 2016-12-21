@@ -79,7 +79,7 @@ If no arguments is given, t is returned."
   (oddp (count nil conditions)))
 ;;(xor t nil t)
 
-(defmacro xnor (&rest conditions)
+(defun xnor (&rest conditions)
   "Return nil iff there are an even number of conditions that evaluates to non nil."
   (oddp (count-if (complement #'null) conditions)))
 ;;(xnor t t nil)
