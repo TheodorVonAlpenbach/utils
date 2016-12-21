@@ -6,7 +6,7 @@
 (setf *local-load-paths* '("~/sources/imms/src/elisp/"
 			   "~/sources/elisp/lsconfig/"))
 
-(setf *local-requires* '(lsconf-mode))
+(setf *local-requires* '(lsconf-mode qt-chess))
 
 ;; Sentences, see info node Sentences
 (setf sentence-end "[.?!][]\"')]*\\($\\|\t\\| \\)[ \t\n]*")
@@ -38,6 +38,8 @@
 	(,+mb-lisp-dir+ "global/mb-indent.el")
 	(,+mb-lisp-dir+ "external/scilab/mbscilab.el")
 	(,+mb-lisp-dir+ "mode-extensions/mb-evil.el")
+	(,+mb-lisp-dir+ "c++/qt-chess.el")
+	(,+mb-lisp-dir+ "mode-extensions/mb-octave.el")
 	(,+mb-lisp-dir+ "mode-extensions/mb-lisp.el")
 	(,+mb-lisp-dir+ "mode-extensions/mb-octave.el")
 	(,+mb-lisp-dir+ "mode-extensions/mb-tex.el")
