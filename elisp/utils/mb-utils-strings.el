@@ -666,4 +666,22 @@ you (the other player) win or lose."
     (error "%s is not a legal BSG string!")))
 ;;(bsg-move "101")
 
+(defun format-integer-ranges (integers &optional sorted-p)
+  "Return a string that expresses the list INTEGERS in a condensed form.
+E.g. '(1 2 3 6 7 8 11) ==> \"1--3, 6--8, 11\".
+
+If SORTED-P is not nil, the function assumes that INTEGERS are
+sorted with #'<.
+
+See also `group-consequtive-integers'."
+  (concat* (group-consequtive-integers integers sorted-p)
+    :in ", "
+    :key #'(lambda (x)
+	     (if (= (length x) 1)
+	       (number-to-string (first x))
+	       (concat* (list (first x) (last-elt x))
+		 :in "--"
+		 :key #'number-to-string)))))
+;;(format-integer-ranges '(1 2 3 6 7 8 11))
+
 (provide 'mb-utils-strings)
