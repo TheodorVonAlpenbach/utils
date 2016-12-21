@@ -179,7 +179,9 @@ By default the last line."
 (let ((insert-map (make-sparse-keymap)))
   (key-chord-define evil-normal-state-map "vi" insert-map)
   (define-key insert-map "d" #'insert-date)
-  (define-key insert-map "t" #'insert-time))
+  (define-key insert-map "t" #'insert-time)
+  (define-key insert-map "c" #'comment-region)
+  (define-key insert-map "u" #' uncomment-region))
 
 (require 'mb-metafont)
 
