@@ -302,6 +302,26 @@ see `bol'"
   (warn "Deprecated. Use LINE-STRING instead.")
   (apply #'line-string args))
 
+(defun bod ()
+  "Move to beginning of the current defun and return POINT."
+  (beginning-of-defun) (point))
+;;(bod)
+
+(defun eod ()
+  "Move to end of the current defun and return POINT."
+  (end-of-defun) (point))
+;;(eod)
+
+(defun bod* ()
+  "Return the POINT at the beginning of the current defun."
+  (save-excursion (bod)))
+;;(bod*)
+
+(defun eod* ()
+  "Return the POINT at the end of the current defun."
+  (save-excursion (eod)))
+;;(eod*)
+
 (cl-defun column-at (&optional (point (point)))
   (save-excursion
     (goto-char point)
