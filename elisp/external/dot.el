@@ -1,4 +1,26 @@
-;;;; generation
+;;;; This module depends on the Graphviz package, which, in particular,
+;;;; contains the dot utility used here. You can install the package like this
+;;;; $ apt-get install graphviz
+
+;;; Customization
+(defgroup Graphviz nil
+  "Customizations for Elisp code based on Graphviz utilities."
+  :tag "Graphviz"
+  :link '(url-link :tag "Home Page" "http://www.graphviz.org/")
+  :group 'mb-elisp)
+
+(defgroup dot nil
+  "Customizations for Elisp code based on the dot utility from the Graphviz package."
+  :tag "dot"
+  :group 'Graphviz)
+
+(defcustom dot-program "dot"
+       "Command to run the dot utility from the Graphviz package."
+       :type 'string
+       :group 'dot)
+
+
+;;; Generation
 (defun dot-node-base (identifier properties)
   "Creates a dot node definition string. PROPERTIES is an alist
 where each element defines a dot node property \(name . value)"
@@ -34,15 +56,17 @@ where each element defines a dot node property \(name . value)"
   (concat* dot-statements :pre "digraph g {\n" :in "\n" :suf "\n}"))
 ;;(dot-string (dot-statements-from-tree '((c f) g c)))
 
-;;;; printing
+
+;;; Printing
 (defun dot-tmp-path (dot-string)
   (concat temporary-file-directory (md5 dot-string)))
 ;;(dot-tmp-path "qwe")
 
 (cl-defun dot-to-png (dot-string &key (path (dot-tmp-path dot-string)))
-  "Returns path to generated PNG file"
+  "Returns path to generated PNG file.
+The function uses `dot-program' to convert the DOT-STRING to a PNG image."
   (string-to-file dot-string path)
-  (let ((res (call-process "dot.exe" nil "*qwe*" nil path "-Tpng" "-O")))
+  (let ((res (call-process dot-program nil "*qwe*" nil path "-Tpng" "-O")))
     (if (zerop res)
       (concat path ".png")
       (error "Couldn't compile .dot file %s. See *qwe* for reason." path))))
@@ -57,7 +81,8 @@ where each element defines a dot node property \(name . value)"
 ;;(dot-view (file-string "~/projects/dot/CHESS-process.gv"))
 
 (defun png-view (filename)
-  (browse-url filename))
+  (auto-image-file-mode 1)
+  (find-file filename))
 
 ;;;; this could be moved to lilypond-<something>
 (defun pdf-view (filename)
