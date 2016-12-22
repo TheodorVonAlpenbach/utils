@@ -146,14 +146,6 @@
      (buffer-file-name)))))
 ;;(find-qt3-brother)
 
-(defun bow ()
-  (awhen (bounds-of-thing-at-point 'word)
-    (goto-char (car it))))
-
-(defun eow ()
-  (awhen (bounds-of-thing-at-point 'word)
-    (goto-char (cdr it))))
-
 (defun qt-latin1 ()
   "Append the common toLatin1().data() string to a QString variable."
   (interactive)
