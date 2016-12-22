@@ -68,6 +68,13 @@ Keywords supported:  :key :count :from-end
 ;;(copy-if #'always "12345" :count 0)
 
 (cl-defun copy (x cl-seq &key (test #'eql) key count from-end)
+  "Return a copy of SEQ containing exactly the items matching X.
+An element Y matches X if (TEST X Y) evaluates to non nil. This
+is a non-destructive function; it makes a copy of SEQ if
+necessary to avoid corrupting the original SEQ.
+
+Keywords supported:  :key :count :from-end
+\n(fn X SEQ [KEYWORD VALUE]...)"
   (copy-if (bind test x 1) cl-seq :key key :count count :from-end from-end))
 ;;(copy 3 '(1 2 3 4) :key #'1+ :test #'<)
 
