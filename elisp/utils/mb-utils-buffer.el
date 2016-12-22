@@ -302,6 +302,7 @@ see `bol'"
   (warn "Deprecated. Use LINE-STRING instead.")
   (apply #'line-string args))
 
+;;; defun
 (defun bod ()
   "Move to beginning of the current defun and return POINT."
   (beginning-of-defun) (point))
@@ -321,6 +322,47 @@ see `bol'"
   "Return the POINT at the end of the current defun."
   (save-excursion (eod)))
 ;;(eod*)
+
+;;; form
+(defun bof ()
+  "Move to the beginning of the current form and return POINT."
+  (backward-up-list 1) (point))
+;;(eof)
+
+(defun eof ()
+  "Move to the end of the current form and return POINT."
+  (up-list 1) (point))
+;;(eof)
+
+(defun bof* ()
+  "Return the POINT at the beginning of the current form."
+  (save-excursion (bof)))
+;;(bof*)
+
+(defun eof* ()
+  "Return the POINT at the end of the current form."
+  (save-excursion (eof)))
+;;(eof*)
+
+;;; word
+(defun bow ()
+  (awhen (bounds-of-thing-at-point 'word)
+    (goto-char (car it))
+    (point)))
+
+(defun eow ()
+  (awhen (bounds-of-thing-at-point 'word)
+    (goto-char (cdr it))))
+
+(defun bow* ()
+  "Return the POINT at the beginning of the current defun."
+  (save-excursion (bow)))
+;;(bow*)
+
+(defun eow* ()
+  "Return the POINT at the end of the current defun."
+  (save-excursion (eow)))
+;;(eow*)
 
 (cl-defun column-at (&optional (point (point)))
   (save-excursion
