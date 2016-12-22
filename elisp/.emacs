@@ -440,3 +440,8 @@ A unit test is a line prefixed by ';;(' and of the form given by
 ;; ignore some tex output files
 (pushnew "\\.\\(dvi\\|aux\\|out\\|bbl\\|blg\\)\\'" ido-ignore-files)
 (pushnew "\\.\\([0-9]*gf\\|pk\\)\\'" ido-ignore-files)
+
+(defgroup mb-elisp nil
+       "Super group for all mb-elisp customizataions."
+       :tag 'mb-elisp
+       :group 'emacs)
