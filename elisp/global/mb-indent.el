@@ -84,15 +84,15 @@ SYMBOL can be a symbol or a list of symbols. See function
   'progn)
 
 (cl-indent '(aif if anif> awhen read-string with-buffer
-	     substring-intv quiz-save-excursion q-try
-	     subseq concatenate with-out-file length*
-	     handles-outflow ly-function ly-context copy-object
-	     min-elt case< progress-bar-init doproduct
-	     make-instance chrome-closest-in-cells make-array
+	     substring-intv quiz-save-excursion q-try subseq
+	     concatenate with-out-file length* handles-outflow
+	     ly-function ly-context copy-object min-elt case<
+	     progress-bar-init doproduct make-instance
+	     chrome-closest-in-cells make-array
 	     cartesian-product3-sum write-gnuplots write-gnuplot
 	     for- dbf-decode-bytes shx-position string-case
-	     html-stream string-match* concat*)
-  'prog1)
+	     html-stream string-match* concat* remove-duplicates)
+	     'prog1)
 
 (cl-indent '(do-lines defmethod with-infile defclass with-outfile
 	     read-csv string-replace-intv remove*
