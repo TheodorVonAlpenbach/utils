@@ -1,6 +1,11 @@
 (defconst vec-default-length 3)
 
 ;;; vec generators
+(defun vec (p1 p2)
+  "Return the vector from point P1 to point P2"
+  (vec-subtract p2 p1))
+;;(vec '(1 1) '(2 2))
+
 (cl-defun vec-constant (&optional (n vec-default-length) (c 0))
   (loop for i below n collect c))
 ;;(vec-constant)
