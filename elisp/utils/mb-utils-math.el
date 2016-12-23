@@ -1,3 +1,5 @@
+(defun sec (x) (/ 1 (cos x)))
+(defun scs (x) (/ 1 (sin x)))
 (defun sinh (x) (/ (- (exp x) (exp (- x))) 2))
 (defun cosh (x) (/ (+ (exp x) (exp (- x))) 2))
 (defun tanh (x) (let ((y (exp (* 2 x)))) (/ (1- y) (1+ y))))
@@ -12,7 +14,7 @@
 	     collect `(defun ,(intern (concat "a" (sstring fn) "d")) (r)
 			(* radians-to-degrees
 			   (,(intern (concat "a" (sstring fn))) r))))))
-(define-degree-trigonometry (cos sin tan))
+(define-degree-trigonometry (cos sin tan sec scs))
 ;;(loop for fn in '(sind cosd tand) collect (funcall fn 45))
 ;;(list (asind 0.5) (acosd 0.5) (atand 1))
 
