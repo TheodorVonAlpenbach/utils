@@ -16,4 +16,4 @@ DEFUN forms include all top-level forms with a car symbol name having the prefix
     (re-search-forward "([[:space:]]*" nil t)
     (insert "cl-")))
 
-(require 'mb-emacs-lisp)
+(provide 'mb-emacs-lisp)
