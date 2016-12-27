@@ -80,7 +80,7 @@ SYMBOL can be a symbol or a list of symbols. See function
 
 (cl-indent 'cl-indent 1)
 
-(cl-indent '(with-temp-file* unwind-protect)
+(cl-indent '(with-other-window with-temp-file* unwind-protect)
   'progn)
 
 (cl-indent '(aif if anif> awhen read-string with-buffer

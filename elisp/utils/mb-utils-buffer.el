@@ -499,5 +499,12 @@ Should this method be interactive?"
     (newline (* 2 (1- n)))
     (previous-line (1- n))))
 
+(defmacro with-other-window (&rest body)
+  "Eval BODY in the other window's buffer."
+  `(prog2
+       (other-window 1)
+       (progn ,@body)
+     (other-window 1)))
+
 (provide 'mb-utils-buffer)
 
