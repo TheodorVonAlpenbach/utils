@@ -243,7 +243,9 @@ The return value is a pair of points \(START END\)."
     (buffer-substring-no-properties (bop) (eop))))
 ;;(paragraph-string)
 
-(defun current-paragraph-as-string () (warn "Deprecated. Use PARAGRAPH-STRING instead.") (paragraph-string))
+(defun current-paragraph-as-string ()
+  (warn "Deprecated. Use PARAGRAPH-STRING instead.")
+  (paragraph-string))
 
 (cl-defun bol (&key linum (offset 0) restrict-to-current-field)
   "Move point to the beginning of the current line and return its value.
