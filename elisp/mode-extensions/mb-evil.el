@@ -33,6 +33,7 @@
 (add-hook 'emacs-lisp-mode-hook #'evil-cleverparens-mode)
 (add-hook 'lisp-mode-hook #'evil-cleverparens-mode)
 (setf evil-cleverparens-swap-move-by-word-and-symbol t)
+(setf parens-require-spaces t)
 
 ;;; Finally, need to revert .emacs* buffers since they have not yet been
 ;;; hooked by the functionality loaded here
@@ -177,6 +178,7 @@ By default the last line."
   (define-key swap-map "d" #'(lambda () (interactive) (kill-buffer (current-buffer))))
   (define-key swap-map "k" #'kill-buffer))
 
+(require 'mb-emacs-lisp)
 (let ((insert-map (make-sparse-keymap)))
   (key-chord-define evil-normal-state-map "vi" insert-map)
   (define-key insert-map "f" #'cl-ify-form)
