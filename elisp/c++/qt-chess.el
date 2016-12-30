@@ -33,7 +33,7 @@
     (setf c-electric-brace t)
     (setf evil-symbol-word-search t)
     (setf indent-tabs-mode nil)
-    (setf parens-require-spaces nil)
+    (setq-local parens-require-spaces nil)
     (linum-mode 1)))
 
 (add-hook 'c-mode-common-hook #'chess-hook)
