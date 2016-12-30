@@ -108,4 +108,17 @@ compared to the relative directory names in PARENT-DIR"
 (with-buffer "LS-notes.org"
   (setf fill-paragraph-function #'fill-time-paragraph))
 
+(defun ls-insert-arrival-time ()
+  (interactive)
+  (if (string/= (buffer-name) "LS-notes.org")
+    (warn "Function ls-insert-arrival-time is only valid in buffer LS-notes.org.")
+    ;;else
+    (goto-char (point-max))
+    (just-one-blank-line)
+    (org-insert-heading)
+    (insert-date nil)
+    (insert "\n")
+    (insert-time nil)
+    (insert " Ankomst\n")))
+
 (provide 'LS)
