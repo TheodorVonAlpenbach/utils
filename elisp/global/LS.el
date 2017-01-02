@@ -105,8 +105,9 @@ compared to the relative directory names in PARENT-DIR"
 ;;(move-directories-lt "/home/MBe/projects/imms/data/amplitudes/75" "~/tmp/75" "Hs1.75-Tz12.5Cum4-Dir090" :execute t)
 ;;"Hs1.75-Tz12.5Cum4-Dir075" TODO: process this
 
-(with-buffer "LS-notes.org"
-  (setf fill-paragraph-function #'fill-time-paragraph))
+(awhen (get-buffer "LS-notes.org")
+  (with-buffer it
+    (setf fill-paragraph-function #'fill-time-paragraph)))
 
 (defun ls-insert-arrival-time ()
   (interactive)
