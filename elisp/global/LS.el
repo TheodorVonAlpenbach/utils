@@ -122,4 +122,14 @@ compared to the relative directory names in PARENT-DIR"
     (insert-time nil)
     (insert " Ankomst\n")))
 
+(defun ls-insert-depature-time ()
+  (interactive)
+  (if (string/= (buffer-name) "LS-notes.org")
+    (warn "Function ls-insert-arrival-time is only valid in buffer LS-notes.org.")
+    ;;else
+    (goto-char (point-max))
+    (just-one-blank-line)
+    (insert-time nil)
+    (insert " Hjem\n")))
+
 (provide 'LS)
