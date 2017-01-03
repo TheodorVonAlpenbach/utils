@@ -63,7 +63,9 @@
   "Note that - should be put at the end in the [] construct"
   (interactive)
   (let ((substitutions
-	 `(("([[:space:]]+" "(")
+	 `(("\\<TRUE\\>" "true")
+	   ("\\<FALSE\\>" "false")
+	   ("([[:space:]]+" "(")
 	   ("[[:space:]]+)" ")")
 	   ("\\[[[:space:]]+" "[")
 	   ("[[:space:]]+\\]" "]")
@@ -76,7 +78,7 @@
 	   ;; ensure spaces around ==, =+, =! operators
 	   ("\\([=+\\*/%&|^<>!-]=\\)" " \\1 ")
 	   ;; ensure spaces around +, / (but not * and -; too difficult at the moment)
-	   ("\\([])[:alnum:]]\\)[[:space:]]*\\([+/]\\)[[:space:]]*\\([[:alnum:]([]\\)"
+	   ("\\([])[:alnum:]]\\)[[:space:]]*\\([+]\\)[[:space:]]*\\([[:alnum:]([]\\)"
 	    "\\1 \\2 \\3")
 	   ;; remove double spaces
 	   ("[ \t]+" " ")
@@ -99,7 +101,7 @@
 	    do (goto-char (point-min))
 	    do (while (re-search-forward re nil t)
 		 ;; (message "Replace using %dth expression (%s)" i re)
-		 (replace-match s)))
+		 (replace-match s t)))
       (indent-region (point-min) (point-max)))))
 ;;(re-search-forward "^[\t]+" nil t)
 
