@@ -183,6 +183,7 @@ By default the last line."
 (let ((insert-map (make-sparse-keymap)))
   (key-chord-define evil-normal-state-map "vi" insert-map)
   (define-key insert-map "a" #'ls-insert-arrival-time)
+  (define-key insert-map "A" #'ls-insert-depature-time)
   (define-key insert-map "f" #'cl-ify-form)
   (define-key insert-map "F" #'cl-ify-defun)
   (define-key insert-map "d" #'insert-date)
