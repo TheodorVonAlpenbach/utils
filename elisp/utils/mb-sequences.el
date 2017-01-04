@@ -182,7 +182,7 @@ This function is not intended for use."
 
 (cl-defun minimum (cl-seq &key (test #'<) key (start 0) end from-end)
   "Find the minimum of SEQ.
-The returned object is the value pair (ELEMENT POSITION VALUE)
+The returned object is the value triple (ELEMENT POSITION VALUE)
 where ELEMENT is the minimum element in SEQ and POSITION is the
 positition of that element in SEQ. VALUE is an element identical
 to (funcall KEY ELEMENT). The default values of the supported
