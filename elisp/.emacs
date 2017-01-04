@@ -188,11 +188,12 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 	 ("\\.emacs-local-" . emacs-lisp-mode) ; then safe additions
 	 ("\\.pdmkvars$" . makefile-mode)
 	 ("\\.pdmkroot$" . makefile-mode)
+	 ("Makefile$" . makefile-mode)
+	 ("\\.pro$" . makefile-mode)
 	 ("\\.bmp$" . hexl-mode)
 	 ("\\.mf$" . metafont-mode)
 	 ("\\.dvi$" . doc-view-mode)
 	 ("\\.gp$" . gnuplot-mode)
-	 ("Makefile$" . makefile-mode)
 	 ("\\.m$\\|\\.octaverc" . octave-mode)
 	 ("\\.py$" . python-mode)
 	 ("\\.ora$" . text-mode)
