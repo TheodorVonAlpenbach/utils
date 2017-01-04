@@ -257,10 +257,6 @@ point to the current field, see `beginning-of-line'"
     (point)))
 ;;(bol :linum nil)
 
-(defun bol* (&rest args)
-  "Return the same as `bol' without moving the POINT."
-  (save-excursion (apply #'bol args)))
-
 (cl-defun eol (&key linum (offset 0) restrict-to-current-field)
   "Move point to the end of the current line and returns its value.
 For RESTRICT-TO-CURRENT-FIELD, see `bol'."
@@ -269,6 +265,14 @@ For RESTRICT-TO-CURRENT-FIELD, see `bol'."
     (end-of-line (1+ offset))
     (point)))
 ;;(save-excursion (list (bol) (eol) (bob) (eob)))
+
+(defun bol* (&rest args)
+  "Return the same as `bol' without moving the POINT."
+  (save-excursion (apply #'bol args)))
+
+(defun eol* (&rest args)
+  "Return the same as `eol' without moving the POINT."
+  (save-excursion (apply #'eol args)))
 
 (cl-defun line-region (&optional linums (buffer (current-buffer)))
   "Returns the region covering the current line in BUFFER.
