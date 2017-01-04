@@ -97,7 +97,7 @@ SYMBOL can be a symbol or a list of symbols. See function
 (cl-indent '(do-lines defmethod with-infile defclass with-outfile
 	     read-csv string-replace-intv remove*
 	     put-text-property do-tuples/o draw
-	     substitute-if)
+	     substitute-if xml-extract-nodes)
   'prog2)
 
 (cl-indent '(for define-derived-mode defun-ajax)
