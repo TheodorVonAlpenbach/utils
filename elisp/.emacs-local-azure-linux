@@ -34,6 +34,7 @@
 (setf *my-favorites*
       `((,+mb-lisp-dir+ ".emacs")
 	(,+mb-lisp-dir+ "utils/mb-utils-strings.el")
+	(,+mb-lisp-dir+ "utils/mb-utils-buffer.el")
 	(,+mb-lisp-dir+ "utils/mb-sequences.el")
 	(,+mb-lisp-dir+ "global/mb-indent.el")
 	(,+mb-lisp-dir+ "external/scilab/mbscilab.el")
