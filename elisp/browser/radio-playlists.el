@@ -136,7 +136,7 @@
 
 ;;; file parsing
 (cl-defun sr-html-entries (html-string &optional (n most-positive-fixnum))
-  (xml-extract-nodes html-string "li" '(("class" "track is-collapsed toggle-item")) n))
+  (xml-extract-nodes html-string "li" '(("class" "track-list-item__item")) n))
 
 (defconst +sr-track-detail-names+
   '("Artist" "Album" "Ensemble/Orkester" "Dirigent" "Etikett")
@@ -150,13 +150,15 @@
 ;;(sr-parse-track-detail "            <span>Etikett:</span> Sterling")
 
 (defun sr-parse-entry (html-entry)
-   (let ((time (first (xml-extract-nodes html-entry "time" () 1 t)))
-	 (title (first (xml-extract-nodes html-entry "span" '(("class" "track-title")) 1 t)))
-	 (track-details (xml-extract-nodes html-entry "div" '(("class" "track-detail")) most-positive-fixnum t)))
-     (let* ((details (cl-mapcar #'sr-parse-track-detail track-details))
-	    ;; More robust is to search for 'Artist' (which currently is always the first item)
-	    (artist (first (first details))))
-       (maptree #'string-trim (list (list time artist title) (rest details))))))
+  (let ((time (first (xml-extract-nodes html-entry "time"
+		       () 1 t)))
+	(title (xml-inner (first (xml-extract-nodes html-entry "h4" nil 1 t))))
+	(track-details (xml-extract-nodes html-entry "div"
+			 '(("class" "track-list-item__detail")) most-positive-fixnum t)))
+    (destructuring-bind (artist work &rest details)
+	(mapcar #'string-trim track-details)
+      (list (list time artist title)
+	    (mapcar #'sr-parse-track-detail details)))))
 
 (cl-defun sr-entries (html-string &optional n)
   (mapcar #'sr-parse-entry (sr-html-entries html-string n)))
@@ -165,7 +167,7 @@
   (let* ((main-line-entry (first sr-entry)))
     (if with-details
       (let* ((time-line-entry (list "Time" (first main-line-entry)))
-	     (artist-line-entry (rest main-line-entry))
+	     (artist-line-entry (list "Artist" (second main-line-entry)))
 	     (rest-lines-entries (first (rest sr-entry)))
 	     (line-entries (append (list time-line-entry artist-line-entry) rest-lines-entries)))
 	(concat* line-entries 
