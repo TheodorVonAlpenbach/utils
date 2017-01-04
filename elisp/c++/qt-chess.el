@@ -213,4 +213,39 @@ before carrying out its actions."
   (define-key qt-map "M" #'chess-memberize)
   (define-key qt-map "l" #'qt-latin1))
 
+(defun qt-align-line (indent)
+  (save-excursion
+    (let ((a (bol)))
+      (when (re-search-forward "=" (eol*) t 1)
+	(let ((b (point)))
+	  (let ((diff (- indent (- b a))))
+	    (re-search-backward "[[:space:]]")
+	    (if (plusp diff)
+	      (insert (make-string diff 32))
+	      (delete-backward-char (- diff)))))))))
+
+(cl-defun qt-align-pro-file (&optional (min-space 2))
+  "Automatically align all the assigment operators in a .pro file.
+Default minimum space before assigment is 2. It can be overruled
+by optional argument MIN-SPACE.
+
+Note that the function takes into account that there might always
+be operators like '+=' and '-='. Still, the function aligns the
+'=' character, so in a .pro file with only '=' assigments, it
+might seem like there is a space too much before the assigment
+operators.
+
+Consider move this functionality to a makefile-mode extension module"
+  (interactive)
+  (let ((max-lhs
+	 (loop for l in (buffer-lines)
+	       for s = (string-match* "^[[:space:]]*\\([[:alpha:]_]*\\)"
+			 l :num 1)
+	       maximize (length (sstring s)))))
+    (save-excursion
+      (bob)
+      (loop for i below (1- (length (buffer-lines)))
+	    do (qt-align-line (+ max-lhs min-space 2))
+	    do (forward-line 1)))))
+
 (provide 'qt-chess)
