@@ -213,7 +213,9 @@ By default the last line."
 (defun mb-eval-string (string &rest args)
   (case major-mode
     (mb-lisp-mode (apply #'mb-lisp-eval-1 string args))
-    (emacs-lisp-mode (eval (read string)))))
+    (emacs-lisp-mode (eval (read string)))
+    (octave-mode (octave-send-string string))
+    (mbscilab-mode (mbscilab-eval string))))
 ;;(mb-eval-string "(+ 2 2)")
 
 
@@ -246,27 +248,27 @@ By default the last line."
      (save-excursion
       (forward-sexp 1)
       (eval-last-sexp nil)))
-    (octave-mode
-     (save-excursion
-       (octave-send-string
-	(string-match* "#*\\([^#]*\\)" (line-string) :num 1))))))
+    (otherwise
+     (mb-eval-string
+      (string-match* "\\(?:#\\|//+\\|[[:space:]]\\)*\\(.*\\)"
+	(line-string) :num 1)))))
 ;;(+ (+ 111 2) 3)
 
 (defun eval-defun-test (&optional no-eval-p)
   (interactive)
-  (case major-mode
+  (cl-case major-mode
     ((emacs-lisp-mode mb-lisp-mode python-mode)
      (save-excursion
-     (unless no-eval-p
-       (mb-eval-defun))
-     (evil-cp-end-of-defun)
-     (eol :offset 1)
-     (mb-eval-last-sexp)))
+       (unless no-eval-p
+	 (mb-eval-defun))
+       (evil-cp-end-of-defun)
+       (eol :offset 1)
+       (mb-eval-last-sexp)))
     (metafont-mode (meta-eval-buffer))
-    (octave-mode
+    (otherwise
      (save-excursion
        (unless no-eval-p
-	 (octave-send-defun))
+	 (mb-eval-defun))
        (end-of-defun)
        (eval-current-sexp)))))
 ;;(eval-defun-test)
@@ -278,9 +280,10 @@ By default the last line."
 		    (buffer-string-no-properties) :num 1)))
     (find-file-other-window filename)))
 
+
 (defun mb-eval-buffer (&optional args)
   (interactive)
-  (case major-mode
+  (cl-case major-mode
     (emacs-lisp-mode (apply #'eval-buffer args))
     (gnuplot-mode (gnuplot-send-buffer-to-gnuplot))
     (mb-lisp-mode (if (slime-p)
@@ -288,24 +291,28 @@ By default the last line."
 		    (mb-lisp-eval-buffer)))
     (metafont-mode (meta-compile-file (buffer-file-name)))
     (octave-mode (octave-send-buffer))
+    (mbscilab-mode (mbscilab-eval-buffer))
     (python-mode (python-shell-send-buffer nil))
     ((c++-mode cc-mode) (compile "make -k"))))
 
 (defun mb-eval-defun ()
   (interactive)
-  (case major-mode
+  (cl-case major-mode
     (emacs-lisp-mode (eval-defun nil))
     (mb-lisp-mode
      (when (slime-p)
        (slime-eval-defun)))
     (octave-mode (octave-send-defun))
-    (python-mode (apply #'python-shell-send-region (mb-python-defun-region)))))
+    (python-mode (apply #'python-shell-send-region (mb-python-defun-region)))
+    (otherwise (apply #'mb-eval-region (defun-region)))))
 
 (defun mb-eval-region (start end &optional printflag read-function)
   (interactive "r")
   (case major-mode
     (emacs-lisp-mode (eval-region start end printflag read-function))
     (python-mode (python-shell-send-region start end nil))
+    (mbscilab-mode (mbscilab-eval-region start end))
+    (sh-mode (sh-execute-region start end))
     (octave-mode (octave-send-region start end))))
 
 (defun mb-eval-region-from-point (&optional printflag read-function)
