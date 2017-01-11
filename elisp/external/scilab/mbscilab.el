@@ -8,7 +8,7 @@
 (require 'mbscilab-font-lock)
 
 ;;(defconst +with-scilab-process-p+ t)
-(defconst +with-scilab-process-p+ nil)
+(defconst +with-scilab-process-p+ t)
 (defvar *scilab-partial-answer* "")
 (defvar *scilab-answer* nil)
 (defvar *scilab-display-answer* nil)
@@ -18,11 +18,21 @@
 (define-error :mbscilab-no-process "General error in mbscilab mode" 'error)
 
 ;;; Comint methods
+(defun scilab-command ()
+  (if (eql (emacs-os) :linux)
+    "scilab-adv-cli"
+    "/cygdrive/c/Program Files (x86)/scilab-5.5.2/bin/Scilex.exe"))
+
 (defun scilab-command-line-string ()
-  "/cygdrive/c/Program Files (x86)/scilab-5.5.2/bin/Scilex.exe")
+  (if +scilab-init-file+
+    (format "%s -f %s" (scilab-command) +scilab-init-file+)
+    (scilab-command)))
+;;(scilab-command-line-string)
 
 (defconst +scilab-init-file+
-  "/cygdrive/c/Users/MBe.azure/AppData/Roaming/Scilab/scilab-5.5.2/scilab.ini")
+  (if (eql (emacs-os) :linux)
+    "~/sources/SciLab/toolboxes/LSSensorViewer/macros/LSSensorViewer.ini"
+    "/cygdrive/c/Users/MBe.azure/AppData/Roaming/Scilab/scilab-5.5.2/scilab.ini"))
 
 (defun mbscilab-buffer ()
   "TODO scilab here and scilab there. Make this a variable with a suitable name!"
@@ -118,7 +128,9 @@ TODO: better name?"
 ;;(mbscilab-eval "2+2" t)
 
 (defun my-cygpath (path)
-  (format "C:\\cygwin%s" (replace-regexp-in-string "/" "\\\\" path)))
+  (if (eql (emacs-os) :linux)
+    path
+    (format "C:\\cygwin%s" (replace-regexp-in-string "/" "\\\\" path))))
 
 (cl-defun mbscilab-exec (path &optional (mode -1))
   (let ((expression (format "exec('%s', %d)" (my-cygpath path) mode)))
@@ -213,6 +225,8 @@ debug mode no longer triggers the buffer's modified mark."
   "An extension of c mode
 \\{mbscilab-mode-map}"
   (setq-local mbscilab-mode-p t)
+  (setq-local beginning-of-defun-function #'mbscilab-beginning-of-defun)
+  (setq-local end-of-defun-function #'scilab-end-of-defun)
 
   (setq-local tags-file-name "~/.SCILABTAGS")
   (when (file-exists-p +scilab-tags-path+)
@@ -235,7 +249,9 @@ debug mode no longer triggers the buffer's modified mark."
     (save-buffer)
     (mbscilab-delete-autosaved-files)
     (accept-process-output (scilab-process) 1)
-    (make-comint "scilab" (scilab-command-line-string) +scilab-init-file+)
+  (if +scilab-init-file+
+    (make-comint "scilab" (scilab-command) nil "-f" +scilab-init-file+)
+    (make-comint "scilab" (scilab-command)))
     (with-buffer (mbscilab-buffer)
       (scilab-comint-mode))))
 ;;(make-comint "scilab" (scilab-command-line-string))
@@ -254,8 +270,7 @@ debug mode no longer triggers the buffer's modified mark."
 
 
 (defun scilab-switch-to-repl ()
-  (interactive)
-  )
+  (interactive))
 
 (defun scilab-whereami ()
   (interactive)
