@@ -329,6 +329,11 @@ see `bol'"
   (save-excursion (eod)))
 ;;(eod*)
 
+(defun defun-region ()
+  "Return the region of the current defun.
+The return value is a pair of points \(START END\)."
+  (list (bod*) (eod*)))
+
 ;;; form
 (defun bof ()
   "Move to the beginning of the current form and return POINT."
