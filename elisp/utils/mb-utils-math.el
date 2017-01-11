@@ -998,6 +998,14 @@ quotients by the gcd: (%d, %d)"
 	  (first (cl-floor (* l (mod (* l-inverse s) k)) k)))))
 ;;(loop for s below 10 collect (test3 s))
 
-(defun test4 ())
+(defun factors (n)
+  (loop for i from 1 to (/ n 2)
+	if (zerop (mod n i))
+	collect i))
+;;(factors 10)
+
+(defun perfect-number-p (n)
+  (= (sum (factors n)) n))
+;;(perfect-number-p 28)
 
 (provide 'mb-utils-math)
