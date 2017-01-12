@@ -210,6 +210,7 @@ By default the last line."
   (minor-mode-p 'slime-mode))
 ;;(slime-p)
 
+;;; Eval machinery
 (defun mb-eval-string (string &rest args)
   (case major-mode
     (mb-lisp-mode (apply #'mb-lisp-eval-1 string args))
@@ -217,7 +218,6 @@ By default the last line."
     (octave-mode (octave-send-string string))
     (mbscilab-mode (mbscilab-eval string))))
 ;;(mb-eval-string "(+ 2 2)")
-
 
 (defun eval-form ()
   (interactive)
