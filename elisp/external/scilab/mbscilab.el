@@ -130,7 +130,7 @@ TODO: better name?"
 (defun my-cygpath (path)
   (if (eql (emacs-os) :linux)
     path
-    (format "C:\\cygwin%s" (replace-regexp-in-string "/" "\\\\" path))))
+    (format "C:\\cygwin64%s" (replace-regexp-in-string "/" "\\\\" path))))
 
 (cl-defun mbscilab-exec (path &optional (mode -1))
   (let ((expression (format "exec('%s', %d)" (my-cygpath path) mode)))
