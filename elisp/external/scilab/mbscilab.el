@@ -30,9 +30,11 @@
 ;;(scilab-command-line-string)
 
 (defconst +scilab-init-file+
-  (if (eql (emacs-os) :linux)
-    "~/sources/SciLab/toolboxes/LSSensorViewer/macros/LSSensorViewer.ini"
-    "/cygdrive/c/Users/MBe.azure/AppData/Roaming/Scilab/scilab-5.5.2/scilab.ini"))
+  ;; old path "C:\\Users\\MBe.azure\\AppData\\Roaming\\Scilab\\scilab-5.5.2\\scilab.ini"
+  (let ((path "~/sources/SciLab/toolboxes/LSSensorViewer/macros/LSSensorViewer.ini"))
+    (if (eql (emacs-os) :linux)
+      path (cygpath path))))))
+;;(cygpath "~/sources/SciLab/toolboxes/LSSensorViewer/macros/LSSensorViewer.ini")
 
 (defun mbscilab-buffer ()
   "TODO scilab here and scilab there. Make this a variable with a suitable name!"
