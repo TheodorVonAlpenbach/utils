@@ -293,7 +293,8 @@ By default the last line."
     (octave-mode (octave-send-buffer))
     (mbscilab-mode (mbscilab-eval-buffer))
     (python-mode (python-shell-send-buffer nil))
-    ((c++-mode cc-mode) (compile "make -k"))))
+    ((c++-mode cc-mode) (compile "make -k"))
+    (otherwise (mb-eval-region (point-min) (point-max)))))
 
 (defun mb-eval-defun ()
   (interactive)
@@ -316,14 +317,21 @@ By default the last line."
     (octave-mode (octave-send-region start end))))
 
 (defun mb-eval-region-from-point (&optional printflag read-function)
+  "Evalutates content from POINT to the end of the buffer."
   (interactive "r")
   (mb-eval-region (bol*) (point-max) printflag read-function))
+
+(defun mb-eval-region-to-point (&optional printflag read-function)
+  "Evalutates content from the end of the buffer to POINT."
+  (interactive "r")
+  (mb-eval-region (point-min) (eol*) printflag read-function))
 
 (let ((eval-map (make-sparse-keymap)))
   (key-chord-define evil-normal-state-map "kj" eval-map)
   (define-key eval-map "d" #'mb-eval-defun)
   (define-key eval-map "b" #'mb-eval-buffer)
   (define-key eval-map "s" #'mb-eval-region-from-point)
+  (define-key eval-map "S" #'mb-eval-region-to-point)
   (define-key eval-map "r" #'mb-eval-region)
   (define-key eval-map "l" #'mb-eval-last-sexp)
   (define-key eval-map "f" #'eval-form)
