@@ -7,7 +7,7 @@
 		    (forward-sexp -1)
 		(error t)))))
 
-(defun count-sexps ()
+(defun count-sexps-current-level ()
   "Counts number of sexps at current level \(at point\)"
   (interactive)
   (save-excursion
@@ -21,7 +21,33 @@
       (princ n))))
 ;;(count-sexps sdfd)
 
-(defun* lift-sexp (&optional (n 1))
+(defun count-sexps-region* (start end)
+  "Return the number of sexps between START and END."
+  (interactive "r")
+  (message "%d" (count-sexps-region start end)))
+
+;; Calling scan-sexps may have three different types of outcome
+
+;; 1. It returns an integer. This means that the scan was ok: it found
+;; a sexp to the right of POINT which ends at the integer it returned
+;; 2. It returns nil. This means that it did not find any sexps after
+;; POINT. Probably there is only whitespace or other non-sexp
+;; characters left in the buffer
+;; 3. It fails and returns a condition. This means that we are at the
+;; end of a sexp contained in another sexp
+
+(defun count-sexps-region (start end)
+  "Return the number of sexps between START and END."
+  (save-excursion
+    (save-restriction
+      (narrow-to-region start end)
+      (1- (loop for p = (point-min) then (condition-case nil
+					     (scan-sexps p 1)
+					   (error nil))
+		while p count 1
+		do (goto-char p))))))
+
+(cl-defun lift-sexp (&optional (n 1))
   "Replace sexp at the above level with the N next sexps. N must be
 positive or zero. If zero, it just removes the surrounding
 paranthesis."
@@ -30,25 +56,25 @@ paranthesis."
     (kill-sexp n)
     (progn
       (goto-first-sexp)
-      (kill-sexp (count-sexps))))  
+      (kill-sexp (count-sexps-current-level))))  
   (backward-up-list 1)
   (kill-sexp 1)
   (yank 2))
 ;;(a b (c d))
 
-(defun* defun-symbol (&optional (point (point)))
+(cl-defun defun-symbol (&optional (point (point)))
   "Returns the defun symbol at POINT."
   (save-excursion
     (end-of-defun)
     (beginning-of-defun)
     (down-list 1)
     (when (member (sexp-at-point)
-		  '(defun defun* defmacro defmacro* defparameter defconstant))
+		  '(defun cl-defun defmacro cl-defmacro defparameter defconstant))
       (forward-sexp 2)
       (sexp-at-point))))
 (definteractive defun-symbol)
 
-(defun* defun-symbols (&optional (buffer (current-buffer)))
+(cl-defun defun-symbols (&optional (buffer (current-buffer)))
   "Returns all the defun symbols in BUFFER."
   (save-excursion
     (goto-char (point-min))
