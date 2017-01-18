@@ -33,7 +33,7 @@
   ;; old path "C:\\Users\\MBe.azure\\AppData\\Roaming\\Scilab\\scilab-5.5.2\\scilab.ini"
   (let ((path "~/sources/SciLab/toolboxes/LSSensorViewer/macros/LSSensorViewer.ini"))
     (if (eql (emacs-os) :linux)
-      path (cygpath path))))))
+      path (cygpath path))))
 ;;(cygpath "~/sources/SciLab/toolboxes/LSSensorViewer/macros/LSSensorViewer.ini")
 
 (defun mbscilab-buffer ()
