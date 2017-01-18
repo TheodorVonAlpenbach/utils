@@ -421,17 +421,36 @@ See arbeidslog for an example of a time paragraph"
 	    (fill-paragraph-function nil))
 	(fill-paragraph justify region)))
     (fill-paragraph justify region)))
- 
+
+
+;; A few helpers
+(defvar *sexp-statt-word* nil)
+
+(defun count-w-or-s (beg end)
+  (if *sexp-statt-word*
+    (count-sexps-region beg end)
+    (count-words beg end)))
+
+(defun transpose-w-or-s (n)
+  (if *sexp-statt-word*
+    (transpose-sexps n)
+    (transpose-words n)))
+
+(defun forward-w-or-s (n)
+  (if *sexp-statt-word*
+    (forward-sexp n)
+    (forward-word n)))
+
 (cl-defun rotate-words-1 (beg end &optional (n 1))
   "Rotate words in region from BEG to END N times.
 N is optional, and is 1 by default."
-  (let ((nwords (count-words beg end)))
+  (let ((nwords (count-w-or-s beg end)))
     (when (plusp nwords)
       (save-excursion
 	(loop repeat (mod (- n) nwords)
-	  do (goto-char beg)
-	  do (forward-word 1)
-	  do (transpose-words (1- nwords)))))))
+	      do (goto-char beg)
+	      do (forward-w-or-s 1)
+	      do (transpose-w-or-s (1- nwords)))))))
 
 (cl-defun rotate-words (&optional (n 1))
   "Rotate words in active region.
@@ -440,18 +459,26 @@ If region is not active this function is equivalent with
   (interactive "^p")
   (if (use-region-p)
     (rotate-words-1 (region-beginning) (region-end) n)
-    (transpose-words n)))
+    (transpose-w-or-s n)))
+
+(cl-defun rotate-sexps (&optional (n 1))
+  "Rotate symbol in active region.
+If region is not active this function is equivalent with
+`transpose-sexps'."
+  (interactive "^p")
+  (let ((*sexp-statt-word* t))
+    (rotate-words n)))
 
 (defun reverse-words-1 (beg end)
   "Reverse words in region from BEG to END.
 Helper function for `reverse-words'."
-  (let ((n (count-words beg end)))
+  (let ((n (count-w-or-s beg end)))
     (when (plusp n)
       (save-excursion
 	(goto-char beg)
 	(loop for i from (1- n) downto 1
 	      do (rotate-words-1 (point) end 1)
-	      do (forward-word 1))))))
+	      do (forward-w-or-s 1))))))
 
 (cl-defun reverse-words (&optional (n 1))
   "Reverse words in active region.
@@ -460,8 +487,15 @@ If region is not active this function is equivalent with
   (interactive "^p")
   (if (use-region-p)
     (reverse-words-1 (region-beginning) (region-end))
-    (transpose-words n)))
+    (transpose-w-or-s n)))
 
+(cl-defun reverse-sexps (&optional (n 1))
+  "Reverse sexps in active region.
+If region is not active this function is equivalent with
+`transpose-sexps'."
+  (interactive "^p")
+  (let ((*sexp-statt-word* t))
+    (reverse-words n)))
 
 (define-key global-map "\M-t" #'reverse-words)
 
