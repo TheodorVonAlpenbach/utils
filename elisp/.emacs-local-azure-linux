@@ -18,7 +18,7 @@
 
 ;; tags
 (setf tags-table-list
-      (cl-nunion '("~/.MBTAGS" "~/.CTAGS" "~/.OTAGS" "~/.CLTAGS" "~/.SCILABTAGS")
+      (cl-nunion '("~/.MBTAGS" "~/.CTAGS" "~/.OTAGS" "~/.CLTAGS" "~/.PYTAGS" "~/.SCILABTAGS")
 		 tags-table-list :test #'string=))
 
 ;; lynx
@@ -53,9 +53,11 @@
 	;; common lisp utils
 	(,+home-dir+ "projects/utils/lisp/mb-utils.lisp")
 
-	;; cvs entry points
+	;; chess
+	(,+home-dir+ "projects/chess/libHsmsCore/src/ChAlarmServer.cpp")
+
+	;; CVS entry points
 	(,+home-dir+ "sources/elisp/lsconfig/lsconf-mode.el")
-	(,+home-dir+ "sources/imms/src/cpp/TimeSeries/TimeSeries.cpp")
 	(,+home-dir+ "sources/imms/src/lisp/egina/egina-wave.lisp")
 	(,+home-dir+ "sources/imms/src/lisp/wave/wave.lisp")
 
@@ -63,6 +65,7 @@
 	(,lsdoc-dir "arbeidslog" :point :end :keyboard :no :time-paragraphs t)
 	(,lsdoc-dir "adresser.txt" :keyboard :no)
 	(,lsdoc-dir "todo.org" :keyboard :no)
+	(,lsdoc-dir "portlog.org" :keyboard :no)
 	(,lsdoc-dir "LS-notes.org" :point :end :keyboard :no :time-paragraphs t)))
 ;;(find-file "/ssh:sil:~/doc")
 
@@ -71,6 +74,3 @@
 
 ;; lisp
 (setf inferior-lisp-program "sbcl")
-
-;; dot
-(setf *dot-dir* "c:/Program Files/Graphviz2.30/bin/")
