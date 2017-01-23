@@ -21,6 +21,7 @@
 (require 'evil)
 (require 'evil-cleverparens)
 (require 'evil-cleverparens-text-objects)
+(require 'evil-textobj-line)
 ;;(require 'evil-org) ; does not work
 
 (require 'evil-exchange)
