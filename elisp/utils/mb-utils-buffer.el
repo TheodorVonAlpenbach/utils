@@ -267,11 +267,27 @@ For RESTRICT-TO-CURRENT-FIELD, see `bol'."
 ;;(save-excursion (list (bol) (eol) (bob) (eob)))
 
 (defun bol* (&rest args)
-  "Return the same as `bol' without moving the POINT."
+  "Return the same as `bol' without moving the POINT.
+Note: if you are not using any of the keyword arguments, see
+`bol', you should stick to the standard function
+`line-beginning-position' instead."
+  (when (null args)
+    (warn "bol* called without keyword arguments from function: %s"
+	  ;; Note that 6 is carefully calculated from the current form
+	  ;; hierarchy
+	  (second (backtrace-frame 6))))
   (save-excursion (apply #'bol args)))
 
 (defun eol* (&rest args)
-  "Return the same as `eol' without moving the POINT."
+  "Return the same as `eol' without moving the POINT.
+Note: if you are not using any of the keyword arguments, see
+`eol', you should stick to the standard function
+`line-end-position' instead."
+  (when (null args)
+    (warn "eol* called without keyword arguments from function: %s"
+	  ;; Note that 6 is carefully calculated from the current form
+	  ;; hierarchy
+	  (second (backtrace-frame 6))))
   (save-excursion (apply #'eol args)))
 
 (cl-defun line-region (&optional linums (buffer (current-buffer)))
