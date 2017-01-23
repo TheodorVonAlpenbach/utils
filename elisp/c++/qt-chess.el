@@ -204,14 +204,17 @@ before carrying out its actions."
 
 (let ((qt-map (make-sparse-keymap)))
   (evil-key-chord-define '(normal motion) global-map "gh" qt-map)
+  (define-key qt-map "a" #'qt-align-pro-file)
   (define-key qt-map "c" #'clean-chess-code)
   (define-key qt-map "f" #'find-qt3-brother)
   (define-key qt-map "g" #'chess-goto-error)
   (define-key qt-map "h" #'qt-help)
   (define-key qt-map "i" #'chess-insert-error)
+  (define-key qt-map "l" #'qt-latin1)
   (define-key qt-map "m" #'chess-memberize-class-no-query)
   (define-key qt-map "M" #'chess-memberize)
-  (define-key qt-map "l" #'qt-latin1))
+  (define-key qt-map "s" #'emacs->qtcreator-paths)
+  (define-key qt-map "S" #'qtcreator->emacs-paths))
 
 (defun qt-align-line (indent)
   (save-excursion
@@ -247,5 +250,23 @@ Consider move this functionality to a makefile-mode extension module"
       (loop for i below (1- (length (buffer-lines)))
 	    do (qt-align-line (+ max-lhs min-space 2))
 	    do (forward-line 1)))))
+
+(defun swap-emacs-and-qtcreator-paths (emacs->qtcreator-p start end)
+  (save-excursion
+    (save-restriction
+      (narrow-to-region start end)
+      (goto-char (point-min))
+      (let ((from (if emacs->qtcreator-p "\\.\\./" "\\.\\./\\.\\./"))
+	    (to (if emacs->qtcreator-p "../../" "../")))
+	(while (re-search-forward from nil t)
+	  (replace-match to))))))
+
+(defun emacs->qtcreator-paths (start end)
+  (interactive "r")
+  (swap-emacs-and-qtcreator-paths t start end))
+
+(defun qtcreator->emacs-paths (start end)
+  (interactive "r")
+  (swap-emacs-and-qtcreator-paths nil start end))
 
 (provide 'qt-chess)
