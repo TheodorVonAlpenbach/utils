@@ -162,7 +162,7 @@
 ;;;; Table handling
 
 ;;; General config
-(defconst qp-season '(26 "Allmennquiz"))
+(defconst qp-season '(27 "Allmennquiz"))
 (defun qp-season-number () (number-to-string (first qp-season)))
 (defun qp-season-name () (second qp-season))
 
@@ -182,8 +182,8 @@
     (highbury "Highbury (Oslo)" torsdag "\\(.*\\) \\([[:digit:]]+\\)$" "Highbury") 
     (onkel-oskar-namsos "Onkel Oskar (Namsos)" onsdag (4 5 0) "Onkel Oskar")
     (nellie "Nellie (Hamar)" onsdag (0 1) "Hamar")
-    (felix "Felix (Lillehammer)" torsdag (5 6) "Felix")
-    (scotsman "Scotsman (Oslo)" torsdag (4 5 0) "Scotsman"))
+    (scotsman "Scotsman (Oslo)" torsdag (4 5 0) "Scotsman")
+    (felix "Felix (Lillehammer)" torsdag (4 5 0) "Felix"))
   "Whats the third number number?
 Format is (tag pubstring day columns pubregexp)")
 
