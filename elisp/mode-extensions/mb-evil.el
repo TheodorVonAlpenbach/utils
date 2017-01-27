@@ -85,6 +85,7 @@ STATE can take the same values as in `evil-define-key'."
 (key-chord-define evil-insert-state-map "f;" 'yank)
 (key-chord-define evil-normal-state-map "j;" 'save-buffer)
 (key-chord-define evil-normal-state-map "J:" 'save-some-buffers)
+(evil-key-chord-define '(normal visual motion) global-map "uu" 'undo-tree-redo)
 (evil-key-chord-define '(normal visual motion) global-map "vn" 'ido-switch-buffer)
 
 (evil-define-motion evil-goto-line-keep-column (count)
@@ -185,11 +186,12 @@ By default the last line."
   (key-chord-define evil-normal-state-map "vi" insert-map)
   (define-key insert-map "a" #'ls-insert-arrival-time)
   (define-key insert-map "A" #'ls-insert-depature-time)
+  (define-key insert-map "c" #'comment-region)
+  (define-key insert-map "d" #'insert-date)
   (define-key insert-map "f" #'cl-ify-form)
   (define-key insert-map "F" #'cl-ify-defun)
-  (define-key insert-map "d" #'insert-date)
-  (define-key insert-map "t" #'insert-time)
-  (define-key insert-map "c" #'comment-region)
+  (define-key insert-map "k" #'browse-kill-ring)
+  (define-key insert-map "t" #' insert-time)
   (define-key insert-map "u" #' uncomment-region))
 
 (require 'mb-metafont)

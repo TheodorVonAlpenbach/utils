@@ -6,7 +6,7 @@
 (setf *local-load-paths* '("~/sources/imms/src/elisp/"
 			   "~/sources/elisp/lsconfig/"))
 
-(setf *local-requires* '(lsconf-mode qt-chess))
+(setf *local-requires* '(lsconf-mode qt-chess browse-kill-ring))
 
 ;; Sentences, see info node Sentences
 (setf sentence-end "[.?!][]\"')]*\\($\\|\t\\| \\)[ \t\n]*")
