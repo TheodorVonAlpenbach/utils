@@ -65,7 +65,7 @@
 	(,lsdoc-dir "arbeidslog" :point :end :keyboard :no :time-paragraphs t)
 	(,lsdoc-dir "adresser.txt" :keyboard :no)
 	(,lsdoc-dir "todo.org" :keyboard :no)
-	(,lsdoc-dir "portlog.org" :keyboard :no)
+	(,lsdoc-dir "qtportlog.org" :keyboard :no)
 	(,lsdoc-dir "LS-notes.org" :point :end :keyboard :no :time-paragraphs t)))
 ;;(find-file "/ssh:sil:~/doc")
 
