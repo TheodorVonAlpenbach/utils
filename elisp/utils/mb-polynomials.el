@@ -6,6 +6,12 @@
 ;;;; (numerator denomintator) where both elements are representations
 ;;;; of polynomials as described above.
 
+(defun horner (p x)
+  (loop for ai in (reverse p)
+	for sum = ai then (+ (* sum x) ai)
+	finally (return sum)))
+;;(horner '(2 0 1) 3)
+
 (defun polynom-p (p)
   (and (listp p)
        (plusp (length p))
