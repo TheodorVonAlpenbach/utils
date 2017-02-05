@@ -354,54 +354,6 @@ the rotation degree."
      (* 1.0 n-games game-price)))
 ;;(trondheim-percentage 5000 500 1000 10 35)
 
-(cl-defun polylogarithm-abs-lt-1 (x &optional (n 2) (num-iterations 50))
-  "http://mathworld.wolfram.com/Polylogarithm.html"
-  (loop for i from 1 below num-iterations
-	sum (/ (expt x i) (expt i n))))
-
-
-;;; Standard math functions not supported by Emacs
-(cl-defun dilog-lt-minus-1 (x &optional (num-iterations 50))
-  "http://www.geocities.com/hjsmithh/Numbers/Dilog.html"
-  (when (>= x -1) (error "Input"))
-  (let ((y (/ 1 (- 1.0 x))))
-    (- 0 
-       (polylogarithm-abs-lt-1 (- 1 y) 2 num-iterations)
-       (/ (sq (log y)) 2))))
-;;(dilog-lt-minus-1 -2)
-
-(cl-defun dilog-gt-1 (x &optional (num-iterations 50))
-  (when (< x 1) (error "Input"))
-  (- (dilog 1)
-     (* (log x) (log (- x 1)))
-     (dilog (- 1 x))))
-;;(dilog-gt-1 3 60)
-
-(cl-defun dilog (x &optional (num-iterations 50))
-  "http://mathworld.wolfram.com/Dilogarithm.html. For testing, see
-http://functions.wolfram.com/webMathematica/FunctionEvaluation.jsp?name=PolyLog2"
-  (cond
-   ((= x 0) 0)
-   ((= x -1) (- (/ (sq pi) 12)))
-   ((= x 1) (/ (sq pi) 6))
-   ((< (abs x) 1) (polylogarithm-abs-lt-1 x 2 num-iterations))
-   ((< x -1) (dilog-lt-minus-1 x num-iterations))
-   ((> x 1) (dilog-gt-1 x num-iterations))))
-;;(dilog 7)
-
-(defun atan2 (x y)
-  "Arctan with two arguments"
-  ;; http://en.wikipedia.org/wiki/Atan2
-  (numcond x
-      (> (atan (/ (float y) x)))
-      (< (numcond y
-	   (>= (+ (atan (/ (float y) x)) float-pi))
-	   (<  (- (atan (/ (float y) x)) float-pi))))
-      (= (numcond y
-	   (> (/ float-pi 2))
-	   (< (- (/ float-pi 2)))
-	   (= 'indeterminate)))))
-;;(atan2 -1 0)
 
 (defconst bilkollektivet-price-table 
   '((B 26 180 280 2.70 1.30)
@@ -624,7 +576,7 @@ behavior when the argument is not an integer"
 
 ;;;random numbers
 (defun random-float-base (&optional seed)
-  "Returns a number in [0 1]"
+  "Return a random number in [0 1]."
   (when seed (random t))
   (/ (- (coerce (random) 'float) most-negative-fixnum)
      (- (coerce most-positive-fixnum 'float)
@@ -632,25 +584,32 @@ behavior when the argument is not an integer"
 ;;(loop for i below 100000 count (< (random-float-base) .1)) should -> .1
 
 (cl-defun random-float (&optional (a 0.0) (b 1.0) seed)
+  "Return a random number in [a b]."
   (+ (* (random-float-base seed) (- b a)) a))
 ;;(random-float 1 4)
 
 (cl-defun random-integer (&optional (a 0) (b 1) seed)
+  "Return a random integer in [a b]." 
   (when seed (random t))
   (+ (random (1+ (- b a))) 
      a))
 ;;(loop for i below 100000 count (= (random-integer 1 3) 3))
 
 (cl-defun random-integers (n &optional (a 0) (b 1) seed)
+  "Return a list of N random numbers in [a b]."
   (when seed (random t))
   (loop repeat n collect (random-integer a b)))
 ;;(random-integers 10 1 3 t)
 
 (cl-defun random* (&optional (a 0) (b 1) (integerp nil) seed)
+  "Return a random number in the interval [a b]. If optional
+INTEGERP is nil then the number can take every floating point
+value in the specified interval. Else, it will be an integer."
   (if integerp
     (random-integer a b seed)
     (random-float a b seed)))
 
+;;
 (defun interval-floor (n interval)
   (* (floor n interval) interval))
 ;;(interval-floor 30 10)
