@@ -193,6 +193,18 @@ Note that line numbers and paragraph numbers (check) starts from base 0."
   "Move POINT forward N sexps and return point"
   (forward-sexp n) (point))
 
+(defun bos* (&optional (n 1))
+  "Return the POINT at the beginning of the Nth sexp before current point."
+  (save-excursion (bos n)))
+
+(defun eos* (&optional (n 1))
+  "Return the POINT at the beginning of the Nth sexp before current point."
+  (save-excursion (eos n)))
+
+(cl-defun last-sexp-region (&optional (n 1))
+  (save-excursion
+    (list (bos n) (eos n))))
+
 (defalias 'region-string 'buffer-substring-no-properties)
 ;;(region-string 1 100)
 
