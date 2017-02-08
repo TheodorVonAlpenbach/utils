@@ -6,25 +6,25 @@
   intermediate result in order to calculate diameter. Also diameter2
   is useful in many algorithms linear algebra"))
 
-(defmethod diameter2 ((x geometry))
-  "Default diameter is 0. It applies automatically to all 1d objects, like
-  point."
-  0)
-
 (defmethod diameter2 ((x segment))
-  (inner-product x))
-;;(diameter2 (make-segment '(1 0) '(0 0)))
+  (norm2 x))
+;;(diameter2 (make-segment '(1 1) '(3 2)))
 
 (defun mmg (lpoints)
   "Short cut for make multipoints. Only for testing"
   (make-multi-geometry (mapcar #'make-point lpoints)))
 ;;(mmg '((1 2)(2 4)))
 
-(defmethod diameter2 ((x multi-geometry))
+(defmethod diameter2 ((x geometry))
   "Slow, but safe"
   (loop for (p q) in (relations (points x))
 	maximize (diameter2 (make-segment p q))))
 ;;(diameter2 (mmg '((1 2) (2 4) (0 0))))
+
+(defmethod diameter2 ((x point))
+  "Default diameter is 0. It applies automatically to all 1d objects, like
+  point."
+  0)
 
 (defgeneric diameter (geometry)
   (:documentation "Returns the diameter of GEOMETRY"))
