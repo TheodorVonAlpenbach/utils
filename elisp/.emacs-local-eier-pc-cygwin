@@ -53,6 +53,7 @@
 	;; ("/ssh:ssh:~/doc" "todo.org" :keyboard :no)
 	;; ("/ssh:ssh:~/doc" "LS-notes.org" :point :end :keyboard :no :time-paragraphs t)
 	))
+;;/ssh:ssh:~/doc/arbeidslog-new
 
 ;;scheme
 (setf scheme-program-name "guile")
