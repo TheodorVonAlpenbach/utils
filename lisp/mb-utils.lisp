@@ -51,7 +51,8 @@
    :with-transpose
    :expand-list :expand-tree :expand-sequence
    :deltas
-   :replace-nth :nreplace-nth))
+   :replace-nth :nreplace-nth
+   :run-program))
 
 (in-package :mb-utils)
 
@@ -1250,7 +1251,9 @@ With DIMENSION set to 0 it is equivalent to EXPAND-LIST."
 ;;; external stuff
 (defun run-program (program &rest args)
   #+clisp
+  ;; (format t "Running ~a with arguments ~a~%" program args)
   (apply #'ext:execute program args)
+  ;; (format t "Finished!~%")
   #+sbcl
   (apply #'sb-ext:run-program program args)
   #-(or clisp sbcl)
