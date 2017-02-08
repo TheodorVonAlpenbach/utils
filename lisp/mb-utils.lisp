@@ -790,6 +790,21 @@ is true. The latter option is the fastest in this implementation."
   `(with-open-file (,out ,filespec :direction :output :if-exists ,if-exists)
      ,@body))
 
+(defun make-temporary-file (&optional (prefix "/tmp/tmp"))
+  #+clisp
+  (posix:mkstemp prefix)
+  #+sbcl
+  (declare (ignore prefix))
+  (error "Not implemented")
+  #-(or clisp sbcl)
+  (error "Not implemented"))
+
+(defmacro with-temporary-file ((stream &optional prefix) &rest body)
+  "Executes BODY with STREAM bound to a file stream to a newly created
+file. Returns the pathname of the stream together with the value of last form in BODY."
+  `(let ((,stream (make-temporary-file ,(or prefix "/tmp/tmp"))))
+     (values (pathname ,stream)
+	     (prog1 (progn ,@body) (close ,stream)))))
 ;;; read text
 (defun skip-lines (stream n)
   "Move to util file"
@@ -907,7 +922,7 @@ is the same throughout TREE."
 	   #+clisp
 	   (ext:getenv "HOMEPATH")
 	   #+sbcl
-	   (posix-getenv "HOME")
+	   (sb-ext:posix-getenv "HOME")
 	   #-(or clisp sbcl)
 	   (error "Not implemented"))))
 ;;(merge-pathnames "Google Drive/Contango-MB/Light Structures" (win32-homepath))
@@ -1231,3 +1246,12 @@ With DIMENSION set to 0 it is equivalent to EXPAND-LIST."
 (defun replace-nth (n new-value sequence)
   (nreplace-nth n new-value (copy-seq sequence)))
 ;;(let ((s '(0 1 2))) (list (replace-nth 1 'qwe s) s))
+
+;;; external stuff
+(defun run-program (program &rest args)
+  #+clisp
+  (apply #'ext:execute program args)
+  #+sbcl
+  (apply #'sb-ext:run-program program args)
+  #-(or clisp sbcl)
+  (error "Not implemented"))
