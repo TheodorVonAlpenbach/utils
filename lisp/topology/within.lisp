@@ -6,7 +6,9 @@
 
 ;;; INSIDE
 (defmethod inside ((x point) (y triangle))
-  (every #'plusp (boundary y) :key (bind #'cross-product x)))
+  (warn "Not checked")
+  ;; (every #'plusp (boundary y) (bind #'cross-product x))
+  (every #'plusp (mapcar (bind #'cross-product x) (boundary y))))
 ;;(within (make-point '(1/2 1/2)) (make-triangle '(0 0) '(1 0) '(0 1)))
 
 ;;; WITHIN
