@@ -15,6 +15,17 @@
   (inner-product x))
 ;;(diameter2 (make-segment '(1 0) '(0 0)))
 
+(defun mmg (lpoints)
+  "Short cut for make multipoints. Only for testing"
+  (make-multi-geometry (mapcar #'make-point lpoints)))
+;;(mmg '((1 2)(2 4)))
+
+(defmethod diameter2 ((x multi-geometry))
+  "Slow, but safe"
+  (loop for (p q) in (relations (points x))
+	maximize (diameter2 (make-segment p q))))
+;;(diameter2 (mmg '((1 2) (2 4) (0 0))))
+
 (defgeneric diameter (geometry)
   (:documentation "Returns the diameter of GEOMETRY"))
 
