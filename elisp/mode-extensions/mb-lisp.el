@@ -328,6 +328,7 @@ non-Elisp syntax in Common Lisp. E.g. #(1 2 3) fails in
 (defun lisp-process-buffer ()
   (if (boundp 'inferior-lisp-buffer)
     inferior-lisp-buffer))
+;;(lisp-process-buffer)
 
 (defun mb-inferior-lisp-set-locals ()
   (define-key inferior-lisp-mode-map [(f12)] 'repl-abort)
