@@ -4,3 +4,4 @@
 TAGS
 *workspace
 *.pyc
+*.fasl
