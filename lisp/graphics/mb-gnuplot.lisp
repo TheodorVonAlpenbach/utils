@@ -290,7 +290,8 @@ with N points."
   "Returns a gnuplot script for plotting unary FUNCTION from A to B
 with N points."
   (let* ((scriptpath (gp-path directory name "gp"))
-	 (target (script scriptpath expression terminal :aspect-ratio aspect-ratio)))
+	 (target (script scriptpath expression terminal
+			 :aspect-ratio aspect-ratio)))
     (run-program "/usr/bin/gnuplot" scriptpath)
     (list :script scriptpath :target target)))
 ;;(gp:plot `(:l (:d ,#'sqrt :resolution 10) :with :linespoints))
