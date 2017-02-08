@@ -82,7 +82,7 @@ STATE can take the same values as in `evil-define-key'."
 (key-chord-mode 1)
 (key-chord-define evil-insert-state-map "dg" 'evil-move-past-close)
 (key-chord-define evil-insert-state-map "df" 'evil-normal-state)
-(key-chord-define evil-insert-state-map "f;" 'yank)
+(key-chord-define evil-insert-state-map "a;" 'yank)
 (key-chord-define evil-normal-state-map "j;" 'save-buffer)
 (key-chord-define evil-normal-state-map "J:" 'save-some-buffers)
 (evil-key-chord-define '(normal visual motion) global-map "uu" 'undo-tree-redo)
