@@ -91,7 +91,7 @@ SYMBOL can be a symbol or a list of symbols. See function
 	     chrome-closest-in-cells make-array
 	     cartesian-product3-sum write-gnuplots write-gnuplot
 	     for- dbf-decode-bytes shx-position string-case
-	     html-stream string-match* concat* remove-duplicates)
+	     html-stream string-match* concat* remove-duplicates csv-string write-csv)
 	     'prog1)
 
 (cl-indent '(do-lines defmethod with-infile defclass with-outfile
