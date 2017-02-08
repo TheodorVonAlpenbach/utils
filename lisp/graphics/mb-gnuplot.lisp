@@ -6,13 +6,6 @@
 (in-package :mb-gnuplot)
 
 ;;; Move this to utils later
-(defmacro with-temporary-file ((stream &optional (prefix )) &rest body)
-  "Executes BODY with STREAM bound to a file stream to a newly created
-file. Returns the pathname of the stream together with the value of last form in BODY."
-  `(let ((,stream (posix:mkstemp ,(or prefix "/tmp/tmp"))))
-     (values (pathname ,stream)
-	     (prog1 (progn ,@body) (close ,stream)))))
-
 (defvar *gp-unique-id* 0)
 (defun gp-unique-id (&optional reset)
   (when reset
@@ -91,7 +84,9 @@ TODO:
   (typecase target
     (function (apply #'write-function stream target plist))
     (array (apply #'write-array stream target plist))
-    (mb-grid::grid (apply #'write-array stream (mb-grid::grid-data target) :x-values (mb-grid::grid-axes target) plist))
+    ;; (mb-grid::grid
+    ;;  (apply #'write-array stream (mb-grid::grid-data target)
+    ;; 	    :x-values (mb-grid::grid-axes target) plist))
     (mb-grid::grid (apply #'write-1d-grid stream target plist))
     (t (error "Unknown type ~a for target ~a" (type-of target) target))))
 ;;(write-data-1 t #'sqrt :resolution 10)
@@ -296,7 +291,7 @@ with N points."
 with N points."
   (let* ((scriptpath (gp-path directory name "gp"))
 	 (target (script scriptpath expression terminal :aspect-ratio aspect-ratio)))
-    (ext:execute "/usr/bin/gnuplot" scriptpath)
+    (run-program "/usr/bin/gnuplot" scriptpath)
     (list :script scriptpath :target target)))
 ;;(gp:plot `(:l (:d ,#'sqrt :resolution 10) :with :linespoints))
 ;;(gp:plot `((:l (:d ,(lambda (x) (sq x)) :x-values (0 1) :resolution 10) :with :linespoints) (:l (:d ,(lambda (x) (- 2 (sq x))) :x-values (1 2) :resolution 10) :with :linespoints)))
@@ -367,7 +362,7 @@ with N points."
 
 (defun reset-range (scriptpath x-range &optional (new-name (rangify-name scriptpath x-range)))
   (let ((scriptpath (reset-range-in-script scriptpath x-range new-name)))
-    (ext:execute "/usr/bin/gnuplot" (namestring scriptpath))
+    (run-program "/usr/bin/gnuplot" (namestring scriptpath))
     (list :script (namestring scriptpath) :target (namestring (make-pathname :type "pdf" :defaults scriptpath)))))
 ;;(reset-range "/tmp/PM.gp" '(97 100))
 
