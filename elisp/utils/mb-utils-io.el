@@ -184,9 +184,12 @@ See `parse-csv-string' for more details"
 			     :key #'(lambda (x) (format "%S" x))))))
 ;;(csv-string '((a b c) (1 2 3)))
 
-(cl-defun write-csv (lists filename &optional (column-separator ";") (line-separator "\n") overwrite)
+(cl-defun write-csv (lists filename
+			   &optional column-separator line-separator overwrite)
   "Saves  csv file FILENAME to a list of lists."
-  (string-to-file (csv-string lists column-separator line-separator) filename overwrite))
+  (string-to-file
+   (csv-string lists
+     (or column-separator ";") (or line-separator "\n")) filename overwrite))
 
 ;;; Binary stuff
 (cl-defun read-byte-vector (file &key (from 0) to)
