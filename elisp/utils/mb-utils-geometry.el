@@ -36,4 +36,18 @@
     res))
 ;;(1d-move (first (1d-interspaces 3 10)) 1)
 
+
+(defun minmax (numbers)
+  (list (reduce #'min numbers)
+	(reduce #'max numbers)))
+(defun minmax (numbers)
+  (list (butlast (minimum numbers))
+	(butlast (minimum numbers :test #'>))))
+;;(minmax '(1 3 2 4 0))
+
+(defun bounding-box (points)
+  (list (minmax (mapcar #'first points))
+	(minmax (mapcar #'second points))))
+;;(bounding-box '((0 0) (-1 3) (1 2)))
+
 (provide 'mb-utils-geometry)
