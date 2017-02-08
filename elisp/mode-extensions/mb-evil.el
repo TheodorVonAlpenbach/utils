@@ -237,12 +237,14 @@ By default the last line."
   (case major-mode
     (emacs-lisp-mode (eval-last-sexp args))
     (mb-lisp-mode
-     (if args
-       (slime-pprint-eval-last-expression)
-       (slime-eval-last-expression)))
+     (if (slime-p)
+       (if args
+	 (slime-pprint-eval-last-expression)
+	 (slime-eval-last-expression))
+       (mb-lisp-eval-sexp args)))
     (python-mode (apply #'python-shell-send-region
 			(mb-python-last-sexp-region)))
-    (t (apply #'mb-eval-region (last-sexp-region) args))))
+    (t (apply #'mb-eval-region (append (last-sexp-region) args)))))
 
 (defun eval-current-sexp ()
   (interactive)
@@ -273,7 +275,8 @@ By default the last line."
        (unless no-eval-p
 	 (mb-eval-defun))
        (end-of-defun)
-       (eval-current-sexp)))))
+       (eol)
+       (eval-last-sexp)))))
 ;;(eval-defun-test)
 
 (defun gp-eval-buffer ()
