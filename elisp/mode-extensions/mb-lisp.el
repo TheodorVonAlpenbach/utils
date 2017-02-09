@@ -703,4 +703,16 @@ documentation strings of defclass, defconstant etc."
     (apply orig-fun args)))
 (advice-add 'forward-sentence :around #'restrict-to-lisp-doc)
 
+;;; slime/evil additions
+(defun slime-plot-last-result ()
+  (interactive)
+  (when (slime-p)
+    (with-buffer "*Messages*"
+      (eob)
+      (bol :offset -1)
+      (awhen (string-match* "[^ \"]*pdf" (line-string))
+	(find-file-other-window it)))))
+
+(define-key *eval-map* "p" #'slime-plot-last-result)
+       
 (provide 'mb-lisp)
