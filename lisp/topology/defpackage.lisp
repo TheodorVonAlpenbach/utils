@@ -5,7 +5,7 @@
 	   :interval
 	   :point :make-point
 	   :segment :make-segment :start :end
-	   :polyline :make-polyline :segments
+	   :path :make-path :segments
 	   :polygon
 	   :triangle :make-triangle
 	   :points :coordinates :boundary

@@ -5,12 +5,12 @@
 
 (defmethod area ((x geometry))
   "Default area is 0. It applies automatically to all 0d objects, like
-  point, and to all 1d objects, like segment, polyline etc."
+  point, and to all 1d objects, like segment, path etc."
   0)
 
 (defmethod area ((x multi-geometry))
   "Default area is 0. It applies automatically to all 1d objects, like
-  point, segment, polyline etc."
+  point, segment, path etc."
   (reduce #'+ (elements x) :key #'area))
 
 (defmethod area ((x polygon))

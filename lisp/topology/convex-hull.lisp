@@ -3,7 +3,7 @@
 ;;shortcuts (only for testing)
 (defun ms (x1 y1 x2 y2) (make-segment `(,x1 ,y1) `(,x2 ,y2)))
 (defun mss (&rest xs-and-ys) (loop for (s e) in (pairs (cut xs-and-ys)) collect (make-segment s e)))
-(defun mpl (&rest xs-and-ys) (make-polyline (cut xs-and-ys)))
+(defun mpl (&rest xs-and-ys) (make-path (cut xs-and-ys)))
 (defun mpg (&rest xs-and-ys) (make-polygon (cut xs-and-ys)))
 ;;(mpg 0 0  1 0  1 1)
 
@@ -25,6 +25,6 @@
       segments
       (join-convex (first segments) (convex-hull (rest segments))))))
 
-(defmethod convex-hull ((x polyline)) (convex-hull (segments x)))
+(defmethod convex-hull ((x path)) (convex-hull (segments x)))
 (defmethod convex-hull ((x polygon)) (convex-hull (boundary x)))
 ;;(convex-hull (mpg 0 0  1 1  2 0  1 1  2 2  1 1  0 2  1 1))

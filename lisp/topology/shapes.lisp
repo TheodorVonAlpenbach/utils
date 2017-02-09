@@ -60,30 +60,30 @@
   (list (start x) (end x)))
 ;;(points (make-segment '(1 2) '(2 4)))
 
-(defclass polyline (geometry)
+(defclass path (geometry)
   ((segments :initarg :segments :accessor segments :type list)))
 
-(defmethod make-polyline (points)
-  (make-instance 'polyline
+(defmethod make-path (points)
+  (make-instance 'path
     :segments (loop for (start end) in (pairs points)
 		    collect (make-segment start end))))
-;;(trace make-polyline)
+;;(trace make-path)
 
-(defmethod points ((x polyline))
+(defmethod points ((x path))
   (let ((segments (segments x)))
     (cons (start (first segments)) (mapcar #'end segments))))
-;;(points (make-polyline '((0 0) (1 0) (1 1) (0 1))))
+;;(points (make-path '((0 0) (1 0) (1 1) (0 1))))
 
-(defmethod print-object ((x polyline) stream)
+(defmethod print-object ((x path) stream)
   (print-unreadable-object (x stream :type t)
     (princ (mapcar #'coordinates (points x)) stream)))
-;;(make-polyline '((0 0) (1 0) (1 1) (0 1)))
+;;(make-path '((0 0) (1 0) (1 1) (0 1)))
 
 (defclass polygon (geometry)
-  ((boundary :initarg :boundary :accessor boundary :type polyline)))
+  ((boundary :initarg :boundary :accessor boundary :type path)))
 
 (defmethod make-polygon (points)
-  (make-instance 'polygon :boundary (make-polyline (rcons points (first points)))))
+  (make-instance 'polygon :boundary (make-path (rcons points (first points)))))
 ;;(make-polygon '((0 0) (1 0) (0 1)))
 
 (defmethod segments ((x polygon))
@@ -102,7 +102,7 @@
 (defclass triangle (polygon) ())
 
 (defmethod make-triangle (x1 x2 x3)
-  (make-instance 'triangle :boundary (make-polyline (list x1 x2 x3 x1))))
+  (make-instance 'triangle :boundary (make-path (list x1 x2 x3 x1))))
 ;;(mapcar #'coordinates (mapcar #'start (boundary (make-triangle '(0 0) '(1 0) '(0 1)))))
 ;;(type-of (boundary (make-triangle '(0 0) '(1 0) '(0 1))))
 ;;(apply #'make-triangle (mapcar #'make-point '((0 0) (1 0) (0 1))))
@@ -132,8 +132,8 @@
       (list (- (* x c) (* y s)) (+ (* x s) (* y c))))))
 ;;(rotate '(1 0) (/ pi 2))
 
-(defmethod rotate ((x point) (y number))
-  (make-point (rotate (coordinates x) y)))
+(defmethod rotate ((p point) (radians number))
+  (make-point (rotate (coordinates p) radians)))
 ;;(rotate (make-point '(1 0)) pi)
 
 (defmethod rotate ((x segment) (y number))
@@ -158,24 +158,30 @@
 (defmethod minor-radius ((x ellipse)) (/ (minor-diameter x) 2))
 ;;(minor-radius (make-ellipse (make-segment '(0 -2) '(0 2)) 2))
 
-(defmethod radii ((x ellipse)) (list (major-radius x) (minor-radius x)))
+(defmethod radii ((x ellipse))
+  "Return the radii of the ELLIPSE's axes as a pair."
+  (list (major-radius x) (minor-radius x)))
 ;;(radii (make-ellipse (make-segment '(0 -2) '(0 2)) 2))
 
-(defun origo () (make-point '(0 0)))
+(defun origin ()
+  "Shouldn't this rather be a constant?. Also, it seems to be obsolete."
+  (make-point '(0 0)))
 
-(defmethod make-segment-origo ((r number) &optional orientation center)
-  "ORIENTATION is the angle from x-axis to major-axis. Default
-ORIENTATION is 0. Default CENTER is (ORIGO)"
-  (let ((s (make-segment (list (- r) 0) (list r 0))))
-    (when orientation (setf s (rotate s orientation)))
-    (when center (g+ s center))
-    s))
-;;(make-segment-origo 1 (/ pi 2) '(1 1))
+(defmethod make-segment-origin ((radius number) &optional radians center)
+  "Return the segement ((-RADIUS 0) (RADIUS 0)),
+i.e. a horizontal line of length 2*RADIUS centered at (0 0). If
+RADIANS is specified, the result is rotated this amount. If CENTER is
+specified is should be a point designator, and the center of the
+result is translated to this point."
+  (let ((s (make-segment (list (- radius) 0) (list radius 0))))
+    (when radians (setf s (rotate s radians)))
+    (if center (g+ s center) s)))
+;;(make-segment-origin 1 (/ pi 2) '(1 1))
 
-(defmethod make-ellipse-origo (major-radius minor-radius &optional orientation center)
-  "ORIENTATION is the angle from x-axis to major-axis"
-  (make-ellipse (make-segment-origo major-radius orientation center) (* 2 minor-radius)))
-;;(make-ellipse-origo 2 1)
+(defmethod make-ellipse-origin (major-radius minor-radius &optional radians center)
+  "RADIANS is the angle from x-axis to major-axis"
+  (make-ellipse (make-segment-origin major-radius radians center) (* 2 minor-radius)))
+;;(make-ellipse-origin 2 1)
 
 (defmethod points ((x ellipse))
   (append (points (major-axis x)) (points (minor-axis x))))
