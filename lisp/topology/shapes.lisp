@@ -74,6 +74,11 @@
     (cons (start (first segments)) (mapcar #'end segments))))
 ;;(points (make-path '((0 0) (1 0) (1 1) (0 1))))
 
+(defmethod head ((x path)) (first (segments x)))
+(defmethod tail ((x path)) (last-elt (segments x)))
+(defmethod start ((x path)) (start (head x)))
+(defmethod end ((x path)) (end (tail x)))
+
 (defmethod print-object ((x path) stream)
   (print-unreadable-object (x stream :type t)
     (princ (mapcar #'coordinates (points x)) stream)))

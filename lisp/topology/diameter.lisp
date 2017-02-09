@@ -19,7 +19,7 @@
   "Slow, but safe"
   (loop for (p q) in (relations (points x))
 	maximize (diameter2 (make-segment p q))))
-;;(diameter2 (mmg '((1 2) (2 4) (0 0))))
+;;(diameter2 (mmg '((1 2) (3 4) (0 0))))
 
 (defmethod diameter2 ((x point))
   "Default diameter is 0. It applies automatically to all 1d objects, like
@@ -31,5 +31,5 @@
 
 (defmethod diameter ((x geometry))
   (sqrt (diameter2 x)))
-;;(diameter (make-segment '(0 0) '(1 0)))
+;;(diameter (mmg '((1 2) (3 4) (0 0))))
 

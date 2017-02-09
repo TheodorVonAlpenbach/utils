@@ -14,4 +14,6 @@
 	   :distance
 	   :format-object
 	   :plot
-	   :gp-point))
+	   :gp-point)
+  (:shadow :head
+	   :tail))
