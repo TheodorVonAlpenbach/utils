@@ -65,6 +65,7 @@
   (let ((substitutions
 	 `(("\\<TRUE\\>" "true")
 	   ("\\<FALSE\\>" "false")
+	   ("\\<latin1\\>" "toLatin1().data")
 	   ("([[:space:]]+" "(")
 	   ("[[:space:]]+)" ")")
 	   ("\\[[[:space:]]+" "[")
@@ -200,26 +201,10 @@ before carrying out its actions."
   (interactive)
   (chess-memberize-class prefix t))
 
-(define-key evil-normal-state-map "ga" 'what-cursor-position)
-
-(let ((qt-map (make-sparse-keymap)))
-  (evil-key-chord-define '(normal motion) global-map "gh" qt-map)
-  (define-key qt-map "a" #'qt-align-pro-file)
-  (define-key qt-map "c" #'clean-chess-code)
-  (define-key qt-map "f" #'find-qt3-brother)
-  (define-key qt-map "g" #'chess-goto-error)
-  (define-key qt-map "h" #'qt-help)
-  (define-key qt-map "i" #'chess-insert-error)
-  (define-key qt-map "l" #'qt-latin1)
-  (define-key qt-map "m" #'chess-memberize-class-no-query)
-  (define-key qt-map "M" #'chess-memberize)
-  (define-key qt-map "s" #'emacs->qtcreator-paths)
-  (define-key qt-map "S" #'qtcreator->emacs-paths))
-
 (defun qt-align-line (indent)
   (save-excursion
     (let ((a (bol)))
-      (when (re-search-forward "=" (eol*) t 1)
+      (when (re-search-forward "=" (line-end-position) t 1)
 	(let ((b (point)))
 	  (let ((diff (- indent (- b a))))
 	    (re-search-backward "[[:space:]]")
@@ -268,5 +253,37 @@ Consider move this functionality to a makefile-mode extension module"
 (defun qtcreator->emacs-paths (start end)
   (interactive "r")
   (swap-emacs-and-qtcreator-paths nil start end))
+
+(defvar *qmake-program* "/home/mbe/Qt/5.7/gcc_64/bin/qmake")
+
+(defun qmake ()
+  (interactive)
+  (let ((pro-files (directory-files "." nil "\\.pro$")))
+    (if (= (length pro-files) 1)
+      (compile (format "%s -r -spec linux-g++ CONFIG+=debug %s"
+		 *qmake-program* (first pro-files)))
+      (error "Was expecting one and one only .pro file in current directory!"))))
+
+(setf compilation-read-command nil)
+(defun chess-compile ()
+  (interactive)
+  (compilation-start "make -k"))
+
+(let ((qt-map (make-sparse-keymap)))
+  (evil-key-chord-define '(normal motion) global-map "gh" qt-map)
+  (define-key qt-map "a" #'qt-align-pro-file)
+  (define-key qt-map "c" #'chess-compile)
+  (define-key qt-map "f" #'find-qt3-brother)
+  (define-key qt-map "g" #'chess-goto-error)
+  (define-key qt-map "h" #'qt-help)
+  (define-key qt-map "i" #'chess-insert-error)
+  (define-key qt-map "l" #'qt-latin1)
+  (define-key qt-map "m" #'chess-memberize-class-no-query)
+  (define-key qt-map "M" #'chess-memberize)
+  (define-key qt-map "n" #'next-error)
+  (define-key qt-map "q" #'qmake)
+  (define-key qt-map "s" #'emacs->qtcreator-paths)
+  (define-key qt-map "S" #'qtcreator->emacs-paths)
+  (define-key qt-map "v" #'clean-chess-code)) ;memo: vask!
 
 (provide 'qt-chess)
