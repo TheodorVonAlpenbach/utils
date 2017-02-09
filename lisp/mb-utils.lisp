@@ -1255,6 +1255,6 @@ With DIMENSION set to 0 it is equivalent to EXPAND-LIST."
   (apply #'ext:execute program args)
   ;; (format t "Finished!~%")
   #+sbcl
-  (apply #'sb-ext:run-program program args)
+  (sb-ext:run-program program args)
   #-(or clisp sbcl)
   (error "Not implemented"))
