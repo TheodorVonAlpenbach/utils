@@ -294,6 +294,7 @@ with N points."
 			 :aspect-ratio aspect-ratio)))
     (run-program "/usr/bin/gnuplot" scriptpath)
     (list :script scriptpath :target target)))
+;;(gp:plot `(:l ,#'sqrt))
 ;;(gp:plot `(:l (:d ,#'sqrt :resolution 10) :with :linespoints))
 ;;(gp:plot `((:l (:d ,(lambda (x) (sq x)) :x-values (0 1) :resolution 10) :with :linespoints) (:l (:d ,(lambda (x) (- 2 (sq x))) :x-values (1 2) :resolution 10) :with :linespoints)))
 
