@@ -29,6 +29,7 @@
    :boundaries
    :with-gensyms
    :with-outfile
+   :with-temporary-file
    :read-lines :file->lines :file->string
    :write-lines :lines->file :string->file
    :read-text-file :read-text-file-lines ;;deprecated methods
@@ -796,9 +797,13 @@ is true. The latter option is the fastest in this implementation."
   (posix:mkstemp prefix)
   #+sbcl
   (declare (ignore prefix))
-  (error "Not implemented")
+  (string-trim
+   (list #\newline)
+   (with-output-to-string (s)
+     (sb-ext:run-program "/bin/mktemp" nil :output s)))
   #-(or clisp sbcl)
   (error "Not implemented"))
+;;(type-of (make-temporary-file))
 
 (defmacro with-temporary-file ((stream &optional prefix) &rest body)
   "Executes BODY with STREAM bound to a file stream to a newly created
@@ -806,6 +811,8 @@ file. Returns the pathname of the stream together with the value of last form in
   `(let ((,stream (make-temporary-file ,(or prefix "/tmp/tmp"))))
      (values (pathname ,stream)
 	     (prog1 (progn ,@body) (close ,stream)))))
+;;(with-temporary-file (s) (format s "qwe"))
+
 ;;; read text
 (defun skip-lines (stream n)
   "Move to util file"
