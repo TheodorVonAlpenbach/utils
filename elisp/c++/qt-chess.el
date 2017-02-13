@@ -9,7 +9,7 @@
 	    (expand-file-name filename)))
 ;;(in-directory-p "~/bin/mbtags.sh" "~/")
 
-(cl-defun chess-file-p (buffer &optional (chess-dir "~/projects/chess/libHsmsCore"))
+(cl-defun chess-file-p (buffer &optional (chess-dir "~/projects/chess"))
   (or (in-directory-p (buffer-file-name buffer) chess-dir)
       (in-directory-p (buffer-file-name buffer) "~/sources/CHESS/Integrate")
       (in-directory-p (buffer-file-name buffer) "~/sources/CHESS/SimFBGA3Imp")))
