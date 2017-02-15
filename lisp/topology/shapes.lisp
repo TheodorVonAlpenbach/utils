@@ -26,8 +26,12 @@
   ((coordinates :initarg :coordinates :accessor coordinates :type list
 		:documentation "An n dimensional point")))
 
-(defmethod points ((x point)) (list x))
-(defmethod coordinates ((x geometry)) (mapcar #'coordinates (points x)))
+(defmethod points ((x point))
+  (list x))
+
+;; Make this generic because of (coordinates point)
+(defmethod coordinates ((x geometry))
+  (mapcar #'coordinates (points x)))
 
 (defmethod print-object ((x point) stream)
   (print-unreadable-object (x stream :type t)
