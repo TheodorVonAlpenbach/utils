@@ -52,3 +52,34 @@
 	collect y))
 ;;(generate-random-walk 30 2.0)
 ;;(gp::plot `(generate-random-walk 20 2.0))
+
+(defun turning-points (ts threashold)
+  (when (minusp threashold)
+    (error "THREASHOLD cannot be negative"))
+  (unless (listp ts)
+    (error "Timeseries must be a list"))
+  (if (null ts)
+    (warn "Timeseries is empty")
+    (let ((res (list (pop ts)))
+	  (register ()))
+      (while (ts)
+	(case (length ts)
+	  (0 (push (pop ts) register))
+	  (1 (if (same-direction-p res register ts)
+	       ;; replace single element in register with stronger element
+	       (setf (car register) (pop ts))
+	       (if (> (abs (- (car register) (car ts)) threshold))
+		 ;; move only element in register to res and replace
+		 ;; it with top of ts
+		 (push (pop register) res)
+		 ;; else move top of res to top of register
+		 (push (pop ts) register))))
+	  (3 (if (same-direction-p res register ts)
+	       ;; replace register with top of ts
+	       (setf register (list (pop ts)))
+	       (if (> (abs (- (cadr register) (car ts))) threshold)
+		 (push (pop* register 2) res)
+		 (if (between-p register ts)
+		   (setf (car register) (pop ts))
+		   (pop ts)))))))
+      (nreverse res))))
