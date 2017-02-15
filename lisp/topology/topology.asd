@@ -9,6 +9,7 @@
    (:cl-source-file "shapes" :depends-on ("defpackage" "shortcuts"))
    (:cl-source-file "algebra" :depends-on ("shapes"))
    (:cl-source-file "boundary" :depends-on ("algebra"))
+   (:cl-source-file "distance" :depends-on ("algebra"))
    (:cl-source-file "within" :depends-on ("algebra"))
    (:cl-source-file "diameter" :depends-on ("algebra"))
    (:cl-source-file "angle" :depends-on ("algebra"))

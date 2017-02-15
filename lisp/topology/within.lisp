@@ -1,8 +1,8 @@
+(in-package :topology)
 ;;;; This package contains the methods WITHIN and INSIDE.
 ;;;; (WITHIN X Y) simply means that X is an element or a subset of Y.
 ;;;; (INSIDE X Y) == (and (WITHIN X Y) (not (WITHIN X (BOUNDARY Y)))),
 ;;;; i.e. X must be stricly inside Y.
-(in-package :topology)
 
 ;;; INSIDE
 (defmethod inside ((x point) (y triangle))
@@ -69,42 +69,10 @@ Other values in [0 1] gives the position on the segment accordingly.
 If negative, the projection is on the continuation of the segment
 closest to P2, if positive closest to P1."
   (let ((dp (g- p2 p1)))
-    (/ (inner-product p dp) (norm2 dp))))
-;;(projection-parameter-points (mp 1 0) (mp 0 0) (mp 1 1))
+    (/ (inner-product (g- p p1) dp) (norm2 dp))))
+;;(projection-parameter-points (mp .1 .5) (mp 1 1) (mp 0 1))
 
 (defmethod projection-parameter ((p point) (s segment))
   "See point specialization only"
   (projection-parameter-points p (start s) (end s)))
 ;;(projection-parameter (mp 1 0) (ms 0 0 1 1))
-
-;;;DISTANCE2
-;; TODO instead of (distance2 x nil), check if diameter2 is the same. In that case this should be used instead, since it is so much clearer
-;; Move distance a separate module
-(defgeneric distance2 (x y))
-(defmethod distance2 ((x cons) (y (eql nil))) (reduce #'+ (mapcar #'sq x)))
-(defmethod distance2 ((x cons) (y cons)) (distance2 (g- x y) nil))
-(defmethod distance2 ((x point) (y point)) (distance2 (coordinates x) (coordinates y)))
-
-(defmethod distance2 ((x point) (y segment))
-  (let ((c (projection-parameter x y)))
-    (print c)
-    (if (<= 0 c 1)
-      ;; the projection of X on segment Y is WITHIN Y
-      (- (distance2 x (start y))
-	 (* (sq c) (diameter2 y)))
-      ;; projection of X is outside Y
-      (if (minusp c)
-	(distance2 x (start y))
-	(distance2 x (end y))))))
-;;(distance2 (mp 1 0) (ms 0 1 100.0 100))
-
-(defmethod distance2 ((x segment) (y point)) (distance2 y x))
-(defmethod distance2 ((x segment) (y segment))
-  (min (distance2 (start x) y)
-       (distance2 (end x) y)))
-;;(distance2 (ms 0 0 1 0) (ms 0 1 100 100))
-
-;;DISTANCE
-(defgeneric distance (x y))
-(defmethod distance (x y) (sqrt (distance2 x y)))
-;;(distance (make-point '(2 0)) (make-segment '(0 0) '(1 0)))
