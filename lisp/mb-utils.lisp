@@ -796,11 +796,12 @@ is true. The latter option is the fastest in this implementation."
   #+clisp
   (posix:mkstemp prefix)
   #+sbcl
-  (declare (ignore prefix))
-  (string-trim
-   (list #\newline)
-   (with-output-to-string (s)
-     (sb-ext:run-program "/bin/mktemp" nil :output s)))
+  (progn
+    (declare (ignore prefix))
+    (string-trim
+     (list #\newline)
+     (with-output-to-string (s)
+       (sb-ext:run-program "/bin/mktemp" nil :output s))))
   #-(or clisp sbcl)
   (error "Not implemented"))
 ;;(type-of (make-temporary-file))
