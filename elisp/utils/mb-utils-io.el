@@ -171,7 +171,7 @@ temporary file name as value."
 (cl-defun parse-csv-file (filename &rest args)
   "Parses csv file FILENAME to a list of lists.
 See `parse-csv-string' for more details"
-  (apply parse-csv-string (file-string filename) args))
+  (apply #'parse-csv-string (file-string filename) args))
 ;;(parse-csv-file "")
 
 (cl-defun csv-string (lists &optional (column-separator ";") line-separator)
