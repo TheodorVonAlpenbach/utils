@@ -16,11 +16,6 @@
   (mapcan #'points (elements x)))
 ;;(points (make-multi-geometry (list (make-point '(1 2)) (make-point '(2 4)))))
 
-;;; interval
-(defclass interval (geometry)
-  ((start :initarg :start :accessor start :type number :documentation "Lower bound of an interval")
-   (end :initarg :end :accessor end :type number :documentation "Upper bound of an interval")))
-
 ;;; point
 (defclass point (geometry)
   ((coordinates :initarg :coordinates :accessor coordinates :type list

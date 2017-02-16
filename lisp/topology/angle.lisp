@@ -12,9 +12,12 @@ NUMERICS-UTILS::DETERMINANT."
   (- (* (first x) (second y)) (* (second x) (first y))))
 ;;(cross-product '(234 456) '(567 34))
 
-(defmethod cross-product ((x point) (y point)) (cross-product (coordinates x) (coordinates y)))
-(defmethod cross-product ((x segment) (y segment)) (cross-product (direction x) (direction y)))
-(defmethod cross-product ((x segment) (y point)) (cross-product (direction x) (g- y (start x))))
+(defmethod cross-product ((x point) (y point))
+  (cross-product (coordinates x) (coordinates y)))
+(defmethod cross-product ((x segment) (y segment))
+  (cross-product (direction x) (direction y)))
+(defmethod cross-product ((x segment) (y point))
+  (cross-product (direction x) (g- y (start x))))
 
 (defmethod cross-product ((x cons) (y (eql nil))) (second x))
 (defmethod cross-product ((x point) (y (eql nil))) (second (coordinates x)))
@@ -27,7 +30,7 @@ Absolute here means that the result is always in [0 PI] and that
 \(abs-angle X Y) == (abs-angle Y X)."
   (acos (/ (inner-product x y) (norm x) (norm y))))
 
-(defmethod abs-angle ((x point) (y nil))
+(defmethod abs-angle ((x point) (y (eql nil)))
   (acos (/ (inner-product x nil) (norm x))))
 
 (defmethod abs-angle (x y)
