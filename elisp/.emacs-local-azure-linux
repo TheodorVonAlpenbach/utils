@@ -52,6 +52,7 @@
 	
 	;; common lisp utils
 	(,+home-dir+ "projects/utils/lisp/mb-utils.lisp")
+	(,+home-dir+ "projects/utils/lisp/topology/shapes.lisp")
 
 	;; chess
 	(,+home-dir+ "projects/chess/libHsmsCore/src/ChAlarmServer.cpp")
