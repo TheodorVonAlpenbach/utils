@@ -91,13 +91,15 @@ SYMBOL can be a symbol or a list of symbols. See function
 	     chrome-closest-in-cells make-array
 	     cartesian-product3-sum write-gnuplots write-gnuplot
 	     for- dbf-decode-bytes shx-position string-case
-	     html-stream string-match* concat* remove-duplicates csv-string write-csv)
+	     html-stream string-match* concat* remove-duplicates
+	     csv-string write-csv)
 	     'prog1)
 
 (cl-indent '(do-lines defmethod with-infile defclass with-outfile
 	     read-csv string-replace-intv remove*
 	     put-text-property do-tuples/o draw
-	     substitute-if xml-extract-nodes)
+	     substitute-if xml-extract-nodes
+	     write-csv)
   'prog2)
 
 (cl-indent '(for define-derived-mode defun-ajax)
@@ -124,7 +126,7 @@ SYMBOL can be a symbol or a list of symbols. See function
 
 (cl-indent 'defclass '((&whole 4 &rest (&whole 2 &rest 1))
 		       &rest (&whole 2 &rest 1)))
-(cl-indent 'defmethod '(4 4 (&whole 4 &rest 1) &body))
+;;(cl-indent 'defmethod '(4 4 (&whole 4 &rest 1) &body))
 (cl-indent 'generic-flet 'flet)
 (cl-indent 'cl-flet 'flet)
 (cl-indent 'generic-labels 'labels)
