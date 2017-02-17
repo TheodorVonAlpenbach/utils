@@ -6,9 +6,12 @@
 	   :point :make-point
 	   :segment :make-segment :start :end
 	   :path :make-path :segments
-	   :polygon
+	   :polygon :make-polygon
 	   :triangle :make-triangle
+	   :ellipse :make-ellipse
+	   :box :make-box
 	   :points :coordinates :boundary
+	   :area
 	   :within
 	   :gequal
 	   :distance

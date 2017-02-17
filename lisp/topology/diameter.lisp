@@ -26,10 +26,21 @@
   point."
   0)
 
+(defmethod diameter2 ((x interval))
+  (sq (diameter x)))
+
+(defmethod diameter2 ((x box))
+  (+ (diameter2 (x-range x))
+     (diameter2 (y-range x))))
+
+
 (defgeneric diameter (geometry)
   (:documentation "Returns the diameter of GEOMETRY"))
 
 (defmethod diameter ((x geometry))
   (sqrt (diameter2 x)))
 ;;(diameter (mmg '((1 2) (3 4) (0 0))))
+
+(defmethod diameter ((x interval))
+  (- (end x) (start x)))
 

@@ -19,9 +19,16 @@
   (* 1/2 (abs (loop with cs = (coordinates x)
 		    for ((xa ya) (xb yb)) in (pairs (rcons cs (first cs)))
 		    sum (* (- xb xa) (+ ya yb))))))
-;;(area (make-polygon '((0 0) (1 0) (2 1) (3 0) (3 2) (2 3) (1 2) (0 2))))
+;;(area (mpg 0 0  1 0  2 1  3 0  3 2  2 3  1 2  0 2))
 ;;(area (make-triangle '(0 0) '(1 0) '(2 1)))
 ;;(plot (make-triangle '(0 0) '(1 0) '(2 1)))
 ;;(plot (make-polygon '((0 0) (1 0) (2 1) (3 0) (3 2) (2 3) (1 2) (0 2))))
 
+(defmethod area ((x ellipse))
+  "Return area of an ellipse.
+The formula is A = PI * major-radius * minor-radius."
+  (apply #'* pi (radii x)))
 
+(defmethod area ((x box))
+  (* (diameter (x-range x))
+     (diameter (y-range x))))

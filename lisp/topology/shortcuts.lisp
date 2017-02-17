@@ -16,4 +16,8 @@
 (defun mpg (&rest xs-and-ys) (make-polygon (cut xs-and-ys)))
 ;;(mpg 0 0  1 0  1 1)
 
+(defun mbb (&rest args) (apply #'make-bounding-box args))
+;;(mbb 0 1 0 1)
+
+
 

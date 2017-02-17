@@ -49,6 +49,10 @@
   (g/ (reduce #'g+ geometries) (length geometries)))
 ;;(gaverage (list (make-point '(0 0)) (make-point '(2 0))))
 
+(defmethod scale (g c &optional at)
+  (if at (g+ (g* (g- g at) c) at) (g* g c)))
+;;(scale (make-segment '(-1 0) '(1 0)) 2 '(1 0))
+
 ;;; CENTRE
 (defgeneric centre (x) (:documentation "The centre of geometry X as a POINT"))
 (defmethod centre ((x geometry)) nil)
