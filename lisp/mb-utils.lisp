@@ -10,7 +10,7 @@
    :nor :awhen :aif :it :awhile :acond
    :mnth :melt
    :project
-   :nth* :pop-list
+   :nth* :pop-list :pop*
    :rcons
    :copy-if :infix-list
    :remove-nth
@@ -87,8 +87,13 @@ nil"
     (remf plist key)))
 ;;(let ((plist '(:a 1 :b 2))) (list (popf plist :c) plist))
 
-(defun sq (x) (declare (number x)) (* x x))
-(defmacro nor (&rest conditions) "Nor." `(not (or ,@conditions)))
+(defun sq (x)
+  (declare (number x))
+  (* x x))
+
+(defmacro nor (&rest conditions)
+  "Nor."
+  `(not (or ,@conditions)))
 
 (defmacro with-gensyms (syms &body body)
   `(let ,(mapcar #'(lambda (s)
@@ -772,6 +777,16 @@ similar to `mapcar'"
      (push x (cdr (nthcdr (1- n) list)))))
 ;;(let ((qwe '(0 1 2 3))) (list (list-insert 'a 3 qwe) qwe))
 
+(defmacro pop* (place &optional (n 1) reverse)
+  "Pops n times from list at PLACE and returns last element popped.
+If reverse i non nil, it returns the first popped element"
+  `(prog1 
+       (if ,reverse 
+	 (car ,place)
+	 (nth (1- ,n) ,place))
+     (setf ,place (nthcdr ,n ,place))))
+;;(let ((l '(a b c))) (list (pop* l 2) l)) 
+
 (defmacro pop-list (place &optional (n 1) (reverse nil))
   "Pops N times from list at PLACE and returns all the popped
 elements. The order is maintained in the returned list unless REVERSE
@@ -792,16 +807,18 @@ is true. The latter option is the fastest in this implementation."
   `(with-open-file (,out ,filespec :direction :output :if-exists ,if-exists)
      ,@body))
 
-(defun make-temporary-file (&optional (prefix "/tmp/tmp"))
-  #+clisp
-  (posix:mkstemp prefix)
-  #+sbcl
-  (progn
-    (declare (ignore prefix))
+(defun make-temporary-file-sbcl (prefix)
+  (declare (ignore prefix))
     (string-trim
      (list #\newline)
      (with-output-to-string (s)
        (sb-ext:run-program "/bin/mktemp" nil :output s))))
+
+(defun make-temporary-file (&optional (prefix "/tmp/tmp"))
+  #+clisp
+  (posix:mkstemp prefix)
+  #+sbcl
+  (make-temporary-file-sbcl prefix)
   #-(or clisp sbcl)
   (error "Not implemented"))
 ;;(type-of (make-temporary-file))
