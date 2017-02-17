@@ -1,3 +1,3 @@
 (defpackage :timeseries
-  (:use :cl :mb-utils)
+  (:use :cl :mb-utils :csv)
   (:export :turning-points))

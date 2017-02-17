@@ -8,9 +8,9 @@
   (same-direction-p r (car ts) (cadr ts)))
 ;;(wrong-direction-p 0 '(1 2))
 
-(defun turning-points (ts threashold)
-  (when (minusp threashold)
-    (error "THREASHOLD cannot be negative"))
+(defun turning-points-old (ts threshold)
+  (when (minusp threshold)
+    (error "THRESHOLD cannot be negative"))
   (unless (listp ts)
     (error "Timeseries must be a list"))
   (if (null ts)
@@ -29,7 +29,7 @@
 		 (pop ts)
 		 (setf state :right-direction)))
 	      (:right-direction
-	       (if (> (abs (- (first ts) (second ts))) threashold)
+	       (if (> (abs (- (first ts) (second ts))) threshold)
 		 (progn (push (pop ts) res)
 			(setf state :idle))
 		 (setf state :below-threshold)))
@@ -40,35 +40,63 @@
 		 (if (apply #'same-direction-p (head ts 3))
 		   (setf ts (remove-nth 1 ts)
 			 state :right-direction)
-		   (destructuring-bind (a b c) (pop-list ts 3)
+		   (destructuring-bind (a nil c) (pop-list ts 3)
 		      (push (max a c) ts)
 		      (setf state :idle))))))))))
-;;(turning-points '(0 1 2 3 2 1 2 1) 10)
+;;(turning-points-old '(0 1 2 3 2 1 2 1) 10)
 
 (defun generate-random-walk (n amplitude &optional (start 0))
   (loop for i below n
 	for p2p = (* 2 amplitude)
 	for y = start then (+ y (- amplitude (random p2p))) 
 	collect y))
-;;(generate-random-walk 30 2.0)
+;;(generate-random-walk 100 2.0)
+;;(generate-random-walk 3 2)
 ;;(gp::plot `(generate-random-walk 20 2.0))
+;;(trace generate-random-walk)
 
-(defun turning-points (ts threashold)
-  (when (minusp threashold)
-    (error "THREASHOLD cannot be negative"))
+(defun timestamps (n &optional delta-t start-t)
+  "Return a list of length N with Ith element (+ START-T (* I DELTA-T))"
+  (let ((delta-t (or delta-t 1)))
+    (loop for i below n
+	  for elt = (or start-t 0) then (+ elt delta-t)
+	  collect elt)))
+;;(timestamps 5)
+;;(untrace timestamps)
+
+(defun write-random-walks (n amplitudes filename
+			   &optional starts (delta-t 1) (start-t))
+  "Generate M timeseries of length N and write to FILENAME.
+M is the length of AMPLITUDES."
+  (write-csv-file
+   (transpose-tree
+    (cons (timestamps n delta-t start-t)
+	  (loop for amplitude in amplitudes
+		for start in (or starts
+				 (make-list (length amplitudes)
+					    :initial-element 0))
+		collect (generate-random-walk n amplitude start))))
+    filename
+    :column-separator #\;))
+;;(write-random-walks 3 '(1.0 2.0) "/home/mbe/projects/chess/TPTFilter/test/random-walk.csv" '(.5 .3))
+;;(write-random-walks 3 '(1.0 2.0) "~/projects/utils/lisp/timeseries/qwe.dat" '(.5 .3))
+
+(defun turning-points (ts threshold)
+  (when (minusp threshold)
+    (error "THRESHOLD cannot be negative"))
   (unless (listp ts)
     (error "Timeseries must be a list"))
   (if (null ts)
     (warn "Timeseries is empty")
     (let ((res (list (pop ts)))
 	  (register ()))
-      (while (ts)
+      (loop while ts do
 	(case (length ts)
 	  (0 (push (pop ts) register))
 	  (1 (if (same-direction-p res register ts)
 	       ;; replace single element in register with stronger element
 	       (setf (car register) (pop ts))
-	       (if (> (abs (- (car register) (car ts)) threshold))
+	       (if (> (abs (- (car register) (car ts))) threshold)
 		 ;; move only element in register to res and replace
 		 ;; it with top of ts
 		 (push (pop register) res)
