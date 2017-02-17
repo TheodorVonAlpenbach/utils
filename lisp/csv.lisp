@@ -42,7 +42,9 @@ For info abount CSV files, see http://en.wikipedia.org/wiki/Comma-separated_valu
 ;;(subseq (parse-csv-file (merge-pathnames "data/EGINA_Seastates (on-site).csv" +egina-path+)) 0 10)
 
 ;;; write
-(defun write-csv (tree stream &key (column-separator *column-separator*) (row-separator *row-separator*))
+(defun write-csv (tree stream &key
+				(column-separator *column-separator*)
+				(row-separator *row-separator*))
   (flet ((csv-line (x) (concat x :in (string column-separator))))
     (write-list (mapcar #'csv-line tree) stream :in (string row-separator))))
 ;;(write-csv '(("a" "b") ("a" "b")) t)
@@ -51,9 +53,19 @@ For info abount CSV files, see http://en.wikipedia.org/wiki/Comma-separated_valu
   (with-output-to-string (s) (apply #'write-csv tree s args)))
 ;;(csv-string '(("a" "b") ("a" "b")))
 
-(defun write-csv-file (tree filename &rest args)
-  (with-open-file (s filename :direction :output)
-    (apply #'write-csv tree s args)))
-;;(write-csv-file '(("a" "b") ("a" "b")) "~/tmp/qwe/qwe.txt")
+(defun write-csv-file (tree filename
+		       &key
+			 (column-separator *column-separator*)
+			 (row-separator *row-separator*)
+			 (if-exists :overwrite)
+			 (if-does-not-exists :create))
+  (with-open-file (s filename
+		     :direction :output
+		     :if-exists if-exists
+		     :if-does-not-exist if-does-not-exists)
+    (write-csv tree s
+      :column-separator column-separator
+      :row-separator row-separator)))
+;;(write-csv-file '(("a" "b") ("a" "b")) "/home/mbe/tmp/qwe.txt")
 
 (provide 'csv)
