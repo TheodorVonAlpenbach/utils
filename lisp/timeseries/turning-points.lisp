@@ -68,18 +68,20 @@
 			   &optional starts (delta-t 1) (start-t))
   "Generate M timeseries of length N and write to FILENAME.
 M is the length of AMPLITUDES."
-  (write-csv-file
-   (transpose-tree
-    (cons (timestamps n delta-t start-t)
-	  (loop for amplitude in amplitudes
-		for start in (or starts
-				 (make-list (length amplitudes)
-					    :initial-element 0))
-		collect (generate-random-walk n amplitude start))))
-    filename
-    :column-separator #\;))
+  (let ((*print-pprint-dispatch* (copy-pprint-dispatch)))
+    (set-pprint-dispatch 'float (lambda (s f) (format s "~,2f" f)))
+    (write-csv-file
+     (transpose-tree
+      (cons (timestamps n delta-t start-t)
+	    (loop for amplitude in amplitudes
+		  for start in (or starts
+				   (make-list (length amplitudes)
+					      :initial-element 0))
+		  collect (generate-random-walk n amplitude start))))
+     filename
+     :column-separator #\;)))
 ;;(write-random-walks 3 '(1.0 2.0) "/home/mbe/projects/chess/TPTFilter/test/random-walk.csv" '(.5 .3))
-;;(write-random-walks 3 '(1.0 2.0) "~/projects/utils/lisp/timeseries/qwe.dat" '(.5 .3))
+;;(write-random-walks 10 '(1.0 2.0) "~/projects/chess/TPTFilter/test/random-walk2.csv" nil .01 (coerce (get-unix-time) 'double-float))
 
 (defun turning-points (ts threshold)
   (when (minusp threshold)
