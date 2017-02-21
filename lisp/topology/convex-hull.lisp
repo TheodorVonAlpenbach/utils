@@ -76,28 +76,46 @@ using intersection point."
     (plusp (inner-product ns2 (g+ nu ns1)))))
 ;;(let* ((s1 (ms -1 0 0 0)) (s2 (ms 4 3 5 3)) (ns1 (normalize (direction s1)))(ns2 (normalize (direction s2)))) (time (all-segments-closer-between3 s1 s2 ns1 ns2)))
 
-(defmethod line-intersect-p ((x cons) (y cons))
-  "Returns the intersection of lines X and Y.
-X are a pairs of points, (X1 X2) and (Y1 Y2), signifying the lines
-going through the points X1 and X2, and Y1 and Y2, respectively. The
-intersection points is calculating by solving for S in the following
-line equations:
+(defmethod overlap-p ((s1 segment) (s2 segment))
+  (destructuring-bind (t1 t2) (line-intersection-coeffs s1 s2)
+    (if t1
+      (and (<= 0 t1 1) (<= 0 t2 1))
+      ;; s1 and s2 are parallel
+      (overlap-p (start s1) s2))))
 
-T*X2 + (1-T)*X1 = S*Y2 + (1-S)*Y1
-"
-  (let* ((dx (g- (second x) (first x)))
-	 (dy (g- (second y) (first y)))
-	 (dz (g- (first y) (second x)))
-	 (pdx (coordinates dx))
-	 (pdy (coordinates dy))
-	 (denominator (- (* (first pdy)
-			    (second pdx))
-			 (second pdy))))
-    (unless (zerop denominator) ;;otherwise no intersection --> NIL
-      (let ((s (/ (cross-product dx dz) denominator)))
-	(g+ (g* (second y) s)
-	    (g* (first y) (- 1 s)))))))
-;;(line-intersect-p (ms 0 0 1 0) (ms 4 3 5 3))
+(defmethod overlap-p ((p point) (s segment))
+  (zerop (distance2 p s)))
+;;(overlap-p (ms 0 0 .9 0) (ms 0 0 .9 0))
 
-(defmethod line-intersect-p ((x segment) (y segment))
-  (line-intersect-p (points x) (points y)))
+(defmethod line-intersection ((s1 segment) (s2 segment))
+  (let* ((u (g- (start s2) (start s1)))
+	 (v1 (direction s1))
+	 (v2 (direction s2))
+	 (t2 (line-intersection-t u v1 v2)))
+    (g+ (g* v2 t2) (start s2))))
+;;(line-intersection (ms 0 0 2 0) (ms 1 -1 1 1))
+
+(defmethod line-intersection-coeffs ((s1 segment) (s2 segment))
+  (flet ((x (p) (first (coordinates p))))
+    (let* ((u (g- (start s2) (start s1)))
+	   (v1 (direction s1))
+	   (v2 (direction s2))
+	   (t2 (line-intersection-coeff2-1 u v1 v2))
+	   (t1 (awhen t2 (/ (+ (* it (x v2)) (x u)) (x v1)))))
+      (list t1 t2))))
+;;(line-intersection-coeffs (ms 0 0 .9 0) (ms 1 0 1.9 0))
+
+(defmethod line-intersection-coeff2 ((x segment) (y segment))
+  "Return the second intersection coefficient of X and Y"
+  (line-intersection-t (g- (start y) (start x)) (direction x) (direction y)))
+;;(line-intersection-coeff2 (ms 0 0 2 0) (ms 1 -1 1 1))
+
+(defmethod line-intersection-coeff2-1 (u v1 v2)
+  "Return the T-value of vector V2 at the crossing with V1 + U.
+For instance let S1 = (P11 P12) and S2 = (P21 P22) be two line segments.
+Let Vi = Pi2 - Pi1, and U = P21 - P11.
+
+A helper for LINE-INTERSECTION-COEFF2"
+  (let ((denominator (cross-product v1 v2)))
+    (unless (zerop denominator) (/ (cross-product u v1) denominator))))
+;;(line-intersection-coeff2-1 '(1 -1) '(2 0) '(0 2))
