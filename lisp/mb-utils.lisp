@@ -35,7 +35,7 @@
    :read-text-file :read-text-file-lines ;;deprecated methods
    :sequence-index-boundary
    :win32-homepath
-   :parse-iso-dttm :parse-iso-date :parse-iso-time :iso-time
+   :parse-iso-dttm :parse-iso-date :parse-iso-time :iso-time :get-unix-time
    :tree->value-index-tuples
    :tree-dimensions
    :tree->array :array->tree
@@ -987,6 +987,12 @@ is the same throughout TREE."
 ;;(iso-time :format "~4,'0d-~2,'0d-~2,'0d ~2,'0d:~2,'0d:~2,'0d Z")
 ;;(iso-time)
 
+(defun get-unix-time ()
+  "Return the number of seconds since 1970-01-01 00:00:00 UTC.
+Corresponds to the command '/bin/date +%s'"
+  (- (get-universal-time) 2208988800))
+
+
 ;;;; array utils
 (defun unit-sequence (dimension length &key (unit 1) (zero 0) (type 'list))
   "Returns a Euclidian unit vector of LENGTH for DIMENSION as a list."
@@ -1283,3 +1289,4 @@ With DIMENSION set to 0 it is equivalent to EXPAND-LIST."
   (sb-ext:run-program program args)
   #-(or clisp sbcl)
   (error "Not implemented"))
+
