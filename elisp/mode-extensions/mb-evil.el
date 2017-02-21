@@ -238,6 +238,7 @@ By default the last line."
 (defun mb-eval-last-sexp (&rest args)
   (interactive)
   (case major-mode
+    (octave-mode (eval-current-sexp))
     (emacs-lisp-mode (eval-last-sexp args))
     (mb-lisp-mode
      (if (slime-p)
@@ -279,7 +280,7 @@ By default the last line."
 	 (mb-eval-defun))
        (end-of-defun)
        (eol)
-       (eval-last-sexp)))))
+       (mb-eval-last-sexp)))))
 ;;(eval-defun-test)
 
 (defun gp-eval-buffer ()
