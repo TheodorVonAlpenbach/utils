@@ -842,10 +842,13 @@ E.g. (let ((l '(a))) (push* l 'b 'c)) => (C B A)"
 (defmacro with-temporary-file ((stream &optional prefix) &rest body)
   "Executes BODY with STREAM bound to a file stream to a newly created
 file. Returns the pathname of the stream together with the value of last form in BODY."
-  `(let ((,stream (make-temporary-file ,(or prefix "/tmp/tmp"))))
+  `(with-open-file (,stream (make-temporary-file ,(or prefix "/tmp/tmp"))
+			    :direction :output
+			    :if-does-not-exist :create
+			    :if-exists :supersede)
      (values (pathname ,stream)
-	     (prog1 (progn ,@body) (close ,stream)))))
-;;(with-temporary-file (s) (format s "qwe"))
+	     (progn ,@body))))
+;;(with-temporary-file (s) (format s "qwe") 'qweqwe)
 
 ;;; read text
 (defun skip-lines (stream n)
