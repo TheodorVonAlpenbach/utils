@@ -31,7 +31,7 @@
 (defun extract-subopus-number-line ()
   (interactive)
   (move-beginning-of-line 1)
-  (let* ((op (extract-opus-number (current-line-as-string)))
+  (let* ((op (extract-opus-number (line-string)))
 	 (sub-opus (or (and (listp op)
 			    (second op))
 		       "")))

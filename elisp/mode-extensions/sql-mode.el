@@ -12,7 +12,7 @@ select * from mytable;   (sends \"\nselect * from mytable;\")
 the output buffer prompt.)"
   (interactive)
     (let* ((regexp "^\\(.*--\\)?\\(.*\\)")
-	   (s (string-trim (string-match* regexp (current-line-as-string) :num 2))))
+	   (s (string-trim (string-match* regexp (line-string) :num 2))))
       (sql-send-string (format "\n%s" s))))
 (define-key sql-mode-map (kbd "C-c C-e") 'sql-send-expression)
 

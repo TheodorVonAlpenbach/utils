@@ -29,7 +29,7 @@ store the deleted region in the kill ring, is
 (defun schedule-fill-paragraph (&optional justify)
   "Fills schedule paragraphs. Too macroish implemented."
   (interactive "P")
-  (unless (string-match* (iso-date-regexp) (current-line-as-string))
+  (unless (string-match* (iso-date-regexp) (line-string))
       (destructuring-bind (timestamp text) (kill-current-schedule-paragraph)
 	(let ((new-text (with-temp-buffer
 			  (insert (string-trim-left (remove 10 text)))

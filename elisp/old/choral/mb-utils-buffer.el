@@ -271,7 +271,7 @@ see `bol'"
       (if with-properties
 	(buffer-substring beg end)
 	(buffer-substring-no-properties beg end)))))
-;;(current-line-as-string :to-point t :from-point nil)
+;;(line-string :to-point t :from-point nil)
 
 (defun current-line-as-string (&rest args)
   (warn "Deprecated. Use LINE-STRING instead.")

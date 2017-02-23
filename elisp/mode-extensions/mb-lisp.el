@@ -47,7 +47,7 @@
 A true hack..."
   (interactive)
   (while (not (regexp-equal "^\\[[0-9,]*\\]>\\s-*" 
-			    (current-line-as-string)))
+			    (line-string)))
     (execute-kbd-macro "abort\n")
     (sleep-for 0 100))
 ;;  (execute-kbd-macro "(in-package :cl-user)\n")
@@ -354,7 +354,7 @@ non-Elisp syntax in Common Lisp. E.g. #(1 2 3) fails in
 
 (defun commented-line-p ()
   "Returns nil iff current line is not commented"
-  (commented-string-p (current-line-as-string)))
+  (commented-string-p (line-string)))
 ;;(commented-line-p)
 
 (defun toggle-comment-line ()

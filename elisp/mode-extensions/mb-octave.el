@@ -67,7 +67,7 @@ ones (2)
 the output buffer prompt.)"
   (interactive)
   (let* ((regexp "^[[:space:]#]*\\(.*\\)")
-	 (s (string-trim (string-match* regexp (current-line-as-string) :num 1))))
+	 (s (string-trim (string-match* regexp (line-string) :num 1))))
     (if s
       (octave-send-string (format "\n%s" s))
       (message "No expression at point"))))

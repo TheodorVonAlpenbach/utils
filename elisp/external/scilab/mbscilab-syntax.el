@@ -143,7 +143,7 @@ project search, or, again, just provide the current buffer."
   (= (line-number-at-pos point) (second (getf fn-info :lines))))
 ;;(mbscilab-last-line-p (scilab-fn-info))
 
-(cl-defun scilab-function-at-line (&optional (line (current-line-as-string)))
+(cl-defun scilab-function-at-line (&optional (line (line-string)))
   (second (scilab-parse-statement line)))
 
 (defun scilab-function-path (function)
