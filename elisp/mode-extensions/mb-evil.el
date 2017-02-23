@@ -244,7 +244,7 @@ By default the last line."
      (if (slime-p)
        (if args
 	 (slime-pprint-eval-last-expression)
-	 (slime-eval-last-expression))
+	 (setf qwe (slime-eval-last-expression)))
        (mb-lisp-eval-sexp args)))
     (python-mode (apply #'python-shell-send-region
 			(mb-python-last-sexp-region)))
@@ -478,5 +478,15 @@ occurence of 'delete' replaced with 'yank'."
       (evil-yank beg end type register yank-handler))
      (t
       (evil-yank beg (line-end-position) type register yank-handler)))))
+
+
+(defun print-last-pdf-in-Messages ()
+  (interactive)
+  (with-buffer "*Messages*"
+    (save-excursion
+      (eob)
+      (re-search-backward "\\.pdf\"")
+      (ffap-no-prompt-read-only))))
+;;(print-last-pdf-in-Messages)
 
 (provide 'mb-evil)
