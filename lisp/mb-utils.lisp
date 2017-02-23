@@ -10,7 +10,7 @@
    :nor :awhen :aif :it :awhile :acond
    :mnth :melt
    :project
-   :nth* :pop-list :pop*
+   :nth* :pop-list :pop* :pop-nth :push*
    :rcons
    :copy-if :infix-list
    :remove-nth
@@ -771,14 +771,14 @@ similar to `mapcar'"
 ;;(project #(#(a b c) (d e f)) 0 2)
 
 (defun list-insert (x n list)
-  "Inserts element X at position N in LIST"
+  "Insert element X at position N in LIST"
   (if (zerop n)
      (push x list)
      (push x (cdr (nthcdr (1- n) list)))))
 ;;(let ((qwe '(0 1 2 3))) (list (list-insert 'a 3 qwe) qwe))
 
 (defmacro pop* (place &optional (n 1) reverse)
-  "Pops n times from list at PLACE and returns last element popped.
+  "Pop n times from list at PLACE and returns last element popped.
 If reverse i non nil, it returns the first popped element"
   `(prog1 
        (if ,reverse 
@@ -787,8 +787,17 @@ If reverse i non nil, it returns the first popped element"
      (setf ,place (nthcdr ,n ,place))))
 ;;(let ((l '(a b c))) (list (pop* l 2) l)) 
 
+(defmacro pop-nth (place n)
+  "Pop and return the nth element from list PLACE."
+  `(if (zerop ,n)
+     (pop ,place)
+     (let* ((l (nthcdr (1- ,n) ,place)))
+       (prog1 (second l)
+	 (setf (cdr l) (cddr l))))))
+;;(let ((l '(a b c d))) (list (pop-nth l 1) l))
+
 (defmacro pop-list (place &optional (n 1) (reverse nil))
-  "Pops N times from list at PLACE and returns all the popped
+  "Pop N times from list at PLACE and returns all the popped
 elements. The order is maintained in the returned list unless REVERSE
 is true. The latter option is the fastest in this implementation."
   (let ((glist (gensym)))
@@ -797,6 +806,13 @@ is true. The latter option is the fastest in this implementation."
 	 (when ,place (push (pop ,place) ,glist)))
        (if ,reverse ,glist (nreverse ,glist)))))
 ;;(let ((qwe '(1 2 3 4))) (list (pop-list qwe 2) qwe))
+
+(defmacro push* (list &rest args)
+  "Push ARGS on LIST in the given order, and returned the modified list.
+E.g. (let ((l '(a))) (push* l 'b 'c)) => (C B A)"
+  `(loop for x in (list ,@args) do (push x ,list)
+	 finally (return ,list)))
+;;(let ((l '(a))) (list (push* l 'b 'c) l))
 
 (defmacro awhile (expr &body body)
   `(do ((it ,expr ,expr))
