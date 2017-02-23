@@ -83,5 +83,5 @@ Optional GNUPLOT-ID gives the ID tag for 'set object ID ...' statements"))
 		,(apply #'format nil "plot [~d:~d] [~d:~d] 0 lt bgnd"
 			(flatten* (gp-bb x))))
 	   :aspect-ratio :square))
-;;(plot (make-segment '(1 2) '(2 4)))
+;;(plot (make-segment '(1 2) '(2 4)))(:SCRIPT "/tmp/gp0003.gp" :TARGET "/tmp/gp0003.pdf")
 ;;(plot (make-multi-geometry (list (make-point '(1 2)) (make-point '(2 4)))))
