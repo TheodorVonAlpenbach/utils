@@ -295,8 +295,10 @@ with N points."
     (run-program "/usr/bin/gnuplot" scriptpath)
     (list :script scriptpath :target target)))
 ;;(gp:plot `(:l ,#'sqrt))
+;;(gp:plot `(:l #2A((0 0) (1 1))))
 ;;(gp:plot `(:l (:d ,#'sqrt :resolution 10) :with :linespoints))
 ;;(gp:plot `((:l (:d ,(lambda (x) (sq x)) :x-values (0 1) :resolution 10) :with :linespoints) (:l (:d ,(lambda (x) (- 2 (sq x))) :x-values (1 2) :resolution 10) :with :linespoints)))
+;;(tree->array '((0 0) (1 1)))
 
 (defun version-number (name)
   (if (stringp name)
