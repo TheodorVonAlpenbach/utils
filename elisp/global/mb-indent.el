@@ -116,11 +116,14 @@ SYMBOL can be a symbol or a list of symbols. See function
 (cl-indent 'cl-ppcre:register-groups-bind 'destructuring-bind)
 
 (cl-indent '(find-music collaps-multi-spectrum map-spectra
-	     with-transposed-tree grid-transform-data write-list
+	     with-transposed-tree grid-transform-data
 	     format-list remove-if remove-if-not copy-if draw-if
 	     sort cl-sort find-if-not cl-find remove cl-remove
 	     cl-remove-if-not group mapcar mapcan maptree copy-object-to)
   1)
+
+(cl-indent '(write-list)
+  2)
 
 (cl-indent 'substitute '(4 4 2 &body))
 
