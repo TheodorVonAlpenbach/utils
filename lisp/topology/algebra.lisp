@@ -89,8 +89,3 @@
 (defmethod norm2 (x) (inner-product x x))
 (defmethod norm (x) (sqrt (norm2 x)))
 (defmethod normalize (x) (g/ x (norm x)))
-
-;;; DIAMETER2 and DIAMETER
-(defmethod diameter2 (x) (norm2 x))
-(defmethod diameter2 ((x ellipse)) (diameter2 (major-axis x)))
-(defmethod diameter (x) (sqrt (diameter2 x)))
