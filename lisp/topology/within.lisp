@@ -61,18 +61,3 @@
       (and (gequal (start x) (end y))
 	   (gequal (end x) (start y)))))
 ;;(gequal (make-segment '(1 0) '(0 0)) (make-segment '(0 0) '(1 0)))
-
-(defmethod projection-parameter-points ((p point) (p1 point) (p2 point))
-  "Returns the relative distance from the projection of P on the line segment P2 - P1 to P1 and P2.
-If the result is 1 the projection equals P1, if 0 it is equal to P2.
-Other values in [0 1] gives the position on the segment accordingly.
-If negative, the projection is on the continuation of the segment
-closest to P2, if positive closest to P1."
-  (let ((dp (g- p2 p1)))
-    (/ (inner-product (g- p p1) dp) (norm2 dp))))
-;;(projection-parameter-points (mp .1 .5) (mp 1 1) (mp 0 1))
-
-(defmethod projection-parameter ((p point) (s segment))
-  "See point specialization only"
-  (projection-parameter-points p (start s) (end s)))
-;;(projection-parameter (mp 1 0) (ms 0 0 1 1))

@@ -8,12 +8,7 @@
 
 (defmethod diameter2 ((x segment))
   (norm2 x))
-;;(diameter2 (make-segment '(1 1) '(3 2)))
-
-(defun mmg (lpoints)
-  "Short cut for make multipoints. Only for testing"
-  (make-multi-geometry (mapcar #'make-point lpoints)))
-;;(mmg '((1 2)(2 4)))
+;;(diameter2 (ms 1 1 3 2))
 
 (defmethod diameter2 ((x geometry))
   "Slow, but safe"
@@ -32,6 +27,9 @@
 (defmethod diameter2 ((x box))
   (+ (diameter2 (x-range x))
      (diameter2 (y-range x))))
+
+(defmethod diameter2 ((x ellipse))
+  (diameter2 (major-axis x)))
 
 
 (defgeneric diameter (geometry)

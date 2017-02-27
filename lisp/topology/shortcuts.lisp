@@ -19,5 +19,10 @@
 (defun mbb (&rest args) (apply #'make-bounding-box args))
 ;;(mbb 0 1 0 1)
 
+(defun mmg (lpoints)
+  "Short cut for make multipoints. Only for testing"
+  (make-multi-geometry (mapcar #'make-point lpoints)))
+;;(mmg '((1 2)(2 4)))
+
 
 
