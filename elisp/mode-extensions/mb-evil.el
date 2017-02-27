@@ -232,7 +232,7 @@ By default the last line."
      (save-excursion
        (evil-cp-up-sexp 1)
        (forward-char 1)
-       (eval-last-sexp nil)))
+       (mb-eval-last-sexp nil)))
     (octave-mode (octave-send-block))))
 
 (defun mb-eval-last-sexp (&rest args)
