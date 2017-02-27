@@ -44,6 +44,7 @@
 	(,+mb-lisp-dir+ "global/LS.el")
 
 	(,+home-dir+ "projects/utils/lisp/mb-utils.lisp")
+	(,+home-dir+ "projects/utils/lisp/topology/geometry.lisp")
 
 	(,*shared-data-dir* "ferskvare" :point :end :keyboard :no)
 ;;	(,*shared-data-dir* "arbeidslog" :point :end :keyboard :no)
