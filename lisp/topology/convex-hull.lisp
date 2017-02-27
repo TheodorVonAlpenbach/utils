@@ -76,17 +76,6 @@ using intersection point."
     (plusp (inner-product ns2 (g+ nu ns1)))))
 ;;(let* ((s1 (ms -1 0 0 0)) (s2 (ms 4 3 5 3)) (ns1 (normalize (direction s1)))(ns2 (normalize (direction s2)))) (time (all-segments-closer-between3 s1 s2 ns1 ns2)))
 
-(defmethod overlap-p ((s1 segment) (s2 segment))
-  (destructuring-bind (t1 t2) (line-intersection-coeffs s1 s2)
-    (if t1
-      (and (<= 0 t1 1) (<= 0 t2 1))
-      ;; s1 and s2 are parallel
-      (overlap-p (start s1) s2))))
-
-(defmethod overlap-p ((p point) (s segment))
-  (zerop (distance2 p s)))
-;;(overlap-p (ms 0 0 .9 0) (ms 0 0 .9 0))
-
 (defmethod line-intersection ((s1 segment) (s2 segment))
   (let* ((u (g- (start s2) (start s1)))
 	 (v1 (direction s1))
