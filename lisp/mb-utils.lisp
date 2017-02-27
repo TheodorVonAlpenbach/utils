@@ -432,10 +432,18 @@ Destructive."
 ;;;; is no such restriction in the new concat (or rather, write-list).
 ;;;; And INFIX-LIST is now obsolete, as far as I can see.
 (defun write-list (list out &key pre in suf test key)
-  (flet ((sp (x) (when x (case x (:newline (format nil "~%")) (t (format nil x))))))
+  (flet ((sp (x) (when x (case x
+			   (:newline (format nil "~%"))
+			   (t (format nil x))))))
     (let ((list (if key (mapcar key list) list)))
-      (format out (concatenate 'string "~@[~a~]~{~a" (format nil "~@[~~^~a~]" (sp in)) "~}~@[~a~]")
-	(sp pre) (if test (copy-if test list) list) (sp suf)))))
+      (format out
+	(concatenate 'string
+	  "~@[~a~]~{~a"
+	  (format nil "~@[~~^~a~]" (sp in))
+	  "~}~@[~a~]")
+	(sp pre)
+	(if test (copy-if test list) list)
+	(sp suf)))))
 ;;(time (progn (write-list (a-b 0 10000) nil :in ", " :pre "<<" :suf ">>" :test #'oddp :key #'1+) :fine))
 ;;(write-list (a-b 0 10) nil :in :newline :pre "<<" :suf ">>" :test #'oddp :key #'1+)
 
@@ -443,12 +451,17 @@ Destructive."
 ;;(time (progn (concat (a-b 0 100000) :in ", " :pre "<<" :suf ">>" :test #'oddp :key #'1+) :fine))
 
 (defun format-list (out list format-fn &key pre in suf test key)
+  "Format LIST to OUT stream with FORMAT-FN.
+FORMAT-FN must be a function of two arguments, where the first
+argument is a stream.
+
+TODO! There is overlap between this function and write-list. Why is that?"
   (flet ((sp (x) (when x (case x (:newline (format out "~%")) (t (princ x out))))))
     (let ((list (if key (mapcar key list) list)))
       (sp pre)
       (loop for x on (if test (remove-if-not test list) list)
-           do (funcall format-fn out (first x))
-           while (rest x) do (sp in))
+	    do (funcall format-fn out (first x))
+	    while (rest x) do (sp in))
       (sp suf))))
 ;;(format-list t '(1 2 3) #'(lambda (out x) (format out "~a" x)) :in ", ")
 
@@ -1199,7 +1212,8 @@ If A, B, C are consecutive numbers, the delta for B is (- (/ (+ A C) 2) B)."
 ;;(deltas #(0 1 3))
 
 (defmacro with-transpose ((var tree) &body body)
-  "Executes BODY with the transpose of TREE bound to VAR returning the transpose of the result of BODY."
+  "Executes BODY with the transpose of TREE bound to VAR
+returning the transpose of the result of BODY."
   `(let ((,var (transpose-tree ,tree)))
      (transpose-tree (progn ,@body))))
 ;;(with-transpose (it '((1 2 3) (a b c))) (sort it #'> :key #'first))
