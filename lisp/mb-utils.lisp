@@ -836,6 +836,7 @@ E.g. (let ((l '(a))) (push* l 'b 'c)) => (C B A)"
   `(with-open-file (,out ,filespec :direction :output :if-exists ,if-exists)
      ,@body))
 
+#+sbcl
 (defun make-temporary-file-sbcl (prefix)
   (declare (ignore prefix))
     (string-trim
