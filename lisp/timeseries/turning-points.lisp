@@ -1,13 +1,43 @@
 (in-package :timeseries)
 
+(defun turning-point-p (a b c key)
+  (and b (destructuring-bind (a b c) (mapcar key (list a b c))
+	   (if (> a c) (or (> b a) (< b c)) (or (> b c) (< b a))))))
+;;(nor 1 (turning-point-p 0.5d0 1.99d0 3.24d0 #'identity))
+
+(defun diff (x y key)
+  (abs (- (funcall key x) (funcall key y))))
+;; (diff '(0 2) '(0 3/4) #'second)
+
+(defun turning-points (ts threshold &key (key #'identity) setkey debug)
+  (let (res a b)
+    (flet ((dp (x) (when debug (print x))))
+      (loop while ts do (dp `(:res ,res :ab (,a ,b) :ts ,ts)) do
+	    (cond
+	      ((not a) (dp :cond0) (setf a (pop ts))) 
+	      ((not b) (dp :cond1) (setf b (pop ts)))
+	      ((not (turning-point-p a b (car ts) key)) (dp :cond2)
+	       (setf b (pop ts)))
+	      ((>= (diff a b key) threshold) (dp :cond3)
+	       (push a res) (setf a b b (pop ts)))
+	      ((turning-point-p a (car ts) b key) (dp :cond4)
+	       (setf a (pop ts))
+	       (if setkey
+		 (funcall setkey b (- (funcall key a) single-float-epsilon))
+		 (setf b (- (funcall key a) single-float-epsilon))))
+	      (t (dp :cond5) (pop ts))))
+      (dp `(:res ,res :ab (,a ,b) :ts ,ts))
+      (when (>= (diff a b key) threshold) (dp :cond6)
+	    (push a res))
+      (dp `(:res ,res :ab (,a ,b) :ts ,ts)))
+    (nreverse res)))
+;;(turning-points '(0 2 -2 -1 0 -1 2 0) 1 :debug t)
+
+;;; old implementation
 (defun same-direction-p (a b c key)
+	   
   (destructuring-bind (a b c) (mapcar key (list a b c))
     (or (<= a b c) (>= a b c))))
-;;(same-direction-p 0 1 0 #'identity)
-
-(defun distance (x y key)
-  (abs (- (funcall key x) (funcall key y))))
-;; (distance '(0 2) '(0 3/4) #'second)
 
 (defun tp-prologue (ts key)
   "Return first valid RES, A, B, TS constallation"
@@ -38,7 +68,7 @@
 	  do (when debug (print (list :res res :ab (list a b) :ts ts)))
 	  do (if (same-direction-p a b (car ts) key)
 	       (setf b (pop ts))
-	       (if (>= (distance a b key) threshold)
+	       (if (>= (diff a b key) threshold)
 		 (setf res (cons a res)  a b  b (pop ts))
 		 (if (same-direction-p a (car ts) b key)
 		   (pop ts)
