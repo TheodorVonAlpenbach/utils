@@ -207,25 +207,20 @@ where a comes before b in LIST."
   "Generalization of combine2"
   (when lists
     (if (= (length lists) 1)
-      (mapcar #'list (first lists))
-      (loop for x in (combine2 (mapcar #'list (first lists))
+      (mapcar #'list (listify (first lists)))
+      (loop for x in (combine2 (mapcar #'list (listify (first lists)))
 			       (combine-1 (rest lists)))
 	    collect (flatten x)))))
+;;(combine-1 '((b c) a))
 ;;(combine-1 '((a b)))
 ;;(combine-1 '((a b) (c d)))
 ;;(combine-1 '((a b) (c d) (e f)))
 
 (cl-defun combine (lists &key key)
   "Generalization of combine2"
-  (if key (mapcar (bind #'apply key 1) (combine-1 lists)) (combine-1 lists)))
-;;(combine '())
-;;(combine '(a))
-;;(combine '((a)))
-;;(combine '((a b)))
-;;(combine '((a d) (b c)))
-;;(combine '((a) (b) (c)) :key #'list)
-;;(combine '(("a" "b") ("c") ("e" "f")))
-;;(combine '(("a" "b") ("c") ("e" "f")) :key #'concat)
+  (if key
+    (mapcar (bind #'apply key 1) (combine-1 lists))
+    (combine-1 lists)))
 
 (defun test-arguments (fn args)
   (combine args :key #'(lambda (&rest args)
