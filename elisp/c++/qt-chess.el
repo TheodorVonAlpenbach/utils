@@ -269,12 +269,19 @@ Consider move this functionality to a makefile-mode extension module"
   (interactive)
   (compilation-start "make -k"))
 
+(defun chess-grep ()
+  "Greps in this project and in the whole of chess"
+  (interactive)
+  (mb-grep-basic :directories "~/projects/chess/lib*/src/" :types "{h,cpp}"))
+
 (let ((qt-map (make-sparse-keymap)))
   (evil-key-chord-define '(normal motion) global-map "gh" qt-map)
   (define-key qt-map "a" #'qt-align-pro-file)
   (define-key qt-map "c" #'chess-compile)
   (define-key qt-map "f" #'find-qt3-brother)
-  (define-key qt-map "g" #'chess-goto-error)
+  (define-key qt-map "e" #'chess-goto-error)
+  (define-key qt-map "g" #'mb-c++-grep)
+  (define-key qt-map "G" #'chess-grep)
   (define-key qt-map "h" #'qt-help)
   (define-key qt-map "i" #'chess-insert-error)
   (define-key qt-map "l" #'qt-latin1)
