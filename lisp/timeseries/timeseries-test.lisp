@@ -21,24 +21,22 @@
   (let ((tss (transpose-tree (read-test-data path))))
     (mapcar (compose #'transpose-tree (bind #'list (first tss) 1)) (rest tss))))
 ;;(tss-test-data)
-;;(turning-points (subseq (first (tss-test-data)) 0) 2 :key #'second)
-;;(turning-points (mapcar #'second (subseq (first (tss-test-data)) 19 50)) 2)
-(mapcar #'second (subseq (first (tss-test-data)) 19 300))
-(turning-points (mapcar #'second (subseq (first (tss-test-data)) 50 120)) 2 :debug t)
-(subseq (first (read-tp-fasit)) 20 30)
-
-
-(defun setfsecond (x y) (setf (second x) y))
 
 (defun tp-test-data (&optional (path *test-path*))
   "Read test timeseries and calculate their turning points."
   (loop for ts in (tss-test-data path)
 	collect (turning-points ts *test-threshold*
-				:key #'second
-				:setkey #'setfsecond)))
+			 :key #'second
+			 :setkey #'timeseries::setfsecond)))
 ;;(tp-test-data)
 
-(defun record-tp-test-data (&optional (path *test-path*))
+(defun tp-dir-test-data (&optional (path *test-path*))
+  "Read test timeseries and calculate their turning points."
+  (loop for ts in (tss-test-data path)
+	collect (turning-points-dir ts *test-threshold* :key #'second)))
+;;(tp-dir-test-data)
+
+(defun record-tp-test-data (&optional (fasit-path *fasit-path*) (test-path *test-path*))
   "Records the result of the current turning-points function.
 Use this with caution! This should be only when
 
@@ -47,9 +45,9 @@ Use this with caution! This should be only when
 
 (Of course, you could run it if nothing has been changed, but why
 should you want to do that?!)"
-  (with-open-file (s *fasit-path* :direction :output :if-exists :supersede)
-    (print (tp-test-data path) s)))
-;;(record-tp-test-data)
+  (with-open-file (s fasit-path :direction :output :if-exists :supersede)
+    (print (tp-test-data test-path) s)))
+;;(record-tp-test-data "/home/mbe/projects/utils/lisp/timeseries/random-walks2.dat")
 
 (defun read-tp-fasit (&optional (path *fasit-path*))
   "Read the turning point fasit into a list of TP timeseries.
@@ -75,13 +73,15 @@ See record-tp-test-data for info on the creation of the fasit."
 ;;   :pre "[ " :in :newline :suf " ]")
 
 (define-test test-tp-test-data
-  (assert-equal 2 (length (tp-test-data)))
-  (assert-equalp  (clean-fasit (tp-test-data) 100)))
-;;(tp-test-data)
+  (let ((tpf (clean-fasit (read-tp-fasit) 100))
+	(tp (clean-fasit (tp-test-data) 100)))
+    (assert-equal (length tpf) (length tp))
+    (assert-equal (mapcar #'length tpf) (mapcar #'length tp))
+    (assert-equal tpf tp)))
+
+(define-test test-dir-implementation
+  (assert-equal (clean-fasit (tp-test-data) 100)
+		(clean-fasit (tp-dir-test-data) 100)))
 
 (run-tests :all)
-
-(loop for (t1 x1) in (first (clean-fasit (read-tp-fasit) 100))
-      for (t2 x2) in (first (clean-fasit (tp-test-data) 100))
-      for dx = (- x1 x2)
-      collect (list x1 x2 dx))
+;;(setq lisp-unit::*print-failures* t)
