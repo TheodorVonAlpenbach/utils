@@ -9,7 +9,8 @@
 
 (defmethod points ((x path))
   (let ((segments (segments x)))
-    (cons (start (first segments)) (mapcar #'end segments))))
+    (cons (start (elt segments 0))
+	  (loop for s across segments collect (end s)))))
 ;;(points (make-path '((0 0) (1 0) (1 1) (0 1))))
 
 (defmethod points ((x polygon))
