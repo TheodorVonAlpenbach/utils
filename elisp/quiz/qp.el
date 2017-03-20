@@ -344,7 +344,7 @@ For LIMIT, see qp-guess-customer-tag."
 (defun qp-legal-table-entries-p (tes)
   (and tes (consp tes)
        (every #'consp tes) (every #'(lambda (x) (= (length x) 7)) tes)
-       (loop for x in (flatten (project-sequence tes 0 1 6))
+       (loop for x in (flatten (project-sequence tes '(0 1 6)))
 	     always (integerp (read x)))))
 ;;(qp-legal-table-entries-p '(("0" "1" "2a" "3a" "4a" "5a" "6") ("0" "1" "2a" "3a" "4a" "5a" "6")))
 
