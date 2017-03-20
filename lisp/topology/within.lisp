@@ -61,3 +61,4 @@
       (and (gequal (start x) (end y))
 	   (gequal (end x) (start y)))))
 ;;(gequal (make-segment '(1 0) '(0 0)) (make-segment '(0 0) '(1 0)))
+
