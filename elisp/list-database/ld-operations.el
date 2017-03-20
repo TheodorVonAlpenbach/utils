@@ -276,7 +276,7 @@ Returns nil iif form is not a metadata identifier"
 			    :key (lexical-let ((col (or order-by (ld-colexp (ld-primary-key (ld-schema schema)) schema))))
 				   #'(lambda (row) (elt row col)))))))
       (when columns
-        (setf rows (apply #'project-sequence rows columns)))
+        (setf rows (project-sequence rows columns)))
       (when column
 	(if columns
 	  (ld-warning "Both keyword argument :columns and :column specified. Discards the latter.")
