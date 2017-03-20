@@ -279,4 +279,60 @@ to the right:
 	(subseq sequence a (+ a k))))))
 ;;(loop with s = "01234" for k to (length s) collect (center s k t))
 
+(defun assoc-project (sequence a b)
+  "Map each sequence element ELT of SEQUENCE to (cons (elt ELT A) (elt
+ELT B))."
+  (mapcar #'(lambda (x) (cons (elt x a) (elt x b))) sequence))
+;;(assoc-project '((a aa aaa) (b bb bbb)) 0 1)
+
+(defun project-1 (sequence x)
+  "Apply projection object X on SEQUENCE.
+X is either an integer or a function. If X is an integer, the
+function returns the Xth element of SEQUENCE. Otherwise, X must
+be a function, and the function will return (funcall X SEQUENCE)."
+  (if (integerp x)
+    (elt sequence x)
+    (funcall x sequence)))
+
+(defun project (sequence projection)
+  "Project SEQUENCE according to PROJECTION.
+
+PROJECTION is either a projection element, a sequence of
+projection object, or T. See project-1 for a description of a
+projection object.
+
+
+If PROJECTION is a single projection object the function will
+return the result of applying the projection object on SEQUENCE.
+
+If PROJECTION is a sequence of projection objects X1, X2, ... the
+function will return the sequence Y1, Y2, ..., where YI is the
+result of applying projection XI on SEQUENCE.
+
+The resulting sequence will be of the same sequence type as
+SEQUENCE.
+
+Finally, PROJECTION might also be T. In this case the function
+returns SEQUENCE unaltered."
+  (if (eql projection t)
+    sequence
+    (if (or (integerp projection) (functionp projection))
+      (project-1 sequence projection)
+      (coerce (loop for x in (coerce projection 'list)
+		    collect (project-1 sequence x))
+	      (type-of-super sequence)))))
+;;(project '(a b c) '(1 0 2 1))
+;;(project '(a b c) t)
+;;(project "abc" 2)
+;;(project "abc" '(2))
+;;(project '(0 1 2 3) #'(lambda (x) (elt x 2)))
+
+(defun project-sequence (sequence projection)
+  "Project multi-dimensional SEQUENCE according to PROJECTION-ARGS."
+  (coerce (mapcar #'(lambda (x) (project x projection)) sequence)
+	  (type-of-super sequence)))
+;;(project-sequence '("01" "09") 1)
+;;(mapcar #'first (project-sequence '((1 2 3) (4 5 6)) 1 2))
+;;(project-sequence '("01" "09") (list 1))
+
 (provide 'mb-sequences)
