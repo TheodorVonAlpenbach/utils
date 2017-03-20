@@ -6,6 +6,7 @@
 	   :point :make-point
 	   :segment :make-segment :start :end
 	   :path :make-path :segments
+	   :convex-path :make-convex-path
 	   :polygon :make-polygon
 	   :triangle :make-triangle
 	   :ellipse :make-ellipse
