@@ -17,6 +17,7 @@
 (defun mpa (&rest xs-and-ys) (make-path (cut xs-and-ys)))
 (defun mpl (&rest xs-and-ys) (make-path (cut xs-and-ys)))
 (defun mpg (&rest xs-and-ys) (make-polygon (cut xs-and-ys)))
+(defun mcpa (&rest xs-and-ys) (make-convex-path (cut xs-and-ys)))
 
 (define-test test-make-geometries
   (let ((p0 (make-point '(0 0)))
@@ -24,6 +25,13 @@
     (assert-equal 'point (type-of p1))
     (assert-equal 'segment (type-of (make-segment p0 p1)))
     (assert-equal 'path (type-of (make-path (list p0 p1))))))
+
+(define-test test-line-intersection
+  (assert-equal nil (topology::line-intersection (ms 0 0 1 0) (ms 0 1 1 1)))
+  (assert-equal nil (topology::line-intersection (ms -1 1 -1 0) (ms 1 0 1 1))))
+
+(define-test test-left-p
+  (assert-equal (topology::left-p (mp 0 1) (mp 1 0)) t))
 
 (define-test test-coordinates
   (assert-equal '(1 0) (coordinates (make-point '(1 0)))))
@@ -33,7 +41,16 @@
   (assert-equalp 17 (area (make-ellipse (ms -17 0 17 0) (/ 2 pi))))
   (assert-equalp 15 (area (make-box 0 3 0 5))))
 
-;;(run-tests '(test-make-geometries test-coordinates))
+(define-test test-distance
+  (let ((cp (mcpa 1 0  1 1  -1 1  -1 0)))
+    (assert-equalp 1 (distance (mp 0 0) cp))
+    (assert-equalp 1/2 (distance (mp 1/2 0) cp))
+    (assert-equalp 0 (distance (mp 1 0) cp))
+    (assert-equalp 1/2 (distance (mp 3/2 0) cp))
+
+    (assert-equalp 1 (topology::distance2-to-line (ms 0 0 1 0) (ms 0 1 1 1)))
+    (assert-equalp 1/2 (topology::distance2-to-line (ms 0 0 1 0) (ms 0 1 1 2)))))
+;;(run-tests '(test-distance))
 (run-tests :all)
 ;;(setf *print-failures* t)
 ;;(remove-tests '(test-make-point))
