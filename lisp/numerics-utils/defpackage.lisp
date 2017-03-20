@@ -34,4 +34,10 @@
 	   :map-rows
 	   :matrix-row
 	   :submatrix
-	   :vector-inner-product))
+	   :vector-inner-product
+	   :positive-infinity :negative-infinity))
+
+(in-package :numerics-utils)
+
+(defconstant positive-infinity most-positive-double-float)
+(defconstant negative-infinity most-negative-double-float)
