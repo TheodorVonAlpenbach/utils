@@ -375,33 +375,6 @@ value is reset."
 	 (progn ,@body)
 	 (set-syntax-table ,old-table)))))
 
-(defun assoc-project (sequence a b)
-  "Map each sequence element ELT of SEQUENCE to (cons (elt ELT A) (elt
-ELT B))."
-  (mapcar #'(lambda (x) (cons (elt x a) (elt x b))) sequence))
-;;(assoc-project '((a aa aaa) (b bb bbb)) 0 1)
-
-(defun project (sequence projection)
-  "Project SEQUENCE according to integer sequence PROJECTION. See
-#'PROJECT. Maybe this is obsolete. Must check its use. Or maybe call."
-  (if (eql projection t)
-    sequence
-    (coerce (loop for x in (coerce projection 'list)
-		  collect (if (integerp x)
-			    (elt sequence x)
-			    (funcall x sequence)))
-	    (type-of-super sequence))))
-;;(project '(a b c) '(1 0 2 1))
-;;(project '(a b c) t)
-;;(project "abc" '(2))
-
-(defun project-sequence (sequence &rest projection-args)
-  "Project SEQUENCE according to PROJECTION-ARGS."
-  (coerce (mapcar #'(lambda (x) (project x projection-args)) sequence)
-	  (type-of-super sequence)))
-;;(project-sequence '("01" "09") 1)
-;;(mapcar #'first (project-sequence '((1 2 3) (4 5 6)) 1 2))
-
 (cl-defmacro dolines ((line string &optional result) body)
   "(dolines (LINE STRING [RESULT]) BODY...): loop over lines in a
 string. Evaluate BODY with LINE bound to each consecutive substring in
