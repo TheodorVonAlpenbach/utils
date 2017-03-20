@@ -5,16 +5,18 @@
   :depends-on (:mb-utils :numerics-utils :mb-gnuplot)
   :components
   ((:cl-source-file "defpackage")
+   (:cl-source-file "utils" :depends-on ("defpackage"))
    (:cl-source-file "geometry" :depends-on ("defpackage"))
-   (:cl-source-file "point" :depends-on ("geometry"))
+   (:cl-source-file "interval" :depends-on ("geometry"))
+   (:cl-source-file "box" :depends-on ("interval"))
+
+   (:cl-source-file "point" :depends-on ("geometry" "box"))
    (:cl-source-file "segment" :depends-on ("point"))
    (:cl-source-file "path" :depends-on ("segment"))
    (:cl-source-file "polygon" :depends-on ("path"))
    (:cl-source-file "triangle" :depends-on ("polygon"))
    (:cl-source-file "ellipse" :depends-on ("segment"))
    (:cl-source-file "multi-geometry" :depends-on ("geometry"))
-   (:cl-source-file "interval" :depends-on ("geometry"))
-   (:cl-source-file "box" :depends-on ("interval"))
 
    (:cl-source-file "points" :depends-on ("ellipse" "triangle" "multi-geometry"))
    (:cl-source-file "shortcuts" :depends-on ("points"))
