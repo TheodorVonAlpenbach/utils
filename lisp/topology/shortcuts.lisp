@@ -12,6 +12,7 @@
 	collect (make-segment s e)))
 ;;(mss 0 0 1 0 0 0 0 1)
 (defun mpa (&rest xs-and-ys) (make-path (cut xs-and-ys)))
+(defun mcpa (&rest xs-and-ys) (make-convex-path (cut xs-and-ys)))
 (defun mpl (&rest xs-and-ys) (make-path (cut xs-and-ys)))
 (defun mpg (&rest xs-and-ys) (make-polygon (cut xs-and-ys)))
 ;;(mpg 0 0  1 0  1 1)
