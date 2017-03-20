@@ -77,12 +77,15 @@ using intersection point."
 ;;(let* ((s1 (ms -1 0 0 0)) (s2 (ms 4 3 5 3)) (ns1 (normalize (direction s1)))(ns2 (normalize (direction s2)))) (time (all-segments-closer-between3 s1 s2 ns1 ns2)))
 
 (defmethod line-intersection ((s1 segment) (s2 segment))
+  "Return the intersection POINT of segments S1 and S2,
+or NIL if it does not exist."
   (let* ((u (g- (start s2) (start s1)))
 	 (v1 (direction s1))
 	 (v2 (direction s2))
-	 (t2 (line-intersection-t u v1 v2)))
-    (g+ (g* v2 t2) (start s2))))
+	 (t2 (line-intersection-coeff2-1 u v1 v2)))
+    (when t2 (g+ (g* v2 t2) (start s2)))))
 ;;(line-intersection (ms 0 0 2 0) (ms 1 -1 1 1))
+;;(trace line-intersection)
 
 (defmethod line-intersection-coeffs ((s1 segment) (s2 segment))
   (flet ((x (p) (first (coordinates p))))
