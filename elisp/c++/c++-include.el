@@ -37,7 +37,7 @@
 
 (defun c++-standard-header-files (dirs)
   "Returns absolute path of all c++ standard headers."
-  (remove-if #'(lambda (x) (or (not (regexp-equal "[a-z]+" x))
+  (remove-if #'(lambda (x) (or (not (string-match-exact "[a-z]+" x))
 			       (find x '("CVS" "TAGS") :test #'string=)))
 	      (directory-files* dirs t)
 	      :key #'file-name-nondirectory))

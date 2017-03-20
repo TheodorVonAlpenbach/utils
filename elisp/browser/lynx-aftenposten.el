@@ -50,14 +50,12 @@ denne konstanten vil bli ignorert av funksjonen
     (forward-lynx-reference (signum n))))
 
 (defun lynx-aftenposten-p (url)
-  (regexp-equal ".*\\.\\(aftenposten\\|osloby\\)\\.no.*" url))
+  (string-match-exact ".*\\.\\(aftenposten\\|osloby\\)\\.no.*" url))
 ;;(lynx-aftenposten-p "http://fotball.aftenposten.no/landslaget/article148659.ece")
-;;(lynx-aftenposten-p "http://www.osloby.no/landslaget/article148659.ece")
 
 (defun lynx-aftenposten-article-p (url)
-  (regexp-equal ".*www\\.aftenposten\\.no.*articleID=.*" url))
+  (string-match-exact ".*www\\.aftenposten\\.no.*articleID=.*" url))
 ;;(lynx-aftenposten-article-p "http://www.aftenposten.no/nyheter/siste100/")
-;;(if (lynx-aftenposten-article-p "http://www.aftenposten.no/nyheter/siste100/") 40 80)
 
 (defun lynx-aftenposten-format-paragraphs ()
   "Assume point is at beginning of article."

@@ -46,12 +46,9 @@
   "Repeats Abort until the prompt is top-level.
 A true hack..."
   (interactive)
-  (while (not (regexp-equal "^\\[[0-9,]*\\]>\\s-*" 
-			    (line-string)))
+  (while (not (string-match-exact "^\\[[0-9,]*\\]>\\s-*" (line-string)))
     (execute-kbd-macro "abort\n")
-    (sleep-for 0 100))
-;;  (execute-kbd-macro "(in-package :cl-user)\n")
-  )
+    (sleep-for 0 100)))
 
 (defun symbol-regexp (symbol)
   (format "\\_<%s\\_>" symbol))
