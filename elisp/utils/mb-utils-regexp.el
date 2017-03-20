@@ -5,26 +5,15 @@
 (defconst *empty-regexp* "\\`\\`"
   "Matches absolutely nothing.")
 
-(defun regexp-equal (regexp string)
-  "Returns T if the REGEXP match equals STRING. else nil"
-  (string= (string-match* regexp string) string))
-;;(regexp-equal "[a-z]+" "qwe")
-
-(defun mb-make-integer-regexp (int)
-  "Returns a regexp matching integer INT"
-  (number-to-string int))
-;(mb-make-integer-regexp 234)
-
-(defun list-interval (a b)
-  "Converts interval of integers to list"
-  (loop for x from a to b collect x))
-;;(list-interval 2 3)
-
-(defun mb-make-integers-regexp-or (ints)
+(defun regexp-or (strings)
   "Returns a regexp matching any integer in INTS"
-  (concat* (mapcar 'number-to-string ints) :in "\|"))
-;(mb-make-integers-regexp-or '(1 2 3))
-;(mb-make-integers-regexp-or (list-interval -2 11))
+  (concat* strings :in "\\|"))
+;;(regexp-or '("qwe" "ewq"))
+
+(defun regexp-or-integers (ints)
+  "Returns a regexp matching any integer in INTS"
+  (regexp-or (mapcar 'number-to-string ints)))
+;;(regexp-or-integers (a-b 1 3))
 
 (defun factor-list (list test &rest args)
   "{aa ab b ba} -> {a{a b} b{nil a}}"
