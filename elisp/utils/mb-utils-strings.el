@@ -98,14 +98,13 @@ match."
   (let ((pos (string-match regexp string)))
     (if pos (match-end 0) nil)))
 
+(require 'mb-sequences)
 (defun split-string-at-pos (string &rest positions)
-  "Splits STRING at POSITIONS and return the resulting substrings as a
-list of strings"
-  (loop for position in (nreverse (cons (length string) (nreverse positions)))
-	  for start = 0 then end
-	for end = position
-	collect (substring string start end)))
-;;(split-string-at-pos "qweqwe" 2)
+  (warn "split-string-at-pos is deprecated.
+Use `split-at-position' instead. Called from %s"
+	(second (backtrace-frame 6)))
+  (apply #'split-at-position string positions))
+;;(length (split-string-at-pos "qweqweqwe" 1))
 
 (cl-defun split-string-by-length (string n &key (from-end nil))
   "Splits STRING to substrings of length N.
@@ -113,7 +112,7 @@ Only the length of the last substring (or the first substring, if
 from-end is t) is less than (or equal to) N."
   (let ((split-positions (a-b (if from-end (mod (length string) n) n)
 			      (length string) n)))
-    (remove "" (apply #'split-string-at-pos string split-positions))))
+    (remove "" (apply #'split-at-position string split-positions))))
 ;;(split-string-by-length "0123456789012345" 3 :from-end t)
 
 (defun regexp-consecutive-matches (regexp string)
@@ -182,7 +181,7 @@ the result is undefined."
 (cl-defun split-string-once (string regexp) 
   "Splits STRING into the list (before-match match after-match)"
   (and (string-match regexp string)
-       (split-string-at-pos string (match-beginning 0) (match-end 0))))
+       (split-at-position string (match-beginning 0) (match-end 0))))
 ;;(split-string-once "gabcdg" "\\`g")
 
 (defun split-string-regexp-1 (string regexp)
@@ -289,7 +288,7 @@ NEWSTRING."
 (defun substitute-string (string subst-string from to)
   "Removes substring [FROM TO) from STRING and inserts
   SUBST-STRING at position FROM in STRING"
-  (let ((substrings (split-string-at-pos string from to)))
+  (let ((substrings (split-at-position string from to)))
     (if (/= 3 (length substrings))
       (error "FROM (%d) and TO (%d) arguments are invalid for STRING %s" string from to)
       (concat (first substrings) subst-string (third substrings)))))
@@ -355,8 +354,10 @@ time FN will be called by INFIX-LIST"
 			   (concat "\n" indent-string)))))
 ;;(string-indent-lines "a\nb" "  ")
 
+
 (cl-defun concat* (list &key (pre "") (in "") (infun nil) (suf "")
-			(test (constantly t)) (key #'identity)
+			(test (constantly t))
+			(key #'identity)
 			(indent-string "") discard-nil)
   "Concat strings in LIST adding prefix, suffix, and regular infixes.
 If not an element satisfies TEST then it is not inserted. Before
