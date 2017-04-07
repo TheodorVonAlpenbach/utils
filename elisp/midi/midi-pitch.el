@@ -13,7 +13,7 @@ where PITCH-CLASS is in [0 11] and OCTAVE in [-1 9]."
 (defun midi-split-pitch-string (pitch-string)
   "Splits PITCH-STRING into its pitch class and octave parts: (PITCH-CLASS OCTAVE).
 where PITCH-CLASS is an element in constant MIDI-PITCH-CLASSES and OCTAVE in [-1 9]."
-  (split-string-at-pos pitch-string
+  (split-at-position pitch-string
      (if (string-match "#" pitch-string) 2 1)))
 ;;(midi-split-pitch-string "C#1") ==> ("C#" "1")
 

@@ -95,7 +95,7 @@ Note that group to not consider LIST as a set. To do this, LIST must be sorted f
   (apply #'nconc (transpose lists)))
 (defun zip (&rest lists) 
   (apply #'nzip (copy-tree lists)))
-;;(zip '(0 2) '(1 3))
+;;(zip '(0 2 4) '(1 3))
 
 (cl-defun nunzip (list &optional (n 2))
   "Destructive version of `ZIP'
@@ -113,14 +113,15 @@ TODO: something is wrong, see test below."
 (cl-defun unzip (list &optional (n 2)) (nunzip (copy-list list) n))
 ;;(unzip (0-n 10) 3)
 
-(defun nflank (a list b)
+(cl-defun nflank (a list &optional (b a))
   "Inserts A before and B after LIST. Destructive."
   (nconc (cons a list) (list b)))
 ;;(let ((l (list 2 3))) (list l (nflank 1 l 4)))
 
-(defun flank (a list b)
+(cl-defun flank (a list &optional (b a))
   "Inserts A before and B after LIST."
   (nflank a (copy-list list) b))
+;;(flank 1 '(a))
 
 (defmacro twins (x) `(make-list 2 ,x))
 ;;(twins (+ 1 2))
@@ -406,14 +407,14 @@ TODO: this looks like draw. Check out and clean up if necessary"
 		    (values (nsplit-nth i list*) list*)))))
 ;;(test-split-nth) => (((0 (1 2)) (0 1 2)) ((1 (0 2)) (0 2)) ((2 (0 1)) (0 1)))
 
-(defun split-at-positions (positions list)
-  "Retruns a list consisting of the elements of LIST at POSITIONS
+(defun split-at-pos (list &rest positions)
+  "Return a list consisting of the elements of LIST at POSITIONS
 together with the remainder of LIST. Destructive."
   (loop for pos in (reverse positions)
 	for (x list*) = (nsplit-nth pos list) then (nsplit-nth pos list*)
 	collect x into elts
 	finally return (list (nreverse elts) list*)))
-;;(let ((list '(0 1 2 3 4 5 6 7))) (list (split-at-positions '(1 3 5) list) list))
+;;(let ((list '(0 1 2 3 4 5 6 7))) (list (split-at-pos list 1 3 5) list))
 
 (cl-defun filter-duplicates (list1 list2 &key (test #'eql) (start 0) end)
   "Removes all elements from row and fasit that are equal and is
