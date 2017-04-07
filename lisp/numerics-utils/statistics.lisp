@@ -34,6 +34,7 @@
 			       for x = (addend k)
 			       while (not (zerop x)) sum x)))))))))
 ;;(handles-outflow () (funcall (wrapped-normal-distribution 3.11366738555788 0.136511989704312) -2.8448865))
+;;(handles-outflow () (mapcar (wrapped-normal-distribution 0.0 1.0) '(0 1 2)))
 ;;(gp::plot `((:l (:d ,(wrapped-normal-distribution -2.600540585471551 0.7) :x-values ,(list (- pi) pi)))))
 
 (defun wnd (&rest args) (apply #'wrapped-normal-distribution args))
