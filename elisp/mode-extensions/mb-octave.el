@@ -255,6 +255,11 @@ are between functions."
     (octave-fill-documentation-paragraph)
     (octave-fill-paragraph)))
 
+(defun insert-texinfo-var ()
+  (interactive)
+  (insert "@var{}")
+  (backward-char 1))
+
 ;;; shortcuts
 (define-key octave-mode-map (kbd "C-x C-e") 'octave-eval-last-sexp)
 (define-key octave-mode-map (kbd "C-M-x") 'octave-eval-defun)
@@ -273,5 +278,7 @@ are between functions."
 (define-key octave-mode-map (kbd "C-h i") #'octave-info)
 
 (define-key inferior-octave-mode-map (kbd "C-h i") #'inferior-octave-info)
+
+(define-key octave-mode-map (kbd "C-c i @") #'insert-texinfo-var)
 
 (provide 'mb-octave)
