@@ -210,6 +210,7 @@ TODO: implement this. Probably involves some macro magic"
 ;;(mapcar (bind #'nth '(a b c) 0) '(0 2 1))
 
 (cl-defun compose (&rest fns)
+  "Return a function that applies functions FNS from right to left."
   (lexical-let ((fns fns))
     (if fns
 	(lexical-let ((fn1 (car (last fns)))
@@ -219,6 +220,7 @@ TODO: implement this. Probably involves some macro magic"
 			      :from-end t
 			      :initial-value (apply fn1 args)))))
       (function identity))))
+;;(funcall (compose #'sq #'1+) 1)
 ;;(funcall (compose #'1+ #'sq) 1)
 
 (cl-defun arg-map (function &rest args)
@@ -364,7 +366,25 @@ value is reset."
 	(progn ,@body)
 	(set-match-data ,old-match-data)))))
 
-(cl-defun constantly (x) (lexical-let ((x x)) #'(lambda (&rest args) x)))
+(cl-defmacro with-object ((x expr) &body body)
+  "Execute BODY with value bound to symbol X, and then return the evaluation of X.
+This is useful for such constructs as
+
+\(let ((x expr))
+   (setf (third x)) 'qwe)
+   x) ==
+\(with-object (x expr)
+   (setf (third x) 'qwe))"
+  `(let ((,x ,expr))
+     ,@body
+     ,x))
+;;(with-object (x '(a b d)) (setf (third x) 'c))
+(def-edebug-spec with-object
+    ((symbolp form)
+     body))
+
+(cl-defun constantly (x)
+  (lexical-let ((x x)) #'(lambda (&rest args) x)))
 
 (cl-defmacro with-syntax-table (table &body body)
   "See doc at emacs lisp info."
