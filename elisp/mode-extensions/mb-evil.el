@@ -138,10 +138,12 @@ By default the last line."
 (defun rotate-windows ()
   "Rotate windows."
   (interactive)
-  (loop with buffers = (loop for w in (window-list) collect (window-buffer w))
-	for b in (rotate-list buffers)
-	for w in (window-list)
-	do (set-window-buffer w b)))
+  (let ((cb (current-buffer)))
+    (loop with buffers = (loop for w in (window-list) collect (window-buffer w))
+	  for b in (rotate-list buffers)
+	  for w in (window-list)
+	  do (set-window-buffer w b))
+    (select-window (get-buffer-window cb))))
 ;;(rotate-windows)
 
 (defun find-tag-no-prompt ()
@@ -269,19 +271,17 @@ By default the last line."
 
 (defun eval-defun-test (&optional no-eval-p)
   (interactive)
-  (cl-case major-mode
-    ((emacs-lisp-mode mb-lisp-mode python-mode)
-     (save-excursion
+  (save-excursion
+    (cl-case major-mode
+      ((emacs-lisp-mode mb-lisp-mode python-mode)
        (unless no-eval-p
 	 (mb-eval-defun))
        (evil-cp-end-of-defun)
        (eol :offset 1)
-       (mb-eval-last-sexp)))
-    (metafont-mode (meta-eval-buffer))
-    (otherwise
-     (save-excursion
-       (unless no-eval-p
-	 (mb-eval-defun))
+       (mb-eval-last-sexp))
+      (metafont-mode (meta-eval-buffer))
+      (otherwise
+       (unless no-eval-p (mb-eval-defun))
        (end-of-defun)
        (eol)
        (mb-eval-last-sexp)))))
@@ -446,7 +446,13 @@ does not work for me."
   "Smartparens sexp object."
   (evil-range (point-min) (point-max) 'inclusive :expanded t))
 
+(evil-define-text-object mb-evil-inner-variable-name (count &optional beg end type)
+  "Smartparens sexp object."
+  (destructuring-bind (beg end) (last-sexp-region)
+    (evil-range (1+ beg) (1- end) 'inclusive :expanded t)))
+
 (define-key evil-outer-text-objects-map "g" #'mb-evil-buffer)
+(define-key evil-inner-text-objects-map "v" #'mb-evil-inner-variable-name)
 
 (evil-define-operator evil-yank-line (beg end type register yank-handler)
   "Yank to end of line.
