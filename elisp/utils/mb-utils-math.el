@@ -131,10 +131,15 @@ reverse operation is performed. "
   "Checks that personnummer is valid according to its check digits
 \(the last two digits\). The formulas are taken from
 http://www.matematikk.org/pub/mattetekst/Persnr/."
-  (let* ((parts (butlast (mapcar #'string-to-number (split-string-at-pos personnummer 1 2 3 4 5 6 7 8 9 10)) 2))
-	 (k1 (asetf (second (floor* (scalar-product '(3 7 6 1 8 9 4 5 2) parts) 11)) 
+  (let* ((parts (butlast (mapcar #'string-to-number
+			   (apply #'split-at-position
+			     personnummer (1-n 10))) 2))
+	 (k1 (asetf (second (floor* (scalar-product
+				     '(3 7 6 1 8 9 4 5 2) parts) 11)) 
 	       (if (zerop it) 0 (- 11 it))))
-	 (k2 (asetf (second (floor* (scalar-product '(5 4 3 2 7 6 5 4 3 2) (append parts (list k1))) 11))
+	 (k2 (asetf (second (floor* (scalar-product
+				     '(5 4 3 2 7 6 5 4 3 2)
+				     (append parts (list k1))) 11))
 	       (if (zerop it) 0 (- 11 it)))))
     (list (int-to-string (+ (* 10 k1) k2)) (substring personnummer 9))))
 ;;(personnummer-check "06017229573")
@@ -205,29 +210,35 @@ x.)"
   (group (sort* list order-relation :key key)))
 ;;(partition-from-ordering '(a b d a b c b a) :order-relation #'symbol<)
 
-(cl-defun npartition (list &key (test #'eql) key)
-  "Returns a partition of set LIST corresponding to the
-EQUIVALENCE-RELATION on LIST. "
-  (let ((res ())) 
-    (while list
-      (push (draw-if (bind test (if key (funcall key (car list)) (car list)))
-		     list :key key)
-	    res))
-    (nreverse res)))
+(defmacro pushhash (key value hash-table)
+  "Push VALUE on HASH-TABLE's KEY entry."
+  `(puthash ,key (cons ,value (gethash ,key ,hash-table)) ,hash-table))
 
 (cl-defun npartition (list &key (test #'eql) key)
   "Returns a partition of set LIST corresponding to the
-EQUIVALENCE-RELATION on LIST. "
-  (loop while list collect
-	(draw-if (bind test (if key (funcall key (car list)) (car list))) list
-		 :key key)))
-;;(npartition '(a b e c d e))
+equivalence relation TEST on LIST."
+  (let ((ht (make-hash-table :test test)))
+    (loop with rlist = (reverse list) ; to preserve order inside classes
+	  for x in rlist
+	  for kx in (if key (mapcar key rlist) rlist)
+	  do (pushhash kx x ht))
+    (loop for k being the hash-keys of ht using (hash-values v)
+	  collect v)))
+;;(npartition (0-n 10) :key (bind #'mod 3))
 
-(cl-defun partition (sequence &optional (equivalence-relation #'eql))
-  "Returns a partition of set LIST corresponding to the
-EQUIVALENCE-RELATION on LIST"
-  (coerce (npartition (coerce sequence 'list) equivalence-relation)
-	  (type-of sequence)))
+(cl-defun partition (sequence &rest args)
+  "Return the list of equivalence classes in SEQUENCE.
+The method regards the elements in SEQUENCE as an unordered set.
+Each equivalence class is a sequence of the same type as SEQUENCE.
+The equivalence relation is given by keyword :test.
+\nKeywords supported:  :test :key
+\n(fn SEQUENCE [KEYWORD VALUE]...)"
+  (mapcar (bind #'coerce (type-of sequence))
+    (apply #'npartition (coerce sequence 'list) args)))
+;;(partition (coerce '(a 1 b b "string" a) 'vector))
+;;(partition (vector 'a 1 'b 'b "string" 'a))
+;;(partition "abcdeafe")
+
 ;;(partition (0-n 10) #'(lambda (x y) (eq (oddp x) (oddp y))))
 ;;(partition (vector 1 2 3 4) #'(lambda (x y) (eq (oddp x) (oddp y))))
 
@@ -680,6 +691,10 @@ either 0 or 1)"
 	  do (push (+ (first res) (second res)) res))
     (nreverse res)))
 ;;(length (fibonacci-numbers 10))
+
+(defun normalize (numbers)
+  (map (type-of numbers) (bind #'/ (float (sum numbers))) numbers))
+;;(normalize (vector 1 2 3))
 
 (defun waverage (list)
   "Returns the Weighted average of the number and weight pairs in LIST: ((x1 w1) (x2 w2) ...)"
