@@ -78,6 +78,14 @@ Keywords supported:  :key :count :from-end
   (copy-if (bind test x 1) cl-seq :key key :count count :from-end from-end))
 ;;(copy 3 '(1 2 3 4) :key #'1+ :test #'<)
 
+(defun split-at-position (sequence &rest positions)
+  "Split SEQUENCE at POSITIONS and return the resulting subsequences as a list."
+  (loop for position in (nreverse (cons (length sequence) (nreverse positions)))
+	for start = 0 then end
+	for end = position
+	collect (subseq sequence start end)))
+;;(split-at-position "qweqwe" 2 4)
+
 (defun elt-random (sequence)
   "Returns a random element in SEQUENCE"
   (elt sequence (random (length sequence))))
