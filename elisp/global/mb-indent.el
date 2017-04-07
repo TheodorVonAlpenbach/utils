@@ -92,7 +92,9 @@ SYMBOL can be a symbol or a list of symbols. See function
 	     cartesian-product3-sum write-gnuplots write-gnuplot
 	     for- dbf-decode-bytes shx-position string-case
 	     html-stream string-match* concat* remove-duplicates
-	     csv-string write-csv)
+	     csv-string write-csv
+	     gui-position-objects-horizontally
+	     gui-position-objects-vertically)
 	     'prog1)
 
 (cl-indent '(do-lines defmethod with-infile defclass with-outfile
@@ -119,7 +121,7 @@ SYMBOL can be a symbol or a list of symbols. See function
 	     with-transposed-tree grid-transform-data
 	     format-list remove-if remove-if-not copy-if draw-if
 	     sort cl-sort find-if-not cl-find remove cl-remove
-	     cl-remove-if-not group mapcar mapcan maptree copy-object-to)
+	     cl-remove-if-not group mapcar mapcan maptree apply copy-object-to)
   1)
 
 (cl-indent '(write-list)
