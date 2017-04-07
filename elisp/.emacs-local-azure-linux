@@ -3,8 +3,7 @@
 ;;(set-frame-position (selected-frame) 0 0)
 
 ;; Local elisp load paths
-(setf *local-load-paths* '("~/sources/imms/src/elisp/"
-			   "~/sources/elisp/lsconfig/"))
+(setf *local-load-paths* '("~/git/lsconf"))
 
 (setf *local-requires* '(lsconf-mode qt-chess browse-kill-ring))
 
@@ -58,7 +57,7 @@
 	(,+home-dir+ "projects/chess/libHsmsCore/src/ChAlarmServer.cpp")
 
 	;; CVS entry points
-	(,+home-dir+ "sources/elisp/lsconfig/lsconf-mode.el")
+	(,+home-dir+ "git/lsconf/lsconf-mode.el")
 	(,+home-dir+ "sources/imms/src/lisp/egina/egina-wave.lisp")
 	(,+home-dir+ "sources/imms/src/lisp/wave/wave.lisp")
 
