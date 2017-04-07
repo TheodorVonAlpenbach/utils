@@ -58,7 +58,8 @@
 
 (defmacro handles-outflow ((&optional restart) &body body)
   "Handles FLOATING-POINT-UNDERFLOW conditions in BODY with RESTART"
-  `(handler-bind ((floating-point-underflow ,(or restart #'round-floating-point-underflow-to-zero)))
+  `(handler-bind ((floating-point-underflow
+		   (or ,restart #'round-floating-point-underflow-to-zero)))
      ,@body))
 ;;(handles-outflow (#'round-floating-point-underflow-to-zero) (+))
 
