@@ -200,8 +200,9 @@ By default the last line."
   (define-key insert-map "f" #'cl-ify-form)
   (define-key insert-map "F" #'cl-ify-defun)
   (define-key insert-map "k" #'browse-kill-ring)
-  (define-key insert-map "t" #' insert-time)
-  (define-key insert-map "u" #' uncomment-region))
+  (define-key insert-map "t" #'insert-time)
+  (define-key insert-map "u" #'uncomment-region)
+  (define-key insert-map "@" #'insert-texinfo-var))
 
 (require 'mb-metafont)
 
