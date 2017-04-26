@@ -270,6 +270,13 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 		       *local-requires*)
       do (require m))
 
+;; autoloads
+(autoload 'turn-on-eldoc-mode "eldoc" nil t)
+
+(add-hook 'emacs-lisp-mode-hook 'turn-on-eldoc-mode)
+(add-hook 'lisp-interaction-mode-hook 'turn-on-eldoc-mode)
+(add-hook 'ielm-mode-hook 'turn-on-eldoc-mode)
+
 ;; finding favourites
 (mapcar
  #'(lambda (x) 
@@ -296,13 +303,6 @@ Not in use. Projects should be shared, at least until we are up and running Git.
  '(temp-buffer-resize-mode t)
  '(visible-bell t))
 (custom-set-faces)
-
-;; autoloads
-(autoload 'turn-on-eldoc-mode "eldoc" nil t)
-
-(add-hook 'emacs-lisp-mode-hook 'turn-on-eldoc-mode)
-(add-hook 'lisp-interaction-mode-hook 'turn-on-eldoc-mode)
-(add-hook 'ielm-mode-hook 'turn-on-eldoc-mode)
 
 ;; tags revisited
 (defun mb-tags-file ()
