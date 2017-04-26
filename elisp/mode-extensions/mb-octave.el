@@ -85,6 +85,7 @@ the output buffer prompt.)"
 ;;(eval-scilab-expression)
 ;;(read-string "test: ")
 
+(add-hook 'octave-mode-hook 'turn-on-eldoc-mode)
 (add-hook 'octave-mode-hook 'linum-mode)
 
 ;;;; extensions for debugging
@@ -257,8 +258,11 @@ are between functions."
 
 (defun insert-texinfo-var ()
   (interactive)
-  (insert "@var{}")
-  (backward-char 1))
+  (if (symbol-at-point)
+    (destructuring-bind (beg . end) (bounds-of-thing-at-point 'symbol)
+      (insert (format "@var{%s}" (delete-and-extract-region beg end))))
+    (insert "@var{}")
+    (backward-char 1)))
 
 ;;; shortcuts
 (define-key octave-mode-map (kbd "C-x C-e") 'octave-eval-last-sexp)
