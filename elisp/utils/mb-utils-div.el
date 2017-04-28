@@ -236,7 +236,7 @@ TODO: implement this. Probably involves some macro magic"
   (lexical-let ((lt less-than-function))
     #'(lambda (&rest args)
       (nor (apply lt args) (apply lt (nreverse args))))))
-;;(funcall (lt-equal #'-<) 1 1 1)
+;;(funcall (lt-equal #'<) 1 1 1)
 
 ;;; Anaphoric macros
 (defmacro aif (test-form then-form &rest else-forms)
@@ -284,31 +284,6 @@ TODO: implement this. Probably involves some macro magic"
 ;;(setf ewq '((1) 1)) ==> ((1) 1)
 ;;(asetf (first ewq) (* 2 (first it))) ==> 2
 ;;ewq ==> (2 1)
-
-(defun -< (first &rest rest)
-  "Returns nil iff not the elements in REST are in ascending order
-due to operator #'<"
-  (or (null rest)
-      (and (< first (car rest))
-           (apply #'-< rest))))
-;;(-< 1 2 3 4 3) 
-
-(defun -= (first &rest rest)
-  "Returns nil iff not the elements in REST are equal
-due to operator #'="
-  (or (and (null rest) 
-	   (numberp first))
-      (and (= first (first rest))
-	   (apply #'-= rest))))
-;;(-= 1 1 1)
-
-(defun -<= (first &rest rest)
-  "Returns nil iff not the elements in REST are in descending order
-due to operator #'>"
-  (or (null rest)
-      (and (or (< first (car rest)) (= first (car rest)))
-           (apply #'-<= rest))))
-;;(-<= 1 2 3 3 2)
 
 (defmacro definteractive (defun)
   "Make DEFUN interactive with name CL-DEFUN. DEFUN takes no arguments.
@@ -518,7 +493,9 @@ etc. NB! Check if obsolete!"
 ;;(equal* 1 1)
 
 (defun all-equal (&rest args)
-  (> 2 (length (remove-duplicates args :test #'equal))))
+  "Return T if all ARGS are EQUAL and NIL if not."
+  (not (when args (cl-find (first args) (rest args) :test #'nequal))))
+;;(all-equal 1 1)
 ;;(all-equal 1 1)
 
 (defun mequal (map-function &rest args)
