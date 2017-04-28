@@ -18,7 +18,7 @@
 (defun factor-list (list test &rest args)
   "{aa ab b ba} -> {a{a b} b{nil a}}"
   (apply #'group-adjacent (apply #'sort* list test args) :test test args))
-;;(factor-list '("ab" "b" "ac") #'char= :key #'first-elt)
+;;(factor-list '("ab" "b" "ac") #'= :key #'first-elt)
 
 (cl-defun group-adjacent (list &key (test #'eql) (key #'identity))
   "(0 0 1 2 2 2 3 3) -> ((0 0) (1) (2 2 2) (3 3))"
@@ -33,15 +33,15 @@
 	  do (setq acc (list elt)) and
 	  do (setq current (funcall key elt))
 	  finally return (nconc res (list acc)))))
-;;(group-adjacent '("ab" "ac" "b") :key #'first-elt :test #'char=)
-;;(group-adjacent '("") :key #'first-elt :test #'char=)
+;;(group-adjacent '("ab" "ac" "b") :key #'first-elt :test #'=)
+;;(group-adjacent '("") :key #'first-elt :test #'=)
 
 (defun factor-strings (strings)
   "{aa ab b ba} -> {a{a b} b{nil a}}"
   (mapcar #'(lambda (x) (list (first-elt (first x))
 			      (remove-empty-strings
 			       (mapcar #'(lambda (y) (remove-nth 0 y)) x))))
-   (group-adjacent (sort* strings #'string<) :test #'char= :key #'first-elt)))
+   (group-adjacent (sort* strings #'string<) :test #'= :key #'first-elt)))
 ;;(factor-strings '("ab" "b" "ac"))
 ;;(factor-strings '("ee" "d1" "d3" "4d" "ef" "ag5"))
 
