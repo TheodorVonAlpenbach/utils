@@ -54,11 +54,6 @@ STRING is not an integer, otherwise returns the resulting integer."
   "Common Lisp CHAR"
   `(aref ,string ,index))
 
-(defun char< (char &rest chars) (apply #'-< char chars))
-(defun char= (char &rest chars) (apply #'-= char chars))
-(defun char/= (char &rest chars) (apply #'/= char chars))
-;;(char/= ?a ?b ?a)
-
 (defun string-to-character-list (string) (coerce string 'list))
 ;;(string-to-character-list "abc")
 
