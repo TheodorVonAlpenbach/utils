@@ -208,7 +208,7 @@ It autogenerates values if this is specified and checks for the property unique"
 (defun ld-metadata-identifier-p (form)
   "Metadata column identifier starts with ::, e.g. ::created"
   (and (keywordp form)
-       (char= (char (symbol-name form) 1) ?:)))
+       (= (char (symbol-name form) 1) ?:)))
 
 (defun ld-metadata-identifier (form)
   "Metadata column identifier starts with ::, e.g. ::created
