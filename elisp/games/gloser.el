@@ -43,7 +43,7 @@
 	      (format "Du fikk %d riktige og %d gale svar.\n\n" num-correct num-wrong)))
     (insert (tab-format table :header '("Ditt svar" "Resultat" "Fasit")))))
 
-(defvar *gloselistefil* (expand-file-name "games/ord.el" *mb-lisp-dir*))
+(defvar *gloselistefil* (expand-file-name "ord.el"))
 ;;(setf *gloselistefil* (list (expand-file-name "quiz/koldens-quiz.txt" *shared-data-dir*)))
 (defvar *gloseliste* nil)
 (defvar *current-glose* nil)
@@ -95,5 +95,14 @@ errors in last session only"
 
 (define-key global-map [(f12)] #'gloser)
 (define-key global-map [(control f12)] #'gloser-rehearse)
+
+(defun gloser-parse-raw-tex-string (string)
+  (loop for l in (string-lines string t)
+	collect (mapcar #'string-trim (split-string l ";"))))
+;;(gloser-parse-raw-tex-string "sly; slu\ndistant; fjern\n")
+
+(defun gloser-parse-raw-tex-region (beg end)
+  (interactive "r")
+  (insert (pp (gloser-parse-raw-tex-string (region-string beg end)))))
 
 (provide 'gloser)
