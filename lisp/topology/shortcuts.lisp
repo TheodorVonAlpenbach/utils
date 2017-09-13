@@ -7,6 +7,9 @@
 (defun ms (x1 y1 x2 y2) (make-segment `(,x1 ,y1) `(,x2 ,y2)))
 ;;(ms 0 0 1 0)
 
+(defun mps (&rest xs-and-ys)
+  (mapcar #'make-point (cut xs-and-ys)))
+;;(mps 0 0 1 0 0 0 0 1)
 (defun mss (&rest xs-and-ys)
   (loop for (s e) in (pairs (cut xs-and-ys))
 	collect (make-segment s e)))
@@ -24,6 +27,3 @@
   "Short cut for make multipoints. Only for testing"
   (make-multi-geometry (mapcar #'make-point lpoints)))
 ;;(mmg '((1 2)(2 4)))
-
-
-
