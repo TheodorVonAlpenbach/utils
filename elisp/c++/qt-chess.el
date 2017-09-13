@@ -11,9 +11,11 @@
 
 (cl-defun chess-file-p (buffer &optional (chess-dir "~/projects/chess"))
   (or (in-directory-p (buffer-file-name buffer) chess-dir)
+      (in-directory-p (buffer-file-name buffer) "~/sources/CHESS/RemoteAcceleration")
+      (in-directory-p (buffer-file-name buffer) "~/sources/CHESS/Tail")
       (in-directory-p (buffer-file-name buffer) "~/sources/CHESS/Integrate")
       (in-directory-p (buffer-file-name buffer) "~/sources/CHESS/SimFBGA3Imp")))
-;;(chess-file-p (get-buffer "ChServerSocket.h"))
+;;(chess-file-p (get-buffer "FIRFilter.cpp"))
 ;;(chess-file-p (current-buffer))
 
 (c-add-style
@@ -59,13 +61,17 @@
 ;;(clean-chess-code-test-string)
 ;;(insert (concat* (clean-chess-code-test-string) :in "\n"))
 
+(defun qt3-p ()
+  (string-match "sources/CHESS" (file-name-directory (buffer-file-name))))
+;;(qt3-p)
+
 (defun clean-chess-code ()
   "Note that - should be put at the end in the [] construct"
   (interactive)
   (let ((substitutions
 	 `(("\\<TRUE\\>" "true")
 	   ("\\<FALSE\\>" "false")
-	   ("\\<latin1\\>" "toLatin1().data")
+	   ("\\<latin1\\>" "toLatin1().data" 5)
 	   ("([[:space:]]+" "(")
 	   ("[[:space:]]+)" ")")
 	   ("\\[[[:space:]]+" "[")
@@ -97,7 +103,13 @@
 	   ("^[\t]+" " ") ;; remove tab indents; this will be indented properly later
 	   ("{[[:space:]]+}" "{}"))))
     (save-excursion
-      (loop for (re s) in substitutions
+      (loop for (re s) in (if (qt3-p)
+			    ;; remove substitutions tagged with v > 3
+			    ;; see for instance the latin1 substitution
+			    (remove-if #'(lambda (x)
+					   (and (third x) (> (third x) 3)))
+			      substitutions)
+			    substitutions)
 	    for i from 0
 	    do (goto-char (point-min))
 	    do (while (re-search-forward re nil t)
@@ -274,11 +286,19 @@ Consider move this functionality to a makefile-mode extension module"
   (interactive)
   (mb-grep-basic :directories "~/projects/chess/lib*/src/" :types "{h,cpp}"))
 
+(defun chess-lookup-qtlog ()
+  (interactive)
+  (awhen (thing-at-point 'symbol)
+    (switch-to-buffer-other-window "qtportlog.org")
+    (goto-char (point-min))
+    (re-search-forward (substring-no-properties it))))
+
 (let ((qt-map (make-sparse-keymap)))
   (evil-key-chord-define '(normal motion) global-map "gh" qt-map)
   (define-key qt-map "a" #'qt-align-pro-file)
   (define-key qt-map "c" #'chess-compile)
-  (define-key qt-map "f" #'find-qt3-brother)
+  (define-key qt-map "f" #'chess-lookup-qtlog)
+  (define-key qt-map "F" #'find-qt3-brother)
   (define-key qt-map "e" #'chess-goto-error)
   (define-key qt-map "g" #'mb-c++-grep)
   (define-key qt-map "G" #'chess-grep)
