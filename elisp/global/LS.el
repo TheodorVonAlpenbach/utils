@@ -132,4 +132,16 @@ compared to the relative directory names in PARENT-DIR"
     (insert-time nil)
     (insert " Hjem\n")))
 
+(defun ls-project-number->tag (project-number)
+  "Convert integer PROJECT-NUMBER to corresponding project tag."
+  (insert-sequence (format "%05d" project-number) "_" :start1 2 :end1 2))
+;;(ls-project-number->tag 15010)
+
+(defun ls-project-name (project-number)
+  "Return the directory name under ~/systems containing PROJECT-NUMBER."
+  (find (ls-project-number->tag project-number)
+	(directory-files "~/systems")
+	:test #'string-match*))
+;;(ls-project-name 14029)
+
 (provide 'LS)
