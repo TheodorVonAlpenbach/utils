@@ -28,10 +28,9 @@
 
 (define-test test-line-intersection
   (assert-equal nil (topology::line-intersection (ms 0 0 1 0) (ms 0 1 1 1)))
-  (assert-equal nil (topology::line-intersection (ms -1 1 -1 0) (ms 1 0 1 1))))
-
-(define-test test-left-p
-  (assert-equal (topology::left-p (mp 0 1) (mp 1 0)) t))
+  (assert-equal nil (topology::line-intersection (ms -1 1 -1 0) (ms 1 0 1 1)))
+  (assert-equal (mp 1 2)
+		(topology::line-intersection (ms 1 2  1 3) (ms 4 5  6 7))))
 
 (define-test test-coordinates
   (assert-equal '(1 0) (coordinates (make-point '(1 0)))))
@@ -42,15 +41,20 @@
   (assert-equalp 15 (area (make-box 0 3 0 5))))
 
 (define-test test-distance
-  (let ((cp (mcpa 1 0  1 1  -1 1  -1 0)))
+  (let ((cp (mcpa 1 0  1 1  -1 1  -1 0))
+	(po (mpg  1 0  1 1  -1 1  -1 0)))
     (assert-equalp 1 (distance (mp 0 0) cp))
     (assert-equalp 1/2 (distance (mp 1/2 0) cp))
     (assert-equalp 0 (distance (mp 1 0) cp))
     (assert-equalp 1/2 (distance (mp 3/2 0) cp))
+    (assert-equalp 1/2 (distance po (mp 1/2 1/2)))
+    (assert-equalp 1/2 (distance (mp 1/2 1/2) po))
 
     (assert-equalp 1 (topology::distance2-to-line (ms 0 0 1 0) (ms 0 1 1 1)))
     (assert-equalp 1/2 (topology::distance2-to-line (ms 0 0 1 0) (ms 0 1 1 2)))))
+;;(distance (mpg  1 0  1 1  -1 1  -1 0) (mp 1/2 1/2))
 ;;(run-tests '(test-distance))
+(setf *print-failures* t)
 (run-tests :all)
-;;(setf *print-failures* t)
-;;(remove-tests '(test-make-point))
+;;
+;;(remove-tests '(test-left-p))
