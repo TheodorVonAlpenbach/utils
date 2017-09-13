@@ -6,19 +6,30 @@
 
 ;;;; NB! res_alle.txt er en fil som må lastes opp som iso-8859-1.
 ;;;; Dette innebærer at data som lastes inn må encodes som iso-8859-1.
-;;;; Dette er nå implementert i konverteringsfunksjonene. 
-;;;; Sette encodingen bufferen til iso-8859. Dette er også gjort. Trikset er å legge til element i 
-;;;; file-coding-system-alist, som vist under.
+;;;; Dette er nå implementert i konverteringsfunksjonene. Sette
+;;;; encodingen bufferen til iso-8859. Dette er også gjort. Trikset er
+;;;; å legge til element i file-coding-system-alist, som vist under.
 
 ;;;; NB! igjen: dersom noe skulle gå galt med res_alle.txt, og på en
 ;;;; eller annen måte blir kodet i utf-8, så kan dette enkelt rettes
 ;;;; opp med C-x RET c iso-8859 save-buffer (og touche buffer om nødvendig).
 
+;;;; For å vaske forkludrete data som følge av encoding-rot kan man
+;;;; evaluere noe sånt som
+;;;; (map-strings-region 1 (point-max) *iso-latin1-encoding* 4 0) 
+
 ;;;; Noen tips.
-;;;; 1. Ikke slett resultatbufferen. Det er ikke noe vits i å laste ned fra FTP hele tiden. Det holder med å synkronisere én vei.
-;;;; 2. Legg mail i Brinkster som har med tabelloppdatering i egen katalog. Det er ryddigere, særlig med tanke på all spammen som kommer.
-;;;;    Jeg pleier dessuten å flagge de mailene i tabellkatalogen som ikke ennå er blitt lastet opp.
-;;;; 3. De fleste resultatene sendes som Excel-filer. En kjapp måte å trekke ut dataene, er som følger
+
+;;;; 1. Ikke slett resultatbufferen. Det er ikke noe vits i å laste
+;;;;    ned fra FTP hele tiden. Det holder med å synkronisere én vei.
+
+;;;; 2. Legg mail i Brinkster som har med tabelloppdatering i egen
+;;;;    katalog. Det er ryddigere, særlig med tanke på all spammen som
+;;;;    kommer. Jeg pleier dessuten å flagge de mailene i
+;;;;    tabellkatalogen som ikke ennå er blitt lastet opp.
+
+;;;; 3. De fleste resultatene sendes som Excel-filer. En kjapp måte å
+;;;;    trekke ut dataene, er som følger
 ;;;;    * Åpne vedlegg
 ;;;;    * Ctrl-Home for å komme til A1
 ;;;;    * Down for å komme til første resultatrad (dette er ikke nødvendig dersom overskriftsrad mangler)
@@ -38,6 +49,20 @@
 ;;;; C-S-n Neste tag
 ;;;; C-S-t Overfør til quizark
 ;;;; C-S-s lagre
+
+;;;; Endre antall runder i tabellen
+;;;; ==============================
+;;;; Siden antall runder i vår- og høstsesongen varierer, må man for
+;;;; hver sesong endre antall kolonner for runder i tabellene. Dette
+;;;; gjøre som følger
+
+;;;; 1. Last ned TranformUtils.inc:
+;;;;    (qp-download :transform-utils)
+;;;; 2. Endre cNumRounds til det ønskede antallet
+;;;; 3. Lagre, og last opp:
+;;;;    (qp-upload :transform-utils)
+;;;; I elisp:
+;;;; 4. Endre qp-season til ny sesong
 
 (defconst +qp-backup-extension+ ".0")
 
@@ -112,7 +137,7 @@
     (:css-old "qpstyleTAB.css" "webroot")
     (:css "qpstyleTAB.css" "webroot/styles")))
 (defconst +qp-asp-items+ '(:0101 :0102 :0103 :0104 :0105))
-;;(qp-download :tables)
+;;(qp-download :transform-utils)
 
 (defun qp-asp-item-entry (keyword)
   (when (cl-find keyword +qp-asp-items+)
@@ -162,7 +187,7 @@
 ;;;; Table handling
 
 ;;; General config
-(defconst qp-season '(27 "Allmennquiz"))
+(defconst qp-season '(28 "Allmennquiz"))
 (defun qp-season-number () (number-to-string (first qp-season)))
 (defun qp-season-name () (second qp-season))
 
@@ -178,6 +203,7 @@
     (vertshuset "Vålerenga Verthus (Oslo)" tirsdag (5 6 0) "Vålerenga")
     (highbury "Highbury (Oslo)" torsdag
 	      ,(if (eql (emacs-os) :linux) '(0 4)  '(1 5)) "Highbury")
+    (highbury "Highbury (Oslo)" torsdag (0 1) "Highbury")
     (highbury "Highbury (Oslo)" torsdag (1 2) "Highbury")
     (highbury "Highbury (Oslo)" torsdag "\\(.*\\) \\([[:digit:]]+\\)$" "Highbury") 
     (onkel-oskar-namsos "Onkel Oskar (Namsos)" onsdag (4 5 0) "Onkel Oskar")
