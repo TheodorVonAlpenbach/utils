@@ -46,26 +46,31 @@ later."
   (if (listp x)
     (and (<= (first interval) (first x))
 	 (>= (second interval) (second x)))
-    (-< (first interval) x (second interval))))
+    (<= (first interval) x (second interval))))
+
 (defun i-within (interval1 interval2) 
   (i-contains interval2 interval1))
+
 (defun i-within-strictly (interval1 interval2) 
   (and (i-within interval1 interval2)
        (nequal interval2 interval2)))
 ;;(i-contains '(0 3) '(1 2))
+
 (defun i-disjoint (interval1 interval2) 
   (or (< (second interval1) (first interval2))
       (< (second interval2) (first interval1))))
 ;;(i-disjoint '(0 2) '(3 5))
+
 (defun i-touch (interval1 interval2)
   (let ((a (first interval1)) (b (second interval1))
 	(c (first interval2)) (d (second interval2)))
     (if (< a c) (= b c) (= a d))))
 ;;(i-touch '(0 2) '(-1 0))
+
 (defun i-overlap (interval1 interval2)
   (let ((a (first interval1)) (b (second interval1))
 	(c (first interval2)) (d (second interval2)))
-    (or (-< a c b d) (-< c a d b))))
+    (or (< a c b d) (< c a d b))))
 ;;(i-overlap '(0 2) '(1 3))
 
 (defun i-intersection (interval1 interval2)
