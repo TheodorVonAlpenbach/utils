@@ -37,9 +37,9 @@
   (abs (- x y)))
 ;;(distance 2 1)
 
-(defun average (list &key key)
+(cl-defun average (list &key key)
   (/ (apply #'+ (if key (mapcar key list) list))
-     (length list)))
+     (float (length list))))
 ;;(average (list 1 2 3) :key #'1+)
 
 (defmacro negatef (n)
