@@ -474,6 +474,7 @@ string between them."
 	  as s = (subseq string i j)
           if (not (and remove-empty-string-p (string= s ""))) collect s
           while j))
+;;(split-by-char "The   fox" #\Space t)
 ;;(split-by-char (nth 5 (read-text-file-lines testfile)) #\Space t)
 
 (defun string->lines (string &optional remove-empty-lines-p (split-char #\Newline))
