@@ -43,3 +43,32 @@
   (should (equal '(49 57) (project-sequence '("01" "09") 1)))
   (should (equal '("1" "9") (project-sequence '("01" "09") (list 1))))
   (should (equal '((2 3) (5 6)) (project-sequence '((1 2 3) (4 5 6)) '(1 2)))))
+
+(ert-deftest test-insert-sequence ()
+  "Test of INSERT-SEQUENCE"
+  (should (equal '(1 2 3 4 5)
+		 (insert-sequence '(1 2 5) '(3 4) :start1 2)))
+  (should (equal [1 2 3 4 5]
+		 (insert-sequence [1 2 5] [3 4] :start1 2)))
+  (should (equal "complete"
+		 (insert-sequence "comete" "pl"
+				  :start1 3)))
+  (should (equal "concrete"
+		 (insert-sequence "comete" "ncr"
+				  :start1 2 :end1 3)))
+  (should (equal "concrete"
+		 (insert-sequence "comete" "incr"
+				  :start1 2 :end1 3 :start2 1)))
+  (should (equal "concrete"
+		 (insert-sequence "comete" "incredible"
+				  :start1 2 :end1 3 :start2 1 :end2 4)))
+  (should (equal "incrediblecomet"
+		 (insert-sequence "comet" "incredible")))
+  (should (equal "ediblecomet"
+		 (insert-sequence "comet" "incredible"
+				  :start2 4)))
+  (should (equal "incomet"
+		 (insert-sequence "comet" "incredible"
+				  :end2 2)))
+  (should (equal "dicomet"
+		 (insert-sequence "comet" "incredible" :start2 5 :end2 7))))
