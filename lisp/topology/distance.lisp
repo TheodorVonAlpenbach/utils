@@ -8,13 +8,33 @@
 (defmethod distance2 ((x cons) (y (eql nil)))
   "Return distance2 for a coordinate tuple to the origin."
   (reduce #'+ (mapcar #'sq x)))
+;;(distance2 (list 1 1) nil)
 
-(defmethod distance2 ((x cons) (y cons))
-  (distance2 (g- x y) nil))
+(defmethod distance2 ((x point) (y (eql nil)))
+  "Return distance2 for a POINT to the origin."
+  (distance2 (coordinates x) y))
+;;(distance2 (mp 1 1) nil)
 
 ;; point
 (defmethod distance2 ((x point) (y point))
-  (distance2 (coordinates x) (coordinates y)))
+  (distance2 (g- x y) nil))
+;;(distance2 (mp 1 1) (mp 2 2))
+
+(defmethod distance2 ((x sequence) y)
+  (reduce #'min x :key (bind #'distance2 y)))
+;;(distance2 (vector (mp 1 0) (mp 1 1)) (mp 2 2))
+(defmethod distance2 (x (y cons)) (distance2 y x))
+(defmethod distance2 (x (y vector)) (distance2 y x))
+(defmethod distance2 ((x path) (y geometry)) (distance2 (segments x) y))
+(defmethod distance2 ((x polygon) (y geometry)) (distance2 (boundary x) y))
+;;(distance2 (mpa 0 2 2 2) (mpa 0 0 1 0 0 1))
+(defmethod distance2 (x (y path)) (distance2 y x))
+;; mirrors
+(defmethod distance2 (x (y point)) (distance2 y x))
+(defmethod distance2 (x (y segment)) (distance2 y x))
+(defmethod distance2 (x (y multi-geometry)) (distance2 y x))
+(defmethod distance2 (x (y polygon)) (distance2 y x))
+;;(distance2 (ms 0 0 1 0) (ms 0 1 1 1))
 
 ;;; p-s
 (defmethod projection-parameter-points ((p point) (p1 point) (p2 point))
@@ -24,8 +44,9 @@ Other values in [0 1] gives the position on the segment accordingly.
 If negative, the projection is on the continuation of the segment
 closest to P2, if positive closest to P1."
   (let ((dp (g- p2 p1)))
-    (/ (inner-product (g- p p1) dp) (norm2 dp))))
-;;(projection-parameter-points (mp .1 .5) (mp 1 1) (mp 0 1))
+    (/ (inner-product (g- p p1) dp) (coerce (norm2 dp) 'long-float))))
+;;(projection-parameter-points (mp .1 .5) (mp 0 0) (mp 6.866455E-4 -0.01203537))
+;;(projection-parameter-points (mp 10.931273 59.112213) (mp 11.687057 58.9792) (mp 11.687743 58.967163))
 
 (defmethod projection-parameter ((p point) (s segment))
   "See point specialization only"
@@ -40,6 +61,7 @@ closest to P2, if positive closest to P1."
 ;;(trace distance2-to-line)
 
 (defmethod distance2-to-line ((s segment) (line segment))
+  (print (list line s))
   (if (left-of-p (start s) line)
     (if (left-of-p (end s) line)
       (if (left-of-p s line)
@@ -99,8 +121,11 @@ closest to P2, if positive closest to P1."
 
 (defmethod distance2 ((s1 segment) (s2 segment))
   (destructuring-bind (t1 t2) (line-intersection-coeffs s1 s2)
-    (flet ((pos (x) (if (minusp x) :behind (if (> x 1) :ahead :on))))
-      (distance2-1 s1 s2 t1 t2 (pos t1) (pos t2)))))
+    (if t1
+      (flet ((pos (x) (if (minusp x) :behind (if (> x 1) :ahead :on))))
+	(distance2-1 s1 s2 t1 t2 (pos t1) (pos t2)))
+      ;; parallel
+      (distance2 (start s1) s2))))
 ;;(distance2 (ms -1/2 0 100 100) (ms 0 0 1 0))
 
 ;; composite objects
@@ -141,12 +166,6 @@ only implemented for points."
 	       (distance2 x s2)
 	       (distance2 x (make-segment s1 s2)))))))))
 ;;(distance (mp 0 1/2) (mcpa 1 0  1 1  -1 1  -1 0))
-
-;; mirrors
-(defmethod distance2 (x (y point)) (distance2 y x))
-(defmethod distance2 (x (y segment)) (distance2 y x))
-(defmethod distance2 (x (y path)) (distance2 y x))
-(defmethod distance2 (x (y multi-geometry)) (distance2 y x))
 
 ;;DISTANCE
 ;; Should this be a generic function? Is there any case where
