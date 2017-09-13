@@ -182,6 +182,7 @@ By default the last line."
   (define-key swap-map "n" #'ffap-next)
   (define-key swap-map "N" #'ffap-previous)
   (define-key swap-map "o" #'other-window)
+  (define-key swap-map "O" #'(lambda () (interactive) (other-window -1)))
   (define-key swap-map "r" #'revert-buffer)
   (define-key swap-map "s" #'smart-swap)
   (define-key swap-map "T" #'find-tag-no-prompt)
@@ -195,13 +196,13 @@ By default the last line."
   (key-chord-define evil-normal-state-map "vi" insert-map)
   (define-key insert-map "a" #'ls-insert-arrival-time)
   (define-key insert-map "A" #'ls-insert-depature-time)
-  (define-key insert-map "c" #'comment-region)
+  (define-key insert-map "c" #'comment-region*)
   (define-key insert-map "d" #'insert-date)
   (define-key insert-map "f" #'cl-ify-form)
   (define-key insert-map "F" #'cl-ify-defun)
   (define-key insert-map "k" #'browse-kill-ring)
   (define-key insert-map "t" #'insert-time)
-  (define-key insert-map "u" #'uncomment-region)
+  (define-key insert-map "u" #'uncomment-region*)
   (define-key insert-map "@" #'insert-texinfo-var))
 
 (require 'mb-metafont)
@@ -305,10 +306,11 @@ By default the last line."
 		    (slime-compile-and-load-file)
 		    (mb-lisp-eval-buffer)))
     (metafont-mode (meta-compile-file (buffer-file-name)))
-    (octave-mode (octave-send-buffer))
+    (octave-mode (octave-eval-buffer))
     (mbscilab-mode (mbscilab-eval-buffer))
     (python-mode (python-shell-send-buffer nil))
     ((c++-mode cc-mode) (compile "make -k"))
+    (latex-mode (TeX-command-run-all nil))
     (otherwise (mb-eval-region (point-min) (point-max)))))
 
 (defun mb-eval-defun ()
@@ -329,6 +331,7 @@ By default the last line."
     (python-mode (python-shell-send-region start end nil))
     (mbscilab-mode (mbscilab-eval-region start end))
     (sh-mode (sh-execute-region start end))
+    (latex-mode (TeX-command-run-all-region))
     (octave-mode (octave-send-region start end))))
 
 (defun mb-eval-region-from-point (&optional printflag read-function)
@@ -389,7 +392,7 @@ mentioned\) RESULT is returned unmodified."
 
 (defun mb-insert-state-init ()
   ;;(key-chord-mode 1)
-  (when (member (buffer-name) '("arbeidslog" "todo.org" "log.org"))
+  (when (member (buffer-name) '("arbeidslog" "log.org"))
     (activate-input-method 'norwegian-keyboard))
   (advice-add #'key-chord-input-method
 	      :filter-return #'quailify-key-chord-input-method))
@@ -447,13 +450,20 @@ does not work for me."
   "Smartparens sexp object."
   (evil-range (point-min) (point-max) 'inclusive :expanded t))
 
+(evil-define-text-object mb-evil-inner-defun (count &optional beg end type)
+  "Object for inner defun of c++ like languages"
+  (evil-range (bol* :point (bod*) :offset 1)
+	      (eol* :point (eod*) :offset -2)
+	      'inclusive :expanded t))
+
 (evil-define-text-object mb-evil-inner-variable-name (count &optional beg end type)
-  "Smartparens sexp object."
+  "Smartparens sexp object. E.g. +foobar+ --> foobar"
   (destructuring-bind (beg end) (last-sexp-region)
     (evil-range (1+ beg) (1- end) 'inclusive :expanded t)))
 
 (define-key evil-outer-text-objects-map "g" #'mb-evil-buffer)
 (define-key evil-inner-text-objects-map "v" #'mb-evil-inner-variable-name)
+(define-key evil-inner-text-objects-map "D" #'mb-evil-inner-defun)
 
 (evil-define-operator evil-yank-line (beg end type register yank-handler)
   "Yank to end of line.
@@ -499,5 +509,22 @@ occurence of 'delete' replaced with 'yank'."
       (re-search-backward "\\.pdf\"")
       (ffap-no-prompt-read-only))))
 ;;(print-last-pdf-in-Messages)
+
+;;;; Insert quotes (put this somewhere else when finished)
+(cl-defun mb-surround-region-1 (region left right n)
+  (insert-at left (car region) n)
+  (insert-at right (+ (cdr region) (length left)) n))
+
+(cl-defun mb-surround-lookup-right (left)
+  (string-case left
+    ("(" ")")
+    (otherwise left)))
+;;(mapcar #'mb-surround-lookup-right (list "'" "("))
+
+(cl-defun mb-surround-region (region left n)
+  (mb-surround-region-1 region left (mb-surround-lookup-right left) n))
+
+(defun mb-surround-word (left n)
+  (mb-surround-region (cons (bow*) (eow* n)) left 1))
 
 (provide 'mb-evil)
