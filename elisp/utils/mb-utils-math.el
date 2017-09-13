@@ -305,13 +305,6 @@ the rotation degree."
     (2cycle-lform (cycle-normal-form (make-distributed-list n (length cycle))))))
 ;;(2cycle-to-optimal-lform '(a a a b b a))
 
-(cl-defun 2cycle-badness-old (cycle &optional (test #'eq))
-  "Calculates how good the elements of CYCLE is distributed, assuming the number of non-EQ elements is 2"
-  (let* ((lform (2cycle-lform (cycle-normal-form cycle test) test))
-	 (loptimal-lform (2cycle-to-optimal-lform cycle test)))
-    (sum (mapcar* #'distance lform loptimal-lform))))
-;;(2cycle-badness-old '(a a a a a b b))
-
 (cl-defun 2cycle-badness (cycle &optional (test #'eq))
   "Calculates how good the elements of CYCLE is distributed, assuming the number of non-EQ elements is 2"
   (let* ((n (length cycle))
@@ -328,7 +321,8 @@ the rotation degree."
 ;;(2cycle-badness '(a a a a a b))
 
 (cl-defun cycle-badness (cycle &optional (test #'eq))
-  "Calculates how good the elements of CYCLE is distributed, assuming the number of non-EQ elements is 2"
+  "Calculate how well the elements of CYCLE is distributed,
+assuming the number of non-EQ elements is 2"
   (lexical-let ((test test))
     (loop for elt in (remove-duplicates cycle)
 	  for badness = (2cycle-badness cycle #'(lambda (x y) 
@@ -338,7 +332,8 @@ the rotation degree."
 ;;(cycle-badness '(a b c a b c b a c a b c))
 
 (cl-defun cycle-best (cycles &optional (test #'eq))
-  "Calculates how good the elements of CYCLE is distributed, assuming the number of non-EQ elements is 2"
+  "Calculate the best distribution of the elements in CYCLE.
+See `cycle-badness' for the measure of a good cycle."
   (loop with min-cycle = (first cycles)
 	with min = (cycle-badness min-cycle test)
 	for c in cycles
@@ -919,7 +914,7 @@ quotients by the gcd: (%d, %d)"
 ;;(/ (- 3 (* 2 (log 3 2))) (- (* 7 (log 3 2)) 11))
 ;;  
 
-(cl-defun floor-test (k &optional (max-m k))
+(cl-defun floor-test1 (k &optional (max-m k))
   "Tests that F(mlog3) = F(m(F(klog3))/k), for all m and k"
   (let ((log3 (log 3 2)))
     (loop for m to max-m
@@ -942,7 +937,7 @@ quotients by the gcd: (%d, %d)"
 (defun fractional (x) (- (float x) (floor x)))
 ;;(fractional 3.4)
 
-(defun test (k) (< (fractional (* k (log 3 2))) (/ 1.0 k)))
+(defun test-fractional (k) (< (fractional (* k (log 3 2))) (/ 1.0 k)))
 ;;(loop for i from 1 below 1000 if (test i) collect (list i (l-value i) (gcd i (l-value i))))
 
 (cl-defun floor-test2 (max-k m)
@@ -962,7 +957,7 @@ quotients by the gcd: (%d, %d)"
 ;;(mapcar #'l-value (a-b 1 12))
 ;;(loop for k from 1 to 12 collect (* (float k) (fractional (* k (log 3 2)))))
 
-(cl-defun test3 (s &optional (k 12))
+(cl-defun l-value-test (s &optional (k 12))
   (let ((l (l-value k))
 	(l-inverse (extended-gcd (l-value k) k)))
     (list s
@@ -981,5 +976,34 @@ quotients by the gcd: (%d, %d)"
 (defun perfect-number-p (n)
   (= (sum (factors n)) n))
 ;;(perfect-number-p 28)
+
+(cl-defun perfect-numbers (&optional (n 10000))
+  (loop for i from 2 to n
+	if (perfect-number-p i) collect i))
+;;(perfect-numbers 10000)
+
+(defun integer-ceiling (p q)
+  "Return the ceiling of P/Q, where P and Q are positive integers.
+This is an effective implementation of (coerce (ceiling (/ (float
+p) q)))"
+  (/ (+ p q -1) q))
+;;(integer-ceiling 10 3)
+
+(cl-defun test-integer-ceiling (n &optional (max-integer 1000000))
+  "Test `integer-ceiling'"
+  (loop repeat n
+	for (p q) = (random-integers 2 1 max-integer)
+	if (/= (coerce (ceiling (/ (float p) q)) 'integer)
+	       (integer-ceiling p q))
+	collect (list p q)))
+;;(test-integer-ceiling 100000)
+
+(cl-defun test-another-integer-operation (n &optional (max-integer 1000000))
+  (loop repeat n
+	for (p q r) = (random-integers 3 1 max-integer)
+	for res1 = (coerce (floor (- (float r) (/ (float p) q))) 'integer)
+	for res2 = (- r (integer-ceiling p q))
+	if (/= res1 res2) collect (list r p q res1 res2)))
+;;(test-another-integer-operation 1000000)
 
 (provide 'mb-utils-math)
