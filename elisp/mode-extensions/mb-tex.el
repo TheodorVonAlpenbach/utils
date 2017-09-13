@@ -28,18 +28,33 @@
   "Find master file and view the corresponding PDF file in a buffer.
 Need to include this function in some view parameter. Check this
 at work."
-  (let* ((master-prefix (master-prefix))
-	 (tex-path (concat master-prefix ".tex"))
-	 (pdf-path (concat master-prefix ".pdf")))
-    (if (file-newer-than-file-p tex-path pdf-path)
-      (message "Sentinel called too early!")
-      (when (file-exists-p pdf-path)
-	(switch-to-buffer-other-window (find-file-noselect pdf-path t))
-	(revert-buffer t t t)))))
+  (if (and x (file-exists-p (concat x ".pdf")))
+    (progn (switch-to-buffer-other-window
+	    (find-file-noselect (concat x ".pdf") t))
+	   (revert-buffer t t t))
+    (let* ((master-prefix (master-prefix))
+	   (tex-path (concat master-prefix ".tex"))
+	   (pdf-path (concat master-prefix ".pdf")))
+      (if (eql (second (backtrace-frame 19)) 'TeX-command-run-all-region)
+	(when (file-exists-p "_region.pdf_")
+	  (switch-to-buffer-other-window (find-file-noselect "_region.pdf_" t))
+	  (revert-buffer t t t))
+	(if (file-newer-than-file-p tex-path pdf-path)
+	  (message "Sentinel called too early!")
+	  (when (file-exists-p pdf-path)
+	    (switch-to-buffer-other-window (find-file-noselect pdf-path t))
+	    (revert-buffer t t t)))))))
 
 ;;; Add this viewer to TeX-expand-list. (Check if lambda is necessary.)
 (pushnew '("%V" (lambda () "open-my-pdf")) TeX-expand-list :test #'equal)
 ;;(nilf TeX-expand-list)
+
+;; NB! Make this an ...
+(defun TeX-run-function (_name command _file)
+  "Execute Lisp function or function call given as the string COMMAND.
+Parameters NAME and FILE are ignored."
+  (let ((fun (car (read-from-string command))))
+    (if (functionp fun) (funcall fun file) (eval fun))))
 
 (defun mb-open-pdf (fn)
   "First version of 'open pdf'"
