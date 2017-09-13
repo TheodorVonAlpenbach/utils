@@ -23,6 +23,8 @@
    ;; (:cl-source-file "shapes" :depends-on ("multi-geometry" "shortcuts"))
    (:cl-source-file "algebra" :depends-on ("shortcuts"))
    (:cl-source-file "boundary" :depends-on ("algebra"))
+   (:cl-source-file "cross-product" :depends-on ("algebra"))
+   (:cl-source-file "left-of-p" :depends-on ("cross-product"))
    (:cl-source-file "distance" :depends-on ("algebra"))
    (:cl-source-file "within" :depends-on ("algebra"))
    (:cl-source-file "diameter" :depends-on ("algebra"))
