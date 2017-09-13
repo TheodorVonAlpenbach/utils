@@ -121,7 +121,8 @@ SYMBOL can be a symbol or a list of symbols. See function
 	     with-transposed-tree grid-transform-data
 	     format-list remove-if remove-if-not copy-if draw-if
 	     sort cl-sort find-if-not cl-find remove cl-remove
-	     cl-remove-if-not group mapcar mapcan maptree apply copy-object-to)
+	     cl-remove-if-not group mapcar mapcan maptree copy-object-to
+	     apply funcall)
   1)
 
 (cl-indent '(write-list)
