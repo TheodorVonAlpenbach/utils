@@ -136,28 +136,43 @@
 
 ;;; file parsing
 (cl-defun sr-html-entries (html-string &optional (n most-positive-fixnum))
-  (xml-extract-nodes html-string "li" '(("class" "track-list-item__item")) n))
+  (xml-extract-nodes html-string "li" '(("class" "track-list-item")) n))
 
 (defconst +sr-track-detail-names+
   '("Artist" "Album" "Ensemble/Orkester" "Dirigent" "Etikett")
   "Order is significant")
 
-(defun sr-parse-track-detail (track-detail)
+(defun sr-parse-track-detail-old (track-detail)
   "item is one of Artist, Album, Ensemble/Orkester Dirigent Etikett"
   (let ((detail-name (first (xml-extract-nodes track-detail "span" () 1 t))))
     (list (substring* detail-name 0 -1) ; skip last semicolon
 	  (string-match* (format "<span>%s</span> \\(.*\\)" detail-name) track-detail :num 1))))
 ;;(sr-parse-track-detail "            <span>Etikett:</span> Sterling")
 
+(defun sr-parse-track-detail (track-detail)
+  "Split track-detail into a pair.
+\"Solist: Mr. Holtermann\" -> \(\"Solist\" \"Mr. Holtermann\"\)."
+  (awhen track-detail
+    (mapcar #'string-trim (split-string it ":"))))
+;;(sr-parse-track-detail "Solist: Mr. Holtermann")
+
+(defun sr-parse-time (sr-time)
+  "Convert SR time to ISO short time format HH:MM."
+  (substitute ?: ?. sr-time))
+;;(sr-parse-time "12.00")
+
 (defun sr-parse-entry (html-entry)
-  (let ((time (first (xml-extract-nodes html-entry "time"
-		       () 1 t)))
-	(title (xml-inner (first (xml-extract-nodes html-entry "h4" nil 1 t))))
-	(track-details (xml-extract-nodes html-entry "div"
-			 '(("class" "track-list-item__detail")) most-positive-fixnum t)))
+  "Return a list (time artist title detail1 detail2 ...)."
+  (let ((sr-time (xml-inner (first (xml-extract-nodes html-entry "div"
+				  '(("class" "track-list-item__time-wrapper"))))))
+	(title (xml-inner (first (xml-extract-nodes html-entry "div"
+				  '(("class" "track-list-item__title"))))))
+	(track-details
+	 (xml-extract-nodes html-entry "div"
+	   '(("class" "track-list-item__detail")) most-positive-fixnum t)))
     (destructuring-bind (artist work &rest details)
-	(mapcar #'string-trim track-details)
-      (list (list time artist title)
+	(mapcar #'xml-inner track-details)
+      (list (list (sr-parse-time sr-time) artist title)
 	    (mapcar #'sr-parse-track-detail details)))))
 
 (cl-defun sr-entries (html-string &optional n)
@@ -188,7 +203,8 @@
 (cl-defun sr-at-converter (html-string time)
   ""
   (sr-format-entry (find time (sr-entries html-string)
-			 :key #'(lambda (x) (first (first x))) :test #'string>= :from-end nil)))
+			 :key #'(lambda (x) (first (first x)))
+			 :test #'string>= :from-end nil)))
 
 (cl-defun sr-to-temp-buffer (sr-converter tag &rest args)
   (wget (sr-url) nil (apply #'html-to-temp-buffer-sentinel
