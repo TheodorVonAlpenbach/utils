@@ -51,8 +51,11 @@
 
 (defgeneric gequal (x y))
 
+(defmethod gequal ((x sequence) (y sequence))
+  (every #'equal x y))
+
 (defmethod gequal ((x point) (y point))
-  (every #'equal (coordinates x) (coordinates y)))
+  (gequal (coordinates x) (coordinates y)))
 ;;(gequal (make-point '(1 2)) (make-point '(1 2)))
 
 (defmethod gequal ((x segment) (y segment))
