@@ -147,11 +147,11 @@
   (ly-instrument-class (ly-get-instrument instrument-symbol)))
 ;;(ly-get-instrument-class 'fagotto)
 
-(defun* ly-get-instruments (instrument-class &optional (instruments ly-instruments))
+(cl-defun ly-get-instruments (instrument-class &optional (instruments ly-instruments))
   (copy-if (bind #'eq instrument-class) instruments :key #'ly-instrument-class))
 ;;(ly-get-instruments 'strings (nthcdr 7 ly-instruments))
 
-(defun* ly-instrument-symbols (&optional (instruments ly-instruments))
+(cl-defun ly-instrument-symbols (&optional (instruments ly-instruments))
   (mapcar #'ly-instrument-symbol instruments))
 ;;(ly-instrument-symbols)
 
@@ -275,7 +275,7 @@
 ;;(ly-expand-instrument-symbols '(bassi winds strings brass tutti))
 ;;(ly-expand-instrument-symbols 'tutti)
 
-(defun* ly-make-source (instrument-symbols sections &optional (global-symbol 'global))
+(cl-defun ly-make-source (instrument-symbols sections &optional (global-symbol 'global))
   (let ((instrument-symbols* (ly-expand-instrument-symbols instrument-symbols)))
     (concat* 
      (list (ly-make-includes instrument-symbols*)
@@ -305,20 +305,24 @@
 
 (defun ly-make-buffer-name (instrument-symbols sections)
   "Nice to have: sort parts"
-  (let ((instruments-part (concat* (mapcar #'ly-abbrevate-symbol (llist instrument-symbols))
+  (let ((instruments-part (concat* (mapcar #'ly-abbrevate-symbol
+				     (listify instrument-symbols))
 				  :in "-" :key #'symbol-name))
-	(sections-part (concat* (llist sections) :key (compose #'capitalize #'symbol-name))))
+	(sections-part (concat* (listify sections)
+			 :key (compose #'capitalize #'symbol-name))))
     (concat instruments-part "-" sections-part ".ly")))
 ;;(ly-make-buffer-name 'bassi 'a)
 ;;(ly-make-buffer-name '(flauto strings tutti) '(a b c))
 
-(defun* ly-make-and-compile (instrument-symbols sections &optional (global-symbol 'global))
+(cl-defun ly-make-and-compile (instrument-symbols sections &optional (global-symbol 'global))
   (let* ((buffer-name (ly-make-buffer-name instrument-symbols sections))
 	 (path (expand-file-name buffer-name ly-source-directory)))
     (find-file-noselect path)
     (switch-to-buffer buffer-name)
     (erase-buffer)
-    (insert (ly-make-source (llist instrument-symbols) (llist sections) global-symbol))
+    (insert (ly-make-source (listify instrument-symbols)
+			    (llist sections)
+			    global-symbol))
     (indent-region (point-min) (point-max))
     (write-file path nil)
     (LilyPond-command-lilypond)))

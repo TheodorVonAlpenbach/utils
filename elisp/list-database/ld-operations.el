@@ -314,15 +314,15 @@ For order-by we must convert columns to column-positions."
 ;;; Update
 (defun ld-update-1 (table where-function values columns)
   "Skipping properties for now"
-  (assert (= (length (llist values)) (length (llist columns)))
+  (assert (= (length (listify values)) (length (llist columns)))
 	  t "The number of values and the number columns are not the same")
   (let ((rows (copy-if where-function (ld-table-data table))))
     (case (length rows)
       (0 (ld-warning "No single row was selected in :where expression."))
       (1 (let ((row (first rows)))
 	   (ld-set-metadatum (iso-date-and-time) :updated (ld-row-metadata (first rows)))
-	   (loop for value in (llist values)
-		 for colfun in (llist columns)
+	   (loop for value in (listify values)
+		 for colfun in (listify columns)
 		 do (setf (nth colfun row) value)
 		 finally return row)))
       (t (ld-warning "Skipping update since multiple rows were selected in :where expression.")))))
