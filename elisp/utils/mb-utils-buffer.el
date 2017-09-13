@@ -7,6 +7,12 @@
   (max (point) (mark force)))
 ;;(region-end*)
 
+(defun mark-region (beg-or-region &optional end)
+  (if (not end)
+    (apply #'mark-region beg-or-region)
+    (push-mark beg-or-region nil t)
+    (goto-char end)))
+
 (cl-defun marked-text-region (&optional (buffer (current-buffer)))
   "Returns nil if mark is not active, else it returns the marked text.
 The function operates on BUFFER which defaults to the current
@@ -163,11 +169,12 @@ Note that line numbers and paragraph numbers (check) starts from base 0."
 ;;(buffer-substring* :start (point) :length 1 :unit :line)
 ;;(point-min)
 
-(cl-defun insert-at (thing &optional (point (point)))
+(cl-defun insert-at (thing &optional (point (point)) (n 1))
   "`insert's THING at POINT."
   (save-excursion
     (goto-char point)
-    (insert thing)))
+    (loop repeat n do (insert thing))))
+;;(insert-at "qwe" (point) 3)
 
 (defun overwrite-region (string beg end &optional buffer)
   (with-current-buffer (or buffer (current-buffer))
@@ -185,6 +192,7 @@ Note that line numbers and paragraph numbers (check) starts from base 0."
     (next-line 1)
     (point)))
 
+;;; Sexp stuff
 (cl-defun bos (&optional (n 1))
   "Move POINT back N sexps and return point"
   (backward-sexp n) (point))
@@ -205,6 +213,7 @@ Note that line numbers and paragraph numbers (check) starts from base 0."
   (save-excursion
     (list (bos n) (eos n))))
 
+;;; Region stuff
 (defalias 'region-string 'buffer-substring-no-properties)
 ;;(region-string 1 100)
 
@@ -217,6 +226,7 @@ Note that line numbers and paragraph numbers (check) starts from base 0."
   (interactive "r")
   (warn "Deprecated. Use REGION-LINES instead."))
 
+;;; Buffer stuff
 (defsubst bob ()
   "Move POINT to beginning of buffer and return its value"
   (goto-char (point-min)))
@@ -236,6 +246,7 @@ Note that line numbers and paragraph numbers (check) starts from base 0."
   (with-buffer buffer (save-excursion (region-lines (bob) (eob)))))
 ;;(buffer-lines)
 
+;;; Paragraph stuff
 (defsubst eop ()
   "Move POINT to end of paragraph and return its value"
   (forward-paragraph 1)
@@ -259,23 +270,29 @@ The return value is a pair of points \(START END\)."
   (warn "Deprecated. Use PARAGRAPH-STRING instead.")
   (paragraph-string))
 
-(cl-defun bol (&key linum (offset 0) restrict-to-current-field)
+;;; Line stuff
+(cl-defun bol (&key linum point (offset 0) restrict-to-current-field)
   "Move point to the beginning of the current line and return its value.
 If RESTRICT-TO-CURRENT-FIELD is true, the function constrains
 point to the current field, see `beginning-of-line'"
   (let ((inhibit-field-text-motion (not restrict-to-current-field)))
-    (when linum (goto-line linum))
+    (if linum
+      (goto-line linum)
+      (if point (goto-char point)))
     (beginning-of-line (1+ offset))
     (point)))
-;;(bol :linum nil)
+;;(bol :point 9867)
 
-(cl-defun eol (&key linum (offset 0) restrict-to-current-field)
+(cl-defun eol (&key linum point (offset 0) restrict-to-current-field)
   "Move point to the end of the current line and returns its value.
 For RESTRICT-TO-CURRENT-FIELD, see `bol'."
   (let ((inhibit-field-text-motion (not restrict-to-current-field)))
-    (when linum (goto-line linum))
+    (if linum
+      (goto-line linum)
+      (if point (goto-char point)))
     (end-of-line (1+ offset))
     (point)))
+;;(eol :point 10000)
 ;;(save-excursion (list (bol) (eol) (bob) (eob)))
 
 (defun bol* (&rest args)
@@ -336,7 +353,7 @@ see `bol'"
   (warn "Deprecated. Use LINE-STRING instead.")
   (apply #'line-string args))
 
-;;; defun
+;;; Defun stuff 
 (defun bod ()
   "Move to beginning of the current defun and return POINT."
   (beginning-of-defun) (point))
@@ -384,24 +401,29 @@ The return value is a pair of points \(START END\)."
 ;;(eof*)
 
 ;;; word
-(defun bow ()
+(defun bow (&optional n)
+  "Move to the beginning of the current word and return POINT."
   (awhen (bounds-of-thing-at-point 'word)
     (goto-char (car it))
+    (when n (backward-word (1- n)))
     (point)))
 
-(defun eow ()
+(defun eow (&optional n)
+  "Move to the end of the current word and return POINT."
   (awhen (bounds-of-thing-at-point 'word)
-    (goto-char (cdr it))))
+    (goto-char (cdr it))
+    (when n (forward-word (1- n)))
+    (point)))
 
-(defun bow* ()
-  "Return the POINT at the beginning of the current defun."
-  (save-excursion (bow)))
+(defun bow* (&optional n)
+  "Return the POINT at the beginning of the current word."
+  (save-excursion (bow n)))
 ;;(bow*)
 
-(defun eow* ()
+(defun eow* (&optional n)
   "Return the POINT at the end of the current defun."
-  (save-excursion (eow)))
-;;(eow*)
+  (save-excursion (eow n)))
+;;(eow* 3)
 
 (cl-defun column-at (&optional (point (point)))
   (save-excursion
@@ -577,5 +599,16 @@ Should this method be interactive?"
        (progn ,@body)
      (other-window 1)))
 
-(provide 'mb-utils-buffer)
+(defun comment-region* (beg end &optional arg)
+  (interactive "*r\nP")
+  (if (use-region-p)
+    (comment-region beg end arg)
+    (comment-region (line-beginning-position) (line-end-position) arg)))
 
+(defun uncomment-region* (beg end &optional arg)
+  (interactive "*r\nP")
+  (if (use-region-p)
+    (uncomment-region beg end arg)
+    (uncomment-region (line-beginning-position) (line-end-position) arg)))
+
+(provide 'mb-utils-buffer)
