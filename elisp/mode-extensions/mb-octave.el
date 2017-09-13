@@ -1,5 +1,68 @@
 (require 'octave)
 
+(defun octave-help (fn)
+  "Display the documentation of FN."
+  (interactive (list (octave-completing-read)))
+  (inferior-octave-send-list-and-digest
+   (list (format "help ('%s');\n" fn)))
+  (let ((lines inferior-octave-output-list)
+        (inhibit-read-only t))
+    (when (string-match "error: \\(.*\\)$" (car lines))
+      (error "%s" (match-string 1 (car lines))))
+    (with-help-window octave-help-buffer
+      (princ (mapconcat 'identity lines "\n"))
+      (with-current-buffer octave-help-buffer
+        ;; Bound to t so that `help-buffer' returns current buffer for
+        ;; `help-setup-xref'.
+        (let ((help-xref-following t))
+          (help-setup-xref (list 'octave-help fn)
+                           (called-interactively-p 'interactive)))
+        ;; Note: can be turned off by suppress_verbose_help_message.
+        ;;
+        ;; Remove boring trailing text: Additional help for built-in functions
+        ;; and operators ...
+        (goto-char (point-max))
+        (when (search-backward "\n\n\n" nil t)
+          (goto-char (match-beginning 0))
+          (delete-region (point) (point-max)))
+        ;; File name highlight
+        (goto-char (point-min))
+        (when (re-search-forward "from the file \\(.*\\)$"
+                                 (line-end-position)
+                                 t)
+          (let* ((file (match-string 1))
+                 (dir (file-name-directory
+                       (directory-file-name (file-name-directory file)))))
+            (replace-match "" nil nil nil 1)
+            (insert "`")
+            ;; Include the parent directory which may be regarded as
+            ;; the category for the FN.
+            (help-insert-xref-button (file-relative-name file dir)
+                                     'octave-help-file fn)
+            (insert "'")))
+        ;; Make 'See also' clickable.
+        (with-syntax-table octave-mode-syntax-table
+          (when (re-search-forward "^\\s-*See also:" nil t)
+            (let ((end (save-excursion (re-search-forward "^\\s-*$" nil t))))
+              (while (re-search-forward
+                      "\\s-*\\([^,\n]+?\\)\\s-*\\(?:[,]\\|[.]?$\\)" end t)
+                (make-text-button (match-beginning 1) (match-end 1)
+                                  :type 'octave-help-function)))))
+        (octave-help-mode)))))
+;;(inferior-octave-send-list-and-digest (list (format "help ('%s');\n" "egina_export")))
+
+(defun octave-function-name ()
+  (apply #'buffer-substring-no-properties (last (octave-function-file-p) 2)))
+
+(defun octave-eval-buffer ()
+  "Source current Octave buffer, and show documentation when
+point is in the texinfo region."
+  (interactive)
+  (inferior-octave-send-list-and-digest
+   (list (format "source %s;\n" (buffer-file-name))))
+  (when (octave-in-documentation-p)
+    (octave-help (octave-function-name))))
+
 (cl-defun octave-last-sexp (&optional (point (point)))
   (save-excursion
     (goto-char point)
@@ -239,13 +302,21 @@ This functionality is not well covered by octave-fill-paragraph"
 				       "## @seealso"
 				       "## @deftypefn"))
 	(fill-paragraph-function nil))
-    (fill-paragraph)))
+    (if (use-region-p)
+      (fill-region (region-beginning) (region-end))
+      (fill-paragraph))))
+
+(defun octave-in-main-documentation-p ()
+  "Returns non-nil iff POINT is in the function file comment region."
+  (i-contains (octave-function-file-comment) (point)))
 
 (defun octave-in-documentation-p ()
-  "Returns non-nil iff point is in the Octave documentation.
+  "Returns non-nil iff point is a larger Octave comment section.
 Currently only the documentation of the main function is
 supported. To implement the general version we need to know if we
-are between functions."
+are between functions.
+
+Consider also `octave-function-file-comment'."
   (string-match
      "\\(^##.*\\)*"
      (buffer-substring-no-properties (point-min) (point))))
@@ -263,6 +334,11 @@ are between functions."
       (insert (format "@var{%s}" (delete-and-extract-region beg end))))
     (insert "@var{}")
     (backward-char 1)))
+
+(defun mb-octave-test-buffer-file ()
+  (interactive)
+  (octave-send-string (format "test %s" (buffer-file-name))))
+;;(mb-octave-test-buffer-file)
 
 ;;; shortcuts
 (define-key octave-mode-map (kbd "C-x C-e") 'octave-eval-last-sexp)
