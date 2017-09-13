@@ -343,4 +343,12 @@ returns SEQUENCE unaltered."
 ;;(mapcar #'first (project-sequence '((1 2 3) (4 5 6)) 1 2))
 ;;(project-sequence '("01" "09") (list 1))
 
+(cl-defun insert-sequence (seq1 seq2 &key (start1 0) (end1 start1) (start2 0) end2)
+  "Replace elements from START to END in SEQUENCE with X."
+  (cl-flet ((is (x y z)
+	      (if (listp seq1) (append x y z) (concatenate (type-of x) x y z))))
+    (is (subseq seq1 0 start1) (subseq seq2 start2 end2) (subseq seq1 end1))))
+;;(insert-sequence "15010" "_" :start1 2)
+;;(insert-sequence '(1 2 5) '(3 4) :start1 2)
+
 (provide 'mb-sequences)
