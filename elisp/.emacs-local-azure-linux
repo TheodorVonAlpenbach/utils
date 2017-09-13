@@ -2,6 +2,8 @@
 ;;(set-frame-size (selected-frame) 120 61)
 ;;(set-frame-position (selected-frame) 0 0)
 
+(setf display-time-format "%H:%M %d/%m")
+
 ;; Local elisp load paths
 (setf *local-load-paths* '("~/git/lsconf"))
 
@@ -56,15 +58,21 @@
 	;; chess
 	(,+home-dir+ "projects/chess/libHsmsCore/src/ChAlarmServer.cpp")
 
-	;; CVS entry points
+	;; Git entry points
 	(,+home-dir+ "git/lsconf/lsconf-mode.el")
+	(,+home-dir+ "git/imms/src/octave/egina/egina_rao.m")
+	(,+home-dir+ "git/utils/octave/dealmat.m" :read-only t)
+
+	;; CVS entry points
 	(,+home-dir+ "sources/imms/src/lisp/egina/egina-wave.lisp")
 	(,+home-dir+ "sources/imms/src/lisp/wave/wave.lisp")
+	(,+home-dir+ "sources/CHESS/RemoteAcceleration/ChRemoteAcceleration.h")
 
 	;; remote files (shared with windows)
+	;; Note special treatment of arbeidslog in mb-insert-state-init!
 	(,lsdoc-dir "arbeidslog" :point :end :keyboard :no :time-paragraphs t)
 	(,lsdoc-dir "adresser.txt" :keyboard :no)
-	(,lsdoc-dir "todo.org")
+	(,lsdoc-dir "todo.org" :keyboard :no)
 	(,lsdoc-dir "qtportlog.org" :keyboard :no)
 	(,lsdoc-dir "LS-notes.org" :point :end :keyboard :no :time-paragraphs t)))
 ;;(find-file "/ssh:sil:~/doc")
