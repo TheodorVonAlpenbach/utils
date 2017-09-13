@@ -88,14 +88,19 @@ or NIL if it does not exist."
 ;;(trace line-intersection)
 
 (defmethod line-intersection-coeffs ((s1 segment) (s2 segment))
-  (flet ((x (p) (first (coordinates p))))
+  (flet ((x (p) (first (coordinates p)))
+	 (y (p) (second (coordinates p))))
     (let* ((u (g- (start s2) (start s1)))
 	   (v1 (direction s1))
 	   (v2 (direction s2))
 	   (t2 (line-intersection-coeff2-1 u v1 v2))
-	   (t1 (awhen t2 (/ (+ (* it (x v2)) (x u)) (x v1)))))
+	   (t1 (awhen t2
+		 (if (zerop (x v1))
+		   (/ (+ (* it (y v2)) (y u)) (y v1))
+		   (/ (+ (* it (x v2)) (x u)) (x v1))))))
       (list t1 t2))))
-;;(line-intersection-coeffs (ms 0 0 .9 0) (ms 1 0 1.9 0))
+;;(line-intersection-coeffs (ms 1 2  1 3) (ms 4 5  6 7))
+;;(line-intersection-coeffs (ms 1 0 4 0) (ms 0 1 0 3))
 
 (defmethod line-intersection-coeff2 ((x segment) (y segment))
   "Return the second intersection coefficient of X and Y"
