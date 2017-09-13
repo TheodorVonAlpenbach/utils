@@ -1,0 +1,8 @@
+The purpose of this Wikipedia project is to provide an easy interface
+for quering info from Wikipedia.
+
+The first goal is to rank a list of articles after importance.
+1. Number of lang links
+2. Size of English article. Perhaps also size of German and Japanese
+articles. 
+
