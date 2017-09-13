@@ -1,7 +1,6 @@
 (require 'cl)
 (require 'mb-utils-div)
 (require 'mb-utils-sets)
-;;faculty
 
 (defun string> (string1 string2)
   "Returns non-nil iif string1 > string2. See `string<'"
