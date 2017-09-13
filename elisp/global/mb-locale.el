@@ -1,4 +1,5 @@
-(defun map-string-region (from to beg end) (interactive "*r")
+(defun map-string-region (from to beg end)
+  (interactive "*r")
   (save-excursion
     (save-restriction
       (narrow-to-region beg end)
@@ -15,7 +16,8 @@
    (dolist (curr (project-sequence map (list from-column to-column)))
      (awhen (first curr)
        (map-string-region it (second curr) beg (min end (point-max)))))))
-;;(map-strings-region 1 10 *iso-latin1-encoding* 4 0)
+;;(map-strings-region 1 100 *iso-latin1-encoding* 4 0)
+;;(map-strings-region (point-min) (point-max) *iso-latin1-encoding* 4 0)
 
 (defun replace-iso-latin1-with-7bit-region (beg end) (interactive "*r")
   (map-strings-region beg end map-string-iso-latin1-to-7bit))
@@ -105,7 +107,7 @@
     ("ù" "u" "%F9" 249)
     ("ú" "u" "%FA" 250)
     ("û" "u" "%FB" 251)
-    ("ü" "ue" "%FC" 252)
+    ("ü" "ue" "%FC" 252 "ÃÂ¼")
     ("ý" "y" "%FD" 253)
     ("þ" "th" "%FE" 254)
     ("ÿ" "y" "%FF" 255)))
