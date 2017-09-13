@@ -1,6 +1,9 @@
 (require 'c++-include)
 
-(cl-defun mb-grep-basic (&key (target (thing-at-point 'symbol))
+(cl-defun mb-grep-basic (&key (target (if (use-region-p)
+					(buffer-substring-no-properties
+					 (region-beginning) (region-end))
+					(thing-at-point 'symbol)))
 			      (directories
 			       (list (file-name-directory (buffer-file-name))))
 			      (types (list (file-name-extension (buffer-name)))))
