@@ -49,3 +49,23 @@ non-negative integer")
 
 ;;(loop repeat 100 always (apply #'+1+1+1-p (draw-+1+1+1)))
 
+
+* Issues 
+
+** Rating does not update
+2017-09-19 I created the new user `Erik'. In the beginning his rating
+updated find. But after a crash is alwas reset to default rating.
+Moreover, new created problems also remained at inital rating.
+
+I instrumented maths-report-answer for debugging. No effect.
+
+But I realized the problem could be found in maths-db-report-match. I
+instrumented this function, and while debugging everything went fine:
+both user and task rating was updated in the DB as it should.
+
+Even after re-evaluating maths-db-report-match, rating updating was
+ok.
+
+Conclusion: is seems that loading is not always enough. You have to
+evaluate some of the functions at top level to make things work. I
+guess it is the db macros that causes this eval problem.

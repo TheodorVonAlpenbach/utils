@@ -1,5 +1,6 @@
 (require 'maths-config)
-(let ((macroexp--pending-eager-loads '(skip))) (require 'maths-db-ui))
+(let ((macroexp--pending-eager-loads '(skip)))
+  (require 'maths-db-ui))
 (require 'glicko)
 
 (defconst +maths-default-rating+ (first +glicko-init-rating+))
@@ -277,17 +278,27 @@ of tries is quite limited"
     score))
 
 (defun maths-report-answer (answer time-elapsed)
+  "Return result score based on ANSWER and the TIME-ELAPSED.
+Also, calculate new ratings for current user and task,
+and update the current database concordingly.
+
+Comment: the side effects here are not evident from function
+name. Perhaps this function only should calculate score and new
+ratings, and hand the onus of DB update to the caller"
   (let* ((user (maths-current-user))
 	 (task (maths-current-task))
 	 (score (maths-score task answer time-elapsed))
 	 (old-ratings (extract-ratings user task))
 	 (new-ratings (glicko-new-ratings user task score)))
+    ;; this assert seems a bit spurious to me now
     (assert (not (equal old-ratings new-ratings)))
     (destructuring-bind (updated-user updated-task)
 	(apply #'maths-db-report-match
 	       user task
 	       (iso-date-and-time) answer time-elapsed
 	       new-ratings)
+      ;; why return this from this destruct form?
+      ;; it is never used. Debugging purposes?
       (list updated-user updated-task))
     score))
 

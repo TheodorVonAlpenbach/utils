@@ -37,7 +37,7 @@
 ;;(maths-db-last-user)
 
 (cl-defun maths-db-user-names (&key sans)
-  (ld-select :users :where (not (member* :name (llist sans) :test #'string=))
+  (ld-select :users :where (not (member* :name (listify sans) :test #'string=))
 	     :column :name))
 ;;(maths-db-user-names)
 
