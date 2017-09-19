@@ -271,19 +271,28 @@ Returns nil iif form is not a metadata identifier"
     (cl-flet ((colpos (column) (ld-column-position column table-designator)))
       (when (or order order-by)
 	(let* ((schema (ld-table-schema table)))
-	  (setf rows (sort* (copy-list rows)
-			    (ld-sort-predicate order (nth order-by (ld-schema-column-definitions schema)))
-			    :key (lexical-let ((col (or order-by (ld-colexp (ld-primary-key (ld-schema schema)) schema))))
-				   #'(lambda (row) (elt row col)))))))
+	  (setf rows
+		(sort* (copy-list rows)
+		       (ld-sort-predicate
+			order (nth order-by
+				   (ld-schema-column-definitions schema)))
+		       :key (lexical-let
+				((col (or order-by
+					  (ld-colexp
+					   (ld-primary-key (ld-schema schema))
+					   schema))))
+			      #'(lambda (row) (elt row col)))))))
       (when columns
         (setf rows (project-sequence rows columns)))
       (when column
 	(if columns
-	  (ld-warning "Both keyword argument :columns and :column specified. Discards the latter.")
-	  (setf rows (mapcar #'car (project-sequence rows column)))))
+	  (ld-warning
+	   "Both keyword argument :columns and :column specified. Discards the latter.")
+	  (setf rows (project-sequence rows column))))
       (if format
 	(concat* rows :key #'(lambda (x) (apply #'format format x)))
 	(if copy (copy-tree rows) rows)))))
+;;(ld-select :users :columns (:name))
 ;;(ld-select-1 (ld-table :users))
 
 (cl-defmacro ld-select (table-designator &rest args)
@@ -314,13 +323,14 @@ For order-by we must convert columns to column-positions."
 ;;; Update
 (defun ld-update-1 (table where-function values columns)
   "Skipping properties for now"
-  (assert (= (length (listify values)) (length (llist columns)))
+  (assert (= (length (listify values)) (length (listify columns)))
 	  t "The number of values and the number columns are not the same")
   (let ((rows (copy-if where-function (ld-table-data table))))
     (case (length rows)
       (0 (ld-warning "No single row was selected in :where expression."))
       (1 (let ((row (first rows)))
-	   (ld-set-metadatum (iso-date-and-time) :updated (ld-row-metadata (first rows)))
+	   (ld-set-metadatum (iso-date-and-time)
+			     :updated (ld-row-metadata (first rows)))
 	   (loop for value in (listify values)
 		 for colfun in (listify columns)
 		 do (setf (nth colfun row) value)

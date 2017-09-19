@@ -321,7 +321,7 @@
     (switch-to-buffer buffer-name)
     (erase-buffer)
     (insert (ly-make-source (listify instrument-symbols)
-			    (llist sections)
+			    (listify sections)
 			    global-symbol))
     (indent-region (point-min) (point-max))
     (write-file path nil)

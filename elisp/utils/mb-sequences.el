@@ -317,7 +317,6 @@ PROJECTION is either a projection element, a sequence of
 projection object, or T. See project-1 for a description of a
 projection object.
 
-
 If PROJECTION is a single projection object the function will
 return the result of applying the projection object on SEQUENCE.
 
@@ -347,9 +346,9 @@ returns SEQUENCE unaltered."
   "Project multi-dimensional SEQUENCE according to PROJECTION-ARGS."
   (coerce (mapcar #'(lambda (x) (project x projection)) sequence)
 	  (type-of-super sequence)))
-;;(project-sequence '("01" "09") 1)
-;;(mapcar #'first (project-sequence '((1 2 3) (4 5 6)) 1 2))
-;;(project-sequence '("01" "09") (list 1))
+;;(project-sequence '("012" "098") '(0 2))
+;;(mapcar #'first (project-sequence '((1 2 3) (4 5 6)) '(1 2)))
+;;(project-sequence '((1 "Mats" 'qwe) (2 "Ludvik" 'ewq)) 1)
 
 (cl-defun insert-sequence (seq1 seq2 &key (start1 0) (end1 start1) (start2 0) end2)
   "Replace elements from START to END in SEQUENCE with X."
