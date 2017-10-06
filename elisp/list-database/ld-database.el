@@ -17,11 +17,25 @@
     (push table (ld-database-tables db))))
 ;;(ld-create-database :maths :schemas (mapcar #'ld-schemadef->schema *maths-db-schema-definitions*))
 
+(cl-defun ld-set-database (ld-database &optional force)
+  "Change `*current-database*' in a more safe way than with mere
+setf You should always use this function when changing current
+database."
+  (when (or (null *current-database*)
+	    force
+	    (not (yes-or-no-p
+		  (format "Current database is %s, which suggests
+that an application is running, and that there are
+unsaved changes. Do you want to abort now to save your
+application" (ld-database-name *current-database*)))))
+    (setf *current-database* ld-database)))
+
 (cl-defun ld-create-database (keyword &key (name (keyword-name keyword)) schemas
 				    (tables (mapcar #'ld-create-table schemas)))
   (let ((db (list :database (list keyword) name nil)))
     (dolist (table tables db) 
       (ld-add-table table db))))
+(cl-indent '(ld-create-database) 'prog1)
 ;;(ld-create-database :maths :schemas (mapcar #'ld-make-schema *maths-db-schemas*))
 
 (defun ld-database-p (obj)
