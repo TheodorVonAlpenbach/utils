@@ -298,12 +298,21 @@ Returns nil iif form is not a metadata identifier"
 (cl-defmacro ld-select (table-designator &rest args)
   "For :where and :column(s) we must convert the following expression by substituting column expressions with row extracting lambdas.
 For order-by we must convert columns to column-positions."
-  `(ld-select-1 (ld-table ,table-designator)
-		:where (and ',(getf args :where) (ld-expression ,(popf args :where) ,table-designator))
-		:columns (ld-expressions ,(popf args :columns) ,table-designator)
-		:column (and ',(getf args :column) (ld-expression ,(popf args :column) ,table-designator))
-		:order-by (and ',(getf args :order-by) (ld-column-expression->number ,(popf args :order-by) ,table-designator nil))
-		,@args))
+  `(ld-select-1
+    (ld-table ,table-designator)
+    :where (and ',(getf args :where)
+		(ld-expression ,(popf args :where)
+			       ,table-designator))
+    :columns (ld-expressions ,(popf args :columns)
+			     ,table-designator)
+    :column (and ',(getf args :column)
+		 (ld-expression ,(popf args :column)
+				,table-designator))
+    :order-by (and ',(getf args :order-by)
+		   (ld-column-expression->number
+		    ,(popf args :order-by)
+		    ,table-designator nil))
+    ,@args))
 ;;(macroexpand '(ld-select :users))
 ;;(ld-select :users :columns ((funcall (lambda (x) (* 2 x)) (:id)) (:name)) :format "doubled id is %s, and name his name shall be called %s")
 ;;(ld-select :users :columns (:rating))
@@ -339,7 +348,7 @@ For order-by we must convert columns to column-positions."
 
 (defmacro ld-update (table-designator where vals columns)
   "For some very strange reason, this macro fails if VALS is renamed to VALUES.
-No, if fact look up variable `values'. This is defined in core
+No, in fact, look up variable `values'. This is defined in core
 Emacs! So any Emacs macro should avoid using this symbol.
 But still I really don't understand the behaviour of values in a macro."
   `(ld-update-1 ',(ld-table table-designator)
