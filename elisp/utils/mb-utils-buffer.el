@@ -7,6 +7,10 @@
   (max (point) (mark force)))
 ;;(region-end*)
 
+(defun region (&optional force)
+  (cons (region-beginning*) (region-end*)))
+;;(region)
+
 (defun mark-region (beg-or-region &optional end)
   (if (not end)
     (apply #'mark-region beg-or-region)
