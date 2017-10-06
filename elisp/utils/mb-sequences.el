@@ -2,6 +2,14 @@
   (apply #'reduce #'+ sequence cl-keys))
 ;;(sum '(1 2 3) :start 1 :initial-value 123)
 
+(cl-defun product (sequence &rest cl-keys)
+  (apply #'reduce #'* sequence cl-keys))
+;;(product '(1 2 3) :start 1 :initial-value 2)
+
+(cl-defun product-a-b (a b)
+  (product (a-b a b)))
+;;(product-a-b 1 4)
+
 (defun type-of-super (sequence)
   (typecase sequence
     (cons 'list)
