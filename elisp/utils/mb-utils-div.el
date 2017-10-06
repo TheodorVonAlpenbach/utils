@@ -1,7 +1,8 @@
 (require 'cl)
 (require 'mb-indent)
 
-(cl-defun tmap-n (item n table &key (test #'eq)) (find item table :key #'(lambda (row) (nth n row)) :test test))
+(cl-defun tmap-n (item n table &key (test #'eq))
+  (find item table :key #'(lambda (row) (nth n row)) :test test))
 (cl-defun tmap-0 (item table &key (test #'eq)) (tmap-n item 0 table :test test))
 (cl-defun tmap-1 (item table &key (test #'eq)) (tmap-n item 1 table :test test))
 (cl-defun tmap-0-1 (item table &key (test #'eq)) (tmap-n-m item 0 1 table :test test))
@@ -62,6 +63,7 @@ If no arguments is given, t is returned."
 ;;(eq* 2 1 2 2 )
 
 (defun neq (x y) (not (eq x y)))
+(defun neql (x y) (not (eql x y)))
 
 (defun neq* (&rest args)
   "Returns T if not all ARGS are EQ, else NIL."
@@ -488,6 +490,7 @@ etc. NB! Check if obsolete!"
 ;;(struct-type (make-qwe))
 
 (defun equal* (&rest args)
+  "Deprecated"
   (message "Warning! this function is deprecated. Use `all-equal' instead")
   (apply #'all-equal args))
 ;;(equal* 1 1)
