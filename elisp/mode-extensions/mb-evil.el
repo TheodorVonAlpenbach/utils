@@ -91,6 +91,8 @@ STATE can take the same values as in `evil-define-key'."
 (evil-key-chord-define '(normal visual motion) global-map "uu" 'undo-tree-redo)
 (evil-key-chord-define '(normal visual motion) global-map "vn" 'ido-switch-buffer)
 
+(define-key evil-normal-state-map "gp" 'TeX-next-error)
+
 (evil-define-motion evil-goto-line-keep-column (count)
   "Go to the first non-blank character of line COUNT.
 By default the last line."
@@ -203,6 +205,7 @@ By default the last line."
   (define-key insert-map "k" #'browse-kill-ring)
   (define-key insert-map "t" #'insert-time)
   (define-key insert-map "u" #'uncomment-region*)
+  (define-key insert-map "\"" #'(lambda (n) (interactive "P") (mb-surround "\"" (or n 1))))
   (define-key insert-map "@" #'insert-texinfo-var))
 
 (require 'mb-metafont)
@@ -329,7 +332,7 @@ By default the last line."
   (case major-mode
     (emacs-lisp-mode (eval-region start end printflag read-function))
     (python-mode (python-shell-send-region start end nil))
-    (mbscilab-mode (mbscilab-eval-region start end))
+    ((mbscilab-mode scilab-mode) (mbscilab-eval-region start end))
     (sh-mode (sh-execute-region start end))
     (latex-mode (TeX-command-run-all-region))
     (octave-mode (octave-send-region start end))))
@@ -526,5 +529,10 @@ occurence of 'delete' replaced with 'yank'."
 
 (defun mb-surround-word (left n)
   (mb-surround-region (cons (bow*) (eow* n)) left 1))
+
+(defun mb-surround (left n)
+  (if (use-region-p)
+    (mb-surround-region (region) left n)
+    (mb-surround-word left n)))
 
 (provide 'mb-evil)
