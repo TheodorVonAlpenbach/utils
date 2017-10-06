@@ -115,5 +115,3 @@ It returns the updates of user and task as a pair"
 ;;(ld-select :users :columns (:name (round :rating) (round :RD)) :order-by :rating)
 
 (provide 'maths-db-ui)
-;;(require 'maths-db-ui)
-
