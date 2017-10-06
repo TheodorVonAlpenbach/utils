@@ -1,0 +1,20 @@
+* Plan
+  
+Most elements are like maths. Differences:
+UI
+Task selection: here we want the most difficult tasks, own rating does
+not count
+Pictures must be possible, not sure how to do it yet, though
+Hints:
+Alternatives
+Initials
+Should be possible to overrule: add you own answer to solution
+Should be easy to edit question on the fly
+
+Importing modules
+starting with excel
+
+o Create db
+o Create test regime
+x Design UI
+- Implement UI
