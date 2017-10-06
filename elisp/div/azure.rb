@@ -19,6 +19,21 @@ require "optparse"
 ## Example of command-line application in Ruby
 ## http://blog.honeybadger.io/writing-command-line-apps-in-ruby/
 
+## Run examples:
+## 1. list content of container (in this case container "lightstructures"):
+## $ ruby azure.rb list lightstructures
+##
+## 2. upload file ~/mydata/test.csv to container:
+## $ ruby azure.rb upload lightstructures ~/mydata/test.csv
+##
+## 3. download file from container (not implemented!)
+## $ ruby azure.rb download lightstructures test.csv
+## $ ruby azure.rb download lightstructures -o ~/tmp/localtest.csv test.csv
+##
+## 4. delete file from container (not implemented!)
+## $ ruby azure.rb delete lightstructures test.csv
+
+
 ## These values may also be stored in environment variables
 ## AZURE_STORAGE_ACCOUNT and AZURE_STORAGE_ACCESS_KEY
 Azure.config.storage_account_name = "nosdev"
