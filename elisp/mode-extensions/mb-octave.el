@@ -318,8 +318,8 @@ are between functions.
 
 Consider also `octave-function-file-comment'."
   (string-match
-     "\\(^##.*\\)*"
-     (buffer-substring-no-properties (point-min) (point))))
+     "\\(^##.*\\)"
+     (line-string)))
 
 (defun mb-octave-fill-paragraph ()
   (interactive)
