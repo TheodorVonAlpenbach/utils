@@ -30,7 +30,7 @@
     ((ld-identifier-p table-designator :table) (ld-find-table table-designator))
     ((ld-identifier-p table-designator :column) (ld-find-table (butlast table-designator)))
     ((ld-column-p table-designator) (ld-table (ld-identifier table-designator)))))
-;;(ld-table :users)
+;;(ld-table :user)
 
 (defun ld-schema (schema-designator)
   "Almost a corrollary to `ld-table'"
