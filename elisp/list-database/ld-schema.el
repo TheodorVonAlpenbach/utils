@@ -77,9 +77,10 @@ to a legal scheme structure."
 	 (ld-find-column-definition
 	  (ld-make-column-identifier column-designator schema-designator)
 	  schema-designator))))
+;;(ld-find-column-definition :name (ld-table :users))
 
 (defun ld-column-designators->coldefs (column-designators schema-designator)
   (mapcar (bind #'ld-find-column-definition schema-designator) column-designators))
-;;(ld-column-designators->coldefs '(:name :age) (ld-table :users))
+;;(ld-column-designators->coldefs '(:name :rating) (ld-table :users))
 
 (provide 'ld-schema)
