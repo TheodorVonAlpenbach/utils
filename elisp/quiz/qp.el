@@ -201,6 +201,7 @@
     (burums "Fru Burums (Oslo)" mandag (1 5) "Burums") ;;highbury style
     (burums "Fru Burums (Oslo)" mandag "\\(.*\\) \\([[:digit:]]+\\)$" "Burums") 
     (vertshuset "Vålerenga Verthus (Oslo)" tirsdag (5 6 0) "Vålerenga")
+    (highbury "Highbury (Oslo)" torsdag (0 :last) "Highbury")
     (highbury "Highbury (Oslo)" torsdag
 	      ,(if (eql (emacs-os) :linux) '(0 4)  '(1 5)) "Highbury")
     (highbury "Highbury (Oslo)" torsdag (0 1) "Highbury")
@@ -221,7 +222,9 @@ calling for a greater number of columns than max-column."
   (cl-remove-duplicates
    (if (integerp max-column)
      (cl-remove-if #'(lambda (x)
-		       (and (listp x) (> (reduce #'max x) max-column)))
+		       (and (listp x)
+			    (second x) (neql (second x) :last)
+			    (> (reduce #'max x) max-column)))
 		   +qp-customers+ :key #'qp-customer-columns)
      +qp-customers+)
    :key #'first :from-end t))
@@ -273,7 +276,10 @@ Otherwise it is column based."
   (if (qp-customer-data-regexp-based-p customer)
     (string-match* (qp-customer-columns customer) (first entry) :num '(1 2))
     (list (nth (qp-customer-team-column customer) entry)
-	  (nth (qp-customer-score-column customer) entry))))
+	  (let ((sc (qp-customer-score-column customer)))
+	    (if (eql sc :last)
+	      (last-elt entry)
+	      (nth sc entry))))))
 
 (defun qp-customer-round (customer entry)
   (let ((column (qp-customer-round-column customer)))
