@@ -3,9 +3,7 @@
   (cond
     ((zerop n) 1)
     ((minusp n) (error "FACTORIAL is only valid for non-negative integers."))
-    (t (loop for i from m to n
-	     for res = m then (* res i)
-	     finally return res))))
+    (t (product-a-b m n))))
 ;;(mapcar #'factorial (0-n 10))
 
 (cl-defun derangement (n &optional (!0 1) (!1 0))
@@ -47,6 +45,13 @@ For the definition of !N, see https://en.wikipedia.org/wiki/Derangement"
 			finally return numerator-factors)))
     (apply #'* (if float-result (mapcar #'float factors) factors))))
 ;;(binomial-coefficient 14 10)
+
+(defun binomial-coefficient (n m &optional float-result)
+  "Returns n!/(m!*(n-m)!"
+  (let ((m* (min m (- n m))))
+    (/ (product-a-b (1+ (- n m*)) n)
+       (product-a-b 2 m*))))
+;;(binomial-coefficient 26 9)
 
 (defconst uefa-groups
   '(((PSG fra) (Porto por))
@@ -123,8 +128,8 @@ See also `uefa-possible-opponents-gen"
 	   (uefa-same-country-p winner runner-up groups))))
 ;;(uefa-possible-opponents-p 'Barcelona 'Real-Madrid)
 
-(copy-if #'(lambda (runner-up) (uefa-possible-opponents-p winner runner-up groups))
-	   (uefa-runner-ups groups))
+;; (copy-if #'(lambda (runner-up) (uefa-possible-opponents-p winner runner-up groups))
+;; 	   (uefa-runner-ups groups))
 ;;(uefa-possible-opponents 'Barcelona)
 
 (cl-defun uefa-possible-draws (winners-left runner-ups-left &optional (groups uefa-groups))
