@@ -29,11 +29,16 @@
     (scilab-command)))
 ;;(scilab-command-line-string)
 
+(defconst +scilab-init-files+
+  (list
+   (list :viewer "~/sources/SciLab/toolboxes/LSSensorViewer/macros/LSSensorViewer.ini")
+   (list :no-init nil)))
+
 (defconst +scilab-init-file+
-  ;; old path "C:\\Users\\MBe.azure\\AppData\\Roaming\\Scilab\\scilab-5.5.2\\scilab.ini"
-  (let ((path "~/sources/SciLab/toolboxes/LSSensorViewer/macros/LSSensorViewer.ini"))
+  (awhen (second (assoc :no-init +scilab-init-files+))
     (if (eql (emacs-os) :linux)
-      path (cygpath path))))
+      path
+      (cygpath path))))
 ;;(cygpath "~/sources/SciLab/toolboxes/LSSensorViewer/macros/LSSensorViewer.ini")
 
 (defun mbscilab-buffer ()
@@ -234,6 +239,8 @@ debug mode no longer triggers the buffer's modified mark."
   (when (file-exists-p +scilab-tags-path+)
     (visit-tags-table +scilab-tags-path+ t))
 
+  (setq-local comment-start "//")
+  (setq-local comment-end "")
   (setq-local c-electric-flag nil) ;;todo refine c-mode instead
   (setq indent-line-function 'scilab-indent-line)
   (setq indent-region-function nil) ;; inhibit c-indent-region
