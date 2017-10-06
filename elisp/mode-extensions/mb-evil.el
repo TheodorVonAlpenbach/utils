@@ -67,7 +67,7 @@ STATE can take the same values as in `evil-define-key'."
 (define-key global-map "\M-x" 'execute-extended-command)
 (define-key evil-normal-state-map "\M-x" 'execute-extended-command)
 
-(evil-define-key '(normal visual) global-map " " 'scroll-up-command)
+(define-key evil-normal-state-map " " 'scroll-up-command)
 (define-key evil-normal-state-map [return] 'scroll-down-command)
 (define-key evil-normal-state-map "ga" 'what-cursor-position)
 
