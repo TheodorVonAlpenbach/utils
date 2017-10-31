@@ -101,7 +101,8 @@
 		     (regexp-opt '("private" "public")))
 	     "\\1:\n")
 	   ("^[\t]+" " ") ;; remove tab indents; this will be indented properly later
-	   ("{[[:space:]]+}" "{}"))))
+	   ("{[[:space:]]+}" "{}")
+	   ("\\_<ConfigKey\\_>" "configKey"))))
     (save-excursion
       (loop for (re s) in (if (qt3-p)
 			    ;; remove substitutions tagged with v > 3
@@ -176,14 +177,14 @@
   (let ((regexp (format "\\_<%s\\_>" old)))
     (save-excursion
       (goto-char (point-min))
-      (while (re-search-forward regexp nil t)
-	(replace-match new t t)))))
+      (let ((case-fold-search nil))
+	(while (re-search-forward regexp nil t)
+	 (replace-match new t t))))))
 
 (cl-defun chess-memberize-init (&optional (prefix "m_") no-query-p)
   "Prepend 'm_' on all identifiers in buffer equal to identifier at point.
 If no-query-p is nil, the function will ask for confirmation
 before carrying out its actions."
-  (interactive)
   (let* ((old (substring-no-properties (symbol-name (symbol-at-point))))
 	 (new (format "%s%s" prefix old)))
     (when (or no-query-p
