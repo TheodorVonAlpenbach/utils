@@ -206,6 +206,7 @@ By default the last line."
   (define-key insert-map "t" #'insert-time)
   (define-key insert-map "u" #'uncomment-region*)
   (define-key insert-map "\"" #'(lambda (n) (interactive "P") (mb-surround "\"" (or n 1))))
+  (define-key insert-map "\\" #'(lambda (n) (interactive "P") (mb-undo-surround (or n 1))))
   (define-key insert-map "@" #'insert-texinfo-var))
 
 (require 'mb-metafont)
@@ -241,8 +242,8 @@ By default the last line."
   (case major-mode
     ((emacs-lisp-mode mb-lisp-mode)
      (save-excursion
-       (evil-cp-up-sexp 1)
-       (forward-char 1)
+       (backward-up-list 1)
+       (forward-sexp 1)
        (mb-eval-last-sexp)))
     (octave-mode (octave-send-block))))
 
@@ -534,5 +535,16 @@ occurence of 'delete' replaced with 'yank'."
   (if (use-region-p)
     (mb-surround-region (region) left n)
     (mb-surround-word left n)))
+
+;; Undo surround: strictly assume surround is 1 char wide on both
+;; sides
+(defun mb-undo-surround (n)
+  (if (use-region-p)
+    (error "Undo surround region not implemented!")
+    (save-excursion
+      (bow)
+      (backward-delete-char n)
+      (eow)
+      (delete-char n))))
 
 (provide 'mb-evil)
