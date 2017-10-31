@@ -426,14 +426,15 @@ in the same position."
 	finally return (list list1* list2*)))
 ;;(filter-duplicates '(1 2 3 4) '(1 4 2 3) :test #'(lambda (x y) (eql (oddp x) (oddp y)))) ;;filters equal parity
 
-(cl-defun list< (list1 list2 &key (test #'<) (key #'identity))
-  "Lexical list comparison"
+(cl-defun list<-old (list1 list2 &key (test #'<) (key #'identity))
+  "Lexical list comparison. This is obsolete, and WRONG"
   (loop for x1 in list1
 	for x2 in list2
 	for y1 = (funcall key x1)
 	for y2 = (funcall key x2)
 	if (funcall test y1 y2) return t
 	if (funcall test y2 y1) return nil))
+;;(list< '("n") '("n" "c1") :test #'string<)
 ;;(list< '( (a a) (a)  (b b)  (a) (b)) '((b b) (a) (b) (a a) (a)) :key #'length)
 
 (cl-defun list> (list1 list2 &rest args)
@@ -573,5 +574,66 @@ The function assumes that there are no duplicates in INTEGERS."
 			       (or (= (1+ x) y)
 				   (= (1- x) y))))))
 ;;(group-consequtive-integers '(1 2 3 6 7 8 11))
+
+(cl-defun relations->tree (relations &key (test #'eql))
+  "Given list RELATIONS, return a list of family trees.
+A RELATION is a pair (X Y), meaning that X is the parent of the
+child Y. The resulting FAMILY-TREE is a CONS based tree where
+each subnode SN of a node N is a relation in list RELATIONS"
+  (let ((nodes (mapcar #'list
+		 (cl-remove-duplicates (flatten relations) :test test))))
+    ;; the loop builds child node lists and returns non-top nodes
+    (let ((x (loop for (p c) in relations
+		   for pn = (cl-find p nodes :key #'car :test test)
+		   for cn = (cl-find c nodes :key #'car :test test)
+		   do (push cn (cdr pn))
+		   collect cn)))
+      ;; remove non-top nodes from NODES, and we are home
+      (cl-set-difference nodes x))))
+;;(relations->tree '((a b) (a c) (c d) (b e)))
+;;(relations->tree '((a b) (a c) (c d) (b e) (f g)))
+
+(cl-defun tree-member (x tree &key (test #'eql) key from-end)
+  "Return first subtree in TREE having X has its top node"
+  (if (funcall test x (if key (funcall key (car tree)) (car tree)))
+    tree
+    (loop for cn in (if from-end (reverse (cdr tree)) (cdr tree))
+	  if (tree-member x cn :test test :key key :from-end from-end)
+	  return it)))
+;;(tree-member 'b '(a (b (c)) (b (d))) :from-end t)
+
+(cl-defun prune-tree-to-target (x tree &key (test #'eql) key)
+  "Remove all nodes in FAMILY-TREE not having X as successor. Destructive."
+  (when (tree-member x tree)
+    (cons (car tree)
+	  (loop for sn in (cdr tree)
+		if (prune-tree-to-target x sn)
+		collect it))))
+;;(prune-tree-to-target 'b '(a (b (c)) (d (b))))
+
+(cl-defun find-predecessor-tree (x trees
+				 &key (test #'eql) key from-end tree-from-end)
+  "Remove all nodes in FAMILY-TREE not having X as successor."
+  (loop for ft in (if from-end (reverse trees) trees)
+	if (tree-member x ft :test test :key key :from-end tree-from-end)
+	return it))
+;;(predecessor-tree 'e '((f (g)) (a (c (d)) (b (e)))))
+
+(cl-defun find-successor-tree (x trees
+				 &key (test #'eql) key from-end tree-from-end)
+  "Return first subtree in TREES which has X as the top node."
+  (loop for ft in (if from-end (reverse trees) trees)
+	if (tree-member x ft :test test :key key :from-end tree-from-end)
+	return it))
+;;(find-successor-tree 'a '((b) (a (c (d)) (b (e)))))
+
+(defun tree-leaves (tree)
+  (when tree
+    (aif (cdr tree)
+      (loop for x in it append (tree-leaves x))
+      (list (car tree)))))
+;;(tree-leaves '(a))
+;;(tree-leaves '(a))
+;;(tree-leaves '(a (c (d (f))) (b (e))))
 
 (provide 'mb-lists)
