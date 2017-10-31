@@ -615,4 +615,24 @@ Should this method be interactive?"
     (uncomment-region beg end arg)
     (uncomment-region (line-beginning-position) (line-end-position) arg)))
 
+;;;; Save as for images etc
+(defun save-as-1 (filename)
+  "Write current buffer file to FILENAME, and rename buffer.
+It assumes that there will be no write conflicts."
+  (copy-file (buffer-file-name) new)
+  (set-visited-file-name new)
+  (set-buffer-modified-p nil))
+
+(defun save-as ()
+  "Generalization of `write-to': also handles png-files etc."
+  (interactive)
+  (let ((new (read-file-name "Save as: ")))
+    (if (file-exists-p new)
+      (when (yes-or-no-p
+	     (format "File %s already exists. Do you really want to overwrite? "
+	      new))
+	(delete-file new)
+	(save-as-1 new))
+      (save-as-1 new))))
+
 (provide 'mb-utils-buffer)
