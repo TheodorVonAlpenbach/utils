@@ -1,6 +1,13 @@
 (require 'ert)
 (require 'mb-sequences)
 
+(ert-deftest test-list< ()
+  "Test of list<"
+  ;; test types
+  (should (list< '("n") '("n" "c1") :test #'string<))
+)
+;;(string< "n" "o")
+
 (ert-deftest test-copy-if ()
   "Test of copy-if"
   ;; test types
