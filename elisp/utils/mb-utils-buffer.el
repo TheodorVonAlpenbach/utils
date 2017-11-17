@@ -101,37 +101,6 @@ TODO: some magic with trailing newline."
     (goto-char old-point)
     result))
 
-(cl-defun buffer-substring*-old (&key from-line to-line from-point to-point from-paragraph to-paragraph with-properties)
-  "Generalized version of buffer-substring-no-properties.
-  Delimiters are set using either line, point or paragraph. These
-  entities are treated exclusive, so, for instance, if TO-LINE is
-  set, then neither TO-POINT nor TO-PARAGRAPH should be set for
-  clarity. However, it is indeed allowed, but the entity actually
-  chosen by the method is the first set of line, point,
-  paragraph.
-
-  The from and to parts may take different entities. For
-  instance, setting to-line and from-point is totally legal.
-
-  The values are integers, which may be negative. If negative, it
-  is counted backwards from end of buffer. This is also a hint to
-  the algorithm to search from end, which for large buffers is
-  faster.
-
-  If no from entity is set, the from point is point-min. If no to
-  entity is set, the to point is set to point-max."
-  (let ((a (or (and from-line (buffer-line-point from-line))
-	       from-point
-	       (and from-paragraph (buffer-paragraph-point from-paragraph))
-	       (point-min)))
-	(b (or (and to-line (buffer-line-point to-line))
-	       to-point
-	       (and to-paragraph (buffer-paragraph-point to-paragraph))
-	       (point-max))))
-    (if with-properties
-      (buffer-substring a b)
-      (buffer-substring-no-properties a b))))
-
 (cl-defun rpoint (&optional (point (point)))
   "Same as `point' but accepts negative argument POINT. If POINT
 is -1, the last point in buffer is returned, if -2 the last but
