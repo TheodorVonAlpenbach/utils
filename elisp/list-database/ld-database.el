@@ -21,14 +21,18 @@
   "Change `*current-database*' in a more safe way than with mere
 setf You should always use this function when changing current
 database."
-  (when (or (null *current-database*)
-	    force
-	    (not (yes-or-no-p
-		  (format "Current database is %s, which suggests
+  (if (null *current-database*)
+    (setf *current-database* ld-database)
+    (if (or force
+	    (yes-or-no-p
+	     (format "Current database is %s, which suggests
 that an application is running, and that there are
 unsaved changes. Do you want to abort now to save your
-application" (ld-database-name *current-database*)))))
-    (setf *current-database* ld-database)))
+application" (ld-database-name *current-database*))))
+      (progn
+	(ld-save-database ld-database)
+	(setf *current-database* ld-database))
+      (message "Did not set database."))))
 
 (cl-defun ld-create-database (keyword &key (name (keyword-name keyword)) schemas
 				    (tables (mapcar #'ld-create-table schemas)))
