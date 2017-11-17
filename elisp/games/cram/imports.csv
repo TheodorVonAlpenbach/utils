@@ -1,3 +1,19 @@
 source-id;question;answer;picture;alternatives;hints;difficulty
 csv-ref-1;Hva heter hovedstaden i Kina?;Beijing;;;;3
-csv-ref-2;Hva heter hovedstaden i Albania?;Tirana;;;;3
+csv-ref-2;Hva heter hovedstaden i Sverige?;Stockholm;;;;3
+csv-ref-3;Hva heter hovedstaden i Finland?;Helsinki;;;;3
+csv-ref-4;Hva heter hovedstaden i Danmark?;København;;;;3
+csv-ref-5;Hva heter hovedstaden i Tyskland?;Berlin;;;;3
+csv-ref-6;Hva heter hovedstaden i Italia?;Roma;;;;3
+csv-ref-7;Hva heter hovedstaden i Spania?;Madrid;;;;3
+csv-ref-8;Hva heter hovedstaden i Portugal?;Lisboa;;;;3
+csv-ref-9;Hva heter hovedstaden i Sveits?;Bern;;;;3
+csv-ref-10;Hva heter hovedstaden i Nederland?;Amsterdam;;;;3
+csv-ref-11;Hva heter hovedstaden i Belgia?;Brussel;;;;3
+csv-ref-12;Hva heter hovedstaden i Latvia?;Riga;;;;3
+csv-ref-13;Hva heter denne jævla kroatiske skuespilleren?;(Rade) Šerbedžija;;Serbedzija;;4
+csv-ref-14;Hvem skrev filmmusikk til både Das Boot og The Never Ending Story?;(Klaus) Doldinger;;;;4
+csv-ref-15;Hvem har siden 2015 vært programleder for The Daily Show på kanalen Comedy Central?;(Trevor) Noah;;;;4
+csv-ref-16;På hvilker amerikansk TV-kanal vises The Daily Show?;The Comedy Comedy;;;;4
+csv-ref-17;Hva heter Egypts president?;(Abdel Fattah) el-Sisi;;;;3
+csv-ref-18;Hva heter presidenten i Polen?;(Abdel Fattah) el-Sisi;;;;3
