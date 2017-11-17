@@ -26,10 +26,14 @@
   "Convert TABLE-DESIGNATOR to a ld-table object"
   (cond 
     ((ld-table-p table-designator) table-designator)
-    ((keywordp table-designator) (ld-table (ld-make-table-identifier table-designator)))
-    ((ld-identifier-p table-designator :table) (ld-find-table table-designator))
-    ((ld-identifier-p table-designator :column) (ld-find-table (butlast table-designator)))
-    ((ld-column-p table-designator) (ld-table (ld-identifier table-designator)))))
+    ((keywordp table-designator)
+     (ld-table (ld-make-table-identifier table-designator)))
+    ((ld-identifier-p table-designator :table)
+     (ld-find-table table-designator))
+    ((ld-identifier-p table-designator :column)
+     (ld-find-table (butlast table-designator)))
+    ((ld-column-p table-designator)
+     (ld-table (ld-identifier table-designator)))))
 ;;(ld-table :user)
 
 (defun ld-schema (schema-designator)
