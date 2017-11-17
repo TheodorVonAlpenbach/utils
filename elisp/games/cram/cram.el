@@ -2,79 +2,96 @@
 (require 'cram-backend)
 (require 'cram-common)
 
-(defun cram-format-task (operation arguments &optional solution)
-  (format "%d %s %d = %s" 
-    (first arguments)
-    (cram-operator-string (cram-operator operation))
-    (second arguments)
-    (or solution "")))
-;;(cram-format-task :addition '(1 1) 2)
+(defun cram-format-problem (question &optional answer)
+  (format "%s\n" question))
+;;(cram-format-problem "qwe")
 
-(defun cram-format-match (user task)
+(defun cram-format-match (user problem)
   (concat
-   (format "Your rating: %d (RD = %d)\n" (cram-user-rating user) (cram-user-RD user))
-   (format "Task rating: %d (RD = %d)\n" (cram-task-rating task) (cram-task-RD task))
+   (format "Your rating: %d (RD = %d)\n"
+     (cram-user-rating-e user) (cram-user-rating-d user))
+   (format "Problem rating: %d (RD = %d)\n"
+     (cram-problem-rating-e problem) (cram-problem-rating-d problem))
    "\n"
-   (format "Problem #%d:\n" (cram-task-id task))
-   (cram-format-task (cram-task-operation task) (cram-task-arguments task))))
+   (format "Problem #%d:\n" (cram-problem-id problem))
+   (cram-format-problem (cram-problem-question problem))))
+;;(cram-format-match (cram-current-user) (first (cram-db-problems)))
 
 (cl-defun cram-new (&optional (level 1))
-  "Inserts new match, and starts the clocks"
+  "Insert new problem and start the clocks"
   (let ((user (or (cram-current-user)
 		  (cram-register-new-user))))
     (erase-buffer)
-    (insert (cram-format-match user (cram-draw-task :rating (cram-user-rating user))))
-    (time-set-reference)))
+    (cram-problem-mode)
+    (insert (cram-format-match
+	     user
+	     (cram-draw-problem :method :worst
+				:rating (cram-user-rating user))))
+    (time-set-reference)
+    (evil-emacs-state)))
+;;(cram-draw-problem)
 
-(defun cram-read-answer ()
-  "Parses the submitted answer"
-  (save-excursion
-    (backward-char 1)
-    (number-at-point)))
+(defun cram-read-response ()
+  "Parses the submitted response"
+  (string-trim (line-string)))
 
-(cl-defun short-judgement (score answer solution &optional (correct-color "ForestGreen") (error-color "red"))
-  (if (= answer solution)
-    (format "%s Your score was %.2f" (propertize "Correct!" 'face (list :foreground correct-color :weight 'bold)) score)
-    (format "%s Correct answer is %S" (propertize "Incorrect!" 'face (list :foreground error-color :weight 'bold)) solution)))
+(cl-defun short-judgement (score response answer
+				 &optional (correct-color "ForestGreen")
+				 (error-color "red"))
+  (if (equal response answer)
+    (format "%s Your score was %.2f"
+      (propertize "Correct!" 'face
+		  (list :foreground correct-color :weight 'bold)) score)
+    (format "%s Correct response is %S"
+      (propertize "Incorrect!" 'face
+		  (list :foreground error-color :weight 'bold)) answer)))
 
-(cl-defun long-judgement (answer time solution score old-ratings new-ratings)
+(cl-defun long-judgement (response time answer score old-ratings new-ratings)
   (let ((diff-ratings (maptree* #'- new-ratings old-ratings)))
-    (destructuring-bind ((user-rating user-RD) (task-rating task-RD))
+    (destructuring-bind ((user-rating user-RD) (problem-rating problem-RD))
 	(maptree #'round new-ratings)
-      (destructuring-bind ((user-rating-diff user-RD-diff) (task-rating-diff task-RD-diff))
+      (destructuring-bind ((user-rating-diff user-RD-diff)
+			   (problem-rating-diff problem-RD-diff))
 	  (maptree #'round diff-ratings)
-	(concat "\n\n"
-		(short-judgement score answer solution) "\n"
-		(format "Time spent: %.1f seconds\n" (/ time 1000.0))
-		"\n"
-		(format "Your new rating is %d (%d)\n" user-rating user-rating-diff)
-		(format "Your new RD is %d (%d)\n" user-RD user-RD-diff)
-		(format "Task's new rating is %d (%d)\n" task-rating task-rating-diff)
-		(format "Task' new RD is %d (%d)\n" task-RD task-RD-diff))))))
+	(concat
+	  "\n\n"
+	  (short-judgement score response answer) "\n"
+	  (format "Time spent: %.1f seconds\n" (/ time 1000.0))
+	  "\n"
+	  (format "Your new rating is %d (%d)\n" user-rating user-rating-diff)
+	  (format "Your new RD is %d (%d)\n" user-RD user-RD-diff)
+	  (format "Problem's new rating is %d (%d)\n"
+	    problem-rating problem-rating-diff)
+	  (format "Problem' new RD is %d (%d)\n"
+	    problem-RD problem-RD-diff))))))
 
 (defun cram-submit ()
-  "It's a bit confusing with task-entry in DB, task as is, and
-the *cram-current-task* which is yet another structure."
+  "It's a bit confusing with problem-entry in DB, problem as is, and
+the *cram-current-problem* which is yet another structure."
   (let* ((time (time-elapsed nil))
-	 (answer (cram-read-answer))
-	 (old-ratings (cram-current-ratings)) ;current ratings will become the old
-	 (score (cram-report-answer answer time))
-	 (solution (cram-task-solution (cram-current-task)))
+	 (response (cram-read-response))
+	 ; ;current ratings will become the old
+	 (old-ratings (cram-current-ratings))
+	 (score (cram-report-response response time))
+	 (answer (cram-problem-answer (cram-current-problem)))
 	 (new-ratings (cram-current-ratings)))
     (if (and (cram-auto-continue-p) (not current-prefix-arg))
-      (progn (message (short-judgement score answer solution))
+      (progn (message (short-judgement score response answer))
 	     (cram-new))
-      (insert (long-judgement answer time solution score old-ratings new-ratings)))))
+      (insert (long-judgement response time answer score
+			      old-ratings new-ratings))))
+    (cram-answer-mode)
+    (evil-emacs-state))
 
-(defun cram-answer-submitted-p ()
+(defun cram-response-submitted-p ()
   (string-match "Spent" (buffer-string)))
 
 ;;; Interactive functions
 (defun cram-enter ()
   (interactive)
-  (if (cram-answer-submitted-p)
-    (cram-new)
-    (cram-submit)))
+  (if (eql major-mode 'cram-problem-mode)
+    (cram-submit)
+    (cram-new)))
 
 (defun cram-register-new-user ()
   (interactive)
@@ -162,26 +179,22 @@ the *cram-current-task* which is yet another structure."
     (switch-to-buffer-other-window buffer-name)))
 ;;(cram-list-user-ratings)
 
-(defun cram-db-task-ratings ()
-  "Returns a tree of task ratings"
+(defun cram-db-problem-ratings ()
+  "Returns a tree of problem ratings"
   (eval-when (load eval)
-    (ld-select :tasks
-	       :columns (:id
-			 (list :operation :arguments :solution)
-			 (round :rating)
-			 (round :RD)
-			 ::updated)
-	       :order-by :rating
-	       :order :desc)))
+    (cl-sort (ld-select :problem
+			:columns (:id :question :answer :rating ::updated))
+      #'> :key #'first)))
+;;(cram-db-problem-ratings)
 
-(cl-defun cram-list-task-ratings (&optional (buffer-name "*Task Ratings*"))
-  "Prints a table of all tasks with their corresponding rating."
+(cl-defun cram-list-problem-ratings (&optional (buffer-name "*Problem Ratings*"))
+  "Prints a table of all problems with their corresponding rating."
   (interactive)
   (with-output-to-temp-buffer buffer-name
     (princ (tab-format
-	    (mapcol (bind #'apply #'cram-format-task 1)
-		    1 (cram-db-task-ratings))
-	    :header '("ID" "Task" "Rating" "RD" "Updated")
+	    (mapcol (bind #'apply #'cram-format-problem 1)
+		    1 (cram-db-problem-ratings))
+	    :header '("ID" "Problem" "Rating" "RD" "Updated")
 	    :column-separator " | "))
     (switch-to-buffer-other-window buffer-name)))
 
@@ -203,7 +216,7 @@ the *cram-current-task* which is yet another structure."
   (interactive)
   (gnuplot-ratings (cram-db-user-ratings (cram-current-user))))
 
-(defun cram-mode-map ()
+(defun cram-answer-mode-map ()
   (let ((map (make-keymap))
 	(list-map (make-sparse-keymap))
 	(user-map (make-sparse-keymap)))
@@ -214,9 +227,9 @@ the *cram-current-task* which is yet another structure."
     ;; Lists
     (define-key map "l" list-map)
     (define-key list-map "r" 'cram-list-user-ratings)
-    (define-key list-map "R" 'cram-list-task-ratings)    
+    (define-key list-map "R" 'cram-list-problem-ratings)    
     (define-key list-map "p" 'cram-plot-user-ratings)
-    (define-key list-map "P" 'cram-plot-task-ratings)
+    (define-key list-map "P" 'cram-plot-problem-ratings)
 
     ;; User
     (define-key map "u" user-map)
@@ -238,10 +251,10 @@ the *cram-current-task* which is yet another structure."
     (define-key map [delete] 'delete-forward-char)
     map))
 
-(defvar cram-mode-map ;;(nilf cram-mode-map)
-  (cram-mode-map)
+(defvar cram-answer-mode-map ;;(nilf cram-answer-mode-map)
+  (cram-answer-mode-map)
   "Keymap containing cram commands.")
-;;(setf cram-mode-map (cram-mode-map))
+;;(setf cram-answer-mode-map (cram-answer-mode-map))
 
 ;;; Mode line
 (cl-defun cram-mode-line-user-description ()
@@ -265,17 +278,24 @@ the *cram-current-task* which is yet another structure."
   "Adopted the design from `Info-mode' (`Info-set-mode-line')."
   (setf mode-line-format (cram-mode-line)))
 
-(define-derived-mode cram-mode special-mode "Cram"
+(define-derived-mode cram-answer-mode special-mode "Cram answer"
    "Cram mode
-\\{cram-mode-map}"
+\\{cram-answer-mode-map}"
    (setf buffer-read-only nil)
    (cram-set-mode-line))
 
+(define-derived-mode cram-problem-mode text-mode "Cram problem"
+  "Cram problem mode, same as text mode, except return submits the response.
+\\{cram-problem-mode-map}"
+  (setf buffer-read-only nil)
+  (cram-set-mode-line)
+  (evil-emacs-state)
+  (define-key cram-problem-mode-map [return] #'cram-enter))
+
 (cl-defun cram (&optional (level 1))
   (interactive)
-  (cram-init)
+  (cram-init t)
   (switch-to-buffer +cram-buffer+)
-  (cram-mode)
   (cram-new level))
 ;;(cram)
 

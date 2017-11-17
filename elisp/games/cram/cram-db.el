@@ -15,7 +15,7 @@
        :properties (:unique)) ; unique source id
       (:question
        :type string)
-      (:answer)
+      (:answer)               ; rename to :solution?
       (:picture
        :type cons)            ; cons of strings
       (:alternatives
@@ -23,18 +23,19 @@
 			      ; when several answers are possible
       (:hints                 ; typically initials
        :type cons)
+      ;; Glicko rating with deviation (GR RD)
       (:rating
-       :type cons)))          ; Glicko rating with deviation (GR RD)
+       :type (number number))))
 
     (:user "Users"
      ((:id
        :type integer
        :properties (:unique :primary-key :autogenerate))
+       ;; user name, which must be unique
       (:name
-       :type string
-       :properties (:unique))  ;user name, which must be unique
-      (:rating
-       :type cons))) ; Glicko rating with deviation (GR RD)
+       :type string :properties (:unique))
+      ;; Glicko rating with deviation (GR RD)
+      (:rating :type (number number))))
 
     ;; A :match records the event of a :user encountering a :problem
     (:match "Matches"
@@ -42,10 +43,11 @@
       (:iso-time :type string)      ; the date and time the :match was presented
       (:answer)                     ; what the user :answered
       (:time :type integer)         ; the time (in millisecond) user spent before answering
-      (:match-id :type integer)      ; reference to match task
+      (:match-id :type integer)     ; reference to match task
       (:user-id :type integer)      ; reference to match user
-      (:user-rating :type float)    ; Glicko user rating with deviation (GR RD)
-      (:match-rating :type float)))) ; Glicko user rating with deviation (GR RD)
+      ;; Glicko ratings with deviation (GR RD)
+      (:user-rating :type (number number))
+      (:match-rating :type (number number)))))
 
   "TODO: this is a constant, but should eventually become a variable
 Note that this is a PLIST format of coldefs. Hence PLIST-P must be set to t in `ld-make-schema'")
@@ -77,6 +79,6 @@ Note that this is a PLIST format of coldefs. Hence PLIST-P must be set to t in `
 ;;(setf *current-database* (copy-tree *dbcopy*))
 ;;(ld-replace-table '(:cram :matchs) (ld-table-add-column :matchs '(:level :type integer) :colpos 2))
 ;;(ld-table :matchs)
-;;(loop for task in (cram-db-tasks) do (setf (cram-task-level task) (cram-estimate-level task)))
+;;(loop for task in (cram-db-tasks) do (setf (cram-task-level task) (cram-estimate-level task)))(provide 'cram-db)
 
 (provide 'cram-db)

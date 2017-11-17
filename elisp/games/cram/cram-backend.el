@@ -8,8 +8,8 @@
 (defconst +cram-default-user-name+ "Mats")
 (defconst +cram-default-rating-window+ 200)
 
-(defun cram-default-task-rating (operation level)
-  "Eventually this method should take into account the task nature (level and operation)"
+(defun cram-default-problem-rating (operation level)
+  "Eventually this method should take into account the problem nature (level and operation)"
   +cram-default-rating+)
 
 (defvar *cram-current-user* nil ;;(nilf *cram-current-user*)
@@ -33,74 +33,84 @@
     (cram-set-current-user (or (cram-db-last-user)
 				(cram-db-get-user +cram-default-user-name+))))
   *cram-current-user*)
-;;(cram-current-user)
+;;(cram-current-user t)
 
-(cl-defun cram-user-ratings (&optional (user *cram-current-user*))
-  (list (cram-user-rating user) (cram-user-RD user)))
+;;; Current problem
+(defvar *cram-current-problem* nil ;;(nilf *cram-current-problem*)
+  "This should be a tuple on the form (PROBLEM RATING LAST-TIMESTAMP)")
 
+(defun cram-set-current-problem (problem)
+  (setf *cram-current-problem* problem))
 
-;;; Current task
-(defvar *cram-current-task* nil ;;(nilf *cram-current-task*)
-  "This should be a tuple on the form (TASK RATING LAST-TIMESTAMP)")
-
-(defun cram-set-current-task (task)
-  (setf *cram-current-task* task))
-
-(cl-defun cram-get-task-method (&optional (new/old-ratio 0.5))
-  "The ratio of :random should be dependent on the number of tasks in :tasks"
-  ;; only new tasks at this stage
+(cl-defun cram-get-problem-method (&optional (new/old-ratio 0.5))
+  "The ratio of :random should be dependent on the number of problems in :problems"
+  ;; only new problems at this stage
   (if (< (random-float) new/old-ratio)
     :new :random))
-;;(let ((n 1000000)) (/ (loop for i below n if (eql (cram-get-task-method) :new) count 1) (float n)))
+;;(let ((n 1000000)) (/ (loop for i below n if (eql (cram-get-problem-method) :new) count 1) (float n)))
 
-(cl-defun cram-current-task ()
-  "Use this method to retrive a copy of current task"
-  (unless *cram-current-task*
-    (setf *cram-current-task* (cram-get-task :method :next)))
-  (copy-tree *cram-current-task*))
-;;(cram-current-task)
+(cl-defun cram-get-worst-problem ()
+  "Use this method to retrive a copy of current problem"
+  (let ((ps (cram-db-problems)))
+    (if (< (length ps) *cram-same-problem-limit*)
+      (last-elt ps)
+      (min-element
+       (nthcdr *cram-same-problem-limit*
+	       (cl-sort ps #'string> :key #'cram-problem-updated))
+       :key #'cram-problem-rating-e :test #'>))))
+;;(cram-get-worst-problem)
 
-(cl-defun cram-get-task (&key (method :next) (rating +cram-default-rating+))
+(cl-defun cram-current-problem ()
+  "Use this method to retrive a copy of current problem"
+  (unless *cram-current-problem*
+    (setf *cram-current-problem* (cram-get-problem :method :next)))
+  (copy-tree *cram-current-problem*))
+;;(cram-current-problem)
+
+(cl-defun cram-get-problem (&key (method :next) (rating +cram-default-rating+))
   "Method is one of :new (default), :random, :current and :last"
   (case method
-    (:last (cram-db-last-task))
-    (:new (let ((task (cram-create-task :rating rating)))
-	    (if (cl-notany #'null task)
-	      (cram-db-insert-task task)
-	      (cram-db-random-task :rating rating))))
-    (:random (cram-db-random-task :rating rating))
-    (:current (cram-current-task))
-    (:next (cram-get-task :method (cram-get-task-method) :rating rating))
-    (:update-current (cram-db-get-task (cram-task-id (cram-current-task))))))
+    (:last (cram-db-last-problem))
+    (:new (let ((problem (cram-create-problem :rating rating)))
+	    (if (cl-notany #'null problem)
+	      (cram-db-insert-problem problem)
+	      (cram-db-random-problem :rating rating))))
+    (:random (cram-db-random-problem :rating rating))
+    (:current (cram-current-problem))
+    (:next (cram-get-problem :method (cram-get-problem-method) :rating rating))
+    (:worst (cram-get-worst-problem))
+    (:update-current (cram-db-get-problem (cram-problem-id (cram-current-problem))))))
 
-(cl-defun cram-get-task-weird (&key (method :next) (rating +cram-default-rating+))
+(cl-defun cram-get-problem-weird (&key (method :next)
+				       (rating +cram-default-rating+))
   "Method is one of :new (default), :random, :current and :last"
-  (cram-db-insert-task (cram-create-task :rating rating)))
-;;(cram-get-task :method :new)
-;;(cram-get-task :method :random :rating 1500)
+  (cram-db-insert-problem (cram-create-problem :rating rating)))
+;;(cram-get-problem :method :new)
+;;(cram-get-problem :method :random :rating 1500)
 
-(cl-defun cram-draw-task (&key (method :next) (rating +cram-default-rating+))
-  (setf *cram-current-task* (cram-get-task :method method :rating rating)))
-
-(cl-defun cram-task-ratings (&optional (task (cram-current-task :last)))
-  (list (cram-task-rating task) (cram-task-RD task)))
-
+(cl-defun cram-draw-problem (&key (method :worst) (rating +cram-default-rating+))
+  (setf *cram-current-problem* (cram-get-problem :method method :rating rating)))
 
 ;;; other
-(cl-defun cram-current-ratings (&optional (user (cram-current-user t)) (task (cram-get-task :method :current)))
-  (list (cram-user-ratings user) (cram-task-ratings task)))
-;;(cram-get-task :method :current)
+(cl-defun cram-current-ratings (&optional
+				(user (cram-current-user t))
+				(problem (cram-get-problem :method :current)))
+  "Return ratings of current user and problem as a pair of pairs.
+Why was cram-current-user called with t (update arg)?."
+  (list (cram-user-rating user)
+	(cram-problem-rating problem)))
+;;(cram-current-ratings)
 
 (defun cram-operators ()
   '(:addition :substraction :multiplication :division))
 ;;(cram-operators)
 
 (defun cram-random-operation ()
-  (first (elt-random *cram-task-range*)))
+  (first (elt-random *cram-problem-range*)))
 ;;(cram-random-operation)
 
 (defun cram-random-level (operation)
-  (elt-random (apply #'a-b (second (assoc operation *cram-task-range*)))))
+  (elt-random (apply #'a-b (second (assoc operation *cram-problem-range*)))))
 ;;(cram-random-level :substraction)
 
 (defun cram-arguments-1 (level)
@@ -125,8 +135,8 @@
     (cram-arguments-1 level)))
 ;;(loop for i below 10000 never (= (second (cram-arguments 1 :division)) 0))
 
-(defun cram-estimate-level (task)
-  (destructuring-bind (x y) (cram-task-arguments task)
+(defun cram-estimate-level (problem)
+  (destructuring-bind (x y) (cram-problem-arguments problem)
     (cond
       ;; both < 10
       ((and (< x 10) (< y 10))
@@ -134,7 +144,7 @@
        (if (<= (+ x y) 10) 1 2))
       ((and (< x 100) (< y 100)) 3)
       ((and (< x 1000) (< y 1000)) 4))))
-;;(mapcar #'cram-estimate-level (cram-db-tasks))
+;;(mapcar #'cram-estimate-level (cram-db-problems))
 
 (defun combine< (&rest predicates)
   (lexical-let ((preds predicates))
@@ -151,26 +161,26 @@
     #'(lambda (x y) (nor (funcall lt x y) (funcall lt y x)))))
 ;;(funcall (lt->equal #'<) 1 1)
 
-(defun cram-sort-task-predicate ()
+(defun cram-sort-problem-predicate ()
   "Not in use. However an example on use of `combine<'"
-  (combine< (list #'(lambda (x y) (l-explicit< x y (cram-operators))) #'cram-task-operation)
-	    (list #'< #'cram-task-level)))
-;;(sort (cram-db-tasks) (cram-sort-task-predicate))
-;;(ld-select :tasks :columns (:operation :level))
+  (combine< (list #'(lambda (x y) (l-explicit< x y (cram-operators))) #'cram-problem-operation)
+	    (list #'< #'cram-problem-level)))
+;;(sort (cram-db-problems) (cram-sort-problem-predicate))
+;;(ld-select :problems :columns (:operation :level))
 
-(defun cram-group-tasks-by-type (task)
+(defun cram-group-problems-by-type (problem)
   "Not in use, but a good example on advanced use of
-  #'cram-sort-task-predicate"
-  (let ((tasks (cram-db-tasks))
-	(pred (cram-sort-task-predicate)))
-    (group (sort tasks pred) :test (lt->equal pred))))
+  #'cram-sort-problem-predicate"
+  (let ((problems (cram-db-problems))
+	(pred (cram-sort-problem-predicate)))
+    (group (sort problems pred) :test (lt->equal pred))))
 
-(defun cram-estimate-task-rating (operation level)
+(defun cram-estimate-problem-rating (operation level)
   "Direct select, violates policy on "
   (aif (cram-db-ratings-by-type operation level)
     (average it)
     +cram-default-rating+))
-;;(cram-estimate-task-rating :substraction 2)
+;;(cram-estimate-problem-rating :substraction 2)
 
 (defun cram-init-rating (&optional operation level)
   +cram-default-rating+)
@@ -186,129 +196,175 @@
     (:division #'/)))
 ;;(mapcar #'cram-operator '(:addition :substraction :multiplication :division))
 
-(defun task-exists (operation args)
-  (ld-select :tasks
+(defun problem-exists (operation args)
+  (ld-select :problems
     :where (and (eql :operation operation)
 		(equal :arguments args))))
-;;(task-exists :addition '(0 0))
+;;(problem-exists :addition '(0 0))
 
-;;(cl-defun cram-create-task (&key (operation :multiplication) (level 2) (rating +cram-default-rating+))
-(cl-defun cram-create-task (&key (operation (cram-random-operation)) (level (cram-random-level operation)) (rating +cram-default-rating+))
-  "Creates a new task (sans ID and metadata). It makes sure that
+;;(cl-defun cram-create-problem (&key (operation :multiplication) (level 2) (rating +cram-default-rating+))
+(cl-defun cram-create-problem (&key (operation (cram-random-operation)) (level (cram-random-level operation)) (rating +cram-default-rating+))
+  "Creates a new problem (sans ID and metadata). It makes sure that
 the estimated rating is within the default window around RATING.
 Implementaion is kind of overkill, but makes sure that the number
 of tries is quite limited"
   (setf rating +cram-default-rating+)
-  (cl-flet ((task*-rating (task*) ;; since ID is lacking it is not #'sixth but
-	      (or (fifth task*)
+  (cl-flet ((problem*-rating (problem*) ;; since ID is lacking it is not #'sixth but
+	      (or (fifth problem*)
 		  (error "qwe")))
-	    (gentask (level &optional (RD +cram-default-RD+))
+	    (genproblem (level &optional (RD +cram-default-RD+))
 	      (loop for i below 1000
 		    for args = (cram-arguments level operation)
-		    unless (task-exists operation args)
+		    unless (problem-exists operation args)
 		    return (list operation level args
 				 (cram-calculate operation args)
-				 (cram-estimate-task-rating operation level)
+				 (cram-estimate-problem-rating operation level)
 				 350))))
     (let ((min-rating (- rating +cram-default-rating-window+))
 	  (max-rating (+ rating +cram-default-rating-window+))
-	  (task* (gentask level))
-	  (level-range (second (assoc operation *cram-task-range*))))
-      (when task* ;; else, probably all possible problems is already in db
-	(if (< (task*-rating task*) min-rating)
+	  (problem* (genproblem level))
+	  (level-range (second (assoc operation *cram-problem-range*))))
+      (when problem* ;; else, probably all possible problems is already in db
+	(if (< (problem*-rating problem*) min-rating)
 	  (loop for l from level to (max level (last-elt level-range))
-		for task* = (gentask l)
-		if (and task*
-			(>= (task*-rating task*) min-rating))
-		return task*
-		finally return task*)
+		for problem* = (genproblem l)
+		if (and problem*
+			(>= (problem*-rating problem*) min-rating))
+		return problem*
+		finally return problem*)
 	  (loop for l from level downto (min level (first level-range))
-		for task* = (gentask l)
-		if (and task*
-			(<= (fifth task*) max-rating))
-		return task*
-		finally return task*))))))
-;;(loop repeat 1 collect (cram-create-task :rating 1771.5996682195228 :operation :addition))
-;;(loop repeat 1 collect (cram-create-task :rating 1500))
-;;(count nil (loop repeat 100 collect (cram-create-task :rating 1653.5199667679983)))
+		for problem* = (genproblem l)
+		if (and problem*
+			(<= (fifth problem*) max-rating))
+		return problem*
+		finally return problem*))))))
+;;(loop repeat 1 collect (cram-create-problem :rating 1771.5996682195228 :operation :addition))
+;;(loop repeat 1 collect (cram-create-problem :rating 1500))
+;;(count nil (loop repeat 100 collect (cram-create-problem :rating 1653.5199667679983)))
 
-(cl-defun cram-score (task answer time-elapsed &optional (free-time 2000) (max-time 20000))
+(defun expand-alternatives (pattern)
+  "Expand parentheses alternatives in solution string.
+The rules can be summarized in these examples:
+
+\"a\"         -> (\"a\")
+\"(a)\"       -> (\"(a)\" \"a\" \"\") and issue a warning!
+\"(a) b\"     -> (\"(a) b\" \"a b\" \"b\")
+\"(a) (c) b\" -> (\"(a) (c) b\" \"(a) c b\" \"(a) b\"
+		\"a (c) b\"   \"a c b\"   \"a b\"
+		\"(c) b\"     \"c b\"     \"b\")"
+  (loop for x in (combine (loop for x in (read-whole-string pattern)
+				for s = (format "%S" x)
+				collect (if (listp x)
+					  (list s (substring s 1 -1) nil)
+					  (list s))))
+	collect (concat* x :in " ")))
+;;(expand-alternatives "(a) (c) b")
+
+(defun cram-expand-alternatives (problem)
+  "Collect expansions of PROBLEM solution and all alternatives."
+  (mapcar #'expand-alternatives
+    (cons (cram-problem-answer problem)
+	  (awhen (cram-problem-alternatives problem)
+	    split-string ";"))))
+;;(cram-expand-alternatives (car (ld-select :problem :where (string-match "Klaus" :answer))))
+
+(defun cram-correct-response-p (problem response)
+  "Return nil if and only if RESPONSE is incorrect according to PROBLEM.
+RESPONSE is correct if it
+1. matches SOLUTION perfectly
+2. matches SOLUTION with parenthesis characters removed
+3. matches SOLUTION with parentheses removed entirely.
+
+where SOLUTION is a column in PROBLEM. Whitespace repetitions are
+ignored both in SOLUTION and RESPONSE. Also these rules apply to
+each item in the ALTERNATIVES column of PROBLEM.
+
+See also cram-extract-alternatives.
+"
+  (cl-member response (flatten (cram-expand-alternatives problem))
+	     :test #'string=))
+;;(cram-correct-response-p (car (ld-select :problem :where (string-match "Klaus" :answer))) "Doldinger")
+
+(cl-defun cram-score (problem response time-elapsed
+			      &optional (free-time 5000) (max-time 30000))
   "All TIMEs are in milliseconds."
-  (let ((solution (cram-task-solution task)))
-    (if (nequal answer solution)
-      0
+  (let ((response (cram-problem-answer problem)))
+    (if (cram-correct-response-p problem response)
       (- 1 (min 1 (/ (max 0 (- time-elapsed free-time))
-		     (coerce (- max-time free-time) 'float)))))))
-;;(mapcar #'(lambda (x) (cram-score (first *cram-current-task*) (task-result (first *cram-current-task*)) x)) (a-b 0 22000 2000))
+		     (coerce (- max-time free-time) 'float))))
+      0)))
+;;(mapcar #'(lambda (x) (cram-score (first *cram-current-problem*) (problem-result (first *cram-current-problem*)) x)) (a-b 0 22000 2000))
 
 (defsubst cram-invert-score (score) (- 1 score))
 
 ;;; Ratings
-(defun glicko-new-ratings (user task score &optional time)
-  (let* ((uratings (cram-user-ratings user))
-	 (tratings (cram-task-ratings task))
+(defun glicko-new-ratings (user problem score &optional time)
+  (let* ((uratings (cram-user-rating user))
+	 (tratings (cram-problem-rating problem))
 	 (res (list (glicko-rating uratings (list tratings score) time)
-		    (glicko-rating tratings (list uratings (cram-invert-score score)) time))))
+		    (glicko-rating tratings
+				   (list uratings (cram-invert-score score))
+				   time))))
     (message "Calculating ratings %S ==> %S" (list uratings tratings) res)
     res))
+;;(glicko-new-ratings (cram-current-user) (cram-current-problem) 0)
 ;;(glicko-rating '(1372 350) '((1677 35) 0.04) nil)
 
-(defun extract-ratings (user task)
-  (list (list (cram-user-rating user)
-	      (cram-user-RD user))
-	(list (cram-task-rating task)
-	      (cram-task-RD task))))
+(defun extract-ratings (user problem)
+  "Return a pair of ratings. Superfluous util?!"
+  (list (cram-user-rating user)
+	(cram-problem-rating problem)))
 
-(defun cram-report-answer-strange-error (answer time-elapsed)
+(defun cram-report-response-strange-error (response time-elapsed)
   (let* ((user (cram-current-user))
-	 (task (cram-current-task))
-	 (score (cram-score task answer time-elapsed))
-	 (old-ratings (extract-ratings user task ))
-	 (new-ratings (glicko-new-ratings user task score)))
+	 (problem (cram-current-problem))
+	 (score (cram-score problem response time-elapsed))
+	 (old-ratings (extract-ratings user problem))
+	 (new-ratings (glicko-new-ratings user problem score)))
     (assert (not (equal old-ratings new-ratings)))
-    (destructuring-bind (updated-user updated-task)
+    (destructuring-bind (updated-user updated-problem)
 	(apply #'cram-db-report-match
-	       user task
-	       (iso-date-and-time) answer time-elapsed
+	       user problem
+	       (iso-date-and-time) response time-elapsed
 	       new-ratings)
-      ;; Update current user and task
+      ;; Update current user and problem
       ;; For some reason these updates lead to an error
       (cram-set-current-user updated-user)
-      (cram-set-current-task updated-task))
+      (cram-set-current-problem updated-problem))
     score))
 
-(defun cram-report-answer (answer time-elapsed)
-  "Return result score based on ANSWER and the TIME-ELAPSED.
-Also, calculate new ratings for current user and task,
+(defun cram-report-response (response time-elapsed)
+  "Return result score based on RESPONSE and the TIME-ELAPSED.
+Also, calculate new ratings for current user and problem,
 and update the current database concordingly.
 
 Comment: the side effects here are not evident from function
 name. Perhaps this function only should calculate score and new
 ratings, and hand the onus of DB update to the caller"
   (let* ((user (cram-current-user))
-	 (task (cram-current-task))
-	 (score (cram-score task answer time-elapsed))
-	 (old-ratings (extract-ratings user task))
-	 (new-ratings (glicko-new-ratings user task score)))
+	 (problem (cram-current-problem))
+	 (score (cram-score problem response time-elapsed))
+	 (old-ratings (extract-ratings user problem))
+	 (new-ratings (glicko-new-ratings user problem score)))
     ;; this assert seems a bit spurious to me now
     (assert (not (equal old-ratings new-ratings)))
-    (destructuring-bind (updated-user updated-task)
+    (destructuring-bind (updated-user updated-problem)
 	(apply #'cram-db-report-match
-	       user task
-	       (iso-date-and-time) answer time-elapsed
+	       user problem
+	       (iso-date-and-time) response time-elapsed
 	       new-ratings)
       ;; why return this from this destruct form?
       ;; it is never used. Debugging purposes?
-      (list updated-user updated-task))
+      (list updated-user updated-problem))
     score))
 
-(defun cram-init ()
-  (cram-db-init))
+(defun cram-init (&optional force)  
+  (cram-db-init force))
 
 (defun cram-reset-all ()
   (when (yes-or-no-p "Are you sure you want to reset everything? ")
     (cram-init-database)
-    (nilf *cram-current-user* *cram-current-task*)))
+    (nilf *cram-current-user* *cram-current-problem*)))
 ;;(cram-reset-all)
 
 (defun cram-save ()
@@ -317,8 +373,8 @@ ratings, and hand the onus of DB update to the caller"
 
 ;;; reports
 (cl-defun cram-top-ratings (entity &key (from 0) (to 50))
-  "ENTITY is either :users or :tasks"
+  "ENTITY is either :users or :problems"
   (cram-db-ratings entity :from from :to to))
-;;(cram-top-ratings :tasks)
+;;(cram-top-ratings :problems)
 
 (provide 'cram-backend)

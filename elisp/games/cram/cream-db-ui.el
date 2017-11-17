@@ -11,8 +11,8 @@
 (require 'cram-common)
 
 ;;;; Init
-(defun cram-db-init () 
-  (cram-init-database))
+(defun cram-db-init (&optional force) 
+  (cram-init-database force))
 
 
 ;;;; Users
@@ -93,6 +93,8 @@ Two solutions "
 ;;(cram-db-get-problem 10)
 
 (defun cram-db-problems ()
+  "Same as ld-select :problem, but discards the
+*cram-same-problem-limit* newest"
   (ld-select :problem))
 ;;(cram-db-problems)
 
@@ -113,16 +115,16 @@ Two solutions "
 It returns the updates of user and problem as a pair"
   (destructuring-bind (user-id name old-user-rating &rest uargs)
       user
-    (destructuring-bind (problem-id operation level arguments solution
+    (destructuring-bind (problem-id sid q a p
 				    old-problem-rating &rest targs)
 	problem
-      (ld-insert :matches (list iso-time answer time
+      (ld-insert :match (list iso-time answer time
 				problem-id user-id
 				old-user-rating old-problem-rating))
       (list (ld-update :user (= (:id) user-id)
-		       new-user-rating (:rating))
-	    (ld-update :match (= (:id) problem-id)
-		       new-problem-rating (:rating))))))
+		       `(,new-user-rating) (:rating))
+	    (ld-update :problem (= (:id) problem-id)
+		       `(,new-problem-rating) (:rating))))))
 
 ;; Ratings
 (cl-defun cram-db-rating-history (user-or-problem &key from-time to-time n)
