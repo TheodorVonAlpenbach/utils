@@ -4,7 +4,7 @@
 
 (defun ld-sort-predicate (order column-definition)
   "ORDER is either :desc or :asc"
-  (let ((order-pair (case (ld-column-type column-definition)
+ (let ((order-pair (case (ld-column-type column-definition)
 		      (string (list #'string> #'string<))
 		      (t (list #'> #'<)))))
     (ecase order
@@ -330,11 +330,12 @@ For order-by we must convert columns to column-positions."
 ;;(pp (ld-delete :users (= (:id) 1)))
 
 ;;; Update
-(defun ld-update-1 (table where-function values columns)
+(defun ld-update-1 (table-designator where-function values columns)
   "Skipping properties for now"
   (assert (= (length (listify values)) (length (listify columns)))
 	  t "The number of values and the number columns are not the same")
-  (let ((rows (copy-if where-function (ld-table-data table))))
+  (let* ((table (ld-table table-designator))
+	 (rows (copy-if where-function (ld-table-data table))))
     (case (length rows)
       (0 (ld-warning "No single row was selected in :where expression."))
       (1 (let ((row (first rows)))
@@ -343,6 +344,7 @@ For order-by we must convert columns to column-positions."
 	   (loop for value in (listify values)
 		 for colfun in (listify columns)
 		 do (setf (nth colfun row) value)
+		 do (message "Updated column no %d with %S" colfun value)
 		 finally return row)))
       (t (ld-warning "Skipping update since multiple rows were selected in :where expression.")))))
 
@@ -351,7 +353,9 @@ For order-by we must convert columns to column-positions."
 No, in fact, look up variable `values'. This is defined in core
 Emacs! So any Emacs macro should avoid using this symbol.
 But still I really don't understand the behaviour of values in a macro."
-  `(ld-update-1 ',(ld-table table-designator)
+  ;; in this version, table-designator must be a keyword, e.g. :user
+  ;; should make an expansion macro perhaps?
+  `(ld-update-1 ,table-designator
 		(ld-expression ,where ,table-designator)
 		,vals
 		(ld-column-expression->number ,columns ,table-designator (listp ,vals))))
