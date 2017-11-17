@@ -166,6 +166,7 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 			   :test #'string=)
 		(directory-files (expand-file-name ".emacs.d/elpa" +home-dir+) t)
 		(list
+		 (expand-file-name "games/cram" +mb-lisp-dir+)
 		 (expand-file-name "games/maths" +mb-lisp-dir+)
 		 (expand-file-name "external/scilab" +mb-lisp-dir+)
 		 *site-lisp-dir*))
