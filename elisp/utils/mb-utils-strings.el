@@ -679,4 +679,11 @@ See also `group-consequtive-integers'."
 		 :key #'number-to-string)))))
 ;;(format-integer-ranges '(1 2 3 6 7 8 11))
 
+(defun read-whole-string (string)
+  "Read the whole STRING as with `read' into a sexp list."
+  (loop with n = (length string)
+	for (x . pos) = (read-from-string string pos)
+	collect x while (< pos n)))
+;;(read-whole-string "a b (c d)")
+
 (provide 'mb-utils-strings)
