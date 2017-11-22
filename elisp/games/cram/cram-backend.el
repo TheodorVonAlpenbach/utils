@@ -68,7 +68,17 @@
 ;;(cram-current-problem)
 
 (cl-defun cram-get-problem (&key (method :next) (rating +cram-default-rating+))
-  "Method is one of :new (default), :random, :current and :last"
+  "Return a problem from database, or a create a new problem depending on method.
+If METHOD is
+  :NEW     return a new problem a created with `cram-create-new',
+  :LAST    return the last problem the current user met in a match,
+  :RANDOM  return a problem selected at random from the database,
+  :CURRENT return the problem stored in *cram-current-problem*,
+  :RATING  return the problem closest to a certain rating, and
+  :WORST   return the most difficult problem in database.
+
+Many of these methods take additional parameters that can modify
+the selection strategy somewhat. For instance, :RANDOM avoids the last problems presented to the user, see "
   (case method
     (:last (cram-db-last-problem))
     (:new (let ((problem (cram-create-problem :rating rating)))
@@ -82,9 +92,7 @@
     (:update-current (cram-db-get-problem (cram-problem-id (cram-current-problem))))))
 
 (cl-defun cram-get-problem-weird (&key (method :next)
-				       (rating +cram-default-rating+))
-  "Method is one of :new (default), :random, :current and :last"
-  (cram-db-insert-problem (cram-create-problem :rating rating)))
+				    (rating +cram-default-rating+)))
 ;;(cram-get-problem :method :new)
 ;;(cram-get-problem :method :random :rating 1500)
 
@@ -288,8 +296,8 @@ See also cram-extract-alternatives.
 (cl-defun cram-score (problem response time-elapsed
 			      &optional (free-time 5000) (max-time 30000))
   "All TIMEs are in milliseconds."
-  (let ((response (cram-problem-answer problem)))
-    (if (cram-correct-response-p problem response)
+  (let ((answer (cram-problem-answer problem)))
+    (if (cram-correct-response-p answer response)
       (- 1 (min 1 (/ (max 0 (- time-elapsed free-time))
 		     (coerce (- max-time free-time) 'float))))
       0)))
@@ -299,21 +307,26 @@ See also cram-extract-alternatives.
 
 ;;; Ratings
 (defun glicko-new-ratings (user problem score &optional time)
+<<<<<<< HEAD
   (let* ((uratings (cram-user-rating user))
 	 (tratings (cram-problem-rating problem))
-	 (res (list (glicko-rating uratings (list tratings score) time)
-		    (glicko-rating tratings
-				   (list uratings (cram-invert-score score))
-				   time))))
-    (message "Calculating ratings %S ==> %S" (list uratings tratings) res)
-    res))
-;;(glicko-new-ratings (cram-current-user) (cram-current-problem) 0)
-;;(glicko-rating '(1372 350) '((1677 35) 0.04) nil)
+	 =======
+	 (let* ((uratings (cram-user-ratings user))
+		(tratings (cram-problem-ratings problem))
+		>>>>>>> Rename
+		(res (list (glicko-rating uratings (list tratings score) time)
+			   (glicko-rating tratings
+					  (list uratings (cram-invert-score score))
+					  time))))
+	   (message "Calculating ratings %S ==> %S" (list uratings tratings) res)
+	   res))
+    ;;(glicko-new-ratings (cram-current-user) (cram-current-problem) 0)
+    ;;(glicko-rating '(1372 350) '((1677 35) 0.04) nil)
 
-(defun extract-ratings (user problem)
-  "Return a pair of ratings. Superfluous util?!"
-  (list (cram-user-rating user)
-	(cram-problem-rating problem)))
+    (defun extract-ratings (user problem)
+      "Return a pair of ratings. Superfluous util?!"
+      (list (cram-user-rating user)
+	    (cram-problem-rating problem))))
 
 (defun cram-report-response-strange-error (response time-elapsed)
   (let* ((user (cram-current-user))
@@ -334,7 +347,7 @@ See also cram-extract-alternatives.
     score))
 
 (defun cram-report-response (response time-elapsed)
-  "Return result score based on RESPONSE and the TIME-ELAPSED.
+  "Return result score based on RESPONSE and the TIME-ELAPSED. "
 Also, calculate new ratings for current user and problem,
 and update the current database concordingly.
 
