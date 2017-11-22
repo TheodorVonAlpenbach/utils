@@ -68,7 +68,7 @@
 		   (t "windows"))))
       (string-trim (call-process* "cygpath" "--type" ctype (expand-file-name path))))
     path))
-;;(cygpath "/cygdrive/c/Users/MBe.azure/AppData/Roaming/Scilab/scilab-5.5.1/" :unix)
+;;(cygpath "~" :win32)
 
 ;;;; global defaults (can be overrided in .emacs-local)
 (defvar *shared-data-dir* (expand-file-name "mb-data" +shared-dir+)
@@ -164,10 +164,11 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 		(cl-remove "old" (directory-files +mb-lisp-dir+ t)
 			   :key #'file-name-nondirectory
 			   :test #'string=)
-		(directory-files (expand-file-name ".emacs.d/elpa" +home-dir+) t)
+;;		(directory-files (expand-file-name ".emacs.d/elpa" +home-dir+) t)
 		(list
 		 (expand-file-name "games/cram" +mb-lisp-dir+)
 		 (expand-file-name "games/maths" +mb-lisp-dir+)
+		 (expand-file-name "games/cram" +mb-lisp-dir+)
 		 (expand-file-name "external/scilab" +mb-lisp-dir+)
 		 *site-lisp-dir*))
       if (and (file-directory-p x) (not (member x load-path)))
@@ -178,8 +179,8 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 (add-to-list 'load-path "~/.emacs.d/smartparens-master")
 
 ;; Move this to mode-extensions 
-(autoload 'LilyPond-mode "lilypond-mode" "Major mode for editing BNF definitions." t)
-(autoload 'mbscilab-mode "scilab-mode" "Major mode for editing Scilab files." t)
+;; (autoload 'LilyPond-mode "lilypond-mode" "Major mode for editing BNF definitions." t)
+;; (autoload 'mbscilab-mode "scilab-mode" "Major mode for editing Scilab files." t)
 
 (let* ((my-mode-alist
        '(("\\.h$\\|\\.cpp$" . c++-mode)	; first overules of original alist
@@ -206,7 +207,7 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 	 ("\\.shx$" . hexl-mode)
 	 ("\\.dbf$" . hexl-mode)
 	 ("\\.mmf$" . hexl-mode)
-	 ("\\.\\(frm\\|bas\\|cls\\)$" . visual-basic-mode)
+;;	 ("\\.\\(frm\\|bas\\|cls\\)$" . visual-basic-mode)
 ;;	 ("\\.inc$" . fundamental-mode) ; should be vb-mode
 	 ("\\.php$" . php-mode)
 	 ("\\.xsl$" . sgml-mode)
@@ -415,6 +416,7 @@ A unit test is a line prefixed by ';;(' and of the form given by
 (require 'mb-utils-strings)
 (require 'mb-utils-math)
 (require 'maths)
+(require 'cram)
 (require 'mb-gnuplot)
 
 (defun backward-down-list (&optional arg)
