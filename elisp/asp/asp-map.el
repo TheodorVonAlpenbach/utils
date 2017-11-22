@@ -25,4 +25,4 @@
   (if (string= mode-name "Visual Basic") (html-mode)
     (if (string= mode-name "HTML") (visual-basic-mode))))
 
-
+(provide 'asp-map)
