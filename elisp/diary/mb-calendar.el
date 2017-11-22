@@ -23,8 +23,8 @@
 (setq view-diary-entries-initially t)
 (setq mark-diary-entries-in-calendar t)
 
-(set-face-foreground 'calendar-today-face "cyan")
-(set-face-underline-p 'calendar-today-face nil)
+;; (set-face-foreground 'calendar-today-face "cyan")
+;; (set-face-underline-p 'calendar-today-face nil)
 (setq number-of-diary-entries [4 3 3 3 3 6 5])
 
 ;(setq calendar-day-name-array
