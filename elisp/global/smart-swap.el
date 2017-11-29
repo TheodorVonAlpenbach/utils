@@ -9,6 +9,8 @@
   '((tex pdf)
     (ly pdf)
     (gp pdf)
+    (dot png)
+    (conf sh)
     (cpp h :search 1)
     ("Lilypond-compile" ("LilyPond started at .*\n\nlilypond \\(.*\\)$" 1)))
   "TODO: enable :search")
