@@ -59,8 +59,13 @@ where each element defines a dot node property \(name . value)"
 
 ;;; Printing
 (defun dot-tmp-path (dot-string)
-  (concat temporary-file-directory (md5 dot-string)))
+  (format "%s%s.dot" temporary-file-directory (md5 dot-string)))
 ;;(dot-tmp-path "qwe")
+
+(cl-defun rename-file* (file newname &optional (ok-if-already-exists t))
+  "Same as rename-file, but return the new filename if success."
+  (unless (rename-file file newname ok-if-already-exists)
+    newname))
 
 (cl-defun dot-to-png (dot-string &key (path (dot-tmp-path dot-string)))
   "Returns path to generated PNG file.
@@ -68,9 +73,14 @@ The function uses `dot-program' to convert the DOT-STRING to a PNG image."
   (string-to-file dot-string path)
   (let ((res (call-process dot-program nil "*qwe*" nil path "-Tpng" "-O")))
     (if (zerop res)
-      (concat path ".png")
+      (rename-file* (concat path ".png")
+		    (concat (file-name-sans-extension path) ".png"))
       (error "Couldn't compile .dot file %s. See *qwe* for reason." path))))
 ;;(dot-to-png (dot-string (dot-statements-from-tree '((c f) g c))))
+(concat (substring "abc.def" 0 -3) "png")
+
+(defun dotify-node-name (x)
+  (cl-substitute ?_ ?- x))
 
 (defun dot-view-file (path)
   (png-view (dot-to-png (file-string path))))
@@ -83,6 +93,10 @@ The function uses `dot-program' to convert the DOT-STRING to a PNG image."
 (defun png-view (filename)
   (auto-image-file-mode 1)
   (find-file filename))
+
+(defun png-view-externally ()
+  (interactive)
+  (call-process* "xdg-open" (buffer-file-name)))
 
 ;;;; this could be moved to lilypond-<something>
 (defun pdf-view (filename)
