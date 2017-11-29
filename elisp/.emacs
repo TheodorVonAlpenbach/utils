@@ -68,7 +68,7 @@
 		   (t "windows"))))
       (string-trim (call-process* "cygpath" "--type" ctype (expand-file-name path))))
     path))
-;;(cygpath "~" :win32)
+;;(cygpath "/cygdrive/c/Users/MBe.azure/AppData/Roaming/Scilab/scilab-5.5.1/" :unix)
 
 ;;;; global defaults (can be overrided in .emacs-local)
 (defvar *shared-data-dir* (expand-file-name "mb-data" +shared-dir+)
@@ -166,7 +166,6 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 			   :test #'string=)
 		(directory-files (expand-file-name ".emacs.d/elpa" +home-dir+) t)
 		(list
-		 (expand-file-name "games/cram" +mb-lisp-dir+)
 		 (expand-file-name "games/maths" +mb-lisp-dir+)
 		 (expand-file-name "games/cram" +mb-lisp-dir+)
 		 (expand-file-name "external/scilab" +mb-lisp-dir+)
@@ -207,8 +206,7 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 	 ("\\.shx$" . hexl-mode)
 	 ("\\.dbf$" . hexl-mode)
 	 ("\\.mmf$" . hexl-mode)
-;;	 ("\\.\\(frm\\|bas\\|cls\\)$" . visual-basic-mode)
-;;	 ("\\.inc$" . fundamental-mode) ; should be vb-mode
+	 ;; ("\\.\\(inc\\|frm\\|bas\\|cls\\)$" . visual-basic-mode)
 	 ("\\.php$" . php-mode)
 	 ("\\.xsl$" . sgml-mode)
 	 ("\\.cl$" . lisp-mode)
@@ -270,7 +268,9 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 			 mbscilab
 			 dic-map
 			 mb-indent
-			 qp)
+			 qp
+			 ;; not from mb
+			 ert)
 		       *local-requires*)
       do (require m))
 
@@ -371,38 +371,8 @@ Not in use. Projects should be shared, at least until we are up and running Git.
     (switch-to-buffer diff-buffer)))
 ;;(compare-mb-libs "/cygdrive/c/Users/MBe.azure/Google Drive/site-lisp/mb-lisp/" "/home/MBe/tmp/tmp/package/mb-lisp")
 
-(defun copy-libs (path1 path2)
-  (let* ((apath1 (file-truename path1))
-	 (paths1 (mapcar #'file-truename (unix-find path1 :name "*sc[ie]"))))
-    (loop for p1 in paths1
-	  for relative-path = (substring p1 (length apath1))
-	  for p2 = (expand-file-name relative-path path2)
-	  do (when (file-newer-than-file-p p1 p2)
-	       (copy-file p1 p2)))))
-;;(copy-libs "~/tmp/SciLab" "~/sources/SciLab")
-
-(defun rename-files (directory pattern replacement)
-  "Renames all files containing PATTERN in DIRECTORY."
-  (let* ((paths (file-expand-wildcards  (expand-file-name (format "*%s*" pattern) directory))))
-    (loop for path in paths
-	  for fn = (file-name-nondirectory path)
-	  for new-fn = (replace-regexp-in-string pattern replacement fn)
-	  for new-path = (expand-file-name new-fn directory)
-	  do (rename-file path new-path))))
-;;(rename-files "~/data/FFIAOG/MCMV/M341_Karmoy/MomPks/" "351" "341")
-
 (add-to-list 'Info-default-directory-list (expand-file-name ".emacs.d/info" +home-dir+))
 (add-to-list 'Info-additional-directory-list (expand-file-name ".emacs.d/info" +home-dir+))
-
-(defun unit-test-regexp (fn-name)
-  (format ";;(.*%s") fn-name)
-
-(defun unit-tests (&optional fn-name)
-  "Returns a list of all unit tests for the function with name
-  FN-NAME. By default this function is the defun-at-point.
-
-A unit test is a line prefixed by ';;(' and of the form given by
-`unit-test-regexp'")
 
 (defun eval-defun-with-test (orig-fun &rest args)
   (interactive "P")
