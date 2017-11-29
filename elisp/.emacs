@@ -164,7 +164,7 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 		(cl-remove "old" (directory-files +mb-lisp-dir+ t)
 			   :key #'file-name-nondirectory
 			   :test #'string=)
-;;		(directory-files (expand-file-name ".emacs.d/elpa" +home-dir+) t)
+		(directory-files (expand-file-name ".emacs.d/elpa" +home-dir+) t)
 		(list
 		 (expand-file-name "games/cram" +mb-lisp-dir+)
 		 (expand-file-name "games/maths" +mb-lisp-dir+)
