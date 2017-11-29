@@ -372,9 +372,10 @@ IN may also be a function (fn i), taking an index argument, see `infix-list'."
 ;(concat* '("1" "2" "3") :in "\n" :indent-string ">>")
 ;;(concat* '("" "" "3") :in "\n" :indent-string ">>")
 
-(cl-defun andcat (list &optional (delimiter ", ") (pair-delimiter " and ")
-		       (last-delimiter (concat (string-trim delimiter)
-					       pair-delimiter)))
+(cl-defun andcat (list &optional
+		       (delimiter ", ")
+		       (pair-delimiter " and ")
+		       (last-delimiter (concat (string-trim delimiter) pair-delimiter)))
   "Concatenate string list with commas and a final ', and '.
 You may change the delimiters with the optional
 arguments DELIMITER, LAST-DELIMITER, and PAIR-DELIMITER.
