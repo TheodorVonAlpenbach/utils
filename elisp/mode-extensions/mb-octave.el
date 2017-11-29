@@ -7,7 +7,8 @@
 
     (define-key mb-local-map "t" test-map)
     (define-key test-map "f" #'mb-octave-test-buffer-file)
-    (define-key test-map "a" #'mb-octave-test-directory)))
+    (define-key test-map "d" #'mb-octave-test-directory)
+    (define-key test-map "a" #'mb-octave-test-all)))
 
 (add-hook 'octave-mode-hook #'mb-octave-kbd-maps)
 
@@ -373,19 +374,23 @@ If ARGUMENT is a string insert it in the pair of curly parentheses."
     (backward-char 1)))
 
 (defun mb-octave-test-buffer-file ()
+  "Run tests for the current buffer's file."
   (interactive)
-  (octave-send-string (format "test %s" (buffer-file-name))))
-
-(defun mb-octave-test-directory ()
-  (interactive)
-  (octave-send-string (format "mbruntests .")))
+  (octave-send-string (format "test (\"%s\")" (buffer-file-name))))
 ;;(mb-octave-test-buffer-file)
 
-;;; shortcuts
-(define-key octave-mode-map (kbd "C-x C-e") 'octave-eval-last-sexp)
-(define-key octave-mode-map (kbd "C-M-x") 'octave-eval-defun)
+(defun mb-octave-test-directory ()
+  "Run tests for all files in this directory."
+  (interactive)
+  (octave-send-string (format "mbruntests .")))
+
+(defun mb-octave-test-all ()
+  "Run tests for all files in and under this directory."
+  (interactive)
+  (octave-send-string (format "mbruntests . 1")))
+
+;;; Shortcuts (TODO: make evil shortcuts out of them)
 (define-key octave-mode-map (kbd "M-q") 'mb-octave-fill-paragraph)
-(define-key octave-mode-map (kbd "C-c C-;") 'comment-region)
 
 (define-key octave-mode-map [(f5)] #'octave-run)
 (define-key octave-mode-map [(f9)] #'octave-toggle-breakpoint)
