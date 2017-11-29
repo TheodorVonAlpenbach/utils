@@ -344,32 +344,6 @@ non-Elisp syntax in Common Lisp. E.g. #(1 2 3) fails in
 (define-key mb-lisp-mode-map "\C-hf" 'mb-common-lisp-hyperspec)
 (define-key mb-lisp-mode-map [(control \;)] 'comment-region)
 
-;;; Smart comment stuff
-(defun commented-string-p (string)
-  "Returns nil iff current line is not commented"
-  (string-match* "^[[:space:]]*;" string))
-
-(defun commented-line-p ()
-  "Returns nil iff current line is not commented"
-  (commented-string-p (line-string)))
-;;(commented-line-p)
-
-(defun toggle-comment-line ()
-  (interactive)
-  (if (commented-line-p)
-    (comment-line '(4)) ;; this equals C-u prefix
-    (comment-line 2)))
-
-(defun toggle-comment-region (beg end)
-  (interactive "r")
-  (when (< beg end)
-    (save-excursion
-      (goto-char beg)
-      (bol)
-      (while (< (point) end)
-	(toggle-comment-line)
-	(forward-line 1)))))
-
 
 ;;(nilf comint-preoutput-filter-functions)
 ;;(pushnew #'mb-lisp-on-output comint-preoutput-filter-functions)
