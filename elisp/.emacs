@@ -220,6 +220,7 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 	 ("\\.org$" . org-mode)
 	 ("\\.el\\.gz$" . emacs-lisp-mode)
 	 ("\\.pdf$" . doc-view-mode-maybe)
+	 ("\\.texinfo$" . texinfo-mode)
 	 ("\\.tex$" . latex-mode)
 
 	 ;; safe default must come at the end
