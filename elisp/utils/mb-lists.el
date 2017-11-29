@@ -575,15 +575,18 @@ The function assumes that there are no duplicates in INTEGERS."
 				   (= (1- x) y))))))
 ;;(group-consequtive-integers '(1 2 3 6 7 8 11))
 
-(cl-defun relations->tree (relations &key (test #'eql))
+(cl-defun relations->tree (relations &key (test #'eql) reverse-p)
   "Given list RELATIONS, return a list of family trees.
 A RELATION is a pair (X Y), meaning that X is the parent of the
 child Y. The resulting FAMILY-TREE is a CONS based tree where
-each subnode SN of a node N is a relation in list RELATIONS"
+each subnode SN of a node N is a relation in list RELATIONS. If
+instead optional parameter REVERSE-P is not nil then Y is
+interpreted as the parent of X."
   (let ((nodes (mapcar #'list
 		 (cl-remove-duplicates (flatten relations) :test test))))
     ;; the loop builds child node lists and returns non-top nodes
-    (let ((x (loop for (p c) in relations
+    (let ((x (loop for (p c) in (if reverse-p
+				  (mapcar #'reverse relations) relations)
 		   for pn = (cl-find p nodes :key #'car :test test)
 		   for cn = (cl-find c nodes :key #'car :test test)
 		   do (push cn (cdr pn))
@@ -591,6 +594,7 @@ each subnode SN of a node N is a relation in list RELATIONS"
       ;; remove non-top nodes from NODES, and we are home
       (cl-set-difference nodes x))))
 ;;(relations->tree '((a b) (a c) (c d) (b e)))
+;;(relations->tree '((a b) (a c) (c d) (b e)) :reverse-p t)
 ;;(relations->tree '((a b) (a c) (c d) (b e) (f g)))
 
 (cl-defun tree-member (x tree &key (test #'eql) key from-end)
@@ -602,30 +606,38 @@ each subnode SN of a node N is a relation in list RELATIONS"
 	  return it)))
 ;;(tree-member 'b '(a (b (c)) (b (d))) :from-end t)
 
-(cl-defun prune-tree-to-target (x tree &key (test #'eql) key)
-  "Remove all nodes in FAMILY-TREE not having X as successor. Destructive."
-  (when (tree-member x tree)
+(cl-defun prune-tree-to-target (x tree &key (test #'eql) key from-end)
+  "Remove all nodes in FAMILY-TREE not having X as successor.
+Note that the keyword :FROM-END never used in this version."
+  (when from-end
+    (warning "prune-tree-to-target warning: :from-end was set. No effect."))
+  (when (tree-member x tree :test test :key key)
     (cons (car tree)
 	  (loop for sn in (cdr tree)
-		if (prune-tree-to-target x sn)
+		if (prune-tree-to-target x sn :test test :key key)
 		collect it))))
 ;;(prune-tree-to-target 'b '(a (b (c)) (d (b))))
 
-(cl-defun find-predecessor-tree (x trees
-				 &key (test #'eql) key from-end tree-from-end)
-  "Remove all nodes in FAMILY-TREE not having X as successor."
+(cl-defun find-subtree (x trees
+			  &key reverse-p (test #'eql) key from-end tree-from-end)
+  "Find the first subtree in TREES with X as top node.
+If REVERSE-P is not nil, return the minimal ancestor tree
+containing X."
   (loop for ft in (if from-end (reverse trees) trees)
-	if (tree-member x ft :test test :key key :from-end tree-from-end)
+	if (funcall (if reverse-p #'prune-tree-to-target #'tree-member)
+	     x ft :test test :key key :from-end tree-from-end)
 	return it))
-;;(predecessor-tree 'e '((f (g)) (a (c (d)) (b (e)))))
 
-(cl-defun find-successor-tree (x trees
-				 &key (test #'eql) key from-end tree-from-end)
-  "Return first subtree in TREES which has X as the top node."
+(cl-defun copy-subtree (x trees
+			  &key reverse-p (test #'eql) key from-end tree-from-end)
+  "Find the first subtree in TREES with X as top node.
+If REVERSE-P is not nil, return the minimal ancestor tree
+containing X."
   (loop for ft in (if from-end (reverse trees) trees)
-	if (tree-member x ft :test test :key key :from-end tree-from-end)
-	return it))
-;;(find-successor-tree 'a '((b) (a (c (d)) (b (e)))))
+	if (funcall (if reverse-p #'prune-tree-to-target #'tree-member)
+	     x ft :test test :key key :from-end tree-from-end)
+	collect it))
+;;(find-subtree 'e '((f (g)) (a (c (d)) (b (e)))) :reverse-p t)
 
 (defun tree-leaves (tree)
   (when tree
