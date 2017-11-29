@@ -584,6 +584,37 @@ Should this method be interactive?"
     (uncomment-region beg end arg)
     (uncomment-region (line-beginning-position) (line-end-position) arg)))
 
+;;; Smart comment stuff
+(defun commented-string-p (string)
+  "Returns nil iff current line is not commented"
+  (warn "commented-string-p is not supported!")
+  (string-match* "^[[:space:]]*;" string))
+
+(defun commented-line-p ()
+  "Returns nil iff current line is not commented"
+  (comment-only-p (line-beginning-position) (line-end-position)))
+;;(commented-line-p)
+
+(defun toggle-comment-line (&optional arg)
+  "Toggle comment on current line in buffer."
+  (destructuring-bind (beg end) (line-region)
+    (if (commented-line-p)
+     (uncomment-region beg end arg)
+     (comment-region beg end arg))))
+
+(defun toggle-comment-region (beg end &optional arg)
+  (save-excursion
+    (goto-char beg)
+    (while (< (point) end)
+      (toggle-comment-line arg)
+      (forward-line 1))))
+
+(defun toggle-comment-region* (beg end &optional arg)
+  (interactive "*r\nP")
+  (if (use-region-p)
+    (toggle-comment-region beg end arg)
+    (toggle-comment-region (line-beginning-position) (line-end-position) arg)))
+
 ;;;; Save as for images etc
 (defun save-as-1 (filename)
   "Write current buffer file to FILENAME, and rename buffer.
