@@ -36,7 +36,8 @@
     (setf evil-symbol-word-search t)
     (setf indent-tabs-mode nil)
     (setq-local parens-require-spaces nil)
-    (linum-mode 1)))
+    (linum-mode 1)
+    (chess-kbd-maps)))
 
 (add-hook 'c-mode-common-hook #'chess-hook)
 ;;(nilf c-mode-common-hook)
@@ -177,42 +178,45 @@
   (let ((regexp (format "\\_<%s\\_>" old)))
     (save-excursion
       (goto-char (point-min))
-      (let ((case-fold-search nil))
-	(while (re-search-forward regexp nil t)
-	 (replace-match new t t))))))
+      (while (re-search-forward regexp nil t)
+	(replace-match new t t)))))
 
-(cl-defun chess-memberize-init (&optional (prefix "m_") no-query-p)
+(defun chess-replace-symbols (old new query-p)
+  "Replace all symbols OLD with NEW in current buffer"
+  (let ((case-fold-search nil))
+    (case query-p
+      ((nil :never :replacement) (replace-symbols old new))
+      (t (save-excursion
+	   (goto-char (point-min))
+	   (query-replace-regexp old new))))))
+
+(cl-defun chess-memberize-init (&optional query-p (prefix "m_"))
   "Prepend 'm_' on all identifiers in buffer equal to identifier at point.
-If no-query-p is nil, the function will ask for confirmation
+If query-p is non-nil, the function will ask for confirmation
 before carrying out its actions."
   (let* ((old (substring-no-properties (symbol-name (symbol-at-point))))
+	 (old-symbol (format "\\_<%s\\_>" old))
 	 (new (format "%s%s" prefix old)))
-    (when (or no-query-p
-	      (yes-or-no-p* "Rename variable '%s' to '%s'? " old new))
-      (list old new))))
+    (when (member query-p '(:all :replacement))
+      (let ((res (read-from-minibuffer
+		  (format "Replace %s with (default is %s): "
+		    old-symbol new))))
+	(unless (empty-string-p res)
+	  (setf new res))))
+    (list old-symbol new)))
 
-(cl-defun chess-memberize (&optional (prefix "m_") no-query-p)
+(cl-defun chess-memberize (&optional query-p (prefix "m_"))
   "Prepend 'm_' on all identifiers in buffer equal to identifier at point."
-  (interactive)
-  (apply #'replace-symbols (chess-memberize-init prefix no-query-p)))
+  (destructuring-bind (old new) (chess-memberize-init query-p prefix)
+    (chess-replace-symbols old new query-p)))
 
-(cl-defun chess-memberize-no-query (&optional (prefix "m_"))
-  "Prepend 'm_' on all identifiers in buffer equal to identifier at point."
-  (interactive)
-  (chess-memberize prefix t))
-
-(cl-defun chess-memberize-class (&optional (prefix "m_") no-query-p)
-  (interactive)
+(cl-defun chess-memberize-class (&optional query-p (prefix "m_"))
   (save-excursion
-    (destructuring-bind (old new) (chess-memberize-init prefix no-query-p)
-      (replace-symbols old new)
+    (destructuring-bind (old new) (chess-memberize-init query-p prefix)
+      (chess-replace-symbols old new query-p)
       (smart-swap)
-      (replace-symbols old new)
+      (chess-replace-symbols old new query-p)
       (smart-swap))))
-
-(cl-defun chess-memberize-class-no-query (&optional (prefix "m_"))
-  (interactive)
-  (chess-memberize-class prefix t))
 
 (defun qt-align-line (indent)
   (save-excursion
@@ -294,24 +298,43 @@ Consider move this functionality to a makefile-mode extension module"
     (goto-char (point-min))
     (re-search-forward (substring-no-properties it))))
 
-(let ((qt-map (make-sparse-keymap)))
-  (evil-key-chord-define '(normal motion) global-map "gh" qt-map)
-  (define-key qt-map "a" #'qt-align-pro-file)
-  (define-key qt-map "c" #'chess-compile)
-  (define-key qt-map "f" #'chess-lookup-qtlog)
-  (define-key qt-map "F" #'find-qt3-brother)
-  (define-key qt-map "e" #'chess-goto-error)
-  (define-key qt-map "g" #'mb-c++-grep)
-  (define-key qt-map "G" #'chess-grep)
-  (define-key qt-map "h" #'qt-help)
-  (define-key qt-map "i" #'chess-insert-error)
-  (define-key qt-map "l" #'qt-latin1)
-  (define-key qt-map "m" #'chess-memberize-class-no-query)
-  (define-key qt-map "M" #'chess-memberize)
-  (define-key qt-map "n" #'next-error)
-  (define-key qt-map "q" #'qmake)
-  (define-key qt-map "s" #'emacs->qtcreator-paths)
-  (define-key qt-map "S" #'qtcreator->emacs-paths)
-  (define-key qt-map "v" #'clean-chess-code)) ;memo: vask!
+(defun chess-kbd-maps ()
+  (let ((qt-map (make-sparse-keymap))
+	(make-map (make-sparse-keymap))
+	(substitute-map (make-sparse-keymap))
+	(find-map (make-sparse-keymap)))
+    (key-chord-define evil-normal-state-local-map "gh" qt-map)
+
+    (define-key qt-map "m" make-map)
+    (define-key make-map "q" #'qmake)
+    (define-key make-map "c" #'chess-compile)
+    (define-key make-map "n" #'next-error)
+    (define-key make-map "p" #'previous-error)
+
+    (define-key qt-map "s" substitute-map)
+    (define-key substitute-map "q" #'emacs->qtcreator-paths)
+    (define-key substitute-map "Q" #'qtcreator->emacs-paths)
+    (define-key substitute-map "l" #'qt-latin1)
+    (define-key substitute-map "R" (interactivate (chess-memberize :replacement)))
+    (define-key substitute-map "Q" (interactivate (chess-memberize :on-replace)))
+    (define-key substitute-map "A" (interactivate (chess-memberize :all)))
+    (define-key substitute-map "N" (interactivate (chess-memberize nil)))
+    (define-key substitute-map "r" (interactivate (chess-memberize-class :replacement)))
+    (define-key substitute-map "q" (interactivate (chess-memberize-class :on-replace)))
+    (define-key substitute-map "a" (interactivate (chess-memberize-class :all)))
+    (define-key substitute-map "n" (interactivate (chess-memberize-class nil)))
+
+    (define-key qt-map "f" find-map)
+    (define-key find-map "f" #'chess-lookup-qtlog)
+    (define-key find-map "F" #'find-qt3-brother)
+    (define-key find-map "G" #'chess-grep)
+    (define-key find-map "e" #'chess-goto-error)
+    (define-key find-map "g" #'mb-c++-grep)
+    (define-key find-map "h" #'qt-help)
+
+    ;; Miscellanous
+    (define-key qt-map "a" #'qt-align-pro-file)
+    (define-key qt-map "i" #'chess-insert-error)
+    (define-key qt-map "c" #'clean-chess-code)))
 
 (provide 'qt-chess)
