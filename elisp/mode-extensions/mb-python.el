@@ -1,7 +1,8 @@
 (defun set-mb-python-locals ()
   "My local modifications of PYTHON-MODE"
   ;; Disable intraspace for INSERT-PARENTHESES
-  (setq-local parens-require-spaces nil))
+  (setq-local parens-require-spaces nil)
+  (linum-mode))
    
 (defun mb-python-last-sexp-region ()
   (let ((end (point)))
