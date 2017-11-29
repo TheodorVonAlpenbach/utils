@@ -31,7 +31,7 @@
   "Common Lisp function. Checks if CHARACTER is invariant under
 case-table."
   (= (aref (current-case-table) character) character))
-;;(lower-case-p ?Æ) => nil
+;;(lower-case-p ?Ã†) => nil
 
 (defun upper-case-p (character)
   "Inverse of `lower-case-p'."
@@ -314,8 +314,8 @@ TO-STRING)-s. This is very slow"
 						      (second x) ;cons is a one element list
 						      (rest x)   ;cons is an element
 						      )))))
-; (string-replace-map "Àøå" (list (cons "À" "Æ")))
-; (string-replace-map "Àøå"
+; (string-replace-map "Ã€Ã¸Ã¥" (list (cons "Ã€" "Ã†")))
+; (string-replace-map "Ã€Ã¸Ã¥"
 ;   (mapcar #'(lambda (x) (cons (first x) (third x))) *iso-latin1-encoding*))
 
 (defun infix-list (lst infix &optional is-function discard-empty-string) "'(a b c) => '(a INFIX b INFIX c)"
@@ -372,6 +372,34 @@ IN may also be a function (fn i), taking an index argument, see `infix-list'."
 ;(concat* '("1" "2" "3") :in "\n" :indent-string ">>")
 ;;(concat* '("" "" "3") :in "\n" :indent-string ">>")
 
+(cl-defun andcat (list &optional (delimiter ", ") (pair-delimiter " and ")
+		       (last-delimiter (concat (string-trim delimiter)
+					       pair-delimiter)))
+  "Concatenate string list with commas and a final ', and '.
+You may change the delimiters with the optional
+arguments DELIMITER, LAST-DELIMITER, and PAIR-DELIMITER.
+
+\(andcar ()\)
+     â‡’ \"\"
+
+\(andcar (\"Peter\")\)
+     â‡’ \"Peter\"
+
+\(andcar (\"Peter\" \"Paul\")\)
+     â‡’ \"Peter and Paul\" 
+
+\(andcar (\"Peter\" \"Paul\" \"Mary\")\)
+     â‡’ \"Peter, Paul, and Mary\"
+"
+  (case (length list)
+    (0 "")
+    (1 (car list))
+    (2 (concat (first list) pair-delimiter (second list)))
+    (t (concat* (butlast list)
+	 :in delimiter
+	 :suf (concat last-delimiter (last-elt list))))))
+;;(andcat '("Peter" "Paul" "Mary"))
+
 (defun lines-to-string (lines)
   (concat* lines :in "\n"))
 ;;(lines-to-string '("first" "next" "last"))
@@ -400,7 +428,7 @@ STRING."
 ;(quote-word)
 
 (define-key global-map "\M-\"" 'quote-word)
-(define-key global-map [(control \")] 'quote-region); går ikke !!!
+(define-key global-map [(control \")] 'quote-region); gÃ¥r ikke !!!
 
 (defmacro string-case (arg &rest clauses)
   "Same as CASE, but compares with STRING-EQUAL instead of EQL."
@@ -524,6 +552,7 @@ consider `buffer-substring-no-properties'"
   `(loop for ,line in (string-to-lines ,string)
 	 do (progn ,@body)))
 ;;(let (lines) (with-lines (l "qwe\nqwe\nqwe") (push l lines)) lines)
+(def-edebug-spec with-lines ((gate symbolp form) body))
 
 (defun multiply-string (s n)
   "TODO: Not too efficient"
