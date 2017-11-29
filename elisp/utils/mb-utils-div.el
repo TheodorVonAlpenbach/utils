@@ -287,6 +287,12 @@ TODO: implement this. Probably involves some macro magic"
 ;;(asetf (first ewq) (* 2 (first it))) ==> 2
 ;;ewq ==> (2 1)
 
+(defmacro interactivate (&rest body)
+  `(lambda ()
+      (interactive)
+      ,@body))
+;;(interactivate (list 1))
+
 (defmacro definteractive (defun)
   "Make DEFUN interactive with name CL-DEFUN. DEFUN takes no arguments.
 TODO: font-lock face as `defun'."
