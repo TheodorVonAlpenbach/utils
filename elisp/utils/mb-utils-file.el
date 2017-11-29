@@ -66,4 +66,24 @@ see `file-name-alter'"
    (file-name-sans-extension filename) new-extension))
 ;;(file-name-change-extension "qwe/qwe.txt" "cpp")
 
+(defun copy-libs (path1 path2)
+  (let* ((apath1 (file-truename path1))
+	 (paths1 (mapcar #'file-truename (unix-find path1 :name "*sc[ie]"))))
+    (loop for p1 in paths1
+	  for relative-path = (substring p1 (length apath1))
+	  for p2 = (expand-file-name relative-path path2)
+	  do (when (file-newer-than-file-p p1 p2)
+	       (copy-file p1 p2)))))
+;;(copy-libs "~/tmp/SciLab" "~/sources/SciLab")
+
+(defun rename-files (directory pattern replacement)
+  "Renames all files containing PATTERN in DIRECTORY."
+  (let* ((paths (file-expand-wildcards  (expand-file-name (format "*%s*" pattern) directory))))
+    (loop for path in paths
+	  for fn = (file-name-nondirectory path)
+	  for new-fn = (replace-regexp-in-string pattern replacement fn)
+	  for new-path = (expand-file-name new-fn directory)
+	  do (rename-file path new-path))))
+;;(rename-files "~/data/FFIAOG/MCMV/M341_Karmoy/MomPks/" "351" "341")
+
 (provide 'mb-utils-file)
