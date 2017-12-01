@@ -307,26 +307,21 @@ See also cram-extract-alternatives.
 
 ;;; Ratings
 (defun glicko-new-ratings (user problem score &optional time)
-<<<<<<< HEAD
   (let* ((uratings (cram-user-rating user))
 	 (tratings (cram-problem-rating problem))
-	 =======
-	 (let* ((uratings (cram-user-ratings user))
-		(tratings (cram-problem-ratings problem))
-		>>>>>>> Rename
-		(res (list (glicko-rating uratings (list tratings score) time)
-			   (glicko-rating tratings
-					  (list uratings (cram-invert-score score))
-					  time))))
-	   (message "Calculating ratings %S ==> %S" (list uratings tratings) res)
-	   res))
+	 (res (list (glicko-rating uratings (list tratings score) time)
+		    (glicko-rating tratings
+				   (list uratings (cram-invert-score score))
+				   time))))
+    (message "Calculating ratings %S ==> %S" (list uratings tratings) res)
+    res))
     ;;(glicko-new-ratings (cram-current-user) (cram-current-problem) 0)
     ;;(glicko-rating '(1372 350) '((1677 35) 0.04) nil)
 
-    (defun extract-ratings (user problem)
-      "Return a pair of ratings. Superfluous util?!"
-      (list (cram-user-rating user)
-	    (cram-problem-rating problem))))
+(defun extract-ratings (user problem)
+  "Return a pair of ratings. Superfluous util?!"
+  (list (cram-user-rating user)
+	(cram-problem-rating problem)))
 
 (defun cram-report-response-strange-error (response time-elapsed)
   (let* ((user (cram-current-user))
@@ -347,7 +342,7 @@ See also cram-extract-alternatives.
     score))
 
 (defun cram-report-response (response time-elapsed)
-  "Return result score based on RESPONSE and the TIME-ELAPSED. "
+  "Return result score based on RESPONSE and the TIME-ELAPSED.
 Also, calculate new ratings for current user and problem,
 and update the current database concordingly.
 
