@@ -95,11 +95,11 @@ the *cram-current-problem* which is yet another structure."
 
 (defun cram-register-new-user ()
   (interactive)
-  (let ((user-name (read-from-minibuffer "New user name: "))
-	(age (string-to-number (read-from-minibuffer "Age: "))))
-    (assert (and (integerp age) (plusp age)) t "Illegal age")
-    (when (yes-or-no-p (format "Are you sure that you want to register a new user with name '%s'? " user-name))
-      (aif (cram-add-user user-name age)
+  (let ((user-name (read-from-minibuffer "New user name: ")))
+    (when (yes-or-no-p
+	   (format "Are you sure that you want to register a new user with name '%s'? "
+	     user-name))
+      (aif (cram-add-user user-name)
 	(prog1 it
 	  (cram-set-current-user it)
 	  (message "User %s registered" user-name))
@@ -171,10 +171,10 @@ the *cram-current-problem* which is yet another structure."
   (with-output-to-temp-buffer buffer-name
     (princ (tab-format (eval-when (load eval)
 			 (ld-select :users 
-				    :columns (:name :age (round :rating) (round :RD) ::updated)
+				    :columns (:name (round :rating) (round :RD) ::updated)
 				    :order-by :rating
 				    :order :desc)) 
-		       :header '("Name" "Age" "Rating" "RD" "Last update")
+		       :header '("Name" "Rating" "RD" "Last update")
 		       :column-separator " | "))
     (switch-to-buffer-other-window buffer-name)))
 ;;(cram-list-user-ratings)

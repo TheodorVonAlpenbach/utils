@@ -29,10 +29,12 @@
   *cram-current-user*)
 
 (defun cram-current-user (&optional update) 
-  (when (or update (null *cram-current-user*))
-    (cram-set-current-user (or (cram-db-last-user)
-				(cram-db-get-user +cram-default-user-name+))))
-  *cram-current-user*)
+  (when *current-database*
+    (when (or update
+	      (null *cram-current-user*))
+      (cram-set-current-user (or (cram-db-last-user)
+				 (cram-db-get-user +cram-default-user-name+))))
+    *cram-current-user*))
 ;;(cram-current-user t)
 
 ;;; Current problem
