@@ -210,7 +210,7 @@
     (onkel-oskar-namsos "Onkel Oskar (Namsos)" onsdag (4 5 0) "Onkel Oskar")
     (nellie "Nellie (Hamar)" onsdag (0 1) "Hamar")
     (scotsman "Scotsman (Oslo)" torsdag (4 5 0) "Scotsman")
-    (felix "Felix (Lillehammer)" torsdag (4 5 0) "Felix"))
+    (felix "Felix (Lillehammer)" torsdag (0 1) "Felix"))
   "Whats the third number number?
 Format is (tag pubstring day columns pubregexp)")
 
