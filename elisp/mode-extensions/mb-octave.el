@@ -299,11 +299,6 @@ mode in Emacs."
     (switch-to-buffer it)
     (info "(octave.info)Top" "*Octave-info*")))
 
-(defun regexp-or (&rest regexps)
-  "Join together REGEXPS with \\| (OR)."
-  (concat* regexps :in "\\|" :key #'(lambda (x) (format "\\(%s\\)" x))))
-;;(regexp-or "abc" "def")
-
 (defun octave-fill-documentation-paragraph ()
   "Fills an Octave documentation paragraph.
 This functionality is not well covered by octave-fill-paragraph"
@@ -365,13 +360,29 @@ If ARGUMENT is a string insert it in the pair of curly parentheses."
   (format "@%s{%s}" function-name argument))
 ;;(texinfo-@fiy "foo" "bar")
 
-(defun insert-texinfo-var ()
-  (interactive)
-  (if (symbol-at-point)
-    (destructuring-bind (beg . end) (bounds-of-thing-at-point 'symbol)
-      (insert (texinfo-@fiy "var" (delete-and-extract-region beg end))))
-    (insert "@var{}")
-    (backward-char 1)))
+(defun texinfo-insert-@ (code)
+  (if (use-region-p)
+    (region-substitute (format "@%s{%%s}" code))
+    (if (symbol-at-point)
+     (destructuring-bind (beg . end) (bounds-of-thing-at-point 'symbol)
+       (insert (texinfo-@fiy code (delete-and-extract-region beg end))))
+     (insert (format "@%s{}" code))
+     (backward-char 1))))
+
+(defmacro texinfo-def-insert-@-fn (code)
+  "Define an interactive function with only form (texinfo-insert-@ code)."
+  `(defun ,(intern (concat "texinfo-insert-@" code)) ()
+     "Not documented."
+     (interactive)
+     (texinfo-insert-@ ,code)))
+;;(texinfo-def-insert-@-fn "xref")
+
+;; (loop for code in '("var" "xref" "ref" "pxref")
+;;       do (texinfo-def-insert-@-fn code))
+(texinfo-def-insert-@-fn "var")
+(texinfo-def-insert-@-fn "xref")
+(texinfo-def-insert-@-fn "ref")
+(texinfo-def-insert-@-fn "pxref")
 
 (defun mb-octave-test-buffer-file ()
   "Run tests for the current buffer's file."
@@ -405,7 +416,7 @@ If ARGUMENT is a string insert it in the pair of curly parentheses."
 
 (define-key inferior-octave-mode-map (kbd "C-h i") #'inferior-octave-info)
 
-(define-key octave-mode-map (kbd "C-c i @") #'insert-texinfo-var)
+(define-key octave-mode-map (kbd "C-c i @") #'texinfo-insert-@var*)
 
 (defun filter-octave-texinfo-line (string functions)
   "Expand the @seealso macro to @xref-s and @ref-s.
