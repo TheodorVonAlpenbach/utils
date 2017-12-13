@@ -9,7 +9,8 @@
 	    (expand-file-name filename)))
 ;;(in-directory-p "~/bin/mbtags.sh" "~/")
 
-(cl-defun chess-file-p (buffer &optional (chess-dir "~/projects/chess"))
+(cl-defun chess-file-p (&optional (buffer (current-buffer))
+				  (chess-dir "~/projects/chess"))
   (or (in-directory-p (buffer-file-name buffer) chess-dir)
       (in-directory-p (buffer-file-name buffer) "~/sources/CHESS/RemoteAcceleration")
       (in-directory-p (buffer-file-name buffer) "~/sources/CHESS/Tail")
@@ -22,7 +23,9 @@
  "qt-gnu"
  '("gnu" 
    (c-access-key .
-    "\\<\\(signals\\|public\\|protected\\|private\\|public slots\\|protected slots\\|private slots\\):")
+    (format "\\<\\(%s\\):"
+      (regexp-or "signals" "public" "protected" "private" "public"
+		 "slots" "protected slots" "private slots")))
    (c-basic-offset . 4)
    (c-cleanup-list
     brace-else-brace
@@ -39,7 +42,13 @@
     (linum-mode 1)
     (chess-kbd-maps)))
 
+(defun chess-pro-hook ()
+  "Set local qt key map for .pro files (Makefile mode)"
+  (when (chess-file-p)
+    (chess-kbd-maps)))
+
 (add-hook 'c-mode-common-hook #'chess-hook)
+(add-hook 'makefile-mode-hook #'chess-hook)
 ;;(nilf c-mode-common-hook)
 
 (defun clean-chess-code-test-string-ops ()
