@@ -186,7 +186,10 @@ This is a destructive function; it reuses the storage of SEQ if possible.
 
 (cl-defun nminimum-nokey (vec test)
   "Helper for `nminimum'. Same as nminimum, but without key and from-end.
-This function is not intended for use."
+Note that the function fails, if VEC is empty. It is the onus of
+the caller to avoid this.
+
+This function is not intended for use outside of this module."
   (loop with min = (elt vec 0)
 	with pos = 0
 	for i from 0
@@ -207,15 +210,17 @@ respectively.
 
 \nKeywords supported:  :test :key :start :end :from-end
 \n(fn SEQ PREDICATE [KEYWORD VALUE]...)"
-  (if from-end
-    (minimum (nreverse cl-seq) :test test :key key)
-    (destructuring-bind (min pos)
-	(nminimum-nokey
-	 (if key
-	   (map 'vector key (subseq cl-seq start end))
-	   (coerce (subseq cl-seq start end) 'vector))
-	 test)
-      (values (elt cl-seq pos) (+ pos start) min))))
+  (when (plusp (length cl-seq))
+    (if from-end
+      (minimum (nreverse cl-seq) :test test :key key)
+      (destructuring-bind (min pos)
+	  (nminimum-nokey
+	   (if key
+	     (map 'vector key (subseq cl-seq start end))
+	     (coerce (subseq cl-seq start end) 'vector))
+	   test)
+	(values (elt cl-seq pos) (+ pos start) min)))))
+;;(minimum nil)
 ;;(let ((db '((0 2) (1 -1) (1 2)))) (list (nminimum db :key #'second) db))
 
 (cl-defun min-position (&rest args)
@@ -230,6 +235,7 @@ respectively.
 \nKeywords supported:  :test :key :start :end :from-end
 \n(fn SEQ [KEYWORD VALUE]...)"
   (first (apply #'minimum sequence args)))
+;;(min-element '())
 ;;(min-element '(1 2 1 3) :key #'1+)
 
 (cl-defun list< (list1 list2 &key (test #'<) (key #'identity))
