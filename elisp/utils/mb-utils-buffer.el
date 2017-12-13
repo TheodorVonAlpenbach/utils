@@ -8,7 +8,7 @@
 ;;(region-end*)
 
 (defun region (&optional force)
-  (cons (region-beginning*) (region-end*)))
+  (list (region-beginning*) (region-end*)))
 ;;(region)
 
 (defun mark-region (beg-or-region &optional end)
@@ -189,6 +189,22 @@ Note that line numbers and paragraph numbers (check) starts from base 0."
 ;;; Region stuff
 (defalias 'region-string 'buffer-substring-no-properties)
 ;;(region-string 1 100)
+
+(cl-defun region-replace-raw (new-string region)
+  "Replace the content of current buffer's REGION with NEW-STRING."
+  (apply #'delete-region region)
+  (insert new-string))
+
+(cl-defun region-replace (format &optional (region (region)))
+  "Replace the content of REGION with the string defined by FORMAT.
+REGION is a pair of points (START END) belonging to BUFFER, which
+is the current buffer by default. This region is replaced by the
+string FORMAT after each substring \"%s\" has been substuted by
+the content of REGION."
+  (region-substitute-raw
+   (replace-regexp-in-string "%s" (apply #'region-string region) format)
+   region))
+;;(region-substitute "(%s)") test reg(i){i}on
 
 (defun region-lines (beg end)
   "Returns a list of strings, each string being line in region"
