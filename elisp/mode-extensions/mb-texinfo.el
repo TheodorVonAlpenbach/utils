@@ -1,11 +1,19 @@
 ;;;; This module contains extensions the Emacs' texinfo mode.
 
+(define-skeleton texinfo-insert-@xref
+  "Insert a `@xref{...}' command in a Texinfo buffer.
+A numeric argument says how many words the braces should surround.
+The default is not to surround any existing words with the braces."
+  (bow)
+  "@ref{" _ "}")
+
 (defun mb-texinfo-map ()
   (let ((map (make-sparse-keymap))
-	(insert-map         (make-sparse-keymap))  ; c
+	(insert-map         (make-sparse-keymap))  ; i
 	(update-map         (make-sparse-keymap))  ; u
 	(tex-map            (make-sparse-keymap))  ; t
 	(makeinfo-map       (make-sparse-keymap))  ; m
+	(ref-map            (make-sparse-keymap))  ; r
 	(texinfo-format-map (make-sparse-keymap))) ; e
     ;; map is currently valid only on normal and visual state
     (key-chord-define evil-normal-state-local-map "gh" map)
@@ -17,7 +25,14 @@
     (define-key map "{" 'texinfo-insert-braces)
     (define-key map "o" 'texinfo-insert-block)
 
-    (define-key map "c" insert-map)
+    (define-key map "r" ref-map)
+    (define-key ref-map "x" 'texinfo-insert-@xref)
+    (define-key ref-map ";" 'texinfo-insert-@xref)
+    (define-key ref-map "r" 'texinfo-insert-@ref)
+    (define-key ref-map "p" 'texinfo-insert-@pxref)
+    (define-key ref-map "u" 'texinfo-insert-@uref)
+
+    (define-key map "i" insert-map)
     (define-key insert-map "c" 'texinfo-insert-@code)
     (define-key insert-map "d" 'texinfo-insert-@dfn)
     (define-key insert-map "D" 'texinfo-start-menu-description)
@@ -61,6 +76,10 @@
     (define-key makeinfo-map "l" 'makeinfo-recenter-compilation-buffer)
     (define-key makeinfo-map "r" 'makeinfo-region)
     (define-key makeinfo-map "b" 'makeinfo-buffer)
+    (define-key makeinfo-map "h" 'mb-texinfo-make-html)
+    (define-key makeinfo-map "H" 'mb-texinfo-make-html)
+    (define-key makeinfo-map "n" 'next-error)
+    (define-key makeinfo-map "p" 'previous-error)
 
     (define-key map "e" texinfo-format-map)
     (define-key texinfo-format-map "r" 'texinfo-format-region)
@@ -70,5 +89,14 @@
 ;;(mb-texinfo-map)
 
 (add-hook 'Texinfo-mode-hook 'mb-texinfo-map)
+
+(defun mb-texinfo-make-html ()
+  (interactive)
+  (makeinfo-buffer)
+  (call-process* "makeinfo" "--html" (buffer-file-name)))
+
+(defun mb-texinfo-install-html ()
+  (interactive)
+  (call-process* "cp" "-r" "lsbin" "/ls/platinum/u1/mbe/html/"))
 
 (provide 'mb-texinfo)
