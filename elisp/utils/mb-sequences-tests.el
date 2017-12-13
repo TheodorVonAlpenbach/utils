@@ -4,8 +4,17 @@
 (ert-deftest test-list< ()
   "Test of list<"
   ;; test types
-  (should (list< '("n") '("n" "c1") :test #'string<))
-)
+  (should (list< '("n") '("n" "c1") :test #'string<)))
+
+(ert-deftest test-minimum ()
+  "Test of minimum"
+  ;; test types
+  (should (equal (minimum '()) nil)))
+
+(ert-deftest test-min-element ()
+  "Test of min-element"
+  ;; test types
+  (should (equal (min-element '()) nil)))
 ;;(string< "n" "o")
 
 (ert-deftest test-copy-if ()
