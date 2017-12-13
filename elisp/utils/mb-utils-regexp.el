@@ -5,15 +5,15 @@
 (defconst *empty-regexp* "\\`\\`"
   "Matches absolutely nothing.")
 
-(defun regexp-or (strings)
+(defun regexp-or (&rest strings)
   "Returns a regexp matching any integer in INTS"
   (concat* strings :in "\\|"))
-;;(regexp-or '("qwe" "ewq"))
+;;(regexp-or "abc" "def")
 
-(defun regexp-or-integers (ints)
+(defun regexp-or-integers (&rest ints)
   "Returns a regexp matching any integer in INTS"
-  (regexp-or (mapcar 'number-to-string ints)))
-;;(regexp-or-integers (a-b 1 3))
+  (apply #'regexp-or (mapcar 'number-to-string ints)))
+;;(apply #'regexp-or-integers (a-b 1 3))
 
 (defun factor-list (list test &rest args)
   "{aa ab b ba} -> {a{a b} b{nil a}}"
