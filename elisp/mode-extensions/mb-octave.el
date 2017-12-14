@@ -2,8 +2,12 @@
 
 (defun mb-octave-kbd-maps ()
   (let ((mb-local-map (make-sparse-keymap))
-	(test-map (make-sparse-keymap)))
+	(test-map (make-sparse-keymap))
+	(insert-map (make-sparse-keymap)))
     (key-chord-define evil-normal-state-local-map "gh" mb-local-map)
+
+    (define-key mb-local-map "i" insert-map)
+    (define-key insert-map "v" #'texinfo-insert-@var)
 
     (define-key mb-local-map "t" test-map)
     (define-key test-map "f" #'mb-octave-test-buffer-file)
@@ -362,7 +366,7 @@ If ARGUMENT is a string insert it in the pair of curly parentheses."
 
 (defun texinfo-insert-@ (code)
   (if (use-region-p)
-    (region-substitute (format "@%s{%%s}" code))
+    (region-replace (format "@%s{%%s}" code))
     (if (symbol-at-point)
      (destructuring-bind (beg . end) (bounds-of-thing-at-point 'symbol)
        (insert (texinfo-@fiy code (delete-and-extract-region beg end))))
