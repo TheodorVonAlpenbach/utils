@@ -201,10 +201,10 @@ REGION is a pair of points (START END) belonging to BUFFER, which
 is the current buffer by default. This region is replaced by the
 string FORMAT after each substring \"%s\" has been substuted by
 the content of REGION."
-  (region-substitute-raw
+  (region-replace-raw
    (replace-regexp-in-string "%s" (apply #'region-string region) format)
    region))
-;;(region-substitute "(%s)") test reg(i){i}on
+;;(region-replace "(%s)") test reg(i){i}on
 
 (defun region-lines (beg end)
   "Returns a list of strings, each string being line in region"
