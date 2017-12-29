@@ -62,7 +62,7 @@
 	;; (,lsdoc-dir "qtportlog.org" :keyboard :no)
 	;; (,lsdoc-dir "LS-notes.org" :point :end :keyboard :no :time-paragraphs t)
 	))
-;;(find-file "/ssh:sil:~/doc")
+;;(find-file "/ssh:ssh:~/doc/LS-notes.org")
 
 ;;scheme
 (setf scheme-program-name "guile")
