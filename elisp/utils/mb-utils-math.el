@@ -1007,3 +1007,11 @@ p) q)))"
 ;;(test-another-integer-operation 1000000)
 
 (provide 'mb-utils-math)
+
+(defun problem (n)
+  (/ (loop with primes = (subseq 10000-first-primes 0 15)
+	   repeat n
+	   for s = (+ (random-integer 1 50) (random-integer 1 50))
+	   count (and (find s primes) (< s 50)))
+     (float n)))
+;;(* (problem 1000000) (/ 2500 313.0))
