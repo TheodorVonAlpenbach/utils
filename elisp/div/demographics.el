@@ -26,6 +26,7 @@ POPULATION is a triple (CHILDREN ADULTS ELDER)."
 		  average-number-of-children
 		  premature-death-rate)
 	collect new-population))
+;;(sds-simulate 3 30 '(1 1 1) 70)
 ;;(sds-simulate 3 30 '(0.05 0.1 0.05) 70)
 
 (cl-defun sds-estimate-growth (num-generations
@@ -41,7 +42,7 @@ POPULATION is a triple (CHILDREN ADULTS ELDER)."
 			 collect (/ (float b) a)))
 	  (/ 1.0 generation-length))))
 ;;(sds-estimate-growth 10 30 '(3.8 2 2) 7 '(0.5 0.2))
-;;(sds-estimate-growth 100 30 '(1 1 1) 71)
+;;(sds-estimate-growth 300 30 '(1 1 1) 70)
 ;;(sds-estimate-growth 100 30 '(1 1 1) 3.1)
 ;;(sds-estimate-growth 100 30 '(1 1 1) 1.7)
 ;;(pp (loop for y from 0 to 50 by 5 collect (* .2 (expt 1.08 y))))
