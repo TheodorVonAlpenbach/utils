@@ -35,18 +35,25 @@
   "Parses the submitted response"
   (string-trim (line-string)))
 
-(cl-defun short-judgement (score response answer
+
+(defun format-alternatives (alternatives)
+  (or alternatives "None."))
+
+(cl-defun short-judgement (score response answer alternatives
 				 &optional (correct-color "ForestGreen")
 				 (error-color "red"))
-  (if (equal response answer)
-    (format "%s Your score was %.2f"
+  (if (plusp score)
+    (format "%s Your score was %.2f\nFull answer: %s\nAlternatives: %s"
       (propertize "Correct!" 'face
-		  (list :foreground correct-color :weight 'bold)) score)
-    (format "%s Correct response is %S"
+		  (list :foreground correct-color :weight 'bold))
+      score answer (format-alternatives alternatives))
+    (format "%s Correct response is %S\nAlternatives: %S"
       (propertize "Incorrect!" 'face
-		  (list :foreground error-color :weight 'bold)) answer)))
+		  (list :foreground error-color :weight 'bold))
+      answer (format-alternatives alternatives))))
 
-(cl-defun long-judgement (response time answer score old-ratings new-ratings)
+(cl-defun long-judgement (response time answer alternatives
+			  score old-ratings new-ratings)
   (let ((diff-ratings (maptree* #'- new-ratings old-ratings)))
     (destructuring-bind ((user-rating user-RD) (problem-rating problem-RD))
 	(maptree #'round new-ratings)
@@ -55,7 +62,7 @@
 	  (maptree #'round diff-ratings)
 	(concat
 	  "\n\n"
-	  (short-judgement score response answer) "\n"
+	  (short-judgement score response answer alternatives) "\n"
 	  (format "Time spent: %.1f seconds\n" (/ time 1000.0))
 	  "\n"
 	  (format "Your new rating is %d (%d)\n" user-rating user-rating-diff)
@@ -63,7 +70,10 @@
 	  (format "Problem's new rating is %d (%d)\n"
 	    problem-rating problem-rating-diff)
 	  (format "Problem' new RD is %d (%d)\n"
-	    problem-RD problem-RD-diff))))))
+	    problem-RD problem-RD-diff)
+	  ;; only in debugging stage
+	  (format "\nDebug sorted problem table\n%S"
+	    (cl-sort (cram-db-problems) #'string> :key #'cram-problem-updated)))))))
 
 (defun cram-submit ()
   "It's a bit confusing with problem-entry in DB, problem as is, and
@@ -74,11 +84,12 @@ the *cram-current-problem* which is yet another structure."
 	 (old-ratings (cram-current-ratings))
 	 (score (cram-report-response response time))
 	 (answer (cram-problem-answer (cram-current-problem)))
+	 (alternatives(cram-problem-alternatives (cram-current-problem)))
 	 (new-ratings (cram-current-ratings)))
     (if (and (cram-auto-continue-p) (not current-prefix-arg))
-      (progn (message (short-judgement score response answer))
+      (progn (message (short-judgement score response answer alternatives))
 	     (cram-new))
-      (insert (long-judgement response time answer score
+      (insert (long-judgement response time answer alternatives score
 			      old-ratings new-ratings))))
     (cram-answer-mode)
     (evil-emacs-state))

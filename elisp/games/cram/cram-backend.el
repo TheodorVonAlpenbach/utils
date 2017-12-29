@@ -69,7 +69,7 @@
   (copy-tree *cram-current-problem*))
 ;;(cram-current-problem)
 
-(cl-defun cram-get-problem (&key (method :next) (rating +cram-default-rating+))
+(cl-defun cram-get-problem (&key (method :worst) (rating +cram-default-rating+))
   "Return a problem from database, or a create a new problem depending on method.
 If METHOD is
   :NEW     return a new problem a created with `cram-create-new',
@@ -93,7 +93,7 @@ the selection strategy somewhat. For instance, :RANDOM avoids the last problems 
     (:worst (cram-get-worst-problem))
     (:update-current (cram-db-get-problem (cram-problem-id (cram-current-problem))))))
 
-(cl-defun cram-get-problem-weird (&key (method :next)
+(cl-defun cram-get-problem-weird (&key (method :worst)
 				    (rating +cram-default-rating+)))
 ;;(cram-get-problem :method :new)
 ;;(cram-get-problem :method :random :rating 1500)
@@ -122,39 +122,6 @@ Why was cram-current-user called with t (update arg)?."
 (defun cram-random-level (operation)
   (elt-random (apply #'a-b (second (assoc operation *cram-problem-range*)))))
 ;;(cram-random-level :substraction)
-
-(defun cram-arguments-1 (level)
-  "Returns "
-  (case level
-    (1 ;positive integers that adds to 10 or lower
-     (let ((x (random 10)))
-       (list x (random (- 11 x)))))
-    (2 ;integers less than 10
-     (list (random 10) (random 10)))
-    (3 ;integers less than 100
-     (list (random 100) (random 100)))
-    (4 ;integers less than 1000
-     (list (random 1000) (random 1000)))))
-
-(defun cram-arguments (level operation)
-  "Returns "
-  (if (eql operation :division)
-    (loop for args = (cram-arguments-1 level)
-	  while (zerop (first args))
-	  finally (return (list (apply #'* args) (first args))))
-    (cram-arguments-1 level)))
-;;(loop for i below 10000 never (= (second (cram-arguments 1 :division)) 0))
-
-(defun cram-estimate-level (problem)
-  (destructuring-bind (x y) (cram-problem-arguments problem)
-    (cond
-      ;; both < 10
-      ((and (< x 10) (< y 10))
-       ;;... then either level 1 or 2
-       (if (<= (+ x y) 10) 1 2))
-      ((and (< x 100) (< y 100)) 3)
-      ((and (< x 1000) (< y 1000)) 4))))
-;;(mapcar #'cram-estimate-level (cram-db-problems))
 
 (defun combine< (&rest predicates)
   (lexical-let ((preds predicates))
@@ -252,6 +219,7 @@ of tries is quite limited"
 ;;(loop repeat 1 collect (cram-create-problem :rating 1500))
 ;;(count nil (loop repeat 100 collect (cram-create-problem :rating 1653.5199667679983)))
 
+(require 'mb-utils-strings)
 (defun expand-alternatives (pattern)
   "Expand parentheses alternatives in solution string.
 The rules can be summarized in these examples:
@@ -275,8 +243,9 @@ The rules can be summarized in these examples:
   (mapcar #'expand-alternatives
     (cons (cram-problem-answer problem)
 	  (awhen (cram-problem-alternatives problem)
-	    split-string ";"))))
-;;(cram-expand-alternatives (car (ld-select :problem :where (string-match "Klaus" :answer))))
+	    (split-string it ";")))))
+;;(cram-expand-alternatives (car (ld-select :problem :where (string-match* "Klaus" :answer))))
+;;(ld-select :problem)
 
 (defun cram-correct-response-p (problem response)
   "Return nil if and only if RESPONSE is incorrect according to PROBLEM.
@@ -299,7 +268,7 @@ See also cram-extract-alternatives.
 			      &optional (free-time 5000) (max-time 30000))
   "All TIMEs are in milliseconds."
   (let ((answer (cram-problem-answer problem)))
-    (if (cram-correct-response-p answer response)
+    (if (cram-correct-response-p problem response)
       (- 1 (min 1 (/ (max 0 (- time-elapsed free-time))
 		     (coerce (- max-time free-time) 'float))))
       0)))
@@ -309,16 +278,20 @@ See also cram-extract-alternatives.
 
 ;;; Ratings
 (defun glicko-new-ratings (user problem score &optional time)
+  "Calculate new ratings for USER and PROBLEM given SCORE.
+Optional TIME is the amount of days since the last time problem
+was SOLVED."
   (let* ((uratings (cram-user-rating user))
 	 (tratings (cram-problem-rating problem))
 	 (res (list (glicko-rating uratings (list tratings score) time)
 		    (glicko-rating tratings
 				   (list uratings (cram-invert-score score))
 				   time))))
-    (message "Calculating ratings %S ==> %S" (list uratings tratings) res)
-    res))
-    ;;(glicko-new-ratings (cram-current-user) (cram-current-problem) 0)
-    ;;(glicko-rating '(1372 350) '((1677 35) 0.04) nil)
+	  (message "Calculating ratings %S ==> %S" (list uratings tratings) res)
+	   res))
+;;(glicko-new-ratings (cram-current-user) (cram-current-problem) 0)
+;;(glicko-rating '(1776 47) '((1413 217) .85) nil)
+;;(glicko-rating '(1413 217) '((1776 47) .15) nil)
 
 (defun extract-ratings (user problem)
   "Return a pair of ratings. Superfluous util?!"
@@ -361,7 +334,9 @@ ratings, and hand the onus of DB update to the caller"
     (destructuring-bind (updated-user updated-problem)
 	(apply #'cram-db-report-match
 	       user problem
-	       (iso-date-and-time) response time-elapsed
+	       (iso-date-and-time :with-seconds t)
+	       response
+	       time-elapsed
 	       new-ratings)
       ;; why return this from this destruct form?
       ;; it is never used. Debugging purposes?
@@ -373,7 +348,7 @@ ratings, and hand the onus of DB update to the caller"
 
 (defun cram-reset-all ()
   (when (yes-or-no-p "Are you sure you want to reset everything? ")
-    (cram-init-database)
+    (cram-init-database t)
     (nilf *cram-current-user* *cram-current-problem*)))
 ;;(cram-reset-all)
 
