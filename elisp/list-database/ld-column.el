@@ -1,9 +1,10 @@
 ;; column definitions == (:column keyword name type)
-(defun* ld-make-column (id &key name type properties)
+(cl-defun ld-make-column (id &key name type properties)
   "If TYPE is nil: no particular type. Otherwise use the type symbols in elisp."
   (list :column id (or name (keyword-name (ld-identifier-keyword id :column))) type properties))
 ;;(ld-make-column :qwe)
 
+(defalias 'ld-column-tag #'first)
 (defalias 'ld-column-identifier #'second)
 (defalias 'ld-column-name #'third)
 (defalias 'ld-column-type #'fourth)
