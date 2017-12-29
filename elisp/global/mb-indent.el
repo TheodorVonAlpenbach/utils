@@ -94,7 +94,8 @@ SYMBOL can be a symbol or a list of symbols. See function
 	     html-stream string-match* concat* remove-duplicates
 	     csv-string write-csv
 	     gui-position-objects-horizontally
-	     gui-position-objects-vertically)
+	     gui-position-objects-vertically
+	     ld-update)
 	     'prog1)
 
 (cl-indent '(do-lines defmethod with-infile defclass with-outfile
