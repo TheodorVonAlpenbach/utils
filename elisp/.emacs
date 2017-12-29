@@ -178,7 +178,7 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 (add-to-list 'load-path "~/.emacs.d/smartparens-master")
 
 ;; Move this to mode-extensions 
-;; (autoload 'LilyPond-mode "lilypond-mode" "Major mode for editing BNF definitions." t)
+(autoload 'LilyPond-mode "lilypond-mode" "Major mode for editing BNF definitions." t)
 ;; (autoload 'mbscilab-mode "scilab-mode" "Major mode for editing Scilab files." t)
 
 (let* ((my-mode-alist
@@ -212,6 +212,7 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 	 ("\\.cl$" . lisp-mode)
 	 ("\\.qz$" . quiz-mode)
 	 ("\\.ly$" . LilyPond-mode)
+	 ("\\.ily$" . LilyPond-mode)
 	 ("\\.exe\\.config$" . sgml-mode)
 	 ("\\.bnf$" . backus-naur-mode)
 	 ("\\.sc[ie]$" . mbscilab-mode)
@@ -280,6 +281,7 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 (add-hook 'emacs-lisp-mode-hook 'turn-on-eldoc-mode)
 (add-hook 'lisp-interaction-mode-hook 'turn-on-eldoc-mode)
 (add-hook 'ielm-mode-hook 'turn-on-eldoc-mode)
+(add-hook 'LilyPond-mode-hook (lambda () (turn-on-font-lock)))
 
 ;; finding favourites
 (mapcar
