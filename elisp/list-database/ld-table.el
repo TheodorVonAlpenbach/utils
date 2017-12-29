@@ -18,7 +18,7 @@
   (and (consp obj) (eql (first obj) :table)))
 ;;(ld-table-p emps)
 
-(defun* ld-make-table-identifier (keyword &optional (database *current-database*))
+(cl-defun ld-make-table-identifier (keyword &optional (database *current-database*))
   (list (ld-database-keyword database) keyword))
 ;;(ld-globalize-table :qwe)
 
@@ -53,7 +53,7 @@
     (:all (copy-tree table))))
 ;;(ld-clone-table emps)
 
-(defun* ntable-insert-column (coldata rows &optional colpos)
+(cl-defun ntable-insert-column (coldata rows &optional colpos)
   (assert (= (length coldata) (length rows)))
   (let ((trows (transpose rows)))
     (list-insert coldata (or colpos (length trows)) trows)
