@@ -15,6 +15,14 @@
     ("Lilypond-compile" ("LilyPond started at .*\n\nlilypond \\(.*\\)$" 1)))
   "TODO: enable :search")
 
+(defun elisp-swap ()
+  "Swap an emacs lisp file with its associated test file."
+  (when (eql major-mode 'emacs-lisp-mode)
+    (aif (string-match* "test-\\(.*\\.el$\\)" (buffer-name) :num 1)
+      (find-file (expand-file-name it (buffer-directory)))
+      (find-file (expand-file-name (concat "test-" (buffer-name))
+				   (buffer-directory))))))
+
 (defun regexp-swap (file-regexp)
   (destructuring-bind (regexp num) file-regexp
     (awhen (string-match* regexp (buffer-string-no-properties) :num 1)
@@ -52,14 +60,6 @@
 		 (when (match-current-buffer-p to) (swap-target from)))
      return it))
 
-(cl-defun smart-swap (&optional (swaps +smart-swaps+))
-  "Swaps to file as defined in SWAPS"
-  (interactive)
-  (or (simple-swap)
-      (aif (smart-swap-find-target swaps)
-	(find-file it)
-	(message "Couldn't find swap target for current file"))))
-
 (defun simple-swap-1 (fn1 fn2)
   (let ((bfn (buffer-file-name (current-buffer))))
     (if (string= fn1 bfn)
@@ -74,5 +74,14 @@
 	for fn2 = (expand-file-name f2 d)
 	do (simple-swap-1 fn1 fn2)))
 ;;(simple-swap)
+
+(cl-defun smart-swap (&optional (swaps +smart-swaps+))
+  "Swaps to file as defined in SWAPS"
+  (interactive)
+  (or (simple-swap)
+      (elisp-swap)
+      (aif (smart-swap-find-target swaps)
+	(find-file it)
+	(message "Couldn't find swap target for current file"))))
 
 (provide 'smart-swap)
