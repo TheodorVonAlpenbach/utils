@@ -432,7 +432,7 @@ STRING."
 (define-key global-map [(control \")] 'quote-region); går ikke !!!
 
 (defmacro string-case (arg &rest clauses)
-  "Same as CASE, but compares with STRING-EQUAL instead of EQL."
+  "Same as case, but compares with `string-equal' instead of `eql'."
   (let ((g (gensym)))
     `(let ((,g ,arg))
        (cond ,@(mapcar #'(lambda (cl)
