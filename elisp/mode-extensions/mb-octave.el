@@ -1,4 +1,5 @@
 (require 'octave)
+(require 'mb-texinfo)
 
 (defun mb-octave-kbd-maps ()
   (let ((mb-local-map (make-sparse-keymap))
@@ -8,11 +9,15 @@
 
     (define-key mb-local-map "i" insert-map)
     (define-key insert-map "v" #'texinfo-insert-@var)
+    (define-key insert-map "r" #'texinfo-insert-@ref)
 
     (define-key mb-local-map "t" test-map)
     (define-key test-map "f" #'mb-octave-test-buffer-file)
-    (define-key test-map "d" #'mb-octave-test-directory)
-    (define-key test-map "a" #'mb-octave-test-all)))
+    (define-key test-map "d" #'mb-octave-test-buffer-directory)
+    (define-key test-map "D" #'mb-octave-test-repl-directory)
+    (define-key test-map "a" #'mb-octave-test-buffer-directory-recursively)
+    (define-key test-map "A" #'mb-octave-test-repl-directory-recursively)))
+
 
 (add-hook 'octave-mode-hook #'mb-octave-kbd-maps)
 
@@ -394,15 +399,31 @@ If ARGUMENT is a string insert it in the pair of curly parentheses."
   (octave-send-string (format "test (\"%s\")" (buffer-file-name))))
 ;;(mb-octave-test-buffer-file)
 
-(defun mb-octave-test-directory ()
-  "Run tests for all files in this directory."
+(defun mb-octave-test-buffer-directory (&optional recursively-p)
+  "Run tests for all files in the current buffer's directory.
+If RECURSIVELY-P is not NIL, then the test covers the files in
+all the subdirectories as well."
   (interactive)
-  (octave-send-string (format "mbruntests .")))
+  (octave-send-string (format "mbruntests %s%s"
+			(file-name-directory (buffer-file-name))
+			(if recursively-p " 1" ""))))
 
-(defun mb-octave-test-all ()
-  "Run tests for all files in and under this directory."
+(defun mb-octave-test-repl-directory (&optional recursively-p)
+  "Run tests for all files in the REPL's current directory.
+If RECURSIVELY-P is not NIL, then the test covers the files in
+all the subdirectories as well."
   (interactive)
-  (octave-send-string (format "mbruntests . 1")))
+  (octave-send-string (format "mbruntests .%s" (if recursively-p " 1" ""))))
+
+(defun mb-octave-test-buffer-directory-recursively ()
+  "Run tests for all files in and under the current buffer's directory."
+  (interactive)
+  (mb-octave-test-buffer-directory t))
+
+(defun mb-octave-test-repl-directory-recursively ()
+  "Run tests for all files in and under REPL's current directory."
+  (interactive)
+  (mb-octave-test-repl-directory t))
 
 ;;; Shortcuts (TODO: make evil shortcuts out of them)
 (define-key octave-mode-map (kbd "M-q") 'mb-octave-fill-paragraph)
