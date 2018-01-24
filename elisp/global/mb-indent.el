@@ -157,6 +157,8 @@ SYMBOL can be a symbol or a list of symbols. See function
 ;; here comes my first "indent composition". Nice.
 (cl-indent 'define-binary-type '(4 &lambda &rest (&whole 2 &lambda &body)))
 
+;; cl-who
+(cl-indent '(:a :select :html :head :title :script :option) (make-list 20 2))
 
 ;;;; The tricky loop indent
 (defconst +loop-keywords+
@@ -178,7 +180,9 @@ Stop looking before LOOP-START."
        (beginning-of-line)
        
 ;;       (when (looking-at "^\\s-*\\(loop\\s-*\\)?\\(:?\\sw+\\|;\\)")
-       (when (looking-at (format "^[[:space:]]*\\(loop[[:space:]]*\\)?\\(%s\\)" (loop-keyword-regexp)))
+       (when (looking-at
+	      (format "^[[:space:]]*\\(loop[[:space:]]*\\)?\\(%s\\)"
+		(loop-keyword-regexp)))
          (setq length (length (match-string 2))))
        (forward-line -1))
       length)))
