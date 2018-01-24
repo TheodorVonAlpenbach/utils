@@ -192,6 +192,13 @@ By default the last line."
   (define-key swap-map "v" #'(lambda () (interactive)
 				     (switch-to-buffer (other-buffer)))))
 
+(let ((div-map (make-sparse-keymap)))
+  (evil-key-chord-define '(normal motion) global-map "dm" div-map)
+  (define-key div-map "l" (lambda (n) (interactive "p") (inc-thing-at-point n 1)))
+  (define-key div-map "h" (lambda (n) (interactive "p") (inc-thing-at-point (- n) 1)))
+  (define-key div-map "j" (lambda (n) (interactive "p") (inc-thing-at-point n 2)))
+  (define-key div-map "k" (lambda (n) (interactive "p") (inc-thing-at-point (- n) 2))))
+
 (require 'mb-emacs-lisp)
 (require 'LS)
 (let ((insert-map (make-sparse-keymap)))
@@ -203,11 +210,13 @@ By default the last line."
   (define-key insert-map "f" #'cl-ify-form)
   (define-key insert-map "F" #'cl-ify-defun)
   (define-key insert-map "k" #'browse-kill-ring)
+  (define-key insert-map "q" #'fill-paragraph)
   (define-key insert-map "t" #'insert-time)
   (define-key insert-map "u" #'uncomment-region*)
   (define-key insert-map "\"" #'(lambda (n) (interactive "P") (mb-surround "\"" (or n 1))))
+  (define-key insert-map "`" #'(lambda (n) (interactive "P") (mb-surround "`" (or n 1))))
   (define-key insert-map "\\" #'(lambda (n) (interactive "P") (mb-undo-surround (or n 1))))
-  (define-key insert-map "@" #'insert-texinfo-var))
+  (define-key insert-map "@" #'texinfo-insert-@var))
 
 (require 'mb-metafont)
 
@@ -231,7 +240,10 @@ By default the last line."
 ;;; Eval machinery
 (defun mb-eval-string (string &rest args)
   (case major-mode
-    (mb-lisp-mode (apply #'mb-lisp-eval-1 string args))
+    (mb-lisp-mode
+     (if (slime-p)
+       (slime-eval string)
+       (apply #'mb-lisp-eval-1 string args)))
     (emacs-lisp-mode (eval (read string)))
     (octave-mode (octave-send-string string))
     (mbscilab-mode (mbscilab-eval string))))
@@ -268,7 +280,9 @@ By default the last line."
     ((emacs-lisp-mode mb-lisp-mode)
      (save-excursion
       (forward-sexp 1)
-      (eval-last-sexp nil)))
+      (if (slime-p)
+	(slime-eval-last-expression)
+	(eval-last-sexp nil))))
     (otherwise
      (mb-eval-string
       (string-match* "\\(?:#\\|//+\\|[[:space:]]\\)*\\(.*\\)"
@@ -522,8 +536,9 @@ occurence of 'delete' replaced with 'yank'."
 (cl-defun mb-surround-lookup-right (left)
   (string-case left
     ("(" ")")
+    ("`" "'")
     (otherwise left)))
-;;(mapcar #'mb-surround-lookup-right (list "'" "("))
+;;(mapcar #'mb-surround-lookup-right (list "`" "'" "("))
 
 (cl-defun mb-surround-region (region left n)
   (mb-surround-region-1 region left (mb-surround-lookup-right left) n))
@@ -531,10 +546,14 @@ occurence of 'delete' replaced with 'yank'."
 (defun mb-surround-word (left n)
   (mb-surround-region (cons (bow*) (eow* n)) left 1))
 
+(defun mb-surround-symbol (left n)
+  (mb-surround-region (cons (bos*) (eos* n)) left 1))
+
 (defun mb-surround (left n)
   (if (use-region-p)
     (mb-surround-region (region) left n)
-    (mb-surround-word left n)))
+    ;; (mb-surround-word left n)
+    (mb-surround-symbol left n)))
 
 ;; Undo surround: strictly assume surround is 1 char wide on both
 ;; sides
