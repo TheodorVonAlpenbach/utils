@@ -1,6 +1,6 @@
 (asdf:defsystem :topology
   :name "topology"
-  :author "Mats Bergstrrøm <mbe@lightstructures.no>"
+  :author "Mats Bergstrøm <mbe@lightstructures.no>"
   :version "1.0.0"
   :depends-on (:mb-utils :numerics-utils :mb-gnuplot)
   :components
