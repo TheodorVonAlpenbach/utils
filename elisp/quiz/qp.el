@@ -58,7 +58,7 @@
 
 ;;;; 1. Last ned TranformUtils.inc:
 ;;;;    (qp-download :transform-utils)
-;;;; 2. Endre cNumRounds til det ønskede antallet
+;;;; 2. Endre cNumRounds og cNumNonCountingRounds etter behov.
 ;;;; 3. Lagre, og last opp:
 ;;;;    (qp-upload :transform-utils)
 ;;;; I elisp:
@@ -187,7 +187,7 @@
 ;;;; Table handling
 
 ;;; General config
-(defconst qp-season '(28 "Allmennquiz"))
+(defconst qp-season '(29 "Allmennquiz"))
 (defun qp-season-number () (number-to-string (first qp-season)))
 (defun qp-season-name () (second qp-season))
 
