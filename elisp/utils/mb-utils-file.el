@@ -8,6 +8,13 @@
   (file-name-nondirectory (file-name-sans-extension path)))
 ;(filename-base "d/d/a.b")
 
+(defun directory-truename (directory)
+  "Return a canonical form of DIRECTORY.
+In this implementation the canonical form is the same as the
+result of FILE-TRUENAME without any trailing slash. Example:
+~/my/dirctory/ --> /home/mbe/my/directory (not .../directory/)"
+  (string-trim-right (file-truename directory) "/"))
+
 (cl-defun find-filename (file &optional (dirs (list "./")))
   "Checks if FILE exists as readable in one of DIRS. If so it is
 returned. DIRS is sorted according to priority."
