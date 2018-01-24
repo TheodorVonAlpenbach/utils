@@ -648,4 +648,22 @@ containing X."
 ;;(tree-leaves '(a))
 ;;(tree-leaves '(a (c (d (f))) (b (e))))
 
+(defmacro memcase (list &rest clauses)
+  "Same as case, but select the clause in CLAUSES with (member X LIST),
+where X is a `car' of one of the CLAUSES. Currently it uses `eql'
+for comparison."
+  (let ((g (gensym)))
+    `(let ((,g ,list))
+       (unless (consp ,g)
+	 (error "First argument of MEMCASE must be a list!"))
+       (cond ,@(mapcar #'(lambda (clause)
+                           (let ((k (car clause)))
+                             `(,(cond ((member k '(t otherwise))
+                                       t)
+                                      ((consp k)
+                                       `(cl-intersection ,g ',k :test #'eql))
+                                      (t `(member ',k ,g)))
+                               (progn ,@(cdr clause)))))
+                       clauses)))))
+
 (provide 'mb-lists)
