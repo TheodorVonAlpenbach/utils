@@ -37,3 +37,11 @@
 		 '("b" ("c"))))
   (should (equal (tree-member 'b '(a (b (c)) (b (d))) :from-end nil) '(b (c))))
   (should (equal (tree-member 'b '(a (b (c)) (b (d))) :from-end t) '(b (d)))))
+
+(ert-deftest test-memcase ()
+  "Test of `memcase'"
+  (should (equal (memcase '(a b c) (a 'A) (otherwise 'B)) 'A))
+  (should (equal (memcase '(a b c) (d 'A) (otherwise 'B)) 'B))
+  (should (equal (memcase '(a b c) ((a d) 'A) (otherwise 'B)) 'A))
+  (should (equal (memcase '(a b c) ((d e) 'A) (otherwise 'B)) 'B)))
+
