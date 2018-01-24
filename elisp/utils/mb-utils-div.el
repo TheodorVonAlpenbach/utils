@@ -98,15 +98,20 @@ If reverse i non nil, it returns the first popped element"
 ;;(setq qwe '(1 2 3 4 5 6))
 ;;(pop* qwe 3 t)
 
+(defmacro push-list (list place)
+  `(setf ,place (nconc ,list ,place)))
+;;(setq qwe '(a))
+;;(push-list '(1 234 4) qwe)
+
 (defmacro push-back (x place)
   `(setf ,place (nconc ,place (list ,x))))
 ;;(setf qwe '(a))
 ;;(push-back 1 qwe)
 
-(defmacro push-list (list place)
-  `(setf ,place (nconc ,list ,place)))
-;;(setq qwe '(a))
-;;(push-list '(1 234 4) qwe)
+(defmacro push-back-list (list place)
+  `(setf ,place (nconc ,place ,list)))
+;;(setf qwe '(a))
+;;(push-back 1 qwe)
 
 (cl-defmacro push* (place &rest elts)
   `(push-list (list ,@elts) ,place))
