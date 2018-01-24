@@ -1,3 +1,7 @@
+(cl-defun buffer-directory (&optional (buffer (current-buffer)))
+  (file-name-directory (buffer-file-name buffer)))
+;;(buffer-directory)
+
 (defun region-beginning* (&optional force)
   "See `region-beginning' and `mark'"
   (min (point) (mark force)))
@@ -174,11 +178,11 @@ Note that line numbers and paragraph numbers (check) starts from base 0."
   "Move POINT forward N sexps and return point"
   (forward-sexp n) (point))
 
-(defun bos* (&optional (n 1))
+(cl-defun bos* (&optional (n 1))
   "Return the POINT at the beginning of the Nth sexp before current point."
   (save-excursion (bos n)))
 
-(defun eos* (&optional (n 1))
+(cl-defun eos* (&optional (n 1))
   "Return the POINT at the beginning of the Nth sexp before current point."
   (save-excursion (eos n)))
 
