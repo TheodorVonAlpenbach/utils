@@ -15,6 +15,7 @@
       (in-directory-p (buffer-file-name buffer) "~/sources/CHESS/RemoteAcceleration")
       (in-directory-p (buffer-file-name buffer) "~/sources/CHESS/Tail")
       (in-directory-p (buffer-file-name buffer) "~/sources/CHESS/Integrate")
+      (in-directory-p (buffer-file-name buffer) "~/sources/CHESS/Differentiate")
       (in-directory-p (buffer-file-name buffer) "~/sources/CHESS/SimFBGA3Imp")))
 ;;(chess-file-p (get-buffer "FIRFilter.cpp"))
 ;;(chess-file-p (current-buffer))
@@ -75,6 +76,11 @@
   (string-match "sources/CHESS" (file-name-directory (buffer-file-name))))
 ;;(qt3-p)
 
+(defun qt-eob ()
+  "Same as `eob', but ignores the section after #endif declarations."
+  (or (re-search-forward "^#endif" nil t)
+      (point-max)))
+
 (defun clean-chess-code ()
   "Note that - should be put at the end in the [] construct"
   (interactive)
@@ -122,11 +128,15 @@
 			      substitutions)
 			    substitutions)
 	    for i from 0
-	    do (goto-char (point-min))
-	    do (while (re-search-forward re nil t)
-		 ;; (message "Replace using %dth expression (%s)" i re)
-		 (replace-match s t)))
-      (indent-region (point-min) (point-max)))))
+	    ;; We must narrow the buffer to avoid cleaning the doc part in .h files
+	    do (save-restriction
+		 (narrow-to-region (bob) (qt-eob))
+		 (bob)
+		 (while (re-search-forward re nil t)
+		   ;; (message "Replace using %dth expression (%s)" i re)
+		   (replace-match s t))))
+      ;; Narrow to avoid cleaing doc part
+      (indent-region (bob) (qt-eob)))))
 ;;(re-search-forward "^[\t]+" nil t)
 
 (pushnew "~/.CTAGS" tags-table-list)
@@ -230,13 +240,17 @@ before carrying out its actions."
 (defun qt-align-line (indent)
   (save-excursion
     (let ((a (bol)))
-      (when (re-search-forward "=" (line-end-position) t 1)
+      (if (re-search-forward "=" (line-end-position) t 1)
 	(let ((b (point)))
 	  (let ((diff (- indent (- b a))))
 	    (re-search-backward "[[:space:]]")
 	    (if (plusp diff)
 	      (insert (make-string diff 32))
-	      (delete-backward-char (- diff)))))))))
+	      (delete-backward-char (- diff)))))
+	(when (not (blank-line-p))
+	  (back-to-indentation)
+	  (delete-backward-char (- (point) a)) ;; delete existing indent
+	  (insert (make-string (1+ indent) 32)))))))
 
 (cl-defun qt-align-pro-file (&optional (min-space 2))
   "Automatically align all the assigment operators in a .pro file.
@@ -251,16 +265,18 @@ operators.
 
 Consider move this functionality to a makefile-mode extension module"
   (interactive)
-  (let ((max-lhs
-	 (loop for l in (buffer-lines)
-	       for s = (string-match* "^[[:space:]]*\\([[:alpha:]_]*\\)"
-			 l :num 1)
-	       maximize (length (sstring s)))))
-    (save-excursion
-      (bob)
-      (loop for i below (1- (length (buffer-lines)))
-	    do (qt-align-line (+ max-lhs min-space 2))
-	    do (forward-line 1)))))
+  (if (string= (file-name-extension (buffer-file-name)) "pro")
+    (let ((max-lhs
+	  (loop for l in (buffer-lines)
+		for s = (string-match* "^[[:space:]]*\\([[:alpha:]_]*\\)"
+			  l :num 1)
+		maximize (length (sstring s)))))
+     (save-excursion
+       (bob)
+       (loop for i below (1- (length (buffer-lines)))
+	     do (qt-align-line (+ max-lhs min-space 2))
+	     do (forward-line 1))))
+    (message "Current buffer is not a .pro file")))
 
 (defun swap-emacs-and-qtcreator-paths (emacs->qtcreator-p start end)
   (save-excursion
@@ -306,6 +322,10 @@ Consider move this functionality to a makefile-mode extension module"
     (switch-to-buffer-other-window "qtportlog.org")
     (goto-char (point-min))
     (re-search-forward (substring-no-properties it))))
+
+(defun qt-split-stream ()
+  (interactive)
+  )
 
 (defun chess-kbd-maps ()
   (let ((qt-map (make-sparse-keymap))
