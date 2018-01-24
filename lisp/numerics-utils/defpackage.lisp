@@ -6,6 +6,7 @@
 	   :grid-interpolate
 	   :reshape-grid
 	   :grid-p
+	   :imod
 	   :gamma :upper-incomplete-gamma :lower-incomplete-gamma
 	   :wrapped-normal-distribution :wnd
 	   :variance :stddev :random-normal-fn :random-normal
