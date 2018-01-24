@@ -199,7 +199,8 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 	 ("\\.py$" . python-mode)
 	 ("\\.rb$" . ruby-mode)
 	 ("\\.ora$" . text-mode)
-	 ("\\.xml$" . text-mode)
+	 ("\\.xml$" . xml-mode)
+	 ("\\.html$" . html-mode)
 	 ("\\.o$" . hexl-mode)
 	 ("\\.exe$" . hexl-mode)
 	 ("\\.shp$" . hexl-mode)
@@ -265,6 +266,7 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 			 mb-lisp
 			 mb-python
 			 mb-octave
+			 mb-texinfo
 			 list-db
 			 mbscilab
 			 dic-map
