@@ -86,12 +86,9 @@ default value of optional parameter BUFFER is the current buffer."
 (defmacro with-file (file &rest body)
   "Insert FILE in a temporary buffer, evaluate body and save the
 \(possibly\) modified buffer back to FILE."
-  `(with-temp-buffer
-     (unwind-protect 
-       (progn
-	 (insert-file ,file)
-	 ,@body)
-       (write-file ,file))))
+  `(with-temp-file ,file
+     (insert-file ,file)
+     ,@body))
 (def-edebug-spec with-file t)
 
 (defmacro with-file-readonly (file &rest body)
