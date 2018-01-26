@@ -1,4 +1,5 @@
-(set-frame-font "--Courier New-normal-normal-normal-mono-13-*-*-*-c-*-iso8859-1")
+(set-frame-font
+    "-outline-Courier New-normal-normal-normal-mono-13-*-*-*-c-*-iso8859-1")
 ;;(set-frame-size (selected-frame) 220 61)
 ;;(set-frame-position (selected-frame) 0 0)
 
