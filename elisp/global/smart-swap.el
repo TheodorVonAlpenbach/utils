@@ -15,13 +15,11 @@
     ("Lilypond-compile" ("LilyPond started at .*\n\nlilypond \\(.*\\)$" 1)))
   "TODO: enable :search")
 
+(require 'mb-ert)
 (defun elisp-swap ()
   "Swap an emacs lisp file with its associated test file."
   (when (eql major-mode 'emacs-lisp-mode)
-    (aif (string-match* "test-\\(.*\\.el$\\)" (buffer-name) :num 1)
-      (find-file (expand-file-name it (buffer-directory)))
-      (find-file (expand-file-name (concat "test-" (buffer-name))
-				   (buffer-directory))))))
+    (mb-swap-ert-defun)))
 
 (defun regexp-swap (file-regexp)
   (destructuring-bind (regexp num) file-regexp
