@@ -119,7 +119,8 @@
 		    "-R" "ftps8.brinkster.com"
 		    (qp-ftp-dir item)
 		    local-path)
-      (message "Finished!")))))
+      (message "Finished!")
+      (qp-check-last-upload)))))
 
 ;;;; Specializations (currently res_alle.txt and ??)
 
@@ -334,7 +335,12 @@ Iff ALLOW-OVERLAP-P is true then overlapping matches are counted"
 ;;(count-matches-in-string "aa" "aaabaaa" nil)
 
 (cl-defun qp-guess-customer-tag (data &optional (limit 5))
-  (let* ((lines (string-lines data))
+  "TODO: collect team-pub relations from res_alle.txt and create
+regexp for matching team in a line of DATA. If match, then this
+team will be linked to the pub(s) using the generated relation
+list. Do this for all data lines, and select the most frequently
+detected pub name."
+  (let* ((lines (remove-if #'empty-string-p (string-lines data)))
 	 (numlines (length lines))
 	 (numcols (count 9 (first lines))))
     (loop for (tag x y z regexp) in (qp-customers numcols)
@@ -453,5 +459,17 @@ week number of the first round."
     (qp-current-round (week-number date-or-week))))
 ;;(mapcar #'qp-current-round (list 38 "2016-09-22" "2016-09-15"))
 ;;(qp-current-round)
+
+(defun qp-check-last-upload ()
+  (when (string= (buffer-name) "res_alle.txt")
+    (destructuring-bind (s round day sname pub team points)
+	(split-string (last-elt (buffer-lines) 1) "[\t]")
+      (let ((url (format
+		     ;; TODO util for GET queries
+		     "http://quiz-park.com/tabell.asp?SerieType=%s&SerieRunde=%s&GlobalEllerPub=%s"
+		   sname round pub)))
+	;; (browse-url-emacs url)
+	(browse-url url)))))
+;;(qp-check-last-upload)
 
 (provide 'qp)
