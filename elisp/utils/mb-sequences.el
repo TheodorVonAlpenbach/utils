@@ -143,11 +143,16 @@ elements.
 ;;(let ((s '(0 1 2 3 0 0))) (list (draw-if #'evenp s :key #'identity :count 2) s))
 ;;(let ((s "qweqwe")) (list (draw-if (bind #'eql ?e) s :key #'identity :end 4) s))
 
-(cl-defun positions (item sequence &key (key #'identity) (test #'eq))
-  (loop for x in (coerce sequence 'list)
-	for i from 0
-	if (funcall test item (funcall key x))
-	collect i))
+(cl-defun positions (x sequence &key (test #'eql) (key #'identity))
+  "Return the positions of the elements in SEQUENCE that occur in X.
+X might be an atom or a sequence.
+
+Keywords supported: :test :key"
+  (let ((list (listify x)))
+    (loop for y in (if key (map 'list key sequence) (coerce sequence 'list)) 
+	  for i from 0
+	  if (cl-member y list :test test)
+	  collect i)))
 ;;(positions 'a '(a b c a))
 
 ;;; min/max function
