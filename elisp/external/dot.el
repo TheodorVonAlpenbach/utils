@@ -98,6 +98,10 @@ The function uses `dot-program' to convert the DOT-STRING to a PNG image."
   (interactive)
   (call-process* "xdg-open" (buffer-file-name)))
 
+(defun png-print ()
+  (interactive)
+  (call-process* "lpr" "-P" "SHARP_MX-2640NPCL_PS" "-o" "media=A3" (buffer-file-name)))
+
 ;;;; this could be moved to lilypond-<something>
 (defun pdf-view (filename)
   (browse-url filename))
