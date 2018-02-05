@@ -99,7 +99,7 @@ If reverse i non nil, it returns the first popped element"
 ;;(pop* qwe 3 t)
 
 (defmacro push-list (list place)
-  `(setf ,place (nconc ,list ,place)))
+  `(setf ,place (append ,list ,place)))
 ;;(setq qwe '(a))
 ;;(push-list '(1 234 4) qwe)
 
@@ -114,6 +114,7 @@ If reverse i non nil, it returns the first popped element"
 ;;(push-back 1 qwe)
 
 (cl-defmacro push* (place &rest elts)
+  "Same as `push' but allows push of multiple elements."
   `(push-list (list ,@elts) ,place))
 ;;(setq qwe '(a))
 ;;(push* qwe 1 234 4)
@@ -324,9 +325,10 @@ TODO: font-lock face as `defun'."
      ,@body))
 ;;(with-gensyms (gx gy) 1)
 
-(defun last-elt (sequence)
+(cl-defun last-elt (sequence &optional (n 0))
   "Return last element of SEQUENCE."
-  (elt sequence (1- (length sequence))))
+  (elt sequence (- (length sequence) 1 n)))
+;;(last-elt '(a b c) 1)
 
 (defun first-elt (sequence)
   "Return first element of SEQUENCE."
