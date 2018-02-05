@@ -1,6 +1,12 @@
+(cl-defun empty-buffer-p (&optional (buffer (current-buffer)))
+  (with-buffer buffer
+    (empty-string-p (buffer-string))))
+;;(empty-buffer-p)
+
 (cl-defun buffer-directory (&optional (buffer (current-buffer)))
   (file-name-directory (buffer-file-name buffer)))
 ;;(buffer-directory)
+;;(def-edebug-spec buffer-directory (&optional (symbolp form)))
 
 (defun region-beginning* (&optional force)
   "See `region-beginning' and `mark'"
@@ -170,23 +176,25 @@ Note that line numbers and paragraph numbers (check) starts from base 0."
     (point)))
 
 ;;; Sexp stuff
-(cl-defun bos (&optional (n 1))
+;;; TODO rename these as bof, eof etc, and reserve bos, eos etc to symbols
+;;; because sexp and form is indeed the same
+(defun bos (&optional n)
   "Move POINT back N sexps and return point"
-  (backward-sexp n) (point))
+  (bo-thing 'sexp n))
 
-(cl-defun eos (&optional (n 1))
+(defun eos (&optional n)
   "Move POINT forward N sexps and return point"
-  (forward-sexp n) (point))
+  (eo-thing 'sexp n))
 
-(cl-defun bos* (&optional (n 1))
+(defun bos* (&optional n)
   "Return the POINT at the beginning of the Nth sexp before current point."
   (save-excursion (bos n)))
 
-(cl-defun eos* (&optional (n 1))
+(defun eos* (&optional n)
   "Return the POINT at the beginning of the Nth sexp before current point."
   (save-excursion (eos n)))
 
-(cl-defun last-sexp-region (&optional (n 1))
+(defun last-sexp-region (&optional (n 1))
   (save-excursion
     (list (bos n) (eos n))))
 
@@ -346,23 +354,37 @@ see `bol'"
   (warn "Deprecated. Use LINE-STRING instead.")
   (apply #'line-string args))
 
+(cl-defun bo-thing (thing &optional n)
+  "Move to the beginning of the current THING and return point."
+  (awhen (bounds-of-thing-at-point thing)
+    (goto-char (car it))
+    (when n (forward-thing thing (- 1 n)))
+    (point)))
+
+(defun eo-thing (thing &optional n)
+  "Move to the end of the current word and return POINT."
+  (awhen (bounds-of-thing-at-point thing)
+    (goto-char (cdr it))
+    (when n (forward-thing thing (1- n)))
+    (point)))
+
 ;;; Defun stuff 
-(defun bod ()
+(defun bod (&optional n)
   "Move to beginning of the current defun and return POINT."
-  (beginning-of-defun) (point))
+  (bo-thing 'defun n))
 ;;(bod)
 
-(defun eod ()
+(defun eod (&optional n)
   "Move to end of the current defun and return POINT."
-  (end-of-defun) (point))
+  (eo-thing 'defun n))
 ;;(eod)
 
-(defun bod* ()
+(defun bod* (&optional n)
   "Return the POINT at the beginning of the current defun."
   (save-excursion (bod)))
 ;;(bod*)
 
-(defun eod* ()
+(defun eod* (&optional n)
   "Return the POINT at the end of the current defun."
   (save-excursion (eod)))
 ;;(eod*)
@@ -373,22 +395,21 @@ The return value is a pair of points \(START END\)."
   (list (bod*) (eod*)))
 
 ;;; form
-(defun bof ()
+(defun bof (&optional n)
   "Move to the beginning of the current form and return POINT."
-  (backward-up-list 1) (point))
-;;(eof)
+  (bo-thing 'list n))
 
-(defun eof ()
+(defun eof (&optional n)
   "Move to the end of the current form and return POINT."
-  (up-list 1) (point))
+  (eo-thing 'list n))
 ;;(eof)
 
-(defun bof* ()
+(defun bof* (&optional n)
   "Return the POINT at the beginning of the current form."
   (save-excursion (bof)))
 ;;(bof*)
 
-(defun eof* ()
+(defun eof* (&optional n)
   "Return the POINT at the end of the current form."
   (save-excursion (eof)))
 ;;(eof*)
@@ -396,17 +417,11 @@ The return value is a pair of points \(START END\)."
 ;;; word
 (defun bow (&optional n)
   "Move to the beginning of the current word and return POINT."
-  (awhen (bounds-of-thing-at-point 'word)
-    (goto-char (car it))
-    (when n (backward-word (1- n)))
-    (point)))
+  (bo-thing 'word n))
 
 (defun eow (&optional n)
   "Move to the end of the current word and return POINT."
-  (awhen (bounds-of-thing-at-point 'word)
-    (goto-char (cdr it))
-    (when n (forward-word (1- n)))
-    (point)))
+    (eo-thing 'word n))
 
 (defun bow* (&optional n)
   "Return the POINT at the beginning of the current word."
