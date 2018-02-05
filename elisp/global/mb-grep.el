@@ -17,14 +17,23 @@
        'grep-mode))))
 ;;(mb-grep-basic :target "mb-grep-basic" :types '("el"))
 
-(cl-defun subdirs (rootdir &optional (depth 1))
+(cl-defun subdirs (rootdir &optional (depth t) flatten-p)
   "Return a tree of all directories under ROOTDIR.
-If FLATTEN-P is non-nil the result is flattened to a list."
+If optional argument DEPTH is a non-negative integer, the result
+is restricted to subdirectories DEPTH levels below rootdir. If
+optional argument FLATTEN-P is non-nil the result is flattened to
+a list.
+
+Note! In this version the flatten-p mechanism is not implemented.
+The current implementation always returns a flattened list."
   (cl-set-difference
-   (split-string (call-process* "find" rootdir "-type" "d" "-maxdepth" (sstring depth)) "\n")
+   (if (and (integerp depth)
+	    (not (minusp depth)))
+     (split-string (call-process* "find" rootdir "-type" "d" "-maxdepth" (sstring depth)) "\n")
+     (split-string (call-process* "find" rootdir "-type" "d") "\n"))
    '("" ".." "./" ".")
    :test #'string=))
-;;(subdirs "..")
+;;(length (subdirs ".." 3))
 
 (cl-defun mb-grep-dirs (prefix)
   "Return a list of directories according to prefix.
