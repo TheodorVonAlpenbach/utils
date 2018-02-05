@@ -62,16 +62,31 @@ paranthesis."
   (yank 2))
 ;;(a b (c d))
 
-(cl-defun defun-symbol (&optional (point (point)))
+(defconst +defun-symbols+
+  '(defun cl-defun
+    defmacro cl-defmacro
+    defparameter defconstant
+    ert-deftest))
+
+(defconst +defun-regexp+
+  (regexp-opt (mapcar #'sstring +defun-symbols+)))
+
+(cl-defun defun-symbol (&optional (point (point)) (defun-symbols +defun-symbols+))
   "Returns the defun symbol at POINT."
-  (save-excursion
-    (end-of-defun)
-    (beginning-of-defun)
-    (down-list 1)
-    (when (member (sexp-at-point)
-		  '(defun cl-defun defmacro cl-defmacro defparameter defconstant))
-      (forward-sexp 2)
-      (sexp-at-point))))
+  (when (in-defun-p)
+    (save-excursion
+     (bod)
+     (forward-thing 'symbol 1)
+     (when (member (sexp-at-point) defun-symbols)
+       (forward-sexp 1)
+       (sexp-at-point)))))
+
+(cl-defun in-defun-p (&optional (point (point))
+				  (defun-regexp +defun-regexp+))
+  "Returns not nil if POINT is inside a defun form."
+  (awhen (thing-at-point 'defun)
+    (string-match* (format "\\_<%s" defun-regexp) it)))
+
 (definteractive defun-symbol)
 
 (cl-defun defun-symbols (&optional (buffer (current-buffer)))
@@ -87,5 +102,8 @@ paranthesis."
 (defun insert-defun-symbols ()
   (interactive)
   (insert (format "%S" (defun-symbols))))
+
+
+
 
 (provide 'mb-sexp)
