@@ -33,8 +33,13 @@ file."
 ;;(substring (buffer-string-no-properties) 1 30)
 
 (defun file-string (filename &optional coding-system)
-  "Returns content of file as a string.
-Note that the function discards the EOF character."
+  "Returns content of FILENAME as a string.
+Note that the function discards the EOF character.
+
+NB! If FILENAME should be absolute, otherwise this function will
+expand it to the directory of this module."
+  ;; (unless (absolute-path-p filename)
+  ;;   (warn "Filename is not absolute. Results are undefined."))
   (with-temp-buffer
     (let ((coding-system-for-read coding-system))
       (insert-file-contents filename)
@@ -77,6 +82,7 @@ default value of optional parameter BUFFER is the current buffer."
 ;;(with-buffer* *lynx-buf* (goto-char 10))
 
 (defmacro with-buffer (buffer &rest body)
+  "Temporarily work with BUFFER and evalue last form in BODY."
   `(save-excursion
      (set-buffer ,buffer)
      ,@body))
@@ -154,13 +160,17 @@ temporary file name as value."
 	  (split-string string (or line-separator "\n") omit-nulls)))
 ;;(parse-csv-string "")
 
-(cl-defun parse-csv-string (string &optional (column-separator ";") line-separator (omit-nulls t))
+(defvar *csv-show-progress* nil)
+
+(cl-defun parse-csv-string (string &optional
+				   (column-separator ";")
+				   line-separator (omit-nulls t))
   "Parses csv file FILENAME to a list of lists."
   (loop with lines = (split-string string (or line-separator "\n") omit-nulls)
 	for x in lines
 	for i from 0
 	while (and x (not (empty-string-p (string-trim x))))
-	do (message "%d/%d" i (length lines))
+	if *csv-show-progress* do (message "%d/%d" i (length lines))
 	collect (if (stringp column-separator)
 		  (split-string x column-separator)
 		  (parse-csv-line x column-separator omit-nulls))))
