@@ -396,7 +396,10 @@ If ARGUMENT is a string insert it in the pair of curly parentheses."
 (defun mb-octave-test-buffer-file ()
   "Run tests for the current buffer's file."
   (interactive)
-  (octave-send-string (format "test (\"%s\")" (buffer-file-name))))
+  (octave-send-string
+   (format "source (\"%s\"); test (\"%s\")"
+     (expand-file-name ".octaverc" (buffer-directory))
+     (buffer-file-name))))
 ;;(mb-octave-test-buffer-file)
 
 (defun mb-octave-test-buffer-directory (&optional recursively-p)
