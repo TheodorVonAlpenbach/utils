@@ -77,3 +77,11 @@ later."
   (and (not (i-disjoint interval1 interval2))
        (subseq (sort (append interval1 interval2) #'<) 1 3)))
 ;;(i-intersection '(4 4) '(1 3))
+
+;;; Functions that operate on lists interpreted as sets
+;;; They are are supplement to the existing set functions like
+;;; cl-set-difference, cl-intersection, cl-subsetp, cl-set-exclusive-or, cl-union,
+(cl-defun set-equalp (list1 list2 &rest args)
+  (and (apply #'cl-subsetp list1 list2 args)
+       (apply #'cl-subsetp list2 list1 args)))
+;;(set-equal '(a) '(a a))
