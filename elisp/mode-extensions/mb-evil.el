@@ -201,6 +201,7 @@ By default the last line."
 
 (require 'mb-emacs-lisp)
 (require 'LS)
+
 (let ((insert-map (make-sparse-keymap)))
   (key-chord-define evil-normal-state-map "vi" insert-map)
   (define-key insert-map "a" #'ls-insert-arrival-time)
@@ -213,10 +214,15 @@ By default the last line."
   (define-key insert-map "q" #'fill-paragraph)
   (define-key insert-map "t" #'insert-time)
   (define-key insert-map "u" #'uncomment-region*)
+  (define-key insert-map "'" #'(lambda (n) (interactive "P") (mb-surround "'" (or n 1))))
   (define-key insert-map "\"" #'(lambda (n) (interactive "P") (mb-surround "\"" (or n 1))))
   (define-key insert-map "`" #'(lambda (n) (interactive "P") (mb-surround "`" (or n 1))))
   (define-key insert-map "\\" #'(lambda (n) (interactive "P") (mb-undo-surround (or n 1))))
   (define-key insert-map "@" #'texinfo-insert-@var))
+
+(let ((big-insert-map (make-sparse-keymap)))
+  (key-chord-define evil-normal-state-map "vI" big-insert-map)
+  (define-key big-insert-map "\"" #'(lambda (n) (interactive "P") (mb-surround "\\\"" (or n 1)))))
 
 (require 'mb-metafont)
 
@@ -547,6 +553,7 @@ occurence of 'delete' replaced with 'yank'."
   (mb-surround-region (cons (bow*) (eow* n)) left 1))
 
 (defun mb-surround-symbol (left n)
+  (message "%S" (list (point) (bos*) (eos*)))
   (mb-surround-region (cons (bos*) (eos* n)) left 1))
 
 (defun mb-surround (left n)
