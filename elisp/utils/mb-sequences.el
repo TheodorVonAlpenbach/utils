@@ -202,7 +202,7 @@ This function is not intended for use outside of this module."
 	when (funcall test x min)
 	do (setf min x pos i)
 	finally (return (values min pos))))
-;;(nminimum-nokey (vector 1 2 3 0) #'<)
+;;(nminimum-nokey (vector 17 17) #'>=)
 
 (cl-defun minimum (cl-seq &key (test #'<) key (start 0) end from-end)
   "Find the minimum of SEQ.
@@ -224,9 +224,9 @@ respectively.
 	     (map 'vector key (subseq cl-seq start end))
 	     (coerce (subseq cl-seq start end) 'vector))
 	   test)
-	(values (elt cl-seq pos) (+ pos start) min)))))
-;;(minimum nil)
-;;(let ((db '((0 2) (1 -1) (1 2)))) (list (nminimum db :key #'second) db))
+	(let ((pos* (+ pos start)))
+	  (values (elt cl-seq pos*) pos* min))))))
+;;(minimum '(1 2 3 5 5) :start 3)
 
 (cl-defun min-position (&rest args)
   "Returns position of the minimum element in SEQUENCE.
