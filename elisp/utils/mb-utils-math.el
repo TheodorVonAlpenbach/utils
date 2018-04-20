@@ -1015,3 +1015,17 @@ p) q)))"
 	   count (and (find s primes) (< s 50)))
      (float n)))
 ;;(* (problem 1000000) (/ 2500 313.0))
+
+(cl-defun approximate-frequency (f &optional (eps 0.1) (max-m 100))
+  (flet ((fn (f eps m) (- (log (+ f eps) 2) (* m (log 3.0 2))))
+	 (fz (n m) (expt 2 (+ n (* m (log 3.0 2))))))
+    (loop for m from 73 below max-m
+	  for n-min = (ceiling (fn f (- eps) m))
+	  for n-max = (floor (fn f eps m))
+	  for n-best (if (< (abs n-min) (abs n-max)) n-min n-max)
+	  unless (< n-max n-min) return (list n-min n-max m (fz n-min m))
+	  for nn-min = (ceiling (fn f (- eps) (- m)))
+	  for nn-max = (floor (fn f eps (- m)))
+	  unless (< nn-max nn-min) return (list nn-min (- m) (fz nn-min (- m))))))
+;;(approximate-frequency 1 1)
+;;(approximate-frequency (* 100 pi) 1)
