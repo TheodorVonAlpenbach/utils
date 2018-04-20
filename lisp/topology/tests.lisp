@@ -53,8 +53,11 @@
     (assert-equalp 1 (topology::distance2-to-line (ms 0 0 1 0) (ms 0 1 1 1)))
     (assert-equalp 1/2 (topology::distance2-to-line (ms 0 0 1 0) (ms 0 1 1 2)))))
 ;;(distance (mpg  1 0  1 1  -1 1  -1 0) (mp 1/2 1/2))
+
+(define-test test-generalize
+  (let ((path (mpa 0 0  1 0  2 1  2 2  1 3  0 3  -1 2  -1 1)))))
+
 ;;(run-tests '(test-distance))
 (setf *print-failures* t)
 (run-tests :all)
-;;
 ;;(remove-tests '(test-left-p))
