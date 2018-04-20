@@ -14,18 +14,14 @@
   (should (equal (mb-ert-swap-defun-name "test-qwe" :ert) "test-test-qwe"))
   (should (equal (mb-ert-swap-defun-name "12345qwe" :non-ert) "qwe"))
   (should (equal (mb-ert-swap-defun-name "qwe" :ert "supertest-") "supertest-qwe"))
+  (should (equal (mb-ert-swap-defun-name "qwe" :ert-soft) "test-qwe"))
+  (should (equal (mb-ert-swap-defun-name "test-qwe" :ert-soft) "test-qwe"))
   (should-error (mb-ert-swap-defun-name 'qwe)))
 
 (ert-deftest test-mb-ert-swap-filename ()
   "Test of `mb-ert-swap-filename'"
   (should (equal (mb-ert-swap-filename "/qwe/qwe.el") "/qwe/test-qwe.el"))
-  (should (equal (mb-ert-swap-filename "/qwe/test-qwe.el") "/qwe/qwe.el"))
-  (let ((test-buffer (get-buffer-create "test-abcdefeuropris.el"))
-	(buffer (get-buffer-create "abcdefeuropris.el")))
-    (should (equal (mb-ert-swap-filename test-buffer)
-		   (expand-file-name "abcdefeuropris.el" (buffer-directory))))
-    (kill-buffer test-buffer)
-    (kill-buffer buffer)))
+  (should (equal (mb-ert-swap-filename "/qwe/test-qwe.el") "/qwe/qwe.el")))
 
 (ert-deftest test-mb-ert-get-test-filename ()
   "Test of `mb-ert-get-test-filename'"
@@ -37,8 +33,12 @@
   (should (mb-ert-test-filename-p "~/path/test-qwe.el"))
   (should-not (mb-ert-test-filename-p "~/path/qwe.el")))
 
-(ert-deftest test-mb-swap-ert-defun ()
-"Test of `mb-swap-ert-defun'"
- (should (equal (mb-swap-ert-defun ) nil)))
+(ert-deftest test-mb-ert-name-p ()
+  "Test of `mb-ert-name-p'"
+  (should (mb-ert-name-p "test-qwe"))
+  (should (equal (mb-ert-name-p "atest-qwe") nil))
+  (should (equal (mb-ert-name-p "test-qwe" "asd") nil))
+  (should (mb-ert-name-p "atest-qwe" "atest")))
 
 (provide 'test-mb-ert.el)
+
