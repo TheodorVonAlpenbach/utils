@@ -6,10 +6,14 @@
 					(thing-at-point 'symbol)))
 			      (directories
 			       (list (file-name-directory (buffer-file-name))))
-			      (types (list (file-name-extension (buffer-name)))))
+			      (types
+			       (list
+				(or (file-name-extension (buffer-file-name))
+				    (file-name-nondirectory (buffer-file-name))))))
   "Convenient grep according to file type."
   (when (stringp target)
-    (let ((globs (loop for x in (listify types) collect (concat "/*." x))))
+    (let ((globs (loop for x in (listify types) collect
+		       (format "/%s%s" (if (eql (char x 0) ?.) "" "*") x))))
       (compilation-start
        (format "grep -nH -E '%s' %s"
 	 (substring-no-properties target)
