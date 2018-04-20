@@ -28,6 +28,7 @@
 (setf evil-exchange-key "go")
 (setf evil-exchange-cancel-key "gO")
 (evil-exchange-install)
+(setf evil-symbol-word-search t)
 
 (evil-mode 1)
 (setf evil-move-beyond-eol t)
@@ -90,6 +91,9 @@ STATE can take the same values as in `evil-define-key'."
 (key-chord-define evil-normal-state-map "J:" 'save-some-buffers)
 (evil-key-chord-define '(normal visual motion) global-map "uu" 'undo-tree-redo)
 (evil-key-chord-define '(normal visual motion) global-map "vn" 'ido-switch-buffer)
+
+(define-key vc-prefix-map "j" 'log-edit-done)
+(key-chord-define evil-normal-state-map "vk" vc-prefix-map)
 
 (define-key evil-normal-state-map "gp" 'TeX-next-error)
 
@@ -245,6 +249,9 @@ By default the last line."
 
 ;;; Eval machinery
 (defun mb-eval-string (string &rest args)
+  "This is the core function of the mb-eval machinery. Most other
+eval function should end up here to secure a sort of conformity
+between different"
   (case major-mode
     (mb-lisp-mode
      (if (slime-p)
@@ -252,10 +259,12 @@ By default the last line."
        (apply #'mb-lisp-eval-1 string args)))
     (emacs-lisp-mode (eval (read string)))
     (octave-mode (octave-send-string string))
+    (js-mode (apply #'js-eval-string string args))
     (mbscilab-mode (mbscilab-eval string))))
 ;;(mb-eval-string "(+ 2 2)")
 
 (defun eval-form ()
+  "This is special to Lisp languages only."
   (interactive)
   (case major-mode
     ((emacs-lisp-mode mb-lisp-mode)
@@ -266,18 +275,18 @@ By default the last line."
     (octave-mode (octave-send-block))))
 
 (defun mb-eval-last-sexp (&rest args)
+  "Eval the syntaks expression preceding point."
   (interactive)
   (case major-mode
-    (octave-mode (eval-current-sexp))
     (emacs-lisp-mode (eval-last-sexp args))
-    (mb-lisp-mode
-     (if (slime-p)
-       (if args
-	 (slime-pprint-eval-last-expression)
-	 (setf qwe (slime-eval-last-expression)))
-       (mb-lisp-eval-sexp args)))
+    (mb-lisp-mode (if (slime-p)
+		    (if args
+		      (slime-pprint-eval-last-expression)
+		      (slime-eval-last-expression))
+		    (mb-lisp-eval-sexp args)))
     (python-mode (apply #'python-shell-send-region
-			(mb-python-last-sexp-region)))
+		   (mb-python-last-sexp-region)))
+    (octave-mode (apply #'octave-eval-last-sexp args))
     (t (apply #'mb-eval-region (append (last-sexp-region) args)))))
 
 (defun eval-current-sexp ()
@@ -285,29 +294,29 @@ By default the last line."
   (case major-mode
     ((emacs-lisp-mode mb-lisp-mode)
      (save-excursion
-      (forward-sexp 1)
-      (if (slime-p)
-	(slime-eval-last-expression)
-	(eval-last-sexp nil))))
+       (forward-sexp 1)
+       (if (slime-p)
+	 (slime-eval-last-expression)
+	 (eval-last-sexp nil))))
+    (octave-mode
+     (progn (eol) (mb-eval-last-sexp)))
     (otherwise
-     (mb-eval-string
-      (string-match* "\\(?:#\\|//+\\|[[:space:]]\\)*\\(.*\\)"
-	(line-string) :num 1)))))
+     (princ (mb-eval-string
+	     (string-match* "\\(?:#\\|//+\\|[[:space:]]\\)*\\(.*\\)"
+	       (line-string) :num 1))))))
 ;;(+ (+ 111 2) 3)
 
 (defun eval-defun-test (&optional no-eval-p)
   (interactive)
+  (unless no-eval-p (mb-eval-defun))
   (save-excursion
     (cl-case major-mode
       ((emacs-lisp-mode mb-lisp-mode python-mode)
-       (unless no-eval-p
-	 (mb-eval-defun))
        (evil-cp-end-of-defun)
        (eol :offset 1)
        (mb-eval-last-sexp))
       (metafont-mode (meta-eval-buffer))
       (otherwise
-       (unless no-eval-p (mb-eval-defun))
        (end-of-defun)
        (eol)
        (mb-eval-last-sexp)))))
@@ -330,23 +339,21 @@ By default the last line."
 		    (slime-compile-and-load-file)
 		    (mb-lisp-eval-buffer)))
     (metafont-mode (meta-compile-file (buffer-file-name)))
-    (octave-mode (octave-eval-buffer))
+    (octave-mode (octave-source-buffer))
     (mbscilab-mode (mbscilab-eval-buffer))
     (python-mode (python-shell-send-buffer nil))
     ((c++-mode cc-mode) (compile "make -k"))
     (latex-mode (TeX-command-run-all nil))
     (otherwise (mb-eval-region (point-min) (point-max)))))
 
-(defun mb-eval-defun ()
+(cl-defun mb-eval-defun ()
   (interactive)
   (cl-case major-mode
-    (emacs-lisp-mode (eval-defun nil))
-    (mb-lisp-mode
-     (when (slime-p)
-       (slime-eval-defun)))
-    (octave-mode (octave-send-defun))
+    (emacs-lisp-mode (eval-defun current-prefix-arg))
+    (mb-lisp-mode (when (slime-p)
+		    (slime-eval-defun)))
     (python-mode (apply #'python-shell-send-region (mb-python-defun-region)))
-    (otherwise (apply #'mb-eval-region (defun-region)))))
+    (otherwise (mb-eval-region (bod*) (eod*) t))))
 
 (defun mb-eval-region (start end &optional printflag read-function)
   (interactive "r")
@@ -356,7 +363,11 @@ By default the last line."
     ((mbscilab-mode scilab-mode) (mbscilab-eval-region start end))
     (sh-mode (sh-execute-region start end))
     (latex-mode (TeX-command-run-all-region))
-    (octave-mode (octave-send-region start end))))
+;;    (octave-mode (octave-send-region start end))
+    (otherwise
+     (princ (mb-eval-string
+	     (buffer-substring-no-properties start end)
+	     printflag)))))
 
 (defun mb-eval-region-from-point (&optional printflag read-function)
   "Evalutates content from POINT to the end of the buffer."
@@ -368,8 +379,14 @@ By default the last line."
   (interactive "r")
   (mb-eval-region (point-min) (eol*) printflag read-function))
 
+(defun mb-compile-buffer ()
+  (interactive)
+  (case major-mode
+    (octave-mode (octave-source-buffer))))
+
 (defvar *eval-map* (make-sparse-keymap))
 (key-chord-define evil-normal-state-map "kj" *eval-map*)
+ (define-key *eval-map* "k" #'mb-compile-buffer)
  (define-key *eval-map* "d" #'mb-eval-defun)
  (define-key *eval-map* "b" #'mb-eval-buffer)
  (define-key *eval-map* "s" #'mb-eval-region-from-point)
