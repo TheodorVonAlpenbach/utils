@@ -19,7 +19,8 @@
 
 ;; tags
 (setf tags-table-list
-      (cl-nunion '("~/.MBTAGS" "~/.CTAGS" "~/.OTAGS" "~/.CLTAGS" "~/.PYTAGS" "~/.SCILABTAGS")
+      (cl-nunion '("~/.MBTAGS" "~/.CTAGS" "~/.OTAGS" "~/.CLTAGS"
+		   "~/.PYTAGS" "~/.JSTAGS" "~/.SCILABTAGS")
 		 tags-table-list :test #'string=))
 
 ;; lynx
@@ -29,7 +30,8 @@
 ;; diary file (mandatory to use #'calendar)
 (setf diary-file (setf diary-file (expand-file-name "office/diary" *local-data-dir*)))
 
-(defconst lsdoc-dir "/ls/gold/u1/mbe/doc"
+(defconst lsdoc-dir "/ssh:bla:/ls/gold/u1/mbe/doc/"
+  ;;/ls/gold/u1/mbe/doc
   "Mounted silver doc directory")
 
 (setf *my-favorites*
@@ -69,12 +71,14 @@
 
 	;; remote files (shared with windows)
 	;; Note special treatment of arbeidslog in mb-insert-state-init!
-	(,lsdoc-dir "arbeidslog" :point :end :keyboard :no :time-paragraphs t)
-	(,lsdoc-dir "adresser.txt" :keyboard :no)
-	(,lsdoc-dir "todo.org" :keyboard :no)
-	(,lsdoc-dir "qtportlog.org" :keyboard :no)
-	(,lsdoc-dir "LS-notes.org" :point :end :keyboard :no :time-paragraphs t)))
-;;(find-file "/ssh:sil:~/doc")
+	;; (,lsdoc-dir "arbeidslog" :point :end :keyboard :no :time-paragraphs t)
+	;; (,lsdoc-dir "adresser.txt" :keyboard :no)
+	;; (,lsdoc-dir "todo.org" :keyboard :no)
+	;; (,lsdoc-dir "qtportlog.org" :keyboard :no)
+	;; (,lsdoc-dir "LS-notes.org" :point :end :keyboard :no :time-paragraphs t)
+	))
+;;(find-file "/ssh:bla:/ls/gold/u1/mbe/doc/LS-notes.org")
+;;(find-file "/ssh:bla:/ls/gold/u1/mbe/doc/todo.org")
 
 ;;scheme
 (setf scheme-program-name "guile")
