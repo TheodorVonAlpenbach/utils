@@ -29,7 +29,12 @@
   (eql (emacs-os) :cygwin))
 ;;(cygwin-emacs-p)
 
+;; Otherwise packages like slime might shadow the built in cl library
+;; by pushing directories with cl library compatability packages to
+;; load-path:
+(push "/usr/share/emacs/24.4/lisp/emacs-lisp" load-path)
 (require 'cl)
+
 (defconst +win32-root+
   (ecase (emacs-os)
     (:cygwin "/cygdrive/c")
@@ -200,7 +205,9 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 	 ("\\.rb$" . ruby-mode)
 	 ("\\.ora$" . text-mode)
 	 ("\\.xml$" . xml-mode)
+	 ("\\.css$" . css-mode)
 	 ("\\.html$" . html-mode)
+	 ("\\.js$" . js-mode)
 	 ("\\.o$" . hexl-mode)
 	 ("\\.exe$" . hexl-mode)
 	 ("\\.shp$" . hexl-mode)
@@ -241,9 +248,6 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 (add-hook 'text-mode-hook #'(lambda () (abbrev-mode 1)))
 (add-hook 'text-mode-hook 'turn-on-auto-fill)
 
-;; div modes (see external/mb-div-mode.el)
-;; (add-hook 'php-mode-hook 'mb-php-mode-hook-function)
-(add-hook 'js-mode-hook 'mb-js-mode-hook-function)
 (add-hook 'sh-mode-hook 'linum-mode)
 
 ;;; What's this?! (2015-04-30, but now I have a Clue...)
@@ -258,8 +262,9 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 ;; My lisp, finally everything in .emacs should be split into similar
 ;; files. Also, the files should be byte-compiled too.
 ;; autoload?
-(loop for m in (append '(mb-evil
-			 global-map
+(loop for m in (append '(global-map
+			 mb-utils-io
+			 mb-evil
 			 elisp-map
 			 mb-things
 			 radio-playlists
@@ -273,7 +278,8 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 			 mb-indent
 			 qp
 			 ;; not from mb
-			 ert)
+			 mb-ert
+			 mb-js-mode)
 		       *local-requires*)
       do (require m))
 
