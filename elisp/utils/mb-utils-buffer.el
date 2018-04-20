@@ -3,6 +3,15 @@
     (empty-string-p (buffer-string))))
 ;;(empty-buffer-p)
 
+(defun buffer-major-mode (buffer-or-name)
+  "Return the major mode of the buffer designated by BUFFER-OR-NAME.
+The result type is SYMBOL."
+  (buffer-local-value 'major-mode (get-buffer buffer-or-name)))
+
+(defun major-mode-p (mode buffer-or-name)
+  "Return non nil if the major mode of BUFFER-OR-NAME is MODE."
+  (eql (buffer-major-mode buffer-or-name) mode))
+
 (cl-defun buffer-directory (&optional (buffer (current-buffer)))
   (file-name-directory (buffer-file-name buffer)))
 ;;(buffer-directory)
@@ -194,9 +203,26 @@ Note that line numbers and paragraph numbers (check) starts from base 0."
   "Return the POINT at the beginning of the Nth sexp before current point."
   (save-excursion (eos n)))
 
-(defun last-sexp-region (&optional (n 1))
-  (save-excursion
-    (list (bos n) (eos n))))
+(defun sexp-region () (list (bos* 1) (eos* 1)))
+
+(defun backward-sexp* (&optional n)
+  (backward-sexp n) (point))
+
+(defun c-last-sexp-region ()
+  "Return the region of the sexp preceeding point.
+This function assumes a C-like syntax. In particular, it assumes
+that there is no space between identifiers and delimiters"
+  (let ((end (point)))
+    (save-excursion
+      (loop for res = (ignore-errors (backward-sexp* 1))
+	    until (or (null res)
+		      (member (char-before) '(9 10 32))))
+      (list (point) end))))
+
+(cl-defun last-sexp-region (&optional (n 1))
+  (case major-mode
+    (js-mode (c-last-sexp-region))
+    (otherwise (save-excursion (list (bos n) (eos n))))))
 
 ;;; Region stuff
 (defalias 'region-string 'buffer-substring-no-properties)
@@ -235,6 +261,15 @@ the content of REGION."
   "Move POINT to end of buffer and return its value"
   (goto-char (point-max)))
 
+(cl-defun buffer-region (&optional (buffer (current-buffer)))
+  (with-buffer buffer (save-excursion (list (bob) (eob)))))
+;;(buffer-region)
+
+(cl-defun buffer-lines (&optional (buffer (current-buffer)))
+  (with-buffer buffer (save-excursion (region-lines (bob) (eob)))))
+;;(buffer-lines)
+
+;;; Paragraph stuff
 (defsubst bop ()
   "Move POINT to beginning of paragraph and return its value"
   (backward-paragraph 1)
@@ -243,11 +278,6 @@ the content of REGION."
   (point))
 ;;(bop)
 
-(cl-defun buffer-lines (&optional (buffer (current-buffer)))
-  (with-buffer buffer (save-excursion (region-lines (bob) (eob)))))
-;;(buffer-lines)
-
-;;; Paragraph stuff
 (defsubst eop ()
   "Move POINT to end of paragraph and return its value"
   (forward-paragraph 1)
@@ -272,6 +302,8 @@ The return value is a pair of points \(START END\)."
   (paragraph-string))
 
 ;;; Line stuff
+;; NOTE: To calculate the line number from POINT, use line-number-at-pos
+
 (cl-defun bol (&key linum point (offset 0) restrict-to-current-field)
   "Move point to the beginning of the current line and return its value.
 If RESTRICT-TO-CURRENT-FIELD is true, the function constrains
@@ -393,6 +425,9 @@ see `bol'"
   "Return the region of the current defun.
 The return value is a pair of points \(START END\)."
   (list (bod*) (eod*)))
+
+(defun defun-string ()
+  (apply #'buffer-substring-no-properties (defun-region)))
 
 ;;; form
 (defun bof (&optional n)
