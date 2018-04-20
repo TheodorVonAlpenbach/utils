@@ -81,13 +81,21 @@ default value of optional parameter BUFFER is the current buffer."
 (def-edebug-spec with-buffer* t)
 ;;(with-buffer* *lynx-buf* (goto-char 10))
 
-(defmacro with-buffer (buffer &rest body)
-  "Temporarily work with BUFFER and evalue last form in BODY."
+(defmacro with-buffer (buffer-or-name &rest body)
+  "Temporarily work with BUFFER-OR-NAME and evalue last form in BODY."
   `(save-excursion
-     (set-buffer ,buffer)
+     (set-buffer (or ,buffer-or-name (current-buffer)))
      ,@body))
+;;(with-buffer *lynx-buf* (goto-char 2))
 (def-edebug-spec with-buffer t)
-;(with-buffer *lynx-buf* (goto-char 2))
+
+(cl-defmacro with-point ((point &optional buffer-or-name) &rest body)
+  "Temporarily work with BUFFER at POINT and evalue last form in BODY."
+  `(with-buffer (or ,buffer-or-name (current-buffer))
+     (goto-char ,point)
+     ,@body))
+;;(with-point (290 "mb-utils-io.el") (line-string))
+(def-edebug-spec with-point t)
 
 (defmacro with-file (file &rest body)
   "Insert FILE in a temporary buffer, evaluate body and save the
