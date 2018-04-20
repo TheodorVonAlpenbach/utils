@@ -51,6 +51,7 @@
    :alias
    :with-transpose
    :expand-list :expand-tree :expand-sequence
+   :nflank :flank :twins
    :deltas
    :replace-nth :nreplace-nth
    :run-program))
@@ -101,23 +102,51 @@ nil"
                  syms)
      ,@body))
 
-(defun minimum (list &key (test #'<) (key #'identity))
-  "Returns a minimum element m of SEQUENCE such that \(TEST (KEY x)
-\(KEY m\)\) is false for every element x of SEQUENCE. Also returns the
-position of m in SEQUENCE and then evaluated minimum value (KEY m) as
-second and third arguments respectively."
-  (loop with best = (list (funcall key (first list)) (first list) 0) ;i.e (MINIMUM-VALUE MINIMUM-ELEMENT MINIMUM-POSITION)
-	for x in (rest list)
-	for i from 1
-	for val = (funcall key x)
-	if (funcall test val (first best))
-	do (setf best (list val x i))
-	finally (return (values (second best) (first best) (third best)))))
-;;(minimum '(3 2 1 5) :test #'> :key #'-)
+(defun nminimum-nokey (vec test)
+  "Helper for `nminimum'. Same as nminimum, but without key and from-end.
+Note that the function fails, if VEC is empty. It is the onus of
+the caller to avoid this.
 
-(defun maximum (list &key (test #'<) (key #'identity))
-  (minimum list :test (complement test) :key key))
-;;(maximum '(3 2 1 5))
+This function is not intended for use outside of this module."
+  (loop with min = (elt vec 0)
+	with pos = 0
+	for i from 0
+	for x across vec
+	when (funcall test x min)
+	do (setf min x pos i)
+	finally (return (values min pos))))
+;;(nminimum-nokey (vector 1 2 3 0) #'<)
+
+(defun minimum (seq &key (test #'<) key (start 0) end from-end)
+  "Find the minimum of SEQ.
+The returned object is the value triple (ELEMENT POSITION VALUE) where
+ELEMENT is the minimum element in SEQ and POSITION is the positition
+of that element in SEQ. VALUE is an element identical to (funcall KEY
+ELEMENT). The default values of the supported keywords TEST, KEY,
+START, END, and FROM-END are #'<, #'IDENTITY, 0 NIL, and NIL,
+respectively."
+  (when (plusp (length seq))
+    (if from-end
+      (minimum (nreverse seq) :test test :key key)
+      (multiple-value-bind (min pos)
+	  (nminimum-nokey
+	   (if key
+	     (map 'vector key (subseq seq start end))
+	     (coerce (subseq seq start end) 'vector))
+	   test)
+	(let ((pos* (+ pos start)))
+	  (values (elt seq pos*) pos* min))))))
+;;(minimum (vector 1 2 3 0))
+
+(defun maximum (list &rest args)
+  "Find the maximum of SEQ. See MINIMUM for details."  
+  (apply #'minimum list :test (let ((test (popf args :test)))
+				(if test
+				  (complement test)
+				  #'>))
+	 args))
+;;(maximum '(5 5 3 1 1 4) :start 2)
+;;(maximum '(0 0 0 1 1 4))
 
 (defun nrcons (list x)
   "B after LIST. Destructive."
@@ -771,6 +800,7 @@ similar to `mapcar'"
 (defun melt (sequence &rest positions)
   "Extracts the elements at POSITIONS from SEQUENCE"
   (coerce (apply #'mnth (coerce sequence 'list) positions) (class-of sequence)))
+;;(melt '((a) (b) (c)) 0 2)
 ;;(melt (0-n 10 :type 'vector) 5 2 7)
 
 (defun project-list (tree &rest positions)
@@ -782,6 +812,7 @@ similar to `mapcar'"
   (coerce (loop for x in (coerce seq-tree 'list)
 		collect (apply #'melt x positions))
 	  (class-of seq-tree)))
+;;(project '((a b c) (d e f)) 0 2)
 ;;(project #(#(a b c) (d e f)) 0 2)
 
 (defun list-insert (x n list)
