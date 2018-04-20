@@ -297,15 +297,6 @@ informative."
 ;;(repetitions (0-n 500))
 
 ;;; List functions
-(defun conc (&rest lists)
-  "Not destructive version of `nconc'"
-  (and lists
-       (if (= 1 (length lists))
-	 (first lists)
-	 (let ((res (copy-list (first lists))))
-	   (setf (cdr (last res)) (apply #'conc (rest lists)))
-	   res))))
-
 (defun swap-head (list predicate)
   "Swaps first element in LIST with the first element in that
 matches PREDICATE"
