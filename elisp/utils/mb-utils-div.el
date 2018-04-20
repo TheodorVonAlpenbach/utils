@@ -1,6 +1,13 @@
 (require 'cl)
 (require 'mb-indent)
 
+(cl-defmacro without-message (&body body)
+  `(let ((message-log-max nil))
+     (progn ,@body)))
+;;(without-message 'qwe)
+;;(let ((message-log-max 0)) (eval-defun nil) (eval 2))
+;;(let ((qwe nil)) (eval-defun nil) (eval 2))
+
 (cl-defun tmap-n (item n table &key (test #'eq))
   (find item table :key #'(lambda (row) (nth n row)) :test test))
 (cl-defun tmap-0 (item table &key (test #'eq)) (tmap-n item 0 table :test test))
