@@ -195,10 +195,11 @@
 
 ;;; Customer config
 (defconst +qp-customers+
-  `((burums "Fru Burums (Oslo)" mandag (4 5) "Burums")
+  `((burums "Fru Burums (Oslo)" mandag (1 2) "Burums")
+    (burums "Fru Burums (Oslo)" mandag (4 5) "Burums")
     (burums "Fru Burums (Oslo)" mandag (3 4) "Burums")
     (burums "Fru Burums (Oslo)" mandag ,(if (eql (emacs-os) :linux) '(0 4)  '(1 5)) "Burums")
-    (burums "Fru Burums (Oslo)" mandag (1 2) "Burums")
+    (burums "Fru Burums (Oslo)" mandag (0 1) "Burums") ;Iversen
     (burums "Fru Burums (Oslo)" mandag (1 5) "Burums") ;;highbury style
     (burums "Fru Burums (Oslo)" mandag "\\(.*\\) \\([[:digit:]]+\\)$" "Burums") 
     (vertshuset "Vålerenga Verthus (Oslo)" tirsdag (5 6 0) "Vålerenga")
