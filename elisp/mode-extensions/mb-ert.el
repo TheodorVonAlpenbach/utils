@@ -68,6 +68,9 @@ the associated test buffer's path is \"path/test-buffer-name.el\"."
   (find-file (mb-ert-swap-filename filename)))
 ;;(mb-ert-swap-file)
 
+(cl-defun mb-ert-name-p (name-or-symbol &optional (prefix "test-"))
+  (string-match* (concat "^" prefix) (sstring name-or-symbol)))
+
 (cl-defun mb-ert-swap-defun-name (&optional
 				  (defun-name (sstring (defun-symbol)))
 				  to
@@ -80,6 +83,8 @@ function assumes that DEFUN-SYMBOL is the name of a test function
 if and only if it has PREFIX has prefix. By default, TO is nil."
   (case to
     (:ert (concat prefix defun-name))
+    (:ert-soft (if (mb-ert-name-p defun-name)
+		 defun-name (concat prefix defun-name)))
     (:non-ert (substring defun-name (length prefix)))
     (otherwise (let* ((n (length prefix))
 		      (to* (if (and (> (length defun-name) n)
@@ -142,7 +147,7 @@ Does not support testing of defun when point is at its test function."
   (interactive)
   (awhen (defun-symbol)
     (eval/load-buffer/file)
-    (ert (mb-eval-defun))))
+    (ert (mb-ert-swap-defun-name (sstring (mb-eval-defun)) :ert-soft))))
 
 (cl-defun eval/load-buffer/file (&optional (buffer-or-file (current-buffer)))
   "Evalute or load BUFFER-OR-FILE.
@@ -159,14 +164,16 @@ in Emacs."
 ;;(eval/load-buffer/file (current-buffer))
   
 (cl-defun mb-load/eval-ert-pair (&optional (buffer-or-file (current-buffer)))
-  ())
+  (error "Not implemented"))
 
 (cl-defun mb-ert-test-region (beg end)
-  (interactive "r"))
+  (interactive "r")
+  (error "Not implemented"))
 
 (cl-defun mb-ert-test-buffer (&optional (buffer (current-buffer)))
   "Run all ERT tests associated with defuns in BUFFER."
   (interactive)
+  (error "Not implemented")
   (save-excursion
     (eval-buffer buffer)
     (mb-ert-swap-file (buffer-file-name))
