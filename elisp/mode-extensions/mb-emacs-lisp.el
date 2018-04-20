@@ -24,16 +24,20 @@ DEFUN forms include all top-level forms with a car symbol name having the prefix
     (insert "cl-")))
 
 (cl-defun elisp-goto-defun (name &optional (defun-regexp +defun-regexp+)
-				force-beginning-p)
+				 force-beginning-p)
   "Move point to the beginning of the defun NAME.
 If point is already in the target defun, do not move the point
 unless FORCE-BEGINNING-P is true. `defun' here means any
 defun-ish construct like `cl-defun', `defmacro' etc."
   (message "%S %s" (buffer-name) (point))
-  (unless (string= (sstring (defun-symbol)) name)
+  (if (string= (sstring (defun-symbol)) name)
+    ;; do nothing, but do not return nil which means defun is missing
+    ;; in buffer
+    (point)
+    ;; else, search for defun and go there if found
     (bob)
     (if (re-search-forward (format "^([[:space:]]*%s[[:space:]]+%s\\_>"
-				 defun-regexp name)
+			     defun-regexp name)
 	  nil t)
       (bod)
       ;; else issue warning message and return nil
