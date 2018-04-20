@@ -23,6 +23,9 @@
 (defmethod distance2 ((x sequence) y)
   (reduce #'min x :key (bind #'distance2 y)))
 ;;(distance2 (vector (mp 1 0) (mp 1 1)) (mp 2 2))
+
+;; Except for path and polygon, the rest are the same?!
+;; TODO: try to bundle them to a (defmethod distance2 (x y) (distance2 y x))
 (defmethod distance2 (x (y cons)) (distance2 y x))
 (defmethod distance2 (x (y vector)) (distance2 y x))
 (defmethod distance2 ((x path) (y geometry)) (distance2 (segments x) y))
