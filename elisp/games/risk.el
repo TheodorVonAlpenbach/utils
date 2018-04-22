@@ -1,6 +1,6 @@
-(defun roll-dice ()
-  (random 6))
-;; (roll-dice)
+(defun roll-dice (&optional base)
+  (if base (random-integer base (+ base 5)) (random 6)))
+;; (roll-dice 1)
 
 (defun roll-dices-no-sort (n)
   (loop repeat n collect (roll-dice)))
