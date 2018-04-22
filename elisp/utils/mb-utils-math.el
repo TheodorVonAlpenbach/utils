@@ -377,16 +377,6 @@ See `cycle-badness' for the measure of a good cycle."
     (+ price-km price-days price-hours)))
 ;;(bilkollektivet-price-calculator 'C 2000 5)
 
-;;; some physics
-(defconst gravitational-constant 6.67428E-11)
-(defconst GM-constant 3.986004418E14)
-(defconst earth-mass  5.9736E24)
-(defconst earth-radius-pole 6.356752E6)
-(defconst earth-radius-equator 6.378137E6)
-(defconst earth-radius-mean 6.371E6)
-;;(sqrt (/ (* 2 gravitational-constant earth-mass) earth-radius-pole))
-;;(sqrt (/ (* 2 gravitational-constant earth-mass) earth-radius-equator))
-
 
 ;;; div
 (defun is-divisible (n m)
@@ -1029,3 +1019,13 @@ p) q)))"
 	  unless (< nn-max nn-min) return (list nn-min (- m) (fz nn-min (- m))))))
 ;;(approximate-frequency 1 1)
 ;;(approximate-frequency (* 100 pi) 1)
+
+(cl-defun volume-ellipsoid (r1 &optional (r2 r1) (r3 r2))
+  (/ (* 4 pi r1 r2 r3) 3))
+;; Volume Himalia
+;;(volume-ellipsoid (/ 170 2))                     2572440.7845144426
+;; Volume Amalthea as an ellipsoid
+;;(volume-ellipsoid (/ 250 2) (/ 146 2) (/ 128 2)) 2446253.479595252
+;; Volume Amalthea as a prism
+;;(* 250 146 128)                                  4672000
+;; Volume Amalthea according to Wikipedia          2430000 (assuming that it is a true ellipsoid?)
