@@ -12,7 +12,8 @@ POPULATION is a triple (CHILDREN ADULTS ELDER)."
 	       (/ adults 2.0))
 	    (* children (- 1 pdr-children))
 	    (* adults (- 1 pdr-adults))))))
-;;(sds-next-generation '(2 2 2) 7)
+;;(sds-next-generation '(7 2 2) 7 '(.9 .9))
+;;(sds-next-generation '(7.0 0.7 0.12) 7 '(.9 .9))
 
 (cl-defun sds-simulate (num-generations
 			generation-length
@@ -28,6 +29,7 @@ POPULATION is a triple (CHILDREN ADULTS ELDER)."
 	collect new-population))
 ;;(sds-simulate 3 30 '(1 1 1) 70)
 ;;(sds-simulate 3 30 '(0.05 0.1 0.05) 70)
+;;(sds-simulate 3 30 '(0.05 0.1 0.05) 70 '(.9 .9))
 
 (cl-defun sds-estimate-growth (num-generations
 			       generation-length
@@ -41,8 +43,21 @@ POPULATION is a triple (CHILDREN ADULTS ELDER)."
     (expt (average (loop for (a b) in (pairs pop-size)
 			 collect (/ (float b) a)))
 	  (/ 1.0 generation-length))))
+
+(cl-defun sds-estimate-growth (num-generations
+			       generation-length
+			       &rest args)
+  "See `sds-simulate' for ARGS"
+  (let* ((populations (apply #'sds-simulate
+			     num-generations
+			     generation-length
+			     args))
+	 (pop-size (mapcar #'sum populations)))
+    (expt (/ (last-elt pop-size) (first pop-size))
+	  (/ 1.0 (* generation-length num-generations)))))
 ;;(sds-estimate-growth 10 30 '(3.8 2 2) 7 '(0.5 0.2))
-;;(sds-estimate-growth 300 30 '(1 1 1) 70)
+;;(sds-estimate-growth 300 30 '(1 1 1) 200 '(0 0))
+;;(sds-estimate-growth 10 30 '(1 1 1) 70 '(0.1 0.1))
 ;;(sds-estimate-growth 100 30 '(1 1 1) 3.1)
 ;;(sds-estimate-growth 100 30 '(1 1 1) 1.7)
 ;;(pp (loop for y from 0 to 50 by 5 collect (* .2 (expt 1.08 y))))
