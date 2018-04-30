@@ -5,7 +5,7 @@ Mandag        8 15 22 29  5 12 19 26  5 12 19 26  2  9 16 23 30  7 14 21 28  4 1
 Uke           2  3  4  5  6  7  8  9 10 11 12 14 15 16 17 18 19 20 21 22 23 24 25
 Runde         1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23
 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-Fru Burum     x  x  x  x     x  x  x  x  x  x  x  x  x
+Fru Burum     x  x  x  x     x  x  x  x  x  x  x  x  x  x
 Nellie        x  x  x  x  x  x  x  x  x  x  x     x  x
 Onkel Oskar   x  x  x  C  x  x  x  x  x  x  x  x  x  x
 Highbury      x  x  x  x  x  x  x  x  x  x  x     x  x  x
