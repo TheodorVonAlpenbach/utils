@@ -43,10 +43,11 @@ only, or left only depending on the surrounding characters. If
   (insert (iso-time :with-seconds (and (numberp prefix) 
 				       (= prefix 3)))))
 
-(defun insert-date-and-time ()
+(defun insert-date-and-time (prefix)
   "Inserts today's date string at point."
   (interactive)
-  (insert (iso-date-and-time)))
+  (insert (iso-date-and-time :with-seconds (and (numberp prefix) 
+						(= prefix 3)))))
 
 (defun insert-full-date ()
   "Inserts today's date string at point."
@@ -150,9 +151,10 @@ X should evaluate to a string designator."
 ;;(funcall (insert-n '¹) 2)
 ;;(funcall (insert-n "qwe") 2)
 
-(defun insert-symbol-sup1 (n) "Inserts N superscript 1s (¹) at point." (insert-n )
-       (interactive "P")
-       (dotimes (i (or n 1)) (insert ?¹)))
+(defun insert-symbol-sup1 (n)
+  "Inserts N superscript 1s (¹) at point."
+  (interactive "P")
+  (dotimes (i (or n 1)) (insert ?¹)))
 
 (defun insert-symbol-sup2 (n)
   "Inserts N superscript 2s (²) at point."
