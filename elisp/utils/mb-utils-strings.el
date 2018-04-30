@@ -502,6 +502,8 @@ tree. Then a tree of corresponding matches is returned."
       *mb-trim-regexp* regexp)))
 ;;(mb-trim-regexp "a" :right)
 
+;; Note! The following three functions can be in conflict with modules
+;; that Slime loads. Should consider renaming them to mb-string-*
 (defun string-trim-left (string &optional regexp)
   "Returns a copy of STRING trimmed at left with REGEXP."
   (or (third (split-string-once string (mb-trim-regexp regexp :left)))
@@ -715,5 +717,12 @@ See also `group-consequtive-integers'."
 	for (x . pos) = (read-from-string string pos)
 	collect x while (< pos n)))
 ;;(read-whole-string "a b (c d)")
+
+(cl-defun string-head (string &optional (n 1))
+  (lines-to-string (head n (string-lines string))))
+
+(cl-defun string-tail (string &optional (n 1))
+  (lines-to-string (last (string-lines string) n)))
+;;(string-tail "qwe\nqwe2\nqwe3")
 
 (provide 'mb-utils-strings)
