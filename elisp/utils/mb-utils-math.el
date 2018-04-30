@@ -1007,17 +1007,21 @@ p) q)))"
 ;;(* (problem 1000000) (/ 2500 313.0))
 
 (cl-defun approximate-frequency (f &optional (eps 0.1) (max-m 100))
-  (flet ((fn (f eps m) (- (log (+ f eps) 2) (* m (log 3.0 2))))
-	 (fz (n m) (expt 2 (+ n (* m (log 3.0 2))))))
+  "Return \(N M f_nm\), f_nm = 2^N * 3^M, for which |f_nm - f| < EPS.
+If no such triple can be found for M < MAX-M, the function
+instead returns nil.
+
+TODO: move this to some yamal elisp module."
+  (cl-flet ((fn (f eps m) (- (log (+ f eps) 2) (* m (log 3.0 2))))
+	    (fz (n m) (expt 2 (+ n (* m (log 3.0 2))))))
     (loop for m from 73 below max-m
 	  for n-min = (ceiling (fn f (- eps) m))
 	  for n-max = (floor (fn f eps m))
-	  for n-best (if (< (abs n-min) (abs n-max)) n-min n-max)
+	  for n-best = (if (< (abs n-min) (abs n-max)) n-min n-max)
 	  unless (< n-max n-min) return (list n-min n-max m (fz n-min m))
 	  for nn-min = (ceiling (fn f (- eps) (- m)))
 	  for nn-max = (floor (fn f eps (- m)))
 	  unless (< nn-max nn-min) return (list nn-min (- m) (fz nn-min (- m))))))
-;;(approximate-frequency 1 1)
 ;;(approximate-frequency (* 100 pi) 1)
 
 (cl-defun volume-ellipsoid (r1 &optional (r2 r1) (r3 r2))
