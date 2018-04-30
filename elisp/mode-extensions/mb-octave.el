@@ -165,6 +165,7 @@ This functionality is not well covered by octave-fill-paragraph"
   "Fills an Octave documentation paragraph.
 This functionality is not well covered by octave-fill-paragraph"
   (let ((fill-prefix "## ## ")
+	(fill-column 65)
 	(paragraph-separate (regexp-or paragraph-separate
 				       "## [^#]"
 				       "## -*- texinfo -*-"
