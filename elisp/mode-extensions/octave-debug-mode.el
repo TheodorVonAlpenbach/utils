@@ -7,29 +7,58 @@
       (interactive)
       (message "This key for %S is deprecated! Use \"%s\" instead." lfn lnew-key))))
 
-(define-key octave-mode-map [(f5)] (deprecate-message #'octave-run "gh d r"))
-(define-key octave-mode-map [(ctrl f5)] (deprecate-message #'octave-quit-debug "gh d q"))
-(define-key octave-mode-map [(shift f5)] (deprecate-message #'octave-where "gh d w"))
-(define-key octave-mode-map [(f9)] (deprecate-message #'octave-toggle-breakpoint "gh b t"))
-(define-key octave-mode-map [(ctrl f9)] (deprecate-message #'octave-clear-all-breakpoints
-							   "gh b d a"))
-(define-key octave-mode-map [(meta f9)] (deprecate-message #'octave-list-all-breakpoints "gh b l"))
-(define-key octave-mode-map [(f10)] (deprecate-message #'octave-step "gh d SPACE"))
-(define-key octave-mode-map [(ctrl f10)] (deprecate-message #'octave-step-in "gh d d"))
-(define-key octave-mode-map [(shift f10)] (deprecate-message #'octave-step-out "gh d u"))
-(define-key octave-mode-map " " #'(lambda () (interactive) (self-insert-command 1)))
-(define-key octave-mode-map "b" #'(lambda () (interactive) (self-insert-command 1)))
-
 (defun octave-debug-map ()
   (let ((map (make-sparse-keymap)))
     (define-key map "r" #'octave-run)
     (define-key map "w" #'octave-where)
-    (define-key map "s" #'octave-status)
+    (define-key map "S" #'octave-status)
+    (define-key map "s" #'octave-step)
     (define-key map " " #'octave-step)
     (define-key map "q" #'octave-quit-debug)
     (define-key map "d" #'octave-step-in)
     (define-key map "u" #'octave-step-out)
     map))
+
+(defvar octave-debug-mode-map
+  (let ((map (copy-keymap evil-normal-state-map)))
+    (evil-define-key 'normal map "s" (octave-debug-map))
+    (evil-define-key 'normal map "i" (octave-breakpoint-map))
+    map))
+;;(nilf octave-debug-mode-map)
+
+(define-minor-mode octave-debug-mode
+  "Mode for Emacs Lisp buffers while in debugging Octave.
+
+In addition to all Emacs Lisp commands (except those that modify the
+buffer) there are local and global key bindings to several debug
+specific commands.  E.g. `octave-step' is bound to \\[octave-step]
+in the debug buffer and \\<global-map>\\[octave-step] in any buffer.
+
+The edebug buffer commands:
+\\{octave-debug-mode-map}
+
+Global commands prefixed by `global-octave-debug-prefix':
+\\{global-octave-debug-map}
+
+Options:
+`octave-debug-setup-hook'"
+  :lighter " *Debugging*"
+  :keymap octave-debug-mode-map
+  ;; If the user kills the buffer in which Octave debug is currently
+  ;; active, exit to top level, because the edebug command loop can't
+  ;; usefully continue running in such a case.
+  ;;
+  ;; (if (not octave-debug-mode)
+  ;;   (progn
+  ;;     (setq old-evil-normal-state-map evil-normal-state-map)
+  ;;     (message "qweqweqwe!"))
+  ;;   (progn
+  ;;     (setq old-evil-normal-state-map evil-normal-state-map)))
+  )
+
+;; (define-key octave-mode-map " " #'(lambda () (interactive) (self-insert-command 1)))
+;; (define-key octave-mode-map "b" #'(lambda () (interactive) (self-insert-command 1)))
+
 
 (defvar *mb-octave-debug-marker* nil
   "This is created with \(make-marker\) when debugging starts.")
@@ -95,8 +124,10 @@ function at point and LINUM is the current line number."
 step line markings, etc"
   (mb-octave-set-debug-marker nil)
   ;; remove this later
-  (octave-send-string "" t))
-
+  (octave-send-string "" t)
+  (octave-buffer-breakpoints)
+  (with-buffers (octave-buffers)
+    (octave-debug-mode -1)))
 
 (defun octave-enter-debug-mode ()
   "Not implemented Should make current buffer read-only, amplify breakpoints, etc.
@@ -104,7 +135,8 @@ step line markings, etc"
   (octave-update-all-dbstop))
 
 (defun octave-debug-start ()
- "Start debugging with comment statement after the defun at point."
+  "Start debugging with comment statement after the defun at point."
+  (octave-debug-mode 1)
   (save-excursion
     (octave-update-dbstops-buffer (current-buffer))
     (end-of-defun)
@@ -114,10 +146,13 @@ step line markings, etc"
   (if (octave-debug-p)
     (destructuring-bind (line fn)
 	(octave-where)
-      (when (or (find-tag fn)
-		(save-excursion
+      (when (or (save-excursion
 		  (bol :linum line)
-		  (string= (octave-defun-name) fn)))
+		  (string= (octave-defun-name) fn))
+		(condition-case nil
+		    (find-tag fn)
+		  (error nil)))
+	(octave-debug-mode 1)
 	(mb-octave-set-debug-marker line)
 	(goto-line line)
 	(eol)))
