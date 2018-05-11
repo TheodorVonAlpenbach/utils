@@ -427,7 +427,7 @@ The return value is a pair of points \(START END\)."
   (list (bod*) (eod*)))
 
 (defun defun-string ()
-  (apply #'buffer-substring-no-properties (defun-region)))
+  (buffer-substring-no-properties (bod*) (eod*)))
 
 ;;; form
 (defun bof (&optional n)
