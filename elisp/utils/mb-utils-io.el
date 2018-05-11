@@ -89,6 +89,14 @@ default value of optional parameter BUFFER is the current buffer."
 ;;(with-buffer *lynx-buf* (goto-char 2))
 (def-edebug-spec with-buffer t)
 
+(defmacro with-buffers (buffers-or-names &rest body)
+  "Eval BODY in every buffer in the list BUFFERS-OR-NAMES."
+  `(loop for x in ,buffers-or-names
+	 do (with-buffer x ,@body)))
+;;(with-buffer *lynx-buf* (goto-char 2))
+(def-edebug-spec with-buffers t)
+
+
 (cl-defmacro with-point ((point &optional buffer-or-name) &rest body)
   "Temporarily work with BUFFER at POINT and evalue last form in BODY."
   `(with-buffer (or ,buffer-or-name (current-buffer))
