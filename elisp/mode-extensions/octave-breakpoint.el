@@ -20,6 +20,7 @@
 
 (defun octave-breakpoint-map ()
   (let ((map (make-sparse-keymap)))
+    (define-key map "i" #'octave-toggle-breakpoint)
     (define-key map "t" #'octave-toggle-breakpoint)
     (define-key map "l" #'octave-list-all-breakpoints)
     (define-key map "d" (octave-delete-breakpoint-map))
@@ -114,8 +115,7 @@ The result is a list of the same format as the result from
   "Return the buffer breakpoints in all active Octave mode buffers.
 The result is organized as the list described in
 `octave-update-dbstops'."
-  (loop for x being the buffers
-	if (octave-mode-p x)
+  (loop for x in (octave-buffers)
 	collect (list x (octave-buffer-breakpoints x))))
 
 
