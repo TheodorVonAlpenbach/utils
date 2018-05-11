@@ -44,6 +44,7 @@
 	(,+mb-lisp-dir+ "mode-extensions/mb-evil.el")
 	(,+mb-lisp-dir+ "c++/qt-chess.el")
 	(,+mb-lisp-dir+ "mode-extensions/mb-octave.el")
+	(,+mb-lisp-dir+ "mode-extensions/octave-debug-mode.el")
 	(,+mb-lisp-dir+ "mode-extensions/mb-lisp.el")
 	(,+mb-lisp-dir+ "mode-extensions/mb-octave.el")
 	(,+mb-lisp-dir+ "mode-extensions/mb-tex.el")
@@ -56,6 +57,9 @@
 	;; common lisp utils
 	(,+home-dir+ "projects/utils/lisp/mb-utils.lisp")
 	(,+home-dir+ "projects/utils/lisp/topology/shapes.lisp")
+
+	;; other project entries
+	(,+home-dir+ "projects/Osstrupen/laserdot/bbscale.m")
 
 	;; chess
 	(,+home-dir+ "projects/chess/libHsmsCore/src/ChAlarmServer.cpp")
