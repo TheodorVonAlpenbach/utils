@@ -122,7 +122,13 @@
   "Return the name of the Octave function surrounding point"
   (octave-parse-defun-name (defun-string)))
 
+(defun octave-buffers ()
+  "Return a list of all buffers in octave mode."
+  (loop for x being the buffers if
+	(octave-mode-p x) collect x))
 
+
+;;;; Info stuff
 (defun octave-info (prefix)
   "Open the Info page for Octave.
 If the current buffer mode is Octave mode, the Info buffer is
@@ -207,16 +213,16 @@ Consider also `octave-function-file-comment'."
       (octave-fill-documentation-paragraph)
       (octave-fill-paragraph))))
 
+
 ;;;; testing
 (defun mb-octave-test-buffer-file ()
   "Run tests for the current buffer's file."
   (interactive)
-  (let ((octave-send-echo-input nil))
-    (octave-send-string
-     (format "source (\"%s\"); test (\"%s\");"
-       (expand-file-name ".octaverc" (buffer-directory))
-       (buffer-file-name))
-     t)))
+  (let ((octave-send-echo-input nil)
+	(rc (expand-file-name ".octaverc" (buffer-directory))))
+    (when (file-exists-p rc)
+      (octave-send-string (format "source (\"%s\");" rc) t))
+    (octave-send-string (format "test (\"%s\");" (buffer-file-name)) t)))
 ;;(mb-octave-test-buffer-file)
 
 (defun mb-octave-test-directory-fn (directory &optional recursively-p verbose-p)
