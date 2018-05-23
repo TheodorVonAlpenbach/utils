@@ -34,6 +34,10 @@
   ;;/ls/gold/u1/mbe/doc
   "Mounted silver doc directory")
 
+(let ((path "~/.emacs.d/tramp"))
+  (when (file-exists-p path)
+    (delete-file path)))
+
 (setf *my-favorites*
       `((,+mb-lisp-dir+ ".emacs")
 	(,+mb-lisp-dir+ "utils/mb-utils-strings.el")
@@ -75,11 +79,11 @@
 
 	;; remote files (shared with windows)
 	;; Note special treatment of arbeidslog in mb-insert-state-init!
-	;; (,lsdoc-dir "arbeidslog" :point :end :keyboard :no :time-paragraphs t)
-	;; (,lsdoc-dir "adresser.txt" :keyboard :no)
-	;; (,lsdoc-dir "todo.org" :keyboard :no)
+	(,lsdoc-dir "arbeidslog" :point :end :keyboard :no :time-paragraphs t)
+	(,lsdoc-dir "adresser.txt" :keyboard :no)
+	(,lsdoc-dir "todo.org" :keyboard :no)
 	;; (,lsdoc-dir "qtportlog.org" :keyboard :no)
-	;; (,lsdoc-dir "LS-notes.org" :point :end :keyboard :no :time-paragraphs t)
+	(,lsdoc-dir "LS-notes.org" :point :end :keyboard :no :time-paragraphs t)
 	))
 ;;(find-file "/ssh:bla:/ls/gold/u1/mbe/doc/LS-notes.org")
 ;;(find-file "/ssh:bla:/ls/gold/u1/mbe/doc/todo.org")
