@@ -25,6 +25,10 @@
 
 
 
+(ert-deftest test-string-match* ()
+"Test of `string-match*'"
+ (should (equal (string-match* "\\(e\\)" "sdkjhalkqweee " :num '(0 1 10)) '("e" "e" nil))))
+
 (ert-deftest test-andcat ()
   "Test of `andcat'"
   (should (equal (andcat '()) ""))
