@@ -90,31 +90,91 @@ of years, MONTH units of months, etc. The units may be negative."
     (format "\\b\\(?1:%s\\)-\\(?2:%s\\)-\\(?3:%s\\)" y m d)))
 ;;(string-match* (iso-date-regexp) "2014-10-30")
 
+(defun 0-23-regexp ()
+  "Return a optimized regular expression matching 1, ... 23"
+  "\\(?:\\(?:[0-1][0-9]\\)\\|\\(?:2[0-3]\\)\\)")
+
+(defun 0-59-regexp ()
+  "Return a optimized regular expression matching 1, ... 59."
+  "\\(?:[0-5][0-9]\\)")
+
+(defun iso-time-hm-regexp (h-index m-index)
+  (let* ((hm-0-23 (format "\\(?h:%s\\):\\(?m:%s\\)" (0-23-regexp) (0-59-regexp)))
+	 (hm-24 "\\(?h:24\\):\\(?m:00\\)")) ;; who the f*** allowed this in the ISO standard!?
+    (string-replace-map
+	(format "\\(?:%s\\|%s\\)" hm-0-23 hm-24)
+      `(("h" ,(sstring h-index))
+	("m" ,(sstring m-index))))))
+;;(iso-time-hm-regexp 4 5)
+
+(cl-defun iso-time-zone-regexp (&optional (sign-index 1)
+					  (h-index (1+ sign-index))
+					  (m-index (1+ h-index)))
+  "Return a regular expression for UTC time zone.
+Examples (<time> is added for showing the context, and is not
+part of time zone):
+<time>Z
+<time>±hh:mm
+<time>±hhmm
+<time>±hh
+
+Even if UTC does not list time zone hours below -10 nor above
++14:00, and only the minute parts 00, 30, 45, the resulting
+regexp here allows every time from 00:00 to 23:59."
+  (let ((Z "\\(?sign:Z\\)")
+	(sign "\\(?sign:[+-]\\)")
+	(hh (format "\\(?:\\(?h:%s\\)\\)" (0-23-regexp)))
+	(mm (format "\\(?::?\\(?m:%s\\)\\)" (0-59-regexp))))
+    (string-replace-map
+	(format "\\(?:%s\\|%s\\)" Z (format "\\(?:%s%s%s?\\)" sign hh mm))
+      `(("sign" ,(sstring sign-index))
+	("h" ,(sstring h-index))
+	("m" ,(sstring m-index))))))
+
 (defun iso-time-regexp ()
-  (let* ((ms "[0-9]*")
-	 (s "[0-5][0-9]")
-	 (m s)
-	 (h (numbers-regexp 0 23))
-	 (hm-0-23 (format "\\(?4:%s\\):\\(?5:%s\\)" h m))
-	 (hm-24 "\\(?4:24\\):\\(?5:00\\)") ;; who the f*** allowed this in the ISO standard!?)
-	 (hm (format "\\(?:%s\\|%s\\)" hm-0-23 hm-24)))
-    (format "%s\\(?::\\(?6:%s\\)\\(?:.\\(?7:%s\\)\\)?\\)?Z?\\b" hm s ms)))
-
-;;(string-match* (iso-date-regexp) "2013-04-12" :num '(1 2 3))
-;;(string-match* (iso-time-regexp) "14:59:22.00Z" :num '(4 5 6 7))
-;;(string-match* (format "%sT%s" (iso-date-regexp) (iso-time-regexp)) "2013-04-12T14:59:22.00Z" :num '(1 2 3 4 5 6 7))
-
-(cl-defun iso-dttm-regexp (&optional (date-time-split-regexp "T"))
-  (format "%s\\(?:%s%s\\)?\\|\\(?:%s\\)" (iso-date-regexp) date-time-split-regexp (iso-time-regexp) (iso-time-regexp)))
+  "Return a regular expression for ISO 8601 time.
+The most complete time is on the form 'hh:mm:ss.ms+HH:MM'. In
+this case, the matching indices of the parts hh, mm, ss, ms, +,
+HH, MM are 4, 5, 6, 7, 8, 9, 10, respectively. For abbreviated
+forms, see below, some of the matching parts will be nil. Here
+examples of abbreviated time forms:
+12:00 // the shortes possible form
+12:00:00
+12:00:00.0001
+12:00Z
+12:00+01:00
+12:00:00Z
+12:00:00.01+00:01 // non-existing time zone, but it is allowed 
+"
+  (format "%s\\(?::\\(?6:%s\\)\\(?:.\\(?7:%s\\)\\)?\\)?%s?\\b"
+    (iso-time-hm-regexp 4 5) (0-59-regexp) "[0-9]*" (iso-time-zone-regexp 8)))
+;;(string-match* (iso-time-regexp) "14:59:22.001Z" :num '(4 5 6 7))
 
 (defconst *iso-date* (iso-date-regexp))
 (defconst *iso-time* (iso-time-regexp))
-(defconst *iso-dttm* (iso-dttm-regexp))
+
+(defun iso-dttm-regexp (date-time-split-regexp)
+  (format "%s\\(?:%s%s\\)?\\|\\(?:%s\\)"
+    *iso-date* date-time-split-regexp *iso-time* *iso-time*))
+
+(defconst *iso-dttm* (iso-dttm-regexp "T"))
 (defconst *iso-dttm-lazy* (iso-dttm-regexp "[T ]"))
 
 (cl-defun decode-iso-dttm (iso-dttm &optional (lazy-dttm nil) (noerror t))
-  (multiple-value-bind (y mo d h mi s ms)
-      (if (string-match* (if lazy-dttm *iso-dttm-lazy* *iso-dttm*) iso-dttm :num '(1 2 3 4 5 6 7))
+  "Parse an ISO 8601 formatted time string.
+Note! This version does not handle time zones.
+See https://common-lisp.net/project/local-time/manual.html
+for inspiration."
+  ())
+
+(cl-defun decode-iso-dttm (iso-dttm &optional (lazy-dttm nil) (noerror t))
+  "Parse an ISO 8601 formatted time string.
+Note! This version does not handle time zones.
+See https://common-lisp.net/project/local-time/manual.html
+for inspiration."
+  (multiple-value-bind (y mo d h mi s ms tz-sign tz-h tz-m)
+      (if (string-match* (if lazy-dttm *iso-dttm-lazy* *iso-dttm*)
+	    iso-dttm :num '(1 2 3 4 5 6 7 8 9 10))
 	(let ((time (mapcar (compose #'string-to-number (bind #'sstring "0")) 
 			    (list y mo d h mi s)))) ;;discard ms
 	  (if (zerop (first time)) ;ie. we parse time only
@@ -620,6 +680,17 @@ See `parse-week' for definition of week designator."
 				(apply #'cl-mapcar #'- eperiod))
 		 (first eperiod))))))
 ;;(interpolate-time .5 (today))
+
+(defun unix-time (time-designator)
+  "Convert time-designator to the number of seconds since 1970-01-01 UTC."
+  (iso-to-unix-time (iso-date-and-time :time time-designator)))
+;;(unix-time "2018-05-22")
+
+(defun iso-to-unix-time (utc-iso-time)
+  "Convert UTC-ISO-TIME to the number of seconds since 1970-01-01 UTC."
+  (string-to-number
+   (call-process-shell-command* "date" "-d" utc-iso-time "+%s")))
+;;(iso-to-unix-time "2018-05-22")
 
 ;;;; examples
 ;;(add-time "2000-10-29" :day 1)
