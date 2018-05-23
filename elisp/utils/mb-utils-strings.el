@@ -307,16 +307,16 @@ result of FUNCTION."
 ;;(string-replace-f "-qwewe-" "\\(qw\\)e" #'(lambda (string) (upcase (match-string 1 string))))
 
 (cl-defun string-replace-map (string map)
-  "Alters STRING according to MAP. A map is an alist of '(FROM-STRING .
-TO-STRING)-s. This is very slow"
+  "Alters STRING according to MAP. A map is an list of pairs
+\(FROM-STRING TO-STRING\). This is very slow"
   (dolist (x map string) 
       (setq string (string-replace string (first x) (if (listp (rest x))
 						      (second x) ;cons is a one element list
 						      (rest x)   ;cons is an element
 						      )))))
-; (string-replace-map "Àøå" (list (cons "À" "Æ")))
-; (string-replace-map "Àøå"
-;   (mapcar #'(lambda (x) (cons (first x) (third x))) *iso-latin1-encoding*))
+:;(string-replace-map "Àøå" (list (cons "À" "Æ") (cons "ø" "Ø ")))
+:;(string-replace-map "Àøå"
+:;  (mapcar #'(lambda (x) (cons (first x) (third x))) *iso-latin1-encoding*))
 
 (defun infix-list (lst infix &optional is-function discard-empty-string) "'(a b c) => '(a INFIX b INFIX c)"
   "INFIX may be a function (FN I), where argument I is the nth time FN will be called by INFIX-LIST"
