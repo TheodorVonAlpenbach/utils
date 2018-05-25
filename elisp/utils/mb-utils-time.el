@@ -21,7 +21,39 @@
 (defalias 'mbt-day-light-saving-time-p 'eighth)
 (defalias 'mbt-time-zone 'ninth)
 
-;;;; Time points
+(defun time-encode (time-designator)
+  "Encodes TIME (as a list). Obsolete?"
+  (apply #'encode-time (parse-time time-designator)))
+;;(time-encode '2014-04-02)
+
+(defun clean-time (time-designator) 
+  "Corrects time-zone and week-day in TIME-DESIGNATOR.
+Be careful with this function. If a (decoded) time is set with a
+specific time zone, it is possibly intended. This function calls
+`decode-time', which always assumes that the local time zone is
+in effect when it decodes its argument."
+  (decode-time (time-encode time-designator)))
+;;(add-time (the-apocalypse) :year 1)
+;;(clean-time (now))
+
+(cl-defun add-time (decoded-time &key (year 0) (month 0) (week 0) (day 0)
+				 (hour 0) (minute 0) (second 0))
+  "Add time parts to decoded-time.
+See keywords for the availble time units that can be added. The
+units may be negative."
+  (incf (mbt-year decoded-time) year)
+  (incf (mbt-month decoded-time) month)
+  (incf (mbt-day decoded-time) (+ day (* 7 week)))
+  (incf (mbt-hour decoded-time) hour)
+  (incf (mbt-minute decoded-time) minute)
+  (incf (mbt-second decoded-time) second)
+  (clean-time decoded-time))
+(cl-indent 'add-time 'prog1)
+;;(add-time "2000-10-28" :hour 1)
+;;(add-time "13:12" :minute 1)
+;;(add-time '(0 0 0 28 10 2001 0 t 7200) :day 1)
+;;(add-time "1990-12-31T22:59:59" :second 2 :hour 2)
+
 (defun daylight-savings-p (time-designator)
   "Returns true iff TIME-DESIGNATOR is in a daylight savings
 period of the year."
@@ -29,31 +61,13 @@ period of the year."
       (first (current-time-zone (time-encode time-designator)))))
 ;;(daylight-savings-p '2014-03-31T01:00)
 
-(defun parse-iso-time (iso-time)
-  (reverse (mapcar #'string-to-number (split-string iso-time ":"))))
-;;(parse-iso-time "12:39:01")
-
-;(debug-on-entry #'add-time)
-(cl-defun add-time (time-designator &key (year 0) (month 0) (week 0) (day 0) (hour 0) (minute 0) (second 0))
-  "Creates an adjusted time object that equals TIME-DESIGNATOR added YEAR units
-of years, MONTH units of months, etc. The units may be negative."
-  (let ((time (parse-time time-designator)))
-    (incf (mbt-year time) year)
-    (incf (mbt-month time) month)
-    (incf (mbt-day time) (+ day (* 7 week)))
-    (incf (mbt-hour time) hour)
-    (incf (mbt-minute time) minute)
-    (incf (mbt-second time) second)
-    (clean-time time)))
-(cl-indent 'add-time 'prog1)
-;;(add-time "2000-10-28" :hour 1)
-;;(add-time "13:12" :minute 1)
-;;(add-time '(0 0 0 28 10 2001 0 t 7200) :day 1)
-;;(add-time "1990-12-31T22:59:59" :second 2 :hour 2)
-
-(cl-defun add-time* (time &optional (year 0) (month 0) (week 0) (day 0) (hour 0) (minute 0) (second 0))
+(cl-defun add-time* (time &optional
+			  (year 0) (month 0) (week 0) (day 0)
+			  (hour 0) (minute 0) (second 0))
   (when time
-    (add-time time :year year :month month :week week :day day :hour hour :minute minute :second second)))
+    (add-time time
+      :year year :month month :week week :day day
+      :hour hour :minute minute :second second)))
 ;;(add-time* "2000-10-28" 0 0 0 1)
 
 (cl-defun make-time (&key (new-time (the-creation)) date time (skip-dls-p nil))
@@ -277,19 +291,16 @@ Argument may be a time objects itself or a string."
 ;;; (interval-cc (decode-time t1) (decode-time t2)) - time interval atom
 ;;; '((decode-time) time-ext1 '(time-ext2 time-ext3)))
 
-(defun time-encode (time-designator)
-  "Encodes TIME (as a list)"
-  (apply #'encode-time (parse-time time-designator)))
-;;(time-encode '2014-04-02)
+(defconst *the-creation* (clean-time '(0 0 0 1 1 1970 0))
+  "The earliest date that the Emacs manual guarantees will work
+  on every system.")
 
-(defun clean-time (time-designator) 
-  "Corrects time-zone and week-day in TIME-DESIGNATOR."
-  (decode-time (time-encode time-designator)))
-;;(add-time (the-apocalypse) :year 1)
-;;(clean-time (now))
+(defconst *the-apocalypse* (clean-time '(0 0 0 31 12 2147485547 0))
+  "The latest date that encode-time and decode-time can handle on
+  my current system.")
 
-(defconst *the-creation* (clean-time '(0 0 0 1 1 1971 0)))
-(defconst *the-apocalypse* (clean-time '(0 0 0 1 1 2038 0)))
+(decode-time (time-encode (clean-time '(0 0 0 31 12 2147485547 0))))
+(decode-time (encode-time 0 0 0 1 6 2000 7200))
 
 (defun the-creation () (copy-time *the-creation*))
 (defun the-apocalypse () (copy-time *the-apocalypse*))
@@ -682,12 +693,19 @@ See `parse-week' for definition of week designator."
 ;;(interpolate-time .5 (today))
 
 (defun unix-time (time-designator)
-  "Convert time-designator to the number of seconds since 1970-01-01 UTC."
+  "Convert time-designator to the number of seconds since 1970-01-01 UTC.
+This function was implemented before I knew about `float-time'.
+TODO: use `float-time' directly on decoded time, instead of
+calling `iso-to-unix-time'. The latter will then become
+obsolete."
   (iso-to-unix-time (iso-date-and-time :time time-designator)))
 ;;(unix-time "2018-05-22")
+;;(float-time (apply #'encode-time (subseq (parse-time "2018-05-22") 0 6)))
 
 (defun iso-to-unix-time (utc-iso-time)
-  "Convert UTC-ISO-TIME to the number of seconds since 1970-01-01 UTC."
+  "Convert UTC-ISO-TIME to the number of seconds since 1970-01-01 UTC.
+This function was implemented before I knew about `float-time'.
+TODO: use `float-time' instead of calling shell util."
   (string-to-number
    (call-process-shell-command* "date" "-d" utc-iso-time "+%s")))
 ;;(iso-to-unix-time "2018-05-22")
