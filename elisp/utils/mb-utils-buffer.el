@@ -403,12 +403,20 @@ see `bol'"
 ;;; Defun stuff 
 (defun bod (&optional n)
   "Move to beginning of the current defun and return POINT."
-  (bo-thing 'defun n))
+  ;; Can't use bo-thing since bounds-of-thing-at-point fails when
+  ;; defun is not indented according to common style!
+  (forward-char 1)
+  (beginning-of-defun n)
+  (point))
 ;;(bod)
 
 (defun eod (&optional n)
   "Move to end of the current defun and return POINT."
-  (eo-thing 'defun n))
+  ;; See implementation note in `bod'.
+  (backward-char 1)
+  (end-of-defun n)
+  (backward-char 1)
+  (point))
 ;;(eod)
 
 (defun bod* (&optional n)
