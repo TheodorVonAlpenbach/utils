@@ -9,7 +9,7 @@ Fru Burum     x  x  x  x     x  x  x  x  x  x  P  x  x  x  x  x  x  x  ok
 Nellie        x  x  x  x  x  x  x  x  x  x  x  P  x  x  x  x C2  x  x  ok
 Onkel Oskar   x  x  x C1  x  x  x  x  x  x  x  P  x  x  x  x  x  x  x  x  ok
 Highbury      x  x  x  x  x  x  x  x  x  x  x  P  x  x  x  x  x C3 C4  x  ok
-Scotsman      x  x  x  x  x  x  x  x  x  x  x  P  ok
+Scotsman      x  x  x  x  x  x  x  x  x  x  x  P  x  x  x  ok
 
 C1: Stengt, ingen quiz
 C2: 1. mai, ingen quiz
