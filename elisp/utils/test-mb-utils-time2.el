@@ -82,6 +82,19 @@
   "Test of `iso-dttm'"
   (should (equal (iso-dttm '(0 0) t) "1970-01-01T00:00:00GMT")))
 
+
+(ert-deftest test---add-ddate ()
+  "Test of `--add-ddate'"
+  (should (equal (--add-ddate (decode-time (parse-time "2018-03-25T12:00")) :day -1)
+		 '(3600 0 11 24 3 2018 6 nil 3600))))
+
+(ert-deftest test-add-etime-date ()
+  "Test of `add-etime-date'"
+  (should (equal (iso-dttm (add-etime-date (parse-time "2018-03-25T12:00") :day -1))
+		 "2018-03-24T12:00:00CET"))
+  (should (equal (iso-dttm (add-etime-date (parse-time "2018-03-25T01:00") :day -1))
+		 "2018-03-24T01:00:00CET")))
+
 (ert-deftest test-midnight ()
   "Test of `midnight'"
   (should (equal (subseq (iso-dttm (midnight)) 11 19)
@@ -95,7 +108,11 @@
   (should (equal (iso-dttm (midnight (parse-time "1972-01-05T23:00cet") t) t)
 		 "1972-01-05T00:00:00GMT"))
   (should (equal (iso-dttm (midnight (parse-time "1972-01-06T00:00") t) t)
-		 "1972-01-06T00:00:00GMT")))
+		 "1972-01-06T00:00:00GMT"))
+  (should (equal (iso-dttm (midnight (parse-time "2018-03-25T12:00")))
+		 "2018-03-25T00:00:00CET"))
+  (should (equal (iso-dttm (midnight (parse-time "2018-10-28T12:00")))
+		 "2018-10-28T00:00:00CEST")))
 
 (ert-deftest test-midday ()
   "Test of `midday'"
@@ -106,7 +123,13 @@
   (should (equal (iso-dttm (midday (parse-time "1972-01-06T00:00Z")) t)
 		 "1972-01-06T11:00:00GMT"))
   (should (equal (iso-dttm (midday (parse-time "1972-01-06T00:00Z")))
-		 "1972-01-06T12:00:00CET")))
+		 "1972-01-06T12:00:00CET"))
+  (should (all-equal (iso-dttm (midday (parse-time "2018-03-25T18:00")))
+		     (iso-dttm (midday (parse-time "2018-03-25T01:00")))
+		     "2018-03-25T12:00:00CEST"))
+  (should (all-equal (iso-dttm (midday (parse-time "2018-10-28T18:00")))
+		     (iso-dttm (midday (parse-time "2018-10-28T01:00")))
+		     "2018-10-28T12:00:00CET")))
 
 (ert-deftest test-morning ()
   "Test of `morning'"
@@ -115,12 +138,24 @@
 		 "1972-01-06T06:00:00GMT"))
   ;; This test will fail outside CET locale
   (should (equal (iso-dttm (morning (parse-time "1972-01-06")))
-		 "1972-01-06T06:00:00CET")))
+		 "1972-01-06T06:00:00CET"))
+  (should (all-equal (iso-dttm (morning (parse-time "2018-03-25T18:00")))
+		     (iso-dttm (morning (parse-time "2018-03-25T01:00")))
+		     "2018-03-25T06:00:00CEST"))
+  (should (all-equal (iso-dttm (morning (parse-time "2018-10-28T18:00")))
+		     (iso-dttm (morning (parse-time "2018-10-28T01:00")))
+		     "2018-10-28T06:00:00CET")))
 
 (ert-deftest test-evening ()
   "Test of `evening'"
   (should (equal (iso-dttm (evening (parse-time "1972-01-06T00:00Z") t) t)
-		 "1972-01-06T18:00:00GMT")))
+		 "1972-01-06T18:00:00GMT"))
+  (should (all-equal (iso-dttm (evening (parse-time "2018-03-25T18:00")))
+		     (iso-dttm (evening (parse-time "2018-03-25T01:00")))
+		     "2018-03-25T18:00:00CEST"))
+  (should (all-equal (iso-dttm (evening (parse-time "2018-10-28T18:00")))
+		     (iso-dttm (evening (parse-time "2018-10-28T01:00")))
+		     "2018-10-28T18:00:00CET")))
 
 (ert-deftest test-weekday-number ()
   "Test of `weekday-number'"
@@ -132,12 +167,125 @@
   "Test of `weekstart'"
   (should (equal (iso-dttm (weekstart (parse-time "1972-01-06")))
 		 "1972-01-03T00:00:00CET"))
-  (should (equal (iso-dttm (weekstart (parse-time "1972-01-06")))
-		 "1972-01-03T00:00:00CET")))
+  (should (all-equal (iso-dttm (weekstart (parse-time "2018-10-28T03:00")))
+		     (iso-dttm (weekstart (parse-time "2018-10-28T02:30")))
+		     (iso-dttm (weekstart (parse-time "2018-10-28T02:00")))
+		     "2018-10-22T00:00:00CEST"))
+  (should (all-equal (iso-dttm (weekstart (parse-time "2018-03-25T03:00")))
+		     (iso-dttm (weekstart (parse-time "2018-03-25T02:30")))
+		     (iso-dttm (weekstart (parse-time "2018-03-25T02:00")))
+		     "2018-03-19T00:00:00CET")))
 
 (ert-deftest test-append-timezone-regexp ()
   "Test of `append-timezone-regexp'"
   (should (equal (append-timezone-regexp '("CEST" . 0))
 		 '("CEST" 0 "\\(CEST\\)$"))))
+
+(ert-deftest test-monthstart ()
+  "Test of `monthstart'"
+  (should (all-equal (iso-dttm (monthstart (parse-time "1972-01-01")))
+		     (iso-dttm (monthstart (parse-time "1972-01-06")))
+		     "1972-01-01T00:00:00CET"))
+  (should (all-equal (iso-dttm (monthstart (parse-time "2018-07-01")))
+		     (iso-dttm (monthstart (parse-time "2018-07-06")))
+		     "2018-07-01T00:00:00CEST")))
+
+(ert-deftest test-yearstart ()
+  "Test of `yearstart'"
+  (should (all-equal (iso-dttm (yearstart (parse-time "1972-01-06")))
+		     (iso-dttm (yearstart (parse-time "1972-07-06")))
+		 "1972-01-01T00:00:00CET"))
+  (should (all-equal (iso-dttm (yearstart (parse-time "2018-01-06")))
+		     (iso-dttm (yearstart (parse-time "2018-07-06")))
+		 "2018-01-01T00:00:00CET")))
+
+
+(ert-deftest test-parse-time ()
+  "Test of `parse-time'"
+  (should (all-equal (parse-time "2018-01-06")
+		     (parse-time '2018-01-06)
+		     (parse-time '(23120 880))
+		     (parse-time '(0 0 0 6 1 2018 6 nil 3600))
+		     '(23120 880))))
+
+(ert-deftest test-time< ()
+  "Test of `time<'"
+  (should (time< '2018-05-28T00:00CET '2018-05-28T00:00Z))
+  (should (time< '2018-05-28T00:00Z '2018-05-28T00:00EST))
+  (should (time< '2018-05-28T00:00Z '2018-05-28T00:00:01Z))
+  (should-not (time< '2018-05-28T00:00Z '2018-05-28T00:00Z))
+  (should-not (time< '2018-05-28T00:00EST '2018-05-28T00:00EST))
+  (should-not (time< '2018-05-28T00:00:01Z '2018-05-28T00:00:01Z)))
+
+(ert-deftest test-time<= ()
+"Test of `time<='"
+  (should (time<= '2018-05-28T00:00CET '2018-05-28T00:00Z))
+  (should (time<= '2018-05-28T00:00Z '2018-05-28T00:00EST))
+  (should (time<= '2018-05-28T00:00Z '2018-05-28T00:00:01Z))
+  (should (time<= '2018-05-28T00:00Z '2018-05-28T00:00Z))
+  (should (time<= '2018-05-28T00:00EST '2018-05-28T00:00EST))
+  (should (time<= '2018-05-28T00:00:01Z '2018-05-28T00:00:01Z)))
+
+(ert-deftest test-time- ()
+  "Test of `time<='"
+  (should (equal (time- '2018-05-28T00:00Z '2018-05-28T00:00CET :unit :second)
+		 3600.0))
+  (should (equal (time- '2018-05-28T00:00Z '2018-05-28T00:00EST :unit :second)
+		 -18000.0))
+  (should (equal (time- '2018-05-28T00:00Z '2018-05-28T00:00EST :unit :minute)
+		 -300.0))
+  (should (equal (time- '2018-05-28T00:00Z '2018-05-28T00:00EST :unit :hour)
+		 -5.0))
+  (should (equal (time- '2018-05-28T00:00Z '2018-05-27T00:00Z :unit :day)
+		 1.0))
+  (should (equal (time- '2018-05-28 '2018-05-21 :unit :week)
+		 1.0))
+  (should (equal (* (time- (add-etime-time (add-etime-date (now) :day 6) :hour 25)
+			   (now)
+			   :unit :week)
+		    168)
+		 169.0)))
+
+(ert-deftest test-today ()
+  "Test of `today'"
+  (should (<= 23 (period-length (today) :hour) 25))
+  (should (equal (period-length (today (parse-time "2018-03-25")) :hour)
+		 23.0))
+  (should (equal (period-length (today (parse-time "2018-10-28")) :hour)
+		 25.0))
+  (should (equal (period-length (today (parse-time "2018-06-01")) :hour)
+		 24.0)))
+
+(ert-deftest test-tomorrow ()
+  "Test of `tomorrow'"
+  (should (<= 23 (period-length (tomorrow) :hour) 25))
+  (should (equal (period-length (tomorrow (parse-time "2018-03-23")) :hour)
+		 24.0))
+  (should (equal (period-length (tomorrow (parse-time "2018-03-24")) :hour)
+		 23.0))
+  (should (equal (period-length (tomorrow (parse-time "2018-03-26")) :hour)
+		 24.0))
+  (should (equal (period-length (tomorrow (parse-time "2018-10-26")) :hour)
+		 24.0))
+  (should (equal (period-length (tomorrow (parse-time "2018-10-27")) :hour)
+		 25.0))
+  (should (equal (period-length (tomorrow (parse-time "2018-10-28")) :hour)
+		 24.0)))
+
+(ert-deftest test-yesterday ()
+  "Test of `tomorrow'"
+  (should (<= 23 (period-length (yesterday) :hour) 25))
+  (should (equal (period-length (yesterday (parse-time "2018-03-25")) :hour)
+		 24.0))
+  (should (equal (period-length (yesterday (parse-time "2018-03-26")) :hour)
+		 23.0))
+  (should (equal (period-length (yesterday (parse-time "2018-03-27")) :hour)
+		 24.0))
+  (should (equal (period-length (yesterday (parse-time "2018-10-28")) :hour)
+		 24.0))
+  (should (equal (period-length (yesterday (parse-time "2018-10-29")) :hour)
+		 25.0))
+  (should (equal (period-length (yesterday (parse-time "2018-10-30")) :hour)
+		 24.0)))
 
 (provide 'test-mb-utils-time2.el)
