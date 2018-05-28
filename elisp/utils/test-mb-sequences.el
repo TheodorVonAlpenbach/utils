@@ -20,4 +20,32 @@
 "Test of `minimum'"
  (should (equal (minimum '(1 2 3 5 5) :start 3) '(5 3 5))))
 
+(ert-deftest test-insert-sequence ()
+  "Test of `insert-sequence'"
+  (should (all-equal (insert-sequence "15010" "_" :start1 2)
+		     (insert-sequence "15010" "_" :start1 2 :end1 2)
+		     (insert-sequence "15010" "_" :start1 2 :end1 -3)
+		     (insert-sequence "15010" "_" :start1 -3 :end1 -3)
+		     (insert-sequence "15010" "_" :start1 -3 :end1 2)
+		     "15_010"))
+  (should (equal (insert-sequence "15010" "abc")
+		 "abc15010"))
+  (should (equal (insert-sequence "15010" "abc" :start1 1)
+		 "1abc5010"))
+  (should (equal (insert-sequence "15010" "abc" :start1 1 :end1 2)
+		 "1abc010"))
+  (should (equal (insert-sequence "15010" "abc" :start1 1 :end1 2 :start2 1)
+		 "1bc010"))
+  (should (equal (insert-sequence "15010" "abc" :start1 1 :end1 2 :start2 1 :end2 -1)
+		 "1b010")))
+
+(ert-deftest test-replace-sequence ()
+  "Test of `replace-sequence'"
+  (should (equal (replace-sequence "01234" "ab" 1)
+		 "0ab34"))
+  (should (equal (replace-sequence "01234" "ab" 1 1)
+		 "0ab1234"))
+  (should (equal (replace-sequence "01234" "ab" 1 -1)
+		 "0ab4")))
+
 (provide 'test-mb-sequences.el)
