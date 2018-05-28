@@ -236,7 +236,7 @@ for inspiration."
 (defmacro copy-time (time)
   `(copy-list ,time))
 
-(defun parse-time (time-designator)
+(defun parse-time-old (time-designator)
   "Returns a new time object equal to TIME-DESIGNATOR.
 Argument may be a time objects itself or a string."
   (typecase time-designator
@@ -355,7 +355,7 @@ Argument may be a time objects itself or a string."
     res))
 ;;(pp (loop for i in (a-b -4 6) collect (iso-date-and-time :time (monthstart i))))
 
-(cl-defun yearstart (&optional (time (now)))
+(cl-defun yearstart-old (&optional (time (now)))
   (let ((res (monthstart 0 time)))
     (setf (mbt-month res) 1)
     res))
@@ -395,9 +395,11 @@ Argument may be a time objects itself or a string."
       (:millenium (* 1000 y))
       (otherwise (error "Unknown unit."))))
 
-  (cl-defun time- (time-designator1 time-designator2 &key (unit :day))
-    "Converts TIME-DESIGNATOR to an integer counted from REFERANCE-TIME with
-RESOLUTION as unit \(= 1\)."
+  (cl-defun time--old (time-designator1 time-designator2 &key (unit :day))
+    "Return the number of days between TIME-DESIGNATOR1 and time-designator2.
+With keyword :UNIT you can specify another time unit for the time
+difference. Time units from :MONTH and higher are inambiguous,
+and are not recommended."
     (let ((diff (mapcar* #'- (time-encode time-designator1) (time-encode time-designator2)))
 	  (u (unit-factor unit)))
       (+ (* (/ 2^16 u) (first diff))
@@ -460,7 +462,7 @@ TODO: add lang parameter?"
 ;;(iso-date-and-time :time '2014-04-02T22:25 :with-seconds t)
 
 ;;;; Time intervals (also called a periods)
-(cl-defun period (&key (from (the-creation)) (to (the-apocalypse)))
+(cl-defun period-old (&key (from (the-creation)) (to (the-apocalypse)))
   "Creates a time interval [FROM TO), where FROM and TO are
 TIMEs, not time designators."
   (interval-co from to))
