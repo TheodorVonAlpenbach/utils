@@ -4,7 +4,7 @@
 ;; or equivalently
 (dic-show-lookups)
 
-(dic-show-lookups :dic 'all :time *always*)
+(dic-show-lookups :dic 'all :time +always+)
 
 
 (dic-show-lookups :dic "it-eng" 
