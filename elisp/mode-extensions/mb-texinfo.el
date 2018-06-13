@@ -24,7 +24,7 @@ If ARGUMENT is a string insert it in the pair of curly parentheses."
 ;;(texinfo-def-insert-@-fn "xref")
 
 (cl-defmacro texinfo-define-inserts
-    (&optional (symbols '(var xref ref pxref code result)))
+    (&optional (symbols '(var xref ref pxref code result uref)))
   `(progn ,@(loop for code in symbols collect
 		  `(texinfo-def-insert-@-fn ,(sstring code)))))
 (texinfo-define-inserts)
