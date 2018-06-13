@@ -30,7 +30,7 @@
 ;; diary file (mandatory to use #'calendar)
 (setf diary-file (setf diary-file (expand-file-name "office/diary" *local-data-dir*)))
 
-(defconst lsdoc-dir "/ssh:bla:/ls/gold/u1/mbe/doc/"
+(defconst lsdoc-dir "/ssh:bro:/ls/gold/u1/mbe/doc/"
   ;;/ls/gold/u1/mbe/doc
   "Mounted silver doc directory")
 
@@ -85,8 +85,8 @@
 	;; (,lsdoc-dir "qtportlog.org" :keyboard :no)
 	(,lsdoc-dir "LS-notes.org" :point :end :keyboard :no :time-paragraphs t)
 	))
-;;(find-file "/ssh:bla:/ls/gold/u1/mbe/doc/LS-notes.org")
-;;(find-file "/ssh:bla:/ls/gold/u1/mbe/doc/todo.org")
+;;(find-file "/ssh:bro:/ls/gold/u1/mbe/doc/LS-notes.org")
+;;(find-file "/ssh:bro:/ls/gold/u1/mbe/doc/todo.org")
 
 ;;scheme
 (setf scheme-program-name "guile")
