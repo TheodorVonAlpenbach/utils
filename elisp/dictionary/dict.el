@@ -325,7 +325,7 @@ lastest lookup: %s\n%s\n"
 	  (remove-if 
 	   #'(lambda (y)
 	       (not 
-		(and (within-time (or (fourth y) *the-creation*) time)
+		(and (within-time-p (or (fourth y) +the-creation+) time)
 		     (or (eq dic :all) (string= dic (second y))))))
 	   (reverse *dic-db*)))))
 ;;(dic-show-lookups :dic :all :time (period :from (now :hour -2) :to (now)))
