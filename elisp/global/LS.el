@@ -118,6 +118,8 @@ compared to the relative directory names in PARENT-DIR"
     (just-one-blank-line)
     (org-insert-heading)
     (insert-date nil)
+    (insert-parentheses* nil)
+    (eol)
     (insert "\n")
     (insert-time nil)
     (insert " Ankomst\n")))
