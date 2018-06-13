@@ -103,7 +103,7 @@ The function uses `dot-program' to convert the DOT-STRING to a PNG image."
 See http://localhost:631/ for further print options"
   (interactive)
   (call-process* "lpr" "-P" "SHARP_MX-2640NPCL_PS" "-o" "media=A3" (buffer-file-name)))
-;;alias pr2l='lpr -P SHARP_MX-2640NPCL_PS -o media=A4,sides=two-sided-long-edge
+;;alias pr2l='lpr -P SHARP_MX-2640NPCL_PS -o media=A4,sides=two-sided-long-edge'
 
 ;;;; this could be moved to lilypond-<something>
 (defun pdf-view (filename)
