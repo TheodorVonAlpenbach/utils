@@ -1,20 +1,24 @@
+-*- eval: (auto-fill-mode 0); -*-
+
 Vår 2018
 
 Måned         jan         feb         mar         apr           mai         jun
-Mandag        8 15 22 29  5 12 19 26  5 12 19 26  2  9 16 23 30  7 14 21 28  4 11
-Uke           2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24
-Runde         1  2  3  4  5  6  7  8  9 10 11    12 13 14 15 16 17 18 19 20 21 22 23
-+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-Fru Burum     x  x  x  x     x  x  x  x  x  x  P  x  x  x  x  x  x  x  ok
-Nellie        x  x  x  x  x  x  x  x  x  x  x  P  x  x  x  x C2  x  x  ok
-Onkel Oskar   x  x  x C1  x  x  x  x  x  x  x  P  x  x  x  x  x  x  x  x  ok
-Highbury      x  x  x  x  x  x  x  x  x  x  x  P  x  x  x  x  x C3 C4  x  ok
-Scotsman      x  x  x  x  x  x  x  x  x  x  x  P  x  x  x  ok
+Mandag        8 15 22 29  5 12 19 26  5 12 19 26  2  9 16 23 30  7 14 21 28  4
+Uke           2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22 23
+Runde         1  2  3  4  5  6  7  8  9 10 11    12 13 14 15 16 17 18 19 20 21
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Fru Burum     x  x  x  x     x  x  x  x  x  x  P  x  x  x  x  x  x  x C6  x  x
+Nellie        x  x  x  x  x  x  x  x  x  x  x  P  x  x  x  x C2  x  x  x  x  ok
+Onkel Oskar   x  x  x C1  x  x  x  x  x  x  x  P  x  x  x  x  x  x  x  x  x  C5
+Highbury      x  x  x  x  x  x  x  x  x  x  x  P  x  x  x  x  x C3 C4  x  x  x  ok
+Scotsman      x  x  x  x  x  x  x  x  x  x  x  P  x  x  x  x  x C3 C4  x  ?  x
 
 C1: Stengt, ingen quiz
 C2: 1. mai, ingen quiz
 C3: 10. mai var Kristi Himmelfartsdag, antagelig ingen quiz på grunn av dette
 C4: 17. mai, ingen quiz
+C5: avsluttet sesongen en runde før sesongslutt
+C6: 2. pinsedag, muligens ingen quiz
 P: Påske
 
 Høst 2017
