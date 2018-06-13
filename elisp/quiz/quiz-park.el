@@ -473,4 +473,4 @@ week number of the first round."
 	(browse-url url)))))
 ;;(qp-check-last-upload)
 
-(provide 'qp)
+(provide 'quiz-park)
