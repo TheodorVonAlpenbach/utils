@@ -116,7 +116,8 @@ SYMBOL can be a symbol or a list of symbols. See function
 (cl-indent '(define-condition do-tuples/c defgeneric) 'defun)
 (cl-indent '\ '/) ;this sets indent properly, but indent isn't applied anyway
 
-(cl-indent 'cl-ppcre:register-groups-bind 'destructuring-bind)
+(cl-indent '(cl-ppcre:register-groups-bind period-bind)
+  'destructuring-bind)
 
 (cl-indent '(find-music collaps-multi-spectrum map-spectra
 	     with-transposed-tree grid-transform-data
