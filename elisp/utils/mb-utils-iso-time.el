@@ -7,9 +7,9 @@
 (defconst +iso-day-regexp+ "\\(?:0[1-9]\\|[12][0-9]\\|3[01]\\)")
 
 (defun iso-date-regexp ()
-  (let* ((y (iso-year-regexp))
-	(m (numbers-regexp 1 12))
-	(d (numbers-regexp 1 31)))
+  (let* ((y +iso-year-regexp+)
+	(m +iso-month-regexp+)
+	(d +iso-day-regexp+))
     (format "\\b\\(?1:%s\\)-\\(?2:%s\\)-\\(?3:%s\\)" y m d)))
 ;;(string-match* (iso-date-regexp) "2014-10-30")
 
@@ -185,10 +185,10 @@ for inspiration."
 
 (cl-defun weekday (&optional (lang :no) (time-designator (decode-time)))
   "Returns weekday of TIME-DESIGNATOR (default is today) in language LANG"
-    (nth (dtime-day-of-week (parse-time time-designator))
+    (nth (etime-day-of-week (parse-time time-designator))
        (second (assoc lang *weekdays*))))
 ;;(loop for i below 7 collect (weekday :no (now :day i)))
-;;(weekday :no '2014-04-02)
+;;(weekday :no '2009-01-01)
 
 (cl-defun full-date (&optional (lang :no) (time-designator (decode-time)))
   "Returns TIME-DESIGNATOR (default is today) in full date format in language LANG
@@ -207,10 +207,10 @@ TODO: add lang parameter?"
 
 (cl-defun iso-time (&key (time (decode-time)) (with-seconds nil))
   "Returns time designator TIME (default is now) in iso string format"
-  (let ((time (parse-time time)))
+  (let ((etime (parse-time time)))
     (if with-seconds 
-      (format "%02d:%02d:%02d" (dtime-hour time) (dtime-minute time) (dtime-second time))
-      (format "%02d:%02d" (dtime-hour time) (dtime-minute time)))))
+      (format "%02d:%02d:%02d" (etime-hour etime) (etime-minute etime) (etime-second etime))
+      (format "%02d:%02d" (etime-hour etime) (etime-minute etime)))))
 ;;(iso-time :with-seconds t :time '2014-04-02)
 
 (cl-defun iso-date-and-time (&key (time (decode-time)) (with-seconds nil))
@@ -218,3 +218,5 @@ TODO: add lang parameter?"
   (let ((time (parse-time time)))
     (concat (iso-date time) "T" (iso-time :time time :with-seconds with-seconds))))
 ;;(iso-date-and-time :time '2014-04-02T22:25 :with-seconds t)
+
+(provide 'mb-utils-iso-time)
