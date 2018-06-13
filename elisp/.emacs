@@ -188,6 +188,7 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 
 (let* ((my-mode-alist
        '(("\\.h$\\|\\.cpp$" . c++-mode)	; first overules of original alist
+	 ("\\.c$" . c-mode)
 	 ("\\.\\(lisp\\|asd\\)$" . mb-lisp-mode)
 	 ("\\.el$\\|\\.emacs$\\|\\.emacs-local-" . emacs-lisp-mode)
 	 ("\\.bash\\(rc\\|_profile\\)\\|\\.sh\\|\\.profile$" . sh-mode)
@@ -276,7 +277,7 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 			 mbscilab
 			 dic-map
 			 mb-indent
-			 qp
+			 quiz-park
 			 ;; not from mb
 			 mb-ert
 			 mb-js-mode)
@@ -431,3 +432,8 @@ Not in use. Projects should be shared, at least until we are up and running Git.
        "Super group for all mb-elisp customizataions."
        :tag 'mb-elisp
        :group 'emacs)
+
+(setq send-mail-function    'smtpmail-send-it
+      smtpmail-smtp-server  "smtp.office365.com"
+      smtpmail-stream-type  'starttls
+      smtpmail-smtp-service 587)
