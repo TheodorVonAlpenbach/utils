@@ -301,7 +301,7 @@ between different"
 	 (slime-eval-last-expression)
 	 (eval-last-sexp nil))))
     (octave-mode
-     (progn (eol) (mb-eval-last-sexp)))
+     (save-excursion (eol) (mb-eval-last-sexp)))
     (otherwise
      (princ (mb-eval-string
 	     (string-match* "\\(?:#\\|//+\\|[[:space:]]\\)*\\(.*\\)"
@@ -543,6 +543,20 @@ occurence of 'delete' replaced with 'yank'."
      (t
       (evil-yank beg (line-end-position) type register yank-handler)))))
 
+(evil-define-motion evil-goto-line-preserve-column (count)
+  "Go to the first non-blank character of line COUNT.
+By default the last line."
+  :jump t
+  :type line
+  (let ((c (current-column)))
+    (if (null count)
+      (with-no-warnings
+	(end-of-buffer)
+	(evil-previous-line))
+      (goto-char (point-min))
+      (forward-line (1- count)))
+    (evil-goto-column c)))
+(define-key evil-normal-state-map "gG" 'evil-goto-line-preserve-column)
 
 (defun print-last-pdf-in-Messages ()
   (interactive)
@@ -556,7 +570,7 @@ occurence of 'delete' replaced with 'yank'."
 ;;;; Insert quotes (put this somewhere else when finished)
 (cl-defun mb-surround-region-1 (region left right n)
   (insert-at left (car region) n)
-  (insert-at right (+ (cdr region) (length left)) n))
+  (insert-at right (+ (second region) (length left)) n))
 
 (cl-defun mb-surround-lookup-right (left)
   (string-case left
