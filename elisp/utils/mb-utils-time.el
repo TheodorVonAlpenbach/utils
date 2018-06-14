@@ -285,13 +285,16 @@ Argument may be a time objects itself or a string."
   on every system.")
 ;;(decode-time +the-creation+)
 
-(defconst *the-apocalypse* (encode-time 0 0 0 31 12 2147485547 0)
+(defconst +the-apocalypse+
+  (if (cygwin-emacs-p)
+      (encode-time 0 0 0 31 12 2147483647 0)
+      (encode-time 0 0 0 31 12 2147485547 0))
   "The latest date that encode-time and decode-time can handle on
   my current system.")
-;;(decode-time *the-apocalypse*)
+;;(decode-time +the-apocalypse+)
 
 (defun the-creation () (copy-time +the-creation+))
-(defun the-apocalypse () (copy-time *the-apocalypse*))
+(defun the-apocalypse () (copy-time +the-apocalypse+))
 
 ;; Note that the leap second inserted as 1990-12-31T23:59:60 is not 
 ;; implemented in encode-time:
