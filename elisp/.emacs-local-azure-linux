@@ -52,7 +52,7 @@
 	(,+mb-lisp-dir+ "mode-extensions/mb-lisp.el")
 	(,+mb-lisp-dir+ "mode-extensions/mb-octave.el")
 	(,+mb-lisp-dir+ "mode-extensions/mb-tex.el")
-	(,+mb-lisp-dir+ "quiz/qp.el")
+	(,+mb-lisp-dir+ "quiz/quiz-park.el")
 	(,+mb-lisp-dir+ "global/LS.el")
 
 	;; local scripts
@@ -63,7 +63,7 @@
 	(,+home-dir+ "projects/utils/lisp/topology/shapes.lisp")
 
 	;; other project entries
-	(,+home-dir+ "projects/Osstrupen/laserdot/bbscale.m")
+	(,+home-dir+ "projects/Osstrupen/laserdot/laserdot.m")
 
 	;; chess
 	(,+home-dir+ "projects/chess/libHsmsCore/src/ChAlarmServer.cpp")
