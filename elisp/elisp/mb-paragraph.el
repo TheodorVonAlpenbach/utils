@@ -32,7 +32,7 @@ store the deleted region in the kill ring, is
   (unless (string-match* (iso-date-regexp) (line-string))
       (destructuring-bind (timestamp text) (kill-current-schedule-paragraph)
 	(let ((new-text (with-temp-buffer
-			  (insert (string-trim-left (remove 10 text)))
+			  (insert (string-trim-left* (remove 10 text)))
 			  (bob)
 			  (insert "       ")
 			  (eob)

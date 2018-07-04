@@ -25,7 +25,7 @@ that matches a field substring"
 			    collect (apply #'substring query-string iv)))
 	 (values (loop for iv in (cut (rest (flatten pos-ivs)) 2 t)
 			     for s = (apply #'substring query-string iv)
-			     collect (string-trim s "[ \f\t\n\r\v:]+"))))
+			     collect (string-trim* s "[ \f\t\n\r\v:]+"))))
     (mapcar* #'list fields values)))
 ;;(lab-api-filters lab-api-query-test) 
 

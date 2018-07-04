@@ -199,12 +199,12 @@ REGEXP and SIDE arguments, respectively, in `split-string'."
 	 (res (flatten (append (mapcar #'nbutlast (butlast split-data))
 			       (last split-data)))))
     (if trim
-      (loop for x in res collect (string-trim x trim side))
+      (loop for x in res collect (string-trim* x trim side))
       res)))
 ;;(split-string-regexp-list "babc db efg b " "b" t)
 
 (cl-defun split-string-regexp-pairs (string regexp &key trim (side :both) (prefixed t))
-  "Splits STRING at places where REGEXP matches a substring of STRING.
+  "Split STRING at places where REGEXP matches a substring of STRING.
 
 It returns a list similiar to what `split-string-regexp-list'
 does, but also groups the results to \(\(substring-0
@@ -218,7 +218,7 @@ For the use of TRIM and SEPARATOR, see `split-string-regexp-list'"
 ;;(split-string-regexp-pairs "babcdbefgb" "b" :trim nil :side :left)
 
 (cl-defun split-string-regexp (string regexp &optional omit-nulls trim (side :both))
-  "Splits STRING to a list of substrings at places where REGEXP matches a substring of STRING.
+  "Split STRING to a list of substrings at places where REGEXP matches a substring of STRING.
 
 If OMIT-NULLS is true, it detracts from the result all substrings
 that are empty strings.
@@ -504,27 +504,27 @@ tree. Then a tree of corresponding matches is returned."
 
 ;; Note! The following three functions can be in conflict with modules
 ;; that Slime loads. Should consider renaming them to mb-string-*
-(defun string-trim-left (string &optional regexp)
+(defun string-trim-left* (string &optional regexp)
   "Returns a copy of STRING trimmed at left with REGEXP."
   (or (third (split-string-once string (mb-trim-regexp regexp :left)))
       string))
-;;(string-trim-left "***qwe" "\\*")
+;;(string-trim-left* "***qwe" "\\*")
 
-(defun string-trim-right (string &optional regexp)
+(defun string-trim-right* (string &optional regexp)
   "Returns a copy of STRING trimmed at right with REGEXP."
   (or (first (split-string-once string (mb-trim-regexp regexp :right)))
       string))
-;;(string-trim-right "qwe***" "\\**")
+;;(string-trim-right* "qwe***" "\\**")
 
-(cl-defun string-trim (string &optional regexp (side :both))
+(cl-defun string-trim* (string &optional regexp (side :both))
   "Returns a copy of STRING trimmed with REGEXP at both sides.
 If SIDE is :LEFT or :RIGHT, STRING is only trimmed at its left or
 right side respectively."
   (ecase side
-    (:left (string-trim-left string regexp))
-    (:right (string-trim-right string regexp))
-    ((:both t) (string-trim-right (string-trim-left string regexp) regexp))))
-;;(string-trim " **qwe**" t)
+    (:left (string-trim-left* string regexp))
+    (:right (string-trim-right* string regexp))
+    ((:both t) (string-trim-right* (string-trim-left* string regexp) regexp))))
+;;(string-trim* " **qwe**" t)
 
 (defun string-remove-props (string)
   "Returns STRING without any emacs text props. For an entire buffer,

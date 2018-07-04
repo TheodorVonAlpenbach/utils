@@ -172,7 +172,7 @@ The rules for expression extraction depends on point context. Examples:
   (if (and (looking-at "[[:space:]/]*$") (looking-back ";"))
     ;; case 1 (trivial): point is at the end of a semicolon terminated statement
     ;; ==> return the statement
-    (string-trim-left (line-string) "[[:space:]/]*")
+    (string-trim-left* (line-string) "[[:space:]/]*")
     ;; else return the scilab "sexp" before point. This is more tricky:
     (cl-flet ((bs (&optional allow-linebreak-p)
 		(let ((bol (save-excursion (bol))))

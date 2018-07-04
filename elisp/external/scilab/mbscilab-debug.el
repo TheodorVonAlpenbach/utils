@@ -267,7 +267,7 @@ The line numbers are local to the current function."
 
 (defun scilab-parse-value (string)
   (if (= (char string 0) ?!)
-    (string-trim string "[!\n\t ]*")
+    (string-trim* string "[!\n\t ]*")
     (string-to-number string)))
 ;;(mapcar #'scilab-parse-value '("!qwe    !" "1.2" "456"))
 

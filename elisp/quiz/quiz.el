@@ -441,7 +441,7 @@ TODO: factorize this and clean answer as well."
     (just-one-space)
     (save-excursion
       (quiz-forward-item)
-      (insert (string-trim s "[^[:alnum:]()«»]")))))
+      (insert (string-trim* s "[^[:alnum:]()«»]")))))
 
 (defun quiz-remove-A ()
   "Removes next A item"

@@ -1,9 +1,9 @@
 (require 'ert)
 (require 'mb-utils-strings)
 
-(ert-deftest test-string-trim ()
+(ert-deftest test-string-trim* ()
   "Test of `string-trim'."
-  (should (equal (string-trim " qwe ") "qwe")))
+  (should (equal (string-trim* " qwe ") "qwe")))
 
 (ert-deftest test-read-whole-string ()
   "Test of `read-whole-string'."

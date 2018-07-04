@@ -357,7 +357,7 @@ TOKEN-STREAM and continues evaluations of the modified stream."
 	      ((and (listp x) 
 		    (eq (first x) 'set)
 		    (string-match "instrumentName" (second x))) 
-	       (setf instrument (string-trim (third x) "[#\"]")))
+	       (setf instrument (string-trim* (third x) "[#\"]")))
 
 	      ((time-signature-p x) (setf ts x))
 
