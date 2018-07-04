@@ -37,6 +37,9 @@
 (setf evil-cleverparens-swap-move-by-word-and-symbol t)
 (setf parens-require-spaces t)
 
+(setf sp-pair-list (cl-remove "'" sp-pair-list :key #'car :test #'string=))
+(setf sp-pair-list (cl-remove "`" sp-pair-list :key #'car :test #'string=))
+
 ;;; Finally, need to revert .emacs* buffers since they have not yet been
 ;;; hooked by the functionality loaded here
 (loop for b in (list (get-buffer ".emacs") (get-file-buffer +emacs-local+))
@@ -184,7 +187,7 @@ By default the last line."
   (define-key swap-map "g" #'mb-grep)
   (define-key swap-map "G" #'mb-grep-interactive)
   (define-key swap-map "F" #'find-file-read-only)
-  (define-key swap-map "k" #'kill-buffer)
+  (define-key swap-map "k" #'browse-kill-ring)
   (define-key swap-map "n" #'ffap-next)
   (define-key swap-map "N" #'ffap-previous)
   (define-key swap-map "o" #'other-window)
@@ -215,7 +218,6 @@ By default the last line."
   (define-key insert-map "D" #'(lambda () (interactive) (insert-date-and-time 3)))
   (define-key insert-map "f" #'cl-ify-form)
   (define-key insert-map "F" #'cl-ify-defun)
-  (define-key insert-map "k" #'browse-kill-ring)
   (define-key insert-map "q" #'fill-paragraph)
   (define-key insert-map "t" #'insert-time)
   (define-key insert-map "T" #'(lambda () (interactive) (insert-time 3)))
@@ -344,7 +346,7 @@ between different"
     (octave-mode (octave-source-buffer))
     (mbscilab-mode (mbscilab-eval-buffer))
     (python-mode (python-shell-send-buffer nil))
-    ((c++-mode cc-mode) (compile "make -k"))
+    ((c++-mode cc-mode makefile-mode) (compile "make -k"))
     (latex-mode (TeX-command-run-all nil))
     (otherwise (mb-eval-region (point-min) (point-max)))))
 
