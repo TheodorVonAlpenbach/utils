@@ -23,8 +23,11 @@ If ARGUMENT is a string insert it in the pair of curly parentheses."
      (texinfo-insert-@ ,code)))
 ;;(texinfo-def-insert-@-fn "xref")
 
+(defconst +texinfo-inserts+
+  '(var xref ref pxref code result uref file))
+
 (cl-defmacro texinfo-define-inserts
-    (&optional (symbols '(var xref ref pxref code result uref)))
+    (&optional (symbols +texinfo-inserts+))
   `(progn ,@(loop for code in symbols collect
 		  `(texinfo-def-insert-@-fn ,(sstring code)))))
 (texinfo-define-inserts)
