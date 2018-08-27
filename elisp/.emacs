@@ -43,7 +43,10 @@
 
 ;;;; global defaults (can be overrided in .emacs-local)
 (defun win32-user-profile ()
-  (concat "/cygdrive/c" (subseq (substitute ?/ ?\\ (getenv "USERPROFILE")) 2)))
+  (let ((up (getenv "USERPROFILE")))
+    (if up
+	(concat "/cygdrive/c" (subseq (substitute ?/ ?\\ up) 2))
+      "")))
 ;;(win32-user-profile)
 
 (defconst +win32-home-dir+
@@ -158,10 +161,10 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 
 ;;; non standard packages
 (require 'package)
-(loop for x in '(("marmalade" . "http://marmalade-repo.org/packages/")
-		 ("melpa"     . "http://melpa.milkbox.net/packages/"))
-      do (unless (member x package-archives)
-	   (push x package-archives)))
+;; (loop for x in '(("marmalade" . "http://marmalade-repo.org/packages/")
+;; 		 ("melpa"     . "http://melpa.milkbox.net/packages/"))
+;;       do (unless (member x package-archives)
+;; 	   (push x package-archives)))
 
 ;; path
 (loop for x in (nconc 
@@ -169,7 +172,7 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 		(cl-remove "old" (directory-files +mb-lisp-dir+ t)
 			   :key #'file-name-nondirectory
 			   :test #'string=)
-		(directory-files (expand-file-name ".emacs.d/elpa" +home-dir+) t)
+		;; (directory-files (expand-file-name ".emacs.d/elpa" +home-dir+) t)
 		(list
 		 (expand-file-name "games/maths" +mb-lisp-dir+)
 		 (expand-file-name "games/cram" +mb-lisp-dir+)
@@ -280,7 +283,8 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 			 quiz-park
 			 ;; not from mb
 			 mb-ert
-			 mb-js-mode)
+			 ;; mb-js-mode
+			 )
 		       *local-requires*)
       do (require m))
 
