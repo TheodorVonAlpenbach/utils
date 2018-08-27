@@ -98,6 +98,7 @@ STATE can take the same values as in `evil-define-key'."
 (define-key vc-prefix-map "j" 'log-edit-done)
 (key-chord-define evil-normal-state-map "vk" vc-prefix-map)
 
+(define-key evil-normal-state-map  [?g ? ] 'just-one-space)
 (define-key evil-normal-state-map "gp" 'TeX-next-error)
 
 (evil-define-motion evil-goto-line-keep-column (count)
