@@ -1,0 +1,96 @@
+;;(set-frame-font "--Courier New-normal-normal-normal-mono-13-*-*-*-c-*-iso8859-1")
+;;(set-frame-size (selected-frame) 120 61)
+;;(set-frame-position (selected-frame) 0 0)
+
+(setf display-time-format "%H:%M %d/%m")
+
+;; Local elisp load paths
+(setf *local-load-paths* '("~/git/lsconf" "~/lilypond/usr/share/emacs/site-lisp/"))
+
+;; (setf *local-requires* '(lsconf-mode qt-chess browse-kill-ring))
+(setf *local-requires* '(qt-chess browse-kill-ring))
+
+;; Sentences, see info node Sentences
+(setf sentence-end "[.?!][]\"')]*\\($\\|\t\\| \\)[ \t\n]*")
+(setf sentence-end-double-space nil)
+
+;; news
+(setf gnus-select-method '(nntp "news.online.no"))
+(setf user-full-name "Mats Bergstrøm")
+
+;; tags
+(setf tags-table-list
+      (cl-nunion '("~/.MBTAGS" "~/.CTAGS" "~/.OTAGS" "~/.CLTAGS"
+		   "~/.PYTAGS" "~/.JSTAGS" "~/.SCILABTAGS")
+		 tags-table-list :test #'string=))
+
+;; lynx
+(setf *lynx-proxy-dir* (expand-file-name "lynx-proxy" *local-data-dir*))
+(setf *lynx-auth* "")
+
+;; diary file (mandatory to use #'calendar)
+(setf diary-file (setf diary-file (expand-file-name "office/diary" *local-data-dir*)))
+
+(defconst lsdoc-dir "/ssh:bro:/ls/gold/u1/mbe/doc/"
+  ;;/ls/gold/u1/mbe/doc
+  "Mounted silver doc directory")
+
+(let ((path "~/.emacs.d/tramp"))
+  (when (file-exists-p path)
+    (delete-file path)))
+
+(setf *my-favorites*
+      `((,+mb-lisp-dir+ ".emacs")
+	(,+mb-lisp-dir+ "utils/mb-utils-strings.el")
+	(,+mb-lisp-dir+ "utils/mb-utils-buffer.el")
+	(,+mb-lisp-dir+ "utils/mb-sequences.el")
+	(,+mb-lisp-dir+ "global/mb-indent.el")
+	(,+mb-lisp-dir+ "external/scilab/mbscilab.el")
+	(,+mb-lisp-dir+ "mode-extensions/mb-evil.el")
+	(,+mb-lisp-dir+ "c++/qt-chess.el")
+	(,+mb-lisp-dir+ "mode-extensions/mb-octave.el")
+	(,+mb-lisp-dir+ "mode-extensions/octave-debug-mode.el")
+	(,+mb-lisp-dir+ "mode-extensions/mb-lisp.el")
+	(,+mb-lisp-dir+ "mode-extensions/mb-octave.el")
+	(,+mb-lisp-dir+ "mode-extensions/mb-tex.el")
+	(,+mb-lisp-dir+ "quiz/quiz-park.el")
+	(,+mb-lisp-dir+ "global/LS.el")
+
+	;; local scripts
+	(,+home-dir+ "bin/ilmctrl.py")
+	
+	;; common lisp utils
+	(,+home-dir+ "projects/utils/lisp/mb-utils.lisp")
+	(,+home-dir+ "projects/utils/lisp/topology/shapes.lisp")
+
+	;; other project entries
+	(,+home-dir+ "projects/Osstrupen/laserdot/laserdot.m")
+
+	;; chess
+	(,+home-dir+ "projects/chess/libHsmsCore/src/ChAlarmServer.cpp")
+
+	;; Git entry points
+	;;(,+home-dir+ "git/lsconf/lsconf-mode.el")
+	(,+home-dir+ "git/imms/src/octave/egina/egina_rao.m")
+	(,+home-dir+ "git/utils/octave/div/dealmat.m" :read-only t)
+
+	;; CVS entry points
+	(,+home-dir+ "sources/imms/src/lisp/egina/egina-wave.lisp")
+	(,+home-dir+ "sources/imms/src/lisp/wave/wave.lisp")
+
+	;; remote files (shared with windows)
+	;; Note special treatment of arbeidslog in mb-insert-state-init!
+	(,lsdoc-dir "arbeidslog" :point :end :keyboard :no :time-paragraphs t)
+	(,lsdoc-dir "adresser.txt" :keyboard :no)
+	(,lsdoc-dir "todo.org" :keyboard :no)
+	;; (,lsdoc-dir "qtportlog.org" :keyboard :no)
+	(,lsdoc-dir "LS-notes.org" :point :end :keyboard :no :time-paragraphs t)
+	))
+;;(find-file "/ssh:bro:/ls/gold/u1/mbe/doc/LS-notes.org")
+;;(find-file "/ssh:bro:/ls/gold/u1/mbe/doc/todo.org")
+
+;;scheme
+(setf scheme-program-name "guile")
+
+;; lisp
+(setf inferior-lisp-program "sbcl")
