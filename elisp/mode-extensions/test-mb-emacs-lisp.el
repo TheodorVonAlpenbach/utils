@@ -1,4 +1,4 @@
 (require 'ert)
-(require 'lsconf-sensors)
+(require 'mb-emacs-lisp.el)
 
 (provide 'test-mb-emacs-lisp.el)
