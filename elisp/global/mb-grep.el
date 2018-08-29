@@ -15,10 +15,10 @@
     (let ((globs (loop for x in (listify types) collect
 		       (format "/%s%s" (if (eql (char x 0) ?.) "" "*") x))))
       (compilation-start
-       (format "grep -nH -E '%s' %s"
+       (format "grep -nHs -E '%s' %s"
 	 (substring-no-properties target)
 	 (concat* (combine (list directories globs) :key #'concat) :in " "))
-       'grep-mode))))
+       'grep-mode nil t))))
 ;;(mb-grep-basic :target "mb-grep-basic" :types '("el"))
 
 (cl-defun subdirs (rootdir &optional (depth t) flatten-p)
@@ -35,26 +35,71 @@ The current implementation always returns a flattened list."
 	    (not (minusp depth)))
      (split-string (call-process* "find" rootdir "-type" "d" "-maxdepth" (sstring depth)) "\n")
      (split-string (call-process* "find" rootdir "-type" "d") "\n"))
-   '("" ".." "./" ".")
+   '("" ".." "../" "." "./")
    :test #'string=))
-;;(length (subdirs ".." 3))
+;;(length (subdirs "./"))
 
-(cl-defun mb-grep-dirs (prefix)
+(cl-defun mb-grep-dirs-1 (up maxdepth dir)
+  (let ((sd (subdirs (if (zerop up)
+		       dir
+		       (expand-file-name (concat* (make-list up "../")) dir))
+		     maxdepth)))
+    (push-unique dir sd #'string=)))
+;;(mb-grep-dirs-1 0 1 "./")
+
+(cl-defun mb-grep-dirs (prefix &optional (dir "./"))
   "Return a list of directories according to prefix.
-If prefix is nil or zero, it returns the directories in the
-current directory. If PREFIX is less than 10, it returns all
-directories below the PREFIXth superdirectory of the current
-directory. For higher values of PREFIX it splits prefix in to
-MAXDEPTH and UP, where MAXDEPTH is defined as (floor PREFIX 10),
-and UP is (mod PREFIX 10). The UP part defines the root directory
-for the search as described above. MAXDEPTH restricts the search
-to MAXDEPTH levels of subdirectories below the root directory,
-just like the -maxdepth option in the sh utility find."
-  (if (null prefix)
-    (subdirs "../")
-    (destructuring-bind (maxdepth up) (cl-floor prefix 10)
-      (subdirs (if (zerop up) "./" (concat* (make-list up "../"))) maxdepth))))
-;;(mb-grep-dirs 13)
+If prefix is nil or zero, it returns all the subdirectories,
+recursively, in the current directory. If PREFIX is less than 10,
+it returns all subdirectories, recursively, below the PREFIXth
+superdirectory of the current directory. For higher values of
+PREFIX it splits prefix in to MAXDEPTH and UP, where MAXDEPTH is
+defined as (floor PREFIX 10), and UP is (mod PREFIX 10). The UP
+part defines the root directory for the search as described
+above. MAXDEPTH restricts the search to MAXDEPTH levels of
+subdirectories below the root directory, just like the -maxdepth
+option in the sh utility find.
+
+With a prefix the roles of MAXDEPTH and UP is reversed, see the
+examples below.
+
+Examples:
+
+PREFIX   DIRS
+nil      ./ and all its subdirectories
+0        ./ and all its subdirectories
+1        ../ and all its subdirectories
+2        ../../ and all its subdirectories
+...
+9        ../../../../../../../../../ and all its subdirectories
+
+10       ../ only
+20       ../../ only
+11       ../ and its direct subdirectories only
+21       ../../ and its direct subdirectories only 
+
+35       ../../../ and its subdirectories at maximum five levels down      
+
+- or -0  ./ only
+-1       ./ and its direct subdirectories only
+-5       ./ and its subdirectories at maximum five levels down
+-14      same as 41
+-72      same as 27
+"
+  (if (equal prefix "-")
+    (mb-grep-dirs-1 0 0 dir)
+    (if (or (null prefix) (zerop prefix))
+      (mb-grep-dirs-1 0 nil dir)
+      (let (maxdepth up)
+	(if (minusp prefix)
+	  (if (> prefix -10)
+	    (setf up 0 maxdepth (abs prefix))
+	    (multiple-value-setq (maxdepth up) (cl-floor (abs prefix) 10)))
+	  (if (< prefix 10)
+	    (setf up prefix maxdepth nil)
+	    (multiple-value-setq (up maxdepth) (cl-floor prefix 10))))
+	(mb-grep-dirs-1 up maxdepth dir)))))
+;;(mb-grep-dirs -1 "/home/mbe/")
 
 (cl-defun mb-grep-interactive ()
   "Convenient grep according to file type."
@@ -66,7 +111,17 @@ just like the -maxdepth option in the sh utility find."
 (cl-defun mb-grep ()
   "Convenient grep according to file type."
   (interactive)
+  (case major-mode
+    (emacs-lisp-mode (mb-elisp-grep))
+    (t (mb-gen-grep))))
+
+(cl-defun mb-gen-grep ()
+  "Convenient grep according to file type."
   (mb-grep-basic :directories (mb-grep-dirs current-prefix-arg)))
+
+(cl-defun mb-elisp-grep ()
+  "Convenient grep for Emacs lisp mode."
+  (mb-grep-basic :directories (mb-grep-dirs (if current-prefix-arg 0 1))))
 
 (cl-defun mb-c++-grep ()
   "Convenient grep according to file type."
