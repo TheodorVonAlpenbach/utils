@@ -25,15 +25,19 @@
 ;;(require 'evil-org) ; does not work
 
 (require 'evil-exchange)
-(setf evil-exchange-key "go")
-(setf evil-exchange-cancel-key "gO")
-(evil-exchange-install)
-(setf evil-symbol-word-search t)
 
-(evil-mode 1)
+(evil-mode)
 (setf evil-move-beyond-eol t)
-(add-hook 'emacs-lisp-mode-hook #'evil-cleverparens-mode)
-(add-hook 'lisp-mode-hook #'evil-cleverparens-mode)
+(setf evil-cross-lines t)
+
+(defun set-mb-lisp-locals ()
+  "My local modifications of lisp modes."
+  (evil-cleverparens-mode)
+  (setf evil-symbol-word-search t))
+
+(add-hook 'emacs-lisp-mode-hook #'set-mb-lisp-locals)
+(add-hook 'lisp-mode-hook #'set-mb-lisp-locals)
+
 (setf evil-cleverparens-swap-move-by-word-and-symbol t)
 (setf parens-require-spaces t)
 
@@ -232,8 +236,6 @@ By default the last line."
 (let ((big-insert-map (make-sparse-keymap)))
   (key-chord-define evil-normal-state-map "vI" big-insert-map)
   (define-key big-insert-map "\"" #'(lambda (n) (interactive "P") (mb-surround "\\\"" (or n 1)))))
-
-(require 'mb-metafont)
 
 ;; TODO: move these two defuns elsewhere
 (require 'mb-metafont)
