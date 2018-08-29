@@ -46,10 +46,10 @@
   "Probably bad new proposal"
   (if (functionp mode-or-fn)
     mode-or-fn
-    (case mode
+    (case mode-or-fn
       (emacs-lisp-mode #'lisp-indent-function)
       (t #'common-lisp-indent-function))))
-;;(mapcar #'get-indent-function '(emacs-lisp-mode mb-lisp-mode dummy-mode))
+;;(mapcar #'get-indent-function '(if emacs-lisp-mode mb-lisp-mode dummy-mode))
 
 (defun set-indent (symbol indent mode-or-fn)
   "Probably bad new proposal"
@@ -75,6 +75,9 @@ SYMBOL can be a symbol or a list of symbols. See function
 	     (get indent indent-fn)
 	     indent)))))
 
+(put 'if 'lisp-indent-function 1)
+(put 'if 'common-lisp-indent-function-for-elisp 1)
+
 (defun cl-indent (symbol indent)
   (set-indent symbol indent))
 
@@ -83,7 +86,9 @@ SYMBOL can be a symbol or a list of symbols. See function
 (cl-indent '(with-other-window with-temp-file* unwind-protect)
   'progn)
 
-(cl-indent '(aif if anif> awhen read-string with-buffer with-point
+(cl-indent '(aif anif>) 'prog1)
+
+(cl-indent '(awhen read-string with-buffer with-point
 	     substring-intv quiz-save-excursion q-try subseq
 	     concatenate with-out-file length* handles-outflow
 	     ly-function ly-context copy-object min-elt case<
@@ -96,7 +101,7 @@ SYMBOL can be a symbol or a list of symbols. See function
 	     gui-position-objects-horizontally
 	     gui-position-objects-vertically
 	     ld-update)
-	     'prog1)
+  'prog1)
 
 (cl-indent '(do-lines defmethod with-infile defclass with-outfile
 	     read-csv string-replace-intv remove*
@@ -217,11 +222,13 @@ Stop looking before LOOP-START."
      ;; though it doesn't start a sexp.
      loop-indentation)))
 
-(defun common-lisp-indent-function (indent-point state)
+(defun mb-common-lisp-indent-function (indent-point state)
   "Check to see what happens to loop if this"
   ;; handle concat separately
   (cl-indent 'concat (if (eql major-mode 'emacs-lisp-mode) 'progn 'prog1))
   (cl-indent 'format (if (eql major-mode 'emacs-lisp-mode) 'prog1 'prog1))
   (common-lisp-indent-function-1 indent-point state))
+
+(advice-add #'common-lisp-indent-function :override #'mb-common-lisp-indent-function)
 
 (provide 'mb-indent)
