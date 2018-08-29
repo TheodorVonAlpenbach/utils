@@ -277,7 +277,7 @@ fn2, ..., fnN, if it is not an element in FUNCTIONS."
 			    :test #'string=)
       (if it
 	(concat "See also "
-		(andcat (mapcar (bind #'texinfo-@fiy "ref" 1) it))
+		(andcat (mapcar (bind #'texinfo-atfiy "ref" 1) it))
 		" for related topics.")
 	(error "qwe")))
     string))
