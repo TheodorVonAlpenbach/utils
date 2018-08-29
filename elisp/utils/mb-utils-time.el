@@ -254,7 +254,8 @@ ZONE is a pair (ZONE-CODE . UTC-OFFSET). The result is on the form
     (when (eql (char string 10) ?T)
       (setf (char string 10) ? ))
     (date-to-time (clean-time-zone-suffix string))))
-;;(decode-time (mb-parse-time-string "2018-05-24T00:00+0100"))
+;;(decode-time (mb-parse-time-string "2018-05-24T00:00+0000"))
+;;(decode-time (mb-parse-time-string "2018-05-24T00:00Z"))
 
 (defun parse-time (time-designator)
   "Returns a new time object equal to TIME-DESIGNATOR.
@@ -268,7 +269,8 @@ Argument may be a time objects itself or a string."
     (number (list 0 (round time-designator)))
     (error "%s is not a legar time designator")))
 ;;(mapcar #'parse-time (list 1527598870.823139 "2005-01-18 09:15" '2014-04-02))
-;;(parse-time "2000-01-18T22:31")
+;;(parse-time "2000-01-18T22:31:00CET")
+;;(parse-time "2000-01-18T22:31:00Z")
 
 ;;; Notion of time extension: time extension atoms are time points
 ;;; (points in timespace) or time intervals (intervals with time point
@@ -336,9 +338,11 @@ status. If UNIVERSAL is not nil, return result in UTC."
   "Return current time as an encoded time object."
   (if (null args)
     (--time-encode (decode-time))
-    (warn "Calling `now' with arguments has been deprecated. Use `add-etime-date' or `add-etime-time' for modifying time, instead.")
+    (warn (concat "Calling `now' with arguments has been deprecated.\n "
+		  "Use `add-etime-date' or `add-etime-time' "
+		  "for modifying time, instead."))
     (apply #'add-etime (--time-encode (decode-time)) args)))
-;;(iso-dttm (now :year 1 :month 10 :day 3 :hour 16 :minute 21 :second 30))
+;;(now)
 
 (cl-defun midnight (&optional (etime (now)) universal)
   "Return the first time point within the date of ETIME in local time.
@@ -370,6 +374,9 @@ If UNIVERSAL is not nil, return the `midday' in UTC."
   "Return the first time point after the date of ETIME in local time.
 If UNIVERSAL is not nil, return the `next-midnight' in UTC."
   (--etime-set-time etime 0 0 24 universal))
+;;(list (midnight (parse-time "2018-03-25")) (next-midnight (parse-time "2018-03-25")))
+;;(next-midnight (parse-time "2018-03-25"))
+;;(midnight (parse-time "2018-03-26"))
 
 (defun weekday-number (weekday-designator)
   "Return the weekday number corresponding to WEEKDAY-DESIGNATOR.
@@ -482,14 +489,14 @@ higher are inambiguous, and are not recommended."
   "Creates a time interval [FROM TO), where FROM and TO are
 TIMEs, not time designators."
   (interval-co from to))
-;;(period :from (today))
+;;(period :from (now) :to (add-etime-date (now) :day 1))
 
 (cl-defmacro period-bind ((a b) period &rest body)
   `(let ((,a (interval-l ,period))
 	 (,b (interval-r ,period)))
      ,@body))
 ;;(period-bind (a b) (today) (list a b))
-(def-edebug-spec period-bind body)
+(def-edebug-spec period-bind ((symbolp symbolp) form body))
 
 (defun iso-period (period)
   "Format time PERIOD in accordance with ISO 8601."
@@ -501,7 +508,7 @@ TIMEs, not time designators."
 
 (cl-defun period-length (period &optional (unit :second))
   (period-bind (a b) period
-    (time- b a :unit unit)))
+    (etime- b a unit)))
 ;;(period-length (today))
 
 ;;; Some standard periods
@@ -511,6 +518,8 @@ TIMEs, not time designators."
   "Period from midnight of ETIME to the following midnight.
 The default value of the optional parameter ETIME, is `(now)'."
   (period :from (midnight etime) :to (next-midnight etime)))
+;;(period-length (today (parse-time "2018-03-25")) :hour)
+;;(etime- (next-midnight (parse-time "2018-03-25")) (midnight (parse-time "2018-03-25")) :hour)
 
 (defun this-week (&optional etime)
   "Period from week start at ETIME to the following week start.
@@ -525,14 +534,14 @@ optional parameter ETIME, is `(now)'."
 (defun yesterday (&optional etime) (today (add-etime-date etime :day -1)))
 
 ;;; Period queries
-(defun within-period (time period) 
-  (within time period))
-;;(within-period (now) (period :from (midnight (now :year -1)) :to (now :second 1)))
+(defun within-period-p (time period) 
+  (within time period :test #'etime<))
+;;(within-period-p (now) (period :from (midnight) :to (next-midnight)))
 ;;(setf debug-on-error t)
-;;(debug-on-entry 'within-period)
+;;(debug-on-entry 'within-period-p)
 
 (defun within-time (time time-extension) 
-  "Generalization of `within-period'.
+  "Generalization of `within-period-p'.
 TIME-EXTENSION is a list of either time points or time
 intervals."
   (if (interval-p time-extension)
