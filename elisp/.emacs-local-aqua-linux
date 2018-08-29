@@ -20,8 +20,13 @@
 
 ;; tags
 (setf tags-table-list
-      (cl-nunion '("~/.MBTAGS" "~/.CTAGS" "~/.OTAGS" "~/.CLTAGS"
-		   "~/.PYTAGS" "~/.JSTAGS" "~/.SCILABTAGS")
+      (cl-nunion '("~/.MBTAGS"
+		   "~/.CTAGS"
+		   "~/.OTAGS"
+		   "~/.CLTAGS"
+		   "~/.PYTAGS"
+		   "~/.JSTAGS"
+		   "~/.SCILABTAGS")
 		 tags-table-list :test #'string=))
 
 ;; lynx
