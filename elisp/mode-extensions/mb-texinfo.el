@@ -1,17 +1,17 @@
 ;;;; This module contains extensions the Emacs' texinfo mode.
 
-(cl-defun texinfo-@fiy (function-name &optional (argument ""))
+(cl-defun texinfo-atfiy (function-name &optional (argument ""))
   "Prepend \"@\" to FUNCTION-NAME and append curly parentheses.
 If ARGUMENT is a string insert it in the pair of curly parentheses."
   (format "@%s{%s}" function-name argument))
-;;(texinfo-@fiy "foo" "bar")
+;;(texinfo-atfiy "foo" "bar")
 
 (defun texinfo-insert-@ (code)
   (if (use-region-p)
     (region-replace (format "@%s{%%s}" code))
     (if (symbol-at-point)
      (destructuring-bind (beg . end) (bounds-of-thing-at-point 'symbol)
-       (insert (texinfo-@fiy code (delete-and-extract-region beg end))))
+       (insert (texinfo-atfiy code (delete-and-extract-region beg end))))
      (insert (format "@%s{}" code))
      (backward-char 1))))
 
