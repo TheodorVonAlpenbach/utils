@@ -1,5 +1,4 @@
 (require 'ert)
-(require 'lsconf-sensors)
 
 (ert-deftest test-add-time ()
   "Test of `add-etime'"
@@ -344,11 +343,17 @@
 
 (ert-deftest test-max-week-number ()
   "Test of `max-week-number'"
-  (should (equal (pp (mapcar #'max-week-number (a-b 2001 2030)))
+  (should (equal (mapcar #'max-week-number (a-b 2001 2030))
 		 ;; Checked with Goolge Calendar
 		 ;; 1  2  3  4  5  6  7  8  9  0
 		 '(52 52 52 53 52 52 52 52 53 52
 		   52 52 52 52 53 52 52 52 52 53
 		   52 52 52 52 52 53 52 52 52 52))))
+
+(ert-deftest test-within-period-p ()
+  "Test of `within-period-p'"
+  (should (within-period-p (now) (period :from (midnight) :to (next-midnight))))
+  (should (within-period-p (now) (today)))
+  (should-not (within-period-p (now) (tomorrow))))
 
 (provide 'test-mb-utils-time.el)

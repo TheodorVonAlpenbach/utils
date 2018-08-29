@@ -1,5 +1,4 @@
 (require 'ert)
-(require 'lsconf-sensors)
 
 (ert-deftest test-set-equalp ()
   "Test of `set-equalp'"

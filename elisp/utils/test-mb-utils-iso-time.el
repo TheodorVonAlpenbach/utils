@@ -1,5 +1,4 @@
 (require 'ert)
-(require 'lsconf-sensors)
 
 (ert-deftest test-iso-time-regexp ()
   "Test of `iso-time-regexp'"

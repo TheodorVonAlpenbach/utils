@@ -1,5 +1,5 @@
 (require 'ert)
-(require 'lsconf-sensors)
+(require 'mb-js-mode)
 
 (ert-deftest test-js-eval-string ()
   "Test of `js-eval-string'"
@@ -7,4 +7,4 @@
   (should (equal (js-eval-string "'2+2'") "'2+2'"))
   (should (equal (js-eval-string "[1,2]") "[ 1, 2 ]")))
 
-(provide 'test-mb-js-mode.el)
+(provide 'test-mb-js-mode)

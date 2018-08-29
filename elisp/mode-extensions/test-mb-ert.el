@@ -1,5 +1,5 @@
 (require 'ert)
-(require 'lsconf-sensors)
+(require 'mb-ert)
 
 (ert-deftest test-mb-ert-test-buffer-p ()
   "Test of `mb-ert-test-buffer-p'"
@@ -31,7 +31,9 @@
 (ert-deftest test-mb-ert-test-filename-p ()
   "Test of `mb-ert-test-filename-p'"
   (should (mb-ert-test-filename-p "~/path/test-qwe.el"))
-  (should-not (mb-ert-test-filename-p "~/path/qwe.el")))
+  (should-not (mb-ert-test-filename-p "~/path/qwe.el"))
+  (should-not (mb-ert-test-filename-p "~/projects/utils/elisp/mode-extensions/mb-js-mode.el"))
+  (should-not (mb-ert-test-filename-p "~/projects/utils/elisp/mode-extensions/test-mb-js-mode.el")))
 
 (ert-deftest test-mb-ert-name-p ()
   "Test of `mb-ert-name-p'"
@@ -40,5 +42,14 @@
   (should (equal (mb-ert-name-p "test-qwe" "asd") nil))
   (should (mb-ert-name-p "atest-qwe" "atest")))
 
-(provide 'test-mb-ert.el)
+(ert-deftest test-mb-ert-file-defuns ()
+  "Test of `mb-ert-file-defuns'"
+  (should-error (mb-ert-file-defuns "~/projects/utils/elisp/utils/mb-sequences.el")))
+
+(ert-deftest test-mb-ert-swap-defun-symbol ()
+  "Test of `mb-ert-swap-defun-symbol'"
+  (should (equal (mb-ert-swap-defun-symbol 'qwe) 'test-qwe))
+  (should (equal (mb-ert-swap-defun-symbol 'qwe) 'test-qwe)))
+
+(provide 'test-mb-ert)
 
