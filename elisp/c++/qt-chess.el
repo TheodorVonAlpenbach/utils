@@ -10,13 +10,14 @@
 ;;(in-directory-p "~/bin/mbtags.sh" "~/")
 
 (cl-defun chess-file-p (&optional (buffer (current-buffer))
-				  (chess-dir "~/projects/chess"))
+				  (chess-dir "~/git/chess"))
   (or (in-directory-p (buffer-file-name buffer) chess-dir)
       (in-directory-p (buffer-file-name buffer) "~/sources/CHESS/RemoteAcceleration")
       (in-directory-p (buffer-file-name buffer) "~/sources/CHESS/Tail")
       (in-directory-p (buffer-file-name buffer) "~/sources/CHESS/Integrate")
       (in-directory-p (buffer-file-name buffer) "~/sources/CHESS/Differentiate")
-      (in-directory-p (buffer-file-name buffer) "~/sources/CHESS/SimFBGA3Imp")))
+      (in-directory-p (buffer-file-name buffer) "~/sources/CHESS/SimFBGA3Imp")
+      (in-directory-p (buffer-file-name buffer) "~/sources/CHESS/SimFBGA3")))
 ;;(chess-file-p (get-buffer "FIRFilter.cpp"))
 ;;(chess-file-p (current-buffer))
 
@@ -296,7 +297,7 @@ Consider move this functionality to a makefile-mode extension module"
   (interactive "r")
   (swap-emacs-and-qtcreator-paths nil start end))
 
-(defvar *qmake-program* "/home/mbe/Qt/5.7/gcc_64/bin/qmake")
+(defvar *qmake-program* "/home/mbe/Qt/5.11.2/gcc_64/bin/qmake")
 
 (defun qmake ()
   (interactive)
@@ -314,7 +315,7 @@ Consider move this functionality to a makefile-mode extension module"
 (defun chess-grep ()
   "Greps in this project and in the whole of chess"
   (interactive)
-  (mb-grep-basic :directories "~/projects/chess/lib*/src/" :types "{h,cpp}"))
+  (mb-grep-basic :directories "~/git/chess/lib*/src/" :types "{h,cpp}"))
 
 (defun chess-lookup-qtlog ()
   (interactive)
