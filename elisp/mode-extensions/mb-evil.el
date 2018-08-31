@@ -22,13 +22,15 @@
 (require 'evil-cleverparens)
 (require 'evil-cleverparens-text-objects)
 (require 'evil-textobj-line)
-;;(require 'evil-org) ; does not work
-
-(require 'evil-exchange)
 
 (evil-mode)
 (setf evil-move-beyond-eol t)
 (setf evil-cross-lines t)
+
+(require 'evil-exchange)
+(setf evil-exchange-key "go")
+(setf evil-exchange-cancel-key "gO")
+(evil-exchange-install)
 
 (defun set-mb-lisp-locals ()
   "My local modifications of lisp modes."
