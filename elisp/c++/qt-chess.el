@@ -144,7 +144,7 @@
 
 (defun qt-help ()
   (interactive)
-  (let ((tag (string-trim (find-tag-default) "'")))
+  (let ((tag (string-trim* (find-tag-default) "'")))
     (browse-url (format "http://doc.qt.io/qt-5/%s.html" (downcase tag)))))
 
 (defun chess-goto-error ()
@@ -308,8 +308,11 @@ Consider move this functionality to a makefile-mode extension module"
       (error "Was expecting one and one only .pro file in current directory!"))))
 
 (setf compilation-read-command nil)
-(defun chess-compile ()
+
+(defun chess-compile (&optional with-clean-p)
   (interactive)
+  (when with-clean-p
+    (call-process* "make" "clean"))
   (compilation-start "make -k"))
 
 (defun chess-grep ()
@@ -338,6 +341,7 @@ Consider move this functionality to a makefile-mode extension module"
     (define-key qt-map "m" make-map)
     (define-key make-map "q" #'qmake)
     (define-key make-map "c" #'chess-compile)
+    (define-key make-map "C" (interactivate (chess-compile t)))
     (define-key make-map "n" #'next-error)
     (define-key make-map "p" #'previous-error)
 
