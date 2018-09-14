@@ -188,7 +188,7 @@
 ;;;; Table handling
 
 ;;; General config
-(defconst qp-season '(29 "Allmennquiz"))
+(defconst qp-season '(30 "Allmennquiz"))
 (defun qp-season-number () (number-to-string (first qp-season)))
 (defun qp-season-name () (second qp-season))
 
