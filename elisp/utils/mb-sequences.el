@@ -243,44 +243,6 @@ respectively.
 ;;(min-element '())
 ;;(min-element '(1 2 1 3) :key #'1+)
 
-(cl-defun list< (list1 list2 &key (test #'<) (key #'identity))
-  "Lexical like comparison of LIST1 and LIST2.
-For I from zero Ith element of LIST1 is compared with binary
-predicate TEST to the Ith element of LIST2. If they are not equal
-the function returns imediately. If the lists are equal at all
-positions of the shortest list, the shortest list is considered
-less than the longer list.
-
-TEST can also be a list of binary predicates which must be at
-least as long as the shortest of LIST1 and LIST2. In this case,
-the Ith element in TEST is used to compare the Ith elements of
-the two lists.
-
-The function also accepts a :key keyword, which is used in the
-canonical sense, see for instance `cl-find'
-
-TODO: turn this into sequence<"
-  (loop with tests = (if (atom test)
-		       (make-list (min (length list1) (length list2)) test)
-		       test)
-	for x1 in list1
-	for x2 in list2
-	for test in tests
-	for y1 = (funcall key x1)
-	for y2 = (funcall key x2)
-	if (funcall test y1 y2) return t
-	if (funcall test y2 y1) return nil
-	;; if we arrive here, return min #'length
-	finally (return (< (length list1) (length list2)))))
-;;(list< '("n") '("n" "c1") :test #'string<)
-;;(list< '((a a) (a)  (b b)  (a) (b)) '((b b) (a) (b) (a a) (a)) :key #'length)
-;;(list< '(1 "b") '(1 "b") :test #'string< :key #'sstring)
-;;(list< '("n" "c1" "c3") '("n" "c1" "c2") :test #'string<)
-
-(cl-defun list> (list1 list2 &key (test #'<) (key #'identity))
-  (list< list2 list1 :test test :key key))
-;;(list> '(1 2 3 5) '(1 2 3 3 3))
-
 (cl-defun subseq* (seq &optional (start 0) (end nil))
   "Same as SUBSEQ but takes negative limit arguments (meaning from end).
 Note that this is exactly the same code as in `substring*' !
