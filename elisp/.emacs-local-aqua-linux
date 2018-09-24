@@ -50,6 +50,7 @@
 	(,+mb-lisp-dir+ "utils/mb-utils-buffer.el")
 	(,+mb-lisp-dir+ "utils/mb-sequences.el")
 	(,+mb-lisp-dir+ "global/mb-indent.el")
+	(,+mb-lisp-dir+ "global/mb-grep.el")
 	(,+mb-lisp-dir+ "external/scilab/mbscilab.el")
 	(,+mb-lisp-dir+ "mode-extensions/mb-evil.el")
 	(,+mb-lisp-dir+ "c++/qt-chess.el")
@@ -80,8 +81,9 @@
 	(,+home-dir+ "git/utils/octave/div/dealmat.m" :read-only t)
 
 	;; CVS entry points
-	(,+home-dir+ "sources/imms/src/lisp/egina/egina-wave.lisp")
-	(,+home-dir+ "sources/imms/src/lisp/wave/wave.lisp")
+	(,+home-dir+ "cvs/sources/imms/src/lisp/egina/egina-wave.lisp")
+	(,+home-dir+ "cvs/sources/imms/src/lisp/wave/wave.lisp")
+	(,+home-dir+ "cvs/sources/SciLab/toolboxes/OsstrupenViewer/macros/OS_config.sce")
 
 	;; remote files (shared with windows)
 	;; Note special treatment of arbeidslog in mb-insert-state-init!
