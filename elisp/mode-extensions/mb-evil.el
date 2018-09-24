@@ -26,6 +26,7 @@
 (evil-mode)
 (setf evil-move-beyond-eol t)
 (setf evil-cross-lines t)
+(evil-select-search-module 'evil-search-module 'evil-search)
 
 (require 'evil-exchange)
 (setf evil-exchange-key "go")
@@ -105,6 +106,7 @@ STATE can take the same values as in `evil-define-key'."
 (key-chord-define evil-normal-state-map "vk" vc-prefix-map)
 
 (define-key evil-normal-state-map  [?g ? ] 'just-one-space)
+(define-key evil-normal-state-map  [?g return] 'delete-blank-lines)
 (define-key evil-normal-state-map "gp" 'TeX-next-error)
 
 (evil-define-motion evil-goto-line-keep-column (count)
