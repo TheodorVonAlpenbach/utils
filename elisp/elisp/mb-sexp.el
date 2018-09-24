@@ -103,7 +103,4 @@ paranthesis."
   (interactive)
   (insert (format "%S" (defun-symbols))))
 
-
-
-
 (provide 'mb-sexp)
