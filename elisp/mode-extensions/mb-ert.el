@@ -38,7 +38,7 @@ If such module does not exist, create one."
   (eob)
   (backward-sexp 1)
   (insertf
-   "(ert-deftest %s%s ()\n\"Test of `%s'\"\n (should (equal (%s ) nil)))\n\n"
+   "(ert-deftest %s%s ()\n  \"Test of `%s'\"\n (should (equal (%s ) nil)))\n\n"
    *mb-ert-defun-prefix* defun-name defun-name defun-name)
   (backward-char 10))
 
