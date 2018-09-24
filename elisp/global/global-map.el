@@ -4,6 +4,12 @@
 (require 'mb-paragraph)
 (require 'info)
 
+;; Eval stuff
+(define-key lisp-mode-shared-map "\C-ce" 'eval-buffer)
+(define-key lisp-mode-shared-map "\C-cr" 'eval-region)
+
+(define-key lisp-mode-shared-map "\C-c\C-c" 'comment-region)
+
 ;; Print expression
 (define-key global-map "\C-c\C-p" 'print)
 
