@@ -34,6 +34,23 @@
  (should (equal (last-elt '(a b c) 1) 'b))
  (should (equal (last-elt '(a b c)) 'c)))
 
+(ert-deftest test-nor ()
+  "Test of `nor'"
+  (should (nor))
+  (should (nor nil))
+  (should (nor nil nil nil))
+  (should-not (nor nil t))
+  (should-not (nor t (error "Not visible")))
+  (should-error (nor nil (error "Visible"))))
+
+(ert-deftest test-nand ()
+"Test of `nand'"
+  (should-not (nand)) ;; empty argument list -> no argument is nil!
+  (should (nand nil))
+  (should (nand t nil))
+  (should (nand t nil (error "Not visible")))
+  (should-error (nand t (error "Visible") t)))
+
 (ert-deftest test-push-back ()
   "Test of `push-' macros"
   (let ((list '(a)))
