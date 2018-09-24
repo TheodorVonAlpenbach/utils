@@ -114,7 +114,8 @@ If SHIFT is nil the notes will be shifted so that the first note has start-time 
   (let ((new-mvt (mvt-copy movement)))
     ;; remove repeats not strictly within [from-bar to-bar]
     (setf (mvt-repeats new-mvt)
-	  (remove* (list from-bar to-bar) (mvt-repeats new-mvt) :test #'i-within-strictly))
+	  (remove* (list from-bar to-bar) (mvt-repeats new-mvt)
+	    :test #'(lambda (x y) (i-within x y t))))
     (setf (first (mvt-voice-groups new-mvt))
 	  (vg-section (mvt-voice-group new-mvt)
 		      (mvt-bar-position new-mvt from-bar with-upbeat)

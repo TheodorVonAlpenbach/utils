@@ -186,7 +186,7 @@ This functionality is not well covered by octave-fill-paragraph"
 
 (defun octave-in-main-documentation-p ()
   "Returns non-nil iff POINT is in the function file comment region."
-  (i-contains (octave-function-file-comment) (point)))
+  (i-contain-p (octave-function-file-comment) (point)))
 
 (defun octave-comment-line-p ()
   "Return non-nil if point is in a commented line."
