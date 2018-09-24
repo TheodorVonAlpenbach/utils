@@ -93,7 +93,6 @@ TODO: better name?"
   "An extension of comint mode
 \\{scilab-comint-mode-map\\}")
 
-
 (defun scilab-comint-mode-set-filter-functions ()
   (setq-local comint-output-filter-functions
 	      '(scilab-output-garbage-filter
