@@ -384,7 +384,8 @@ See `cycle-badness' for the measure of a good cycle."
 ;(mapcar #'(lambda (n) (is-divisible n 5)) (loop for i below 11 collect i))
 
 (require 'mb-utils-10000-first-primes)
-(defun primep (n) (find n 10000-first-primes))
+(defun primep (n)
+  (not-null (find n 10000-first-primes)))
 ;;(remove-if nil (mapcar #'primep (1-n 20)))
 
 (cl-defun factorize (n &optional (primes 10000-first-primes))
