@@ -42,12 +42,12 @@ The current implementation always returns a flattened list."
 (cl-defun mb-grep-dirs-1 (up maxdepth dir)
   (let ((sd (subdirs (if (zerop up)
 		       dir
-		       (expand-file-name (concat* (make-list up "../")) dir))
+		       (expand-file-name (concat* (make-list up "..")) dir))
 		     maxdepth)))
-    (push-unique dir sd #'string=)))
-;;(mb-grep-dirs-1 0 1 "./")
+    (push-unique (expand-file-name dir) sd #'string=)))
+;;(mb-grep-dirs-1 1 1 ".")
 
-(cl-defun mb-grep-dirs (prefix &optional (dir "./"))
+(cl-defun mb-grep-dirs (prefix &optional (dir "."))
   "Return a list of directories according to prefix.
 If prefix is nil or zero, it returns all the subdirectories,
 recursively, in the current directory. If PREFIX is less than 10,
@@ -113,6 +113,7 @@ nil      ./ and all its subdirectories
   (interactive)
   (case major-mode
     (emacs-lisp-mode (mb-elisp-grep))
+    (mbscilab-mode (mb-scilab-grep))
     (t (mb-gen-grep))))
 
 (cl-defun mb-gen-grep ()
@@ -121,7 +122,13 @@ nil      ./ and all its subdirectories
 
 (cl-defun mb-elisp-grep ()
   "Convenient grep for Emacs lisp mode."
-  (mb-grep-basic :directories (mb-grep-dirs (if current-prefix-arg 0 1))))
+  (mb-grep-basic :directories (mb-grep-dirs (if current-prefix-arg 0 1))
+		 :types "el"))
+
+(cl-defun mb-scilab-grep ()
+  "Convenient grep for mbscilab mode."
+  (mb-grep-basic :directories (mb-grep-dirs (if current-prefix-arg 0 1))
+		 :types '("*sci" "*sce")))
 
 (cl-defun mb-c++-grep ()
   "Convenient grep according to file type."
