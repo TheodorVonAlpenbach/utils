@@ -86,6 +86,15 @@ Keywords supported:  :key :count :from-end
   (copy-if (bind test x 1) cl-seq :key key :count count :from-end from-end))
 ;;(copy 3 '(1 2 3 4) :key #'1+ :test #'<)
 
+(defun select (sequence predicates &key key)
+  "Return a list of sequences, matching PREDICATES on SEQUENCE.
+The Nth sequence in the result are the elements in SEQUENCE that
+satisfy then Nth predicate in PREDICATES. A last element in the
+result is a sequence with elements that do not match any of
+PREDICATES."
+  (loop for p in (push-back (apply #'not-disjoin predicates) predicates)
+	collect (copy-if p sequence :key key)))
+
 (defun split-at-position (sequence &rest positions)
   "Split SEQUENCE at POSITIONS and return the resulting subsequences as a list."
   (loop for position in (nreverse (cons (length sequence) (nreverse positions)))
