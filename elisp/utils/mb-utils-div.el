@@ -79,8 +79,14 @@ If no arguments is given, t is returned."
 
 (defun nequal (x y) (not (equal x y)))
 
-(defmacro nand (&rest conditions) "Nand." `(not (and ,@conditions)))
-(defmacro nor (&rest conditions) "Nor." `(not (or ,@conditions)))
+(defmacro nand (&rest conditions)
+  "Return nil if at least one of CONDITIONS is nil, otherwise return t."
+  `(not (and ,@conditions)))
+(def-edebug-spec nor t)
+
+(defmacro nor (&rest conditions)
+  "Return t if all CONDITIONS is nil, otherwise return nil."
+  `(and ,@(mapcar #'(lambda (x) `(not ,x)) conditions)))
 (def-edebug-spec nor t)
 
 (defun xor (&rest conditions)
@@ -110,7 +116,7 @@ If reverse i non nil, it returns the first popped element"
 ;;(setq qwe '(a))
 ;;(push-list '(1 234 4) qwe)
 
-(defmacro push-back (x place)
+ (defmacro push-back (x place)
   `(setf ,place (nconc ,place (list ,x))))
 ;;(setf qwe '(a))
 ;;(push-back 1 qwe)
@@ -228,15 +234,39 @@ TODO: implement this. Probably involves some macro magic"
   "Return a function that applies functions FNS from right to left."
   (lexical-let ((fns fns))
     (if fns
-	(lexical-let ((fn1 (car (last fns)))
-		      (fns (butlast fns)))
-	  (function (lambda (&rest args)
-		      (reduce #'funcall fns 
-			      :from-end t
-			      :initial-value (apply fn1 args)))))
+      (lexical-let ((fn1 (car (last fns)))
+		    (fns (butlast fns)))
+	(function (lambda (&rest args)
+	  (reduce #'funcall fns 
+		  :from-end t
+		  :initial-value (apply fn1 args)))))
       (function identity))))
 ;;(funcall (compose #'sq #'1+) 1)
 ;;(funcall (compose #'1+ #'sq) 1)
+
+(defun disjoin (&rest predicates)
+  "Return a function that returns t if any of PREDICATES return not nil."
+  (lexical-let ((preds predicates))
+    (function (lambda (&rest args)
+	       (loop for p in preds thereis (apply p args))))))
+;;(mapcar (disjoin #'oddp #'primep) (0-n 10))
+
+(defun not-disjoin (&rest predicates)
+  "Return a function that returns t if all PREDICATES return nil."
+  (complement (apply #'disjoin predicates)))
+;;(mapcar (not-disjoin #'evenp #'primep) (0-n 12))
+
+(defun conjoin (&rest predicates)
+  "Return a function that returns nil if any of PREDICATES return nil."
+  (lexical-let ((preds predicates))
+    (function (lambda (&rest args)
+	       (loop for p in preds always (apply p args))))))
+;;(mapcar (conjoin #'evenp #'primep) (0-n 10))
+
+(defun not-conjoin (&rest predicates)
+  "Return a function that returns nil if all PREDICATES return not nil."
+  (complement (apply #'conjoin predicates)))
+;;(mapcar (not-conjoin #'evenp #'primep) (0-n 10))
 
 (cl-defun arg-map (function &rest args)
   (funcall #'mapcar function args))
