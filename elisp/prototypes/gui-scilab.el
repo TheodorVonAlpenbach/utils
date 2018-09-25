@@ -19,7 +19,7 @@
 				      (prefix "pos"))
   "Format the rectangle envelopes in GUI as Scilab assignments.
 Also add a similar statement for the GUI's envelope. For
-instance, a GUI containing only a rectangle with a name "Qwe",
+instance, a GUI containing only a rectangle with a name \"Qwe\",
 and with a calculated envelope ((0 1) (2 3)) is converted to the
 statements
 
