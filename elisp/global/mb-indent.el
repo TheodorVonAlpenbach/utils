@@ -107,7 +107,7 @@ SYMBOL can be a symbol or a list of symbols. See function
 	     read-csv string-replace-intv remove*
 	     put-text-property do-tuples/o draw
 	     substitute-if xml-extract-nodes
-	     write-csv)
+	     write-csv call-if)
   'prog2)
 
 (cl-indent '(for define-derived-mode defun-ajax)
