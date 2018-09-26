@@ -107,7 +107,8 @@ STATE can take the same values as in `evil-define-key'."
 
 (define-key evil-normal-state-map  [?g ? ] 'just-one-space)
 (define-key evil-normal-state-map  [?g return] 'delete-blank-lines)
-(define-key evil-normal-state-map "gp" 'TeX-next-error)
+(define-key evil-normal-state-map "gp" 'next-error)
+(define-key evil-normal-state-map "gP" 'previous-error)
 
 (evil-define-motion evil-goto-line-keep-column (count)
   "Go to the first non-blank character of line COUNT.
