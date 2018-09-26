@@ -167,16 +167,18 @@ has length shorter than N, this last element is discarded."
 	while pos collect pos))
 ;;(positions-if #'oddp (vector 0 1 2 3 4 5) :start 2)
 
-(defun cut-if (predicate sequence inclusion &rest args)
-  "INCLUSION not supported yet."
+(defun cut-list-if (predicate list inclusion &rest args)
+  "Cut LIST in sublists where PREDICATE is true.
+If INCLUSION is not nil, then the element in LIST matching
+PREDICATE is included in the result."
   (loop for start = 0 then end
-	for end in (apply #'positions-if predicate sequence args)
-	if (subseq sequence start end) collect it into res
+	for end in (apply #'positions-if predicate list args)
+	if (subseq list start end) collect it into res
 	finally (return (if inclusion
-			  (append res (list (subseq sequence (or end 0))))
+			  (append res (list (subseq list (or end 0))))
 			  (mapcar #'(lambda (x) (subseq x 1))
-				  (append res (list (subseq sequence (or end 0)))))))))
-;;(cut-if #'oddp (0-n 10) t)
+			    (append res (list (subseq list (or end 0)))))))))
+;;(cut-if #'primep (0-n 10) t)
 
 
 (defun relations (list &optional with-identity ordered)
@@ -372,13 +374,13 @@ If N is nil the list is not split, so the function returns a list of only LIST"
 ;;(setq qwe '(a b c d e))
 ;;(list-split qwe 0)
 
-(defun list-split-if (list predicate &rest args)
+(defun list-split-if (predicate list &rest args)
   "Splits LIST into two at the positions where unary PREDICATE is true
 Currently support one split only"
   (aif (apply #'cl-position-if predicate list args)
     (list-split list it)
     (list list)))
-;;(list-split-if '(1 2 3 4 5) #'oddp)
+;;(list-split-if #'oddp '(1 2 3 4 5))
 
 (defun nsplit-nth (n list)
   "Returns Nth element in LIST and the remainder of LIST. Destructive.
