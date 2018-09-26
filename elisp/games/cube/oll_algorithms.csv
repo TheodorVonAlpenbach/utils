@@ -15,7 +15,7 @@ Streetlights; 456 lrlr; r U r' (U R U' R')2 r U' r'; G; Anti-Frying Pan; ok
 Bottlecap; 456 rrll; F (U R U' R')2 F'; G; Breakneck; ok
 Rice Cooker; 258 rrll; (R' U' R U' R') d (R' U R) B; G; Rice Cooker (y)
 Breakneck; 458 llrr; F (R U R' U') (R U R' U') F'; F' (L' U' L U) (L' U' L U) F'; Bottlecap
-Frying Pan; 458 lrlr; G; (r U r') (R U R' U')2 (r U' r'); Anti-Streetlights
+Frying Pan; 458 lrlr y; G; (r U r') (R U R' U')2 (r U' r'); Anti-Streetlights
 Right back squeezy; 245 rrll; (l U') (l2' U l2 U l2') (U' l); G; Anti-Right back squeezy
 
 # two edges -- one corner
