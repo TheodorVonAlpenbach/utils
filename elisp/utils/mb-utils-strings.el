@@ -318,64 +318,45 @@ result of FUNCTION."
 :;(string-replace-map "Àøå"
 :;  (mapcar #'(lambda (x) (cons (first x) (third x))) *iso-latin1-encoding*))
 
-(defun infix-list (lst infix &optional is-function discard-empty-string) "'(a b c) => '(a INFIX b INFIX c)"
-  "INFIX may be a function (FN I), where argument I is the nth time FN will be called by INFIX-LIST"
-  (if lst
-    (let ((rlst (cons (first lst) nil)))
-      (dolist (i (rest lst) rlst)
-	(setf rlst (append rlst (list (if is-function
-					(funcall infix i)
-					infix) 
-				      i)))))))
-
-(defun infix-list (list infix &optional is-function) 
-  "'(a b c) => '(a INFIX b INFIX c)"
-  "INFIX may be a function (FN I), where argument I is the nth
-time FN will be called by INFIX-LIST"
-  (if list
-    (cons (first list)
-	  (loop for x in (rest list)
-		for i from 0
-		collect (if is-function 
-			  (funcall infix i) infix)
-		collect x))))
-;(infix-list '(a b c) #'1+ t)
-
 (defun string-indent-lines (string indent-string)
-  (apply #'concat
-	 (cons indent-string 
-	       (infix-list (string-to-lines string)
-			   (concat "\n" indent-string)))))
-;;(string-indent-lines "a\nb" "  ")
+  "Prepend all lines in STRING with INDENT-STRING."
+  (if (empty-string-p indent-string)
+    string
+    (apply #'concat
+     (cons indent-string 
+	   (infix-list (string-to-lines string)
+		       (concat "\n" indent-string))))))
+;;(string-indent-lines "a\nb\nc" "<<")
 
 
 (cl-defun concat* (list &key (pre "") (in "") (infun nil) (suf "")
-			(test (constantly t))
-			(key #'identity)
-			(indent-string "") discard-nil)
+			  (test (constantly t))
+			  (key #'identity)
+			  (indent-string "")
+			  discard-nil
+			  discard-empty)
   "Concat strings in LIST adding prefix, suffix, and regular infixes.
-If not an element satisfies TEST then it is not inserted. Before
+If an element does not satisfy TEST then it is not inserted. Before
 insertion, KEY modifies the elements. Note that KEY manipulation does
 not affect TEST.
 IN may also be a function (fn i), taking an index argument, see `infix-list'."
-  (let* ((list* (remove-if-not test (if discard-nil (remove nil list) list)))
-	 (list** (infix-list (mapcar key list*) (or infun in) infun))
-	 (res (concat pre (apply #'concat list**) suf)))
-    (if (empty-string-p indent-string)
-      res
-      (string-indent-lines res indent-string))))
-;(concat* '("1" "2" "3") :in "\n" :indent-string ">>")
-;(concat* '("a" "b" "c") :pre "(" :in " " :suf ")" :test #'(lambda (x) (string= x "a")) :key #'length)
-;(concat* '(1 2 nil 3) :test #'oddp :key #'int-to-string :discard-nil t)
-;(concat* '((1 (2)) (1 (3))) :test #'second :key #'first)
-;(concat* '(("ee") ("d3" "d1") ("4d") ("ef") ("ag5")) :pre "\\([^" :suf "]" :key (lambda (x) (char-to-string (first x))))
-;(concat* '("1" "2" "3") :in "\n" :indent-string ">>")
-;;(concat* '("" "" "3") :in "\n" :indent-string ">>")
+  (let* ((list* (mapcar key
+		  (remove-if-not test
+		    (if discard-nil (remove nil list) list)))))
+    (string-indent-lines
+     (concat pre
+	     (apply #'concat
+	       (infix-list (if discard-empty
+			     (cl-remove "" list* :test #'string=) list*)
+			   (or infun in) infun))
+	     suf)
+     indent-string)))
 
 (cl-defun andcat (list &optional
 		       (delimiter ", ")
 		       (pair-delimiter " and ")
-		       (last-delimiter (concat (string-trim delimiter) pair-delimiter)))
+		       (last-delimiter (concat (string-trim delimiter)
+					       pair-delimiter)))
   "Concatenate string list with commas and a final ', and '.
 You may change the delimiters with the optional
 arguments DELIMITER, LAST-DELIMITER, and PAIR-DELIMITER.

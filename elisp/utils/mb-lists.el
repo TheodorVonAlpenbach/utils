@@ -95,7 +95,7 @@ Note that group to not consider LIST as a set. To do this, LIST must be sorted f
   (apply #'nconc (transpose lists)))
 (defun zip (&rest lists) 
   (apply #'nzip (copy-tree lists)))
-;;(zip '(0 2 4) '(1 3))
+;;(butlast (zip '(0 2 4) '(1 3 3)))
 
 (cl-defun nunzip (list &optional (n 2))
   "Destructive version of `ZIP'
@@ -112,6 +112,26 @@ TODO: something is wrong, see test below."
 
 (cl-defun unzip (list &optional (n 2)) (nunzip (copy-list list) n))
 ;;(unzip (0-n 10) 3)
+
+(defun infix-list (list infix &optional infix-is-function-p) 
+  "Zip list with INFIX-es.
+'(a b c) => '(a INFIX b INFIX c).
+
+INFIX may be a function with signature (I &optional N), where
+argument I is the nth time FN will be called by INFIX-LIST, and N
+is the total number of calls. If you want the function to
+actually call INFIX you must set the optional argument
+INFIX-IS-FUNCTION-P to NON-NIL. Otherwise the function will treat
+INFIX as a constant sexp."
+  (when list
+    (let ((n (length list)))
+      (butlast (zip list (if infix-is-function-p
+			   (mapcar (if (= 1 (cdr (function-arity infix)))
+				     infix
+				     (bind infix n))
+			     (0-n n))
+			   (make-list n infix)))))))
+;(infix-list '(a b c) #'1+ t)
 
 (cl-defun nflank (a list &optional (b a))
   "Inserts A before and B after LIST. Destructive."

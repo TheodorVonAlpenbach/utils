@@ -29,6 +29,39 @@
 "Test of `string-match*'"
  (should (equal (string-match* "\\(e\\)" "sdkjhalkqweee " :num '(0 1 10)) '("e" "e" nil))))
 
+(ert-deftest test-concat* ()
+  "Test of `concat*'"
+  (should (equal (concat* '("1" "" "3")
+		   :in "\n"
+		   :indent-string ">>"
+		   :discard-empty t)
+		 ">>1\n>>3"))
+  (should (equal (concat* '("1" "2" "3") :in "\n" :indent-string ">>")
+		 ">>1\n>>2\n>>3"))
+  (should (equal (concat* '("a" "b" "c")
+		   :pre "(" :in " " :suf ")"
+		   :test #'(lambda (x) (string= x "a"))
+		   :key (compose #'number-to-string #'length))
+		 "(1)"))
+  (should (equal (concat* '(1 2 nil 3)
+		   :test #'oddp
+		   :key #'number-to-string
+		   :discard-nil t)
+		 "13"))
+  (should (equal (concat* '(("two" (2)) ("three" (3)) ("four" (4)))
+		   :test (compose #'primep #'caadr)
+		   :key #'first
+		   :in " and ")
+		 "two and three"))
+  (should (equal (concat* '(("a") ("z" "ignored"))
+		   :pre "\\([^" :in "-" :suf "]\\)"
+		   :key #'car)
+		 "\\([^a-z]\\)"))
+  (should (equal (concat* '(Peter Paul Mary)
+		   :infun #'(lambda (i n) (if (= i (- n 2)) ", and " ", "))
+		   :key #'sstring)
+		 "Peter, Paul, and Mary")))
+
 (ert-deftest test-andcat ()
   "Test of `andcat'"
   (should (equal (andcat '()) ""))
