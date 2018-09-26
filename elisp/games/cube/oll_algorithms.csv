@@ -1,0 +1,66 @@
+# -*- eval: (auto-fill-mode -1) -*-
+
+# no edges
+Blank; 5 lrlr; (R U2) (R2' F R F') U2' (R' F R F'); NA; Zamboni
+Zamboni; 5 llrr; F (R U R' U') F' f (R U R' U') f'; G; Zamboni; ok
+Nazi; 59 rrr; f (R U R' U') B' R b (R U R' U') F'; G; Anti-Nazi; ok
+Diagonal; 357 lr; R U R' U (R' F R F') U2 (R' F R F'); G; Crown
+Crown; 359 rl; (r U R') (U R U'2 r2') (U' R U' R') U2 r; NA; Bunny; ok
+Bunny; 359 lr; (r' R U) (R U R' U') (r R2') (F R F'); NA; Diagonal; ok
+X; 13579 ;(r' R) U (R U R' U') r2 R2' (U R U' r'); G; X
+
+# two edges -- no corners
+Highway; 258 lrlr; R U'2 R2 U' R U' R' U'2 (F R F'); G; Breakneck
+Streetlights; 456 lrlr; r U r' (U R U' R')2 r U' r'; G; Anti-Frying Pan; ok
+Bottlecap; 456 rrll; F (U R U' R')2 F'; G; Breakneck; ok
+Rice Cooker; 258 rrll; (R' U' R U' R') d (R' U R) B; G; Rice Cooker (y)
+Breakneck; 458 llrr; F (R U R' U') (R U R' U') F'; F' (L' U' L U) (L' U' L U) F'; Bottlecap
+Frying Pan; 458 lrlr; G; (r U r') (R U R' U')2 (r U' r'); Anti-Streetlights
+Right back squeezy; 245 rrll; (l U') (l2' U l2 U l2') (U' l); G; Anti-Right back squeezy
+
+# two edges -- one corner
+Gun; 1456 lll; F (U R U' R'2) F' (R U R) U' R'; G; Kite (y')
+Squeegee; 4567 lll; l' U' l (L' U' L U) l' U l; G; Anti-Lightning; ok
+Wide Anti-Sune ("L"); 5689 rrr; (r U2 R' U') (R U r'); G; Reverse Wide Anti-Sune
+Reverse Wide Anti-Sune; 1458 lll; (r U R') (U R U2 r'); G; Wide Anti-Sune
+Downstairs; 2457 lll; F' (L' U' L U) F y F (R U R' U') F'; G; Anti-Spotted Chameleon
+Kite; 1568 rrr; (y') (R U R' U') R' F R2 U R' U' F'; G; Gun
+
+# two edges -- two corners
+Tying Shoelaces; 34569 rl; (R U R' U') (R' F R F'); (L' U' L U) (L F' L' F); Untying Shoelaces; ok
+T; 34569 rl; F (R U R' U') F'; F' (L' U' L U) F; P; ok
+City; 13456 lr; (R U R' U') B' (R' F R F') B; G; Untying Shoelaces; ok
+Seeing Headlights; 12578 rl; R' U' (R' F R F') U R; G; Anti-P; ok
+Fung; 14569 lr; L F' (L' U' L U) F U' L'; G; Anti-Couch; ok
+P; 14578 rl; F (U R U' R') F'; F' (U' L' U L) F; T; ok
+Couch; 35689 rl; R' U' F U R U' R' F' R; L U F' U' L' U L F L'; Anti-Fung
+Untying Shoelaces; 34578 rl; (F R' F' R) (U R U' R'); (F' L F L') (U' L' U L); Tying Shoelaces; ok
+Fish Salad; 23567 rl; R U'2 R2' (F R F') R U2 R'; G; Untying Shoelaces
+Spotted Chameleon; 24579 lr; M U (R U R' U') (R' F R F') M'; M U' (L' U' L U) (L F' L' F) M'; (y) Fung
+Awkward Fish; 25679 rl; R U' R' U2 R U y R U' R' y' U' R'; G; Anti-Couch
+Mario; 14589 rl; (R U R' U) (R U' R' U') (R' F R F'); G; Couch
+
+# two edges - four corners
+H; 1345679; (R U R' U') (r R') (U R U' r'); G; Stealth; ok
+Stealth; 1345789 ; (r U R' U') (R r') (U R U' R'); G; H; ok
+
+# four edges
+Anti-Sune; 245689 rrr; (R U2 R' U') (R U' R'); G; Sune; ok
+Double Anti-Sune; 24568 lrlr; (R U2 R' U') (R U R' U') (R U' R'); G; Anti-Sune; ok
+Triple Anti-Sune; 2345678 lr; (R U2 R' U') (R U R' U')2 (R U' R'); G; Double Anti-Sune; ok
+Bruno; 24568 llrr; (R U'2) (R2 U' R'2 U' R2') (U'2 R); G; Bruno; ok
+Headlights; 1234568 rl; R2' D' R U2 R' D R U2 R; NA; Triple Anti-Sune; ok
+Chameleon; 2345689 rl; (r U R' U') (r' F R F'); G; Triple Anti-Sune; ok
+
+# Sune
+# R U R' U R U2 R' = y (L' U2 L U) (L' U L)
+# 
+# Wide Sune
+# r U R' U R U2 r' =? y (l' U2 L U) (L' U l)
+# 
+# Wide Anti-Sune
+# r U R' U R U2 r' =? y (r U2 R' U') (R U' r')
+#
+# Right Front Wide Anti-Sune, same as Wide Anti-Sune???
+# The =? are probably not equality
+# (r U2 R' U') R U' r'
