@@ -200,7 +200,6 @@ PREDICATE is included in the result."
 			    (append res (list (subseq list (or end 0)))))))))
 ;;(cut-if #'primep (0-n 10) t)
 
-
 (defun relations (list &optional with-identity ordered)
   "Returns a list containing all possible binary relations of the
 elements in LIST = (a b c ...). Iff WITH-IDENTITY is non-nil the
@@ -333,7 +332,7 @@ matches PREDICATE"
     `(let ((,glist ,list))
        (rotatef ,@(mapcar #'(lambda (x) `(nth ,x ,glist)) positions))
        ,glist)))
-;;(mrotate-list '(a b c) 0 1 2)
+;;(mrotate-list '(a b c d) 0 2 3)
 
 (cl-defun nrotate-list (list &optional (n 1))
   (when list
@@ -347,13 +346,6 @@ matches PREDICATE"
 (cl-defun rotate-list (list &optional (n 1))
   "Returns a list that is LIST rotated N times."
   (nrotate-list (copy-list list) n))
-
-(defun list-insert (x n list)
-  "Inserts element X at position N in LIST"
-  (if (zerop n)
-    (push x list)
-    (push x (nthcdr n list)))
-  list)
 
 (defmacro list-insert (x n list)
   "Inserts element X at position N in LIST. Returns the tail of
