@@ -100,7 +100,7 @@ SYMBOL can be a symbol or a list of symbols. See function
 	     csv-string write-csv
 	     gui-position-objects-horizontally
 	     gui-position-objects-vertically
-	     ld-update)
+	     ld-update list-split-if)
   'prog1)
 
 (cl-indent '(do-lines defmethod with-infile defclass with-outfile
