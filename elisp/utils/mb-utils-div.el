@@ -703,4 +703,11 @@ also is a cons, will be encapsulated in a list."
 (cl-indent 'numcond 'case)
 ;;(numcond (4 3) (= 'eq) (< 'lt) (> 'geq))
 
+(defun call-if (predicate function expression)
+  "Return (FUNCTION EXPRESSION) if predicate is not nil.
+Otherwise return expression"
+  (if predicate
+    (funcall function expression)
+    expression))
+
 (provide 'mb-utils-div)
