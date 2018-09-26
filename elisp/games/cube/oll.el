@@ -43,48 +43,61 @@
 (defconst +oll-tex-direction+ '(6 7 8  3 4 5  0 1 2)
   "The order the upper faces are listed in the TeX module rubik.")
 
-(defun oll-expand-corners (uf roc)
+(defun oll-rotation-number (rotation)
+  (position rotation '(nil y y2 yw)))
+
+(defun oll-expand-corners (uf roc rotation)
   "Return OC"
   (assert (= (length (cl-set-difference '(1 3 9 7) uf))
 	     (length roc))
 	  nil "Malformed oll. UF: %S, ROC: %S" uf roc)
-  (loop for x in '(1 3 9 7)
-	collect (if (member x uf) 'u (pop roc))))
-;;(oll-expand-corners '(3 4 5 6 9) '(r l))
+  (rotate-list (loop for x in '(1 3 9 7)
+		     collect (if (member x uf) 'u (pop roc)))
+	       (oll-rotation-number rotation)))
+;;(oll-expand-corners '(3 4 5 6 9) '(r l) 'y2)
 ;;(oll-expand-corners '(1 4 5 6) '(l l l))
 
 (defun oll-uf-p (i uf)
   "Return not nil if upper face I is yellow given UF."
-  (member i uf))
+  (not-null (member i uf)))
 
-(defun oll-ufs (uf)
+(defun oll-ufs-rotate (rotation)
+  (let ((n (oll-rotation-number rotation)))
+    (call-if (> n 1) #'nreverse
+      (if (evenp (oll-rotation-number rotation))
+	(a-b 1 9)
+	'(3 6 9 2 5 8 1 4 7)))))
+;;(oll-ufs-rotate 'yw)
+
+(defun oll-ufs (uf rotation)
   "Map each upper face to nil if it is not yellow. Otherwise map it to not nil."
-  (loop for i from 1 to 9 collect (oll-uf-p i uf)))
-;;(oll-ufs '(2 3 5 6 7))
+  (loop for i in (oll-ufs-rotate rotation) collect (oll-uf-p i uf)))
+;;(oll-ufs '(2 3 5 6 7) nil)
 
-(defun mapnil (list value &optional true-value)
+(defun mapnil (list value true-value)
   (loop for x in list collect (if x (or true-value x) value)))
 ;;(mapnil '(nil 1 nil 2) 'x 'y)
 
-(defun oll-uf-xy-tex (uf)
+(defun oll-uf-xy-tex (uf rotation)
   "Convert UF to X's and Y's in the TeX direction"
-  (mapnil (project (oll-ufs uf) +oll-tex-direction+) 'X 'Y))
-;;(oll-uf-xy-tex '(2 3 5 6 7))
+  (mapnil (project (oll-ufs uf rotation) +oll-tex-direction+) 'X 'Y))
+;;(oll-uf-xy-tex '(2 3 5 6 7) 'y)
 
-(defun oll-swap-xy (color) (if (eql color 'X) 'Y 'X))
+(defun oll-swap-xy (color)
+  (if (eql color 'X) 'Y 'X))
 
 (defun oll-side (lc mid rc)
   (list (if (eql lc 'r) 'Y 'X) (if mid 'X 'Y) (if (eql rc 'l) 'Y 'X)))
 ;;(oll-side 'l nil 'l)
 
-(defun oll-sides (uf roc)
-  (let ((oc (oll-expand-corners uf roc))
-	(xy (oll-ufs uf)))
+(defun oll-sides (uf roc rotation)
+  (let ((oc (oll-expand-corners uf roc rotation))
+	(xy (oll-ufs uf rotation)))
     (list (oll-side (nth 0 oc) (nth 1 xy) (nth 1 oc))
 	  (reverse (oll-side (nth 1 oc) (nth 5 xy) (nth 2 oc)))
 	  (reverse (oll-side (nth 2 oc) (nth 7 xy) (nth 3 oc)))
 	  (oll-side (nth 3 oc) (nth 3 xy) (nth 0 oc)))))
-;;(oll-sides '(1 3 5 7 9) nil)
+;;(oll-sides '(2 3 4 5 6 7 8) '(l r) 'y)
 
 ;;;; TeX output
 (defun oll{} (color)
@@ -92,33 +105,35 @@
   (format "{%S}" color))
 ;;(oll{} 'X)
 
-(defun oll-face-tex (uf)
-  (concat* (oll-uf-xy-tex uf) :pre "  \\DrawRubikLayerFace" :key #'oll{}))
-;;(oll-face-tex '(2 3 5 6 7))
+(defun oll-face-tex (uf rotation)
+  (concat* (oll-uf-xy-tex uf rotation) :pre "  \\DrawRubikLayerFace" :key #'oll{}))
+;;(oll-face-tex '(2 3 5 6 7) 'y)
 
 (defun oll-side-tex (side sf)
   (concat* sf :pre (format "\\DrawRubikLayerSide%S" side) :key #'oll{}))
 ;;(oll-side-tex 'B '(X Y Y))
 
-(defun oll-sides-tex (uf roc)
+(defun oll-sides-tex (uf roc rotation)
   (concat* (loop for side in '(B R T L)
-		 for sf in (oll-sides uf roc)
+		 for sf in (oll-sides uf roc rotation)
 		 collect (oll-side-tex side sf))
     :pre "  " :in "\n  "))
-;;(oll-sides-tex '(1 4 5 6) '(l l))
+;;(oll-sides-tex '(5) '(l r l r) 'yw)
 
 (defun oll-parse (oll)
   (let ((soll (split-string oll nil t)))
     (list (mapcar #'string-to-integer (split-string (first soll) "" t))
-	  (when (rest soll)
-	    (mapcar #'ssymbol (split-string (second soll) "" t))))))
-;;(oll-parse "13579")
+	  (when (second soll)
+	    (mapcar #'ssymbol (split-string (second soll) "" t)))
+	  (when (third soll)
+	    (intern (third soll))))))
+;;(oll-parse "13579  ")
 
 (cl-defun oll-tex (oll &optional (cm 1) (ratio 0.3))
-  (destructuring-bind (uf roc) (oll-parse oll)
+  (destructuring-bind (uf roc rotation) (oll-parse oll)
     (format "\\ShowCube{%gcm}{%g}{\n%s\n%s\n}"
-      cm ratio (oll-face-tex uf) (oll-sides-tex uf roc))))
-;;(oll-tex "1456 ll")
+      cm ratio (oll-face-tex uf rotation) (oll-sides-tex uf roc rotation))))
+;;(oll-tex "5 lrlr")
 
 (defun oll-table-row (x rows)
   (destructuring-bind (name oll alg anti rev) x
@@ -161,7 +176,7 @@
 (defconst +oll-template-source+ (expand-file-name "output-template.tex" +oll-home+))
 
 (cl-defun parse-oll-csv (&optional (filename +oll-source+))
-  (loop for x in (cut-if #'empty-string-p
+  (loop for x in (cut-list-if #'empty-string-p
 			 (remove-if (bind #'string-match "^#" 1)
 			   (file-lines filename))
 			 t)
@@ -187,6 +202,6 @@
 		    (oll-doc source)
 		    (file-name-nondirectory filename))
 		  filename))
-;;(oll-export (expand-file-name "output/oll-algorithms2.tex" +oll-home+))
+;;(oll-export (expand-file-name "output/oll-algorithms.tex" +oll-home+))
 
 (provide 'oll)
