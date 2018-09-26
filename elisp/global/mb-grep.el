@@ -42,10 +42,11 @@ The current implementation always returns a flattened list."
 (cl-defun mb-grep-dirs-1 (up maxdepth dir)
   (let ((sd (subdirs (if (zerop up)
 		       dir
-		       (expand-file-name (concat* (make-list up "..")) dir))
+		       (expand-file-name
+			(concat* (make-list up (file-name-as-directory ".."))) dir))
 		     maxdepth)))
     (push-unique (expand-file-name dir) sd #'string=)))
-;;(mb-grep-dirs-1 1 1 ".")
+;;(mb-grep-dirs-1 2 nil ".")
 
 (cl-defun mb-grep-dirs (prefix &optional (dir "."))
   "Return a list of directories according to prefix.
@@ -122,7 +123,7 @@ nil      ./ and all its subdirectories
 
 (cl-defun mb-elisp-grep ()
   "Convenient grep for Emacs lisp mode."
-  (mb-grep-basic :directories (mb-grep-dirs (if current-prefix-arg 0 1))
+  (mb-grep-basic :directories (mb-grep-dirs (or current-prefix-arg 0 1))
 		 :types "el"))
 
 (cl-defun mb-scilab-grep ()
