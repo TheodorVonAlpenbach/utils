@@ -23,8 +23,6 @@
   (should (equal (string-tail "line1\nline2\nline3\nline4" 2) "line3\nline4"))
   (should (equal (string-tail "line1\nline2\nline3\nline4" 0) "")))
 
-
-
 (ert-deftest test-string-match* ()
 "Test of `string-match*'"
  (should (equal (string-match* "\\(e\\)" "sdkjhalkqweee " :num '(0 1 10)) '("e" "e" nil))))
@@ -71,4 +69,3 @@
   (should (equal (andcat '("Peter" "Paul" "Mary") "; ") "Peter; Paul; and Mary"))
   (should (equal (andcat '("Peter" "Paulus" "Maria") ", " " und " " und ")
 	   "Peter, Paulus und Maria")))
-

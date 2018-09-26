@@ -38,6 +38,14 @@
   (should (equal (tree-member 'b '(a (b (c)) (b (d))) :from-end nil) '(b (c))))
   (should (equal (tree-member 'b '(a (b (c)) (b (d))) :from-end t) '(b (d)))))
 
+(ert-deftest test-infix-list ()
+  "Test of `infix-list'"
+  (should (equal (infix-list '(a b c) #'1+ t)
+		 '(a 1 b 2 c)))
+  (should (equal (infix-list '(a b c)
+			     #'(lambda (i n) (if (= i (- n 2)) 'and '\,)) t)
+		 '(a \, b and c))))
+
 (ert-deftest test-memcase ()
   "Test of `memcase'"
   (should (equal (memcase '(a b c) (a 'A) (otherwise 'B)) 'A))
