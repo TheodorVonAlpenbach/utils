@@ -14,5 +14,13 @@
   (should (oll-uf-p 2 '(1 2 3)))
   (should-not (oll-uf-p 4 '(1 2 3))))
 
+(ert-deftest test-oll-ufs ()
+  "Test of `oll-ufs'"
+  (should (equal (oll-ufs '(2 3 5 6 7)) '(nil t t nil t t t nil nil)))
+  (should (equal (oll-ufs '(2 3 5 6 7) 1) '(nil t t nil t t t nil nil))))
+
+(ert-deftest test-oll-rotation-number ()
+  "Test of `oll-rotation-number'"
+ (should (equal (mapcar #'oll-rotation-number '(nil y y2 yw)) '(0 1 2 3))))
 
 (provide 'test-oll.el)
