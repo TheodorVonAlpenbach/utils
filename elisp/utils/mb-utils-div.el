@@ -166,6 +166,7 @@ elements as a list maintaing the order."
 
 ;;; Function objects
 (defun always (&rest args) "Returns t, ALWAYS" t)
+(defun never (&rest args) "Returns nil, always" nil)
 
 (defun complement (function)
   "Returns a function that is the complement of FUNCTION"
@@ -248,7 +249,7 @@ TODO: implement this. Probably involves some macro magic"
   "Return a function that returns t if any of PREDICATES return not nil."
   (lexical-let ((preds predicates))
     (function (lambda (&rest args)
-	       (loop for p in preds thereis (apply p args))))))
+      (loop for p in preds thereis (apply p args))))))
 ;;(mapcar (disjoin #'oddp #'primep) (0-n 10))
 
 (defun not-disjoin (&rest predicates)
@@ -260,7 +261,7 @@ TODO: implement this. Probably involves some macro magic"
   "Return a function that returns nil if any of PREDICATES return nil."
   (lexical-let ((preds predicates))
     (function (lambda (&rest args)
-	       (loop for p in preds always (apply p args))))))
+      (loop for p in preds always (apply p args))))))
 ;;(mapcar (conjoin #'evenp #'primep) (0-n 10))
 
 (defun not-conjoin (&rest predicates)
