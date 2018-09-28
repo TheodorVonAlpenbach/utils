@@ -129,7 +129,7 @@ nil      ./ and all its subdirectories
 (cl-defun mb-scilab-grep ()
   "Convenient grep for mbscilab mode."
   (mb-grep-basic :directories (mb-grep-dirs (if current-prefix-arg 0 1))
-		 :types '("*sci" "*sce")))
+		 :types '("sci" "sce")))
 
 (cl-defun mb-c++-grep ()
   "Convenient grep according to file type."
