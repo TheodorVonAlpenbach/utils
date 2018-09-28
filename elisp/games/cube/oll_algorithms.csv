@@ -31,7 +31,7 @@ Tying Shoelaces; 34569 rl; (R U R' U') (R' F R F'); (L' U' L U) (L F' L' F); Unt
 T; 34569 rl; F (R U R' U') F'; F' (L' U' L U) F; P; ok
 City; 13456 lr; (R U R' U') B' (R' F R F') B; G; Untying Shoelaces; ok
 Seeing Headlights; 12578 rl; R' U' (R' F R F') U R; G; Anti-P; ok
-Fung; 14569 lr; L F' (L' U' L U) F U' L'; G; Anti-Couch; ok
+Fung; 14569 lr y2; L F' (L' U' L U) F U' L'; G; Anti-Couch; ok
 P; 14578 rl; F (U R U' R') F'; F' (U' L' U L) F; T; ok
 Couch; 35689 rl; R' U' F U R U' R' F' R; L U F' U' L' U L F L'; Anti-Fung
 Untying Shoelaces; 34578 rl; (F R' F' R) (U R U' R'); (F' L F L') (U' L' U L); Tying Shoelaces; ok
