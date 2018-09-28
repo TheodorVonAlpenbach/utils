@@ -221,7 +221,7 @@ that there is no space between identifiers and delimiters"
 
 (cl-defun last-sexp-region (&optional (n 1))
   (case major-mode
-    (js-mode (c-last-sexp-region))
+    ((js-mode mbscilab-mode) (c-last-sexp-region))
     (otherwise (save-excursion (list (bos n) (eos n))))))
 
 ;;; Region stuff
