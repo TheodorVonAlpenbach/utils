@@ -151,7 +151,7 @@
 (defun oll-rows (lines &optional with-ok-p)
   (loop for l in lines
 	for r = (split-string l ";" nil " ")
-	if (or with-ok-p (= (length r) 5)) collect r))
+	if (or with-ok-p (= (length r) 5)) collect (subseq r 0 5)))
 ;;(oll-rows (first (parse-oll-csv)))
 
 (cl-defun oll-table (lines &optional with-ok-p with-heading-p)
@@ -184,10 +184,10 @@
 ;;(mapcar #'length (parse-oll-csv "oll_algorithms.csv"))
 ;;(last-elt (parse-oll-csv "oll_algorithms.csv"))
 
-(cl-defun oll-doc (&optional (filename +oll-source+))
+(cl-defun oll-doc (&optional (filename +oll-source+) with-ok-p)
   (concat* (parse-oll-csv filename)
     :pre "\\begin{document}\n"
-    :key #'oll-table
+    :key (bind #'oll-table with-ok-p)
     :in "\n\n\\vspace{0.5 cm} \\noindent\\rule{\\textwidth}{1pt} \\vspace{0.5 cm}\n\n"
     :suf "\n\\end{document}\n"
     :discard-empty t))
@@ -195,13 +195,14 @@
 
 (cl-defun oll-export (filename
 		      &optional
+			with-ok-p
 			(source +oll-source+)
 			(template (file-string +oll-template-source+)))
   (string-to-file (format template
 		    (iso-date)
-		    (oll-doc source)
+		    (oll-doc source with-ok-p)
 		    (file-name-nondirectory filename))
 		  filename))
-;;(oll-export (expand-file-name "output/oll-algorithms.tex" +oll-home+))
+;;(oll-export (expand-file-name "output/oll-algorithms.tex" +oll-home+) t)
 
 (provide 'oll)
