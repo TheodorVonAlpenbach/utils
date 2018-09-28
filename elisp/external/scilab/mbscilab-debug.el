@@ -283,7 +283,8 @@ The line numbers are local to the current function."
 (defun scilab-parse-answer (string)
   "Returns the current stack at debug stop point"
   (lexical-let ((re "[A-Za-z0-9]+  ="))
-    (let ((groups (rest (cut-if #'(lambda (x) (string-match* re x)) (string-to-lines string) t))))
+    (let ((groups (rest (cut-list-if #'(lambda (x) (string-match* re x))
+			  (string-to-lines string) t))))
       (mapcar #'scilab-parse-answer-group groups))))
 ;;(transpose (mapcar #'second (scilab-parse-answer qwe)))
 
