@@ -199,6 +199,7 @@ PREDICATE is included in the result."
 			  (mapcar #'(lambda (x) (subseq x 1))
 			    (append res (list (subseq list (or end 0)))))))))
 ;;(cut-if #'primep (0-n 10) t)
+(cl-indent 'cut-list-if 'prog1)
 
 (defun relations (list &optional with-identity ordered)
   "Returns a list containing all possible binary relations of the
