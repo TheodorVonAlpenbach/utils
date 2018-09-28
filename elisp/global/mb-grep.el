@@ -1,24 +1,43 @@
 (require 'c++-include)
 
+(defun mb-grep-filter-dirs (dirs match match-not)
+  (let ((case-fold-search nil))
+    (cl-remove-if (disjoin (if match
+			     (complement (bind #'string-match match 1))
+			     #'never)
+			   (if match-not
+			     (bind #'string-match match-not 1)
+			     #'never))
+     dirs)))
+;;(mb-grep-filter-dirs '("abc" "bcd") "b" (regexp-or "i" "d"))
+
 (cl-defun mb-grep-basic (&key (target (if (use-region-p)
 					(buffer-substring-no-properties
 					 (region-beginning) (region-end))
 					(thing-at-point 'symbol)))
-			      (directories
-			       (list (file-name-directory (buffer-file-name))))
-			      (types
-			       (list
-				(or (file-name-extension (buffer-file-name))
-				    (file-name-nondirectory (buffer-file-name))))))
+			   (directories
+			    (list (file-name-directory (buffer-file-name))))
+			   (types
+			    (list
+			     (or (file-name-extension (buffer-file-name))
+				 (file-name-nondirectory (buffer-file-name)))))
+			   (match nil)
+			   (match-not nil))
   "Convenient grep according to file type."
-  (when (stringp target)
-    (let ((globs (loop for x in (listify types) collect
-		       (format "/%s%s" (if (eql (char x 0) ?.) "" "*") x))))
-      (compilation-start
-       (format "grep -nHs -E '%s' %s"
-	 (substring-no-properties target)
-	 (concat* (combine (list directories globs) :key #'concat) :in " "))
-       'grep-mode nil t))))
+  (save-excursion
+    (when (stringp target)
+      (let ((globs (loop for x in (listify types) collect
+			 (format "/%s%s" (if (eql (char x 0) ?.) "" "*") x))))
+	(compilation-start
+	 (format "grep -nHs -E '%s' %s"
+	   (substring-no-properties target)
+	   (concat* (mapcar #'file-relative-name
+		      (mb-grep-filter-dirs
+		       (combine (list directories globs)
+				:key #'concat)
+		       match match-not))
+	     :in " "))
+	 'grep-mode nil t)))))
 ;;(mb-grep-basic :target "mb-grep-basic" :types '("el"))
 
 (cl-defun subdirs (rootdir &optional (depth t) flatten-p)
@@ -100,7 +119,7 @@ nil      ./ and all its subdirectories
 	    (setf up prefix maxdepth nil)
 	    (multiple-value-setq (up maxdepth) (cl-floor prefix 10))))
 	(mb-grep-dirs-1 up maxdepth dir)))))
-;;(mb-grep-dirs -1 "/home/mbe/")
+;;(mb-grep-dirs 2 "~/cvs/sources/SciLab/toolboxes/OsstrupenViewer/macros/")
 
 (cl-defun mb-grep-interactive ()
   "Convenient grep according to file type."
@@ -123,13 +142,15 @@ nil      ./ and all its subdirectories
 
 (cl-defun mb-elisp-grep ()
   "Convenient grep for Emacs lisp mode."
-  (mb-grep-basic :directories (mb-grep-dirs (or current-prefix-arg 0 1))
-		 :types "el"))
+  (mb-grep-basic :directories (mb-grep-dirs (or current-prefix-arg 1))
+		 :types "el"
+		 :match-not "/old/"))
 
 (cl-defun mb-scilab-grep ()
   "Convenient grep for mbscilab mode."
-  (mb-grep-basic :directories (mb-grep-dirs (if current-prefix-arg 0 1))
-		 :types '("sci" "sce")))
+  (mb-grep-basic :directories (mb-grep-dirs (or current-prefix-arg 2))
+		 :types '("sci" "sce")
+		 :match-not (regexp-or "CVS" "etc" "help")))
 
 (cl-defun mb-c++-grep ()
   "Convenient grep according to file type."
