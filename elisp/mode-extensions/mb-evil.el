@@ -44,8 +44,9 @@
 (setf evil-cleverparens-swap-move-by-word-and-symbol t)
 (setf parens-require-spaces t)
 
-(setf sp-pair-list (cl-remove "'" sp-pair-list :key #'car :test #'string=))
-(setf sp-pair-list (cl-remove "`" sp-pair-list :key #'car :test #'string=))
+;;; Smartparens adjustments for elisp (should do the same for common list etc)
+(sp-local-pair 'emacs-lisp-mode "'" nil :actions nil)
+(sp-local-pair 'emacs-lisp-mode "`" "'" :when '(sp-in-string-p sp-in-comment-p))
 
 ;;; Finally, need to revert .emacs* buffers since they have not yet been
 ;;; hooked by the functionality loaded here
