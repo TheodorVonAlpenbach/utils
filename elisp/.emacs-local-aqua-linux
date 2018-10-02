@@ -5,7 +5,8 @@
 (setf display-time-format "%H:%M %d/%m")
 
 ;; Local elisp load paths
-(setf *local-load-paths* '("~/git/lsconf" "~/lilypond/usr/share/emacs/site-lisp/"))
+(setf *local-load-paths* '("~/cvs/sources/imms/src/elisp/"
+			   "~/lilypond/usr/share/emacs/site-lisp/"))
 
 ;; (setf *local-requires* '(lsconf-mode qt-chess browse-kill-ring))
 (setf *local-requires* '(qt-chess browse-kill-ring))
