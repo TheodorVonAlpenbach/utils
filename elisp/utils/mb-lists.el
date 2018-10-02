@@ -198,7 +198,7 @@ PREDICATE is included in the result."
 			  (append res (list (subseq list (or end 0))))
 			  (mapcar #'(lambda (x) (subseq x 1))
 			    (append res (list (subseq list (or end 0)))))))))
-;;(cut-if #'primep (0-n 10) t)
+;;(cut-list-if #'primep (0-n 10) t)
 (cl-indent 'cut-list-if 'prog1)
 
 (defun relations (list &optional with-identity ordered)
@@ -223,7 +223,7 @@ where a comes before b in LIST."
     (loop for x1 in (listify list1) nconc 
 	  (loop for x2 in (listify list2)
 		collect (list x1 x2)))))
-;;(combine2 '(a b) '(c d) t)
+;;(combine2 '(a (b c)) '(c d) t)
 ;;(combine2 '(a b) nil t)
 
 (cl-defun combine-1 (lists)
@@ -233,10 +233,11 @@ where a comes before b in LIST."
       (mapcar #'list (listify (first lists)))
       (loop for x in (combine2 (mapcar #'list (listify (first lists)))
 			       (combine-1 (rest lists)))
-	    collect (flatten x)))))
+
+	    collect (mapcar #'car x)))))
+;;(combine-1 '((a b) (c (d e))))
 ;;(combine-1 '((b c) a))
 ;;(combine-1 '((a b)))
-;;(combine-1 '((a b) (c d)))
 ;;(combine-1 '((a b) (c d) (e f)))
 
 (cl-defun combine (lists &key key)
@@ -244,6 +245,7 @@ where a comes before b in LIST."
   (if key
     (mapcar (bind #'apply key 1) (combine-1 lists))
     (combine-1 lists)))
+;;(combine '((0 1 2) (("3" 1) ("7" 1))))
 
 (defun test-arguments (fn args)
   (combine args :key #'(lambda (&rest args)
