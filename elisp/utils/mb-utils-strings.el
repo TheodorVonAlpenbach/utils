@@ -228,7 +228,7 @@ For the use of TRIM and SEPARATOR, see `split-string-regexp-list'."
     (if omit-nulls (cl-delete "" res :test #'string=) res)))
 ;;(split-string-regexp "bab cd bqwerb" "b" t nil :right)
 
-(defun substring-intv (string regexp-interval &optional (count 1))
+(cl-defun substring-intv (string regexp-interval &optional (count 1))
   "Returns substring of STRING matching REGEXP-INTERVAL."
   (assert (>= count 0))
   (multiple-value-call #'(lambda (beg mid end match) (if match mid ""))
