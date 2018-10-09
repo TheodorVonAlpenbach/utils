@@ -19,7 +19,7 @@
 (setf reftex-insert-label-flags '("s" "sfte"))
 
 
-(defun master-prefix ()
+(defun master-prefixes  ()
   (expand-file-name
    (file-name-sans-extension (TeX-master-file))
    (TeX-master-directory)))
