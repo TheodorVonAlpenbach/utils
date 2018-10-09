@@ -180,15 +180,15 @@ for inspiration."
 ;; Time formatting
 (cl-defun iso-date (&optional (date (decode-time)))
   "Returns DATE (default is today) in iso string format"
-  (format "%04d-%02d-%02d" (dtime-year date) (dtime-month date) (dtime-day date)))
-;;(iso-date (now :year 1))
+  (format "%04d-%02d-%02d"
+    (etime-year date) (etime-month date) (etime-day date)))
+;;(iso-date (now))
 
 (cl-defun weekday (&optional (lang :no) (time-designator (decode-time)))
   "Returns weekday of TIME-DESIGNATOR (default is today) in language LANG"
     (nth (etime-day-of-week (parse-time time-designator))
        (second (assoc lang *weekdays*))))
-;;(loop for i below 7 collect (weekday :no (now :day i)))
-;;(weekday :no '2009-01-01)
+;;(loop for i below 7 collect (weekday :no (add-etime-date (now) :day i)))
 
 (cl-defun full-date (&optional (lang :no) (time-designator (decode-time)))
   "Returns TIME-DESIGNATOR (default is today) in full date format in language LANG
@@ -202,14 +202,15 @@ TODO: the iso-date part should be changed to corresond with the language"
   "Returns DATE (default is today) in short string format.
 TODO: add lang parameter?"
   (let ((time (parse-time time-designator)))
-    (format "%d.%d" (dtime-day time) (dtime-month time))))
+    (format "%d.%d" (etime-day time) (etime-month time))))
 ;;(short-date '2014-04-02)
 
 (cl-defun iso-time (&key (time (decode-time)) (with-seconds nil))
   "Returns time designator TIME (default is now) in iso string format"
   (let ((etime (parse-time time)))
     (if with-seconds 
-      (format "%02d:%02d:%02d" (etime-hour etime) (etime-minute etime) (etime-second etime))
+      (format "%02d:%02d:%02d"
+	(etime-hour etime) (etime-minute etime) (etime-second etime))
       (format "%02d:%02d" (etime-hour etime) (etime-minute etime)))))
 ;;(iso-time :with-seconds t :time '2014-04-02)
 
