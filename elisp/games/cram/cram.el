@@ -273,15 +273,16 @@ the *cram-current-problem* which is yet another structure."
   '(:eval (let ((user (cram-current-user)))
 	    (format " [%s (R:%d RD:%d)]" 
 	      (cram-user-name user)
-	      (cram-user-rating user)
-	      (cram-user-RD user)))))
+	      (cram-user-rating-e user)
+	      (cram-user-rating-d user))
+	    "qwe")))
 ;;(cram-mode-line-user-description)
 
 (cl-defun cram-mode-line ()
   "Adopted the design from `Info-mode' (`Info-set-mode-line')."
   (let* ((line (copy-tree mode-line-format)))
     (list-insert (cram-mode-line-user-description)
-		 (1+ (position 'mode-line-buffer-identification line))
+		 (1+ (or (position 'mode-line-buffer-identification line) 0))
 		 line)
     line))
 
