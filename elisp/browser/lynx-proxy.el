@@ -12,7 +12,7 @@ autoincremented each time new entry is added to db."
   "Entrys 'key' is the URL. INDEX is a unique integer within a LPDB.
 POINT is the emacs buffer's point value when the entry site was last
 visited."
-  (url :read-only t)
+  (url nil :read-only t)
   (index (lpdb-get-unique-index) :read-only t)
   (point 0))
 
