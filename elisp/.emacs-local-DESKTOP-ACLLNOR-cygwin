@@ -49,7 +49,7 @@
 	(,+mb-lisp-dir+ "mode-extensions/mb-lisp.el")
 	(,+mb-lisp-dir+ "mode-extensions/mb-octave.el")
 	(,+mb-lisp-dir+ "mode-extensions/mb-tex.el")
-	(,+mb-lisp-dir+ "quiz/qp.el")
+	(,+mb-lisp-dir+ "quiz/quiz-park.el")
 	(,+mb-lisp-dir+ "global/LS.el")
 	(,+mb-lisp-dir+ "games/cram/cram.el")
 	(,+mb-lisp-dir+ "games/maths/maths.el")
