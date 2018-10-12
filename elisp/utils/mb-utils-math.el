@@ -606,7 +606,6 @@ value in the specified interval. Else, it will be an integer."
     (random-integer a b seed)
     (random-float a b seed)))
 
-;;
 (defun interval-floor (n interval)
   (* (floor n interval) interval))
 ;;(interval-floor 30 10)
@@ -650,12 +649,9 @@ http://en.wikipedia.org/wiki/Geographical_distance#Lambert.27s_formulae"
   "Returns a LIST of K numbers that adds to N, and so that the
 numbers are `almost' equal (ie. (- (max LIST) (min LIST)) is
 either 0 or 1)"
-  (destructuring-bind (floor rest) (floor* n k)
-    (let ((res (make-list k floor)))
-      (loop for i below rest
-	    for x in-ref res
-	    do (incf x))
-      res)))
+  (destructuring-bind (q r) (cl-floor n k)
+    (append (make-list r (1+ q))
+	    (make-list (- k r) q))))
 ;;(generate-addends-fixed 271 3)
 
 (cl-defun generate-addends (n)
