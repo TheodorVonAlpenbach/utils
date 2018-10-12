@@ -10,6 +10,7 @@
 (defun octave-debug-map ()
   (let ((map (make-sparse-keymap)))
     (define-key map "r" #'octave-run)
+    (define-key map "c" #'octave-run-to-cursor)
     (define-key map "w" #'octave-where)
     (define-key map "S" #'octave-status)
     (define-key map "s" #'octave-step)
@@ -199,5 +200,10 @@ step line markings, etc"
     (octave-resume)
     (octave-debug-start)
     (octave-debug-refresh-display)))
+
+(defun octave-run-to-cursor ()
+  (interactive)
+  (octave-with-temp-dbstop (point)
+   (octave-run)))
 
 (provide 'octave-debug-mode)
