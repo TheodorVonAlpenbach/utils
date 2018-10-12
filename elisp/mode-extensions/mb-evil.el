@@ -110,6 +110,13 @@ STATE can take the same values as in `evil-define-key'."
 (define-key evil-normal-state-map  [?g return] 'delete-blank-lines)
 (define-key evil-normal-state-map "gp" 'next-error)
 (define-key evil-normal-state-map "gP" 'previous-error)
+(define-key evil-normal-state-map "gI" 'mb-show-process-buffer)
+
+(defun mb-show-process-buffer ()
+  (interactive)
+  (case major-mode
+    (mbscilab-mode (mbscilab-show-process-buffer))
+    (octave-mode (octave-show-process-buffer))))
 
 (evil-define-motion evil-goto-line-keep-column (count)
   "Go to the first non-blank character of line COUNT.
@@ -580,7 +587,7 @@ By default the last line."
 
 ;;;; Insert quotes (put this somewhere else when finished)
 (cl-defun mb-surround-region-1 (region left right n)
-  (insert-at left (car region) n)
+  (insert-at left (first region) n)
   (insert-at right (+ (second region) (length left)) n))
 
 (cl-defun mb-surround-lookup-right (left)
@@ -598,7 +605,7 @@ By default the last line."
 
 (defun mb-surround-symbol (left n)
   (message "%S" (list (point) (bos*) (eos*)))
-  (mb-surround-region (cons (bos*) (eos* n)) left 1))
+  (mb-surround-region (list (bos*) (eos* n)) left 1))
 
 (defun mb-surround (left n)
   (if (use-region-p)
