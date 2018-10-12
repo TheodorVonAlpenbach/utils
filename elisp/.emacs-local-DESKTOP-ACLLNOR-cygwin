@@ -63,6 +63,7 @@
 	(,lsdoc-dir "arbeidslog" :point :end :keyboard :no :time-paragraphs t)
 	(,lsdoc-dir "adresser.txt" :keyboard :no)
 	(,lsdoc-dir "todo.org" :keyboard :no)
+	(,lsdoc-dir "ferskvare" :keyboard :no)
 	(,lsdoc-dir "LS-notes.org" :point :end :keyboard :no :time-paragraphs t)
 	))
 
