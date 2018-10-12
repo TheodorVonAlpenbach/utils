@@ -41,12 +41,19 @@
       (cygpath path))))
 ;;(cygpath "~/sources/SciLab/toolboxes/LSSensorViewer/macros/LSSensorViewer.ini")
 
-(defun mbscilab-buffer ()
+(defun inferior-mbscilab-buffer ()
   "TODO scilab here and scilab there. Make this a variable with a suitable name!"
   (get-buffer "*scilab*"))
 
+(defun mbscilab-show-process-buffer ()
+  "Make sure that `inferior-inferior-mbscilab-buffer' is displayed."
+  (interactive)
+  (aif (get-buffer (inferior-mbscilab-buffer))
+    (display-buffer it '(display-buffer-use-some-window))
+    (message "No buffer named %s" (inferior-mbscilab-buffer))))
+
 (defun scilab-process ()
-  (get-buffer-process (mbscilab-buffer)))
+  (get-buffer-process (inferior-mbscilab-buffer)))
 
 (defun mbscilab-comint-clean-prompt (&optional string)
   "TODO: write scilab-last-output.
@@ -260,7 +267,7 @@ debug mode no longer triggers the buffer's modified mark."
   (if +scilab-init-file+
     (make-comint "scilab" (scilab-command) nil "-f" +scilab-init-file+)
     (make-comint "scilab" (scilab-command)))
-    (with-buffer (mbscilab-buffer)
+    (with-buffer (inferior-mbscilab-buffer)
       (scilab-comint-mode))))
 ;;(make-comint "scilab" (scilab-command-line-string))
 ;;(make-comint "clisp" "clisp")
@@ -321,7 +328,6 @@ at the beginning of a defun."
 (define-key mbscilab-mode-map "\C-\M-h" 'scilab-mark-function)
 (define-key mbscilab-mode-map "\M-(" 'scilab-insert-parentheses)
 
-(define-key mbscilab-mode-map [(f7)] #'(lambda () (interactive) (switch-to-buffer (mbscilab-buffer))))
 (define-key mbscilab-mode-map [(f5)] #'scilab-resume)
 (define-key mbscilab-mode-map [(shift f5)] #'scilab-resume-to-cursor)
 (define-key mbscilab-mode-map [(ctrl f5)] #'scilab-abort)
