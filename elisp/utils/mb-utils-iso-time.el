@@ -178,10 +178,11 @@ for inspiration."
 ;;(month-name 1 :en t)
 
 ;; Time formatting
-(cl-defun iso-date (&optional (date (decode-time)))
+(cl-defun iso-date (&optional (time-designator (decode-time)))
   "Returns DATE (default is today) in iso string format"
-  (format "%04d-%02d-%02d"
-    (etime-year date) (etime-month date) (etime-day date)))
+  (let ((etime (parse-time time-designator)))
+    (format "%04d-%02d-%02d"
+      (etime-year etime) (etime-month etime) (etime-day etime))))
 ;;(iso-date (now))
 
 (cl-defun weekday (&optional (lang :no) (time-designator (decode-time)))
