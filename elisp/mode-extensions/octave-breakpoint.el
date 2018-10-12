@@ -193,10 +193,12 @@ source-d in Octave."
   "Set breakpoint at the line covering the point POS.
 The function adds a dbstop in Octave, and marks the corresponding
 buffer line."
-  (destructuring-bind (fn line) (mb-octave-location pos)
-    (octave-set-dbstops (unless (octave-debug-p) fn) line t)
-    (octave-set-buffer-breakpoint line))
-  (first inferior-octave-output-list))
+  (if (octave-breakpoint-p pos)
+    (message "Breakpoint is alreday present.")
+    (destructuring-bind (fn line) (mb-octave-location pos)
+      (octave-set-dbstops (unless (octave-debug-p) fn) line t)
+      (octave-set-buffer-breakpoint line)
+      (first inferior-octave-output-list))))
 ;;(octave-set-breakpoint)
 
 (defun octave-unset-breakpoint (&optional pos)
@@ -205,13 +207,15 @@ Implementaion note. This mechanism could be more effective if a
 DEFUN-BREAKPOINT was the triple (DEFUN LINUM POS). Then all of
 this info could be passed to this function and the costy call to
 mb-octave-location would be superfluous."
-  (destructuring-bind (fn line) (mb-octave-location pos)
-    (octave-send-string (if (octave-debug-p)
-			  (format "dbclear %d" line)
-			  (format "dbclear %s %d" fn line))
-			t)
-    (octave-unset-buffer-breakpoint line))
-  inferior-octave-output-list)
+  (if (octave-breakpoint-p pos)
+    (destructuring-bind (fn line) (mb-octave-location pos)
+      (octave-send-string (if (octave-debug-p)
+			    (format "dbclear %d" line)
+			    (format "dbclear %s %d" fn line))
+			  t)
+      (octave-unset-buffer-breakpoint line)
+      inferior-octave-output-list)
+    (message "No breakpoint to unset")))
 ;;(octave-unset-breakpoint)
 
 (defun octave-unset-breakpoints-region (beg end &optional buffer)
