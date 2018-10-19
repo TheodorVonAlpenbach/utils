@@ -25,10 +25,15 @@
     (define-key map "a" (mb-octave-test-directory-fn "/home/mbe/git/utils/octave/" t))
     (define-key map "A" (mb-octave-test-directory-fn "/home/mbe/git/imms/src/octave/" t))
     map))
+ 
+(defun mb-octave-init ()
+  (mb-octave-kbd-maps)
+  (turn-on-eldoc-mode)
+  (linum-mode)
+  (setf evil-symbol-word-search t)
+  (modify-syntax-entry ?_  "_"))
 
-(add-hook 'octave-mode-hook #'mb-octave-kbd-maps)
-(add-hook 'octave-mode-hook 'turn-on-eldoc-mode)
-(add-hook 'octave-mode-hook 'linum-mode)
+(add-hook 'octave-mode-hook 'mb-octave-init)
 
 (defun octave-mode-p (buffer-or-name)
   "Return non nil if BUFFER-OR-NAME is in Octave mode."
