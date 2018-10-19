@@ -116,7 +116,8 @@ STATE can take the same values as in `evil-define-key'."
   (interactive)
   (case major-mode
     (mbscilab-mode (mbscilab-show-process-buffer))
-    (octave-mode (octave-show-process-buffer))))
+    (octave-mode (octave-show-process-buffer))
+    (emacs-lisp-mode (display-buffer "*scratch*" '(display-buffer-use-some-window)))))
 
 (evil-define-motion evil-goto-line-keep-column (count)
   "Go to the first non-blank character of line COUNT.
@@ -243,6 +244,7 @@ By default the last line."
   (define-key insert-map "'" #'(lambda (n) (interactive "P") (mb-surround "'" (or n 1))))
   (define-key insert-map "\"" #'(lambda (n) (interactive "P") (mb-surround "\"" (or n 1))))
   (define-key insert-map "`" #'(lambda (n) (interactive "P") (mb-surround "`" (or n 1))))
+  (define-key insert-map "g" #'(lambda (n) (interactive "P") (mb-surround "«" (or n 1))))
   (define-key insert-map "\\" #'(lambda (n) (interactive "P") (mb-undo-surround (or n 1))))
   (define-key insert-map "@" #'texinfo-insert-@var))
 
@@ -594,6 +596,7 @@ By default the last line."
   (string-case left
     ("(" ")")
     ("`" "'")
+    ("«" "»")
     (otherwise left)))
 ;;(mapcar #'mb-surround-lookup-right (list "`" "'" "("))
 
