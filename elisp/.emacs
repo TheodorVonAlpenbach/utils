@@ -275,6 +275,7 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 			 mb-lisp
 			 mb-python
 			 mb-octave
+			 mb-ruby
 			 mb-texinfo
 			 list-db
 			 mbscilab
