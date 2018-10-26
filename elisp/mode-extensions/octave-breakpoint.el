@@ -22,6 +22,7 @@
   (let ((map (make-sparse-keymap)))
     (define-key map "i" #'octave-toggle-breakpoint)
     (define-key map "t" #'octave-toggle-breakpoint)
+    (define-key map "r" #'octave-refresh-breakpoints)
     (define-key map "l" #'octave-list-all-breakpoints)
     (define-key map "d" (octave-delete-breakpoint-map))
     map))
@@ -250,6 +251,10 @@ executes BODY."
 (defun octave-list-all-breakpoints ()
   (interactive)
   (octave-send-string "dbstatus" t))
+
+(defun octave-refresh-breakpoints ()
+  (interactive)
+  (octave-update-all-dbstop))
 
 (defun octave-delete-breakpoint-line ()
   (interactive)
