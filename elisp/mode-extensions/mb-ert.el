@@ -310,4 +310,14 @@ them before calling (ert t)."
 (advice-add #'ert--insert-human-readable-selector
 	    :override #'mb-ert--insert-human-readable-selector)
 
+(defun ert-string-to-file (string file)
+  "Same as `string-to-file', but indended for use with ERT.
+The reason is that `string-to-file' calls `write-file' which
+issues an `args-out-of-range' error, which is catched by ERT, and
+causes the test to fail. This function, probably slower than
+`string-to-file', avoids this by using `with-temp-file'
+instead."
+  (with-temp-file file
+    (overwrite-region string (point-min) (point-max))))
+
 (provide 'mb-ert)
