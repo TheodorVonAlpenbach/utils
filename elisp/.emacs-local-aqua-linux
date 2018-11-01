@@ -6,7 +6,8 @@
 
 ;; Local elisp load paths
 (setf *local-load-paths* '("~/cvs/sources/imms/src/elisp/"
-			   "~/lilypond/usr/share/emacs/site-lisp/"))
+			   "~/lilypond/usr/share/emacs/site-lisp/"
+			   "~/git/utils/elisp/lsconfig/"))
 
 ;; (setf *local-requires* '(lsconf-mode qt-chess browse-kill-ring))
 (setf *local-requires* '(qt-chess browse-kill-ring))
