@@ -1,9 +1,10 @@
 (require 'mb-utils-div)
 
 (defmacro defthing (name regexp)
-  (let* ((symbol (ssymbol name))		;perhaps unnecessary
+  (let* ((symbol (ssymbol name))	;perhaps unnecessary
 	 (bounds (gensym))
 	 (n (gensym))
+	 (as-list-p (gensym))
 	 (point (gensym))
 	 (sname (symbol-name symbol))
 	 (name-regxp (intern (concat "*" sname "-regexp*"))) ;now obsolete?
@@ -13,61 +14,72 @@
 	 (name-at-point (intern (concat sname "-at-point")))
 	 (type-name (intern (concat sname "p"))))
     `(progn
-      (defconst ,name-regxp ,regexp (format "Regular expression for %d" ,sname))
+       (defconst ,name-regxp ,regexp (format "Regular expression for %d" ,sname))
 
-      (defun ,thing-at-point-bounds-of-name ()
-	(when (thing-at-point-looking-at ,name-regxp)
-	  (cons (match-beginning 0) (match-end 0))))
+       (defun ,thing-at-point-bounds-of-name (&optional ,as-list-p)
+	 ,(format
+	      "Return the region bounds of the %s at point.
+By default the bounds are returned as the cons pair (START END).
+If optional AS-LIST-P is not nil, the bounds are returned as a list pair.
 
-      (put ',symbol 'end-op
-       (function (lambda ()
-	 (let ((,bounds (,thing-at-point-bounds-of-name)))
-	   (if ,bounds
-	     (goto-char (cdr ,bounds))
-	     (error "No %s here" ,sname))))))
-      (put ',symbol 'beginning-op
-       (function (lambda ()
-	 (let ((,bounds (,thing-at-point-bounds-of-name)))
-	   (if ,bounds
-	     (goto-char (car ,bounds))
-	     (error "No %s here" ,sname))))))
+This function is generated with macro `defthing' in module
+'mb-things.
+\n(fn &optional AS-LIST-P)"
+	    name)
+       	 (when (thing-at-point-looking-at ,name-regxp)
+	   (if ,as-list-p
+	     (list (match-beginning 0) (match-end 0))
+	     (cons (match-beginning 0) (match-end 0)))))
 
-      (cl-defun ,forward-name (&optional (,n 1))
-	,(format "%s is generated with macro `defthing' in module 'mb-things. TODO: Handle n = 0."
-	  forward-name)
-	(interactive "p")
-	(unless (= ,n 0)
-	  (let ((,point (point))
-		(,bounds (,thing-at-point-bounds-of-name)))
-	    (if (> ,n 0)
-	      ;; forward
-	      (if (and ,bounds 
-		       (< ,point (cdr ,bounds)))
-		(progn (goto-char (cdr ,bounds))
-		       (re-search-forward ,name-regxp nil (- ,n 1)))
-		(re-search-forward ,name-regxp nil t ,n))
-	      ;; backward
-	      (if (and ,bounds 
-		       (< (car ,bounds) ,point))
-		(progn (goto-char (car ,bounds))
-		       (re-search-backward ,name-regxp nil t (- (abs ,n) 1)))
-		(re-search-backward ,name-regxp nil t (- ,n)))))))
+       (put ',symbol 'end-op
+	    (function (lambda ()
+	      (let ((,bounds (,thing-at-point-bounds-of-name)))
+		(if ,bounds
+		  (goto-char (cdr ,bounds))
+		  (error "No %s here" ,sname))))))
+       (put ',symbol 'beginning-op
+	    (function (lambda ()
+	      (let ((,bounds (,thing-at-point-bounds-of-name)))
+		(if ,bounds
+		  (goto-char (car ,bounds))
+		  (error "No %s here" ,sname))))))
 
-      (cl-defun ,backward-name (&optional (,n 1))
-	,(format "%s is generated with macro `defthing' in module 'mb-things. TODO: Handle n = 0."
-	  backward-name)
-	(interactive "p")
-	(,forward-name (- ,n)))
+       (cl-defun ,forward-name (&optional (,n 1))
+	 ,(format "%s is generated with macro `defthing' in module 'mb-things. TODO: Handle n = 0."
+	    forward-name)
+	 (interactive "p")
+	 (unless (= ,n 0)
+	   (let ((,point (point))
+		 (,bounds (,thing-at-point-bounds-of-name)))
+	     (if (> ,n 0)
+	       ;; forward
+	       (if (and ,bounds 
+			(< ,point (cdr ,bounds)))
+		 (progn (goto-char (cdr ,bounds))
+			(re-search-forward ,name-regxp nil (- ,n 1)))
+		 (re-search-forward ,name-regxp nil t ,n))
+	       ;; backward
+	       (if (and ,bounds 
+			(< (car ,bounds) ,point))
+		 (progn (goto-char (car ,bounds))
+			(re-search-backward ,name-regxp nil t (- (abs ,n) 1)))
+		 (re-search-backward ,name-regxp nil t (- ,n)))))))
 
-      (defun ,name-at-point () 
-	,(format "%s is generated with macro `defthing' in module 'mb-things." name-at-point)
-	(thing-at-point ',symbol))
+       (cl-defun ,backward-name (&optional (,n 1))
+	 ,(format "%s is generated with macro `defthing' in module 'mb-things. TODO: Handle n = 0."
+	    backward-name)
+	 (interactive "p")
+	 (,forward-name (- ,n)))
 
-      (defun ,type-name (string)
-	,(format "%s is generated with macro `defthing' in module 'mb-things." type-name)
-	(integerp (string-match ,regexp string)))
+       (defun ,name-at-point (&optional no-properties) 
+	 ,(format "%s is generated with macro `defthing' in module 'mb-things." name-at-point)
+	 (thing-at-point ',symbol no-properties))
+
+       (defun ,type-name (string)
+	 ,(format "%s is generated with macro `defthing' in module 'mb-things." type-name)
+	 (integerp (string-match ,regexp string)))
       
-      (definteractive ,name-at-point))))
+       (definteractive ,name-at-point))))
 
 ;;;; mb definitions
 (require 'mb-utils-time)
@@ -128,22 +140,32 @@ must be a member of a cycle preceding the cycle of the latter.")
   "LEVEL 1, 2, 3 correspond to day, month, year respectively."
   (acond
     ;; ((weekday-and-date-at-point) (inc-weekday-and-date-at-point n level))
-    ((date-at-point) (save-excursion
-		       (replace-thing-at-point (inc-date it n level) 'date)
-		       (beginning-of-sexp)
-		       (backward-sexp 1)
-		       (when (or (weekday-at-point) (ukedag-at-point))
-			 (replace-thing-at-point (inc-cyclic (thing-at-point 'cyclic) n level) 'cyclic))))
-    ((time-at-point) (replace-thing-at-point (inc-time it n level) 'time))
-    ((number-at-point) (replace-thing-at-point (inc-number it n level) 'number))
-    ((cyclic-at-point) (save-excursion
-			 (replace-thing-at-point (inc-cyclic it n level) 'cyclic)
-			 (end-of-sexp)
-			 (forward-sexp 1)
-			 (when (date-at-point)
-			   (replace-thing-at-point (inc-date (thing-at-point 'date) n level) 'date))))  
-    ((list-at-point)) ;;todo
-    ((word-at-point))
+    ((date-at-point t)
+     (save-excursion
+       (replace-thing-at-point (inc-date it n level) 'date)
+       (beginning-of-sexp)
+       (backward-sexp 1)
+       (when (or (weekday-at-point) (ukedag-at-point))
+	 (replace-thing-at-point (inc-cyclic (thing-at-point 'cyclic) n level) 'cyclic))))
+
+    ((time-at-point t)
+     (replace-thing-at-point (inc-time it n level) 'time))
+
+    ((number-at-point t)
+     (replace-thing-at-point (inc-number it n level) 'number))
+
+    ((cyclic-at-point t)
+     (save-excursion
+       (replace-thing-at-point (inc-cyclic it n level) 'cyclic)
+       (end-of-sexp)
+       (forward-sexp 1)
+       (when (date-at-point)
+	 (replace-thing-at-point (inc-date (thing-at-point 'date) n level) 'date))))  
+
+    ((list-at-point t)) ;;todo
+
+    ((word-at-point t))
+
     (t (error "No thing recoginzed"))))
 
 (defun inc-weekday-and-date-at-point (n level)
@@ -160,18 +182,18 @@ must be a member of a cycle preceding the cycle of the latter.")
 (defun inc-date (date n level)
   "LEVEL 1, 2, 3 correspond to day, month, year respectively."
   (iso-date (case level
-	      (1 (add-time date :day n))
-	      (2 (add-time date :month n))
-	      (3 (add-time date :year n))
+	      (1 (add-etime-date (parse-time date) :day n))
+	      (2 (add-etime-date (parse-time date) :month n))
+	      (3 (add-etime-date (parse-time date) :year n))
 	      (otherwise (error "Level %d is not implemented!" level)))))
 ;;(inc-date "2001-10-20" 1 1)
 
 (defun inc-time (time n level)
   "LEVEL 1, 2, 3 correspond to day, month, year respectively."
   (iso-time :time (case level
-		    (1 (add-time time :minute n))
-		    (2 (add-time time :hour n))
-		    (3 (add-time time :second n))
+		    (1 (add-time (parse-time time) :minute n))
+		    (2 (add-time (parse-time time) :hour n))
+		    (3 (add-time (parse-time time) :second n))
 		    (otherwise (error "Level %d is not implemented!" level)))
 	    :with-seconds (or (= level 3) 
 			      (> (length time) 6))))
