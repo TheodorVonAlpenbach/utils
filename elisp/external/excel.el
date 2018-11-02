@@ -45,6 +45,6 @@
    ","))
 ;;(read-xls "/home/eier/projects/aves/aves.xlsx" :id 2)
 
-(defconst +aves+ (read-xls "/home/eier/projects/aves/aves.xlsx"))
+;;(defconst +aves+ (read-xls "/home/eier/projects/aves/aves.xlsx"))
 
 (provide 'excel)
