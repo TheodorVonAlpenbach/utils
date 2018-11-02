@@ -151,7 +151,7 @@ must be a member of a cycle preceding the cycle of the latter.")
     ((time-at-point t)
      (replace-thing-at-point (inc-time it n level) 'time))
 
-    ((number-at-point t)
+    ((number-at-point)
      (replace-thing-at-point (inc-number it n level) 'number))
 
     ((cyclic-at-point t)
