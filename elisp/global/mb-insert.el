@@ -236,4 +236,13 @@ has the same length as current line."
   (interactive (list (eval-minibuffer "Insert expression: ")))
   (ins expression))
 
+(defun insert-provide ()
+  (interactive)
+  (save-excursion
+    (eob)
+    (delete-blank-lines)
+    (insert (format "\n(provide '%s)"
+	      (file-name-sans-extension (buffer-name))))))
+;;(insert-provide)
+
 (provide 'mb-insert)
