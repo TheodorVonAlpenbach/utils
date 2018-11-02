@@ -284,6 +284,7 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 			 quiz-park
 			 ;; not from mb
 			 mb-ert
+			 lsconf-mode
 			 ;; mb-js-mode
 			 )
 		       *local-requires*)
