@@ -35,10 +35,12 @@ and (10 10), respectively, the two above statements become
 geoQwe = [10, 11, 12, 13];
 geoBild = [10, 11, 12, 13];"
   (concat* (append
+	    ;; First, the frame geometry assignment line:
 	    (list (format "%s = [%d, %d, %d, %d];"
 		    frame-name
 		    (first frame-position) (second frame-position)
 		    (first (last-elt gui)) (second (last-elt gui))))
+	    ;; Then the control geometry assignment lines
 	    (gui-extract-scilab-positions gui))
     :in "\n"))
 ;;(gui-scilab-positions (gui-geometry (os-gui))) 
