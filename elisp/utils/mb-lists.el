@@ -224,6 +224,7 @@ where a comes before b in LIST."
     (loop for x1 in (listify list1) nconc 
 	  (loop for x2 in (listify list2)
 		collect (list x1 x2)))))
+;;(combine2 '(a) '())
 ;;(combine2 '(a) '(b))
 ;;(combine2 '(a b) '(c d e) t)
 ;;(combine2 '(a b) '(c d e) t)
@@ -232,11 +233,13 @@ where a comes before b in LIST."
 
 (cl-defun combine-1 (lists)
   "Generalization of combine2"
-  (if (<= (length lists) 2)
-    (combine2 (first lists) (second lists))
-    (loop for (x y) in (combine2 (first lists)
-				 (combine-1 (rest lists)))
-	  collect (cons x y))))
+  (case (length lists)
+    (0 nil)
+    (1 (list (listify (first lists))))
+    (2 (combine2 (first lists) (second lists)))
+    (t  (loop for (x y) in (combine2 (first lists)
+				  (combine-1 (rest lists)))
+	   collect (cons x y)))))
 ;;(combine-1 '((a b) c (d e)))
 
 (cl-defun combine (lists &key key)
