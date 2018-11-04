@@ -235,8 +235,11 @@ The rules can be summarized in these examples:
 				collect (if (listp x)
 					  (list s (substring s 1 -1) nil)
 					  (list s))))
-	collect (concat* x :in " ")))
+	for res = (concat* x :in " ")
+	collect (string-trim res)))
 ;;(expand-alternatives "(a) (c) b")
+;;(expand-alternatives "(a) b")
+;;(combine '((a nil) (b nil)))
 
 (defun cram-expand-alternatives (problem)
   "Collect expansions of PROBLEM solution and all alternatives."
@@ -244,7 +247,7 @@ The rules can be summarized in these examples:
     (cons (cram-problem-answer problem)
 	  (awhen (cram-problem-alternatives problem)
 	    (split-string it ";")))))
-;;(cram-expand-alternatives (car (ld-select :problem :where (string-match* "Klaus" :answer))))
+;;(cram-expand-alternatives (car (ld-select :problem :where (string-match* "Sisi" :answer))))
 ;;(ld-select :problem)
 
 (defun cram-correct-response-p (problem response)
