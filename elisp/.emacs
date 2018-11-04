@@ -161,10 +161,10 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 
 ;;; non standard packages
 (require 'package)
-;; (loop for x in '(("marmalade" . "http://marmalade-repo.org/packages/")
-;; 		 ("melpa"     . "http://melpa.milkbox.net/packages/"))
-;;       do (unless (member x package-archives)
-;; 	   (push x package-archives)))
+(loop for x in '(("marmalade" . "http://marmalade-repo.org/packages/")
+		 ("melpa"     . "http://melpa.milkbox.net/packages/"))
+      do (unless (member x package-archives)
+	   (push x package-archives)))
 
 ;; path
 (loop for x in (nconc 
@@ -284,6 +284,7 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 			 quiz-park
 			 ;; not from mb
 			 mb-ert
+			 lsconf-mode
 			 ;; mb-js-mode
 			 )
 		       *local-requires*)

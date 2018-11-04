@@ -64,10 +64,8 @@ only, or left only depending on the surrounding characters. If
 (defun iso-to-short-date-at-point ()
   "Converts iso-date at point to short date."
   (interactive)
-  (let ((date (decode-iso-date (date-at-point)))
-	(bounds (thing-at-point-bounds-of-date)))
-    (delete-region (car bounds) (cdr bounds))
-    (insert (short-date date))))
+  (apply #'overwrite-region
+    (short-date (date-at-point t)) (thing-at-point-bounds-of-date t)))
 
 ;; manipulation
 (defun kill-sexp* (n)
@@ -237,5 +235,14 @@ has the same length as current line."
   "Inserts the evaluation of EXPRESSION at point."
   (interactive (list (eval-minibuffer "Insert expression: ")))
   (ins expression))
+
+(defun insert-provide ()
+  (interactive)
+  (save-excursion
+    (eob)
+    (delete-blank-lines)
+    (insert (format "\n(provide '%s)"
+	      (file-name-sans-extension (buffer-name))))))
+;;(insert-provide)
 
 (provide 'mb-insert)

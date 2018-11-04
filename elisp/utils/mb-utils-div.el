@@ -116,8 +116,14 @@ If reverse i non nil, it returns the first popped element"
 ;;(setq qwe '(a))
 ;;(push-list '(1 234 4) qwe)
 
- (defmacro push-back (x place)
+(defmacro push-back (x place)
   `(setf ,place (nconc ,place (list ,x))))
+
+(defun test-push-back1 ()
+  (let ((l (list 'a)))
+    (list (push-back 'b l) l)))
+;;(test-push-back1)
+
 ;;(setf qwe '(a))
 ;;(push-back 1 qwe)
 

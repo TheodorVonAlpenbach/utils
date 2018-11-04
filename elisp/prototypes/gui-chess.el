@@ -1,6 +1,34 @@
 (require 'gui)
 
-(defun gui-extract-scilab-positions (gui)
+(defvar +gui-chess-prefix+ "GUI/RW/LeftP/Tanker")
+
+(cl-defun gui-chess-format-assignment (tag property value
+				       &optional
+					 (type "string")
+					 (prefix +gui-chess-prefix+))
+  (format "<%s/%s/%s(%s) = %s>"
+    prefix tag property type value))
+;;(gcfa "SCAWV0" "type" "label")
+
+(defalias 'gcfa #'gui-chess-format-assignment)
+(defun gcfa-type (tag value) (gcfa tag "type" value))
+(defun gcfa-geo (tag geometry) (gcfa tag "geometry" geometry "rect"))
+(defun gcfa-sensor (tag name) (gcfa tag "sensor" name))
+(defun gcfa-text (tag text) (gcfa tag "text" text))
+
+(cl-defun gcfa-displaynumber (tag geometry sensor-name)
+  (concat* (list (gcfa-type tag "displaynumber")
+		 (gcfa-geo tag geometry)
+		 (gcfa-sensor tag sensor-name))
+    :in "\n"))
+
+(cl-defun gcfa-label (tag geometry text)
+  (concat* (list (gcfa-type tag "label")
+		 (gcfa-geo tag geometry)
+		 (gcfa-text tag text))
+    :in "\n"))
+
+(defun gui-chess-extract-positions (gui)
   "Calculate the envelopes of the rectangles in GUI."
   (if (eql (car gui) :frame)
     (loop for x in (third gui)
@@ -35,12 +63,10 @@ and (10 10), respectively, the two above statements become
 geoQwe = [10, 11, 12, 13];
 geoBild = [10, 11, 12, 13];"
   (concat* (append
-	    ;; First, the frame geometry assignment line:
 	    (list (format "%s = [%d, %d, %d, %d];"
 		    frame-name
 		    (first frame-position) (second frame-position)
 		    (first (last-elt gui)) (second (last-elt gui))))
-	    ;; Then the control geometry assignment lines
 	    (gui-extract-scilab-positions gui))
     :in "\n"))
 ;;(gui-scilab-positions (gui-geometry (os-gui))) 
@@ -56,4 +82,4 @@ parameters, see `gui-scilab-positions'."
 		  filename))
 ;;(gui-export-scilab-positions (gui-geometry (os-gui)) "~/cvs/sources/SciLab/toolboxes/OsstrupenViewer/macros/OsCtrlPositions.sce" '(100 100)) 
 
-(provide 'gui-scilab)
+(provide 'gui-chess)

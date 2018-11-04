@@ -84,65 +84,6 @@ examples of abbreviated time forms:
 (defconst *iso-dttm* (iso-dttm-regexp "T"))
 (defconst *iso-dttm-lazy* (iso-dttm-regexp "[T ]"))
 
-(cl-defun decode-iso-dttm (iso-dttm &optional (lazy-dttm nil) (noerror t))
-  "Parse an ISO 8601 formatted time string.
-Note! This version does not handle time zones.
-See https://common-lisp.net/project/local-time/manual.html
-for inspiration."
-  ())
-
-(cl-defun decode-iso-dttm (iso-dttm &optional (lazy-dttm nil) (noerror t))
-  "Parse an ISO 8601 formatted time string.
-Note! This version does not handle time zones.
-See https://common-lisp.net/project/local-time/manual.html
-for inspiration."
-  (multiple-value-bind (y mo d h mi s ms tz-sign tz-h tz-m)
-      (if (string-match* (if lazy-dttm *iso-dttm-lazy* *iso-dttm*)
-	    iso-dttm :num '(1 2 3 4 5 6 7 8 9 10))
-	(let ((time (mapcar (compose #'string-to-number (bind #'sstring "0")) 
-			    (list y mo d h mi s)))) ;;discard ms
-	  (if (zerop (first time)) ;ie. we parse time only
-	    (make-time :new-time (midnight) :time (nthcdr 3 time))
-	    (if (zerop (fourth time)) ;ie. we parse date only
-	      (make-time :date (subseq time 0 3))
-	      (make-time :date time))))
-	(unless noerror (error "%s is not a valid ISO date" iso-dttm)))))
-;;(mapcar #'decode-iso-dttm (list "16:00" "2013-04-12" "2013-04-12T16:04" "2013-04-12T16:04Z" "qwe"))
-;;(decode-iso-dttm "qwe")
-
-(cl-defun decode-iso-date-old (iso-date &optional (lazy-dttm nil) (noerror t))
-  "Parses an ISO-DATE returning a mb-time object. Format is `yyyy-mm-dd[ hh:mm[:ss]]'"
-  (let* ((dttm (mapcar (compose #'string-to-number (bind #'sstring "0")) 
-		       (string-match* (if lazy-dttm *iso-dttm-lazy* *iso-dttm*)
-				      iso-date :num '(1 2 3 4 5 6))))
-	 (date (or (subseq dttm 0 3)
-		   (mapcar #'string-to-number 
-			   (string-match* *iso-date* iso-date :num '(1 2 3)))))
-	 (time (or (subseq dttm 3)
-		   (mapcar #'string-to-number
-			   (string-match* *iso-time* iso-date :num '(1 2 3) :subexpression-null "0")))))
-    (if (or date time)
-      (make-time :new-time (midnight) :date date :time time)
-      (unless noerror (error "%s is not a valid ISO date" iso-date)))))
-
-(cl-defun decode-iso-date (iso-date &optional (lazy-dttm nil) (noerror t))
-  "Parses an ISO-DATE returning a mb-time object. Format is `yyyy-mm-dd[ hh:mm[:ss]]'"
-  (let* ((dttm-parts (string-match* (if lazy-dttm *iso-dttm-lazy* *iso-dttm*)
-				    iso-date :num '(1 2 3 4 5 6)))
-	 (date-parts (subseq dttm-parts 0 3))
-	 (time-parts (subseq dttm-parts 3))
-	 (date (and (some #'identity date-parts) ;; not all nil
-		    (mapcar (compose #'string-to-number (bind #'sstring "0")) date-parts)))
-	 (time (and (some #'identity time-parts) ;; not all nil
-		    (mapcar (compose #'string-to-number (bind #'sstring "0")) time-parts))))
-    (cond ((and time date) (make-time :date date :time time))
-	  (date (make-time :date date)) 
-	  (time (make-time :time time :date (nreverse (subseq (midnight) 3 6))))
-	  (t (unless noerror (error "%s is not a valid ISO date" iso-date))))))
-;;(mapcar #'decode-iso-date '("13:21" "2013-04-12" "2014-04-02T23:16"))
-;;(parse-time "1993-01-04")
-;;(decode-iso-date-new-try-but-still-not-ok "22:54")
-
 (defconst *time-max-int* 134217727 "2^27 - 1")
 (defconst *weekdays*
   '((:s0 (0 1 2 3 4 5 6) "Zero based weekday sequence starting on a Sunday")

@@ -20,7 +20,7 @@
 
 (ert-deftest test-push-back-list ()
 "Test of `push-back'"
-   (let ((list '(a))
+   (let ((list (list 'a))
 	 (suffix '(suf fix)))
     (should (equal (push-back-list '() list) '(a)))
     (should (equal list '(a)))
@@ -40,19 +40,25 @@
   (should (nor nil))
   (should (nor nil nil nil))
   (should-not (nor nil t))
-  (should-not (nor t (error "Not visible")))
-  (should-error (nor nil (error "Visible"))))
+  (should-not (nor nil t (error "Not visible")))
+  (should (equal 666 (condition-case nil
+			 (nor nil nil (error "Visible"))
+		       (error 666)))))
 
 (ert-deftest test-nand ()
-"Test of `nand'"
+  "Test of `nand'"
   (should-not (nand)) ;; empty argument list -> no argument is nil!
   (should (nand nil))
   (should (nand t nil))
   (should (nand t nil (error "Not visible")))
-  (should-error (nand t (error "Visible") t)))
+  (should (equal 666 (condition-case nil
+			 (nand t t (error "Visible"))
+		       (error 666)))))
 
 (ert-deftest test-push-back ()
   "Test of `push-' macros"
-  (let ((list '(a)))
+  (let ((list (list 'a)))
     (should (equal (push-back 'b list) '(a b)))
     (should (equal list '(a b)))))
+
+(provide 'test-mb-utils-div)

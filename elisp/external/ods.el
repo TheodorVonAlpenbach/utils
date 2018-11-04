@@ -14,6 +14,6 @@ TODO: write a clearer doc."
   (when sheet
     (warn "SHEET argument is ignored in this version!"))
   (parse-csv-string (ods->cvs filename) ","))
-;;(read-ods "~/projects/veracity/13_001_Miros_HeidrunFSO/sensor-names-13001.ods")
+;;(read-ods "/ls/sc/mbe/projects/veracity/MOLTradition/sensor-names-MOLTradition.ods")
 
 (provide 'ods)

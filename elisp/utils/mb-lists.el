@@ -113,6 +113,7 @@ TODO: something is wrong, see test below."
 (cl-defun unzip (list &optional (n 2)) (nunzip (copy-list list) n))
 ;;(unzip (0-n 10) 3)
 
+(require 'function-signature)
 (defun infix-list (list infix &optional infix-is-function-p) 
   "Zip list with INFIX-es.
 '(a b c) => '(a INFIX b INFIX c).
@@ -223,22 +224,20 @@ where a comes before b in LIST."
     (loop for x1 in (listify list1) nconc 
 	  (loop for x2 in (listify list2)
 		collect (list x1 x2)))))
+;;(combine2 '(a) '(b))
+;;(combine2 '(a b) '(c d e) t)
+;;(combine2 '(a b) '(c d e) t)
 ;;(combine2 '(a (b c)) '(c d) t)
 ;;(combine2 '(a b) nil t)
 
 (cl-defun combine-1 (lists)
   "Generalization of combine2"
-  (when lists
-    (if (= (length lists) 1)
-      (mapcar #'list (listify (first lists)))
-      (loop for x in (combine2 (mapcar #'list (listify (first lists)))
-			       (combine-1 (rest lists)))
-
-	    collect (mapcar #'car x)))))
-;;(combine-1 '((a b) (c (d e))))
-;;(combine-1 '((b c) a))
-;;(combine-1 '((a b)))
-;;(combine-1 '((a b) (c d) (e f)))
+  (if (<= (length lists) 2)
+    (combine2 (first lists) (second lists))
+    (loop for (x y) in (combine2 (first lists)
+				 (combine-1 (rest lists)))
+	  collect (cons x y))))
+;;(combine-1 '((a b) c (d e)))
 
 (cl-defun combine (lists &key key)
   "Generalization of combine2"

@@ -123,7 +123,7 @@ the return value format"
   (let ((res (or (q-eat-regexp q *iso-dttm*)
 		 (q-eat-regexp q *iso-time*)
 		 (q-eat-regexp q *iso-date*))))
-    (when res (decode-iso-date res))))
+    (when res (parse-time res))))
 
 (defun lab-time-point-atom-fixed-parse (q)
   "Parses fixed time point atoms, i.e. ISO date and time
