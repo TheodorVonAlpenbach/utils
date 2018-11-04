@@ -437,7 +437,9 @@ signaled otherwise). In this case, if `current-input-method' is
 `current-input-method' is nil \(or another language the the above
 mentioned\) RESULT is returned unmodified."
   (if (or (not current-input-method)
-	  (string/= current-input-method "norwegian-keyboard")
+	  (not (cl-member current-input-method
+			  '("norwegian-keyboard" "croatian")
+			  :test #'string=))
 	  (and (listp result)
 	       (> (length result) 2)
 	       (eql (first result) 'key-chord)))
