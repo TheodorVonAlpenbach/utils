@@ -14,6 +14,7 @@ See header of imports.cvs for correct format"
 		 (string= :source-id (first args))
 		 (butlast (rest args))
 		 (:question :answer :picture :alternatives :hints))))))
+;;(cram-import-csv "~/projects/utils/elisp/games/cram/serbokroatisk.csv")
 ;;(cram-import-csv "~/projects/utils/elisp/games/cram/imports.csv")
 
 (defun ld-columns (table-designator)
