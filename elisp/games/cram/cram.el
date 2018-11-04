@@ -72,8 +72,9 @@
 	  (format "Problem' new RD is %d (%d)\n"
 	    problem-RD problem-RD-diff)
 	  ;; only in debugging stage
-	  (format "\nDebug sorted problem table\n%S"
-	    (cl-sort (cram-db-problems) #'string> :key #'cram-problem-updated)))))))
+	  ;; (format "\nDebug sorted problem table\n%S"
+	  ;;   (cl-sort (cram-db-problems) #'string> :key #'cram-problem-updated))
+	  )))))
 
 (defun cram-submit ()
   "It's a bit confusing with problem-entry in DB, problem as is, and
