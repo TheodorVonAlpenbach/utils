@@ -282,11 +282,7 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 			 dic-map
 			 mb-indent
 			 quiz-park
-			 ;; not from mb
-			 mb-ert
-			 ;; lsconf-mode
-			 ;; mb-js-mode
-			 )
+			 mb-ert)
 		       *local-requires*)
       do (require m))
 

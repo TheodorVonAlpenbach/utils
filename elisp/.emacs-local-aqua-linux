@@ -2,6 +2,9 @@
 ;;(set-frame-size (selected-frame) 120 61)
 ;;(set-frame-position (selected-frame) 0 0)
 
+(require 'lsconf-mode)
+;;(require 'mb-js-mode)
+
 (setf display-time-format "%H:%M %d/%m")
 
 ;; Local elisp load paths
