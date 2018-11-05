@@ -95,7 +95,8 @@ Two solutions "
 (defun cram-db-problems ()
   "Same as ld-select :problem, but discards the
 *cram-same-problem-limit* newest"
-  (ld-select :problem))
+  ;; (ld-select :problem)
+  (ld-select :problem :where (string-match "sk-ref-2" :source-id)))
 ;;(cram-db-problems)
 
 ;;TODO

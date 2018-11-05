@@ -40,12 +40,15 @@
     ;; A :match records the event of a :user encountering a :problem
     (:match "Matches"
      ((:id :type integer :properties (:unique :primary-key :autogenerate))
+      ;; TODO: rename to timestamp
       (:iso-time :type string)      ; the date and time the :match was presented
+      ;; TODO: rename to :response
       (:answer)                     ; what the user :answered
       (:time :type integer)         ; the time (in millisecond) user spent before answering
+      ;; TODO: for sanity swap order on the following two columns
       (:match-id :type integer)     ; reference to match task
       (:user-id :type integer)      ; reference to match user
-      ;; Glicko ratings with deviation (GR RD)
+      ;; Glicko ratings with deviation (GR RD) just before the match
       (:user-rating :type (number number))
       (:match-rating :type (number number)))))
 
@@ -56,6 +59,7 @@ Note that this is a PLIST format of coldefs. Hence PLIST-P must be set to t in `
 ;;(ld-table-column-definitions (ld-table :users))
 
 (defun cram-update-schema (keyword)
+  "Not used. Need to rename (table column) and add (table column)"
   (setf (ld-table-schema
 	 (ld-find-table (list +cram-db-keyword+ keyword) *cram-db*))
 	(ld-schemadef->schema (find keyword +cram-db-schema-definitions+

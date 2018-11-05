@@ -15,6 +15,7 @@ See header of imports.cvs for correct format"
 		 (butlast (rest args))
 		 (:question :answer :picture :alternatives :hints))))))
 ;;(cram-import-csv "~/projects/utils/elisp/games/cram/serbokroatisk.csv")
+;;(ld-save-database *current-database*)
 ;;(cram-import-csv "~/projects/utils/elisp/games/cram/imports.csv")
 
 (defun ld-columns (table-designator)

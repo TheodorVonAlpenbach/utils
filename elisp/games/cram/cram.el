@@ -22,11 +22,12 @@
   (let ((user (or (cram-current-user)
 		  (cram-register-new-user))))
     (erase-buffer)
+
     (cram-problem-mode)
-    (insert (cram-format-match
-	     user
-	     (cram-draw-problem :method :worst
-				:rating (cram-user-rating user))))
+    (aif (cram-draw-problem :method :worst
+			    :rating (cram-user-rating user))
+      (insert (cram-format-match user it))
+      (message "Could not draw problem. Is the database initialized?"))
     (time-set-reference)
     (evil-emacs-state)))
 ;;(cram-draw-problem)

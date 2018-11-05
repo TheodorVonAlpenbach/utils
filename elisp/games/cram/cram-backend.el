@@ -62,6 +62,19 @@
        :key #'cram-problem-rating-e :test #'>))))
 ;;(cram-get-worst-problem)
 
+(cl-defun cram-get-cram-problem (&optional (user (cram-current-user)))
+  "Return the most recent problem that has not been solved the last three times"
+  (let ((ms (ld-select :match :where (= (cram-user-id user) :user-id))))
+    (loop for m in (mapcar (bind #'head 3 1)
+		     (group (cl-sort ms #'> :key #'cram-match-problem-id)
+		       :key #'cram-match-problem-id :test #'=))
+	  for p = (and m
+		       (ld-select :problem :where (= (cram-match-problem-id m)
+						     :problem-id)))
+	  collect (cram-problem-answer p))
+    ))
+;;(setf qwe (cram-get-cram-problem))
+
 (cl-defun cram-current-problem ()
   "Use this method to retrive a copy of current problem"
   (unless *cram-current-problem*
@@ -91,6 +104,7 @@ the selection strategy somewhat. For instance, :RANDOM avoids the last problems 
     (:current (cram-current-problem))
     (:next (cram-get-problem :method (cram-get-problem-method) :rating rating))
     (:worst (cram-get-worst-problem))
+    (:cram (cram-get-cram-problem))
     (:update-current (cram-db-get-problem (cram-problem-id (cram-current-problem))))))
 
 (cl-defun cram-get-problem-weird (&key (method :worst)
@@ -140,7 +154,9 @@ Why was cram-current-user called with t (update arg)?."
 
 (defun cram-sort-problem-predicate ()
   "Not in use. However an example on use of `combine<'"
-  (combine< (list #'(lambda (x y) (l-explicit< x y (cram-operators))) #'cram-problem-operation)
+  (combine< (list #'(lambda (x y)
+		      (l-explicit< x y (cram-operators)))
+		  #'cram-problem-operation)
 	    (list #'< #'cram-problem-level)))
 ;;(sort (cram-db-problems) (cram-sort-problem-predicate))
 ;;(ld-select :problems :columns (:operation :level))
@@ -246,8 +262,8 @@ The rules can be summarized in these examples:
   (mapcar #'expand-alternatives
     (cons (cram-problem-answer problem)
 	  (awhen (cram-problem-alternatives problem)
-	    (split-string it ";")))))
-;;(cram-expand-alternatives (car (ld-select :problem :where (string-match* "lørdag" :answer))))
+	    (split-string it "|")))))
+;;(cram-expand-alternatives (car (ld-select :problem :where (string-match* "konstant" :answer))))
 ;;(ld-select :problem)
 
 (defun cram-correct-response-p (problem response)
@@ -327,7 +343,8 @@ and update the current database concordingly.
 Comment: the side effects here are not evident from function
 name. Perhaps this function only should calculate score and new
 ratings, and hand the onus of DB update to the caller"
-  (let* ((user (cram-current-user))
+  (let* ((user (or (cram-current-user)
+		   (cram-register-new-user)))
 	 (problem (cram-current-problem))
 	 (score (cram-score problem response time-elapsed))
 	 (old-ratings (extract-ratings user problem))
