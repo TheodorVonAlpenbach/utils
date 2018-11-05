@@ -632,4 +632,25 @@ By default the last line."
       (eow)
       (delete-char n))))
 
+(defun evil-increment-rectangle ()
+  (interactive)
+  (let ((p (point))
+	(m (mark)))
+    (let ((b (min p m))
+	  (e (1- (max p m))))
+      (message "%d %d" b e)
+      (evil-apply-on-block
+       (lexical-let (last)
+	 #'(lambda (beg end)
+	     (if last
+	       (let ((s (number-to-string (incf last))))
+		 (overwrite-region s beg end)
+		 (qwe beg end))
+	       (setf last (string-to-number (region-string beg (1+ end)))))))
+       b e nil))))
+;;(increment-rectangle)
+
+(defun qwe (beg end)
+  (message "%d %d" beg end))
+
 (provide 'mb-evil)
