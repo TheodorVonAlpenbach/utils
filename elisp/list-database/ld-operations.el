@@ -151,7 +151,7 @@ It autogenerates values if this is specified and checks for the property unique"
 	collect value)))
 ;;(ld-compile-new-row (ld-table :users) '("Ludvik" "7" 1500 350) nil)
 
-(cl-defun ld-create-metadata (&optional (dttm (iso-date-and-time)))
+(cl-defun ld-create-metadata (&optional (dttm (iso-date-and-time :with-seconds t)))
   (list :metadata :created dttm :updated dttm))
 
 (cl-defun ld-insert (tab values &key columns)
@@ -339,7 +339,7 @@ For order-by we must convert columns to column-positions."
     (case (length rows)
       (0 (ld-warning "No single row was selected in :where expression."))
       (1 (let ((row (first rows)))
-	   (ld-set-metadatum (iso-date-and-time)
+	   (ld-set-metadatum (iso-date-and-time :with-seconds t)
 			     :updated (ld-row-metadata (first rows)))
 	   (loop for value in (listify values)
 		 for colfun in (listify columns)
