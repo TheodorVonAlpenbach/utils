@@ -66,7 +66,7 @@ TODO: when bind* is finished this method is obsolete (or becomes a simple one-li
 	(and x-pos y-pos (< x-pos y-pos))))))
 ;;(funcall (explicit< '(c a b c d)) 'e 'c)
 
-(cl-defun group-positions (list &key (test #'eq) (key #'identity))
+(cl-defun group-positions (list &key (test #'eql) (key #'identity))
   "Groups LIST into a list of sublists where all elements are equal
 according to TEST and KEY."
   (loop for p in (pairs list :key key)	
@@ -76,7 +76,7 @@ according to TEST and KEY."
 ;;(group-positions '((1 2) (1 2)) :test #'equal)
 ;;(equal '(1 2) '(1 2))
 
-(cl-defun group (list &key (test #'eq) (key #'identity))
+(cl-defun group (list &key (test #'eql) (key #'identity))
   "Groups LIST into a list of sublists where all elements are equal
 according to TEST and KEY.
 Note that group to not consider LIST as a set. To do this, LIST must be sorted first."
