@@ -1,0 +1,6 @@
+ld-rename-column column-designator new-keyword
+ld-add-column table-designator keyword fn(row)
+ld-delete-column table-designator fn(row)
+
+ld-copy-database db path newname
+ld-backup
