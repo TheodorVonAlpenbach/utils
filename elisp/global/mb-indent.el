@@ -107,7 +107,7 @@ SYMBOL can be a symbol or a list of symbols. See function
 	     read-csv string-replace-intv remove*
 	     put-text-property do-tuples/o draw
 	     substitute-if xml-extract-nodes
-	     write-csv call-if)
+	     write-csv call-if cl-set-difference)
   'prog2)
 
 (cl-indent '(for define-derived-mode defun-ajax)
@@ -127,7 +127,7 @@ SYMBOL can be a symbol or a list of symbols. See function
 (cl-indent '(find-music collaps-multi-spectrum map-spectra
 	     with-transposed-tree grid-transform-data
 	     format-list remove-if remove-if-not copy-if draw-if
-	     sort cl-sort find-if-not cl-find remove cl-remove
+	     sort cl-sort find-if-not cl-find find-if cl-find-if remove cl-remove
 	     cl-remove-if-not group mapcar cl-mapcar mapcan maptree copy-object-to
 	     apply funcall count-if re-search-backward re-search-forward)
   1)
