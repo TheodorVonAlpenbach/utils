@@ -15,6 +15,7 @@ See header of imports.cvs for correct format"
 		 (butlast (rest args))
 		 (:question :answer :picture :alternatives :hints))))))
 ;;(cram-import-csv "~/projects/utils/elisp/games/cram/serbokroatisk.csv")
+;;(length (ld-select :problem))
 ;;(ld-save-database *current-database*)
 ;;(cram-import-csv "~/projects/utils/elisp/games/cram/imports.csv")
 
@@ -31,7 +32,6 @@ See header of imports.cvs for correct format"
 ;;(ld-select :problem :where (string-equal "Šerbedžija" :answer))
 ;;(ld-select :problem :where (string-match "erbed" :answer))
 ;;(ld-select :problem :where (string-match "havn" :answer))
-;;(length (ld-select :problem))
 ;;(ld-save-database *current-database*)
 ;;(ld-select :problem :where (string= :answer "Bern"))
 ;;(ld-update :problem (= :id 17) '("Serbedzija") (:alternatives))

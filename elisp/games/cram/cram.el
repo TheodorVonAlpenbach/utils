@@ -24,7 +24,7 @@
     (erase-buffer)
 
     (cram-problem-mode)
-    (aif (cram-draw-problem :method :worst
+    (aif (cram-draw-problem :method :cram ; :worst
 			    :rating (cram-user-rating user))
       (insert (cram-format-match user it))
       (message "Could not draw problem. Is the database initialized?"))
@@ -276,8 +276,7 @@ the *cram-current-problem* which is yet another structure."
 	    (format " [%s (R:%d RD:%d)]" 
 	      (cram-user-name user)
 	      (cram-user-rating-e user)
-	      (cram-user-rating-d user))
-	    "qwe")))
+	      (cram-user-rating-d user)))))
 ;;(cram-mode-line-user-description)
 
 (cl-defun cram-mode-line ()

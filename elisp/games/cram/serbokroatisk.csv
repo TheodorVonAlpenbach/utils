@@ -60,14 +60,14 @@ sk-ref-2-6;pijem;(jeg) drikker;;;;3
 sk-ref-2-7;pišem;(jeg) skriver;;;;3
 sk-ref-2-8;pušim;(jeg) røyker;;;;3
 sk-ref-2-9;putujem;(jeg) reiser;;;;3
-sk-ref-2-10;radim;(jeg) arbeider;;;;3
+sk-ref-2-10;radim;(jeg) arbeider;;jobber;;3
 sk-ref-2-11;sedim;(jeg) sitter;;;;3
 sk-ref-2-12;spavam;(jeg) sover;;;;3
 sk-ref-2-13;stanujem;(jeg) bor;;;;3
 sk-ref-2-14;učim;(jeg) studerer;;;;3
 sk-ref-2-15;ustajem;(jeg) reiser (meg);;;;3
 sk-ref-2-16;ali;men;;;;3
-sk-ref-2-17;brzo;raskt;;;;3
+sk-ref-2-17;brzo;raskt;;fort;;3
 sk-ref-2-18;često;ofte;;;;3
 sk-ref-2-19;dobro;bra;;godt;;3
 sk-ref-2-20;glasno;høyt;;;;3
@@ -87,3 +87,50 @@ sk-ref-2-33;suviše;for mye;;;;3
 sk-ref-2-34;uvek;alltid;;;;3
 sk-ref-2-35;veselo;lystig;;muntert;;3
 sk-ref-2-36;zimi;om vinteren;;;;3
+sk-ref-3-1;lekar;lege;;;;3
+sk-ref-3-2;grad;by;;;;3
+sk-ref-3-3;selo;landsby;;;;3
+sk-ref-3-4;dete;barn;;;;3
+sk-ref-3-5;gorim;brenner;;;;3
+sk-ref-3-6;učitelj;lærer;;;;3
+sk-ref-3-7;mlek;melk;;;;3
+sk-ref-3-8;bez;uten;;;;3
+sk-ref-3-9;blizu;nær;;;;3
+sk-ref-3-10;do;til;;;;3
+sk-ref-3-11;iz;ut (av);;;;3
+sk-ref-3-12;od;fra;;;;3
+sk-ref-3-13;kroz;gjennom;;;;3
+sk-ref-3-14;niz;ned;;;;3
+sk-ref-3-15;na;på;;;;3
+sk-ref-3-16;u;i;;;;3
+sk-ref-3-17;padam;(jeg) faller;;;;3
+sk-ref-3-18;per;penn;;;;3
+sk-ref-3-19;čaj;te;;;;3
+sk-ref-3-20;šećer;sukker;;;;3
+sk-ref-3-21;vrt;hage;;;;3
+sk-ref-3-22;voz;tog;;;;3
+sk-ref-3-23;prozor;vindu;;;;3
+sk-ref-3-24;čekić;hammer;;;;3
+sk-ref-3-25;sin;sønn;;;;3
+sk-ref-3-26;konj;hest;;;;3
+sk-ref-3-27;nož;kniv;;;;3
+sk-ref-3-28;muž;ektemann;;mann;;3
+sk-ref-3-29;govorim;(jeg) snakker;;;;3
+sk-ref-3-30;vidim;(jeg) ser;;;;3
+sk-ref-3-31;volim;(jeg) liker;;;;3
+sk-ref-3-32;zbogom;hadet;;ha det;;3
+sk-ref-3-33;dajem;(jeg) gir;;;;3
+sk-ref-3-34;brod;båt;;;;3
+sk-ref-3-35;džep;lomme;;;;3
+sk-ref-3-36;pasoš;pass;;;;3
+sk-ref-3-37;bioskop;kino;;;;3
+sk-ref-3-38;breg;ås;;;;3
+sk-ref-3-39;dosta;nok;;;;3
+sk-ref-3-40;gde;hvor;;;;3
+sk-ref-3-41;hleb;brød;;;;3
+sk-ref-3-42;jezik;språk;;;;3
+sk-ref-3-43;komad;stykke;;;;3
+sk-ref-3-44;mladić;ung mann;;;;3
+sk-ref-3-45;pod;gulv;;;;3
+sk-ref-3-46;slušam;(jeg) hører (på);;lytter;;3
+sk-ref-3-47;zašto;hvorfor;;;;3

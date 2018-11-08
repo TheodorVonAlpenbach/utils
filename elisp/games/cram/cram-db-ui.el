@@ -67,13 +67,14 @@ from the more primitive function `cram-user-id'"
 ;;(cram-db-last-problem)
 
 ;;TODO
-(cl-defun cram-db-random-problem (&key (rating +cram-default-rating+)
-				     (window +cram-default-rating-window+)
-				     (idle-minutes 10))
+(cl-defun cram-db-random-problem (&key (rating (car +cram-default-rating+))
+				    (window +cram-default-rating-window+)
+				    (idle-minutes 10))
   "Low level function that accesses internals of a table.
 TODO: Avoid crash on empty db"
-  (aif (ld-select :match
-	 :where (and (awhen :rating (within it (1-sphere window rating)))
+  (aif (ld-select :problem
+	 :where (and (string-match +cram-ref-filter+ :source-id)
+		     (awhen rating (within it (1-sphere window rating)))
 		     (time< ::updated (add-time (now) :minute (- idle-minutes)))))
     (random-elt it)
     (if (< window 100000)
@@ -92,12 +93,26 @@ Two solutions "
   (first (ld-select :problem :where (= :id id))))
 ;;(cram-db-get-problem 10)
 
-(defun cram-db-problems ()
+(cl-defun cram-db-problems (&optional (quarantine 1))
   "Same as ld-select :problem, but discards the
-*cram-same-problem-limit* newest"
-  ;; (ld-select :problem)
-  (ld-select :problem :where (string-match "sk-ref-2" :source-id)))
+*cram-same-problem-limit* newest.
+Optional QUARANTINE is not implemented."
+  (if +cram-ref-filter+
+    (ld-select :problem :where (string-match +cram-ref-filter+ :source-id))
+    (ld-select :problem)))
 ;;(cram-db-problems)
+
+(cl-defun cram-db-unused-problems ()
+  "Return the :problem entries that is not in any :match entry."
+  (let ((ps (cram-db-problems)))
+    (cl-set-difference ps (ld-select :match)
+      :test #'(lambda (x y) (= (cram-problem-id x)
+			       (cram-match-problem-id y))))))
+;;(length (cram-db-unused-problems))
+;;(ld-select :problem :where (= :id 107))
+;;(ld-select :match :where (= :match-id 107))
+;;(length (ld-select :match))
+;;(cl-set-difference '((1 2) (2 4)) '((1 1) (3 3)) :test #'(lambda (x y) (= (car x) (car y))))
 
 ;;TODO
 (defun cram-db-ratings-by-type (operation level)

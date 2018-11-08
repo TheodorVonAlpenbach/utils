@@ -7,6 +7,8 @@
 (defconst +cram-default-rating+ +glicko-init-rating+)
 (defconst +cram-default-user-name+ "Mats")
 (defconst +cram-default-rating-window+ 200)
+(defconst +cram-ref-filter+ "^sk-ref-[23]"
+  "A regular expression that must match every drawable problem")
 
 (defun cram-default-problem-rating (operation level)
   "Eventually this method should take into account the problem nature (level and operation)"
@@ -28,13 +30,6 @@
     (cram-set-current-user (cram-db-last-user)))
   *cram-current-user*)
 
-(defun cram-current-user (&optional update) 
-  (when *current-database*
-    (when (or update
-	      (null *cram-current-user*))
-      (cram-set-current-user (or (cram-db-last-user)
-				 (cram-db-get-user +cram-default-user-name+))))
-    *cram-current-user*))
 ;;(cram-current-user t)
 
 ;;; Current problem
@@ -64,16 +59,31 @@
 
 (cl-defun cram-get-cram-problem (&optional (user (cram-current-user)))
   "Return the most recent problem that has not been solved the last three times"
-  (let ((ms (ld-select :match :where (= (cram-user-id user) :user-id))))
-    (loop for m in (mapcar (bind #'head 3 1)
-		     (group (cl-sort ms #'> :key #'cram-match-problem-id)
-		       :key #'cram-match-problem-id :test #'=))
-	  for p = (and m
-		       (ld-select :problem :where (= (cram-match-problem-id m)
-						     :problem-id)))
-	  collect (cram-problem-answer p))
-    ))
-;;(setf qwe (cram-get-cram-problem))
+  (or (first (cram-db-unused-problems))
+      (let ((ms (ld-select :match :where (= (cram-user-id user) :user-id))))
+	(or (loop for m3 in (mapcar (bind #'head 3 1)
+			      (group (cl-sort ms
+				       #'> :key #'cram-match-problem-id)
+				:key #'cram-match-problem-id :test #'=))
+		  for id = (cram-match-problem-id (first m3))
+		  for p = (first (ld-select :problem :where (= id :id)))
+		  ;; do (message "%s" (cram-problem-answer p))
+		  if (and
+		      m3
+		      ;; must have been asked last time more than one minute ago
+		      (> (time- (now)
+				(cram-match-timestamp (first m3)) :minute) 1)
+		      (string-match +cram-ref-filter+
+				    (cram-problem-source-id p))
+		      (< (length m3) 3)
+		      (loop for m in m3
+			    ;; do (message "%s" (cram-match-response m))
+			    thereis (not (cram-correct-response-p
+					  p (cram-match-response m)))))
+		  return p)
+	    (cram-db-random-problem :window 10000)))))
+;;(cram-get-cram-problem)
+;;(time- (add-etime-date (now) :day 1))
 
 (cl-defun cram-current-problem ()
   "Use this method to retrive a copy of current problem"
