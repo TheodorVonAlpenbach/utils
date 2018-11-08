@@ -64,4 +64,14 @@ application" (ld-database-name *current-database*))))
 	(tablepos (position id tables :key #'ld-table-identifier :test #'equal)))
     (setf (nth tablepos tables) new-table)))
 
+(defun ld-rename-column (table-designator column-keyword new-keyword)
+  (setf (car (cddadr
+	      (cl-find column-keyword
+		(ld-schema-column-definitions (ld-schema table-designator))
+		:key #'ld-column-keyword)))
+	new-keyword))
+;;(ld-rename-column :match :answer :response)
+(cddadr '(:column (:cram :problem :source-id) "SOURCE-ID" string (:unique)))
+
+
 (provide 'ld-database)
