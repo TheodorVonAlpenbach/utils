@@ -52,9 +52,13 @@ to a legal scheme structure."
 (cl-defun ld-join-schemas (&rest schemas)
   (and schemas
        (ld-make-schema
-	(make-keyword (concat* (mapcar (compose #'downcase #'keyword-name #'ld-schema-identifier) schemas)
+	(make-keyword (concat* (mapcar (compose #'downcase
+						#'keyword-name
+						#'ld-schema-identifier)
+				 schemas)
 			       :in "-and-" :pre "join-of-"))
-	:column-definitions (apply #'append (mapcar #'ld-column-definitions schemas))
+	:column-definitions (apply #'append
+			      (mapcar #'ld-column-definitions schemas))
 	:plist-p nil)))
 ;;(ld-join-schemas (ld-schema emps)(ld-schema comps))
 

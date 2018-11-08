@@ -25,8 +25,10 @@
   "Returns the column that is the primary key. If
 AS-COLUMN-DEFINITION-P is non nil the schema definition for that
 column is returned."
-  (let ((coldef (find-if #'ld-column-primary-key-p (ld-schema-column-definitions schema))))
-    (if as-column-definition-p coldef (ld-column-identifier coldef))))
+  (let ((coldef (find-if #'ld-column-primary-key-p
+		  (ld-schema-column-definitions schema))))
+    (if as-column-definition-p
+      coldef (ld-column-identifier coldef))))
 ;;(ld-primary-key (ld-schema :users))
 
 (defun ld-column-comparator (coldef)

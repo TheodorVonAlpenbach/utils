@@ -11,7 +11,8 @@
 ;; shortcuts to schema properties
 (defsubst ld-table-identifier (table) (ld-schema-identifier (ld-table-schema table)))
 (defsubst ld-table-name (table) (ld-schema-name (ld-table-schema table)))
-(defsubst ld-table-column-definitions (table) (ld-schema-column-definitions (ld-table-schema table)))
+(defsubst ld-table-column-definitions (table)
+  (ld-schema-column-definitions (ld-table-schema table)))
 ;;(ld-schema-column-definitions '(x y z ae oe aa))
 
 (defun ld-table-p (obj)
@@ -41,7 +42,7 @@
   (if (ld-schema-p schema-designator)
     schema-designator
     (ld-table-schema (ld-table schema-designator))))
-;;(ld-schema :tasks)
+;;(ld-schema :user)
 
 ;;; Cloning manipulations
 (defun ld-clone-table (table &optional table-clone-level)
