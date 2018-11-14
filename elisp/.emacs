@@ -93,9 +93,6 @@ This directory is shared, see `+shared-dir+'")
 (defconst +mb-lisp-dir+ "~/projects/utils/elisp"
   "Default directory for mb-lisp files.")
 
-(defvar *local-load-paths* nil
-  "Additional local load paths. Should be defined in .emacs-local-***.")
-
 (defun mb-emacs-local-filename ()
   (let* ((path (expand-file-name
 		(format ".emacs-local-%s-%s"
@@ -110,8 +107,13 @@ This directory is shared, see `+shared-dir+'")
 (defconst +emacs-local+ (mb-emacs-local-filename)
   "Local emacs settings")
 
+(defvar *local-load-paths* nil
+  (format "Additional local load paths. Should be defined in\n%s"
+	  (mb-emacs-local-filename)))
+
 (defvar *local-requires* nil
-  "List of Emacs Lisp modules that are required by local emacs")
+  (format "Additional local `require'-ments. Should be defined in\n%s"
+	  (mb-emacs-local-filename)))
 
 (defvar *cygwin-root* (when (cygwin-emacs-p) "/")
   "Root directory for cygwin. Typically 'C:/cygwin/' or simply '/'")
