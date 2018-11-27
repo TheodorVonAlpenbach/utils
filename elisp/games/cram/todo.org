@@ -1,3 +1,5 @@
+* Issues
+** Answers should be case insensitive
 * Plan
   
 Most elements are like maths. Differences:
