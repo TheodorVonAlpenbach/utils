@@ -405,7 +405,7 @@ see `bol'"
   "Move to beginning of the current defun and return POINT."
   ;; Can't use bo-thing since bounds-of-thing-at-point fails when
   ;; defun is not indented according to common style!
-  (forward-char 1)
+  (condition-case nil (forward-char 1) (error nil))
   (beginning-of-defun n)
   (point))
 ;;(bod)
@@ -413,7 +413,7 @@ see `bol'"
 (defun eod (&optional n)
   "Move to end of the current defun and return POINT."
   ;; See implementation note in `bod'.
-  (backward-char 1)
+  (condition-case nil (backward-char 1) (error nil))
   (end-of-defun n)
   (backward-char 1)
   (point))

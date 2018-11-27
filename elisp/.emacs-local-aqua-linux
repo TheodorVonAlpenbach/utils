@@ -2,15 +2,16 @@
 ;;(set-frame-size (selected-frame) 120 61)
 ;;(set-frame-position (selected-frame) 0 0)
 
-(require 'lsconf-mode)
-;;(require 'mb-js-mode)
-
 (setf display-time-format "%H:%M %d/%m")
 
 ;; Local elisp load paths
 (setf *local-load-paths* '("~/cvs/sources/imms/src/elisp/"
 			   "~/lilypond/usr/share/emacs/site-lisp/"
 			   "~/git/utils/elisp/lsconfig/"))
+
+(setf *local-requires* '(lsconf-mode
+			 ;; mb-js-mode
+			 ))
 
 ;; (setf *local-requires* '(lsconf-mode qt-chess browse-kill-ring))
 (setf *local-requires* '(qt-chess browse-kill-ring))
