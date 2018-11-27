@@ -7,7 +7,7 @@
 (defconst +cram-default-rating+ +glicko-init-rating+)
 (defconst +cram-default-user-name+ "Mats")
 (defconst +cram-default-rating-window+ 200)
-(defconst +cram-ref-filter+ "^sk-ref-[23]"
+(defconst +cram-ref-filter+ "^sk-ref-[3]"
   "A regular expression that must match every drawable problem")
 
 (defun cram-default-problem-rating (operation level)
@@ -29,6 +29,14 @@
   (unless *cram-current-user*
     (cram-set-current-user (cram-db-last-user)))
   *cram-current-user*)
+
+(defun cram-current-user (&optional update)
+  (when *current-database*
+    (when (or update
+              (null *cram-current-user*))
+      (cram-set-current-user (or (cram-db-last-user)
+                                 (cram-db-get-user +cram-default-user-name+))))
+    *cram-current-user*))
 
 ;;(cram-current-user t)
 
@@ -269,10 +277,10 @@ The rules can be summarized in these examples:
 
 (defun cram-expand-alternatives (problem)
   "Collect expansions of PROBLEM solution and all alternatives."
-  (mapcar #'expand-alternatives
-    (cons (cram-problem-answer problem)
-	  (awhen (cram-problem-alternatives problem)
-	    (split-string it "|")))))
+  (flatten (mapcar #'expand-alternatives
+	     (cons (cram-problem-answer problem)
+		   (awhen (cram-problem-alternatives problem)
+		     (split-string it "|"))))))
 ;;(cram-expand-alternatives (car (ld-select :problem :where (string-match* "konstant" :answer))))
 ;;(ld-select :problem)
 
@@ -289,8 +297,9 @@ each item in the ALTERNATIVES column of PROBLEM.
 
 See also cram-extract-alternatives.
 "
-  (cl-member response (flatten (cram-expand-alternatives problem))
-	     :test #'string=))
+  (cl-member (downcase response)
+	     (mapcar #'downcase
+	       (cram-expand-alternatives problem)) :test #'string=))
 ;;(cram-correct-response-p (car (ld-select :problem :where (string-match "Klaus" :answer))) "Doldinger")
 
 (cl-defun cram-score (problem response time-elapsed
