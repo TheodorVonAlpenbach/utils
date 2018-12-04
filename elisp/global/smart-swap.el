@@ -1,9 +1,16 @@
 ;;; Swap files. For older versions, see archive.
 
-(defconst +simple-swaps+
-  '((".emacs" ".emacs-local-azure-cygwin" "~/projects/utils/elisp/")
-    (".emacs" ".emacs-local-azure-linux" "~/projects/utils/elisp/"))
-  "TODO: enable :search")
+(defvar *simple-swaps*
+;; TODO: enable :search
+  '()
+  "A list of explicitly defined swap pairs. Each list element is
+on the form
+
+\(FILENAME-SANS-DIRECTORY1 FILENAME-SANS-DIRECTORY2 DIRECTORY\),
+
+for example,
+
+\(list \".emacs\" \".emacs-local-azure-cygwin\" \"~/projects/utils/elisp/\"\).")
 
 (defconst +smart-swaps+
   '((tex pdf)
@@ -65,12 +72,12 @@
      (if (string= bfn fn2)
        (find-file fn1)))))
 
-(cl-defun simple-swap (&optional (swaps +simple-swaps+))
+(cl-defun simple-swap (&optional (swaps *simple-swaps*))
   (interactive)
   (loop for (f1 f2 d) in swaps
 	for fn1 = (expand-file-name f1 d)
 	for fn2 = (expand-file-name f2 d)
-	do (simple-swap-1 fn1 fn2)))
+	thereis (simple-swap-1 fn1 fn2)))
 ;;(simple-swap)
 
 (cl-defun smart-swap (&optional (swaps +smart-swaps+))
