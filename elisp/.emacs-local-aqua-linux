@@ -9,12 +9,11 @@
 			   "~/lilypond/usr/share/emacs/site-lisp/"
 			   "~/git/utils/elisp/lsconfig/"))
 
-(setf *local-requires* '(lsconf-mode
-			 ;; mb-js-mode
-			 ))
+(pushnew-list
+ '((".emacs" ".emacs-local-aqua-linux" "~/projects/utils/elisp/"))
+ *simple-swaps* :test #'equal)
 
-;; (setf *local-requires* '(lsconf-mode qt-chess browse-kill-ring))
-(setf *local-requires* '(qt-chess browse-kill-ring))
+(setf *local-requires* '(lsconf-mode qt-chess browse-kill-ring))
 
 ;; Sentences, see info node Sentences
 (setf sentence-end "[.?!][]\"')]*\\($\\|\t\\| \\)[ \t\n]*")
@@ -66,6 +65,7 @@
 	(,+mb-lisp-dir+ "mode-extensions/mb-octave.el")
 	(,+mb-lisp-dir+ "mode-extensions/mb-tex.el")
 	(,+mb-lisp-dir+ "quiz/quiz-park.el")
+	(,+mb-lisp-dir+ "quiz/qp-runder.txt")
 	(,+mb-lisp-dir+ "global/LS.el")
 
 	;; local scripts
