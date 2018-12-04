@@ -239,6 +239,8 @@ By default the last line."
   (define-key insert-map "F" #'cl-ify-defun)
   (define-key insert-map "q" #'fill-paragraph)
   (define-key insert-map "p" #'insert-provide)
+  (define-key insert-map "r" #'reverse-sexps)
+  (define-key insert-map "R" #'rotate-sexps)
   (define-key insert-map "t" #'insert-time)
   (define-key insert-map "T" #'(lambda () (interactive) (insert-time 3)))
   (define-key insert-map "u" #'uncomment-region*)
