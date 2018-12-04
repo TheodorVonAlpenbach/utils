@@ -24,7 +24,7 @@ If ARGUMENT is a string insert it in the pair of curly parentheses."
 ;;(texinfo-def-insert-@-fn "xref")
 
 (defconst +texinfo-inserts+
-  '(var xref ref pxref code result uref file))
+  '(var xref ref pxref code result uref file samp verb))
 
 (cl-defmacro texinfo-define-inserts
     (&optional (symbols +texinfo-inserts+))
@@ -62,6 +62,7 @@ If ARGUMENT is a string insert it in the pair of curly parentheses."
     (define-key map "t" 'texinfo-insert-@table)
     (define-key map "u" 'texinfo-insert-@uref)
     (define-key map "v" 'texinfo-insert-@var)
+    (define-key map "V" 'texinfo-insert-@verb)
     (define-key map "x" 'texinfo-insert-@example)
     map))
 
