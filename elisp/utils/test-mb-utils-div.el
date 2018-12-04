@@ -61,4 +61,12 @@
     (should (equal (push-back 'b list) '(a b)))
     (should (equal list '(a b)))))
 
+(ert-deftest test-pushnew-list ()
+  "Test of `pushnew-list'"
+  (let ((list '(c d e)))
+    (should (equal (pushnew-list '(a b c) list) '(a b c d e)))
+    (should (equal list '(a b c d e)))))
+
+
+
 (provide 'test-mb-utils-div)
