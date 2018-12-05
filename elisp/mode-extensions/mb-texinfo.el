@@ -66,13 +66,20 @@ If ARGUMENT is a string insert it in the pair of curly parentheses."
     (define-key map "x" 'texinfo-insert-@example)
     map))
 
+(defun mb-texinfo-snippet-map ()
+  (let ((map (make-sparse-keymap)))
+    (define-key map "e" 'texinfo-insert-group/example-snippet)
+    (define-key map "E" 'texinfo-insert-example-snippet)
+    (define-key map "g" 'texinfo-insert-group-snippet)
+    (define-key map "i" 'texinfo-insert-newline)
+    map))
+
 (defun mb-texinfo-map ()
   (let ((map (make-sparse-keymap))
-	(insert-map         (make-sparse-keymap))  ; i
 	(update-map         (make-sparse-keymap))  ; u
 	(tex-map            (make-sparse-keymap))  ; t
 	(makeinfo-map       (make-sparse-keymap))  ; m
-	(ref-map            (make-sparse-keymap))  ; r
+	(snippet-map        (make-sparse-keymap))  ; s
 	(texinfo-format-map (make-sparse-keymap))) ; e
     ;; map is currently valid only on normal and visual state
     (key-chord-define evil-normal-state-local-map "gh" map)
@@ -85,6 +92,7 @@ If ARGUMENT is a string insert it in the pair of curly parentheses."
     (define-key map "o" 'texinfo-insert-block)
 
     (define-key map "r" (mb-texinfo-ref-map))
+    (define-key map "s" (mb-texinfo-snippet-map))
     (define-key map "i" (mb-texinfo-insert-map))
 
     (define-key map "u" update-map)
@@ -133,5 +141,48 @@ If ARGUMENT is a string insert it in the pair of curly parentheses."
 (defun mb-texinfo-install-html ()
   (interactive)
   (call-process* "cp" "-r" "lsbin" "/ls/platinum/u1/mbe/html/"))
+
+;;; Snippets
+(defun texinfo-insert-newline (&optional n no-trailing-space-p)
+  "Insert a texinfo commented newline at point"
+  (interactive)
+  (bol)
+  (loop with s = (format "##%s\n" (if no-trailing-space-p "" " "))
+	repeat (or n 1) do (insert s))
+  (unless no-trailing-space-p (eol)))
+
+(defun texinfo-insert-env (env &optional no-space-p no-intraspace-p)
+  "Insert an texinfo ENV enviroment snippet within a comment
+region surrounded by empty lines. If optional NO-SPACE-P is nil,
+then skip the surrounding empty lines. If optional
+NO-INTRASPACE-P is nil, then the additional space between the
+environment delimiter lines is skipped."
+  (bol)
+  (unless no-space-p (texinfo-insert-newline 1 t))
+  (insert (format "## @%s\n" (sstring env) (sstring env)))
+  (texinfo-insert-newline 1 t)
+  (insert (format "## @end %s\n" (sstring env) (sstring env)))
+  (unless no-space-p (texinfo-insert-newline 1 t))
+  (previous-line (+ 2 (if no-space-p 0 1)))
+  (eol))
+
+(defun texinfo-insert-group-snippet (&optional no-space-p)
+  "Insert a group snippet within a comment region."
+  (interactive)
+  (texinfo-insert-env 'group no-space-p))
+
+(defun texinfo-insert-example-snippet (&optional no-space-p)
+  "Insert a example snippet within a comment region."
+  (interactive)
+  (texinfo-insert-env 'example no-space-p))
+
+(defun texinfo-insert-group/example-snippet (&optional no-space-p)
+  "Insert a group example snippet within a comment region."
+  (interactive)
+  (texinfo-insert-env 'group nil t)
+  (bol)
+  (kill-line 1)
+  (texinfo-insert-env 'example t))
+
 
 (provide 'mb-texinfo)

@@ -10,6 +10,7 @@
     (key-chord-define evil-normal-state-local-map "gh" mb-local-map)
     (define-key mb-local-map "i" (mb-texinfo-insert-map))
     (define-key mb-local-map "r" (mb-texinfo-ref-map))
+    (define-key mb-local-map "s" (mb-texinfo-snippet-map))
     (define-key mb-local-map "c" (mb-octave-insert-map))
     (define-key mb-local-map "t" (mb-octave-test-map))
     (define-key mb-local-map "b" (octave-breakpoint-map))
