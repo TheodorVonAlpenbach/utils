@@ -10,6 +10,7 @@
 (defun octave-debug-map ()
   (let ((map (make-sparse-keymap)))
     (define-key map "r" #'octave-run)
+    (define-key map "l" #'octave-run-last)
     (define-key map "c" #'octave-run-to-cursor)
     (define-key map "w" #'octave-where)
     (define-key map "S" #'octave-status)
@@ -140,8 +141,7 @@ step line markings, etc"
   (octave-debug-mode 1)
   (save-excursion
     (octave-update-dbstops-buffer (current-buffer))
-    (end-of-defun)
-    (octave-eval-current-line)))
+    (octave-eval-defun-test)))
 
 (defun octave-debug-refresh-display ()
   (if (octave-debug-p)
@@ -200,6 +200,13 @@ step line markings, etc"
     (octave-resume)
     (octave-debug-start)
     (octave-debug-refresh-display)))
+
+(defun octave-run-last ()
+  "Re-eval last defun test expression."
+  (interactive)
+  (octave-update-all-dbstop)
+  (octave-send-string *octave-last-debug-expression* t)
+  (octave-debug-refresh-display))
 
 (defun octave-run-to-cursor ()
   (interactive)

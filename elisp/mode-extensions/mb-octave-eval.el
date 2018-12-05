@@ -107,8 +107,19 @@ the output buffer prompt.)"
   (let* ((regexp "^[[:space:]#]*\\(.*\\)")
 	 (s (string-trim (string-match* regexp (line-string) :num 1))))
     (if s
-      (octave-send-string (format "\n%s" s) t)
+      (let ((expr (format "\n%s" s)))
+	(setf *octave-last-debug-expression* expr)
+	(octave-send-string expr t))
       (message "No expression at point"))))
+
+(defvar *octave-last-debug-expression* nil)
+;;(nilf *octave-last-debug-expression*)
+
+(defun octave-eval-defun-test ()
+  "Eval comment expression after defun at point.
+Also stores this expression in `*octave-last-debug-expression*'."
+  (end-of-defun)
+  (octave-eval-current-line))
 
 (defvar *octave-eval-history* nil)
 ;;(nilf *octave-eval-history*)
