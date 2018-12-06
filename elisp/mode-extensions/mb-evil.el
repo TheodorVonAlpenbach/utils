@@ -250,6 +250,7 @@ By default the last line."
   (define-key insert-map "\"" #'(lambda (n) (interactive "P") (mb-surround "\"" (or n 1))))
   (define-key insert-map "`" #'(lambda (n) (interactive "P") (mb-surround "`" (or n 1))))
   (define-key insert-map "g" #'(lambda (n) (interactive "P") (mb-surround "«" (or n 1))))
+  (define-key insert-map "[" #'(lambda (n) (interactive "P") (mb-surround "[" (or n 1))))
   (define-key insert-map "\\" #'(lambda (n) (interactive "P") (mb-undo-surround (or n 1))))
   (define-key insert-map "@" #'texinfo-insert-@var))
 
@@ -604,6 +605,7 @@ By default the last line."
     ("(" ")")
     ("`" "'")
     ("«" "»")
+    ("[" "]")
     (otherwise left)))
 ;;(mapcar #'mb-surround-lookup-right (list "`" "'" "("))
 
