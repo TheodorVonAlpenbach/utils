@@ -1,17 +1,5 @@
 ;;; Swap files. For older versions, see archive.
 
-(defvar *simple-swaps*
-;; TODO: enable :search
-  '()
-  "A list of explicitly defined swap pairs. Each list element is
-on the form
-
-\(FILENAME-SANS-DIRECTORY1 FILENAME-SANS-DIRECTORY2 DIRECTORY\),
-
-for example,
-
-\(list \".emacs\" \".emacs-local-azure-cygwin\" \"~/projects/utils/elisp/\"\).")
-
 (defconst +smart-swaps+
   '((tex pdf)
     (ly pdf)

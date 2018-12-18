@@ -118,6 +118,18 @@ This directory is shared, see `+shared-dir+'")
 (defvar *cygwin-root* (when (cygwin-emacs-p) "/")
   "Root directory for cygwin. Typically 'C:/cygwin/' or simply '/'")
 
+(defvar *simple-swaps*
+;; TODO: enable :search
+  '()
+  "A list of explicitly defined swap pairs. Each list element is
+on the form
+
+\(FILENAME-SANS-DIRECTORY1 FILENAME-SANS-DIRECTORY2 DIRECTORY\),
+
+for example,
+
+\(list \".emacs\" \".emacs-local-azure-cygwin\" \"~/projects/utils/elisp/\"\).")
+
 (defvar *lilypond-home* nil
   "Default directory for LilyPond hierarchy")
 

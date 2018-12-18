@@ -9,9 +9,9 @@
 			   "~/lilypond/usr/share/emacs/site-lisp/"
 			   "~/git/utils/elisp/lsconfig/"))
 
-(pushnew-list
- '((".emacs" ".emacs-local-aqua-linux" "~/projects/utils/elisp/"))
- *simple-swaps* :test #'equal)
+(cl-pushnew
+ '(".emacs" ".emacs-local-aqua-linux" "~/projects/utils/elisp/")
+  *simple-swaps* :test #'equal)
 
 (setf *local-requires* '(lsconf-mode qt-chess browse-kill-ring))
 
@@ -76,7 +76,7 @@
 	(,+home-dir+ "projects/utils/lisp/topology/shapes.lisp")
 
 	;; other project entries
-	(,+home-dir+ "projects/Osstrupen/laserdot/laserdot.m")
+	(,+home-dir+ "git/projects/17010_Osstrupen/octave/osreport_teigen.m")
 
 	;; chess
 	(,+home-dir+ "git/chess/libHsmsCore/src/ChAlarmServer.cpp")
