@@ -121,10 +121,9 @@ STRING that matches REGEXP"
 (defun split-string-modify-positions (positions with-separator)
   (case with-separator
     ((:none nil) (cut (cons 0 (flatten positions)) 2 t))
-    (:left (cut (cons 0 (flatten (mapcar #'(lambda (x) (list (first x) (first x))) positions))) 2 t))
-    (:right (cut (cons 0 (flatten (mapcar #'(lambda (x) (list (second x) (second x))) positions))) 2 t))
+    (:left (cut (cons 0 (repeat-elements (mapcar #'first positions))) 2 t))
+    (:right (cut (cons 0 (repeat-elements (mapcar #'second positions))) 2 t))
     (:only positions)))
-;;(split-string-modify-positions '((1 2) (5 6)) :none)
 
 (cl-defun split-string* (string &optional separators (with-separator :none))
   "If WITH-SEPARATOR is nil then the method is equal to
@@ -137,7 +136,7 @@ only the matching separators are returned"
 	  (split-string-modify-positions
 	   (regexp-consecutive-matches (or separators "[ \f\t\n\r\v]+") string)
 	   with-separator)))
-;;(split-string* "09:16  Text" "[0-2][0-9]:[0-5][0-9]" :right)
+;;(split-string* " 09:16  Text" "[0-2][0-9]:[0-5][0-9]" :none)
 
 (cl-defun split-string-2 (string regexp &optional (endp nil) (with-separator t)) 
   "Splits STRING into strings at beginning of first match with REGEXP. if
