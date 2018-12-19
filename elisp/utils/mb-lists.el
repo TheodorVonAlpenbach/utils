@@ -8,8 +8,7 @@
 ;;(b-a 10 8 2)
 
 (defun transpose (lists)
-  (apply #'mapcar* #'list lists))
-;;(transpose '((a b c) (d e f)))
+  (when lists (apply #'cl-mapcar #'list lists)))
 
 (defun nrcons (list x)
   (nconc list (list x)))
@@ -93,8 +92,10 @@ Note that group to not consider LIST as a set. To do this, LIST must be sorted f
 
 (defun nzip (&rest lists) 
   (apply #'nconc (transpose lists)))
+
 (defun zip (&rest lists) 
   (apply #'nzip (copy-tree lists)))
+;;(zip)
 ;;(butlast (zip '(0 2 4) '(1 3 3)))
 
 (cl-defun nunzip (list &optional (n 2))
@@ -112,6 +113,10 @@ TODO: something is wrong, see test below."
 
 (cl-defun unzip (list &optional (n 2)) (nunzip (copy-list list) n))
 ;;(unzip (0-n 10) 3)
+
+(defun repeat-elements (x &optional n)
+  (apply #'zip (make-list (or n 2) x)))
+;;(repeat-elements (0-n 3) 0)
 
 (require 'function-signature)
 (defun infix-list (list infix &optional infix-is-function-p) 
