@@ -65,10 +65,27 @@
 			     #'(lambda (i n) (if (= i (- n 2)) 'and '\,)) t)
 		 '(a \, b and c))))
 
+(ert-deftest test-repeat-elements ()
+  "Test of `repeat-elements'"
+  (should (equal (repeat-elements (0-n 3) 3) '(0 0 0 1 1 1 2 2 2)))
+  (should (equal (repeat-elements (0-n 3)) '(0 0 1 1 2 2)))
+  (should (equal (repeat-elements (0-n 3) 2) '(0 0 1 1 2 2)))
+  (should (equal (repeat-elements (0-n 3) 1) '(0 1 2)))
+  (should (equal (repeat-elements (0-n 3) 0) nil)))
+
+(ert-deftest test-zip ()
+  "Test of `zip'"
+  (should (equal (zip nil) nil))
+  (should (equal (zip '(0 2 4) '(1 3 3)) '(0 1 2 3 4 3))))
+
+(ert-deftest test-transpose ()
+  "Test of `transpose'"
+  (should (equal (transpose nil) nil))
+  (should (equal (transpose '((a b c) (d e f))) '((a d) (b e) (c f)))))
+
 (ert-deftest test-memcase ()
   "Test of `memcase'"
   (should (equal (memcase '(a b c) (a 'A) (otherwise 'B)) 'A))
   (should (equal (memcase '(a b c) (d 'A) (otherwise 'B)) 'B))
   (should (equal (memcase '(a b c) ((a d) 'A) (otherwise 'B)) 'A))
   (should (equal (memcase '(a b c) ((d e) 'A) (otherwise 'B)) 'B)))
-

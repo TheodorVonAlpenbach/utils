@@ -60,6 +60,27 @@
 		   :key #'sstring)
 		 "Peter, Paul, and Mary")))
 
+(ert-deftest test-split-string* ()
+  "Test of `split-string*'"
+ (should (equal (split-string* " 09:16  Text" "[0-2][0-9]:[0-5][0-9]")
+		'(" " "  Text")))
+ (should (equal (split-string* " 09:16  Text" "[0-2][0-9]:[0-5][0-9]" :none)
+		'(" " "  Text")))
+ (should (equal (split-string* " 09:16  Text" "[0-2][0-9]:[0-5][0-9]" :left)
+		'(" " "09:16  Text")))
+ (should (equal (split-string* " 09:16  Text" "[0-2][0-9]:[0-5][0-9]" :right)
+		'(" 09:16" "  Text")))
+ (should (equal (split-string* " 09:16  Text" "[0-2][0-9]:[0-5][0-9]" :only)
+		'("09:16"))))
+
+(ert-deftest test-split-string-modify-positions ()
+  "Test of `split-string-modify-positions'"
+  (should (equal (split-string-modify-positions '((1 2) (5 6)) nil) '((0 1) (2 5) (6))))
+  (should (equal (split-string-modify-positions '((1 2) (5 6)) :none) '((0 1) (2 5) (6))))
+  (should (equal (split-string-modify-positions '((1 2) (5 6)) :left) '((0 1) (1 5) (5))))
+  (should (equal (split-string-modify-positions '((1 2) (5 6)) :right) '((0 2) (2 6) (6))))
+  (should (equal (split-string-modify-positions '((1 2) (5 6)) :only) '((1 2) (5 6)))))
+
 (ert-deftest test-andcat ()
   "Test of `andcat'"
   (should (equal (andcat '()) ""))
