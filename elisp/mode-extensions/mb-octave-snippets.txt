@@ -1,0 +1,25 @@
+## Copyright (C) %thisyear% Light Structures
+##
+## This file is not part of Octave.
+
+## -*- texinfo -*-
+## @deftypefn  {Function File} {} %thisname% (@var{x})
+## @deftypefnx {Function File} {@var{y} =} %thisname% (@var{x})
+## @deftypefnx {Function File} {[@var{y}] =} %thisname% (@var{x})
+## Short description
+## 
+## Longer description
+## 
+## @group
+## @example
+## %thisname% (x)
+## @result{} y
+## @end example
+## @end group
+##
+## @seealso{}
+## @end deftypefn
+
+## Author: Mats Bergstrøm <mbe@lightstructures.no>
+## Created: %thisisodate%
+
