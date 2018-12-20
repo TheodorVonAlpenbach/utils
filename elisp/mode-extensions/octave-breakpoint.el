@@ -163,9 +163,12 @@ DEFUN-BREAKPOINTS\), where each element in DEFUN-BREAKPOINTS is a
 list of the same format as the result from
 `octave-region-breakpoints'."
   (loop for (buffer fn-breakpoints) in buffer-breakpoints
+	unless (in-directory-p
+		(buffer-file-name buffer)
+		"~/git/utils/octave/octave_3_2_patch")
 	do (octave-source-buffer t buffer)
-	do (loop for (fn lines) in fn-breakpoints
-		 do (octave-set-dbstops fn lines t))))
+	and do (loop for (fn lines) in fn-breakpoints
+		     do (octave-set-dbstops fn lines t))))
 
 (defun octave-update-dbstops-buffer (&optional buffer)
   "Convert all buffer breakpoints in BUFFER to Octave dbstops.
