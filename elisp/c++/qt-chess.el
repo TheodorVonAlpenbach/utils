@@ -4,11 +4,6 @@
     (zerop it)))
 ;;(prefix-p "qwe" "qwerty")
 
-(defun in-directory-p (filename directory)
-  (prefix-p (expand-file-name directory)
-	    (expand-file-name filename)))
-;;(in-directory-p "~/bin/mbtags.sh" "~/")
-
 (cl-defun chess-file-p (&optional (buffer (current-buffer))
 				  (chess-dir "~/git/chess"))
   (or (in-directory-p (buffer-file-name buffer) chess-dir)

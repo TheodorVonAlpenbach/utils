@@ -1,3 +1,9 @@
+(defun in-directory-p (filename directory)
+  "Return not nil if FILENAME is in DIRECTORY."
+  (prefix-p (expand-file-name directory)
+	    (expand-file-name filename)))
+;;(in-directory-p "~/bin/mbtags.sh" "~/")
+
 (defun concat-directories (directory1 directory2)
   (concat (file-name-as-directory directory1)
 	  directory2))
