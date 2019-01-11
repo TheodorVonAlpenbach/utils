@@ -45,6 +45,9 @@
   ;;/ls/gold/u1/mbe/doc
   "Mounted silver doc directory")
 
+	 
+(pushnew '("\\.eginaconf$" . octave-mode) auto-mode-alist)
+
 (let ((path "~/.emacs.d/tramp"))
   (when (file-exists-p path)
     (delete-file path)))
@@ -90,7 +93,7 @@
 	(,+home-dir+ "cvs/sources/imms/src/elisp/ls-config.el")
 	(,+home-dir+ "cvs/sources/imms/src/lisp/egina/egina-wave.lisp")
 	(,+home-dir+ "cvs/sources/imms/src/lisp/wave/wave.lisp")
-	(,+home-dir+ "cvs/sources/SciLab/toolboxes/OsstrupenViewer/macros/OS_config.sce")
+	;; (,+home-dir+ "cvs/sources/SciLab/toolboxes/OsstrupenViewer/macros/OS_config.sce")
 
 	;; remote files (shared with windows)
 	;; Note special treatment of arbeidslog in mb-insert-state-init!
