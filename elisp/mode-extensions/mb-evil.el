@@ -652,7 +652,7 @@ By default the last line."
 		 (qwe beg end))
 	       (setf last (string-to-number (region-string beg (1+ end)))))))
        b e nil))))
-;;(increment-rectangle)
+;;(evil-increment-rectangle)
 
 (defun qwe (beg end)
   (message "%d %d" beg end))
