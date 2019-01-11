@@ -250,8 +250,11 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 	 ("\\.tex$" . latex-mode)
 
 	 ;; safe default must come at the end
-	 ("[^.]*$" . text-mode)))
-       (new-alist (delete-if #'(lambda (x) (member x auto-mode-alist)) my-mode-alist)))
+	 ("^[^.]*$" . text-mode)))
+
+       (new-alist (delete-if #'(lambda (x)
+				 (member x auto-mode-alist))
+			     my-mode-alist)))
   (setf auto-mode-alist (append new-alist auto-mode-alist)))
 ;;(length auto-mode-alist)
 
