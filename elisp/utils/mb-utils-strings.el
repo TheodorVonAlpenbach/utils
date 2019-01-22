@@ -705,4 +705,19 @@ See also `group-consequtive-integers'."
   (lines-to-string (last (string-lines string) n)))
 ;;(string-tail "qwe\nqwe2\nqwe3")
 
+(defun alliterate-word (word)
+  "Randomly scramble the letters in WORD, except the first and last."
+  (if (> (length word) 3)
+    (concat (substring word 0 1)
+	    (randomize (substring word 1 -1))
+	    (substring word -1))
+    word))
+
+(defun alliterate (string)
+  "Randomly scramble the letter"
+  (apply #'concat
+    (mapcar #'alliterate-word
+      (split-string-regexp-list string "[^[:alpha:]]"))))
+;;(alliterate "Some are born great, some achieve greatness, and some have greatness thrust upon them.")
+
 (provide 'mb-utils-strings)
