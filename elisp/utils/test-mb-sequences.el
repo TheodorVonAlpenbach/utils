@@ -123,4 +123,10 @@
   (should (equal "dicomet"
 		 (insert-sequence "comet" "incredible" :start2 5 :end2 7))))
 
+(ert-deftest test-as-list ()
+  "Test of `as-list'"
+ (should (equal (as-list (x "abc")
+		  (rest x))
+		"bc")))
+
 (provide 'test-mb-sequences)
