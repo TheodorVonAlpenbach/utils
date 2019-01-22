@@ -81,6 +81,24 @@
   (should (equal (split-string-modify-positions '((1 2) (5 6)) :right) '((0 2) (2 6) (6))))
   (should (equal (split-string-modify-positions '((1 2) (5 6)) :only) '((1 2) (5 6)))))
 
+(ert-deftest test-split-string-regexp-list ()
+  "Test of `split-string-regexp-list'"
+  (should (equal (split-string-regexp-list "babc db efg b " "b" t)
+		 '("" "b" "a" "b" "c d" "b" "efg" "b" "")))
+  (should (equal (split-string-regexp-list "babc db efg b " "b" nil)
+		 '("" "b" "a" "b" "c d" "b" " efg " "b" " "))))
+
+(ert-deftest test-alliterate-word ()
+  "Test of `alliterate-word'"
+  (should (equal (alliterate-word "") ""))
+  (should (equal (alliterate-word "I") "I"))
+  (should (equal (alliterate-word "Me") "Me"))
+  (should (equal (alliterate-word "Moi") "Moi"))
+  (let* ((word "Mine")
+	 (aword (alliterate-word "Mine")))
+    (should (equal (first-elt word) (first-elt aword)))
+    (should (equal (last-elt word) (last-elt aword)))))
+
 (ert-deftest test-andcat ()
   "Test of `andcat'"
   (should (equal (andcat '()) ""))
