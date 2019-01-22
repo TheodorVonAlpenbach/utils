@@ -43,10 +43,13 @@
 ;;(subseq (a-b 1 10) -3)
 
 (cl-defmacro as-list ((list sequence) &body body)
+  "Evaluate body with SEQUENCE treated as a list.
+SEQUENCE is coerced to a list bound to the symbol LIST. The
+evaluation of the last form in BODY is expected to be a list,
+which is finally coerced to the same type as SEQUENCE."
   `(let ((,list (coerce ,sequence 'list)))
-     (prog1 (progn ,@body)
-       (setf ,sequence (coerce ,list (type-of ,sequence))))))
-;;(as-list (x "abc") (setf x (rest x)))
+     (coerce (progn ,@body) (type-of ,sequence))))
+(cl-indent 'as-list 1)
 
 (cl-defun copy-if (cl-pred cl-seq &key key count from-end)
   "Return a copy of SEQ containing exactly the items in SEQ not satisfying PREDICATE.
@@ -94,6 +97,10 @@ result is a sequence with elements that do not match any of
 PREDICATES."
   (loop for p in (push-back (apply #'not-disjoin predicates) predicates)
 	collect (copy-if p sequence :key key)))
+
+(cl-defun rotate (sequence &optional (n 1))
+  "Returns a list that is LIST rotated N times."
+  (nrotate-list (copy-list list) n))
 
 (defun split-at-position (sequence &rest positions)
   "Split SEQUENCE at POSITIONS and return the resulting subsequences as a list."
@@ -151,6 +158,13 @@ elements.
      (setf ,sequence (cl-delete-if ,predicate ,sequence ,@cl-keys))))
 ;;(let ((s '(0 1 2 3 0 0))) (list (draw-if #'evenp s :key #'identity :count 2) s))
 ;;(let ((s "qweqwe")) (list (draw-if (bind #'eql ?e) s :key #'identity :end 4) s))
+
+(cl-defun randomize (sequence)
+  "Return the elements of SEQUENCE in random order."
+  (as-list (l sequence)
+    (loop repeat (length sequence)
+	  collect (draw-random sequence))))
+;;(randomize "Mats Bergstr;m")
 
 (cl-defun positions (x sequence &key (test #'eql) (key #'identity))
   "Return the positions of the elements in SEQUENCE that occur in X.
