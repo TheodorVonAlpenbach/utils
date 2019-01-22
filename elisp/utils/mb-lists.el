@@ -357,6 +357,10 @@ matches PREDICATE"
   "Returns a list that is LIST rotated N times."
   (nrotate-list (copy-list list) n))
 
+(cl-defun rotate (sequence &optional (n 1))
+  "Returns a list that is LIST rotated N times."
+  (nrotate-list (copy-list list) n))
+
 (defmacro list-insert (x n list)
   "Inserts element X at position N in LIST. Returns the tail of
 LIST with X as head"
