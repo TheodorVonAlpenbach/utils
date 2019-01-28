@@ -1,5 +1,20 @@
 -*- eval: (auto-fill-mode 0); -*-
 
+Vår 2019
+
+Måned         jan         feb         mar         apr           mai         jun
+Mandag        7 14 21 28  4 11 18 25  4 11 18 25  1  8 15 22 29  6 13 20 27  3
+Uke           1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22
+Runde         1  2  3  4  5  6  7  8  9 10 11    12 13 14 15 16 17 18 19 20 21
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+Fru Burum     o  o  o
+Nellie        o  o  x
+Onkel Oskar   o  o  o
+Highbury      o  o  o
+Scotsman      o  o  o
+
+---
+
 Høst 2018
 
 Måned         aug   sep         okt         nov           des         
