@@ -12,7 +12,7 @@
       (+ (anchor-day cc)
       (destructuring-bind (a b) (cl-floor yy 12)
 	(mod (+ a b (/ b 4)) 7)))))
-;;(doomsday 1985)
+;;(doomsday 2019)
 
 (defun doomsday-reference (y m)
   (let ((ref (nth (1- m) '(3 28 0 4 9 6 11 8 5 10 7 12))))
