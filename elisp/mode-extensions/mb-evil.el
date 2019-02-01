@@ -223,7 +223,9 @@ By default the last line."
   (define-key div-map "l" (lambda (n) (interactive "p") (inc-thing-at-point n 1)))
   (define-key div-map "h" (lambda (n) (interactive "p") (inc-thing-at-point (- n) 1)))
   (define-key div-map "j" (lambda (n) (interactive "p") (inc-thing-at-point n 2)))
-  (define-key div-map "k" (lambda (n) (interactive "p") (inc-thing-at-point (- n) 2))))
+  (define-key div-map "k" (lambda (n) (interactive "p") (inc-thing-at-point (- n) 2)))
+  (define-key div-map "\M-j" (lambda (n) (interactive "p") (inc-thing-at-point n 3)))
+  (define-key div-map "\M-k" (lambda (n) (interactive "p") (inc-thing-at-point (- n) 3))))
 
 (require 'mb-emacs-lisp)
 (require 'LS)
