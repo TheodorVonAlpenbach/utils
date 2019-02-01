@@ -655,6 +655,7 @@ This function is mainly a helper for `week-number'"
 ;;(iso-dttm (first-week-start 1972))
 
 (cl-defun yearweek-number (&optional (etime (now)))
+  "Return (YEAR WEEK) if ETIME is within YEAR's WEEKth week."
   (cl-flet ((weekno (y etime)
 	      (list y (round (1+ (time- (weekstart etime) (first-week-start y)
 					:week))))))
@@ -667,6 +668,7 @@ This function is mainly a helper for `week-number'"
 ;;(mapcar (compose #'yearweek-number #'parse-time) '(1972-01-01 1972-01-06 2001-12-31 2008-12-29))
 
 (cl-defun week-number (&optional (etime (now)))
+  "Return the week number of ETIME."
   (second (yearweek-number etime)))
 ;;(mapcar (compose #'week-number #'parse-time) '(1972-01-01 1972-01-06 2001-12-31 2008-12-29))
 
