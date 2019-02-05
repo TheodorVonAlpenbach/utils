@@ -713,4 +713,15 @@ It assumes that there will be no write conflicts."
 	(save-as-1 new))
       (save-as-1 new))))
 
+(defmacro within-temp-file (&rest body)
+  "Create a temporary file and evaluate BODY there.
+Afterwards delete the file."
+  `(let ((file (make-temp-file "qwe")))
+     (with-file file
+       (message "buffer: %s" ,(buffer-directory))
+       (prog1 (progn ,@body)
+	 (delete-file file)))))
+;;(within-temp-file (+ 2 2))
+(def-edebug-spec within-temp-file progn)
+
 (provide 'mb-utils-buffer)
