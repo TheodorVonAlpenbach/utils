@@ -32,7 +32,8 @@
   (turn-on-eldoc-mode)
   (linum-mode)
   (setf evil-symbol-word-search t)
-  (modify-syntax-entry ?_  "_"))
+  (modify-syntax-entry ?_  "_")
+  (add-hook 'vc-before-checkin-hook 'mb-octave-breakpoints-hook))
 
 (add-hook 'octave-mode-hook 'mb-octave-init)
 
@@ -330,5 +331,18 @@ See also `mb-octave2texinfo-1'."
 			 (concat* fnodes :in "\n\n"))))
 ;;(mb-octave2texinfo '("~/git/utils/octave/lsbin/lsread.m") '("lsread"))
 ;;(mb-octave2texinfo '("~/git/utils/octave/lsbin/lsdate2tm.m") '("lsdate2tm"))
+
+(defun mb-octave-breakpoints-hook ()
+  "Issue error if breakpoints exists in some of the files to be checked in.
+TODO: need a macro a la 'with-file-buffer FILE &rest BODY, that
+takes a path as first argument followed by a BODY of forms. The
+point is that if a FILE's buffer is already present it simply
+evaluates BODY. And if not, it opens FILE with find-file and then
+closes it after BODY forms have been evaluated."
+  (loop for f in (second (vc-deduce-fileset nil t 'state-model-only-files))
+	for b = (find-file f)
+	do (when (octave-buffer-breakpoints b)
+	     (error "Breakpoints exists in file %s" f))))
+;;(mb-octave-breakpoints-hook)
 
 (provide 'mb-octave)
