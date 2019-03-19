@@ -220,7 +220,6 @@ Format is (tag pubstring day columns pubregexp)")
   "Returns a list of qp-customers, and only one entry for each pub.
 If MAX-COLUMN is an integer, then first delete all entries
 calling for a greater number of columns than max-column."
-  
   (cl-remove-duplicates
    (if (integerp max-column)
      (cl-remove-if #'(lambda (x)
