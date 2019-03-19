@@ -7,11 +7,11 @@ Mandag        7 14 21 28  4 11 18 25  4 11 18 25  1  8 15 22 29  6 13 20 27  3
 Uke           1  2  3  4  5  6  7  8  9 10 11 12 13 14 15 16 17 18 19 20 21 22
 Runde         1  2  3  4  5  6  7  8  9 10 11    12 13 14 15 16 17 18 19 20 21
 ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-Fru Burum     x  x  x  x  x  x
-Nellie        x  x     x     x
-Onkel Oskar   x  x  x  x  x  x
-Highbury      x  x  x        x
-Scotsman      x  x  x
+Fru Burum     x  x  x  x  x  x  x  x  x
+Nellie        x  x  x  x  x  x  x  x  x
+Onkel Oskar   x  x  x  x  x  x  x  x  x  x
+Highbury      x  x  x  x  x  x  x  x  x  x
+Scotsman      x  x  x  x  x  x  x  x
 
 ---
 
@@ -71,21 +71,3 @@ Merknader:
 
 Scotsman også har sendt inn for uke 33. Den har jeg lagret som
 ~/tmp/scotsman-r0-h2017.txt på Azure.
-
-29	13	Onsdag	Allmennquiz	Nellie (Hamar)	Quizaholics	52
-29	13	Onsdag	Allmennquiz	Nellie (Hamar)	Quizleis	49
-29	13	Onsdag	Allmennquiz	Nellie (Hamar)	Dragsuget	46
-29	13	Onsdag	Allmennquiz	Nellie (Hamar)	Mimes Bryggeri	44
-29	13	Onsdag	Allmennquiz	Nellie (Hamar)	Sølvguttene	43
-29	13	Onsdag	Allmennquiz	Nellie (Hamar)	The Hunchbacks	43
-29	13	Onsdag	Allmennquiz	Nellie (Hamar)	Teflonpannene	42
-29	13	Onsdag	Allmennquiz	Nellie (Hamar)	Alternativ Fest	42
-29	13	Onsdag	Allmennquiz	Nellie (Hamar)	Kattastrofe	39
-29	13	Onsdag	Allmennquiz	Nellie (Hamar)	Opp Og Ned	38
-29	13	Onsdag	Allmennquiz	Nellie (Hamar)	Argonautene	36
-29	13	Onsdag	Allmennquiz	Nellie (Hamar)	Kamma Believers	35
-29	13	Onsdag	Allmennquiz	Nellie (Hamar)	Trøtte Småbarnsfedre	34
-29	13	Onsdag	Allmennquiz	Nellie (Hamar)	Kate's Bush	34
-29	13	Onsdag	Allmennquiz	Nellie (Hamar)	Ola Og Jinten	32
-29	13	Onsdag	Allmennquiz	Nellie (Hamar)	Kjells Makrell	32
-29	13	Onsdag	Allmennquiz	Nellie (Hamar)	Champangedepartementet	25
