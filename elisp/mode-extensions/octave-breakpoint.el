@@ -117,7 +117,8 @@ The result is a list of the same format as the result from
 The result is organized as the list described in
 `octave-update-dbstops'."
   (loop for x in (octave-buffers)
-	collect (list x (octave-buffer-breakpoints x))))
+	for bs = (octave-buffer-breakpoints x)
+	if bs collect (list x bs)))
 
 
 ;;; dbstops
