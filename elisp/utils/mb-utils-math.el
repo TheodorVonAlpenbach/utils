@@ -63,6 +63,9 @@
   (apply #'* (mapcar #'signum factors)))
 ;;(signum* -1 -2)
 
+(defun unsignum (&rest factors)
+  (- (apply #'signum* factors)))
+
 (cl-defun num-digits (n &optional (base 10))
   "Returns number of digits needed to represent N > 1 in N-ary format"
   (when (< n 1) (error "N must be a positive integer!"))
