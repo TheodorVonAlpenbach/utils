@@ -23,7 +23,9 @@
     (define-key map "i" #'octave-toggle-breakpoint)
     (define-key map "t" #'octave-toggle-breakpoint)
     (define-key map "r" #'octave-refresh-breakpoints)
-    (define-key map "l" #'octave-list-all-breakpoints)
+    (define-key map "p" #'octave-list-all-breakpoints)
+    (define-key map "j" #'octave-forward-breakpoint)
+    (define-key map "k" #'octave-backward-breakpoint)
     (define-key map "d" (octave-delete-breakpoint-map))
     map))
 
@@ -284,4 +286,21 @@ executes BODY."
   ;; just to be sure
   (octave-send-string "dbclear all"))
 
+(cl-defun octave-forward-breakpoint (&optional (n 1))
+  (interactive)
+  (unless (zerop n)
+    (let* ((linums (mapcar #'second (octave-buffer-breakpoints))))
+      (bol :linum (nth (mod (if (plusp n)
+			      (aif (cl-position (line-number-at-pos)
+				     linums :test #'<)
+				(+ it n -1) (1- n))
+			      (aif (cl-position (line-number-at-pos)
+				     linums :test #'> :from-end t)
+				(+ it n 1) n))
+			    (length linums))
+		       linums)))))
+
+(cl-defun octave-backward-breakpoint (&optional (n 1))
+  (interactive)
+  (octave-forward-breakpoint (- n)))
 (provide 'octave-breakpoint)
