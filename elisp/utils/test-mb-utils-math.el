@@ -8,4 +8,9 @@
 		   (append (make-list r (1+ q))
 			   (make-list (- 51 r) q))))))
 
+(ert-deftest test-unsignum ()
+  "Test of `unsignum'"
+  (should (equal (mapcar #'unsignum '(-2 0 2)) '(1 0 -1)))
+  (should (equal (unsignum 1 -1) 1)))
+
 (provide 'test-mb-utils-math)
