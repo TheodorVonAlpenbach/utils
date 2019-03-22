@@ -317,7 +317,7 @@ point to the current field, see `beginning-of-line'"
 ;;(bol :point 9867)
 
 (cl-defun eol (&key linum point (offset 0) restrict-to-current-field)
-  "Move point to the end of the current line and returns its value.
+  "Move point to the end of the current line and return its value.
 For RESTRICT-TO-CURRENT-FIELD, see `bol'."
   (let ((inhibit-field-text-motion (not restrict-to-current-field)))
     (if linum
