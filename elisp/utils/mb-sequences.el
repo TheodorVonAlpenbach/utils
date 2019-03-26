@@ -42,13 +42,19 @@
 ;;(length* '(1 2 3) :start nil :end nil)
 ;;(subseq (a-b 1 10) -3)
 
+(defun sequence-type (sequence)
+  (cond ((listp sequence) 'list)
+	((vectorp sequence) 'vector)
+	((stringp sequence) 'string)))
+;;(sequence-type '(1 2))
+
 (cl-defmacro as-list ((list sequence) &body body)
   "Evaluate body with SEQUENCE treated as a list.
 SEQUENCE is coerced to a list bound to the symbol LIST. The
 evaluation of the last form in BODY is expected to be a list,
 which is finally coerced to the same type as SEQUENCE."
   `(let ((,list (coerce ,sequence 'list)))
-     (coerce (progn ,@body) (type-of ,sequence))))
+     (coerce (progn ,@body) (sequence-type ,sequence))))
 (cl-indent 'as-list 1)
 
 (cl-defun copy-if (cl-pred cl-seq &key key count from-end)
@@ -265,6 +271,14 @@ respectively.
   (first (apply #'minimum sequence args)))
 ;;(min-element '())
 ;;(min-element '(1 2 1 3) :key #'1+)
+
+(cl-defun min-value (sequence &rest args)
+  "Returns minimum value in SEQUENCE
+\nKeywords supported:  :test :key :start :end :from-end
+\n(fn SEQ [KEYWORD VALUE]...)"
+  (third (apply #'minimum sequence args)))
+;;(min-value '(1 2 1 3) :key #'1+)
+;;(min-value '())
 
 (cl-defun subseq* (seq &optional (start 0) (end nil))
   "Same as SUBSEQ but takes negative limit arguments (meaning from end).
