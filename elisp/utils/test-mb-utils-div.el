@@ -67,6 +67,10 @@
     (should (equal (pushnew-list '(a b c) list) '(a b c d e)))
     (should (equal list '(a b c d e)))))
 
-
+(ert-deftest test-ssymbol ()
+  "Test of `ssymbol'"
+  (should (equal (mapcar #'ssymbol
+		   (list 1 0.3 "1" "0.3" "xcv" '(quote zxc) 'vbn))
+		 '(1 0.3 1 0.3 xcv zxc vbn))))
 
 (provide 'test-mb-utils-div)
