@@ -184,6 +184,23 @@ Note that line numbers and paragraph numbers (check) starts from base 0."
     (next-line 1)
     (point)))
 
+
+;;; Beginning / end of helper functions 
+(cl-defun bo-thing (thing &optional n)
+  "Move to the beginning of the current THING and return point."
+  (awhen (bounds-of-thing-at-point thing)
+    (goto-char (car it))
+    (when n (forward-thing thing (- 1 n)))
+    (point)))
+
+(defun eo-thing (thing &optional n)
+  "Move to the end of the current word and return POINT."
+  (awhen (bounds-of-thing-at-point thing)
+    (goto-char (cdr it))
+    (when n (forward-thing thing (1- n)))
+    (point)))
+
+
 ;;; Sexp stuff
 ;;; TODO rename these as bof, eof etc, and reserve bos, eos etc to symbols
 ;;; because sexp and form is indeed the same
@@ -228,20 +245,26 @@ that there is no space between identifiers and delimiters"
 (defalias 'region-string 'buffer-substring-no-properties)
 ;;(region-string 1 100)
 
-(cl-defun region-replace-raw (new-string region)
-  "Replace the content of current buffer's REGION with NEW-STRING."
-  (apply #'delete-region region)
-  (insert new-string))
+(cl-defun region-replace-raw (new-string region &optional (point (car region)))
+  "Replace the content of current buffer's REGION with NEW-STRING.
+The new NEW-STRING is inserted at the beginning of REGION, or at
+the optonal POINT."
+  (save-excursion
+    (goto-char point)
+    (apply #'delete-region region)
+    (insert new-string)))
 
-(cl-defun region-replace (format &optional (region (region)))
+(cl-defun region-replace (format &optional (region (region)) (point (car region)))
   "Replace the content of REGION with the string defined by FORMAT.
 REGION is a pair of points (START END) belonging to BUFFER, which
 is the current buffer by default. This region is replaced by the
 string FORMAT after each substring \"%s\" has been substuted by
-the content of REGION."
+the content of REGION.
+
+For optional argument point, see `region-replace-raw'."
   (region-replace-raw
    (replace-regexp-in-string "%s" (apply #'region-string region) format)
-   region))
+   region point))
 ;;(region-replace "(%s)") test reg(i){i}on
 
 (defun region-lines (beg end)
@@ -385,20 +408,6 @@ see `bol'"
 (defun current-line-as-string (&rest args)
   (warn "Deprecated. Use LINE-STRING instead.")
   (apply #'line-string args))
-
-(cl-defun bo-thing (thing &optional n)
-  "Move to the beginning of the current THING and return point."
-  (awhen (bounds-of-thing-at-point thing)
-    (goto-char (car it))
-    (when n (forward-thing thing (- 1 n)))
-    (point)))
-
-(defun eo-thing (thing &optional n)
-  "Move to the end of the current word and return POINT."
-  (awhen (bounds-of-thing-at-point thing)
-    (goto-char (cdr it))
-    (when n (forward-thing thing (1- n)))
-    (point)))
 
 ;;; Defun stuff 
 (defun bod (&optional n)
