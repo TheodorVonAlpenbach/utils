@@ -357,6 +357,9 @@ matches PREDICATE"
   "Returns a list that is LIST rotated N times."
   (nrotate-list (copy-list list) n))
 
+(cl-defmacro rotatef-list (list &optional (n 1))
+  `(setf ,list (rotate-list ,list ,n)))
+
 (cl-defun rotate (sequence &optional (n 1))
   "Returns a list that is LIST rotated N times."
   (nrotate-list (copy-list list) n))

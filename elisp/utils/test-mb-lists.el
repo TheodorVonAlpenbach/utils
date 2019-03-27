@@ -83,6 +83,16 @@
   (should (equal (transpose nil) nil))
   (should (equal (transpose '((a b c) (d e f))) '((a d) (b e) (c f)))))
 
+(ert-deftest test-rotatef-list ()
+  "Test of `rotatef-list'"
+  (let ((l '(a b c)))
+    (should (equal (rotatef-list l) '(b c a)))
+    (should (equal l '(b c a)))
+    (rotatef-list l 1)
+    (should (equal l '(c a b)))
+    (rotatef-list l 2)
+    (should (equal l '(b c a)))))
+
 (ert-deftest test-memcase ()
   "Test of `memcase'"
   (should (equal (memcase '(a b c) (a 'A) (otherwise 'B)) 'A))
