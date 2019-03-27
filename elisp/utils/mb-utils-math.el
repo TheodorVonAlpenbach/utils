@@ -445,6 +445,37 @@ See `cycle-badness' for the measure of a good cycle."
   (apply #'concat (mapcar #'int-to-string (int-to-bin-array n))))
 ;;(int-to-bin 10450)
 
+(cl-defun uint-length-1 (n &optional (base 10))
+  "Return the number of digits in N in the BASE-number system.
+BASE is 10 by default."
+  (assert (not (minusp n)))
+  (ceiling (log (1+ n) base)))
+
+(cl-defun uint-length (n &optional (base 10))
+  "Return the number of digits in non-negative integer N.
+By default, the function assumes a decimal representation of N,
+but you can change this with the optional argument BASE.
+
+Also, N can be list of non-negative integers. In this case, the
+function returns the greatest digit length of elements in N."
+  (if (listp n)
+    (loop for i in n maximize (uint-length i base))
+    (uint-length-1 n base)))
+;;(uint-length (0-n 111))
+
+(cl-defun uint-to-n-base (n &optional (base 10) (min-length (uint-length n base)))
+  "Divide non-negative integer N into its digits.
+By default the decimal system is used. But you can use an
+arbitrary number base with optional argument BASE. The function
+returns by default a minimum number of digits. With the optional
+MIN-LENGTH you can force another length. The result is then
+prefixed by zeros."
+  (let ((res (loop for i in (nreverse (0-n min-length))
+		   collect (cl-mod (/ n (expt base i)) base))))
+    (append (make-list (- min-length (length res)) 0)
+	    res)))
+;;(loop for i in (a-b 99 101) collect (uint-to-n-base i))
+
 (defun bin-to-int-array (binary-string)
   (mapcar #'string-to-int (split-string binary-string "" t)))
 ;;(bin-to-int-array "01101")
