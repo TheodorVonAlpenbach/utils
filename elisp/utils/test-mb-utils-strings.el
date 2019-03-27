@@ -99,6 +99,10 @@
     (should (equal (first-elt word) (first-elt aword)))
     (should (equal (last-elt word) (last-elt aword)))))
 
+(ert-deftest test-blanks ()
+  "Test of `blanks'"
+  (should (equal (blanks 3) "   ")))
+
 (ert-deftest test-andcat ()
   "Test of `andcat'"
   (should (equal (andcat '()) ""))

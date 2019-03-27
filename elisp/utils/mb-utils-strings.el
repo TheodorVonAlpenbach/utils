@@ -74,6 +74,11 @@ result is capitalized. Else the entire result is downcased."
     (string string)
     (otherwise (error "unknown string format"))))
 
+(cl-defun blanks (n &optional (char 32))
+  "Return a sting made up of N spaces.
+This is a shortcut for \(make-string N 32\))"
+  (make-string n 32))
+
 (defun empty-string-p (string)
   (and (stringp string)
        (zerop (length string))))
@@ -225,7 +230,7 @@ that are empty strings.
 For the use of TRIM and SEPARATOR, see `split-string-regexp-list'."
   (let ((res (first (nunzip (split-string-regexp-list string regexp trim side)))))
     (if omit-nulls (cl-delete "" res :test #'string=) res)))
-;;(split-string-regexp "bab cd bqwerb" "b" t nil :right)
+;;(split-string-regexp "bab cd bqwerb" "b" t nil)
 
 (cl-defun substring-intv (string regexp-interval &optional (count 1))
   "Returns substring of STRING matching REGEXP-INTERVAL."
@@ -719,5 +724,23 @@ See also `group-consequtive-integers'."
     (mapcar #'alliterate-word
       (split-string-regexp-list string "[^[:alpha:]]"))))
 ;;(alliterate "Some are born great, some achieve greatness, and some have greatness thrust upon them.")
+
+(cl-defun alfanumerate (n &optional min-length (chars (a-b ?A ?Z)))
+  "Convert N to string: 0 to A, 1 to B etc.
+If MIN-LENGTH is greater than one, the default, convert 0 to AA, 1 to
+AB, 25 to AZ, 26 to BA and so forth.
+
+N can also be a list of integers. The function then converts each
+of these integers to a string where all strings have the same
+length."
+  (let ((b (length chars)))
+    (if (listp n)
+      (loop with l = (or min-length (loop for i in n maximize (uint-length i b)))
+	    for i in n
+	    collect (alfanumerate i l chars))
+      (coerce (mapcar (bind #'nth chars)
+		(uint-to-n-base n b (or min-length 1)))
+	      'string))))
+;;(alfanumerate (a-b 0 26))
 
 (provide 'mb-utils-strings)
