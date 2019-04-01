@@ -10,6 +10,21 @@
     ("Lilypond-compile" ("LilyPond started at .*\n\nlilypond \\(.*\\)$" 1)))
   "TODO: enable :search")
 
+(defvar *version-swaps* nil
+  "A list on the same format as +smart-swaps+, except the elements are directories.
+When invoked, smart-swap will swap the current buffer with the
+file in the other swap directory.
+
+For example:
+
+\(push '(\"dir1/foo.txt\" \"dir
+\(find-file \"dir1/foo.txt\")
+\(smart-swap)
+;; smart swap will find and load 'dir2/foo.txt' into the current buffer
+\(smart-swap)
+;; smart swap will find and load 'dir1/foo.txt' into the current buffer
+")
+
 (require 'mb-ert)
 (defun elisp-swap ()
   "Swap an emacs lisp file with its associated test file."
@@ -20,6 +35,19 @@
   (destructuring-bind (regexp num) file-regexp
     (awhen (string-match* regexp (buffer-string-no-properties) :num 1)
       (find-file it))))
+
+;;; TODO: move this to ... 
+(cl-defun gen-swap (x pairs &key (test #'eql))
+  "Find PAIR in PAIRS containing X and return the complementary
+element of X in pair."
+  (loop for (a b) in pairs
+	if (funcall test x a) return b
+	if (funcall test x b) return a))
+;;(gen-swap 'a '((a b) (c d)))
+
+(defun version-swap ()
+  (awhen (gen-swap (buffer-directory) *version-swaps* :test #'file-equal-p)
+    (find-file (expand-file-name (buffer-file-name-nondirectory) it))))
 
 (defun substitute-extension (filename extension)
   (format "%s.%s" (file-name-sans-extension filename) (sstring extension)))
@@ -73,6 +101,7 @@
   (interactive)
   (or (simple-swap)
       (elisp-swap)
+      (version-swap)
       (aif (smart-swap-find-target swaps)
 	(find-file it)
 	(message "Couldn't find swap target for current file"))))
