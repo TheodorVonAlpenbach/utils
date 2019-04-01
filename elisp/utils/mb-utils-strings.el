@@ -91,6 +91,10 @@ in connection with e.g. `or'"
        string))
 ;(not-empty "")
 
+(defun blank-p (string)
+  "Return not nil if string has no non-whitespace characters."
+  (empty-string-p (string-trim string)))
+
 (defun string-match-end (regexp string &optional start)
   "Same as `string-match', except that it returns the position after
 match."
@@ -578,37 +582,50 @@ consider `buffer-substring-no-properties'"
 ;;(prin1 (mapcar #'integer-to-ordinal-string '(1 2 3 4 9 10 11 12 13 14 20 21 22 23 24 100003)))
 ;;(mapcar #'integer-to-ordinal-string '( 14 20 21 100003))
 
-(defun integer-to-literary-string (n &optional ordinal-p)
+(cl-defun integer-to-literary-string (n &key ordinal-p (short-separator "-") (long-separator " "))
   (cond (ordinal-p 
-	 (error "Ordinals not supported"))
+	 (integer-to-ordinal-string n))
 	((< n 0) 
 	 (format "minus %d" (integer-to-literary-string (- n))))
 	((< n 20)
 	 (case n
-	   (0 "zero") (1 "one") (2 "two") (3 "three") (4 "four") (5 "five") (6 "six") (7 "seven") (8 "eight") (9 "nine") 
-	   (10 "ten") (11 "eleven") (12 "twelve") (13 "thirteen") (14 "fourteen") (15 "fifteen")  (16 "sixteen")  (17 "seventeen")  (18 "eighteen")  (19 "nineteen") 
+	   (0 "zero") (1 "one") (2 "two") (3 "three") (4 "four") (5 "five")
+	   (6 "six") (7 "seven") (8 "eight") (9 "nine") (10 "ten") (11 "eleven")
+	   (12 "twelve") (13 "thirteen") (14 "fourteen") (15 "fifteen")
+	   (16 "sixteen")  (17 "seventeen")  (18 "eighteen")  (19 "nineteen") 
 	   (100 "hundred") (1000 "thousand") (1000000 "million") (1000000000 "billion")))
 	((< n 100)
 	 (format "%s%s"
 	   (case (interval-floor n 10)
-	     (20 "twenty") (30 "thirty") (40 "forty") (50 "fifty") (60 "sixty") (70 "seventy") (80 "eigthy") (90 "ninety"))
-	   (if (zerop (mod n 10)) "" (concat "-" (integer-to-literary-string (mod n 10))))))
+	     (20 "twenty") (30 "thirty") (40 "forty") (50 "fifty")
+	     (60 "sixty") (70 "seventy") (80 "eigthy") (90 "ninety"))
+	   (if (zerop (mod n 10))
+	     ""
+	     (concat short-separator (integer-to-literary-string (mod n 10))))))
 	((< n 1000)
 	 (format "%s hundred%s"
 	   (integer-to-literary-string (/ n 100))
-	   (if (zerop (mod n 100)) "" (concat " " (integer-to-literary-string (mod n 100))))))
+	   (if (zerop (mod n 100))
+	     ""
+	     (concat long-separator (integer-to-literary-string (mod n 100))))))
 	((< n 1000000)
 	 (format "%s thousand%s"
 	   (integer-to-literary-string (/ n 1000))
-	   (if (zerop (mod n 1000)) "" (concat " " (integer-to-literary-string (mod n 1000))))))
+	   (if (zerop (mod n 1000))
+	     ""
+	     (concat long-separator (integer-to-literary-string (mod n 1000))))))
 	((< n 10E9)
 	 (format "%s million%s"
 	   (integer-to-literary-string (/ n 1000000))
-	   (if (zerop (mod n 1000)) "" (concat " " (integer-to-literary-string (mod n 1000))))))
+	   (if (zerop (mod n 1000))
+	     ""
+	     (concat long-separator (integer-to-literary-string (mod n 1000))))))
 	((< n 10E12)
 	 (format "%s billion"
 	   (integer-to-literary-string (/ n 1000000000.0))
-	   (if (zerop (mod n 1000)) "" (concat " " (integer-to-literary-string (mod n 1000))))))))
+	   (if (zerop (mod n 1000))
+	     ""
+	     (concat long-separator (integer-to-literary-string (mod n 1000))))))))
 ;;(mapcar (bind #'integer-to-literary-string nil) (list 21 99 100 100003 most-positive-fixnum))
 
 (defconst +password-special-characters+
@@ -725,7 +742,7 @@ See also `group-consequtive-integers'."
       (split-string-regexp-list string "[^[:alpha:]]"))))
 ;;(alliterate "Some are born great, some achieve greatness, and some have greatness thrust upon them.")
 
-(cl-defun alfanumerate (n &optional min-length (chars (a-b ?A ?Z)))
+(cl-defun alphanumerate (n &optional min-length (chars (a-b ?A ?Z)))
   "Convert N to string: 0 to A, 1 to B etc.
 If MIN-LENGTH is greater than one, the default, convert 0 to AA, 1 to
 AB, 25 to AZ, 26 to BA and so forth.
@@ -737,10 +754,10 @@ length."
     (if (listp n)
       (loop with l = (or min-length (loop for i in n maximize (uint-length i b)))
 	    for i in n
-	    collect (alfanumerate i l chars))
+	    collect (alphanumerate i l chars))
       (coerce (mapcar (bind #'nth chars)
 		(uint-to-n-base n b (or min-length 1)))
 	      'string))))
-;;(alfanumerate (a-b 0 26))
+;;(alphanumerate (a-b 0 26))
 
 (provide 'mb-utils-strings)
