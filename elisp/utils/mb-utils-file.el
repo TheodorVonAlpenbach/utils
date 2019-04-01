@@ -99,4 +99,20 @@ see `file-name-alter'"
 	  do (rename-file path new-path))))
 ;;(rename-files "~/data/FFIAOG/MCMV/M341_Karmoy/MomPks/" "351" "341")
 
+(defun parent-directory-1 (file n)
+  "Helper for `parent-directory'."
+  (if (plusp n)
+    (parent-directory-1
+     (file-name-directory (directory-file-name file)) (1- n))
+    file))
+;;(parent-directory-1 "/a/b/c" 0)
+
+(cl-defun parent-directory (file &optional (n 1))
+  "Return parent directory of FILE.
+File can be either a file or a directory. With optional N you can
+retrive the Nth parent directory."
+  (assert (integerp n))
+  (parent-directory-1 file n))
+;;(parent-directory "/a/b/c")
+
 (provide 'mb-utils-file)
