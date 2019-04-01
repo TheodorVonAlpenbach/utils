@@ -93,6 +93,15 @@
     (rotatef-list l 2)
     (should (equal l '(b c a)))))
 
+(ert-deftest test-swap ()
+  "Test of `gen-swap'"
+  (should (equal (swap 'a '((a b) (c d))) 'b))
+  (should (equal (swap 'b '((a b) (c d))) 'a))
+  (should (equal (swap 'c '((a b) (c d))) 'd))
+  (should (equal (swap 'd '((a b) (c d))) 'c))
+  (should-not (equal (swap "a" '(("a" "b") ("c" "d"))) "b"))
+  (should (equal (swap "a" '(("a" "b") ("c" "d")) :test #'string=) "b")))
+
 (ert-deftest test-memcase ()
   "Test of `memcase'"
   (should (equal (memcase '(a b c) (a 'A) (otherwise 'B)) 'A))
