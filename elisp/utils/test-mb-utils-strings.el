@@ -103,6 +103,14 @@
   "Test of `blanks'"
   (should (equal (blanks 3) "   ")))
 
+(ert-deftest test-blank-p ()
+  "Test of `blank-p'"
+  (should (equal (blank-p "") t))
+  (should (equal (blank-p " ") t))
+  (should (equal (blank-p "\t") t))
+  (should (equal (blank-p "\n") t))
+  (should (equal (blank-p " \t\n ") t)))
+
 (ert-deftest test-andcat ()
   "Test of `andcat'"
   (should (equal (andcat '()) ""))
