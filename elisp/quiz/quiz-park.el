@@ -4,15 +4,22 @@
 ;;;; qp-upload-table-file, som laster opp buffer
 ;;;; qp-customer-results-to-table-buffer, som "vasker" data fra kunden og legger inn i tabellbuffer.
 
-;;;; NB! res_alle.txt er en fil som må lastes opp som iso-8859-1.
-;;;; Dette innebærer at data som lastes inn må encodes som iso-8859-1.
-;;;; Dette er nå implementert i konverteringsfunksjonene. Sette
-;;;; encodingen bufferen til iso-8859. Dette er også gjort. Trikset er
-;;;; å legge til element i file-coding-system-alist, som vist under.
+;;;; NB! res_alle.txt er en fil som må lastes opp som iso-latin-1-dos.
+;;;; Dette innebærer at data som lastes inn må encodes som
+;;;; iso-latin-1-dos. Dette er nå implementert i
+;;;; konverteringsfunksjonene. Sette encodingen bufferen til
+;;;; iso-latin-1-dos. Dette er også gjort. Trikset er å legge til
+;;;; element i file-coding-system-alist, som vist under.
+
+;;;; NB! Siden asp er Windows, så må vi lagre som DOS! Det har skjedd
+;;;; at jeg har sittet i linux, endret på ulovlige charaterer fra
+;;;; kunde, og så har Emacs på grunn av character-endringen selv
+;;;; funnet ut at den skal lagre i en annen encoding.
 
 ;;;; NB! igjen: dersom noe skulle gå galt med res_alle.txt, og på en
 ;;;; eller annen måte blir kodet i utf-8, så kan dette enkelt rettes
-;;;; opp med C-x RET c iso-8859 save-buffer (og touche buffer om nødvendig).
+;;;; opp med C-x RET c iso-latin-1-dos save-buffer (og touche buffer
+;;;; om nødvendig).
 
 ;;;; For å vaske forkludrete data som følge av encoding-rot kan man
 ;;;; evaluere noe sånt som
@@ -103,23 +110,31 @@
 	    filename))))
 ;;(qp-compare-new-and-orig (qp-res-filename))
 
-(defun qp-upload-brinkster-file (item)
-  "Saves, i.e. uploads buffer to Brinkster via FTP"
+(cl-defun qp-upload-brinkster-file (file &optional (ftp-dir "webroot/data") url)
+  "Save, i.e. upload FILE to Brinkster via FTP"
+  (if url
+    (message "Uploading file to %s..." url)
+    (message "Uploading file to brinkster directory %s..." ftp-dir))
+  (call-process "ncftpput" nil
+		"*ncftp*" nil
+		"-DD"
+		"-u" "brinkster\\quizpark"
+		"-p" "7#ToskePaveKrem"
+		"-R" "ftps8.brinkster.com"
+		ftp-dir
+		file)
+  (message "Finished!"))
+;;(qp-upload-brinkster-file "~/tmp/res_alle.txt_20190401")
+;;See ftp://ftps8.brinkster.com/webroot/data/
+
+(defun qp-upload-brinkster-item (item)
+  "Save, i.e. upload file specified by ITEM to Brinkster via FTP."
   (let ((local-path (qp-local-path item)))
      (when (or (not (buffer-modified-p))
 	    (yes-or-no-p (format "Buffer %s modified; upload anyway? " (buffer-name))))
     (when (or (qp-compare-new-and-orig local-path)
 	      (yes-or-no-p "The modified file seems to have been altered considerably. Continue? "))
-      (message "Uploading file to %s..." (qp-url item))
-      (call-process "ncftpput" nil
-		    "*ncftp*" nil
-		    "-DD"
-		    "-u" "brinkster\\quizpark"
-		    "-p" "7#ToskePaveKrem"
-		    "-R" "ftps8.brinkster.com"
-		    (qp-ftp-dir item)
-		    local-path)
-      (message "Finished!")
+      (qp-upload-brinkster-file local-path (qp-ftp-dir item) (qp-url item))
       (qp-check-last-upload)))))
 
 ;;;; Specializations (currently res_alle.txt and ??)
@@ -138,6 +153,8 @@
     (:css-old "qpstyleTAB.css" "webroot")
     (:css "qpstyleTAB.css" "webroot/styles")))
 (defconst +qp-asp-items+ '(:0101 :0102 :0103 :0104 :0105))
+;;(qp-download :generate-table)
+;;(qp-upload :generate-table)
 ;;(qp-download :transform-utils)
 
 (defun qp-asp-item-entry (keyword)
@@ -163,7 +180,7 @@
 (defun qp-local-path (item) (expand-file-name (qp-filename item) "~/tmp/"))
 (defun qp-url (item) (format "%s/%s/%s" +qp-ftp-root+ (qp-ftp-dir item) (qp-filename item)))
 (defun qp-download (item) (qp-download-brinkster-file item))
-(defun qp-upload (item) (qp-upload-brinkster-file item))
+(defun qp-upload (item) (qp-upload-brinkster-item item))
 ;;(mapcar #'qp-url (mapcar #'first +qp-files+))
 ;;(qp-download :0101)
 ;;(qp-upload :0101)
