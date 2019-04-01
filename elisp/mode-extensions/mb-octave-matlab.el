@@ -1,8 +1,22 @@
 ;;;; Main differences between Octave and MATLAB can be found here
 ;;;; https://en.wikibooks.org/wiki/MATLAB_Programming/Differences_between_Octave_and_MATLAB
+;;;;
+;;;; My additions:
+;;;;
+;;;; 1. MATLAB is more sensitive with variables that share a name with a function. E.g.
+;;;;   [min, imin] = min (varargin{:});
+;;;; works in Octave, but not in MATLAB. This does:
+;;;;   [mi, imin] = min (varargin{:});
+
+(loop with pdir1 = "~/projects/matlab/ls"
+      with pdir2 = "~/git/utils/octave"
+      for dir in (mapcar #'sstring '(lscommon lsbin div time file string))
+      for p = (list (expand-file-name dir pdir1) (expand-file-name dir pdir2))
+      do (push-unique p *version-swaps* #'equal))
 
 (defun o2m-validate-buffer ()
-  (string-match "matlab" (buffer-file-name)))
+  (string-match "projects/matlab/ls" (buffer-file-name)))
+;;(o2m-validate-buffer)
 
 (defun o2m-forward-multiassign ()
   "Find next multiassign line in buffer and return indent."
@@ -52,7 +66,7 @@
 ;;(o2m-convert-ends)
 
 (defun o2m-convert-defun-names ()
-  "Convert defun_name_ to defun_name_."
+  "Convert _defun_name to defun_name_."
   (assert (o2m-validate-buffer))
   (save-excursion
     (bob)
@@ -220,6 +234,20 @@ function foo (a)
       (forward-line 1))))
 ;;(o2m-convert-defaults)
 
+(defun o2m-convert-strings ()
+  (assert (o2m-validate-buffer))
+  (save-excursion
+    (bob)
+    (while (re-search-forward "'" nil t)
+      (when (and (nth 3 (syntax-ppss))
+		 (= (char-after) ?')
+		 (= (char-before (1- (point))) ?'))
+	(replace-match "''")))
+    (bob)
+    (while (re-search-forward "\"" nil t)
+      (replace-match "'"))))
+;;(o2m-convert-strings)
+
 (defun o2m-all ()
   (o2m-convert-defaults)
   (o2m-not-ify-buffer)
@@ -228,7 +256,9 @@ function foo (a)
   (o2m-convert-NA)
   (o2m-convert-defun-names)
   (o2m-convert-ends)
-  (o2m-split-multiassign))
+  (o2m-split-multiassign)
+  (o2m-convert-strings)
+  (o2m-convert-tests))
 ;;(o2m-all)
 
 (defun o2m-add-test-defun (code defun file)
@@ -238,23 +268,109 @@ function foo (a)
       (error "Test file does not have a %%%% Fixures line"))
 
     (bol)
-    (insert (format "function %sTest (testCase)\n%s\nend\n\n"
+    (insert (format "function %s (testCase)\n%s\nend\n\n"
 	      defun code))))
 ;;(o2m-add-test-defun "  y = 2 + 2;" "foo" "~/projects/matlab/ls/div/divTest.m")
 
+(defun o2m-test-module-name ()
+  (file-name-nondirectory
+   (directory-file-name (file-name-directory (buffer-file-name)))))
+;;(o2m-test-module-name)
+
+(defun o2m-test-defun-name-obsolete (name)
+  "I thought for a moment that 0-9 were not allowed in test function names.
+I was wrong."
+  (string-replace-map name
+    (transpose
+     (list (mapcar #'number-to-string (0-n 10))
+	   (loop for i below 10
+		 collect (capitalize (integer-to-literary-string i)))))))
+;;(o2m-test-defun-name-1 "qwe1")
+
+(defun o2m-test-defun-name ()
+  (file-name-sans-extension (file-name-nondirectory (buffer-file-name))))
+;;(o2m-test-defun-name)
+
+(defun o2m-convert-assert (s)
+  ""
+  (format "  verifyEqual (testCase, %s"
+    (string-match*
+	"[[:space:]]*assert[[:space:]]*(\\(.*);?\\)[[:space:]]*$"
+      s :num 1)))
+;;(o2m-convert-assert "assert (a, b);")
+
+(defun o2m-convert-test-line (s)
+  "Assume %! is stripped."
+  (case (read s)
+    (assert (o2m-convert-assert s))
+    (test nil)
+    (t (concat "  " (string-trim-left s)))))
+;;(o2m-convert-test-line "assert (a, b);")
+
 (defun o2m-convert-test-string (s)
-  (string-lines s))
-;;("%!test\n%! x = randi (100, 10);\n%! assert (a, b)";
-)
+  (concat*
+      (loop for l in (string-lines s)
+	    for i from 0
+	    do (message "%d" i)
+	    if (and (not (empty-string-p (string-trim* l "[%! ]*")))
+		    (o2m-convert-test-line (string-trim-left* l "[%! ]+")))
+	    collect it)
+    :in "\n"))
+;;(o2m-convert-test-string "%!test\n%! x = randi (100, 10);\n%! assert (a, b);")
+
+(defun o2m-convert-block (s defun-name file)
+  (o2m-add-test-defun (o2m-convert-test-string s) defun-name file))
+;;(o2m-convert-block "%!test\n%! x = randi (100, 10);\n%! assert (a, b);" "dealnumTest" "~/projects/matlab/ls/div/divTest.m")
 
 (defun o2m-convert-tests ()
-  (bob)
-  (re-search-forward "^%!")
-  (bol)
-  (rest (split-string*
-	 (buffer-substring-no-properties (point) (point-max))
-	 "%!\\(test\\||assert\\)"
-	 :left)))
+  (let ((defun-name (o2m-test-defun-name))
+	(file (format "%sTest.m" (o2m-test-module-name))))
+    (bob)
+    (re-search-forward "^%!")
+    (bol)
+    (let ((test-blocks (remove-if #'blank-p
+			 (split-string*
+			  (buffer-substring-no-properties
+			   (point) (point-max))
+			  "%!\\(test\\||assert\\)"
+			  :left))))
+      (loop for s in test-blocks 
+	    for suffix in (alphanumerate (0-n (length test-blocks)) 1)
+	    for fn = (concat defun-name suffix "Test") 
+	    do (o2m-convert-block s fn file)))))
 ;;(o2m-convert-tests)
 
-(provide 'mb-octave-matlab)
+(defun o2m-convert-doc ()
+  (smart-swap)
+  (octave-help (octave-main-defun-name))
+  (other-window 1)
+  (let ((a (point)))
+    (re-search-forward "Additional help for built-in functions and")
+    (kill-ring-save a (bol))
+    (other-window 1)
+    (smart-swap)
+    (bob)
+    (yank)
+    (let ((b (point)))
+      (re-search-forward "^Function")
+      (kill-region b (bol)))
+    (let* ((to-end (- (+ 1 (point-max)) (bol))))
+      (bob)
+      (while (re-search-forward "^" (- (point-max) to-end) t)
+	(replace-match "%")))
+
+    (bol)
+    (insert "%
+%
+% Author: Mats Bergstrøm <mbe@lightstructures.no>
+% Created: 2017-08-29
+")
+
+    (bob)
+    (kill-line 2)
+    (insert "% Copyright (C) 2019 Light Structures
+%
+")
+
+    (save-buffer)))
+;;(o2m-convert-doc)
