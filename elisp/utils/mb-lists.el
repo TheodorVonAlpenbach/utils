@@ -711,4 +711,15 @@ for comparison."
                                (progn ,@(cdr clause)))))
                        clauses)))))
 
+(cl-defun swap (x pairs &key (test #'eql))
+  "Find PAIR in PAIRS containing X and return the complementary
+element of X in pair.
+
+Keywords supported:  :test
+"
+  (loop for (a b) in pairs
+	if (funcall test x a) return b
+	if (funcall test x b) return a))
+;;(swap 'a '((a b) (c d)))
+
 (provide 'mb-lists)

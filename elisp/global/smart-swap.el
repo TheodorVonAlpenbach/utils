@@ -36,17 +36,8 @@ For example:
     (awhen (string-match* regexp (buffer-string-no-properties) :num 1)
       (find-file it))))
 
-;;; TODO: move this to ... 
-(cl-defun gen-swap (x pairs &key (test #'eql))
-  "Find PAIR in PAIRS containing X and return the complementary
-element of X in pair."
-  (loop for (a b) in pairs
-	if (funcall test x a) return b
-	if (funcall test x b) return a))
-;;(gen-swap 'a '((a b) (c d)))
-
 (defun version-swap ()
-  (awhen (gen-swap (buffer-directory) *version-swaps* :test #'file-equal-p)
+  (awhen (swap (buffer-directory) *version-swaps* :test #'file-equal-p)
     (find-file (expand-file-name (buffer-file-name-nondirectory) it))))
 
 (defun substitute-extension (filename extension)

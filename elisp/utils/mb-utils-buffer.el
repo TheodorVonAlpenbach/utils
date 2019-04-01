@@ -12,6 +12,10 @@ The result type is SYMBOL."
   "Return non nil if the major mode of BUFFER-OR-NAME is MODE."
   (eql (buffer-major-mode buffer-or-name) mode))
 
+(cl-defun buffer-file-name-nondirectory (&optional (buffer (current-buffer)))
+  (file-name-nondirectory (buffer-file-name buffer)))
+;;(buffer-file-name-nondirectory)
+
 (cl-defun buffer-directory (&optional (buffer (current-buffer)))
   (file-name-directory (buffer-file-name buffer)))
 ;;(buffer-directory)
