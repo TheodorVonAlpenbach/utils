@@ -20,4 +20,25 @@
     (o2m-convert-arguments '(("a") ("b") ("c")))
     '("a, b, c" ""))))
 
+(ert-deftest test-o2m-convert-assert ()
+  "Test of `o2m-convert-assert'"
+  (should (equal (o2m-convert-assert "assert (a, b);")
+		 "  function dealnumTest (testCase, a, b);"))
+  (should (equal (o2m-convert-assert "assert (a, b, tol);")
+		 "  function dealnumTest (testCase, a, b, tol);")))
+
+(ert-deftest test-o2m-convert-test-line ()
+  "Test of `o2m-convert-test-line'"
+  (should (equal (o2m-convert-test-line "assert (a, b);")
+		 "  function dealnumTest (testCase, a, b);"))
+  (should (equal (o2m-convert-test-line "a = b + c;")
+		 "  a = b + c;"))
+  (should (equal (o2m-convert-test-line "test") nil)))
+
+(ert-deftest test-o2m-convert-test-string ()
+  "Test of `o2m-convert-test-string'"
+  (should (equal (o2m-convert-test-string
+		  "%!test\n%! x = randi (100, 10);\n%! assert (a, b);")
+		 "  x = randi (100, 10);\n  function dealnumTest (testCase, a, b);")))
+
 (provide 'test-mb-octave-matlab)
