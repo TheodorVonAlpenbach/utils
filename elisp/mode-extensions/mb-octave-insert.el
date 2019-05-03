@@ -9,7 +9,8 @@
     map))
 
 (defun mb-octave-insert-defun ()
-  (message "Not implemented!"))
+  (interactive)
+  (octave-insert-defun))
 
 (defun mb-octave-insert-if ()
   (interactive)
