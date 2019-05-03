@@ -7,15 +7,23 @@
 ;;;;   [min, imin] = min (varargin{:});
 ;;;; works in Octave, but not in MATLAB. This does:
 ;;;;   [mi, imin] = min (varargin{:});
+;;;; 2. MATLAB does not automatically convert into logicals, like Octave. E.g.
+;;;;   ifelse (diff (t), 2, 1)
+;;;; works in Octave, not in MATLAB. But this works in both:
+;;;;   ifelse (find (diff (t)), 2, 1)
 
-(loop with pdir1 = "~/projects/matlab/ls"
-      with pdir2 = "~/git/utils/octave"
-      for dir in (mapcar #'sstring '(lscommon lsbin div time file string))
+(defconst +octave-root+ "~/git/utils/octave")
+(defconst +matlab-root+ "~/git/utils/matlab")
+
+;(setf *version-swaps* nil)
+(loop with pdir1 = +octave-root+
+      with pdir2 = +matlab-root+
+      for dir in (mapcar #'sstring '(lscommon lsbin div time file string timeseries math))
       for p = (list (expand-file-name dir pdir1) (expand-file-name dir pdir2))
       do (push-unique p *version-swaps* #'equal))
 
 (defun o2m-validate-buffer ()
-  (string-match "projects/matlab/ls" (buffer-file-name)))
+  (in-directory-p (buffer-file-name) +matlab-root+))
 ;;(o2m-validate-buffer)
 
 (defun o2m-forward-multiassign ()
@@ -374,3 +382,17 @@ I was wrong."
 
     (save-buffer)))
 ;;(o2m-convert-doc)
+
+(defun o2m-all ()
+  (o2m-convert-defaults)
+  (o2m-not-ify-buffer)
+  (o2m-comments-buffer)
+  (o2m-convert-empty-curls)
+  (o2m-convert-NA)
+  (o2m-convert-defun-names)
+  (o2m-convert-ends)
+  (o2m-split-multiassign)
+  (o2m-convert-strings)
+  (o2m-convert-tests)
+  (o2m-convert-doc))
+;;(o2m-all)
