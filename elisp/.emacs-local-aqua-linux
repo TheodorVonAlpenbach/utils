@@ -42,8 +42,8 @@
 (setf diary-file (setf diary-file (expand-file-name "office/diary" *local-data-dir*)))
 
 (defconst lsdoc-dir
-  "/ssh:bro:/ls/gold/u1/mbe/doc/"
-  ;; "/ls/platinum/u1/mbe/doc"
+  ;; "/ssh:bro:/ls/gold/u1/mbe/doc/"
+  "/ls/platinum/u1/mbe/doc"
   "Mounted silver doc directory")
 
 ;; Special Octave file
