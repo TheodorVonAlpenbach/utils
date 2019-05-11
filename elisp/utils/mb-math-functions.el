@@ -90,3 +90,19 @@ for numerical implementation basis."
   (assert (< 0 p 1))
   (+ mu (* sigma (sqrt 2) (inverse-erf (- (* 2 p) 1)))))
 ;;(loop for p in (list .95 .9 (/ 5 6.0) .75 .5) collect (normal-distribution-quantile p 100 15))
+
+(cl-defun geometric-series (a r &key (start 0) end)
+  "Return the infinite geometric series a + ar + ar^2 + ..."
+  (if (zerop start)
+    (if end
+      (if (= (abs r) 1)
+	(* a (- end start))
+	(* a (/ (- 1.0 (expt r end))
+		(- 1 r))))
+      (if (< (abs r) 1)
+	(/ a (- 1.0 r))
+	(error "Absolute value of common ratio must be less than one")))
+    (- (geometric-series a r :start 0 :end end)
+       (geometric-series a r :start 0 :end start))))
+
+(provide 'mb-math-functions)
