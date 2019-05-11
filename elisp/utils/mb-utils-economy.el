@@ -8,3 +8,20 @@
 (defun* CFaR (list &key (from 19) (to 29))
   (- (average list) (average (subseq list from to))))
 ;;(CFaR list)
+
+(cl-defun deposit (d n &optional (f 1.0))
+  (geometric-series d f :end n))
+;;(deposit 1 2 2)
+
+(cl-defun growth (n &optional (f 1.0) (c 1.0) (d 0.0))
+  (if (zerop d)
+    (* c (expt f n))
+    (- (* c (expt f n)) (deposit d n f))))
+;;(growth 2 2 0.75 1.0)
+
+(cl-defun deposit-to-zero (n &optional (f 1.0) (d 1.0))
+  (/ (coerce (deposit d n f) 'float) (expt f n)))
+;;(deposit-to-zero 2 2 1)
+;;(growth 10 1.08 (deposit-to-zero 3 2 2) 1.0)
+
+(provide 'mb-utils-economy)
