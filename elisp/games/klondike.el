@@ -181,7 +181,7 @@ and all cards pushed on it to visible's COLUMNth deck."
 (defun klondike-ui-hand-out-visible ()
   (interactive)
   (let ((col (read-from-minibuffer "Move hand to visible column: ")))
-    (klondike-move-hand (string-to-number col)))
+    (klondike-move-hand (klondike-parse-column col)))
   (klondike-ui-refresh)
   (klondike-finished))
 
@@ -195,11 +195,18 @@ and all cards pushed on it to visible's COLUMNth deck."
   (klondike-rotate-hand -1)
   (klondike-ui-refresh))
 
+(defun klondike-parse-column (col)
+  (if (string-match "^[a-g]$" (downcase col))
+    (- (char col 0) ?a)
+    (if (string-match "^[0-6]$" col)
+      (string-to-number col)
+      (message "Illegal column descriptor"))))
+
 (defun klondike-ui-move-visible-to-column ()
   (interactive)
   (let ((scard (read-from-minibuffer "Move visible card: "))
 	(col (read-from-minibuffer "... to column: ")))
-    (klondike-move-visible scard (string-to-number col)))
+    (klondike-move-visible scard (klondike-parse-column col)))
   (klondike-ui-refresh))
 
 (cl-defun klondike-finished (&optional  (out (klondike-out *klondike-state*)))
