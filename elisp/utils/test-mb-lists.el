@@ -102,6 +102,12 @@
   (should-not (equal (swap "a" '(("a" "b") ("c" "d"))) "b"))
   (should (equal (swap "a" '(("a" "b") ("c" "d")) :test #'string=) "b")))
 
+(ert-deftest test-group ()
+  "Test of `group'"
+  (should (equal (group '(a b d a d a b)
+		   :test #'(lambda (x y) (eql y 'd)))
+		 '((a) (b d) (a d) (a) (b)))))
+
 (ert-deftest test-memcase ()
   "Test of `memcase'"
   (should (equal (memcase '(a b c) (a 'A) (otherwise 'B)) 'A))
