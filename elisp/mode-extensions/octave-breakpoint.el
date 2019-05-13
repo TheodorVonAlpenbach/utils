@@ -112,7 +112,8 @@ function DEFUN."
   "Return the buffer breakpoints in BUFFER.
 The result is a list of the same format as the result from
 `octave-region-breakpoints'."
-  (octave-region-breakpoints (point-min) (point-max) buffer))
+  (with-buffer buffer
+    (octave-region-breakpoints (point-min) (point-max) buffer)))
 
 (defun octave-all-buffer-breakpoints (&optional buffer)
   "Return the buffer breakpoints in all active Octave mode buffers.

@@ -85,10 +85,14 @@ Options:
 
 (defun mb-octave-location (&optional pos)
   "Returns (FUNCTION-NAME LINUM), where FUNCTION-NAME is the
-function at point and LINUM is the current line number."
-  (let ((fn (substring-no-properties (add-log-current-defun)))
-	(linum (line-number-at-pos pos)))
-    (list fn linum)))
+function at point and LINUM is the current line number.
+
+TODO: rename and move this defun elsewhere. It is not Octave
+specific."
+  (save-excursion
+    (when pos (goto-char pos))
+    (list (substring-no-properties (add-log-current-defun))
+	  (line-number-at-pos))))
 
 (defun octave-debug-p ()
   "Returns not nil if octave is in debugging mode."
