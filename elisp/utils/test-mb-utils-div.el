@@ -73,4 +73,16 @@
 		   (list 1 0.3 "1" "0.3" "xcv" '(quote zxc) 'vbn))
 		 '(1 0.3 1 0.3 xcv zxc vbn))))
 
+(ert-deftest test-notf ()
+  "Test of `notf'"
+  (let ((a t)
+	(b '(t nil)))
+    (notf a)
+    (should-not a)
+    (notf (first b) (second b))
+    (should (equal b '(nil t)))
+    (should b)
+    (notf b)
+    (should-not b)))
+
 (provide 'test-mb-utils-div)
