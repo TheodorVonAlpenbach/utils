@@ -327,6 +327,11 @@ TODO: implement this. Probably involves some macro magic"
   `(progn (setf ,@(mapcan #'(lambda (x) (list x nil)) args))))
 ;;(macroexpand '(nilf (first c) b))
 
+(defmacro notf (&rest args)
+  "Sets all ARGS to nil."
+  `(progn (setf ,@(mapcan #'(lambda (x) (list x `(not ,x))) args))))
+;;(macroexpand '(notf (first c) b))
+
 (defmacro minf (place &rest numbers)
   "Sets PLACE to the minimum value of itself and each of NUMBERS."
   `(progn (setf ,place (min ,place ,@numbers))))
