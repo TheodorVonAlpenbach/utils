@@ -91,7 +91,9 @@ STATE can take the same values as in `evil-define-key'."
   "Is made for insert state."
   (interactive)
   (up-list 1)
-  (insert " "))
+  (case major-mode
+    (emacs-lisp-mode
+     (insert " "))))
 
 (require 'key-chord)
 (key-chord-mode 1)
