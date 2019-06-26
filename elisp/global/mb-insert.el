@@ -245,4 +245,18 @@ has the same length as current line."
 	      (file-name-sans-extension (buffer-name))))))
 ;;(insert-provide)
 
+(defun insert-alphabet (n)
+  "Insert the alphabet.
+With a prefix you can select another language than English.
+Absolut value of prefix defines the language. The sign defines
+the orientation: if it is negative, the alphabet is inserted
+horizontally. Else, it is interted vertically."
+  (interactive "p")
+  (let ((a (case (abs n)
+	     (2 (concat (a-b ?A ?Z) '(?Æ ?Ø ?Å)))
+	     (3 (concat (a-b ?A ?Z) '(?Å ?Ä ?Ö)))
+	     (t (a-b ?A ?Z)))))
+    (insert (apply #'string (if (minusp n) a (infix-list ?\n a))))))
+;;(insert-alphabet -1)
+
 (provide 'mb-insert)
