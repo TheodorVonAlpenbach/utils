@@ -18,11 +18,11 @@
 (setf reftex-plug-into-AUCTeX t)
 (setf reftex-insert-label-flags '("s" "sfte"))
 
-
-(defun master-prefixes  ()
+(defun master-prefix  ()
   (expand-file-name
    (file-name-sans-extension (TeX-master-file))
    (TeX-master-directory)))
+;;(master-prefix)
 
 (defun open-my-pdf (&optional x)
   "Find master file and view the corresponding PDF file in a buffer.
