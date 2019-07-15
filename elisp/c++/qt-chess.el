@@ -90,6 +90,10 @@
 	   ("[[:space:]]+\\]" "]")
 	   ("(void)" "()")
 	   ("\t" "    ")
+	   ;; ensure one space after comment
+	   ("//\\([^![:space:]]\\)" "// \\1")
+	   ;; ensure one space after doc comment
+	   ("// *!\\([^[:space:]]\\)" "//! \\1")
 	   ;; ensure one space after comma (except at EOL)
 	   (",\\([^[:space:]]\\)" ", \\1")
 	   ;; ensure spaces around = operator
@@ -322,9 +326,48 @@ Consider move this functionality to a makefile-mode extension module"
     (goto-char (point-min))
     (re-search-forward (substring-no-properties it))))
 
-(defun qt-split-stream ()
+(defun qt-for2while ()
+  "Convert old-fashion while construct with iterators to a for loop."
   (interactive)
-  )
+  (let ((var (symbol-at-point)))
+    (destructuring-bind (beg . end)
+	(bounds-of-thing-at-point 'list)
+      (delete-region (1+ beg) (1- end))
+      (insert (format "auto it = %S.begin(); it != %S.end(); ++it" var var))
+      (up-list -1)
+      (backward-kill-word 1)
+      (insert "for "))))
+
+(defun qt-used-modules-1 (dir)
+  "Return a list of used modules used in project under DIR"
+  (cl-remove-duplicates
+      (cl-sort (loop for l in (string-lines
+			       (string-trim
+				(call-process-shell-command*
+				 "gfind.sh" "-D" dir "^start_prog" "sh")))
+		     collect (second (split-string l)))
+	#'string<)
+    :test #'string=))
+;;(qt-used-modules-1 "/home/mbe/cvs/systems/17_001_Marshal_CandoII")
+
+(defun qt-used-modules ()
+  "For all projects, return a list of modules used"
+  (mapcar #'qt-used-modules-1 (directory-files "~/cvs/systems" t "^[1][7-9]")))
+;;(qt-used-modules)
+
+(defun qt-count-modules ()
+  "For all projects, return a list of modules used"
+  (loop for p in (partition (flatten (qt-used-modules)) :test #'equal)
+	collect (list (first p) (length p))))
+;;(qt-count-modules)
+
+(defun qt-module-usage ()
+  "Return a string displaying CHESS module usage"
+  (flet ((pr (x)
+	   (format "%-20s  %S%s" (first x) (second x) (or (third x) ""))))
+    (concat* (cl-sort (qt-count-modules) #'> :key #'second)
+      :pre (pr '("Module" Projects "\n")) :in "\n" :key #'pr)))
+;;(qt-module-usage)
 
 (defun chess-kbd-maps ()
   (let ((qt-map (make-sparse-keymap))
