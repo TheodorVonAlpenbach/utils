@@ -2,6 +2,7 @@
   "My local modifications of PYTHON-MODE"
   ;; Disable intraspace for INSERT-PARENTHESES
   (setq-local parens-require-spaces nil)
+  (setq-local evil-symbol-word-search t)
   (linum-mode))
    
 (defun mb-python-last-sexp-region ()
