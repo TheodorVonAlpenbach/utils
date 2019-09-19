@@ -32,4 +32,24 @@
 ;;(escape-velocity (* 10000 +moon-apogee+))
 ;;(escape-velocity (* 20000 +moon-apogee+))
 
+(defun lbs-to-kg (lbs)
+  (* 0.45359237 lbs))
+;;(mapcar (compose #'round #'lbs-to-kg) '(196.6 193 191.8 190.2))
+
+(cl-defun at->s (tt &optional (a 9.825))
+  (* 0.5 a tt tt))
+;;(at->s 10)
+
+(cl-defun as->t (s &optional (a 9.825))
+  (sqrt (/ (* 2 s) a)))
+;;(as->t 381)
+
+(cl-defun at->v (tt &optional (a 9.825))
+  (* a tt))
+
+(cl-defun as->v (s &optional (a 9.825))
+  (at->v (as->t s) a))
+;;(* 3.6 (as->v 381))
+
+
 (provide 'mb-utils-physics)
