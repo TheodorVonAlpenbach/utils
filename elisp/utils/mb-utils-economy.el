@@ -9,19 +9,22 @@
   (- (average list) (average (subseq list from to))))
 ;;(CFaR list)
 
-(cl-defun deposit (d n &optional (f 1.0))
-  (geometric-series d f :end n))
-;;(deposit 1 2 2)
-
+(require 'mb-math-functions)
 (cl-defun growth (n &optional (f 1.0) (c 1.0) (d 0.0))
-  (if (zerop d)
-    (* c (expt f n))
-    (- (* c (expt f n)) (deposit d n f))))
-;;(growth 2 2 0.75 1.0)
+  "Accumulate C after N years with growth rate F.
+N = 0 is the amount at the beginning of year 0, which is C.
+N = 1 is the amount at the beginning of year 1, which is (C+D)*F.
+N = 2 is the amount at the beginning of year 2, which is ((C+D)*F + D)*F etc."
+  (+ (* c (expt f n)) (* d f (geometric-series f :end n))))
+;;(growth 1 2 10 1)
 
-(cl-defun deposit-to-zero (n &optional (f 1.0) (d 1.0))
-  (/ (coerce (deposit d n f) 'float) (expt f n)))
-;;(deposit-to-zero 2 2 1)
-;;(growth 10 1.08 (deposit-to-zero 3 2 2) 1.0)
+(cl-defun withdraw-to-zero (n &optional (f 1.0) (d 1.0))
+  "Return the amount to have on your account on the beginning of
+year 0 to end up with zero after N year, withdrawing D at the
+beginning of each year."
+  (/ (* d f (geometric-series f :end (1- n))) (expt f n)))
+;;(growth 2 2 (withdraw-to-zero 2 2 1) -1)
+;;(growth 24 1.07 (withdraw-to-zero 24 1.07 1000) -1000)
+;;(withdraw-to-zero 1 1.045 100)
 
 (provide 'mb-utils-economy)
