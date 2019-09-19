@@ -73,6 +73,17 @@ from the more primitive function `cram-user-id'"
   "Low level function that accesses internals of a table.
 TODO: Avoid crash on empty db"
   (aif (ld-select :problem
+	 :where (string-match +cram-ref-filter+ :source-id))
+    (random-elt it)))
+;;(cram-db-random-problem)
+
+;; not working when no questions have been asked?
+(cl-defun cram-db-random-problem-old (&key (rating (car +cram-default-rating+))
+				    (window +cram-default-rating-window+)
+				    (idle-minutes 10))
+  "Low level function that accesses internals of a table.
+TODO: Avoid crash on empty db"
+  (aif (ld-select :problem
 	 :where (and (string-match +cram-ref-filter+ :source-id)
 		     (awhen rating (within it (1-sphere window rating)))
 		     (time< ::updated (add-time (now) :minute (- idle-minutes)))))

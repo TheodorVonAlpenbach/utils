@@ -20,3 +20,28 @@ o Create db
 o Create test regime
 x Design UI
 - Implement UI
+
+* DONE Backup save
+* DONE Download 10 plant images
+Name their file names by their scientific name
+(Pick the most difficult ones from my QP quiz)
+* DONE Make a new csv-import-file 
+* DONE Add a module that show image if present 
+* DONE Learn the plants!
+At least for now!
+
+* DONE Legge til alle mine planter
+Skript?
+
+* Begynne på plante hierarki
+Lisp-tre
+
+* Hint
+Hele slektstreet
+med alle søsken i basen
+
+** Hintkolonnen kan også være en funksjon, for eksempel (cram-plante-hint)
+
+  
+Roma
+https://www.google.no/maps/place/Green+152+-+Luxury+Apartments+Rome+Monti+Colosseum/@41.8951491,12.4913606,16.93z/data=!4m8!3m7!1s0x132f61aff7b2420d:0x810d2e1314abdd!5m2!4m1!1i2!8m2!3d41.8976601!4d12.4952454

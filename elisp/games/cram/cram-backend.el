@@ -393,7 +393,11 @@ ratings, and hand the onus of DB update to the caller"
 
 (defun cram-save ()
   (ld-save-database *current-database*))
+;;(cram-save)
 
+(cl-defun cram-backup (&optional (backup-type :iso-date))
+  (ld-save-database *current-database* backup-type))
+;;(cram-backup)
 
 ;;; reports
 (cl-defun cram-top-ratings (entity &key (from 0) (to 50))

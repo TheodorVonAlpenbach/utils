@@ -8,13 +8,13 @@
 
 (defun cram-format-match (user problem)
   (concat
-   (format "Your rating: %d (RD = %d)\n"
-     (cram-user-rating-e user) (cram-user-rating-d user))
-   (format "Problem rating: %d (RD = %d)\n"
-     (cram-problem-rating-e problem) (cram-problem-rating-d problem))
-   "\n"
-   (format "Problem #%d:\n" (cram-problem-id problem))
-   (cram-format-problem (cram-problem-question problem))))
+    (format "Your rating: %d (RD = %d)\n"
+      (cram-user-rating-e user) (cram-user-rating-d user))
+    (format "Problem rating: %d (RD = %d)\n"
+      (cram-problem-rating-e problem) (cram-problem-rating-d problem))
+    "\n"
+    (format "Problem #%d:\n" (cram-problem-id problem))
+    (cram-format-problem (cram-problem-question problem))))
 ;;(cram-format-match (cram-current-user) (first (cram-db-problems)))
 
 (cl-defun cram-new (&optional (level 1))
@@ -26,7 +26,14 @@
     (cram-problem-mode)
     (aif (cram-draw-problem :method :cram ; :worst
 			    :rating (cram-user-rating user))
-      (insert (cram-format-match user it))
+      (progn (insert (cram-format-match user it))
+	     (awhen (cram-problem-picture it)
+	       (find-file-other-window
+		(expand-file-name
+		 it
+		 (concat-directories
+		  (ld-database-repository *current-database*) "images")))
+	       (other-window 1)))
       (message "Could not draw problem. Is the database initialized?"))
     (time-set-reference)
     (evil-emacs-state)))
@@ -305,11 +312,29 @@ the *cram-current-problem* which is yet another structure."
   (evil-emacs-state)
   (define-key cram-problem-mode-map [return] #'cram-enter))
 
-(cl-defun cram (&optional (level 1))
-  (interactive)
+(cl-defun cram-1 (filter &optional (level 1))
+  (setf +cram-ref-filter+ filter)
   (cram-init t)
   (switch-to-buffer +cram-buffer+)
   (cram-new level))
+
+(cl-defun cram (&optional (level 1))
+  (interactive)
+  (cram-1 "^sk-ref-[3]"))
 ;;(cram)
+
+(cl-defun serbo-cram (&optional (level 1))
+  (interactive)
+  (cram-1 "^sk-ref-[0-9]"))
+(defalias 'cram-serbo 'serbo-cram)
+
+(cl-defun quiz-cram (&optional (level 1))
+  (interactive)
+  (cram-1 "^csv-ref-[1]"))
+(defalias 'cram-quiz 'quiz-cram)
+
+(cl-defun quiz-plants (&optional (level 1))
+  (interactive)
+  (cram-1 "^csv-planter-"))
 
 (provide 'cram)
