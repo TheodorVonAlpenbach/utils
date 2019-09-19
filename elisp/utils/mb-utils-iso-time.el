@@ -119,10 +119,10 @@ examples of abbreviated time forms:
 ;;(month-name 1 :en t)
 
 ;; Time formatting
-(cl-defun iso-date (&optional (time-designator (decode-time)))
+(cl-defun iso-date (&optional (time-designator (decode-time)) simple-p)
   "Returns DATE (default is today) in iso string format"
   (let ((etime (parse-time time-designator)))
-    (format "%04d-%02d-%02d"
+    (format (if simple-p "%04d%02d%02d" "%04d-%02d-%02d")
       (etime-year etime) (etime-month etime) (etime-day etime))))
 ;;(iso-date (now))
 
@@ -147,19 +147,25 @@ TODO: add lang parameter?"
     (format "%d.%d" (etime-day time) (etime-month time))))
 ;;(short-date '2014-04-02)
 
-(cl-defun iso-time (&key (time (decode-time)) (with-seconds nil))
+(cl-defun iso-time (&key (time (decode-time)) (with-seconds nil) (simple-p nil))
   "Returns time designator TIME (default is now) in iso string format"
   (let ((etime (parse-time time)))
     (if with-seconds 
-      (format "%02d:%02d:%02d"
+      (format (if simple-p "%02d%02d%02d" "%02d:%02d:%02d")
 	(etime-hour etime) (etime-minute etime) (etime-second etime))
-      (format "%02d:%02d" (etime-hour etime) (etime-minute etime)))))
+      (format (if simple-p "%02d%02d" "%02d:%02d")
+	(etime-hour etime) (etime-minute etime)))))
 ;;(iso-time :with-seconds t :time '2014-04-02)
 
-(cl-defun iso-date-and-time (&key (time (decode-time)) (with-seconds nil))
-  "Prints time designator TIME in full ISO date and time format"
+(cl-defun iso-date-and-time (&key (time (decode-time))
+			       (with-seconds nil)
+			       (simple-p nil))
+  "Prints time designator TIME in full ISO date and time format.
+If SIMPLE is not nil, then format time without the dashes and colons."
   (let ((time (parse-time time)))
-    (concat (iso-date time) "T" (iso-time :time time :with-seconds with-seconds))))
+    (concat (iso-date time simple-p) "T" (iso-time :time time
+						   :with-seconds with-seconds
+						   :simple-p simple-p))))
 ;;(iso-date-and-time :time '2014-04-02T22:25 :with-seconds t)
 
 (provide 'mb-utils-iso-time)

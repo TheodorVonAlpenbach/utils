@@ -29,4 +29,19 @@
   "Test of `weekday'"
   (should (equal (weekday :no '2009-01-01) "torsdag")))
 
+(ert-deftest test-iso-date-and-time ()
+  "Test of `iso-date-and-time'"
+  (should (equal (iso-date-and-time
+		  :time (decode-time (the-creation)))
+		 "1970-01-01T01:00"))
+  (should (equal (iso-date-and-time
+		  :time (decode-time (the-creation))
+		  :simple-p t)
+		 "19700101T0100"))
+  (should (equal (iso-date-and-time
+		  :time (decode-time (the-creation))
+		  :with-seconds t
+		  :simple-p t)
+		 "19700101T010000")))
+
 (provide 'test-mb-utils-iso-time.el)
