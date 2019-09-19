@@ -1,4 +1,5 @@
 (require 'deck)
+(require 'card)
 
 ;;;; STATE is a list (HIDDEN VISIBLE OUT HAND)
 ;;;; HIDDEN and VISIBLE are both lists of length 7
@@ -17,7 +18,7 @@
     (list (loop for i from 1 to 7 collect (pop-list deck (1- i)))
 	  (mapcar #'list (pop-list deck 7))
 	  (list -1 -2 -3 -4)
-	  deck)))
+	  (push-back nil deck))))
 ;;(klondike-init)
 
 (defvar *klondike-state* nil)
@@ -43,9 +44,11 @@
 ;;(klondike-insert-visible '(nil (1) (2) (3) (4) (7 5) (16)))
 
 (defun klondike-format-hand (hand)
-  (if (null hand)
+  (if (= (length hand) 1)
     "Empty"
-    (klondike-format-card (car hand))))
+    (if (null (car hand))
+      "Turn hand!"
+      (klondike-format-card (car hand)))))
 ;;(klondike-format-hand (klondike-hand *klondike-state*))
 
 (cl-defun klondike-insert-state (&optional (state *klondike-state*))
@@ -60,8 +63,12 @@
 (cl-defun klondike-rotate-hand (&optional (n 1) (state *klondike-state*))
   (rotatef-list (klondike-hand state) n))
 ;;(klondike-rotate-hand)
+;;(length (klondike-hand *klondike-state*))
 
 (defun klondike-legal-out-p (n m)
+  "Return true if card N can be placed on top of out-card M.
+If M is negative, there is no out-card present, so N then needs
+to be an ace in order for the function to return true."
   (if (minusp m)
     (card-ace-p n)
     (and (= (card-color n) (card-color m))
@@ -98,22 +105,23 @@ Else move card to visible's COLUMNth deck."
     (message "Hand is empty!")))
 ;;(klondike-move-hand 0)
 
-(cl-defun klondike-find-visible (card visible)
-  "Return (N I J)"
-  (let ((n (card-parse card)))
-    (loop for col in visible
-	  for i from 0
-	  if (position n col) return (list n i it))))
-;;(klondike-find-visible "2s" (klondike-visible *klondike-state*))
+(cl-defun klondike-find-visible (n visible)
+  "Return (COLUMN ROW) or NIL,
+where COLUMN and row are the visible the column and row number,
+respectively."
+  (loop for col in visible
+	for i from 0
+	if (position n col) return (list i it)))
+;;(klondike-find-visible (card-parse "2d") (klondike-visible *klondike-state*))
 
-(cl-defun klondike-move-visible (card &optional column (state *klondike-state*))
-  "Move CARD from hand and to either visible or out.
+(cl-defun klondike-move-visible (n &optional column (state *klondike-state*))
+  "Move card N from hand and to either visible or out.
 If COLUMN is nil, it moves the card to the apropriate OUT deck.
 This action requires that no card is pushed on it. Else move card
 and all cards pushed on it to visible's COLUMNth deck."
   (let ((visible (klondike-visible state)))
-    (aif (klondike-find-visible card visible)
-      (destructuring-bind (n i j) it
+    (aif (klondike-find-visible n visible)
+      (destructuring-bind (i j) it
 	(if (if column
 	      (klondike-push-card-visible
 	       (subseq (nth i visible) 0 (1+ j)) column visible)
@@ -128,27 +136,6 @@ and all cards pushed on it to visible's COLUMNth deck."
 	  (message "Illegal move!")))
       (message "Card is not visible!"))))
 ;;(klondike-move-visible "2h")
-
-(cl-defun klondike-move-visible-old (card &optional column (state *klondike-state*))
-  "Move CARD from hand and to either visible or out.
-If COLUMN is nil, it moves the card to the apropriate OUT deck.
-This action requires that no card is pushed on it. Else move card
-and all cards pushed on it to visible's COLUMNth deck."
-  (let ((cards (loop with n = (card-parse card)
-		     for visible-column in-ref (klondike-visible state)
-		     for hidden-column in-ref (klondike-hidden state)
-		     for pos = (position n visible-column)
-		     if pos
-		     return (prog1
-				(pop-list visible-column (1+ pos))
-			      (awhen (pop hidden-column)
-				(push it visible-column))))))
-
-    (if column
-      (push-list cards (nth column (klondike-visible state)))
-      (setf (nth (card-color (car cards)) (klondike-out state))
-	    (car cards)))))
-;;(klondike-move-visible "9d")
 
 ;;; User interface
 (defconst +klondike-buffer+ "*Klondike*")
@@ -206,18 +193,24 @@ and all cards pushed on it to visible's COLUMNth deck."
   (interactive)
   (let ((scard (read-from-minibuffer "Move visible card: "))
 	(col (read-from-minibuffer "... to column: ")))
-    (klondike-move-visible scard (klondike-parse-column col)))
+    (klondike-move-visible (card-parse scard) (klondike-parse-column col)))
   (klondike-ui-refresh))
 
-(cl-defun klondike-finished (&optional  (out (klondike-out *klondike-state*)))
+(cl-defun klondike-finished (&optional (out (klondike-out *klondike-state*)))
   (when (every #'card-king-p out)
     (message "Klondike accomplished, congratulations!")))
 ;;(klondike-finished '(22 25 38 51))
 
+(cl-defun klondike-push-visible-out (&optional (state *klondike-state*))
+  "Move a visible card to the out card row if possible or return nil.
+The current version will select the out card candidate in the
+order from left to right."
+  (loop for col in (klondike-visible state)
+	until (klondike-move-visible (last-elt col) nil (klondike-out state))))
+
 (defun klondike-ui-move-visible-out ()
   (interactive)
-  (let ((scard (read-from-minibuffer "Move out card: ")))
-    (klondike-move-visible scard))
+  (klondike-push-visible-out *klondike-state*)
   (klondike-ui-refresh)
   (klondike-finished))
 
