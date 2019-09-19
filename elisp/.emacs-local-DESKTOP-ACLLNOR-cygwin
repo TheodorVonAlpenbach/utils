@@ -54,7 +54,7 @@
 	(,+mb-lisp-dir+ "games/cram/cram.el")
 	(,+mb-lisp-dir+ "games/maths/maths.el")
 
-	;; common lisp utils
+	;; Common Lisp utils
 	(,+home-dir+ "projects/utils/lisp/mb-utils.lisp")
 	(,+home-dir+ "projects/utils/lisp/topology/shapes.lisp")
 
@@ -65,9 +65,9 @@
 	(,lsdoc-dir "todo.org" :keyboard :no)
 	(,lsdoc-dir "ferskvare" :keyboard :no :point :end)
 	(,lsdoc-dir "LS-notes.org" :point :end :keyboard :no :time-paragraphs t)
-	))
 
-;; (find-file "/ssh:ssh:~/doc/LS-notes.org")
+	(,+mb-lisp-dir+ "data/small-arbeidslog")))
+;;(find-file "/ssh:ssh:~/doc/LS-notes.org")
 
 ;;scheme
 (setf scheme-program-name "guile")
