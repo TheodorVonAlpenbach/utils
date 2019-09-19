@@ -57,6 +57,10 @@
 ;;;; C-S-t Overfør til quizark
 ;;;; C-S-s lagre
 
+;;;; Annet
+;;;; Generere nye kataloger
+;;;; for i in `seq 33 52`; do mkdir "$iuke" ; done
+
 ;;;; Endre antall runder i tabellen
 ;;;; ==============================
 ;;;; Siden antall runder i vår- og høstsesongen varierer, må man for
