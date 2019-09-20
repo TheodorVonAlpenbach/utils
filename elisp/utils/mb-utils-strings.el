@@ -37,13 +37,14 @@ case-table."
   "Inverse of `lower-case-p'."
   (not (lower-case-p character)))
 
-(defun integer-string-p (string)
+(defun integer-string-p (string &optional only-non-negative-p)
   (and (stringp string)
-       (string-match-exact "[0-9]+" string)))
-;;(mapcar #'integer-string-p '("123" 123 "a"))
+       (string-match-exact
+	(if only-non-negative-p "[0-9]+" "-?[0-9]+") string)))
+;;(mapcar #'integer-string-p '("123" "-123" 123 "a"))
 
 (defun string-to-integer (string)
-  "Similar to `number-to-string', but returns nil (not 0) if the
+  "Similar to `string-to-number', but returns nil (not 0) if the
 STRING is not an integer, otherwise returns the resulting integer."
   (and (integer-string-p string)
        (string-to-number string)))
@@ -455,7 +456,10 @@ overruled by keywords :START and :END."
 `match-string-no-properties' is called instead."
   (funcall (if no-properties #'match-string-no-properties #'match-string) num string))
 
-(cl-defun string-match* (regexp string &key (num 0) (start 0) (return-null nil) (subexpression-null nil) (no-properties t))
+(cl-defun string-match* (regexp string &key (num 0) (start 0)
+					 (return-null nil)
+					 (subexpression-null nil)
+					 (no-properties t))
   "Returns the part of STRING that matches REGEXP. NUM can also be a
 tree. Then a tree of corresponding matches is returned."
   (if (string-match regexp string start)
