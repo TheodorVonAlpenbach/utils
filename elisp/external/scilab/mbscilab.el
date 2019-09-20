@@ -31,7 +31,7 @@
 
 (defconst +scilab-init-files+
   (list
-   (list :viewer "~/sources/SciLab/toolboxes/LSSensorViewer/macros/LSSensorViewer.ini")
+   (list :viewer "~/cvs/sources/SciLab/toolboxes/LSSensorViewer/macros/LSSensorViewer.ini")
    (list :no-init nil)))
 
 (defconst +scilab-init-file+
