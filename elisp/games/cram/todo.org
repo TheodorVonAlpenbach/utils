@@ -33,14 +33,14 @@ At least for now!
 * DONE Legge til alle mine planter
 Skript?
 
-* Begynne på plante hierarki
+* TODO Begynne på plante hierarki
 Lisp-tre
 
-* Hint
+* TODO Hint
 Hele slektstreet
 med alle søsken i basen
 
-** Hintkolonnen kan også være en funksjon, for eksempel (cram-plante-hint)
+** TODO Hintkolonnen kan også være en funksjon, for eksempel (cram-plante-hint)
 
   
 Roma
