@@ -72,8 +72,11 @@ For example:
 		 (when (match-current-buffer-p to) (swap-target from)))
      return it))
 
-(defun simple-swap-1 (fn1 fn2)
-  (let ((bfn (buffer-file-name (current-buffer))))
+(cl-defun simple-swap-1 (f1 f2 &optional (dir (buffer-directory)))
+  "TODO: handle absolute file names"
+  (let ((bfn (buffer-file-name (current-buffer)))
+	(fn1 (expand-file-name f1 dir))
+	(fn2 (expand-file-name f2 dir)))
     (if (string= fn1 bfn)
      (find-file fn2)
      (if (string= bfn fn2)
@@ -82,9 +85,7 @@ For example:
 (cl-defun simple-swap (&optional (swaps *simple-swaps*))
   (interactive)
   (loop for (f1 f2 d) in swaps
-	for fn1 = (expand-file-name f1 d)
-	for fn2 = (expand-file-name f2 d)
-	thereis (simple-swap-1 fn1 fn2)))
+	thereis (simple-swap-1 f1 f2 d)))
 ;;(simple-swap)
 
 (cl-defun smart-swap (&optional (swaps +smart-swaps+))
