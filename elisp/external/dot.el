@@ -67,6 +67,11 @@ where each element defines a dot node property \(name . value)"
   (unless (rename-file file newname ok-if-already-exists)
     newname))
 
+(defun dot-to-png-buffer ()
+  (interactive)
+  (dot-to-png (buffer-string)
+	      :path (file-name-change-extension (buffer-file-name) "png")))
+
 (cl-defun dot-to-png (dot-string &key (path (dot-tmp-path dot-string)))
   "Returns path to generated PNG file.
 The function uses `dot-program' to convert the DOT-STRING to a PNG image."
@@ -85,8 +90,11 @@ The function uses `dot-program' to convert the DOT-STRING to a PNG image."
 (defun dot-view-file (path)
   (png-view (dot-to-png (file-string path))))
 
-(cl-defun dot-view (dot-string &key (path (dot-tmp-path dot-string)))
-  (png-view (dot-to-png dot-string :path path)))
+(cl-defun dot-view (dot-string &key (path (dot-tmp-path dot-string)) extern-p)
+  (awhen (dot-to-png dot-string :path path)
+    (if extern-p
+      (png-view-externally it)
+      (png-view it))))
 ;;(dot-view (dot-string (dot-statements-from-tree '(((c f) g c)))))
 ;;(dot-view (file-string "~/projects/dot/CHESS-process.gv"))
 
@@ -94,9 +102,9 @@ The function uses `dot-program' to convert the DOT-STRING to a PNG image."
   (auto-image-file-mode 1)
   (find-file filename))
 
-(defun png-view-externally ()
+(cl-defun png-view-externally (&optional (filename (buffer-file-name)))
   (interactive)
-  (call-process* "xdg-open" (buffer-file-name)))
+  (call-process* "xdg-open" filename))
 
 (defun png-print ()
   "Print png buffer.
