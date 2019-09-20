@@ -1,50 +1,50 @@
-;;;; Utils for å oppdatere tabeller i Munkholmserien.
+;;;; Utils for Ã¥ oppdatere tabeller i Munkholmserien.
 ;;;; De viktigste er
 ;;;; qp-download-table-file, som laster ned siste tabell via ftp, og rett inn i editerbar buffer
 ;;;; qp-upload-table-file, som laster opp buffer
 ;;;; qp-customer-results-to-table-buffer, som "vasker" data fra kunden og legger inn i tabellbuffer.
 
-;;;; NB! res_alle.txt er en fil som må lastes opp som iso-latin-1-dos.
-;;;; Dette innebærer at data som lastes inn må encodes som
-;;;; iso-latin-1-dos. Dette er nå implementert i
+;;;; NB! res_alle.txt er en fil som mÃ¥ lastes opp som iso-latin-1-dos.
+;;;; Dette innebÃ¦rer at data som lastes inn mÃ¥ encodes som
+;;;; iso-latin-1-dos. Dette er nÃ¥ implementert i
 ;;;; konverteringsfunksjonene. Sette encodingen bufferen til
-;;;; iso-latin-1-dos. Dette er også gjort. Trikset er å legge til
+;;;; iso-latin-1-dos. Dette er ogsÃ¥ gjort. Trikset er Ã¥ legge til
 ;;;; element i file-coding-system-alist, som vist under.
 
-;;;; NB! Siden asp er Windows, så må vi lagre som DOS! Det har skjedd
-;;;; at jeg har sittet i linux, endret på ulovlige charaterer fra
-;;;; kunde, og så har Emacs på grunn av character-endringen selv
+;;;; NB! Siden asp er Windows, sÃ¥ mÃ¥ vi lagre som DOS! Det har skjedd
+;;;; at jeg har sittet i linux, endret pÃ¥ ulovlige charaterer fra
+;;;; kunde, og sÃ¥ har Emacs pÃ¥ grunn av character-endringen selv
 ;;;; funnet ut at den skal lagre i en annen encoding.
 
-;;;; NB! igjen: dersom noe skulle gå galt med res_alle.txt, og på en
-;;;; eller annen måte blir kodet i utf-8, så kan dette enkelt rettes
+;;;; NB! igjen: dersom noe skulle gÃ¥ galt med res_alle.txt, og pÃ¥ en
+;;;; eller annen mÃ¥te blir kodet i utf-8, sÃ¥ kan dette enkelt rettes
 ;;;; opp med C-x RET c iso-latin-1-dos save-buffer (og touche buffer
-;;;; om nødvendig).
+;;;; om nÃ¸dvendig).
 
-;;;; For å vaske forkludrete data som følge av encoding-rot kan man
-;;;; evaluere noe sånt som
+;;;; For Ã¥ vaske forkludrete data som fÃ¸lge av encoding-rot kan man
+;;;; evaluere noe sÃ¥nt som
 ;;;; (map-strings-region 1 (point-max) *iso-latin1-encoding* 4 0) 
 
 ;;;; Noen tips.
 
-;;;; 1. Ikke slett resultatbufferen. Det er ikke noe vits i å laste
-;;;;    ned fra FTP hele tiden. Det holder med å synkronisere én vei.
+;;;; 1. Ikke slett resultatbufferen. Det er ikke noe vits i Ã¥ laste
+;;;;    ned fra FTP hele tiden. Det holder med Ã¥ synkronisere Ã©n vei.
 
 ;;;; 2. Legg mail i Brinkster som har med tabelloppdatering i egen
-;;;;    katalog. Det er ryddigere, særlig med tanke på all spammen som
-;;;;    kommer. Jeg pleier dessuten å flagge de mailene i
-;;;;    tabellkatalogen som ikke ennå er blitt lastet opp.
+;;;;    katalog. Det er ryddigere, sÃ¦rlig med tanke pÃ¥ all spammen som
+;;;;    kommer. Jeg pleier dessuten Ã¥ flagge de mailene i
+;;;;    tabellkatalogen som ikke ennÃ¥ er blitt lastet opp.
 
-;;;; 3. De fleste resultatene sendes som Excel-filer. En kjapp måte å
-;;;;    trekke ut dataene, er som følger
-;;;;    * Åpne vedlegg
-;;;;    * Ctrl-Home for å komme til A1
-;;;;    * Down for å komme til første resultatrad (dette er ikke nødvendig dersom overskriftsrad mangler)
-;;;;    * Ctrl-Shift-End for å merke av alle fylte celler
-;;;;    * Ctrl-c for å kopiere
-;;;;    * Gå til Emacs, åpne buffer *scratch* og yank inn teksten
-;;;;    * Kjør qp-customer-results-to-table-buffer og save buffer
-;;;;    * Kjør qp-upload-table-file
+;;;; 3. De fleste resultatene sendes som Excel-filer. En kjapp mÃ¥te Ã¥
+;;;;    trekke ut dataene, er som fÃ¸lger
+;;;;    * Ã…pne vedlegg
+;;;;    * Ctrl-Home for Ã¥ komme til A1
+;;;;    * Down for Ã¥ komme til fÃ¸rste resultatrad (dette er ikke nÃ¸dvendig dersom overskriftsrad mangler)
+;;;;    * Ctrl-Shift-End for Ã¥ merke av alle fylte celler
+;;;;    * Ctrl-c for Ã¥ kopiere
+;;;;    * GÃ¥ til Emacs, Ã¥pne buffer *scratch* og yank inn teksten
+;;;;    * KjÃ¸r qp-customer-results-to-table-buffer og save buffer
+;;;;    * KjÃ¸r qp-upload-table-file
 ;;;;    * Lukk vedlegg
 
 ;;;; Andre shortcuts
@@ -54,7 +54,7 @@
 ;;;; I Lag quiz
 ;;;; C-S-f Generer forslagsliste
 ;;;; C-S-n Neste tag
-;;;; C-S-t Overfør til quizark
+;;;; C-S-t OverfÃ¸r til quizark
 ;;;; C-S-s lagre
 
 ;;;; Annet
@@ -63,9 +63,9 @@
 
 ;;;; Endre antall runder i tabellen
 ;;;; ==============================
-;;;; Siden antall runder i vår- og høstsesongen varierer, må man for
+;;;; Siden antall runder i vÃ¥r- og hÃ¸stsesongen varierer, mÃ¥ man for
 ;;;; hver sesong endre antall kolonner for runder i tabellene. Dette
-;;;; gjøre som følger
+;;;; gjÃ¸re som fÃ¸lger
 
 ;;;; 1. Last ned TranformUtils.inc:
 ;;;;    (qp-download :transform-utils)
@@ -209,7 +209,7 @@
 ;;;; Table handling
 
 ;;; General config
-(defconst qp-season '(31 "Allmennquiz"))
+(defconst qp-season '(32 "Allmennquiz"))
 (defun qp-season-number () (number-to-string (first qp-season)))
 (defun qp-season-name () (second qp-season))
 
@@ -223,7 +223,7 @@
     (burums "Fru Burums (Oslo)" mandag (0 1) "Burums") ;Iversen
     (burums "Fru Burums (Oslo)" mandag (1 5) "Burums") ;;highbury style
     (burums "Fru Burums (Oslo)" mandag "\\(.*\\) \\([[:digit:]]+\\)$" "Burums") 
-    (vertshuset "Vålerenga Verthus (Oslo)" tirsdag (5 6 0) "Vålerenga")
+    (vertshuset "VÃ¥lerenga Verthus (Oslo)" tirsdag (5 6 0) "VÃ¥lerenga")
     (highbury "Highbury (Oslo)" torsdag (0 1) "Highbury")
     (highbury "Highbury (Oslo)" torsdag (1 2) "Highbury")
     (highbury "Highbury (Oslo)" torsdag (0 :last) "Highbury")
@@ -275,17 +275,30 @@ calling for a greater number of columns than max-column."
   (mapcar #'string-trim (split-string string "[\t]")))
 ;;(qp-customer-entry-from-string "2	Onsdag	Allmennquiz	Onkel Oskar (Namsos)	Purkene	20")
 
+(defun qp-string-filter (string)
+  "Replace non-ASCII characters with ASCII counterparts"
+  (let ((res (string-replace-map (string-trim string)
+	       '(("â€™" . "'")
+		 ("Â´" . "'")))))
+    (aif (string-match "[^[:space:].'a-zA-Z0-9Ã¦Ã¸Ã¥Ã†Ã˜Ã…Ã¤]" res)
+      (error "Unhandled non-ASCII character `%c' at position %d"
+	     (char res it) it)
+      res)))
+;;(qp-string-filter "Kateâ€™s Bush 26")
+
 (defun qp-customer-entries-from-string (string)
   "Converts STRING, i.e. the results entered by a customer, to a
   list of customer-result-entry's."
   (mapcar #'qp-customer-entry-from-string
-	  (remove-if #'empty-string-p (string-to-lines string))))
+	  (remove-if #'empty-string-p
+	    (string-to-lines (qp-string-filter string)))))
 
 (defun qp-customer-entries-from-region (beg end)
   "Converts region to a list of customer-result-entry's and kills the region.
 The killing can be avoided by entering a prefix argument (not
 implemented TODO)."
-  (prog1 (qp-customer-entries-from-string (buffer-substring-no-properties beg end))
+  (prog1 (qp-customer-entries-from-string
+	  (buffer-substring-no-properties beg end))
     (unless current-prefix-arg (kill-region beg end))))
 
 (defun qp-customer-data-regexp-based-p (customer)
