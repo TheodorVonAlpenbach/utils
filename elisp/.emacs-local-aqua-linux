@@ -10,7 +10,10 @@
 			   "~/git/utils/elisp/lsconfig/"))
 
 (cl-pushnew
- '(".emacs" ".emacs-local-aqua-linux" "~/projects/utils/elisp/")
+ '(".emacs" ".emacs-local-aqua-linux")
+  *simple-swaps* :test #'equal)
+(cl-pushnew
+ '("Testbench.conf" "nmeaplay.sh")
   *simple-swaps* :test #'equal)
 
 (setf *local-requires* '(lsconf-mode qt-chess browse-kill-ring))
@@ -89,9 +92,9 @@
 	;;(,+home-dir+ "git/lsconf/lsconf-mode.el")
 	(,+home-dir+ "git/imms/src/octave/egina/egina_rao.m")
 	(,+home-dir+ "git/utils/octave/div/dealmat.m" :read-only t)
+	(,+home-dir+ "git/utils/elisp/lsconfig/lsconf-mode.el")
 
 	;; CVS entry points
-	(,+home-dir+ "cvs/sources/imms/src/elisp/ls-config.el")
 	(,+home-dir+ "cvs/sources/imms/src/lisp/egina/egina-wave.lisp")
 	(,+home-dir+ "cvs/sources/imms/src/lisp/wave/wave.lisp")
 	;; (,+home-dir+ "cvs/sources/SciLab/toolboxes/OsstrupenViewer/macros/OS_config.sce")
