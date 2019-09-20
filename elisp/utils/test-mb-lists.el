@@ -108,6 +108,12 @@
 		   :test #'(lambda (x y) (eql y 'd)))
 		 '((a) (b d) (a d) (a) (b)))))
 
+(ert-deftest test-find-subtree ()
+  "Test of `find-subtree'"
+  (should (equal (find-subtree 'f '((a (b (c (d))))
+				    (e (f (g (h))))))
+		 '(f (g (h))))))
+
 (ert-deftest test-memcase ()
   "Test of `memcase'"
   (should (equal (memcase '(a b c) (a 'A) (otherwise 'B)) 'A))
