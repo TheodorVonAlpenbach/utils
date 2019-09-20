@@ -111,6 +111,15 @@
   (should (equal (blank-p "\n") t))
   (should (equal (blank-p " \t\n ") t)))
 
+(ert-deftest test-integer-string-p ()
+  "Test of `integer-string-p'"
+  (should (equal (mapcar #'integer-string-p
+		   '("123" "0" "-123" 123 "a"))
+		 '("123" "0" "-123" nil nil)))
+  (should (equal (mapcar (bind #'integer-string-p t)
+		   '("123" "0" "-123" 123 "a"))
+		 '("123" "0" nil nil nil))))
+
 (ert-deftest test-andcat ()
   "Test of `andcat'"
   (should (equal (andcat '()) ""))
