@@ -102,7 +102,7 @@
 ;;(y2b "5C8 R4  4G8 F# G  G#3  G8 R4  R3  B4 R8  5C8 R2" :tempo 480 :tag "Shave And A Haircut")
 ;;(y2b "4G4 5C C D8 E F D E4 D8 E F4 E D8 C D4 C2" :tempo 480 "Het Wilhelmus")
 ;;(y2b "4G3 F8 E4 D C D E F G6 A8 G4 F E2" "Ja, vi elsker")
-;;(y2b "5c8 4b 5c r 4c r c r g f e g 5c 4b 5c e d c d r 4d r d r" :tempo 120 "Sea song")
+;;(insert (y2b "5c8 4b 5c r 4c r c r g f e g 5c 4b 5c e d c d r 4d r d r" :tempo 120 "Sea song"))
 ;;(insert (y2b "4g4 r8 g8 a2 g 5c 4b2 r4 4g4 r8 g8 a2 g 5d c2 r4 4g4 r8 g8 5g2 e c 4b a 5f4 r8 f8 e2 c2 d c1" :tempo 240 :tag "Happy Birthday"))
 
 (defun ly2b (m env)
