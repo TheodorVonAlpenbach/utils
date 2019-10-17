@@ -29,7 +29,6 @@ where each element defines a dot node property \(name . value)"
 					       (format "%s=\"%s\"" (car p) (cdr p))))))
 ;;(dot-node-base 'n '((label . "nodeName") (fillcolor . yellow) (style . filled)))
 
-(defconst *dot-dir* (concat *local-data-dir* "dot/"))
 (cl-defun dot-node (identifier &optional name (color "white") (style "filled"))
   (dot-node-base identifier (list (cons 'label name)
 				  (cons 'fillcolor color)
