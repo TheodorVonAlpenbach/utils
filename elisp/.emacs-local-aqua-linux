@@ -12,6 +12,7 @@
 (cl-pushnew
  '(".emacs" ".emacs-local-aqua-linux")
   *simple-swaps* :test #'equal)
+
 (cl-pushnew
  '("Testbench.conf" "nmeaplay.sh")
   *simple-swaps* :test #'equal)
@@ -83,13 +84,12 @@
 	(,+home-dir+ "projects/utils/lisp/topology/shapes.lisp")
 
 	;; other project entries
-	(,+home-dir+ "git/projects/17010_Osstrupen/octave/osreport_teigen.m")
+	(,+home-dir+ "git/projects/17010_Osstrupen/octave/osreport.m")
 
 	;; chess
 	(,+home-dir+ "git/chess/libHsmsCore/src/ChAlarmServer.cpp")
 
 	;; Git entry points
-	;;(,+home-dir+ "git/lsconf/lsconf-mode.el")
 	(,+home-dir+ "git/imms/src/octave/egina/egina_rao.m")
 	(,+home-dir+ "git/utils/octave/div/dealmat.m" :read-only t)
 	(,+home-dir+ "git/utils/elisp/lsconfig/lsconf-mode.el")
