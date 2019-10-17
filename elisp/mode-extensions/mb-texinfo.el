@@ -81,7 +81,8 @@ If ARGUMENT is a string insert it in the pair of curly parentheses."
 	(tex-map            (make-sparse-keymap))  ; t
 	(makeinfo-map       (make-sparse-keymap))  ; m
 	(snippet-map        (make-sparse-keymap))  ; s
-	(texinfo-format-map (make-sparse-keymap))) ; e
+	(texinfo-format-map (make-sparse-keymap))  ; e
+	(texinfo-goto-map   (make-sparse-keymap))) ; g
     ;; map is currently valid only on normal and visual state
     (key-chord-define evil-normal-state-local-map "gh" map)
     (key-chord-define evil-visual-state-local-map "gh" map)
@@ -128,6 +129,9 @@ If ARGUMENT is a string insert it in the pair of curly parentheses."
     (define-key map "e" texinfo-format-map)
     (define-key texinfo-format-map "r" 'texinfo-format-region)
     (define-key texinfo-format-map "b" 'texinfo-format-buffer)
+
+    (define-key map "g" texinfo-goto-map)
+    (define-key texinfo-goto-map "s" 'texinfo-goto-source)
 
     map))
 ;;(mb-texinfo-map)
@@ -185,5 +189,12 @@ environment delimiter lines is skipped."
   (kill-line 1)
   (texinfo-insert-env 'example t))
 
+(defun texinfo-goto-source ()
+  (interactive)
+  (save-excursion
+    (re-search-backward "@subsection")
+    (forward-word 2)
+    (let ((tags-table-list '("~/.OTAGS")))
+      (find-tag-no-prompt-read-only))))
 
 (provide 'mb-texinfo)
