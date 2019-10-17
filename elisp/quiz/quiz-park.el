@@ -280,7 +280,7 @@ calling for a greater number of columns than max-column."
   (let ((res (string-replace-map (string-trim string)
 	       '(("’" . "'")
 		 ("´" . "'")))))
-    (aif (string-match "[^[:space:].'a-zA-Z0-9æøåÆØÅä]" res)
+    (aif (string-match "[^[:space:].'a-zA-Z0-9æøåÆØÅä]()" res)
       (error "Unhandled non-ASCII character `%c' at position %d"
 	     (char res it) it)
       res)))
