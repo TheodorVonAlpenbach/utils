@@ -7,7 +7,17 @@
 ;; Local elisp load paths
 ;;(setf *local-load-paths* '("~/git/lsconf"))
 
-;;(setf *local-requires* '(lsconf-qt-chess browse-kill-ring))
+(cl-pushnew
+ '(".emacs" ".emacs-local-DESKTOP-ACLLNOR-cygwin")
+  *simple-swaps* :test #'equal)
+
+(cl-pushnew
+ '("problem-db.asd" "problem-db.lisp")
+  *simple-swaps* :test #'equal)
+
+(cl-pushnew
+ '("problem-server.asd" "problem-server.lisp")
+  *simple-swaps* :test #'equal)
 
 ;; Sentences, see info node Sentences
 (setf sentence-end "[.?!][]\"')]*\\($\\|\t\\| \\)[ \t\n]*")
@@ -19,8 +29,15 @@
 
 ;; tags
 (setf tags-table-list
-      (cl-nunion '("~/.MBTAGS" "~/.CTAGS" "~/.OTAGS" "~/.CLTAGS" "~/.PYTAGS" "~/.SCILABTAGS")
-		 tags-table-list :test #'string=))
+      (cl-nunion
+       '("~/.MBTAGS"
+	 ;; "~/.CTAGS"
+	 ;; "~/.OTAGS"
+	 "~/.CLTAGS"
+	 ;; "~/.PYTAGS"
+	 ;; "~/.SCILABTAGS"
+	 )
+       tags-table-list :test #'string=))
 
 ;; lynx
 (setf *lynx-proxy-dir* (expand-file-name "lynx-proxy" *local-data-dir*))
@@ -32,10 +49,14 @@
 (defconst lsdoc-dir "/ssh:ssh:~/doc"
   "Mounted silver doc directory")
 
+(defconst pf-dir "/ssh:pf:~/"
+  "Mounted progfab root directory")
+
 (let ((fn "~/.emacs.d/tramp"))
   (when (file-exists-p fn)
     (delete-file fn)))
 
+;;(find-file "/ssh:ssh:~/doc/LS-notes.org")
 (setf *my-favorites*
       `((,+mb-lisp-dir+ ".emacs")
 	(,+mb-lisp-dir+ "utils/mb-utils-strings.el")
@@ -66,11 +87,17 @@
 	(,lsdoc-dir "ferskvare" :keyboard :no :point :end)
 	(,lsdoc-dir "LS-notes.org" :point :end :keyboard :no :time-paragraphs t)
 
-	(,+mb-lisp-dir+ "data/small-arbeidslog")))
+	(,pf-dir "init.lisp")
+	(,pf-dir "log.org")
+
+	(,+mb-lisp-dir+ "data/small-arbeidslog"
+			:point :end :keyboard :no :time-paragraphs t)))
 ;;(find-file "/ssh:ssh:~/doc/LS-notes.org")
+;;(find-file "/ssh:pf:~/init.lisp")
 
 ;;scheme
 (setf scheme-program-name "guile")
 
 ;; lisp
+;; (setf inferior-lisp-program "clisp")
 (setf inferior-lisp-program "sbcl")
