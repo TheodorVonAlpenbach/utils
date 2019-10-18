@@ -9,4 +9,8 @@
   (should (equalp (growth 2 2 10 1) 46)))
 
 
+(ert-deftest test-deposit ()
+  "Test of `deposit'"
+  (should (< (abs (- (deposit 37 1.07 -1.40352077574121) 0.1)) 1e-12)))
+
 (provide 'test-mb-utils-economy)
