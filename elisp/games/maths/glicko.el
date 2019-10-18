@@ -34,13 +34,13 @@ This method guarantees to return a number of type float."
 		       -400)))))
 ;;(glicko-expected-score 1500 1300 50)
 
-(defun glicko-d-squared (opponent-g-values expected-scores)
+(defun glicko-d-squared (expected-scores opponent-g-values)
   "The lists opponent-g-values and expected-scores containts the
 g-value and expected score, respectively, for the opponents"
   (/ 1 +glicko-q-squared+ (loop for g in opponent-g-values
-			      for e in expected-scores
-			      sum (* (sq g) e (- 1 e)))))
-;;(glicko-d-squared '(.94) '(.5))
+				for e in expected-scores
+				sum (* (sq g) e (- 1 e)))))
+;;(glicko-d-squared '(.5) '(.94))
 
 (defun glicko-expected-scores (original-rating opponent-ratings opponents-RDs)
   "Helper function"
@@ -48,7 +48,7 @@ g-value and expected score, respectively, for the opponents"
 	     opponent-ratings opponent-RDs))
 
 (defun glicko-reorder (player matches)
-  "Tranformes PLAYER and MATCHES to the list (player-rating player-RD ratings RDs scores)"
+  "Tranforms PLAYER and MATCHES to the list (player-rating player-RD ratings RDs scores)"
   (append player (transpose (cut (flatten matches) 3))))
 ;;(glicko-reorder '(1600 50) '(((1500 30) 1) ((1700 20) .5) ((2000 10) 0)))
 ;;(glicko-reorder '(1600 50) '((1500 30) 1))
@@ -62,12 +62,18 @@ opponent's strength. SCORE is a real number in the interval [0
 1]. Optional TIME is the number of days since last time PLAYERs
 rating was calculated. It is used to modify PLAYERs RD due to the
 TIME passed since his last activity."
-  (destructuring-bind (original-rating original-RD opponent-ratings opponent-RDs scores)
+  (destructuring-bind (original-rating
+		       original-RD
+		       opponent-ratings
+		       opponent-RDs scores)
       (glicko-reorder player matches)
     (let* ((RD (glicko-update-RD original-RD time))
 	   (g-values (mapcar #'glicko-g-function opponent-RDs))
-	   (expected-scores (glicko-expected-scores original-rating opponent-ratings opponent-RDs))
-	   (new-RD (sqrt (/ 1 (+ (/ 1 (sq RD)) (/ 1 (glicko-d-squared g-values expected-scores))))))
+	   (expected-scores (glicko-expected-scores
+			     original-rating opponent-ratings opponent-RDs))
+	   (new-RD (sqrt (/ 1 (+ (/ 1 (sq RD))
+				 (/ 1 (glicko-d-squared
+				       expected-scores g-values))))))
 	   (new-rating (+ original-rating
 			  (* +glicko-q-constant+
 			     (sq new-RD)
