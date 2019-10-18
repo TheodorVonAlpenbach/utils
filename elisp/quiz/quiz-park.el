@@ -278,13 +278,15 @@ calling for a greater number of columns than max-column."
 (defun qp-string-filter (string)
   "Replace non-ASCII characters with ASCII counterparts"
   (let ((res (string-replace-map (string-trim string)
-	       '(("’" . "'")
-		 ("´" . "'")))))
-    (aif (string-match "[^[:space:].'a-zA-Z0-9æøåÆØÅä]()" res)
+	       '(("’" . "'")))))(
+		 ("´" . "'")
+		 ("-" . "-")
+		 ("…" . "...")))))
+    (aif (string-match "[^[:space:]+-.!'a-zA-Z0-9æøåÆØÅä()]" res)
       (error "Unhandled non-ASCII character `%c' at position %d"
 	     (char res it) it)
       res)))
-;;(qp-string-filter "Kate’s Bush 26")
+;;(qp-string-filter "Ja… morna!")
 
 (defun qp-customer-entries-from-string (string)
   "Converts STRING, i.e. the results entered by a customer, to a
