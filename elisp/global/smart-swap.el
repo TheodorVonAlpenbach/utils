@@ -1,6 +1,6 @@
 ;;; Swap files. For older versions, see archive.
 
-(defconst +smart-swaps+
+(defvar *smart-swaps*
   '((tex pdf)
     (ly pdf)
     (gp pdf)
@@ -11,7 +11,7 @@
   "TODO: enable :search")
 
 (defvar *version-swaps* nil
-  "A list on the same format as +smart-swaps+, except the elements are directories.
+  "A list on the same format as *smart-swaps*, except the elements are directories.
 When invoked, smart-swap will swap the current buffer with the
 file in the other swap directory.
 
@@ -66,7 +66,7 @@ For example:
 	 (when (string-match expr (buffer-file-name))
 	   (buffer-file-name)))))
 
-(cl-defun smart-swap-find-target (&optional (swaps +smart-swaps+))
+(cl-defun smart-swap-find-target (&optional (swaps *smart-swaps*))
   (loop for (from to) in swaps
 	when (or (when (match-current-buffer-p from) (swap-target to))
 		 (when (match-current-buffer-p to) (swap-target from)))
@@ -88,7 +88,7 @@ For example:
 	thereis (simple-swap-1 f1 f2 d)))
 ;;(simple-swap)
 
-(cl-defun smart-swap (&optional (swaps +smart-swaps+))
+(cl-defun smart-swap (&optional (swaps *smart-swaps*))
   "Swaps to file as defined in SWAPS"
   (interactive)
   (or (simple-swap)
