@@ -18,6 +18,13 @@ N = 2 is the amount at the beginning of year 2, which is ((C+D)*F + D)*F etc."
   (+ (* c (expt f n)) (* d f (geometric-series f :end n))))
 ;;(growth 1 2 10 1)
 
+(cl-defun deposit (n &optional (f 1.0) (c 1.0))
+  "Find the yearly deposit that turns an initiaal amount C into
+zero after N year given growth rate F."
+  (- (/ (* c (expt f n))
+	f (geometric-series f :end n))))
+;;(deposit 37 1.07 -1.40352077574121)
+
 (cl-defun withdraw-to-zero (n &optional (f 1.0) (d 1.0))
   "Return the amount to have on your account on the beginning of
 year 0 to end up with zero after N year, withdrawing D at the
@@ -26,5 +33,6 @@ beginning of each year."
 ;;(growth 2 2 (withdraw-to-zero 2 2 1) -1)
 ;;(growth 24 1.07 (withdraw-to-zero 24 1.07 1000) -1000)
 ;;(withdraw-to-zero 1 1.045 100)
+
 
 (provide 'mb-utils-economy)
