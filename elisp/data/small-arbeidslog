@@ -1,0 +1,199 @@
+2019-09-19
+Hello small-arbeidslog!
+
+LP/NAS
+Rutn Negga
+https://en.wikipedia.org/wiki/Ruth_Negga
+
+How many riffs in Mannish Boy?
+First ends at  0:30
+10 1:00
+(/ 273.0 (/ 64.0 20))
+Last riff at 5:03
+And then a finish thing
+
+Augusta Lucilla Palace
+
+TODO
+Bestille nytt bankkort
+LinkedIn
+Linda
+Linux
+CV
+Sende soeknad
+
+Slettet noen Keep-notater. Hentet ut det som (muligens) er å ta vare
+på
+
+Bra øl Keto, dark porter
+
+Myelon (ryggraden)
+
+Nip Rbi Vtt
+
+Kan leses på sengen
+https://www.linkedin.com/pulse/building-cloud-choosing-lisp-because-nobody-told-me-i-mason-browne/
+
+Ellers har jeg laget 36 spørsmål om TV2-personligheter. Jon Strøm tok
+quizzen, og hadde riktignok sine hull. Men han smadret til pinneved
+resten av Stopp Pressen-eliten, som fikk quizzen i etterhånd. Nå
+holder jeg på med en tilsvarende quiz for NRK-personligheter. Den er
+klar til lørdag. Holdt på å si: Jon mot røkla?
+
+2019-09-25
+11:47 Ankomst Ble litt forsinket pga at bremseklossene foran måtte
+      justeres. Jeg dro til T31, men der var sekskantnøkkelknippet
+      helt som forduftet. Da ble det i stedet å dra til
+      sykkelverkstedet i Sannergata. De var behjelpelige og fikset
+      problemet uten å betaling. Og uten å bruke sekskantnøkkel, la
+      jeg merke til.
+
+11:50 22 NOK for kaffe. Greit nok når det er bare 12 NOK for påfyll.
+
+TODO:
+o Opprette mb@progfab.no
+x Ta over for contango.no
+x Skrive mail til Ackenhausen og be om å få overført mail og andre dokumenter. Kan kanskje gjøre dette selv.
+Kjøpe VM hos Google Cloud
+x Sette opp hjemmeside
+o Sette opp en enkel hunchentoot server
+
+o Starte på NRK-profiler
+  11 down, ? to go
+
+Hvis alt dette funker, skal det feires!
+Champagne! Biff!
+
+1800: hente dasspapir
+    : handle torsk, jordbær, melk;
+             overføre kaffe fra T31
+	     Nespresso
+1830 Middag: torsk
+
+12:47  Bekreftelseskode fra G Suite
+       kkrsti5g4ps5x7s72ocqejhatw4ub6upiyeomyvjmtzmghd73wta.mx-verification.google.com.
+
+Øyvor Bakke
+Lodin Aukland
+Lars Andreas Aspesæter
+Ragnhild Lund Ansnes
+Guttorm Andreasen
+Jan Frode Andersen
+Hans Christian Andersen
+Marianne Kvamme Amengual
+Kari Amble
+Per Olav Alvestad
+Hans Chr. Alsvik
+
+Stian Barsnes-Simonsen
+Benedicte Bendiksen
+Egil Birkeland
+Steinar Birkeland
+Brita Blomquist
+Alf Blyverket
+Torfinn Borkhus
+Astrid Brekken
+Magnus Brenna-Lund
+Oddgeir Bruaset
+Haakon Brusveen
+Herborg Bryn
+Stine Buer
+Haakon Børde
+Niklas Baarli
+
+Nicholas Emmanuel Carlie
+Arnfinn Christensen
+Lotten Christiansen
+Frank Svein Dehli
+Leif Wilhelm Dubard
+Stein Eide
+Unni Eikeseth
+Selda Ekiz
+Torstein Ellingsen
+Sven Ole Engelsvold
+Bergljot Engeset
+Erik Eriksson
+Webjørn Svendsen Espeland
+Lottelise Folge
+
+The key transfer to project metadata is taking an unusually long time. Transferring instead to instance metadata may be faster, but will transfer the keys only to this VM. If you wish to SSH into other VMs from this VM, you will need to transfer the keys accordingly.
+Click here to transfer the key to instance metadata. Note that this setting is persistent and needs to be disabled in the Instance Details page once enabled.
+You can drastically improve your key transfer times by migrating to OS Login.
+
+(asdf:load-system "hunchentoot")
+(setf qwe (make-instance 'hunchentoot:easy-acceptor :port 3000))
+(hunchentoot:start qwe)
+(hunchentoot:define-easy-handler (say-yo :uri "/hunchentoot") (name)
+  (setf (hunchentoot:content-type*) "text/plain")
+  (format nil "Hey~@[ ~A~]!" name))
+
+Domainshop's name servers
+ns1.hyp.net
+ns2.hyp.net
+ns3.hyp.net
+
+23:17 Plan videre: For det første så har jeg nå etablert progfab som en
+      hjemmeside. Funket til og med på mobilen. Men for det andre: per
+      nå dør hunchentoot når jeg logges ut av ssh. Dermed
+
+      1. må jeg finne en måte hvordan hunchentoot blir persistent.
+      Enten ved cron eller noe. Her fins det garantert en optimal vei
+      Done. På en måte. Lar sbcl kjøre i screen.
+      ssh pf
+      $ screen
+      $ sbcl init.lisp
+      ctrl-a
+      d
+      exit
+      exit
+      
+      Videre
+
+      2. Lage en (persistent) side med hunchentoot som viser noe mer
+      fornuftig enn Hey <name>. Kan jo igjen ta utgangspunkt i dette
+      testprogrammet som følger med hunchentoot.
+
+      3. hunchentoot funker bare som /hunchentoot. Går man rett på
+      progfab.no kommer man til en Apache-side.
+
+      4. Porte cram til common-lisp. Antagelig like greit å skrive
+      dette om. Jeg ønsker å bruke Postgres som DB-motor.
+
+      5. Sette opp postgres-cram. I første omgang på micro-ubuntu.
+      Senere som en egen container.
+
+      6. GUI
+
+      7. Spørsmål. Lister i første omgang.
+
+      8. Matteoppgaver
+
+      9. Social Network quiz
+
+      10. Få med Ludvik og Erik på dette. 
+
+
+Men i morgen: Osstrupen. For siste gang, forhåpentligvis.
+
+Og søke jobb. Må si jeg ikke er helt motivert akkurat nå.
+
+postgres@mbpf-server:~$ createuser --interactive
+Enter name of role to add: sqluser
+Shall the new role be a superuser? (y/n) y
+
+2019-09-27
+16:29 M;te med Finansco
+
+o i millioner, formattere alle tall med desimal
+  Unntak: Portefølje til arv, Total
+o sparing til pensjon er et fast punkt (graa)
+o legge til sparebeløp
+o hardkode overskrift i «Plan»: «Likviditetsplan for Ola Nordmann»
+o Metode subst Plan
+o alt i skriftstørrelsee 10 pt
+o Sletting fungerer ikke
+o Håndtere blanke konfiglinjer
+o Prøve å fjerne nuller
+o Kopiere konfiggen i superbruker inn i Plan (nederst)
+o Print til p
+16-17
