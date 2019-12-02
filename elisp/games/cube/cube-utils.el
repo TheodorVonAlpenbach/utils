@@ -30,7 +30,7 @@
     (u l) (U L) (l d) (L D) (d r) (D R) (r u) (R U) (M E) (E m) (m e) (e M)
     (otherwise symbol)))
 
-(defun cube-rotate-symbol (symbol &optional (n 1) (dir :y))
+(cl-defun cube-rotate-symbol (symbol &optional (n 1) (dir :y))
   "Rotate SYMBOL clockwise, e.g. F -> R, R2 -> B2, Mw -> Sw.
 Only DIR :Y is currently supported"
   (if (/=  n 1)
@@ -81,5 +81,6 @@ Only DIR :Y is currently supported"
 ;;(cube-with-algorithm #'cube-fliplr "l' U' l (L' U' L U) l' U l")
 ;;(cube-with-algorithm #'cube-fliplr "(r U2 R' U') (R U' r')")
 ;;(cube-sexp-to-string (cube-fliplr-sexp (cube-parse-algorithm "(r U2 R' U') (R U' r')")))
+;;output-template
 
 (provide 'cube-utils)
