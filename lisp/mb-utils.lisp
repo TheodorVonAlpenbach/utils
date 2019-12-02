@@ -5,7 +5,7 @@
    :remf* :popf
    :listify :list<
    :sq
-   :a-b :0-n :abs- :abs+ :string-case
+   :a-b :0-n :1-n :abs- :abs+ :string-case
    :cut :cut-if
    :nor :awhen :aif :it :awhile :acond
    :mnth :melt
@@ -361,6 +361,12 @@ TODO: string keys could also evalute to a list"
 Use keywords to specify sequence type. See A-B for details on possible keywords."
   (unless (zerop n)
     (apply #'a-b 0 (1- (if (minusp n) (1+ n) n)) args)))
+
+(defun 1-n (n &rest args)
+  "Returns sequence 1...N.
+Use keywords to specify sequence type. See A-B for details on possible keywords."
+  (unless (< n 1)
+    (apply #'a-b 1 n args)))
 ;;(mapcar #'0-n '(-1 0 1 2))
 
 (defun abs- (x &optional (n 1))
