@@ -23,9 +23,9 @@
 
 (defvar *klondike-state* nil)
 ;;(setf *klondike-state* (klondike-init))
+;;(klondike-visible *klondike-state*)
 
 (defun klondike-format-card (card)
-  
   (concat (propertize " " 'font-lock-face '(:height 3.0))
 	  (card-format card)))
 ;;(klondike-format-card 0)
@@ -128,12 +128,11 @@ and all cards pushed on it to visible's COLUMNth deck."
 	      (and (zerop j)
 		   (klondike-push-card-out
 		    (car (nth i visible)) (klondike-out state))))
-	  (progn
+	 (progn
 	    (setf (nth i visible) (nthcdr (1+ j) (nth i visible)))
 	    (unless (nth i visible)
 	      (awhen (pop (nth i (klondike-hidden state)))
-		(push it (nth i visible)))))
-	  (message "Illegal move!")))
+		(push it (nth i visible)))))))
       (message "Card is not visible!"))))
 ;;(klondike-move-visible "2h")
 
@@ -206,7 +205,7 @@ and all cards pushed on it to visible's COLUMNth deck."
 The current version will select the out card candidate in the
 order from left to right."
   (loop for col in (klondike-visible state)
-	until (klondike-move-visible (last-elt col) nil (klondike-out state))))
+	until (awhen (car col) (klondike-move-visible it nil state))))
 
 (defun klondike-ui-move-visible-out ()
   (interactive)
