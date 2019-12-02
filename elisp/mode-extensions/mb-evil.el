@@ -119,7 +119,8 @@ STATE can take the same values as in `evil-define-key'."
   (case major-mode
     (mbscilab-mode (mbscilab-show-process-buffer))
     (octave-mode (octave-show-process-buffer))
-    (emacs-lisp-mode (display-buffer "*scratch*" '(display-buffer-use-some-window)))))
+    (emacs-lisp-mode (display-buffer "*scratch*" '(display-buffer-use-some-window)))
+    (mb-lisp-mode (mblisp-show-process-buffer))))
 
 (evil-define-motion evil-goto-line-keep-column (count)
   "Go to the first non-blank character of line COUNT.
@@ -165,6 +166,20 @@ By default the last line."
   (interactive)
   (ffap-next t))
 
+(defun transpose-split-orientation ()
+  "If there is a simple horizontal split, change to vertical, and vice versa.
+A simple split consists of two windows only."
+  (interactive)
+  (when (= 2 (count-windows))
+    (let ((func (if (window-full-height-p)
+                  #'split-window-vertically
+                  #'split-window-horizontally)))
+      (delete-other-windows)
+      (funcall func)
+      (save-selected-window
+	(other-window 1)
+	(switch-to-buffer (other-buffer))))))
+
 (defun rotate-windows ()
   "Rotate windows."
   (interactive)
@@ -194,16 +209,24 @@ By default the last line."
     (when (> (length (buffer-list)) n)
       (setf buffer-read-only t))))
 
+(let ((window-map (make-sparse-keymap)))
+  (evil-key-chord-define '(normal motion) global-map "vw" window-map)
+  (define-key window-map "h" #'split-window-right)
+  (define-key window-map "v" #'split-window-below)
+  (define-key window-map "t" #'transpose-split-orientation)
+  (define-key window-map "r" #'rotate-windows)
+  (define-key window-map "d" #'delete-window)
+  (define-key window-map "o" #'other-window)
+  (define-key window-map "O" #'(lambda () (interactive) (other-window -1))))
+
 (let ((swap-map (make-sparse-keymap)))
   (evil-key-chord-define '(normal motion) global-map "vo" swap-map)
   (define-key swap-map "a" #'ffap-no-prompt)
   (define-key swap-map "A" #'ffap-no-prompt-read-only)
   (define-key swap-map "b" #'bury-buffer)
   (define-key swap-map "B" #'unbury-buffer)
-  (define-key swap-map "c" #'rotate-windows)
   (define-key swap-map "d" #'(lambda () (interactive)
 				     (kill-buffer (current-buffer))))
-  (define-key swap-map "D" #'delete-window)
   (define-key swap-map "f" #'find-file)
   (define-key swap-map "g" #'mb-grep)
   (define-key swap-map "G" #'mb-grep-interactive)
@@ -211,8 +234,6 @@ By default the last line."
   (define-key swap-map "k" #'browse-kill-ring)
   (define-key swap-map "n" #'ffap-next)
   (define-key swap-map "N" #'ffap-previous)
-  (define-key swap-map "o" #'other-window)
-  (define-key swap-map "O" #'(lambda () (interactive) (other-window -1)))
   (define-key swap-map "r" #'revert-buffer)
   (define-key swap-map "s" #'smart-swap)
   (define-key swap-map "T" #'find-tag-no-prompt)
@@ -227,7 +248,8 @@ By default the last line."
   (define-key div-map "j" (lambda (n) (interactive "p") (inc-thing-at-point n 2)))
   (define-key div-map "k" (lambda (n) (interactive "p") (inc-thing-at-point (- n) 2)))
   (define-key div-map "\M-j" (lambda (n) (interactive "p") (inc-thing-at-point n 3)))
-  (define-key div-map "\M-k" (lambda (n) (interactive "p") (inc-thing-at-point (- n) 3))))
+  (define-key div-map "\M-k" (lambda (n)
+			       (interactive "p") (inc-thing-at-point (- n) 3))))
 
 (require 'mb-emacs-lisp)
 (require 'LS)
@@ -361,6 +383,10 @@ between different"
 		    (buffer-string-no-properties) :num 1)))
     (find-file-other-window filename)))
 
+(defun strip-ssh (filename)
+  "Strip the ssh prefix of filename"
+  (string-match* "/ssh:[^:]*:\\(.*\\)" filename :num 1))
+;;(strip-ssh "/ssh:pf:/home/mats_progfab_no/git/problem-server/")
 
 (defun mb-eval-buffer (&optional args)
   (interactive)
@@ -369,7 +395,7 @@ between different"
     (gnuplot-mode (gnuplot-send-buffer-to-gnuplot))
     (mb-lisp-mode (if (slime-p)
 		    (slime-compile-and-load-file)
-		    (mb-lisp-eval-buffer)))
+		    (lisp-load-file (strip-ssh (buffer-file-name)))))
     (metafont-mode (meta-compile-file (buffer-file-name)))
     (octave-mode (octave-source-buffer))
     (mbscilab-mode (mbscilab-eval-buffer))
