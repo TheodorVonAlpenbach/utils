@@ -207,7 +207,7 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 (let* ((my-mode-alist
        '(("\\.h$\\|\\.cpp$" . c++-mode)	; first overules of original alist
 	 ("\\.c$" . c-mode)
-	 ("\\.\\(lisp\\|asd\\)$" . mb-lisp-mode)
+	 ("\\.\\(lisp\\|asd\\|sbclrc\\)$" . mb-lisp-mode)
 	 ("\\.el$\\|\\.emacs$\\|\\.emacs-local-" . emacs-lisp-mode)
 	 ("\\.bash\\(rc\\|_profile\\)\\|\\.sh\\|\\.profile$" . sh-mode)
 	 ("\\.emacs-local-" . emacs-lisp-mode) ; then safe additions
@@ -257,6 +257,7 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 			     my-mode-alist)))
   (setf auto-mode-alist (append new-alist auto-mode-alist)))
 ;;(length auto-mode-alist)
+;;(setf auto-mode-alist (copy 'mb-lisp-mode auto-mode-alist :key #'cdr :test #'neql))
 
 ;; encoding: the following specifies encoding based on file path
 (setq file-coding-system-alist
