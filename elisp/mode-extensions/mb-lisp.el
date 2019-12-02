@@ -322,6 +322,12 @@ non-Elisp syntax in Common Lisp. E.g. #(1 2 3) fails in
 \\{mb-lisp-mode-map\\}"
   (run-hooks))
 
+(defun mblisp-show-process-buffer ()
+  (interactive)
+  (aif (lisp-process-buffer)
+    (display-buffer it '(display-buffer-use-some-window))
+    (inferior-lisp)))
+
 (defun lisp-process-buffer ()
   (if (boundp 'inferior-lisp-buffer)
     inferior-lisp-buffer))
