@@ -52,6 +52,12 @@
 (defconst pf-dir "/ssh:pf:~/"
   "Mounted progfab root directory")
 
+(defconst pfdoc-dir "/ssh:pf:~/doc"
+  "progfab's doc directory")
+
+(defconst pfpf-dir "/ssh:pf:~/git/problem-server"
+  "progfab's doc directory")
+
 (let ((fn "~/.emacs.d/tramp"))
   (when (file-exists-p fn)
     (delete-file fn)))
@@ -76,24 +82,31 @@
 	(,+mb-lisp-dir+ "games/maths/maths.el")
 
 	;; Common Lisp utils
-	(,+home-dir+ "projects/utils/lisp/mb-utils.lisp")
 	(,+home-dir+ "projects/utils/lisp/topology/shapes.lisp")
 
 	;; remote files (shared with windows)
 	;; Note special treatment of arbeidslog in mb-insert-state-init!
-	(,lsdoc-dir "arbeidslog" :point :end :keyboard :no :time-paragraphs t)
-	(,lsdoc-dir "adresser.txt" :keyboard :no)
-	(,lsdoc-dir "todo.org" :keyboard :no)
-	(,lsdoc-dir "ferskvare" :keyboard :no :point :end)
-	(,lsdoc-dir "LS-notes.org" :point :end :keyboard :no :time-paragraphs t)
+	(,pfdoc-dir "arbeidslog" :point :end :keyboard :no :time-paragraphs t)
+	(,pfdoc-dir "adresser.txt" :keyboard :no)
+	;; LS-related
+	;; (,pfdoc-dir "todo.org" :keyboard :no)
+	(,pfdoc-dir "LS-notes.org" :point :end :keyboard :no :time-paragraphs t)
+	(,pfdoc-dir "ferskvare" :keyboard :no :point :end)
 
+	(,pfpf-dir "problem-server.lisp")
+	(,pfpf-dir "problem-server.asd")
+	(,pfpf-dir "problem-server-dispatch.lisp")
+	(,pfpf-dir "problem-db-ui.lisp")
+
+	(,pf-dir "howto.org")
 	(,pf-dir "init.lisp")
+	(,pf-dir "todo.org" :keyboard :no)
 	(,pf-dir "log.org")
 
 	(,+mb-lisp-dir+ "data/small-arbeidslog"
 			:point :end :keyboard :no :time-paragraphs t)))
-;;(find-file "/ssh:ssh:~/doc/LS-notes.org")
 ;;(find-file "/ssh:pf:~/init.lisp")
+;;(find-file "/ssh:ssh:~/doc/arbeidslog")
 
 ;;scheme
 (setf scheme-program-name "guile")
