@@ -278,15 +278,15 @@ calling for a greater number of columns than max-column."
 (defun qp-string-filter (string)
   "Replace non-ASCII characters with ASCII counterparts"
   (let ((res (string-replace-map (string-trim string)
-	       '(("’" . "'")))))(
+	       '(("’" . "'")
 		 ("´" . "'")
 		 ("-" . "-")
 		 ("…" . "...")))))
-    (aif (string-match "[^[:space:]+-.!'a-zA-Z0-9æøåÆØÅä()]" res)
+    (aif (string-match "[^[:space:]+-.!?'a-zA-Z0-9æøåÆØÅäüé()&]" res)
       (error "Unhandled non-ASCII character `%c' at position %d"
 	     (char res it) it)
       res)))
-;;(qp-string-filter "Ja… morna!")
+;;(qp-string-filter "bryr M'ække mer")
 
 (defun qp-customer-entries-from-string (string)
   "Converts STRING, i.e. the results entered by a customer, to a
@@ -339,7 +339,6 @@ Otherwise it is column based."
       (goto-char (point-max)))
     (insert (qp-table-entires-to-string entries))))
 
-
 ;;; Conversion between customer entry and table entry
 (defun qp-customer-entry-to-table-entry (customer customer-entry round)
   (awhen (qp-customer-entry-team-name-and-score customer customer-entry)
@@ -354,7 +353,7 @@ Otherwise it is column based."
 	       (qp-customer-pub-name customer)
 	       (capitalize team-name) team-score)))))
 ;;(qp-customer-entry-to-table-entry (find 'onkel-oskar-namsos +qp-customers+ :key #'first) (qp-customer-entry-from-string "1	Onsdag	Allmennquiz	Onkel Oskar (Namsos)	Cranium	45") 1)
-;;(capitalize "aa bb")
+;;(capitalize "Bryr M'ække")
 
 (defun qp-customer-entries-to-table-entries (customer-tag customer-entries round)
   (remove-if #'null
