@@ -87,27 +87,34 @@ SYMBOL can be a symbol or a list of symbols. See function
   'progn)
 
 (cl-indent '(aif anif>) 'prog1)
+(cl-indent '(hif) 'if)
 
-(cl-indent '(awhen read-string with-buffer with-point
-	     substring-intv quiz-save-excursion q-try subseq
-	     concatenate with-out-file length* handles-outflow
-	     ly-function ly-context copy-object min-elt case<
-	     progress-bar-init doproduct make-instance
-	     chrome-closest-in-cells make-array
-	     cartesian-product3-sum write-gnuplots write-gnuplot
-	     for- dbf-decode-bytes shx-position string-case
-	     html-stream string-match* concat* remove-duplicates
-	     csv-string write-csv
-	     gui-position-objects-horizontally
-	     gui-position-objects-vertically
-	     ld-update list-split-if delete cl-delete)
+(cl-indent
+    '(awhen read-string with-buffer with-point
+      substring-intv quiz-save-excursion q-try subseq
+      concatenate with-out-file length* handles-outflow
+      ly-function ly-context copy-object min-elt case<
+      progress-bar-init doproduct make-instance
+      chrome-closest-in-cells make-array
+      cartesian-product3-sum write-gnuplots write-gnuplot
+      for- dbf-decode-bytes shx-position string-case
+      html-stream string-match* concat* remove-duplicates
+      csv-string write-csv
+      gui-position-objects-horizontally
+      gui-position-objects-vertically
+      ld-update list-split-if delete cl-delete
+      select-dao define-url-fn fmt if connect-toplevel
+      hwhen htm-table htm-banner htm-form-button
+      :export :import-from)
   'prog1)
+(cl-indent  :table :tr)
 
 (cl-indent '(do-lines defmethod with-infile defclass with-outfile
 	     read-csv string-replace-intv remove*
 	     put-text-property do-tuples/o draw
 	     substitute-if xml-extract-nodes
-	     write-csv call-if cl-set-difference)
+	     write-csv call-if cl-set-difference
+	     db-add-user htm-button defclass)
   'prog2)
 
 (cl-indent '(for define-derived-mode defun-ajax)
@@ -130,7 +137,8 @@ SYMBOL can be a symbol or a list of symbols. See function
 	     sort cl-sort find-if-not cl-find find-if cl-find-if
 	     remove cl-remove cl-position
 	     cl-remove-if-not group mapcar cl-mapcar mapcan maptree copy-object-to
-	     apply funcall count-if re-search-backward re-search-forward)
+	     apply funcall count-if re-search-backward re-search-forward
+	     format-timestring)
   1)
 
 (cl-indent '(write-list)
