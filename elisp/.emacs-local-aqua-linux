@@ -7,7 +7,8 @@
 ;; Local elisp load paths
 (setf *local-load-paths* '("~/cvs/sources/imms/src/elisp/"
 			   "~/lilypond/usr/share/emacs/site-lisp/"
-			   "~/git/utils/elisp/lsconfig/"))
+			   "~/git/utils/elisp/lsconfig/"
+			   "~/git/utils/elisp/utils/"))
 
 (cl-pushnew
  '(".emacs" ".emacs-local-aqua-linux")
