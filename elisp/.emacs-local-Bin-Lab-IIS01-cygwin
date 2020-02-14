@@ -1,0 +1,103 @@
+(set-frame-font "--Courier New-normal-normal-normal-mono-17-*-*-*-c-*-iso8859-1")
+;;(set-frame-size (selected-frame) 120 61)
+;;(set-frame-position (selected-frame) 0 0)
+
+(setf display-time-format "%H:%M %d/%m")
+
+;; Local elisp load paths
+(setf *local-load-paths* '("~/cvs/sources/imms/src/elisp/"
+			   "~/lilypond/usr/share/emacs/site-lisp/"
+			   "~/git/utils/elisp/lsconfig/"
+			   "~/git/utils/elisp/utils/"))
+
+(cl-pushnew
+ '(".emacs" ".emacs-local-Bin-Lab-IIS01-cygwin")
+  *simple-swaps* :test #'equal)
+
+(cl-pushnew
+ '("Testbench.conf" "nmeaplay.sh")
+  *simple-swaps* :test #'equal)
+
+(cl-pushnew
+ '(js php)
+  *smart-swaps* :test #'equal)
+
+
+(setf *local-requires* '(browse-kill-ring php-mode))
+
+;; Sentences, see info node Sentences
+(setf sentence-end "[.?!][]\"')]*\\($\\|\t\\| \\)[ \t\n]*")
+(setf sentence-end-double-space nil)
+
+;; news
+(setf gnus-select-method '(nntp "news.online.no"))
+(setf user-full-name "Mats Bergstrøm")
+
+;; tags
+(setf tags-table-list
+      (cl-nunion '("~/.MBTAGS"
+		   "~/.CTAGS"
+		   "~/.OTAGS"
+		   "~/.CLTAGS"
+		   "~/.PYTAGS"
+		   ;; "~/.JSTAGS"
+		   "~/.SCILABTAGS")
+		 tags-table-list :test #'string=))
+
+;; lynx
+(setf *lynx-proxy-dir* (expand-file-name "lynx-proxy" *local-data-dir*))
+(setf *lynx-auth* "")
+
+;; diary file (mandatory to use #'calendar)
+(setf diary-file (setf diary-file (expand-file-name "office/diary" *local-data-dir*)))
+
+(defconst lsdoc-dir
+  ;; "/ssh:bro:/ls/gold/u1/mbe/doc/"
+  "/ls/platinum/u1/mbe/doc"
+  "Mounted silver doc directory")
+
+;; Special Octave file
+(pushnew '("\\.eginaconf$" . octave-mode) auto-mode-alist)
+
+(let ((path "~/.emacs.d/tramp"))
+  (when (file-exists-p path)
+    (delete-file path)))
+
+(setf *my-favorites*
+      `((,+mb-lisp-dir+ ".emacs")
+	(,+mb-lisp-dir+ "utils/mb-utils-strings.el")
+	(,+mb-lisp-dir+ "utils/mb-utils-buffer.el")
+	(,+mb-lisp-dir+ "utils/mb-sequences.el")
+	(,+mb-lisp-dir+ "global/mb-indent.el")
+	(,+mb-lisp-dir+ "global/mb-grep.el")
+	(,+mb-lisp-dir+ "mode-extensions/mb-evil.el")
+	(,+mb-lisp-dir+ "mode-extensions/mb-octave.el")
+	(,+mb-lisp-dir+ "mode-extensions/octave-debug-mode.el")
+	(,+mb-lisp-dir+ "mode-extensions/mb-lisp.el")
+	(,+mb-lisp-dir+ "mode-extensions/mb-octave.el")
+	(,+mb-lisp-dir+ "mode-extensions/mb-tex.el")
+	(,+mb-lisp-dir+ "quiz/quiz-park.el")
+	(,+mb-lisp-dir+ "quiz/qp-runder.txt")
+
+	;; common lisp utils
+	(,+home-dir+ "projects/utils/lisp/mb-utils.lisp")
+
+	;; Binera Complience
+	(,+win32-root+ "/Compliance/IIS/show_sharepoint_user.php")
+	(,+win32-root+ "/Compliance/IIS/folder_tree.php")
+	(,+win32-root+ "/Compliance/IIS/js/bintable.js")
+	(,+win32-root+ "/Compliance/IIS/js/fancy-tree.js")
+
+	;; Binara doc
+	(,+home-dir+ "doc/log.org")
+	(,+home-dir+ "doc/todo.org")
+	(,+home-dir+ "doc/howto.org")
+	))
+;;(find-file "/ssh:bro:/ls/gold/u1/mbe/doc/LS-notes.org")
+;;(find-file "/ssh:bro:/ls/gold/u1/mbe/doc/todo.org")
+
+;;scheme
+(setf scheme-program-name "guile")
+
+;; lisp
+(setf inferior-lisp-program "sbcl")
