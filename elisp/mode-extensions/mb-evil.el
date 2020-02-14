@@ -253,6 +253,7 @@ A simple split consists of two windows only."
 
 (require 'mb-emacs-lisp)
 (require 'LS)
+(require 'mb-utils-buffer)
 
 (let ((insert-map (make-sparse-keymap)))
   (key-chord-define evil-normal-state-map "vi" insert-map)
@@ -277,6 +278,8 @@ A simple split consists of two windows only."
   (define-key insert-map "`" #'(lambda (n) (interactive "P") (mb-surround "`" (or n 1))))
   (define-key insert-map "g" #'(lambda (n) (interactive "P") (mb-surround "«" (or n 1))))
   (define-key insert-map "[" #'(lambda (n) (interactive "P") (mb-surround "[" (or n 1))))
+  (define-key insert-map "{" #'(lambda (n) (interactive "P") (mb-surround "{" (or n 1))))
+  (define-key insert-map "<" #'(lambda (n) (interactive "P") (mb-surround "<" (or n 1))))
   (define-key insert-map "\\" #'(lambda (n) (interactive "P") (mb-undo-surround (or n 1))))
   (define-key insert-map "@" #'texinfo-insert-@var))
 
@@ -635,9 +638,11 @@ By default the last line."
     ("(" ")")
     ("`" "'")
     ("«" "»")
+    ("<" ">")
     ("[" "]")
+    ("{" "}")
     (otherwise left)))
-;;(mapcar #'mb-surround-lookup-right (list "`" "'" "("))
+;;(mapcar #'mb-surround-lookup-right (list "`" "'" "(" "<"))
 
 (cl-defun mb-surround-region (region left n)
   (mb-surround-region-1 region left (mb-surround-lookup-right left) n))
@@ -683,8 +688,5 @@ By default the last line."
 	       (setf last (string-to-number (region-string beg (1+ end)))))))
        b e nil))))
 ;;(evil-increment-rectangle)
-
-(defun qwe (beg end)
-  (message "%d %d" beg end))
 
 (provide 'mb-evil)
