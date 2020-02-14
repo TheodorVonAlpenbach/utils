@@ -105,7 +105,8 @@ SYMBOL can be a symbol or a list of symbols. See function
       ld-update list-split-if delete cl-delete
       select-dao define-url-fn fmt if connect-toplevel
       hwhen htm-table htm-banner htm-form-button
-      :export :import-from)
+      :export :import-from
+      add-hook)
   'prog1)
 (cl-indent  :table :tr)
 
