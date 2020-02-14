@@ -45,12 +45,11 @@ If such module does not exist, create one."
 ;;; Swapping
 (defun mb-ert-swap-filename (filename)
   "Swap from module filename to ERT test module filename or vice-versa."
-  (destructuring-bind (test-prefix name)
-      (string-match* (format "\\(%s\\)?\\(.*\\.el$\\)" *mb-ert-file-prefix*)
-	(file-name-nondirectory filename) :num '(1 2))
-    (expand-file-name (aif test-prefix name (concat *mb-ert-file-prefix* name))
-		      (file-name-directory filename))))
-
+  (awhen (string-match* (format "\\(%s\\)?\\(.*\\.el$\\)" *mb-ert-file-prefix*)
+	   (file-name-nondirectory filename) :num '(1 2))
+    (destructuring-bind (test-prefix name) it
+      (expand-file-name (aif test-prefix name (concat *mb-ert-file-prefix* name))
+			(file-name-directory filename)))))
 ;;(mb-ert-swap-filename "/dir/test-ert.el")
 
 (cl-defun mb-ert-get-test-filename (buffer-or-filename)
@@ -76,7 +75,8 @@ filename of BUFFER-OR-FILENAME."
 
 (cl-defun mb-ert-swap-file (&optional (filename (buffer-file-name)))
   "Return buffer containing the ERT brother of FILENAME"
-  (find-file (mb-ert-swap-filename filename)))
+  (awhen (mb-ert-swap-filename filename)
+    (find-file it)))
 ;;(mb-ert-swap-file)
 
 (cl-defun mb-ert-name-p (name-or-symbol &optional (prefix "test-"))
@@ -115,8 +115,8 @@ For more swap options, use `mb-ert-swap-defun-name'.
 (cl-defun mb-swap-ert-defun (&optional (symbol-or-name (defun-symbol)))
   "Swap an emacs lisp file with its associated test file."
   (let ((defun-name (sstring symbol-or-name)))
-    (mb-ert-swap-file (buffer-file-name))
-    (when defun-name
+    (when (and (mb-ert-swap-file (buffer-file-name))
+	       defun-name)
       (if (mb-ert-test-buffer-p)
 	(or (elisp-goto-defun (mb-ert-swap-defun-name defun-name :ert))
 	    (mb-ert-insert-skeleton defun-name))
