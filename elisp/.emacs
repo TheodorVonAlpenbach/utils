@@ -1,4 +1,4 @@
-;; redirected from on of the following
+;; Redirected from one of the following
 ;; c:/Users/Theodor/AppData/Roaming/.emacs
 ;; c:/Documents and Settings/matsb/Application Data/.emacs
 
@@ -176,7 +176,8 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 ;;; non standard packages
 (require 'package)
 (loop for x in '(("marmalade" . "http://marmalade-repo.org/packages/")
-		 ("melpa"     . "http://melpa.milkbox.net/packages/"))
+		 ("melpa"     . "http://melpa.milkbox.net/packages/")
+		 ("gnu" . "https://elpa.gnu.org/packages/"))
       do (unless (member x package-archives)
 	   (push x package-archives)))
 
@@ -186,7 +187,7 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 		(cl-remove "old" (directory-files +mb-lisp-dir+ t)
 			   :key #'file-name-nondirectory
 			   :test #'string=)
-		;; (directory-files (expand-file-name ".emacs.d/elpa" +home-dir+) t)
+		(directory-files (expand-file-name ".emacs.d/elpa" +home-dir+) t)
 		(list
 		 (expand-file-name "games/cube" +mb-lisp-dir+)
 		 (expand-file-name "games/maths" +mb-lisp-dir+)
@@ -201,7 +202,7 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 (add-to-list 'load-path "~/.emacs.d/smartparens-master")
 
 ;; Move this to mode-extensions 
-(autoload 'LilyPond-mode "lilypond-mode" "Major mode for editing BNF definitions." t)
+;; (autoload 'LilyPond-mode "lilypond-mode" "Major mode for editing BNF definitions." t)
 ;; (autoload 'mbscilab-mode "scilab-mode" "Major mode for editing Scilab files." t)
 
 (let* ((my-mode-alist
@@ -296,12 +297,13 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 			 mb-ruby
 			 mb-texinfo
 			 list-db
-			 mbscilab
-			 dic-map
+			 ;; mbscilab
+			 ;; dic-map
 			 mb-indent
 			 quiz-park
 			 mb-ert)
 		       *local-requires*)
+      do (message "Loading package %S..." m)
       do (require m))
 
 ;; autoloads
