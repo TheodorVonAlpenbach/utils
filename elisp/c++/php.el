@@ -1,6 +1,39 @@
 (require 'simple)
 (require 'php-mode)
 
+(add-hook 'sgml-mode-hook
+  (lambda ()
+    ;; Default indentation is usually 2 spaces, changing to 4.
+    ;; (setq indent-line-function 'indent-relative)
+    (setq sgml-basic-offset 4)))
+;;(nilf sgml-mode-hook)
+
+;; (add-to-list 'c-default-style '(php-mode . "php"))
+(add-hook 'php-mode-hook 'mb-php-mode-hook)
+(defun mb-php-mode-hook ()
+  "My PHP mode configuration."
+  (linum-mode)
+  (setq indent-tabs-mode nil
+        c-default-style "pear"
+        tab-width 4
+        c-basic-offset 4))
+
+(defun php-mode-p ()
+  (equal major-mode 'php-mode))
+
+(defadvice php-evil-indent (after qwe first (beg end))
+  (if (and (php-mode-p) (php-in-sgml-p))
+    (progn (sgml-mode)
+	   (evil-indent beg end)
+	   (php-mode))
+    (evil-indent beg end)))
+
+(defun php-in-sgml-p ()
+  "Return NIL if POINT is not in an SGML section."
+  (>= (save-excursion (or (re-search-backward "[?]>" nil t) 0))
+     (save-excursion (or (re-search-backward "<\\?php" nil t) 0))))
+;;(php-in-sgml-p)
+
 (defun php-insert-log-string (s)
   (when s
     (move-beginning-of-line 1)
