@@ -51,11 +51,14 @@ For example:
 	 expr)
 	((consp expr)
 	 (string-match* (first expr) (buffer-string-no-properties) :num (second expr)))))
+;;(swap-target 'el)
 ;;(swap-target '("filename='\\(.*\\)'" 1))
 
 (defun swap-target (expr)
+  "Here I should allow for search"
   (awhen (expand-swap-target expr)
     (when (file-exists-p it) it)))
+;;(length (directory-files "." t))
 
 (defun match-current-buffer-p (expr)
   (cond ((symbolp expr)
