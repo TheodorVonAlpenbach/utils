@@ -595,7 +595,7 @@ from C to entering :C in the REPL."
     map)
   "Key map for Readonly interaction mode with REPL")
 
-(require 'lilypond-mode)
+;;(require 'lilypond-mode)
 (cl-defun pdf-music (string &optional (prefix "yamal"))
   "Converts lilypond STRING to an PDF-file and open it.
 The file name is a generated name and is put somewhere under
