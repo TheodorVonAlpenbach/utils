@@ -74,7 +74,9 @@ see `file-name-alter'"
 ;;(file-name-add-extension "qwe/qwe" "txt")
 
 (defun file-name-change-extension (filename new-extension)
-  "Return FILENAME with NEW-EXTENSION."
+  "Return FILENAME with NEW-EXTENSION.
+
+\(file-name-change-extension \"qwe.txt\" \"pdf\"\) ==> \"qwe.pdf\""
   (file-name-add-extension
    (file-name-sans-extension filename) new-extension))
 ;;(file-name-change-extension "qwe/qwe.txt" "cpp")
