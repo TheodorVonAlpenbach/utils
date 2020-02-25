@@ -296,6 +296,10 @@ For optional argument point, see `region-replace-raw'."
   (with-buffer buffer (save-excursion (region-lines (bob) (eob)))))
 ;;(buffer-lines)
 
+(cl-defun buffer-string* (&optional (buffer (current-buffer)))
+  (with-buffer buffer (buffer-string)))
+;;(buffer-lines)
+
 ;;; Paragraph stuff
 (defsubst bop ()
   "Move POINT to beginning of paragraph and return its value"
