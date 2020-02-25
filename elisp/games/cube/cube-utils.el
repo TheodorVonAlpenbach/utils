@@ -64,7 +64,6 @@ Only DIR :Y is currently supported"
 ;;(cube-fliplr 'lw)
 ;;(cube-fliplr '((U R Uw Rw U2)2 (U R Uw Rw U2)))
 
-
 (cl-defun cube-parse-algorithm (s &optional (reverse-char ?'))
   (loop while (or (null i) (< i (length s)))
 	for (o . i) = (read-from-string (cl-substitute ?w reverse-char s) i)
