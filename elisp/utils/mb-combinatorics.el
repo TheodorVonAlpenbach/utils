@@ -23,6 +23,27 @@ For the definition of !N, see https://en.wikipedia.org/wiki/Derangement"
 (defalias 'n! 'factorial)
 (defalias '!n 'derangement)
 
+(cl-defun fibonacci-numbers (n &optional (start-values '(0 1)))
+  "Return the N first Fibonacci numbers.
+The optional START-VALUES modifies the two first elements in the
+resulting sequence."
+  (if (< n 2)
+    (head n start-values)
+    (let ((res (reverse start-values)))
+     (loop for i below (- n 2)
+	   do (push (+ (first res) (second res)) res))
+     (nreverse res))))
+;;(fibonacci-numbers 0)
+
+(defconst +golden-ratio+ (/ (1+ (sqrt 5)) 2))
+
+(cl-defun fibonacci-nth (n)
+  (let ((psi +golden-ratio+)
+	(phi (- 1 +golden-ratio+)))
+    (/ (- (expt phi n) (expt psi n))
+       (- phi psi))))
+;;(time (fibonacci-nth 50))
+
 (defun binomial-coefficient-simple (n m)
   "Weak version, cannot deal with Ns and Ms greater than ~ 11"
   (/ (factorial n (1+ m)) (factorial (- n m))))
@@ -52,6 +73,12 @@ For the definition of !N, see https://en.wikipedia.org/wiki/Derangement"
     (/ (product-a-b (1+ (- n m*)) n)
        (product-a-b 2 m*))))
 ;;(binomial-coefficient 26 9)
+
+(cl-defun catalan-nth (n)
+  "Return the Nth Catalan number.
+The Catalan numbers form the sequence A000108 in the OEIS."
+  (/ (binomial-coefficient (2* n) n) (1+ n)))
+;;(catalan-nth 3)
 
 (defconst uefa-groups
   '(((PSG fra) (Porto por))
@@ -150,3 +177,5 @@ where MATCH is formed fro"
 		       groups))
 ;;(setf res (uefa-possible-draws-main))
 ;;(count t (flatten res))
+
+(provide 'mb-combinatorics)
