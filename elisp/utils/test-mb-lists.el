@@ -108,6 +108,11 @@
 		   :test #'(lambda (x y) (eql y 'd)))
 		 '((a) (b d) (a d) (a) (b)))))
 
+(ert-deftest test-head ()
+  "Test of `head'"
+ (should (equal (head 0 '(a b c)) nil))
+ (should (equal (head 1 '(a b c)) '(a))))
+
 (ert-deftest test-memcase ()
   "Test of `memcase'"
   (should (equal (memcase '(a b c) (a 'A) (otherwise 'B)) 'A))

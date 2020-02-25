@@ -26,7 +26,7 @@ element, -2 second last and so on."
 
 (defun head (n list)
   (butlast list (- (length list) n)))
-;;(head 0 '(a b c))
+;;(head 2 '(a b c))
 
 (defun l-explicit*< (x y list &rest cl-keys)
   "Returns a binary predicate (less-than-type) that evalutes to t
