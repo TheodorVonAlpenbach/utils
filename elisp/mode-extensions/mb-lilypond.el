@@ -1,3 +1,27 @@
+(defun current-filename ()
+  (buffer-file-name (current-buffer)))
+;;(current-filename)
+
+(cl-defun mb-lilypond-compile (&optional (filename (current-filename)))
+  (compilation-start (format "lilypond %s" filename)))
+
+(push-unique #'mb-lilypond-compile-view-pdf compilation-finish-functions)
+;;(nilf compilation-finish-functions)
+
+(cl-defun mb-lilypond-compilation-filename (&optional (buffer "*compilation*"))
+  (string-match* "^lilypond \\(.*\\)" (buffer-string* buffer) :num 1))
+;;(mb-lilypond-compilation-filename)
+
+(defun mb-lilypond-compile-view-pdf (compilation-buffer exit-status)
+  (let ((ly-filename (mb-lilypond-compilation-filename)))
+    (message "Made it: %s; %s; %s" 
+	     compilation-buffer (string-trim exit-status) ly-filename)
+    (when (string= (string-trim exit-status) "finished")
+      (let ((pdf-filename (file-name-change-extension ly-filename "pdf")))
+	(awhen (get-file-buffer pdf-filename)
+	  (kill-buffer it))
+	(find-file-other-window pdf-filename)))))
+
 (defun LilyPond-command (name file)
   "Run command NAME on the file you get by calling FILE.
 
