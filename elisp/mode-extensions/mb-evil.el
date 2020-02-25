@@ -405,6 +405,7 @@ between different"
     (python-mode (python-shell-send-buffer nil))
     ((c++-mode cc-mode makefile-mode) (compile "make -k"))
     (latex-mode (TeX-command-run-all nil))
+    (LilyPond-mode (mb-lilypond-compile))
     (otherwise (mb-eval-region (point-min) (point-max)))))
 
 (cl-defun mb-eval-defun ()
