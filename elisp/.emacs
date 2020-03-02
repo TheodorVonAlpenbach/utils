@@ -32,7 +32,6 @@
 ;; Otherwise packages like slime might shadow the built in cl library
 ;; by pushing directories with cl library compatability packages to
 ;; load-path:
-(push "/usr/share/emacs/24.4/lisp/emacs-lisp" load-path)
 (require 'cl)
 
 (defconst +win32-root+
@@ -187,17 +186,19 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 		(cl-remove "old" (directory-files +mb-lisp-dir+ t)
 			   :key #'file-name-nondirectory
 			   :test #'string=)
-		(directory-files (expand-file-name ".emacs.d/elpa" +home-dir+) t)
+		(directory-files
+		 ;; The regexp masks the '.' and '..' files
+		 (expand-file-name ".emacs.d/elpa" +home-dir+) t ".*[^.]")
 		(list
 		 (expand-file-name "games/cube" +mb-lisp-dir+)
 		 (expand-file-name "games/maths" +mb-lisp-dir+)
 		 (expand-file-name "games/cram" +mb-lisp-dir+)
-		 (expand-file-name "external/scilab" +mb-lisp-dir+)
 		 *site-lisp-dir*))
       if (and (file-directory-p x) (not (member x load-path)))
       collect x into res
       finally do (setf load-path (append res load-path)))
 
+(length (directory-files (expand-file-name ".emacs.d/elpa" +home-dir+) t))
 ;; smartparens
 (add-to-list 'load-path "~/.emacs.d/smartparens-master")
 
