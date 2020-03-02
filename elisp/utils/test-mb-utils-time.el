@@ -303,10 +303,9 @@
   (should (equal (period-length (yesterday (parse-time "2018-10-30")) :hour)
 		 24.0)))
 
-(provide 'test-mb-utils-time2.el)
 (ert-deftest test-unix-time ()
   "Test of `unix-time'"
-  (should (null (current-timezone)))
+  (should (equal "Europe/Oslo" (current-timezone)))
   (should (equal (unix-time "1972-01-06T08:15CET") 63530100.0))
   (should (equal (unix-time "1970-01-01T00:00Z") 0.0))
   (should (equal (unix-time "1970-01-01T00:00") -3600.0))

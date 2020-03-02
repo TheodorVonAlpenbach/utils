@@ -396,3 +396,5 @@ I was wrong."
   (o2m-convert-tests)
   (o2m-convert-doc))
 ;;(o2m-all)
+
+(provide 'mb-octave-matlab)

@@ -54,14 +54,16 @@
 
 (defmacro with-timezone (timezone-name &rest body)
   "Temporarily set local timezone to TIMEZONE-NAME and evaluate BODY."
-  `(prog1
-       (condition-case ()
-	   (progn
-	     (setenv "TZ" ,timezone-name)
-	     ,@body)
-	 (error nil))
-     (setenv "TZ" nil)))
+  `(let ((currentenv-tz (getenv "TZ")))
+     (prog1
+	 (condition-case ()
+	     (progn
+	       (setenv "TZ" ,timezone-name)
+	       ,@body)
+	   (error nil))
+       (setenv "TZ" currentenv-tz))))
 (def-edebug-spec with-timezone t)
+;;(getenv "TZ")
 
 (defun set-timezone (timezone-name)
   (setenv "TZ" timezone-name))
@@ -234,6 +236,7 @@ ZONE is a pair (ZONE-CODE . UTC-OFFSET). The result is on the form
 	    sign h (or m "00"))))
       ;; Code suffix not found
       string))
+;;(clean-time-zone-suffix "1972-01-05T23:00Z")
 ;;(clean-time-zone-suffix "1972-01-05T23:00+01:00")
 
 (defun mb-parse-time-string (string)
@@ -266,7 +269,7 @@ Argument may be a time objects itself or a string."
 	    (copy-time time-designator)))
     (string (mb-parse-time-string time-designator))
     (symbol (parse-time (symbol-name time-designator)))
-    (number (list 0 (round time-designator)))
+    (number (seconds-to-time time-designator))
     (error "%s is not a legar time designator")))
 ;;(mapcar #'parse-time (list 1527598870.823139 "2005-01-18 09:15" '2014-04-02))
 ;;(parse-time "2000-01-18T22:31:00CET")
@@ -332,7 +335,7 @@ status. If UNIVERSAL is not nil, return result in UTC."
 
 (defun iso-dttm (etime &optional universal)
   (format-time-string "%Y-%m-%dT%H:%M:%S%Z" etime universal))
-;;(mapcar #'iso-dttm (list (parse-time 1527598870.823139) (encode-now)))
+;;(mapcar #'iso-dttm (list (parse-time (seconds-to-time (float-time))) (encode-now)))
 
 (cl-defun now (&rest args)
   "Return current time as an encoded time object."
@@ -702,6 +705,6 @@ designators WEEK-DESIGNATOR1 and WEEK-DESIGNATOR2. See
 (cl-defun unix-time (&optional (time-designator (now)))
   "Convert time-designator to the number of seconds since 1970-01-01 UTC."
   (float-time (parse-time time-designator)))
-;;(unix-time)
+;;(cons (unix-time) (mapcar #'unix-time '("2020-03-02T12:26:30")))
 
 (provide 'mb-utils-time)

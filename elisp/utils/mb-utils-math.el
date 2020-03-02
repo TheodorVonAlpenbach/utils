@@ -701,13 +701,6 @@ either 0 or 1)"
       (cons head (aggregate (rest numbers) head)))))
 ;;(aggregate '(1 2 3 4))
 
-(cl-defun fibonacci-numbers (n &optional (start-values '(1 1)))
-  (let ((res (reverse start-values)))
-    (loop for i below (- n 2)
-	  do (push (+ (first res) (second res)) res))
-    (nreverse res)))
-;;(length (fibonacci-numbers 10))
-
 (defun normalize (numbers)
   (map (type-of numbers) (bind #'/ (float (sum numbers))) numbers))
 ;;(normalize (vector 1 2 3))

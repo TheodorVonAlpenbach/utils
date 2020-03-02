@@ -235,13 +235,17 @@ the test."
   (mb-ert-test-file (buffer-file-name buffer)))
 ;;(mb-ert-test-buffer (get-buffer "mb-utils-div.el"))
 
+(cl-defun mb-ert-test-files (files)
+  "Invoke ERT on every test function in FILES.
+Note: Either this or mb-ert-test-file is obsolete."
+  (let ((fs (copy-if #'mb-ert-test-filename-p files)))
+    (mapc #'mb-eval/load-ert-pair fs)
+    (mb-ert-test-symbols (mapcan #'mb-ert-file-defuns fs))))
+
 (cl-defun mb-ert-test-buffer-directory (&optional (buffer (current-buffer)))
   "Invoke ERT on every test function in current directory."
   (interactive)
-  (let ((fs (copy-if #'mb-ert-test-filename-p
-	      (directory-files (buffer-directory buffer) t "\.el$"))))
-    (mapc #'mb-eval/load-ert-pair fs)
-    (mb-ert-test-symbols (mapcan #'mb-ert-file-defuns fs))))
+  (mb-ert-test-files (directory-files (buffer-directory buffer) t "\.el$")))
 
 (cl-defun mb-ert-test-buffer-directories (dirs)
   "Invoke ERT on every test function in current directory."
@@ -251,6 +255,12 @@ the test."
 		    (directory-files d t "\.el$"))
 	 do (mapc #'mb-eval/load-ert-pair fs)
 	 append (mapcan #'mb-ert-file-defuns fs))))
+
+(cl-defun mb-ert-test-mb-elisp (&optional (buffer (current-buffer)))
+  "Invoke ERT on every test function in all of MB's elisp code."
+  (interactive)
+  (mb-ert-test-buffer-directories
+   (subdirs (expand-file-name +mb-lisp-dir+))))
 
 (cl-defun mb-ert-test-mb-elisp (&optional (buffer (current-buffer)))
   "Invoke ERT on every test function in all of MB's elisp code."

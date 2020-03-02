@@ -328,7 +328,7 @@ TODO: implement this. Probably involves some macro magic"
 ;;(macroexpand '(nilf (first c) b))
 
 (defmacro notf (&rest args)
-  "Sets all ARGS to nil."
+  "Sets each ARG in ARGS to (not ARG)."
   `(progn (setf ,@(mapcan #'(lambda (x) (list x `(not ,x))) args))))
 ;;(macroexpand '(notf (first c) b))
 
@@ -723,11 +723,11 @@ also is a cons, will be encapsulated in a list."
 (cl-indent 'numcond 'case)
 ;;(numcond (4 3) (= 'eq) (< 'lt) (> 'geq))
 
-(defun call-if (predicate function expression)
-  "Return (FUNCTION EXPRESSION) if predicate is not nil.
-Otherwise return expression"
+(defun call-if (predicate function x)
+  "Return (FUNCTION X) if predicate is not nil.
+Otherwise return x"
   (if predicate
-    (funcall function expression)
-    expression))
+    (funcall function x)
+    x))
 
 (provide 'mb-utils-div)

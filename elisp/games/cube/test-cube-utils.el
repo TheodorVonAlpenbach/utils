@@ -1,10 +1,8 @@
 (require 'ert)
-(require 'lsconf-sensors)
 
-(ert-deftest test-cube-revert-sexp ()
-  "Test of `cube-revert-sexp'"
-  (should (equal (cube-revert-sexp 'U) 'Uw))
-  (should (equal (cube-revert-sexp 'Uw) 'U))
-  (should (equal (cube-revert-sexp '()) nil)))
+(ert-deftest test-cube-revert ()
+  "Test of `cube-revert'"
+  (should (equal (cube-revert '((R U Uw Rw U2) (U R Uw Rw U2)))
+		 '((Uw2 R U Rw Uw) (Uw2 R U Uw Rw)))))
 
 (provide 'test-cube-utils.el)

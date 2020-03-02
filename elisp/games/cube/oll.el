@@ -63,16 +63,22 @@
 
 (defun oll-ufs-rotate (rotation)
   (let ((n (oll-rotation-number rotation)))
-    (call-if (> n 1) #'nreverse
-      (if (evenp (oll-rotation-number rotation))
+    (call-if (> n 1) #'reverse
+      (if (evenp n)
 	(a-b 1 9)
 	'(3 6 9 2 5 8 1 4 7)))))
 ;;(oll-ufs-rotate 'yw)
 
 (defun oll-ufs (uf rotation)
   "Map each upper face to nil if it is not yellow. Otherwise map it to not nil."
-  (loop for i in (oll-ufs-rotate rotation) collect (oll-uf-p i uf)))
-;;(oll-ufs '(2 3 5 6 7) nil)
+  (oll-ufs-rotate rotation))
+;;(oll-ufs '(2 3 5 6 7) 'yw)
+
+(defun oll-ufs (uf rotation)
+  "Map each upper face to nil if it is not yellow. Otherwise map it to not nil."
+  (loop for i in (oll-ufs-rotate rotation)
+	collect (oll-uf-p i uf)))
+;;(oll-ufs '(2 3 5 6 7) 'yw)
 
 (defun mapnil (list value true-value)
   (loop for x in list collect (if x (or true-value x) value)))

@@ -34,5 +34,10 @@ beginning of each year."
 ;;(growth 24 1.07 (withdraw-to-zero 24 1.07 1000) -1000)
 ;;(withdraw-to-zero 1 1.045 100)
 
+(cl-defun profit-to-interest (profit &optional (years 1.0))
+  "Calculate yearly interest based on PROFIT over YEARS
+p = f^y => ln(p) = y * ln(f) => ln(f) = ln(p)/y => f = p^(1 / y)"
+  (expt profit (/ 1.0 years)))
+;;(profit-to-interest 1.5 3)
 
 (provide 'mb-utils-economy)

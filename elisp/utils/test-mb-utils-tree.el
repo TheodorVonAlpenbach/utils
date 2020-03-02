@@ -3,7 +3,7 @@
 
 (ert-deftest test-tree->relations ()
   "Test of `tree->relations'"
- (should (equal (tree->relations ) nil)))
+ (should (equal (tree->relations nil) nil)))
 
 (ert-deftest test-find-subtree ()
   "Test of `find-subtree'"

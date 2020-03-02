@@ -1,13 +1,9 @@
 (require 'ert)
-(require 'lsconf-sensors)
+(require 'oll)
 
 (ert-deftest test-oll-expand-corners ()
   "Test of `oll-expand-corners'"
-  (should (equal (oll-expand-corners '(2 3 5 6 7) '(1 0)) '(1 nil 0 nil))))
-
-(ert-deftest test-oll-uf-xy ()
-  "Test of `oll-uc-xy'"
-  (should (equal (oll-uf-xy '(2 3 5 6 7)) '(Y X X  X Y Y  X Y Y))))
+  (should (equal (oll-expand-corners '(3 4 5 6 9) '(r l) 'y2) '(u l r u))))
 
 (ert-deftest test-oll-uf-p ()
   "Test of `oll-uf-p'"
@@ -16,8 +12,8 @@
 
 (ert-deftest test-oll-ufs ()
   "Test of `oll-ufs'"
-  (should (equal (oll-ufs '(2 3 5 6 7)) '(nil t t nil t t t nil nil)))
-  (should (equal (oll-ufs '(2 3 5 6 7) 1) '(nil t t nil t t t nil nil))))
+  (should (equal (oll-ufs '(2 3 5 6 7) nil) '(nil t t nil t t t nil nil)))
+  (should (equal (oll-ufs '(2 3 5 6 7) 'yw) '(t nil nil nil t t nil t t))))
 
 (ert-deftest test-oll-rotation-number ()
   "Test of `oll-rotation-number'"

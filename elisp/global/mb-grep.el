@@ -40,7 +40,20 @@
 	 'grep-mode nil t)))))
 ;;(mb-grep-basic :target "mb-grep-basic" :types '("el"))
 
-(cl-defun subdirs (rootdir &optional (depth t) flatten-p)
+(defun finddirs (rootdir &optional depth)
+  "Return a list of all subdirectories under ROOTDIR.
+If optional arguement depth is a non-negative integer, the result
+is restricted to depth levels, just like unix utility find's
+-maxdepth."
+  (mapcar #'file-name-as-directory
+    (split-string
+     (if (and (integerp depth) (not (minusp depth)))
+       (call-process* "find" rootdir "-type" "d" "-maxdepth" (sstring depth))
+       (call-process* "find" rootdir "-type" "d"))
+     "\n")))
+;;(finddirs (expand-directory-name +mb-lisp-dir+))
+
+(cl-defun subdirs (rootdir &optional depth flatten-p)
   "Return a tree of all directories under ROOTDIR.
 If optional argument DEPTH is a non-negative integer, the result
 is restricted to subdirectories DEPTH levels below rootdir. If
@@ -50,22 +63,17 @@ a list.
 Note! In this version the flatten-p mechanism is not implemented.
 The current implementation always returns a flattened list."
   (cl-set-difference
-   (if (and (integerp depth)
-	    (not (minusp depth)))
-     (split-string (call-process* "find" rootdir "-type" "d" "-maxdepth" (sstring depth)) "\n")
-     (split-string (call-process* "find" rootdir "-type" "d") "\n"))
-   '("" ".." "../" "." "./")
-   :test #'string=))
-;;(length (subdirs "./"))
+      (finddirs rootdir depth)
+      '("" ".." "../" "." "./")
+    :test #'string=))
+;;(subdirs (expand-directory-name +mb-lisp-dir+))
 
 (cl-defun mb-grep-dirs-1 (up maxdepth dir)
-  (let ((sd (subdirs (if (zerop up)
-		       dir
-		       (expand-file-name
-			(concat* (make-list up (file-name-as-directory ".."))) dir))
-		     maxdepth)))
-    (push-unique (expand-file-name dir) sd #'string=)))
-;;(mb-grep-dirs-1 2 nil ".")
+  (subdirs (if (zerop up)
+	     dir
+	     (parent-directory (expand-directory-name dir) up))
+	   maxdepth))
+;;(mb-grep-dirs-1 1 0 "~/")
 
 (cl-defun mb-grep-dirs (prefix &optional (dir "."))
   "Return a list of directories according to prefix.
@@ -119,7 +127,7 @@ nil      ./ and all its subdirectories
 	    (setf up prefix maxdepth nil)
 	    (multiple-value-setq (up maxdepth) (cl-floor prefix 10))))
 	(mb-grep-dirs-1 up maxdepth dir)))))
-;;(mb-grep-dirs 2 "~/cvs/sources/SciLab/toolboxes/OsstrupenViewer/macros/")
+;;(mb-grep-dirs 10 "~")
 
 (cl-defun mb-grep-interactive ()
   "Convenient grep according to file type."

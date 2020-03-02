@@ -4,6 +4,13 @@
 	    (expand-file-name filename)))
 ;;(in-directory-p "~/bin/mbtags.sh" "~/")
 
+(defun expand-directory-name (directory-name &optional parent-directory-name)
+  "Return the expansion of parent-directory-name with directory-name.
+This is similiar to expand-file-name, except that the result is a
+true directory name."
+  (file-name-as-directory
+   (expand-file-name directory-name parent-directory-name)))
+
 (defun concat-directories (directory1 directory2)
   (concat (file-name-as-directory directory1)
 	  directory2))
