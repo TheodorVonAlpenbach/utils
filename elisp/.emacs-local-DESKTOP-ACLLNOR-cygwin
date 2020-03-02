@@ -67,19 +67,15 @@
       `((,+mb-lisp-dir+ ".emacs")
 	(,+mb-lisp-dir+ "utils/mb-utils-strings.el")
 	(,+mb-lisp-dir+ "utils/mb-utils-buffer.el")
+	(,+mb-lisp-dir+ "utils/mb-utils-time.el")
 	(,+mb-lisp-dir+ "utils/mb-sequences.el")
 	(,+mb-lisp-dir+ "global/mb-indent.el")
 	(,+mb-lisp-dir+ "external/scilab/mbscilab.el")
 	(,+mb-lisp-dir+ "mode-extensions/mb-evil.el")
-	(,+mb-lisp-dir+ "c++/qt-chess.el")
-	(,+mb-lisp-dir+ "mode-extensions/mb-octave.el")
 	(,+mb-lisp-dir+ "mode-extensions/mb-lisp.el")
 	(,+mb-lisp-dir+ "mode-extensions/mb-octave.el")
 	(,+mb-lisp-dir+ "mode-extensions/mb-tex.el")
 	(,+mb-lisp-dir+ "quiz/quiz-park.el")
-	(,+mb-lisp-dir+ "global/LS.el")
-	(,+mb-lisp-dir+ "games/cram/cram.el")
-	(,+mb-lisp-dir+ "games/maths/maths.el")
 
 	;; Common Lisp utils
 	(,+home-dir+ "projects/utils/lisp/topology/shapes.lisp")
@@ -87,22 +83,20 @@
 		     :time-paragraphs t)
 
 	;; remote files (shared with windows)
+	(,pf-dir "init.lisp")
+
 	;; Note special treatment of arbeidslog in mb-insert-state-init!
 	(,pfdoc-dir "arbeidslog" :point :end :keyboard :no :time-paragraphs t)
 	(,pfdoc-dir "adresser.txt" :keyboard :no)
-	;; LS-related
-	(,pfdoc-dir "todo.org" :keyboard :no)
-	(,pfdoc-dir "LS-notes.org" :point :end :keyboard :no :time-paragraphs t)
 	(,pfdoc-dir "ferskvare" :keyboard :no :point :end)
 	(,pfdoc-dir "howto.org")
+	(,pfdoc-dir "log.org")
 
+	;; Problem Server files
 	(,pfps-dir "problem-server.lisp")
 	(,pfps-dir "problem-server.asd")
 	(,pfps-dir "problem-server-dispatch.lisp")
-	(,pfps-dir "problem-db-ui.lisp")
-
-	(,pf-dir "init.lisp")
-	(,pf-dir "log.org")))
+	(,pfps-dir "problem-db-ui.lisp")))
 ;;(find-file "/ssh:pf:~/init.lisp")
 ;;(find-file "/ssh:ssh:~/doc/arbeidslog")
 
