@@ -1,0 +1,65 @@
+(set-frame-font "--Courier New-normal-normal-normal-mono-28-*-*-*-c-*-iso8859-1")
+
+;; Local elisp load paths
+(setf *local-load-paths* '())
+
+;; Sentences, see info node Sentences
+(setf sentence-end "[.?!][]\"')]*\\($\\|\t\\| \\)[ \t\n]*")
+(setf sentence-end-double-space nil)
+
+;; news
+(setf gnus-select-method '(nntp "news.online.no"))
+(setf user-full-name "Mats Bergstrøm")
+
+;; tags
+(setf tags-file-name nil)
+(setf tags-table-list (list (expand-file-name "~/.MBTAGS")))
+
+;; lynx
+(setf *lynx-proxy-dir* (expand-file-name "lynx-proxy" *local-data-dir*))
+(setf *lynx-auth* "")
+
+;; diary file (mandatory to use #'calendar)
+(setf diary-file (setf diary-file (expand-file-name "office/diary" *local-data-dir*)))
+
+;; load favorite files (note that nil/t means position cursor at top/bottom)
+;; but first we have to get rid of the tramp file, which may block ssh:
+(let ((tramp-file "~/.emacs.d/tramp"))
+  (when (file-exists-p tramp-file)
+    (delete-file tramp-file)))
+
+(setf *my-favorites*
+      `((,+mb-lisp-dir+ ".emacs")
+	(,+mb-lisp-dir+ "utils/mb-utils-strings.el")
+	(,+mb-lisp-dir+ "utils/mb-utils-buffer.el")
+	(,+mb-lisp-dir+ "utils/mb-sequences.el")
+	(,+mb-lisp-dir+ "global/mb-indent.el")
+	(,+mb-lisp-dir+ "mode-extensions/mb-lisp.el")
+	(,+mb-lisp-dir+ "mode-extensions/mb-evil.el")
+	(,+mb-lisp-dir+ "mode-extensions/mb-octave.el")
+	(,+mb-lisp-dir+ "mode-extensions/mb-tex.el")
+	(,+mb-lisp-dir+ "quiz/qp.el")
+	
+	(,+mb-utils-dir+ "lisp/mb-utils.lisp")
+	(,+mb-utils-dir+ "lisp/topology/geometry.lisp")
+
+	(,+os-root+ "doc/log.org" :point :end :keyboard :no)
+	(,+os-root+ "doc/personer.org" :point :end :keyboard :no)
+	;; (,*shared-data-dir* "ferskvare" :point :end :keyboard :no)
+	;; (,*shared-data-dir* "arbeidslog" :point :end :keyboard :no)
+
+	;; ("/ssh:ssh:~/doc" "arbeidslog-new" :point :end :keyboard :no :time-paragraphs t)
+	;; ("/ssh:ssh:~/doc" "adresser.txt" :keyboard :no)
+	;; ("/ssh:ssh:~/doc" "todo.org" :keyboard :no)
+	;; ("/ssh:ssh:~/doc" "LS-notes.org" :point :end :keyboard :no :time-paragraphs t)
+	))
+;;/ssh:ssh:~/doc/arbeidslog-new
+
+;;scheme
+(setf scheme-program-name "guile")
+
+;; lisp
+(setf inferior-lisp-program "clisp")
+
+;; dot
+(setf *dot-dir* "c:/Program Files/Graphviz2.30/bin/")
