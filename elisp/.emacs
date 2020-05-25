@@ -89,7 +89,13 @@
 This is always the parent directory to the .emacs directory.
 This directory is shared, see `+shared-dir+'")
 
-(defconst +mb-lisp-dir+ "~/projects/utils/elisp"
+(defconst +os-root+ (expand-file-name "~")
+  "Default directory OS root")
+
+(defconst +mb-utils-dir+ (expand-file-name "git/utils" +os-root+)
+  "Default directory for utils files.")
+
+(defconst +mb-lisp-dir+ (expand-file-name "elisp" +mb-utils-dir+)
   "Default directory for mb-lisp files.")
 
 (defun mb-emacs-local-filename ()
