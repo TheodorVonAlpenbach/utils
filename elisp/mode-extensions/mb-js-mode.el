@@ -7,7 +7,7 @@
   ;; to setup tabs
   (setq js-indent-level 4)
   (setq tab-width 4)
-  (setq indent-tabs-mode t)
+  (setq indent-tabs-mode nil)
   (setq-local parens-require-spaces nil))
 (add-hook 'js-mode-hook 'mb-js-mode-hook-function)
 
