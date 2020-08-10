@@ -387,10 +387,20 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 	       (forward-sexp 1)))))
 					;(switch-to-buffer "*Messages*")
 
+;;; ido and flx
 (require 'ido)
-(ido-mode t)
+(require 'flx-ido)
+(ido-mode 1)
+(ido-everywhere 1)
+(flx-ido-mode 1)
+;; disable ido faces to see flx highlights.
+(setq ido-enable-flex-matching t)
+(setq ido-use-faces nil)
 
-;; the following should be moved to extension/mb-evil-mode.el
+;;; GC optimize
+(setq gc-cons-threshold 20000000)
+
+;;; the following should be moved to extension/mb-evil-mode.el
 ;;; Where to put this?
 (cl-defun unix-find (ppath &key type regex name)
   (let ((args nil))
