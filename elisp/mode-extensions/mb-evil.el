@@ -95,6 +95,8 @@ STATE can take the same values as in `evil-define-key'."
     (emacs-lisp-mode
      (insert " "))))
 
+(define-key evil-normal-state-map "gb" 'sp-down-sexp)
+
 (require 'key-chord)
 (key-chord-mode 1)
 (key-chord-define evil-insert-state-map "dg" 'evil-move-past-close)
@@ -189,7 +191,13 @@ A simple split consists of two windows only."
 	  for w in (window-list)
 	  do (set-window-buffer w b))
     (select-window (get-buffer-window cb))))
-;;(rotate-windows)
+
+(defun swap-windows ()
+  "Rotate windows."
+  (interactive)
+  (rotate-windows)
+  (other-window -1))
+;;(swap-windows)
 
 (defun find-tag-no-prompt ()
   (interactive)
@@ -214,6 +222,7 @@ A simple split consists of two windows only."
   (define-key window-map "h" #'split-window-right)
   (define-key window-map "v" #'split-window-below)
   (define-key window-map "t" #'transpose-split-orientation)
+  (define-key window-map "s" #'swap-windows)
   (define-key window-map "r" #'rotate-windows)
   (define-key window-map "d" #'delete-window)
   (define-key window-map "o" #'other-window)
