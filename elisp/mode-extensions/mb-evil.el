@@ -251,6 +251,7 @@ A simple split consists of two windows only."
 				     (switch-to-buffer (other-buffer)))))
 
 (let ((div-map (make-sparse-keymap)))
+  ;; memo: by default we are incrementing decimeters! (dm)
   (evil-key-chord-define '(normal motion) global-map "dm" div-map)
   (define-key div-map "l" (lambda (n) (interactive "p") (inc-thing-at-point n 1)))
   (define-key div-map "h" (lambda (n) (interactive "p") (inc-thing-at-point (- n) 1)))
