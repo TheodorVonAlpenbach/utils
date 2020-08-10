@@ -15,7 +15,7 @@
 (setq scroll-margin 2)
 (global-font-lock-mode t)
 (show-paren-mode 1) ;shows matching parenthesis
-(transient-mark-mode t)
+(transient-mark-mode 1)
 
 ;;; MB setups
 (defun emacs-os ()
@@ -181,7 +181,8 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 ;;; non standard packages
 (require 'package)
 (loop for x in '(("marmalade" . "http://marmalade-repo.org/packages/")
-		 ("melpa"     . "http://melpa.milkbox.net/packages/")
+		 ;; ("melpa"     . "http://melpa.milkbox.net/packages/")
+		 ("melpa"     . "http://melpa.org/packages/")
 		 ("gnu" . "https://elpa.gnu.org/packages/"))
       do (unless (member x package-archives)
 	   (push x package-archives)))
@@ -234,7 +235,7 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 	 ("\\.xml$" . xml-mode)
 	 ("\\.css$" . css-mode)
 	 ("\\.html$" . html-mode)
-	 ("\\.js$" . js-mode)
+	 ("\\.js$" . rjsx-mode)
 	 ("\\.o$" . hexl-mode)
 	 ("\\.exe$" . hexl-mode)
 	 ("\\.shp$" . hexl-mode)
@@ -355,11 +356,14 @@ Not in use. Projects should be shared, at least until we are up and running Git.
     ((mb-lisp-mode lisp-mode common-lisp-mode) "~/.CLTAGS")
     (mbscilab-mode "~/.SCILABTAGS")
     (octave-mode "~/.OTAGS")
+    ((rjsx-mode js-mode) nil)
     (t (error "Couldn't resolve major mode %S for buffer %s" major-mode (buffer-name)))))
+;;(mb-tags-file)
 
 (defun mb-visit-tags-table ()
   "Note that this function and its invokations must precede init loading of files."
-  (setq-local tags-file-name (mb-tags-file)))
+  (awhen (mb-tags-file)
+    (setq-local tags-file-name it)))
 
 ;; set hooks (NB! should these hooks be set here?)
 (add-hook 'emacs-lisp-mode-hook 'mb-visit-tags-table)
