@@ -160,6 +160,11 @@ nil      ./ and all its subdirectories
 		 :types '("sci" "sce")
 		 :match-not (regexp-or "CVS" "etc" "help")))
 
+(cl-defun mb-js-grep ()
+  "Convenient grep on JS files."
+  (interactive)
+  (mb-grep-basic :types "js"))
+
 (cl-defun mb-c++-grep ()
   "Convenient grep according to file type."
   (interactive)
