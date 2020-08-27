@@ -10,6 +10,7 @@
   (setq indent-tabs-mode nil)
   (setq-local parens-require-spaces nil))
 (add-hook 'js-mode-hook 'mb-js-mode-hook-function)
+(add-hook 'rjsx-mode-hook 'mb-js-mode-hook-function)
 
 (defun mb-nodejs-repl-mode-hook-function ()
   (setq-local parens-require-spaces nil))
