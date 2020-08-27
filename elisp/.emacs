@@ -309,7 +309,9 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 			 ;; dic-map
 			 mb-indent
 			 quiz-park
-			 mb-ert)
+			 mb-js-mode
+			 mb-ert
+			 mb-org)
 		       *local-requires*)
       do (message "Loading package %S..." m)
       do (require m))
