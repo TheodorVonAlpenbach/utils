@@ -239,7 +239,7 @@ ZONE is a pair (ZONE-CODE . UTC-OFFSET). The result is on the form
 ;;(clean-time-zone-suffix "1972-01-05T23:00Z")
 ;;(clean-time-zone-suffix "1972-01-05T23:00+01:00")
 
-(defun mb-parse-time-string (string)
+(defun mb-parse-date-string (string)
   "Parse date STRING and convert it to an encoded time object."
 
   ;; Implementation note: The function relies on built-in function
@@ -253,12 +253,12 @@ ZONE is a pair (ZONE-CODE . UTC-OFFSET). The result is on the form
   ;; This function therefore replaces 'T' with a space before calling
   ;; `date-to-time'.
   (if (< (length string) 11)
-    (mb-parse-time-string (concat string " 00:00"))
+    (mb-parse-date-string (concat string " 00:00"))
     (when (eql (char string 10) ?T)
       (setf (char string 10) ? ))
     (date-to-time (clean-time-zone-suffix string))))
-;;(decode-time (mb-parse-time-string "2018-05-24T00:00+0000"))
-;;(decode-time (mb-parse-time-string "2018-05-24T00:00Z"))
+;;(decode-time (mb-parse-date-string "2018-05-24T00:00+0000"))
+;;(decode-time (mb-parse-date-string "2018-05-24T00:00Z"))
 
 (defun parse-time (time-designator)
   "Returns a new time object equal to TIME-DESIGNATOR.
@@ -267,7 +267,7 @@ Argument may be a time objects itself or a string."
     (cons (if (= (length time-designator) 9)
 	    (--time-encode time-designator)
 	    (copy-time time-designator)))
-    (string (mb-parse-time-string time-designator))
+    (string (mb-parse-date-string time-designator))
     (symbol (parse-time (symbol-name time-designator)))
     (number (seconds-to-time time-designator))
     (error "%s is not a legar time designator")))
