@@ -741,4 +741,11 @@ Afterwards delete the file."
 ;;(within-temp-file (+ 2 2))
 (def-edebug-spec within-temp-file progn)
 
+(defun string-to-clipboard (string)
+  (gui-set-selection 'CLIPBOARD string))
+
+(defun buffer-file-name-to-clipboard ()
+  (interactive)
+  (string-to-clipboard (buffer-file-name)))
+
 (provide 'mb-utils-buffer)
