@@ -95,8 +95,6 @@ STATE can take the same values as in `evil-define-key'."
     (emacs-lisp-mode
      (insert " "))))
 
-(define-key evil-normal-state-map "gb" 'sp-down-sexp)
-
 (require 'key-chord)
 (key-chord-mode 1)
 (key-chord-define evil-insert-state-map "dg" 'evil-move-past-close)
@@ -115,6 +113,9 @@ STATE can take the same values as in `evil-define-key'."
 (define-key evil-normal-state-map "gp" 'next-error)
 (define-key evil-normal-state-map "gP" 'previous-error)
 (define-key evil-normal-state-map "gI" 'mb-show-process-buffer)
+(define-key evil-normal-state-map "gs" 'isearch-forward)
+(define-key evil-normal-state-map "gS" 'isearch-backward)
+(define-key evil-normal-state-map "gb" 'sp-down-sexp)
 
 (defun mb-show-process-buffer ()
   (interactive)
