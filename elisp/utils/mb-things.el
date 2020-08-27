@@ -149,7 +149,7 @@ must be a member of a cycle preceding the cycle of the latter.")
 	 (replace-thing-at-point (inc-cyclic (thing-at-point 'cyclic) n level) 'cyclic))))
 
     ((time-at-point t)
-     (replace-thing-at-point (inc-time it n level) 'time))
+     (replace-thing-at-point (inc-clock it n level) 'time))
 
     ((number-at-point)
      (replace-thing-at-point (inc-number it n level) 'number))
@@ -167,6 +167,7 @@ must be a member of a cycle preceding the cycle of the latter.")
     ((word-at-point t))
 
     (t (error "No thing recoginzed"))))
+;;09:07
 
 (defun inc-weekday-and-date-at-point (n level)
   "Doesn't work thing-at-point doesn't seem to handle spaces in regexps"
@@ -188,17 +189,24 @@ must be a member of a cycle preceding the cycle of the latter.")
 	      (otherwise (error "Level %d is not implemented!" level)))))
 ;;(inc-date "2001-10-20" 1 1)
 
-(defun inc-time (time n level)
-  "LEVEL 1, 2, 3 correspond to day, month, year respectively."
+(defun parse-clock (clock-string)
+  "Parse clock-string and return the time object for date 1970-01-01."
+  (apply #'encode-time
+    (append (subseq (parse-time-string clock-string) 0 3)
+	    (list 1 1 1970))))
+;;(parse-clock "09:45")
+
+(defun inc-clock (time n level)
+  "LEVEL 1, 2, 3 correspond to day, month, year respectively.
+TIME must be a string."
   (iso-time :time (case level
-		    (1 (add-time (parse-time time) :minute n))
-		    (2 (add-time (parse-time time) :hour n))
-		    (3 (add-time (parse-time time) :second n))
+		    (1 (add-time (parse-clock time) :minute n))
+		    (2 (add-time (parse-clock time) :hour n))
+		    (3 (add-time (parse-clock time) :second n))
 		    (otherwise (error "Level %d is not implemented!" level)))
 	    :with-seconds (or (= level 3) 
 			      (> (length time) 6))))
-;;(inc-time "13:13" 1 3)
-
+ 
 (defun inc-number (x n level)
   (let ((res 
 	 (case level
