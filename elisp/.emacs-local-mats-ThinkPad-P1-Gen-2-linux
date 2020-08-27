@@ -3,6 +3,12 @@
 ;; Local elisp load paths
 (setf *local-load-paths* '())
 
+(cl-pushnew
+ '(".emacs" ".emacs-local-mats-ThinkPad-P1-Gen-2-linux")
+  *simple-swaps* :test #'equal)
+
+(setf *local-requires* '(browse-kill-ring))
+
 ;; Sentences, see info node Sentences
 (setf sentence-end "[.?!][]\"')]*\\($\\|\t\\| \\)[ \t\n]*")
 (setf sentence-end-double-space nil)
@@ -53,6 +59,7 @@ sudo mount -a.")
 	(,+cygwin-home+ "doc/technologies.org" :point :end)
 	(,+cygwin-home+ "doc/todo.org" :point :end)
 	(,+cygwin-home+ "doc/howto.org" :point :end)
+	(,+cygwin-home+ "doc/questions.org" :point :end :keyboard :no)
 	(,+cygwin-home+ "doc/log.org" :point :end :keyboard :no)
 
 	))
