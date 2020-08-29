@@ -284,9 +284,14 @@ For optional argument point, see `region-replace-raw'."
 (defsubst bob ()
   "Move POINT to beginning of buffer and return its value"
   (goto-char (point-min)))
-(defsubst eob ()
-  "Move POINT to end of buffer and return its value"
-  (goto-char (point-max)))
+
+(defsubst eob (&optional ensure-newline-p)
+  "Move POINT to end of buffer and return its value.
+If optional ENSURE-NEWLINE-P is not nil, then insert a newline at the
+end of buffer if not already present."
+  (goto-char (point-max))
+  (when (and ensure-newline-p (plusp (current-column)))
+    (newline)))
 
 (cl-defun buffer-region (&optional (buffer (current-buffer)))
   (with-buffer buffer (save-excursion (list (bob) (eob)))))
