@@ -102,7 +102,7 @@ SYMBOL can be a symbol or a list of symbols. See function
       csv-string write-csv
       gui-position-objects-horizontally
       gui-position-objects-vertically
-      ld-update list-split-if delete cl-delete
+      ld-update split-if delete cl-delete
       select-dao define-url-fn fmt if connect-toplevel
       hwhen htm-table htm-banner htm-form-button
       :export :import-from
@@ -115,7 +115,8 @@ SYMBOL can be a symbol or a list of symbols. See function
 	     put-text-property do-tuples/o draw
 	     substitute-if xml-extract-nodes
 	     write-csv call-if cl-set-difference
-	     db-add-user htm-button defclass)
+	     db-add-user htm-button defclass
+	     cl-position-if)
   'prog2)
 
 (cl-indent '(for define-derived-mode defun-ajax)
@@ -157,7 +158,7 @@ SYMBOL can be a symbol or a list of symbols. See function
 	   'multiple-value-bind)
 (cl-indent 'with-added-methods '((1 4 ((&whole 1))) (2 &body)))
 (cl-indent 'handler-bind '((&whole 4 &rest 1) 2 &body))
-(cl-indent 'handler-case '((1 4) (&whole 2 ((0 1) (1 3) (2 &body)))))
+(cl-indent 'handler-case '(4 &rest (&whole 2 &lambda &body)))
 (cl-indent 'define-condition '((1 6)
 			       (2 6 ((&whole 1)))
 			       (3 4 ((&whole 1)))
