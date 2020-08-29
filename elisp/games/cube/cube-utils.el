@@ -13,7 +13,7 @@
     (if (symbolp sexp)
      (cube-revert-symbol sexp)
      (reverse (mapcar #'cube-revert sexp)))))
-;;(cube-revert-sexp '((U R Uw Rw U2) (U R Uw Rw U2)))
+;;(cube-revert '((U R Uw Rw U2) (U R Uw Rw U2)))
 
 (defun cube-rotate-symbol-y (symbol)
   (case symbol
