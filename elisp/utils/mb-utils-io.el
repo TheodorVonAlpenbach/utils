@@ -138,6 +138,11 @@ temporary file name as value."
 	  ,@body)
 	(set-buffer ,current))))
   
+(defmacro with-current-directory (directory &rest body)
+  "Evalute BODY with current directory temporarily set to DIRECTORY."
+  `(let ((default-directory directory))
+     ,@body))
+  
 (cl-defun blank-buffer (&key (buffer (current-buffer)) start end)
   (with-buffer buffer
     (kill-region (or start (point-min)) (or end (point-max)))))
