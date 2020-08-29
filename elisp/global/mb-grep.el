@@ -127,7 +127,7 @@ nil      ./ and all its subdirectories
 	    (setf up prefix maxdepth nil)
 	    (multiple-value-setq (up maxdepth) (cl-floor prefix 10))))
 	(mb-grep-dirs-1 up maxdepth dir)))))
-;;(mb-grep-dirs 10 "~")
+;;(mb-grep-dirs 1)
 
 (cl-defun mb-grep-interactive ()
   "Convenient grep according to file type."
@@ -146,7 +146,7 @@ nil      ./ and all its subdirectories
 
 (cl-defun mb-gen-grep ()
   "Convenient grep according to file type."
-  (mb-grep-basic :directories (mb-grep-dirs current-prefix-arg)))
+  (mb-grep-basic :directories (mb-grep-dirs (or current-prefix-arg 1))))
 
 (cl-defun mb-elisp-grep ()
   "Convenient grep for Emacs lisp mode."
