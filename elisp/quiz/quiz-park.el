@@ -282,7 +282,7 @@ calling for a greater number of columns than max-column."
 		 ("´" . "'")
 		 ("-" . "-")
 		 ("…" . "...")))))
-    (aif (string-match "[^[:space:]+-.!?'a-zA-Z0-9æøåÆØÅäüé()&]" res)
+    (aif (string-match "[^[:space:]+-.!?'a-zA-Z0-9æøåÆØÅäüé()&]/" res)
       (error "Unhandled non-ASCII character `%c' at position %d"
 	     (char res it) it)
       res)))
