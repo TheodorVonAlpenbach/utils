@@ -2,6 +2,19 @@
   (apply #'reduce #'+ sequence cl-keys))
 ;;(sum '(1 2 3) :start 1 :initial-value 123)
 
+(cl-defun cumsum-list (list &optional (key #'+) (initial-value 0))
+  "Return the cumulative sum of LIST.
+Optional argument KEY specifies the operator and INITIAL-VALUE
+the start value for the cumulation."
+  (loop for x in list collect (setf initial-value (funcall key initial-value x))))
+;;(cumsum-list (0-n 3))
+
+(cl-defun cumsum (sequence &key (key #'+) (initial-value 0))
+  "Return the cumulative sum of SEQUENCE.
+For the key arguments, see `cumsum-list'."
+  (as-list (l sequence) (cumsum-list l key initial-value)))
+;;(cumsum (coerce (0-n 3) 'vector))
+
 (cl-defun product (sequence &rest cl-keys)
   (apply #'reduce #'* sequence cl-keys))
 ;;(product '(1 2 3) :start 1 :initial-value 2)
@@ -108,6 +121,13 @@ PREDICATES."
   "Returns a list that is LIST rotated N times."
   (nrotate-list (copy-list list) n))
 
+(cl-defun positions-if (predicate sequence &key from-end (start 0) end key)
+  (loop for start* = start then (1+ pos)
+	for pos = (cl-position-if predicate sequence
+		    :from-end from-end :start start* :end end :key key)
+	while pos collect pos))
+;;(positions-if #'oddp (vector 0 1 2 3 4 5) :start 2)
+
 (defun split-at-position (sequence &rest positions)
   "Split SEQUENCE at POSITIONS and return the resulting subsequences as a list."
   (loop for position in (nreverse (cons (length sequence) (nreverse positions)))
@@ -115,6 +135,11 @@ PREDICATES."
 	for end = position
 	collect (subseq sequence start end)))
 ;;(split-at-position "qweqwe" 2 4)
+
+(defun split-if (predicate sequence &rest args)
+  "Slits SEQUENCE into two at the positions where unary PREDICATE is true."
+  (apply #'split-at-position sequence (apply #'positions-if predicate sequence args)))
+;;(split-if #'oddp '(1 2 3 4 5))
 
 (defun elt-random (sequence)
   "Returns a random element in SEQUENCE"

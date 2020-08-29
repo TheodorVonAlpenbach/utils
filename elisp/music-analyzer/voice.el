@@ -241,7 +241,7 @@ Non-destructive."
 
 (defun notes-split-at-mposition (notes mposition)
   "Cuts list of NOTES in two. Consider renaming"
-  (list-split notes (notes-position notes mposition)))
+  (split-at-position notes (notes-position notes mposition)))
 ;;(notes-split-at-mposition (v-notes (v-test)) 16)
 
 (defun v-split-at-mposition (voice mposition)

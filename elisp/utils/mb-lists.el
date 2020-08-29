@@ -188,12 +188,6 @@ has length shorter than N, this last element is discarded."
 ;;(cut (0-n 5) 3 nil)
 ;;(cut '(1 2 3 4 5) 2 t)
 
-(cl-defun positions-if (predicate sequence &key from-end (start 0) end key)
-  (loop for start* = start then (1+ pos)
-	for pos = (position-if predicate sequence :from-end from-end :start start* :end end :key key)
-	while pos collect pos))
-;;(positions-if #'oddp (vector 0 1 2 3 4 5) :start 2)
-
 (defun cut-list-if (predicate list inclusion &rest args)
   "Cut LIST in sublists where PREDICATE is true.
 If INCLUSION is not nil, then the element in LIST matching
@@ -387,31 +381,6 @@ Optional LENGTH defines length of substituted sublist."
   (butlast list (mod (or n 1) (length list))))
 ;;(butlast* '(a b c d e) -2)
 
-(defun nlist-split (list n)
-  "Splits LIST into two at position N. Destructive"
-  (if (zerop n)
-    (list nil list)
-    (list (butlast* list (- n))
-	(nthcdr n list))))
-;;(loop for pos in (a-b -1 3) collect (nlist-split '(a b) pos))
-
-(defun list-split (list n)
-  "Splits LIST into two at position N. Non-destructive.
-If N is nil the list is not split, so the function returns a list of only LIST"
-  (if n
-    (nlist-split (copy-list list) n)
-    (list list)))
-;;(setq qwe '(a b c d e))
-;;(list-split qwe 0)
-
-(defun list-split-if (predicate list &rest args)
-  "Splits LIST into two at the positions where unary PREDICATE is true
-Currently support one split only"
-  (aif (apply #'cl-position-if predicate list args)
-    (list-split list it)
-    (list list)))
-;;(list-split-if #'oddp '(1 2 3 4 5))
-
 (defun nsplit-nth (n list)
   "Returns Nth element in LIST and the remainder of LIST. Destructive.
 TODO: this looks like draw. Check out and clean up if necessary"
@@ -429,15 +398,6 @@ TODO: this looks like draw. Check out and clean up if necessary"
 	  collect (let ((list* (copy-list list)))
 		    (values (nsplit-nth i list*) list*)))))
 ;;(test-split-nth) => (((0 (1 2)) (0 1 2)) ((1 (0 2)) (0 2)) ((2 (0 1)) (0 1)))
-
-(defun split-at-pos (list &rest positions)
-  "Return a list consisting of the elements of LIST at POSITIONS
-together with the remainder of LIST. Destructive."
-  (loop for pos in (reverse positions)
-	for (x list*) = (nsplit-nth pos list) then (nsplit-nth pos list*)
-	collect x into elts
-	finally return (list (nreverse elts) list*)))
-;;(let ((list '(0 1 2 3 4 5 6 7))) (list (split-at-pos list 1 3 5) list))
 
 (cl-defun filter-duplicates (list1 list2 &key (test #'eql) (start 0) end)
   "Removes all elements from row and fasit that are equal and is
