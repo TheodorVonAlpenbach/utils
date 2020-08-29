@@ -1,8 +1,21 @@
 (require 'js)
 (require 'nodejs-repl)
 
+(setf nodejs-repl-process-name "node -i")
+
+(defun nodejs-repl-buffer-name ()
+  "Return the active node REPL buffer name."
+  (format "*%s*" nodejs-repl-process-name))
+;;(nodejs-repl-buffer-name)
+
+(defun nodejs-repl-buffer ()
+  "Return the active node REPL buffer."
+  (get-buffer (nodejs-repl-buffer-name)))
+;;(nodejs-repl-buffer)
+
 (defun mb-js-mode-hook-function ()
   (linum-mode)
+  (electric-pair-local-mode)
   ;;(setq tab-width 4)
   ;; to setup tabs
   (setq js-indent-level 4)
@@ -22,9 +35,8 @@
   ;; note that nodejs-repl--send-string is not perfectly implemented.
   (unless (get-buffer "*nodejs*") (nodejs-repl))
   (string-lines (nodejs-repl--send-string (concat string "\n"))))
-;;(second (js-eval-string-raw-1 "arrColumn([[1, 217, 3], [1, 218, 3]], 1)"))
 
-(defun js-eval-string-raw (string)
+(defun js-eval-string-raw-old (string)
   "Evaluate string in nodejs REPL."
   ;; TODO make sure REPL is already running with (nodejs-repl). Also,
   ;; note that nodejs-repl--send-string is not perfectly implemented.
@@ -35,11 +47,27 @@
 ;;(js-eval-string "bbRecenter(lrbtBB(0, 10, 1, 2), [0, 0])")
 ;;(js-eval-string "arrColumn([[1, 217, 3], [1, 218, 3]], 1)")
 
+(defun js-eval-string-raw (string)
+  "Helper for `js-eval-string-raw'."
+  ;; TODO make sure REPL is already running with (nodejs-repl). Also,
+  ;; note that nodejs-repl--send-string is not perfectly implemented.
+  (unless (get-buffer "*node -i*")
+    (let ((default-directory "~/"))
+      (nodejs-repl)))
+  (let ((proc (get-process nodejs-repl-process-name)))
+    (process-send-string proc (concat string "\n"))
+    (while (not (accept-process-output proc 0 10 t)))
+    (with-buffer (nodejs-repl-buffer)
+      (eob)
+      (buffer-substring-no-properties
+       (bol)
+       (or (re-search-backward "^> " nil t) 1)))))
+;;(js-eval-string-raw "1+1")
+
 (defun js-eval-string (string &optional printflag)
   "Evaluate string and show result in minibuffer."
   (let ((res (js-eval-string-raw string)))
     (if printflag (intern "") res)))
-;;(js-eval-string "arrColumn([[1, 217, 3], [1, 218, 3]], 1)")
-;;(js-eval-string "'333+333'")
+;;(js-eval-string "333+333")
 
 (provide 'mb-js-mode)
