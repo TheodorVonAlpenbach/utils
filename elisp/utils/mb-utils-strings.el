@@ -765,3 +765,13 @@ length."
 ;;(alphanumerate (a-b 0 26))
 
 (provide 'mb-utils-strings)
+
+(defun parse-fhi-corona ()
+  (interactive)
+  (let ((res (concat*
+		 (rest (string-lines (buffer-string-no-properties)))
+	       :key #'(lambda (x) (string-match* "\\([0-9]+\\) *$" x :num 1))
+	       :in "\n")))
+    (kill-region (point-min) (point-max))
+    (insert res)
+    (kill-ring-save (point-min) (point-max))))
