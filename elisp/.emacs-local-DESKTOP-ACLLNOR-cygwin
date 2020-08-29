@@ -84,19 +84,22 @@
 
 	;; remote files (shared with windows)
 	(,pf-dir "init.lisp")
+	(,pf-dir "progfab/log.org")
 
 	;; Note special treatment of arbeidslog in mb-insert-state-init!
 	(,pfdoc-dir "arbeidslog" :point :end :keyboard :no :time-paragraphs t)
 	(,pfdoc-dir "adresser.txt" :keyboard :no)
 	(,pfdoc-dir "ferskvare" :keyboard :no :point :end)
 	(,pfdoc-dir "howto.org")
-	(,pfdoc-dir "log.org")
 
 	;; Problem Server files
 	(,pfps-dir "problem-server.lisp")
 	(,pfps-dir "problem-server.asd")
 	(,pfps-dir "problem-server-dispatch.lisp")
-	(,pfps-dir "problem-db-ui.lisp")))
+	(,pfps-dir "problem-db-ui.lisp")
+
+	(,pf-dir "git/tuning/tuning.lisp")
+	(,pf-dir "git/tuning/js/tuning.js")))
 ;;(find-file "/ssh:pf:~/init.lisp")
 ;;(find-file "/ssh:ssh:~/doc/arbeidslog")
 
@@ -105,4 +108,4 @@
 
 ;; lisp
 ;; (setf inferior-lisp-program "clisp")
-(setf inferior-lisp-program "sbcl")
+(setf inferior-lisp-program "sbcl --dynamic-space-size 2560")
