@@ -21,6 +21,7 @@
   (setq js-indent-level 4)
   (setq tab-width 4)
   (setq indent-tabs-mode nil)
+  (setq js-switch-indent-offset 4)
   (setq-local parens-require-spaces nil))
 (add-hook 'js-mode-hook 'mb-js-mode-hook-function)
 (add-hook 'rjsx-mode-hook 'mb-js-mode-hook-function)

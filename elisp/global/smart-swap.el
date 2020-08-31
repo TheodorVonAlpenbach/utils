@@ -55,10 +55,16 @@ For example:
 ;;(swap-target 'el)
 ;;(swap-target '("filename='\\(.*\\)'" 1))
 
+(defun smart-swap-find-file (filename-ending relative-target-directory)
+  (directory-files relative-target-directory t filename-ending))
+;;(smart-swap-find-file "swap.el$" "../global")
+
 (defun swap-target (expr)
   "Here I should allow for search"
-  (awhen (expand-swap-target expr)
-    (when (file-exists-p it) it)))
+  (if (consp expr)
+    (awhen (expand-swap-target expr)
+      (when (file-exists-p it) it))
+    (apply #'smart-swap-find-file expr)))
 ;;(length (directory-files "." t))
 
 (defun match-current-buffer-p (expr)
@@ -68,7 +74,9 @@ For example:
 	   (buffer-file-name)))
 	((stringp expr)
 	 (when (string-match expr (buffer-file-name))
-	   (buffer-file-name)))))
+	   (buffer-file-name)))
+	((consp expr)
+	 (match-current-buffer-p (car expr)))))
 
 (cl-defun smart-swap-find-target (&optional (swaps *smart-swaps*))
   (loop for (from to) in swaps

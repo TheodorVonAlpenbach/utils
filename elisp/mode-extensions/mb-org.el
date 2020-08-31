@@ -42,12 +42,12 @@ TODO: move this to some util module?"
   (insert-line-prefix (concat prefix (iso-date) suffix "\n"))
   (forward-line 1))
 
-(cl-defun mb-org-insert-time (&optional (prefix "** ") (time (now)) (suffix ""))
+(cl-defun mb-org-insert-time (&optional (prefix "** ") (time (now)) (suffix " "))
   "Insert time in mb-org file"
   (interactive)
   (eob t)
-  (insert-line-prefix (format "%s%s%s " prefix (iso-time :time time) suffix))
-  (eob))
+  (insert-line-prefix (format "%s%s%s" prefix (iso-time :time time) suffix))
+  (eol))
 
 (cl-defun mb-org-insert-arrival (&optional (time (add-etime-time (now) :minute -5)))
   "Insert \"Ankomst\" stamp in mb-org file"
@@ -63,4 +63,4 @@ TODO: move this to some util module?"
   (mb-org-insert-time "** " time " Hjem")
   (eob t))
 
-
+(provide 'mb-org)

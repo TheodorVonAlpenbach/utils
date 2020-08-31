@@ -7,6 +7,10 @@
  '(".emacs" ".emacs-local-mats-ThinkPad-P1-Gen-2-linux")
   *simple-swaps* :test #'equal)
 
+;;(cl-pushnew '(("actions.js" "../reducers") ("reducers.js" "../actions"))
+;;	    *smart-swaps*)
+;;(setf *smart-swaps* (remove-nth 0 *smart-swaps*))
+
 (setf *local-requires* '(browse-kill-ring))
 
 ;; Sentences, see info node Sentences
