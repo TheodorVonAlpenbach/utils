@@ -7,6 +7,7 @@
     (dot png)
     (conf sh)
     (cpp h :search 1)
+    (scss js)
     ("Lilypond-compile" ("LilyPond started at .*\n\nlilypond \\(.*\\)$" 1)))
   "TODO: enable :search")
 
