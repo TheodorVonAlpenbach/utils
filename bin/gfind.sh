@@ -1,3 +1,5 @@
+#!/bin/bash
+
 dir=./
 up=0
 extension=*
@@ -48,7 +50,7 @@ echo ${verbose+Verbose mode is on}
 echo ${verbose+Target is \'$target\'}
 echo ${verbose+Extension is \'$extension\'}
 
-if [ -z $target ]; then
+if [ -z "$target" ]; then
     printUsage
     exit 0
 fi
