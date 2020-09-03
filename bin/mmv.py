@@ -4,6 +4,9 @@ import sys, shutil, os.path
 
 def printUsage():
     print("Usage: mmv OLD NEW [FILE] ...") 
+
+def printHelp():
+    printUsage()
     print("Rename all FILEs such that each occurrence of substring OLD is replaced by substring NEW.")
 
 def moveFile(old, new, path):
@@ -16,7 +19,7 @@ def moveFile(old, new, path):
 nargs = len(sys.argv)
 
 if (nargs == 2) and ((sys.argv[1] == "--help") or (sys.argv[1] == "-h")):
-    printUsage()
+    printHelp()
 elif nargs < 3:
     print("mmv: Too few arguments") 
     printUsage()
