@@ -95,6 +95,9 @@ STATE can take the same values as in `evil-define-key'."
     (emacs-lisp-mode
      (insert " "))))
 
+;;; Save on exit insert state ("df")
+(add-hook 'evil-insert-state-exit-hook 'save-buffer)
+
 (require 'key-chord)
 (key-chord-mode 1)
 (key-chord-define evil-insert-state-map "dg" 'evil-move-past-close)
@@ -270,6 +273,7 @@ A simple split consists of two windows only."
   (key-chord-define evil-normal-state-map "vi" insert-map)
   (define-key insert-map "a" #'ls-insert-arrival-time)
   (define-key insert-map "A" #'ls-insert-depature-time)
+  (define-key insert-map "b" #'insert-symbol-bullet)
   (define-key insert-map "c" #'comment-region*)
   (define-key insert-map "d" #'insert-date)
   (define-key insert-map "D" #'(lambda () (interactive) (insert-date-and-time 3)))
