@@ -95,8 +95,14 @@ STATE can take the same values as in `evil-define-key'."
     (emacs-lisp-mode
      (insert " "))))
 
+(defun save-buffer-file ()
+  "Same as `save-buffer', but only if buffer-file exists."
+  (interactive)
+  (when (buffer-file-name)
+    (save-buffer)))
 ;;; Save on exit insert state ("df")
-(add-hook 'evil-insert-state-exit-hook 'save-buffer)
+(add-hook 'evil-insert-state-exit-hook 'save-buffer-file)
+;;(pop evil-insert-state-exit-hook)
 
 (require 'key-chord)
 (key-chord-mode 1)
