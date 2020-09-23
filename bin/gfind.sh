@@ -3,6 +3,7 @@
 dir=./
 up=0
 extension=*
+ignoreCase=
 
 function printUsage {
     echo "Usage: $gfind [OPTION] TARGET [EXTENSION]"
@@ -14,10 +15,11 @@ function printUsage {
     echo "  -E ext      Another way to specify file extension, typically used by alias."
     echo "  -u N        Searches the directory tree N levels up from current directory."
     echo "  -d M        Limit the search to directories M levels below current directory."
+    echo "  -i          Ignore case"
     echo "  -v          Verbose mode"
 }
 
-while getopts "hE:u:d:v" arg; do
+while getopts "hE:u:d:iv" arg; do
     case $arg in
 	h)
 	    printUsage
@@ -31,6 +33,9 @@ while getopts "hE:u:d:v" arg; do
 	    ;;
 	d)
 	    down=$OPTARG
+	    ;;
+	i)
+	    ignoreCase=" -i"
 	    ;;
 	v)
 	    verbose=1
@@ -49,6 +54,7 @@ extension=${2:-$extension}
 echo ${verbose+Verbose mode is on}
 echo ${verbose+Target is \'$target\'}
 echo ${verbose+Extension is \'$extension\'}
+echo ${verbose+ignoreCase is \'$ignoreCase\'}
 
 if [ -z "$target" ]; then
     printUsage
@@ -67,4 +73,4 @@ find "$dir" \
      -type f \
      -name "*.$extension" \
      -print0 \
-    | xargs -0 -r grep -a -i --color=auto -n -s "$target"
+    | xargs -0 -r grep $ignoreCase -a --color=auto -n -s "$target"
