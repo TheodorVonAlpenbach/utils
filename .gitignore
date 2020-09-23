@@ -5,3 +5,4 @@ TAGS
 *workspace
 *.pyc
 *.fasl
+bin/test
