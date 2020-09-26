@@ -17,11 +17,13 @@
   (print-unreadable-object (x stream :type t)
     (prin1 (list :estimate (estimate x) :rd (rd x)) stream)))
 
+;;; Revise these formulas
+;;; Is the 400 below related to the original max rd?
 (defconstant +glicko-q-constant+ (/ (log 10) 400))
 (defconstant +glicko-q-squared+ (sq +glicko-q-constant+))
 (defconstant +glicko-p-constant+ (* 3 (sq (/ +glicko-q-constant+ pi))))
-(defconstant +glicko-max-rd+ 350)
-(defconstant +glicko-rd-restore-time+ 14 "Days")
+(defconstant +glicko-max-rd+ 300)
+(defconstant +glicko-rd-restore-time+ 30 "Days")
 (defconstant +glicko-typical-rd+ 50)
 (defconstant +glicko-c-squared+
   (/ (- (sq +glicko-max-rd+)
@@ -30,7 +32,9 @@
 
 ;;;; Update rating RD after elapsed TIME 
 (defmethod new-rd (rd time)
-  (sqrt (+ (sq rd) (* +glicko-c-squared+ time))))
+  "Unit of TIME is DAYS"
+  (min (sqrt (+ (sq rd) (* +glicko-c-squared+ time)))
+       +glicko-max-rd+))
 
 (defun glicko-g-function (rd)
   "Helper function."

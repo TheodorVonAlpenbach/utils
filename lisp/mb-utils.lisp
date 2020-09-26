@@ -54,7 +54,10 @@
    :nflank :flank :twins
    :deltas
    :replace-nth :nreplace-nth
-   :run-program))
+   :run-program
+   :nrotate-list :rotate-list :rotations
+   :permutations :perm
+))
 
 (in-package :mb-utils)
 
