@@ -377,12 +377,6 @@ Use keywords to specify sequence type. See A-B for details on possible keywords.
     (apply #'a-b 1 n args)))
 ;;(mapcar #'0-n '(-1 0 1 2))
 
-(defun 1-n (n &rest args)
-  "Returns sequence 1...N.
-Use keywords to specify sequence type. See A-B for details on possible keywords."
-  (unless (< n 1) (apply #'a-b 1 n args)))
-;;(mapcar #'1-n '(1 2 3))
-
 (defun abs- (x &optional (n 1))
   "Returns the number N integers closer to zero than X. If |X-N| > 0 the result is undefined."
   (- x (* (signum x) n)))
