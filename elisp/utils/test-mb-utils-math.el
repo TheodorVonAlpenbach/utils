@@ -32,4 +32,21 @@
 		 '(0 1 1 1 1 1 1 1 1 1 2)))
   (should (equal (uint-length (0-n 11)) 2)))
 
+(ert-deftest test-L-sum ()
+  "Test of `L-sum'"
+ (should (equal (L-sum ) nil)))
+
+(ert-deftest test-cumsum ()
+  "Test of `cumsum'"
+ (should (equal (cumsum (0-n 3)) '(0 1 3)))
+ (should (equal (cumsum (0-n 3) :initial-value 2) '(2 3 5)))
+ (should (equal (cumsum (1-n 3) :key #'* :initial-value 1) '(1 2 6)))
+ (should (equal (cumsum (coerce (0-n 3) 'vector)) [0 1 3])))
+
+(ert-deftest test-sum ()
+  "Test of `sum'"
+  (should (equal (sum '(1 2 3 4) :start 1 :initial-value 1) 10))
+  (should (equal (sum '(1 2 3 4) :operator #'+ :start 1 :initial-value 1) 10))
+  (should (equal (sum '(1 2 3 4) :operator #'* :start 1 :initial-value 1) 24)))
+
 (provide 'test-mb-utils-math)

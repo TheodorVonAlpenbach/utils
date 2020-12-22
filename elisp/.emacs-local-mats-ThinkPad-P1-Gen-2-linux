@@ -56,7 +56,8 @@ sudo mount -a.")
 	(,+mb-lisp-dir+ "global/mb-indent.el")
 	(,+mb-lisp-dir+ "mode-extensions/mb-lisp.el")
 	(,+mb-lisp-dir+ "mode-extensions/mb-evil.el")
-	
+	(,+mb-lisp-dir+ "external/curl.el")
+
 	(,+mb-utils-dir+ "lisp/mb-utils.lisp")
 
 	(,+cygwin-home+ "doc/personer.org" :point :end :keyboard :no)

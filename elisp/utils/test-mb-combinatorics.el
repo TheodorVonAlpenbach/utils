@@ -16,4 +16,14 @@
   (should (equal (mapcar #'catalan-nth (0-n 10))
 		 '(1 1 2 5 14 42 132 429 1430 4862))))
 
+(ert-deftest test-aliquot-sum ()
+  "Test of `aliquot-sum'"
+  (should (equal (mapcar #'aliquot-sum (1-n 10)) '(0 1 1 3 1 6 1 7 4 8)))
+  (should (equal (mapcar #'aliquot-sum '(1 6 28 220 284)) '(0 6 28 284 220))))
+
+(ert-deftest test-derangement ()
+  "Test of `derangement'"
+  (should (equal (mapcar #'derangement (0-n 11))
+		 '(1 0 1 2 9 44 265 1854 14833 133496 1334961))))
+
 (provide 'test-mb-combinatorics)

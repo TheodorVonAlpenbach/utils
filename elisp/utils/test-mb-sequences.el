@@ -134,11 +134,8 @@
  (should (equal (split-if #'oddp '(1 2 3 4 5)) '(nil (1 2) (3 4) (5))))
  (should (equal (split-if (bind #'equal ?a) "babab") '("b" "ab" "ab"))))
 
-(ert-deftest test-cumsum ()
-  "Test of `cumsum'"
- (should (equal (cumsum (0-n 3)) '(0 1 3)))
- (should (equal (cumsum (0-n 3) :initial-value 2) '(2 3 5)))
- (should (equal (cumsum (1-n 3) :key #'* :initial-value 1) '(1 2 6)))
- (should (equal (cumsum (coerce (0-n 3) 'vector)) [0 1 3])))
+(ert-deftest test-type-of-super ()
+  "Test of `type-of-super'"
+ (should (equal (type-of-super '(1 2 3)) 'list)))
 
 (provide 'test-mb-sequences)

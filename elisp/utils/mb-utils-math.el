@@ -1,23 +1,3 @@
-(defun sec (x) (/ 1 (cos x)))
-(defun scs (x) (/ 1 (sin x)))
-(defun sinh (x) (/ (- (exp x) (exp (- x))) 2))
-(defun cosh (x) (/ (+ (exp x) (exp (- x))) 2))
-(defun tanh (x) (let ((y (exp (* 2 x)))) (/ (1- y) (1+ y))))
-;;(+ (sinh pi) (cosh pi) (- (exp pi)))
-;;(- (tanh 1) (/ (sinh 1) (cosh 1)))
-
-(defmacro define-degree-trigonometry (fns)
-  `(let ((c ,(/ pi 180.0)))
-     ,@(loop for fn in fns
-	     collect `(defun ,(intern (concat (sstring fn) "d")) (d)
-			(,fn (* degrees-to-radians d)))
-	     collect `(defun ,(intern (concat "a" (sstring fn) "d")) (r)
-			(* radians-to-degrees
-			   (,(intern (concat "a" (sstring fn))) r))))))
-(define-degree-trigonometry (cos sin tan sec scs))
-;;(loop for fn in '(sind cosd tand) collect (funcall fn 45))
-;;(list (asind 0.5) (acosd 0.5) (atand 1))
-
 (defun sq (x) (* x x))
 
 (defun between= (x a b)
@@ -28,6 +8,50 @@
   "Returns t iff x and y are identical modulo n"
   (= (mod a n) (mod b n)))
 ;;(modp 3 6 4)
+
+(cl-defun sum (sequence &rest cl-keys)
+  "Sum all elements in SEQUENCE.
+Keywords supported: :operator :start :end :from-end
+:initial-value :key. Default value for :operator is #'+. See
+`reduce' for a description of the other keywords"
+  (let ((op (or (plist-pop cl-keys :operator) #'+)))
+    (apply #'reduce op sequence cl-keys)))
+;;(sum '(1 2 3 4) :operator #'* :start 1 :initial-value 1)
+;;(sum '(1 2 3))
+
+(cl-defun Ln-sum (sequence order &rest cl-keys)
+  "Return the Ln-sum of order ORDER for SEQUENCE. 
+See `sum' for a descriptions of the keywords."
+  (apply #'sum (mapcar (bind #'expt order) sequence) cl-keys))
+;;(L-sum '(1 2 3) 2)
+
+(cl-defun Ln-norm (sequence order &rest cl-keys)
+  "Return the Ln-norm of order ORDER for SEQUENCE.
+See `sum' for a descriptions of the keywords."
+  (expt (apply #'Ln-sum sequence order cl-keys)
+	(/ 1.0 order)))
+;;(Ln-norm '(3 4) 2)
+
+(cl-defun cumsum-list (list &optional (key #'+) (initial-value 0))
+  "Return the cumulative sum of LIST.
+Optional argument KEY specifies the operator and INITIAL-VALUE
+the start value for the cumulation."
+  (loop for x in list collect (setf initial-value (funcall key initial-value x))))
+;;(cumsum-list (0-n 3))
+
+(cl-defun cumsum (sequence &key (key #'+) (initial-value 0))
+  "Return the cumulative sum of SEQUENCE.
+For the key arguments, see `cumsum-list'."
+  (as-list (l sequence) (cumsum-list l key initial-value)))
+;;(cumsum (coerce (0-n 3) 'vector))
+
+(cl-defun product (sequence &rest cl-keys)
+  (apply #'reduce #'* sequence cl-keys))
+;;(product '(1 2 3) :start 1 :initial-value 2)
+
+(cl-defun product-a-b (a b)
+  (product (a-b a b)))
+;;(product-a-b 1 4)
 
 (defmacro avg (&rest args)
   `(/ (+ ,@args) ,(length args)))
@@ -409,6 +433,10 @@ See `cycle-badness' for the measure of a good cycle."
 ;(/ 180 36)
 ;(apply #'* (factorize 1047300))
 ;(/ 288 36)
+
+(defun all-factors (n)
+  (cl-sort (remove-duplicates (mapcar #'product (power-set (factorize n)))) #'<))
+;;(all-factors 284)
 
 (cl-defun test-factorize (n)
   "Tests factorize for first N integers"

@@ -224,6 +224,8 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 	 ("\\.pdmkroot$" . makefile-mode)
 	 ("Makefile$" . makefile-mode)
 	 ("\\.pro$" . makefile-mode)
+	 ("\\.\\(avsc\\|json\\)$" . json-mode)
+	 ("\\.sql$" . sql-mode)
 	 ("\\.bmp$" . hexl-mode)
 	 ("\\.mf$" . metafont-mode)
 	 ("\\.dvi$" . doc-view-mode)

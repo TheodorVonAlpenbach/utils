@@ -175,6 +175,19 @@ TODO: implement a mapping key, see `pairs' (when needed)"
 	collect (butlast h i)))
 ;;(tuples '(a b c d e) 3)
 
+(defun power-set-indices (n)
+  "Return the indices corresponding to a power set for at set with N elements"
+  (if (zerop n)
+    '(())
+    (let ((psi-1 (power-set-indices (1- n))))
+      (append psi-1 (mapcar (bind #'rcons (1- n)) psi-1)))))
+;;(length (power-set-indices 4))
+
+(defun power-set (list)
+  "Return the set of all subsets of list taken as a set."
+  (maptree (bind #'nth list) (power-set-indices (length list))))
+;;(power-set '(a b c))
+
 (cl-defun cut (list &optional (n 2) (include-remainer nil))
   "Cuts LIST into sublists of length N while preserving order.
 If INCLUDE-REMAINER is nil and last element in the result list

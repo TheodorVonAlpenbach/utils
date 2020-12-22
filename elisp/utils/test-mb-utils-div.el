@@ -102,4 +102,19 @@
 ;;     (push (not b) res)))
 ;;(mb-test-notf)
 
+(ert-deftest test-plist-delete ()
+  "Test of `plist-delete'"
+ (should (equal (plist-delete '(:qwe qwe :ewq ewq) :ewq) '(:qwe qwe)))
+ (should (equal (plist-delete '(:qwe qwe :ewq ewq) :qwe) '(:ewq ewq)))
+ (should (equal (plist-delete '(:qwe qwe :ewq ewq :asd asd) :ewq) '(:qwe qwe :asd asd))))
+
+(ert-deftest test-plist-pop ()
+  "Test of `plist-pop'"
+  (should (equal (let ((plist '(:qwe 1 :ewq 2)))
+		   (list (plist-pop plist :ewq) plist))
+		 '(2 (:qwe 1))))
+  (should (equal (let ((plist '(:qwe 1 :ewq 2)))
+		   (list (plist-pop plist :qwe) plist))
+		 '(1 (:ewq 2)))))
+
 (provide 'test-mb-utils-div)

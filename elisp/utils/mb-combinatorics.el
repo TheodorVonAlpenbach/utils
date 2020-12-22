@@ -1,3 +1,5 @@
+(require 'mb-utils-math)
+
 (cl-defun factorial (n &optional (m 1))
   "Returns N!. See also `derangement'"
   (cond
@@ -48,6 +50,23 @@ resulting sequence."
   "Weak version, cannot deal with Ns and Ms greater than ~ 11"
   (/ (factorial n (1+ m)) (factorial (- n m))))
 ;;(binomial-coefficient-simple 10 4)
+
+(defun simplify-ratio (ratio)
+  (mapcar (bind #'/ (apply #'gcd ratio)) ratio))
+;;(simplify-ratio '(6 10))
+
+(cl-defun divisor-function (n &optional (order 1))
+  (Ln-sum (all-factors n) order))
+;;(divisor-function 220)
+;;(divisor-function 284)
+
+(defun aliquot-sum (n)
+  (- (divisor-function n 1) n))
+;;(mapcar #'aliquot-sum (1-n 10))
+
+(defun abundancy-index (n)
+  (simplify-ratio (list (sum (all-factors n)) n)))
+;;(mapcar #'abundancy-index '(220 284 30))
 
 (defun remove-factors (factors divisor)
   "Removes all factors in FACTORS that are also factors in DIVISOR"

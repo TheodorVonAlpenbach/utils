@@ -1,28 +1,3 @@
-(cl-defun sum (sequence &rest cl-keys)
-  (apply #'reduce #'+ sequence cl-keys))
-;;(sum '(1 2 3) :start 1 :initial-value 123)
-
-(cl-defun cumsum-list (list &optional (key #'+) (initial-value 0))
-  "Return the cumulative sum of LIST.
-Optional argument KEY specifies the operator and INITIAL-VALUE
-the start value for the cumulation."
-  (loop for x in list collect (setf initial-value (funcall key initial-value x))))
-;;(cumsum-list (0-n 3))
-
-(cl-defun cumsum (sequence &key (key #'+) (initial-value 0))
-  "Return the cumulative sum of SEQUENCE.
-For the key arguments, see `cumsum-list'."
-  (as-list (l sequence) (cumsum-list l key initial-value)))
-;;(cumsum (coerce (0-n 3) 'vector))
-
-(cl-defun product (sequence &rest cl-keys)
-  (apply #'reduce #'* sequence cl-keys))
-;;(product '(1 2 3) :start 1 :initial-value 2)
-
-(cl-defun product-a-b (a b)
-  (product (a-b a b)))
-;;(product-a-b 1 4)
-
 (defun type-of-super (sequence)
   (typecase sequence
     (cons 'list)

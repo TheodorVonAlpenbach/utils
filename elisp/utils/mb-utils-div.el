@@ -730,4 +730,37 @@ Otherwise return x"
     (funcall function x)
     x))
 
+;;; PLIST utils
+(defun plist-position (plist prop)
+  "Return the property position of PROP in PLIST.
+The position includes both property symbol and value."
+  (loop for pos from 0
+	for (property value) = (pop-list plist 2)
+	if (eq property prop) return pos
+	while plist))
+;;(plist-position '(:qwe qwe :ewq ewq) :ewq)
+
+(defun plist-delete (plist prop)
+  "Delete property PROP from PLIST. Destructive."
+  (let ((pos (plist-position plist prop)))
+    (and pos
+	 (if (zerop pos)
+	   (cddr plist)
+	   (let ((last (nthcdr (1- (* 2 pos)) plist)))
+	     (setf (cdr last) (cdddr last))
+	     plist)))))
+;;(plist-delete '(:qwe qwe :ewq ewq) :ewq)
+
+(defun plist-remove (plist prop)
+  "Remove property PROP from PLIST."
+  (plist-delete (copy-list plist) prop))
+;;(plist-remove '(:qwe qwe :ewq ewq) :ewq)
+
+(defmacro plist-pop (plist prop)
+  "Pops property PROP from PLIST and return its value.
+Return nil if PROP does not exist."
+  `(awhen (plist-get ,plist ,prop)
+     (setf ,plist (plist-delete ,plist ,prop))
+     it))
+
 (provide 'mb-utils-div)
