@@ -66,30 +66,23 @@
 (setf *my-favorites*
       `((,+mb-lisp-dir+ ".emacs")
 	(,+mb-lisp-dir+ "utils/mb-utils-strings.el")
-	(,+mb-lisp-dir+ "utils/mb-utils-buffer.el")
-	(,+mb-lisp-dir+ "utils/mb-utils-time.el")
-	(,+mb-lisp-dir+ "utils/mb-sequences.el")
 	(,+mb-lisp-dir+ "global/mb-indent.el")
-	(,+mb-lisp-dir+ "external/scilab/mbscilab.el")
 	(,+mb-lisp-dir+ "mode-extensions/mb-evil.el")
 	(,+mb-lisp-dir+ "mode-extensions/mb-lisp.el")
-	(,+mb-lisp-dir+ "mode-extensions/mb-octave.el")
-	(,+mb-lisp-dir+ "mode-extensions/mb-tex.el")
 	(,+mb-lisp-dir+ "quiz/quiz-park.el")
 
 	;; Common Lisp utils
 	(,+home-dir+ "projects/utils/lisp/topology/shapes.lisp")
+	(,+home-dir+ "projects/quiz/ferskvare" :point :end :keyboard :no :read-only :none)
 	(,+home-dir+ "data/small-arbeidslog" :point :end :keyboard :no
 		     :time-paragraphs t)
 
 	;; remote files (shared with windows)
-	(,pf-dir "init.lisp")
 	(,pf-dir "progfab/log.org")
 
 	;; Note special treatment of arbeidslog in mb-insert-state-init!
 	(,pfdoc-dir "arbeidslog" :point :end :keyboard :no :time-paragraphs t)
 	(,pfdoc-dir "adresser.txt" :keyboard :no)
-	(,pfdoc-dir "ferskvare" :keyboard :no :point :end)
 	(,pfdoc-dir "howto.org")
 
 	;; Problem Server files
