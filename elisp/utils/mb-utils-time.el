@@ -381,35 +381,12 @@ If UNIVERSAL is not nil, return the `next-midnight' in UTC."
 ;;(next-midnight (parse-time "2018-03-25"))
 ;;(midnight (parse-time "2018-03-26"))
 
-(defun weekday-number (weekday-designator)
-  "Return the weekday number corresponding to WEEKDAY-DESIGNATOR.
-Possible values of WEEKDAY-DESIGNATOR
-are :SUNDAY, :MONDAY, :TUESDAY, :WEDNESDAY,:THURSDAY, :FRIDAY,
-and :SATURDAY."
-  (position weekday-designator '(:sunday :monday :tuesday :wednesday
-				 :thursday :friday :saturday)))
-
-(cl-defun weekstart (&optional (etime (now)) (start-weekday :monday))
-  "Return encoded time of the start of the week ETIME is in.
-ETIME must be an encoded time object, see `encode-time'. Default
-is current time. A second optional parameter defines the start
-day of the week."
-  (let ((dtime (decode-time etime)))
-    (midnight (--time-encode
-		(--add-ddate dtime
-			     :day (- (mod (- (dtime-day-of-week dtime)
-					     (weekday-number start-weekday))
-					  7)))))))
-;;(iso-dttm (weekstart (parse-time "2018-10-28T03:00")))
-;;(iso-dttm (weekstart (now) :sunday))
-
 (defun yearstart (&optional etime)
   (--time-encode (without-tz-modification (dtime (decode-time etime))
+		   (message "%S" (subseq dtime 5))
+		   (message "%S" dtime)
 		   (append '(0 0 0 1 1) (subseq dtime 5)))))
 ;;(iso-dttm (yearstart (parse-time "1972-01-06")))
-;;(iso-dttm (yearstart (parse-time "1973-01-06")))
-;;(iso-dttm (yearstart (parse-time "2018-01-06")))
-;;(iso-dttm (yearstart))
 
 (defun yearend (&optional etime)
   (add-etime-time (yearstart etime) :second -1))
@@ -432,6 +409,41 @@ of the week."
 ;;(iso-dttm (--time-encode (clean-dtime (decode-time (parse-time "1972-01-06")))))
 ;;(iso-dttm (monthstart (parse-time "2018-03-31")))
 
+(defun weekday-number (weekday-designator)
+  "Return the weekday number corresponding to WEEKDAY-DESIGNATOR.
+Possible values of WEEKDAY-DESIGNATOR
+are :SUNDAY, :MONDAY, :TUESDAY, :WEDNESDAY,:THURSDAY, :FRIDAY,
+and :SATURDAY."
+  (position weekday-designator '(:sunday :monday :tuesday :wednesday
+				 :thursday :friday :saturday)))
+
+(cl-defun weekstart (&optional (etime (now)) (start-weekday :monday))
+  "Return encoded time of the start of the week ETIME is in.
+ETIME must be an encoded time object, see `encode-time'. Default
+is current time. A second optional parameter defines the start
+day of the week."
+  (let ((dtime (decode-time etime)))
+    (midnight (--time-encode
+		(--add-ddate dtime
+			     :day (- (mod (- (dtime-day-of-week dtime)
+					     (weekday-number start-weekday))
+					  7)))))))
+;;(iso-dttm (weekstart (now) :sunday))
+
+(defun daystart (&optional etime)
+  (--time-encode (without-tz-modification (dtime (decode-time etime))
+		   (append '(0 0 0) (subseq dtime 3)))))
+;;(iso-dttm (daystart (parse-time "1972-01-06")))
+
+(defun hourstart (&optional etime)
+  (--time-encode (without-tz-modification (dtime (decode-time etime))
+		   (append '(0 0) (subseq dtime 2)))))
+;;(iso-dttm (hourstart (parse-time "1972-01-06T08:15")))
+
+(defun minutestart (&optional etime)
+  (--time-encode (without-tz-modification (dtime (decode-time etime))
+		   (append '(0) (subseq dtime 1)))))
+;;(iso-dttm (minutestart (parse-time "1972-01-06T08:15:17")))
 
 ;; Other utils
 (defun etime< (encoded-time1 encoded-time2)
