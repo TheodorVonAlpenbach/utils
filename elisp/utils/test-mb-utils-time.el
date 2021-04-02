@@ -355,4 +355,9 @@
   (should (within-period-p (now) (today)))
   (should-not (within-period-p (now) (tomorrow))))
 
+(ert-deftest test-daystart ()
+  "Test of `daystart'"
+  (should (equal (iso-dttm (daystart (parse-time "1972-01-06")))
+		 "1972-01-06T00:00:00CET")))
+
 (provide 'test-mb-utils-time.el)
