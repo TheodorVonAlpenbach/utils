@@ -1,3 +1,5 @@
+(require 'mb-lists)
+
 (defun sq (x) (* x x))
 
 (defun between= (x a b)
@@ -705,8 +707,6 @@ http://en.wikipedia.org/wiki/Geographical_distance#Lambert.27s_formulae"
 ;;(geo-distance '(90.0 0.0) '(0.0 0.0))
 ;;(geo-distance '(59.925536 10.759177) '(59.925555 10.76113))
 
-(provide 'mb-utils-math)
-
 (cl-defun generate-addends-fixed (n k)
   "Returns a LIST of K numbers that adds to N, and so that the
 numbers are `almost' equal (ie. (- (max LIST) (min LIST)) is
@@ -1078,10 +1078,12 @@ TODO: move this to some yamal elisp module."
 
 (cl-defun volume-ellipsoid (r1 &optional (r2 r1) (r3 r2))
   (/ (* 4 pi r1 r2 r3) 3))
-;; Volume Himalia
+;; Volume Himalia (Jupiter moon)
 ;;(volume-ellipsoid (/ 170 2))                     2572440.7845144426
-;; Volume Amalthea as an ellipsoid
+;; Volume Amalthea (Jupiter moon) as an ellipsoid
 ;;(volume-ellipsoid (/ 250 2) (/ 146 2) (/ 128 2)) 2446253.479595252
 ;; Volume Amalthea as a prism
 ;;(* 250 146 128)                                  4672000
 ;; Volume Amalthea according to Wikipedia          2430000 (assuming that it is a true ellipsoid?)
+
+(provide 'mb-utils-math)
