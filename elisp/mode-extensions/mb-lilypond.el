@@ -1,3 +1,5 @@
+(require 'LilyPond-mode)
+
 (defun current-filename ()
   (buffer-file-name (current-buffer)))
 ;;(current-filename)
@@ -98,3 +100,5 @@ command."
 	       
 	       (if (string-equal job-string "no jobs")
 		 (LilyPond-compile-file command name))))))))
+
+(provide 'mb-lilypond)
