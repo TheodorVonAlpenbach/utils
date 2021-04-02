@@ -140,7 +140,5 @@ ORIENTATION is either :vertical or :horizontal"
 			     :margin-squares cbs-margins)))
 ;;(cbb-new '(A B C D E F G H) (make-chess-board-square :size '(9 1) :color "brown") '(0 0) :horizontal)
 
-
-
 (provide 'chess-board)
 

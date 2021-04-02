@@ -128,3 +128,5 @@
 	 (cb (cp-board cp))) 
     (actual-range piece cb)))
 ;;(cm-range-print (test-actual-range (new-chess-piece "a2" 'white)))
+
+(provide 'sranges)

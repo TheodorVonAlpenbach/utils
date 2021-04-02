@@ -35,3 +35,5 @@ buffer with name `chess-buffer-name' if no such buffer is already existing.
 
 (defconst chess-mode-map () "Keymap used in chess mode."
   )
+
+(provide 'chess-mode)

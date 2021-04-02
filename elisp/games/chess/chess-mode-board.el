@@ -79,7 +79,7 @@
 (defun chess-board-square-dark-p (square-description)
   (evenp (snumber square-description)))
 
-<(defun* chess-board-insert-colored-string (string square face &optional (start-pos 1))
+(defun* chess-board-insert-colored-string (string square face &optional (start-pos 1))
   (let ((s (propertize string 'face face))
 	(rc (chess-board-square-center (esquare square))))
     (save-excursion

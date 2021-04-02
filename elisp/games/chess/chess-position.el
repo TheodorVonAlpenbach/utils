@@ -1,3 +1,6 @@
+(require 'chess-side)
+(require 'sranges)
+
 ;;; Chess Position
 (defstruct (chess-position
 	    (:conc-name cp-))
@@ -20,18 +23,20 @@
 
 (defun cp-last-move (cp) (first (cp-history cp)))
 
+(defun cp-side (cp white-p)
+  (if white-p (cp-white cp) (cp-black cp)))
+
 (defun cp-remove-piece (cp piece)
-  (cs-remove-piece (if (eq (chess-piece-side piece) 'white) 
-		     (cp-white cp) (cp-black cp))
-		   piece))
+  (cs-remove-piece
+   (cp-side cp (eq (chess-piece-side piece) 'white))
+   piece))
 
 (defun cp-white-to-move-p (chess-position)
   (evenp (length (cp-history chess-position))))
 ;;(cp-white-to-move-p (cp-new))
 
 (defun cp-side-to-move (cp)
-  (if (cp-white-to-move-p cp)
-    (cp-white cp) (cp-black cp)))
+  (cp-side cp (cp-white-to-move-p cp)))
 ;;(cp-side-to-move (cp-new))
 
 (defun* cp-print-ply (cp &optional (n 0) first-move-p)

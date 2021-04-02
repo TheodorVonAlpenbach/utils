@@ -1,4 +1,5 @@
 (require 'position)
+(require 'chess-piece)
 
 (defun make-sboard (pieces)
   (let ((sboard (make-vector 64 nil)))
@@ -9,6 +10,7 @@
 
 (defun sb-default ()
   (make-sboard all-pieces))
+;;(sb-default)
 
 ;;some board utils
 (defun sb-set (cb snumber x)

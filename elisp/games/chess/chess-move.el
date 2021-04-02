@@ -17,8 +17,9 @@
   (let ((piece (sb-get cb from))
 	(capture (sb-get cb to)))
     (unless 
-	(or (and capture (eq (chess-piece-side piece) ;cannot capture own piece
-			     (chess-piece-side capture)))
+	(or (and piece capture
+		 (eq (chess-piece-side piece) ;cannot capture own piece
+		     (chess-piece-side capture)))
 	    (and (eq (chess-piece-type piece) 'pawn)
 		 ;; destination can't be blocked
 		 (or (sb-get cb to))
@@ -42,19 +43,12 @@
 
 (defun cm-new-pawn (cb from to)
   "Special constructor for pawn move"
-  (let ((cm (cm-new cb from to)))
-    (if cm
+  (awhen (cm-new cb from to)
+    (let ((same-column-p (snumber-on-same-column-p from to)))
       (if (cm-capture cm)
-	(if (snumber-on-same-column-p from to)
-	  nil
-	  cm)
-	;;not capture
-	(if (not (snumber-on-same-column-p from to))
-	  nil
-	  ;; can't jump
-	  (if (cm-pawn-jump-p cm)
-	    nil
-	    cm))))))
+       (unless same-column-p it)
+       (when same-column-p
+	 (unless (cm-pawn-jump-p it) it))))))
 
 (defun cm-new-promotions (cm)
   "Returns a list of (four) moves involving promotion.
@@ -94,8 +88,10 @@ Assumes that the move is legal"
   "Optional argument and STYLE is currently unsupported.
 Assumes move has been executed "
   (chess-piece-print (cm-piece cm) first-move-p nil))
+;;(cm-to-string (parse-chess-move "Nb1"))
 
 (defun cm-range-print (cms)
   (print-board-positions (mapcar #'cm-to cms)))
 
 (provide 'chess-move)
+

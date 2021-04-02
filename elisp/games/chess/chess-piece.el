@@ -3,8 +3,8 @@
 (defstruct (chess-piece
 	    (:constructor nil)
 	    (:constructor make-chess-piece (type side snumber)))
-  (type :read-only t)
-  (side :read-only t)
+  (type nil :read-only t)
+  (side nil :read-only t)
   snumber)
 
 (defun parse-chess-move (string)
@@ -64,9 +64,11 @@
 (defconst all-pieces (append white-pieces black-pieces))
 
 ;;simple conversions
-(defun piece-to-bposition (piece) (bp-from-snumber (chess-piece-snumber piece)))
 (defun pieces-to-snumbers (pieces) (mapcar #'chess-piece-snumber pieces))
-(defun pieces-to-bposition (pieces) (bp-from-snumbers (pieces-to-snumbers pieces)))
+
+;; Obsolete? comment now, TODO: remove later
+;; (defun piece-to-bposition (piece) (bp-from-snumber (chess-piece-snumber piece)))
+;; (defun pieces-to-bposition (pieces) (bp-from-snumbers (pieces-to-snumbers pieces)))
 
 (defun pieces-to-board-matrix (pieces)
   (let ((bm (make-board-matrix)))

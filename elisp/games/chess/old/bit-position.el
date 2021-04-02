@@ -1,3 +1,5 @@
+(require 'chess-square)
+
 ;;; Bit position
 (defun bp-from-snumber (snumber)
   (if (< snumber 28)
@@ -11,7 +13,7 @@
 
 (defun bp (square-description)
   (bp-from-snumber (snumber square-description)))
-;;(bp nil)
+;;(bp "a4")
 
 (defun bp-add (&rest bit-positions)
   (if bit-positions
@@ -47,3 +49,4 @@
 (defun bp-print (bp)
   (print-board-positions (bp-to-snumbers bp)))
 
+(provide 'bit-position)

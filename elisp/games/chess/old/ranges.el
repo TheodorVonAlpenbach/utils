@@ -8,8 +8,19 @@
 	append (mapcar (bind #'square-rotate90 i) template)))
 ;;(template-from-skeleton ne-template)
 
-(defconst knight-ranges (bp-range-vector (template-from-skeleton knight-template)))
-(defconst king-ranges (bp-range-vector (template-from-skeleton king-template)))
+(defun range-from-square (square template)
+  (remove nil (remove-duplicates (mapcar (bind #'square-translate square) template))))
+;;(range-from-square '(7 0) ne-template)
+;;(print-board-squares (let ((x '(1 1))) x (range-from-square x ne-template)))
+
+(defun bp-range-vector (range-template &optional include-start-square)
+  "Generate 64-element vector of every range on the board"
+  (apply #'vector
+	 (loop with squares = (if include-start-square
+				(cons '(0 0) range-template)
+				range-template)
+	       for i below (* 8 8) collect (bps (range-from-square (square i) squares)))))
+;;(print-board-positions (bp-to-snumbers (aref (bp-range-vector ne-template t) 0)))
 
 ;;; For long distance pieces 
 (defconst ne-template (loop for i from 1 below 8 collect (make-square i i)))
@@ -21,19 +32,6 @@
 (defconst n-template (mapcar (bind #'square-rotate90 1) e-template))
 (defconst w-template (mapcar (bind #'square-rotate90 2) e-template))
 (defconst s-template (mapcar (bind #'square-rotate90 3) e-template))
-
-(defun range-from-square (square template)
-  (remove nil (remove-duplicates (mapcar (bind #'square-translate square) template))))
-;;(range-from-square '(7 0) ne-template)
-;;(print-board-squares (let ((x '(1 1))) x (range-from-square x ne-template)))
-
-(defun bp-range-vector (range-template &optional include-start-square)
-  (apply #'vector
-	 (loop with squares = (if include-start-square
-				(cons '(0 0) range-template)
-				range-template)
-	       for i below (* 8 8) collect (bps (range-from-square (square i) squares)))))
-;;(print-board-positions (bp-to-snumbers (aref (bp-range-vector ne-template t) 0)))
 
 ;;Diagonal ranges without and with start square (snumber)
 (defconst ne-ranges (list (bp-range-vector ne-template) (bp-range-vector ne-template t)))
@@ -47,6 +45,8 @@
 (defconst w-ranges (list (bp-range-vector w-template) (bp-range-vector w-template t)))
 (defconst s-ranges (list (bp-range-vector s-template) (bp-range-vector s-template t)))
 
+(defconst knight-ranges (bp-range-vector (template-from-skeleton knight-skeleton)))
+(defconst king-ranges (bp-range-vector (template-from-skeleton king-template)))
 (defconst bishop-ranges (list ne-ranges nw-ranges sw-ranges se-ranges))
 (defconst rook-ranges (list e-ranges n-ranges w-ranges s-ranges))
 (defconst queen-ranges (append bishop-ranges rook-ranges))
@@ -74,7 +74,7 @@
 ;; Bit positions? What a waste of time!!
 ;; «Premature optimization is the root of all evil»
 
-;; Don't use pb. Use snumbers instead
+;; Don't use bp. Use snumbers instead
 
 ;; (loop for sn in range
 ;;       for x = (board-ref board sn)
