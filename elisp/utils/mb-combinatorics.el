@@ -64,6 +64,10 @@ resulting sequence."
   (- (divisor-function n 1) n))
 ;;(mapcar #'aliquot-sum (1-n 10))
 
+(defun amicable-numbers-p (x y)
+  (= (divisor-function x) (divisor-function y)))
+;;(amicable-numbers-p 220 284)
+
 (defun abundancy-index (n)
   (simplify-ratio (list (sum (all-factors n)) n)))
 ;;(mapcar #'abundancy-index '(220 284 30))
@@ -196,5 +200,22 @@ where MATCH is formed fro"
 		       groups))
 ;;(setf res (uefa-possible-draws-main))
 ;;(count t (flatten res))
+
+(cl-defun rummy-hands (&optional (players 2) (cards (if (< players 5) 10 6)) (deck 52))
+  "Return the number of possible initial rummy hands,
+given PLAYERS number of players each having HANDS initial hands.
+The function is inspired by the film 'The Midnight Sky' where XXX
+claims there are over 60 billions initial rummy hands. Since the
+scene where this quote occurs involves two players, we assume
+PLAYERS is 2 and CARDS is !0.
+
+This assertion seems wrong given the Wikipedia definition of
+standard rummy."
+  (assert (<= (* players cards) deck) t "Too many players or cards!")
+  (/ (product (loop for n below players
+		    collect (binomial-coefficient deck cards)
+		    do (decf deck cards)))
+     (n! players)))
+;;(rummy-hands 2)
 
 (provide 'mb-combinatorics)
