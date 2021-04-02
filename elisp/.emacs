@@ -197,6 +197,7 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 		 ;; The regexp masks the '.' and '..' files
 		 (expand-file-name ".emacs.d/elpa" +home-dir+) t ".*[^.]")
 		(list
+		 (expand-file-name "games/chess" +mb-lisp-dir+)
 		 (expand-file-name "games/cube" +mb-lisp-dir+)
 		 (expand-file-name "games/maths" +mb-lisp-dir+)
 		 (expand-file-name "games/cram" +mb-lisp-dir+)
@@ -298,7 +299,7 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 ;; autoload?
 (loop for m in (append '(global-map
 			 mb-utils-io
-			 mb-evil
+			 mb-evil-map
 			 mb-things
 			 radio-playlists
 			 mb-lisp
