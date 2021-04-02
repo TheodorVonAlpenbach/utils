@@ -62,37 +62,41 @@
   (when (file-exists-p fn)
     (delete-file fn)))
 
+(autoload 'LilyPond-mode "lilypond-mode" "Major mode for editing BNF definitions." t)
+
 ;;(find-file "/ssh:ssh:~/doc/LS-notes.org")
 (setf *my-favorites*
       `((,+mb-lisp-dir+ ".emacs")
 	(,+mb-lisp-dir+ "utils/mb-utils-strings.el")
 	(,+mb-lisp-dir+ "global/mb-indent.el")
 	(,+mb-lisp-dir+ "mode-extensions/mb-evil.el")
+	(,+mb-lisp-dir+ "mode-extensions/mb-evil-map.el")
 	(,+mb-lisp-dir+ "mode-extensions/mb-lisp.el")
 	(,+mb-lisp-dir+ "quiz/quiz-park.el")
 
 	;; Common Lisp utils
-	(,+home-dir+ "projects/utils/lisp/topology/shapes.lisp")
+	(,+home-dir+ "git/utils/lisp/topology/shapes.lisp")
 	(,+home-dir+ "projects/quiz/ferskvare" :point :end :keyboard :no :read-only :none)
-	(,+home-dir+ "data/small-arbeidslog" :point :end :keyboard :no
+	(,+home-dir+ "data/small-arbeidslog.org" :point :end :keyboard :no
 		     :time-paragraphs t)
 
 	;; remote files (shared with windows)
 	(,pf-dir "progfab/log.org")
 
 	;; Note special treatment of arbeidslog in mb-insert-state-init!
-	(,pfdoc-dir "arbeidslog" :point :end :keyboard :no :time-paragraphs t)
-	(,pfdoc-dir "adresser.txt" :keyboard :no)
-	(,pfdoc-dir "howto.org")
+	;; (,pfdoc-dir "arbeidslog" :point :end :keyboard :no :time-paragraphs t)
+	;; (,pfdoc-dir "adresser.txt" :keyboard :no)
+	;; (,pfdoc-dir "howto.org")
 
-	;; Problem Server files
-	(,pfps-dir "problem-server.lisp")
-	(,pfps-dir "problem-server.asd")
-	(,pfps-dir "problem-server-dispatch.lisp")
-	(,pfps-dir "problem-db-ui.lisp")
+	;; ;; Problem Server files
+	;; (,pfps-dir "problem-server.lisp")
+	;; (,pfps-dir "problem-server.asd")
+	;; (,pfps-dir "problem-server-dispatch.lisp")
+	;; (,pfps-dir "problem-db-ui.lisp")
 
-	(,pf-dir "git/tuning/tuning.lisp")
-	(,pf-dir "git/tuning/js/tuning.js")))
+	;; (,pf-dir "git/tuning/tuning.lisp")
+	;; (,pf-dir "git/tuning/js/tuning.js")
+	))
 ;;(find-file "/ssh:pf:~/init.lisp")
 ;;(find-file "/ssh:ssh:~/doc/arbeidslog")
 
@@ -101,4 +105,4 @@
 
 ;; lisp
 ;; (setf inferior-lisp-program "clisp")
-(setf inferior-lisp-program "sbcl --dynamic-space-size 2560")
+(setf inferior-lisp-program "clisp")
