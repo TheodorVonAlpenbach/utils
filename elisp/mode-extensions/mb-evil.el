@@ -29,8 +29,6 @@
 (evil-select-search-module 'evil-search-module 'evil-search)
 
 (require 'evil-exchange)
-(setf evil-exchange-key "go")
-(setf evil-exchange-cancel-key "gO")
 (evil-exchange-install)
 
 (defun set-mb-lisp-locals ()
@@ -76,17 +74,6 @@ STATE can take the same values as in `evil-define-key'."
     (dolist (map aux-maps)
       (evil-set-keymap-prompt map (keymap-prompt map)))))
 
-(define-key global-map "\M-x" 'execute-extended-command)
-(define-key evil-normal-state-map "\M-x" 'execute-extended-command)
-
-(define-key evil-normal-state-map " " 'scroll-up-command)
-(define-key evil-normal-state-map [return] 'scroll-down-command)
-(define-key evil-normal-state-map "ga" 'what-cursor-position)
-
-;;(evil-define-key '(motion) global-map [tab] #'forward-button)
-;;(evil-define-key '(normal) global-map [tab] #'self-insert-command)
-;;(define-key global-map [tab] #'self-insert-command)
-
 (defun evil-move-past-close ()
   "Is made for insert state."
   (interactive)
@@ -103,28 +90,6 @@ STATE can take the same values as in `evil-define-key'."
 ;;; Save on exit insert state ("df")
 (add-hook 'evil-insert-state-exit-hook 'save-buffer-file)
 ;;(pop evil-insert-state-exit-hook)
-
-(require 'key-chord)
-(key-chord-mode 1)
-(key-chord-define evil-insert-state-map "dg" 'evil-move-past-close)
-(key-chord-define evil-insert-state-map "df" 'evil-normal-state)
-(key-chord-define evil-insert-state-map "a;" 'yank)
-(key-chord-define evil-normal-state-map "j;" 'save-buffer)
-(key-chord-define evil-normal-state-map "J:" 'save-some-buffers)
-(evil-key-chord-define '(normal visual motion) global-map "uu" 'undo-tree-redo)
-(evil-key-chord-define '(normal visual motion) global-map "vn" 'ido-switch-buffer)
-
-(define-key vc-prefix-map "j" 'log-edit-done)
-(key-chord-define evil-normal-state-map "vk" vc-prefix-map)
-
-(define-key evil-normal-state-map  [?g ? ] 'just-one-space)
-(define-key evil-normal-state-map  [?g return] 'delete-blank-lines)
-(define-key evil-normal-state-map "gp" 'next-error)
-(define-key evil-normal-state-map "gP" 'previous-error)
-(define-key evil-normal-state-map "gI" 'mb-show-process-buffer)
-(define-key evil-normal-state-map "gs" 'isearch-forward)
-(define-key evil-normal-state-map "gS" 'isearch-backward)
-(define-key evil-normal-state-map "gb" 'sp-down-sexp)
 
 (defun mb-show-process-buffer ()
   (interactive)
@@ -146,8 +111,6 @@ By default the last line."
     (eol)
     (let ((c (current-column)))
       (loop while (> (current-column) column) do (backward-char)))))
-
-(evil-key-chord-define '(normal visual motion) global-map "GG" 'evil-goto-line-keep-column)
 
 (defun ffap-read-file-or-url-no-prompt (prompt guess)
   "Same as `ffap-read-file-or-url' but without prompting."
@@ -227,88 +190,9 @@ A simple split consists of two windows only."
     (when (> (length (buffer-list)) n)
       (setf buffer-read-only t))))
 
-(let ((window-map (make-sparse-keymap)))
-  (evil-key-chord-define '(normal motion) global-map "vw" window-map)
-  (define-key window-map "h" #'split-window-right)
-  (define-key window-map "v" #'split-window-below)
-  (define-key window-map "t" #'transpose-split-orientation)
-  (define-key window-map "s" #'swap-windows)
-  (define-key window-map "r" #'rotate-windows)
-  (define-key window-map "d" #'delete-window)
-  (define-key window-map "o" #'other-window)
-  (define-key window-map "O" #'(lambda () (interactive) (other-window -1))))
-
-(let ((swap-map (make-sparse-keymap)))
-  (evil-key-chord-define '(normal motion) global-map "vo" swap-map)
-  (define-key swap-map "a" #'ffap-no-prompt)
-  (define-key swap-map "A" #'ffap-no-prompt-read-only)
-  (define-key swap-map "b" #'bury-buffer)
-  (define-key swap-map "B" #'unbury-buffer)
-  (define-key swap-map "d" #'(lambda () (interactive)
-				     (kill-buffer (current-buffer))))
-  (define-key swap-map "f" #'find-file)
-  (define-key swap-map "g" #'mb-grep)
-  (define-key swap-map "G" #'mb-grep-interactive)
-  (define-key swap-map "F" #'find-file-read-only)
-  (define-key swap-map "k" #'browse-kill-ring)
-  (define-key swap-map "n" #'ffap-next)
-  (define-key swap-map "N" #'ffap-previous)
-  (define-key swap-map "r" #'revert-buffer)
-  (define-key swap-map "s" #'smart-swap)
-  (define-key swap-map "T" #'find-tag-no-prompt)
-  (define-key swap-map "t" #'find-tag-no-prompt-read-only)
-  (define-key swap-map "v" #'(lambda () (interactive)
-				     (switch-to-buffer (other-buffer)))))
-
-(let ((div-map (make-sparse-keymap)))
-  ;; memo: by default we are incrementing decimeters! (dm)
-  (evil-key-chord-define '(normal motion) global-map "dm" div-map)
-  (define-key div-map "l" (lambda (n) (interactive "p") (inc-thing-at-point n 1)))
-  (define-key div-map "h" (lambda (n) (interactive "p") (inc-thing-at-point (- n) 1)))
-  (define-key div-map "j" (lambda (n) (interactive "p") (inc-thing-at-point n 2)))
-  (define-key div-map "k" (lambda (n) (interactive "p") (inc-thing-at-point (- n) 2)))
-  (define-key div-map "\M-j" (lambda (n) (interactive "p") (inc-thing-at-point n 3)))
-  (define-key div-map "\M-k" (lambda (n)
-			       (interactive "p") (inc-thing-at-point (- n) 3))))
-
 (require 'mb-emacs-lisp)
 (require 'LS)
 (require 'mb-utils-buffer)
-
-(let ((insert-map (make-sparse-keymap)))
-  (key-chord-define evil-normal-state-map "vi" insert-map)
-  (define-key insert-map "a" #'ls-insert-arrival-time)
-  (define-key insert-map "A" #'ls-insert-depature-time)
-  (define-key insert-map "b" #'insert-symbol-bullet)
-  (define-key insert-map "c" #'comment-region*)
-  (define-key insert-map "d" #'insert-date)
-  (define-key insert-map "D" #'(lambda () (interactive) (insert-date-and-time 3)))
-  (define-key insert-map "f" #'cl-ify-form)
-  (define-key insert-map "F" #'cl-ify-defun)
-  (define-key insert-map "q" #'fill-paragraph)
-  (define-key insert-map "p" #'insert-provide)
-  (define-key insert-map "r" #'reverse-sexps)
-  (define-key insert-map "R" #'rotate-sexps)
-  (define-key insert-map "t" #'insert-time)
-  (define-key insert-map "T" #'(lambda () (interactive) (insert-time 3)))
-  (define-key insert-map "u" #'uncomment-region*)
-  (define-key insert-map "*" #'(lambda (n) (interactive "P") (mb-surround "*" (or n 1))))
-  (define-key insert-map "+" #'(lambda (n) (interactive "P") (mb-surround "+" (or n 1))))
-  (define-key insert-map "'" #'(lambda (n) (interactive "P") (mb-surround "'" (or n 1))))
-  (define-key insert-map "\"" #'(lambda (n) (interactive "P") (mb-surround "\"" (or n 1))))
-  (define-key insert-map "`" #'(lambda (n) (interactive "P") (mb-surround "`" (or n 1))))
-  (define-key insert-map "g" #'(lambda (n) (interactive "P") (mb-surround "«" (or n 1))))
-  (define-key insert-map "[" #'(lambda (n) (interactive "P") (mb-surround "[" (or n 1))))
-  (define-key insert-map "{" #'(lambda (n) (interactive "P") (mb-surround "{" (or n 1))))
-  (define-key insert-map "<" #'(lambda (n) (interactive "P") (mb-surround "<" (or n 1))))
-  (define-key insert-map "\\" #'(lambda (n) (interactive "P") (mb-undo-surround (or n 1))))
-  (define-key insert-map "@" #'texinfo-insert-@var))
-
-(let ((big-insert-map (make-sparse-keymap)))
-  (key-chord-define evil-normal-state-map "vI" big-insert-map)
-  (define-key big-insert-map "\"" #'(lambda (n) (interactive "P") (mb-surround "\\\"" (or n 1)))))
-
-;; TODO: move these two defuns elsewhere
 (require 'mb-metafont)
 
 (defun minor-mode-p (mode)
@@ -467,22 +351,6 @@ between different"
   (case major-mode
     (octave-mode (octave-source-buffer))))
 
-(defvar *eval-map* (make-sparse-keymap))
-(key-chord-define evil-normal-state-map "kj" *eval-map*)
- (define-key *eval-map* "k" #'mb-compile-buffer)
- (define-key *eval-map* "d" #'mb-eval-defun)
- (define-key *eval-map* "b" #'mb-eval-buffer)
- (define-key *eval-map* "s" #'mb-eval-region-from-point)
- (define-key *eval-map* "S" #'mb-eval-region-to-point)
- (define-key *eval-map* "r" #'mb-eval-region)
- (define-key *eval-map* "l" #'mb-eval-last-sexp)
- (define-key *eval-map* "f" #'eval-form)
- (define-key *eval-map* "c" #'eval-current-sexp)
- (define-key *eval-map* "e" #'eval-expression)
- (define-key *eval-map* "t" #'eval-defun-test)
- (define-key *eval-map* "T" #'(lambda () (interactive) (eval-defun-test t)))
-
-
 (defun mb-normal-state-init ()
   (key-chord-mode 1))
 ;;(add-hook 'evil-normal-state-entry-hook 'mb-normal-state-init)
@@ -558,7 +426,6 @@ mentioned\) RESULT is returned unmodified."
                               (wdired-mode . normal))
       do (evil-set-initial-state mode state))
 
-
 (defun alf/key-chord-undefine (keys)
   "Undefine the key chord identified by KEYS.
 This should be done by key-chord-unset-global, however that
@@ -586,10 +453,6 @@ does not work for me."
   "Smartparens sexp object. E.g. +foobar+ --> foobar"
   (destructuring-bind (beg end) (last-sexp-region)
     (evil-range (1+ beg) (1- end) 'inclusive :expanded t)))
-
-(define-key evil-outer-text-objects-map "g" #'mb-evil-buffer)
-(define-key evil-inner-text-objects-map "v" #'mb-evil-inner-variable-name)
-(define-key evil-inner-text-objects-map "D" #'mb-evil-inner-defun)
 
 (evil-define-operator evil-yank-line (beg end type register yank-handler)
   "Yank to end of line.
