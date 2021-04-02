@@ -203,6 +203,8 @@ TIME must be a string."
 		    (1 (add-time (parse-clock time) :minute n))
 		    (2 (add-time (parse-clock time) :hour n))
 		    (3 (add-time (parse-clock time) :second n))
+		    (4 (hourstart (add-time (parse-clock time) :hour (1- n))))
+		    (5 (hourstart (add-time (parse-clock time) :hour n)))
 		    (otherwise (error "Level %d is not implemented!" level)))
 	    :with-seconds (or (= level 3) 
 			      (> (length time) 6))))
