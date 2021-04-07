@@ -11,6 +11,22 @@
   (= (mod a n) (mod b n)))
 ;;(modp 3 6 4)
 
+(defun floor-to (arg divisor)
+  (* divisor (first (cl-floor arg divisor))))
+;;(floor-to 99 25)
+
+(defun ceiling-to (arg divisor)
+  (* divisor (first (cl-ceiling arg divisor))))
+;;(ceiling-to 99 25)
+
+(cl-defun next-greater-multiple (x multiple &optional (n 1))
+  (floor-to (+ x (* n multiple)) multiple))
+;;(next-greater-multiple 100 25 1)
+
+(cl-defun next-smaller-multiple (x multiple &optional (n 1))
+  (ceiling-to (- x (* n multiple)) multiple))
+;;(next-smaller-multiple 100 25 2)
+
 (cl-defun sum (sequence &rest cl-keys)
   "Sum all elements in SEQUENCE.
 Keywords supported: :operator :start :end :from-end
