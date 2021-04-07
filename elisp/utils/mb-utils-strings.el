@@ -765,4 +765,3 @@ length."
 ;;(alphanumerate (a-b 0 26))
 
 (provide 'mb-utils-strings)
-
