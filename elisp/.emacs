@@ -226,6 +226,7 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 	 ("Makefile$" . makefile-mode)
 	 ("\\.pro$" . makefile-mode)
 	 ("\\.\\(avsc\\|json\\)$" . json-mode)
+	 ("\\.js$" . js-mode)
 	 ("\\.sql$" . sql-mode)
 	 ("\\.bmp$" . hexl-mode)
 	 ("\\.mf$" . metafont-mode)
