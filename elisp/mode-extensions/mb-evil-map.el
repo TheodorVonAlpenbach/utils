@@ -51,9 +51,15 @@
   (define-key window-map "O" #'(lambda () (interactive) (other-window -1))))
 
 (let ((date-map (make-sparse-keymap)))
-  (evil-key-chord-define '(normal motion) global-map "dq" date-map)
+  (evil-key-chord-define '(normal motion) global-map "dp" date-map)
   (define-key date-map "f" #'forward-date)
-  (define-key date-map "F" #'backward-date))
+  (define-key date-map "F" #'backward-date)
+  (define-key date-map "t" #'(lambda (n) (interactive "p") (inc-thing-at-point n '(:minute 10))))
+  (define-key date-map "T" #'(lambda (n) (interactive "p") (inc-thing-at-point n '(:minute -10))))
+  (define-key date-map "q" #'(lambda (n) (interactive "p") (inc-thing-at-point n '(:minute 15))))
+  (define-key date-map "Q" #'(lambda (n) (interactive "p") (inc-thing-at-point n '(:minute -15))))
+  (define-key date-map "h" #'(lambda (n) (interactive "p") (inc-thing-at-point n '(:minute 30))))
+  (define-key date-map "H" #'(lambda (n) (interactive "p") (inc-thing-at-point n '(:minute -30)))))
 
 (let ((swap-map (make-sparse-keymap)))
   (evil-key-chord-define '(normal motion) global-map "vo" swap-map)

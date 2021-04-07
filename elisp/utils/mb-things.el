@@ -199,15 +199,24 @@ must be a member of a cycle preceding the cycle of the latter.")
 (defun inc-clock (time n level)
   "LEVEL 1, 2, 3 correspond to day, month, year respectively.
 TIME must be a string."
-  (iso-time :time (case level
-		    (1 (add-time (parse-clock time) :minute n))
-		    (2 (add-time (parse-clock time) :hour n))
-		    (3 (add-time (parse-clock time) :second n))
-		    (4 (hourstart (add-time (parse-clock time) :hour (1- n))))
-		    (5 (hourstart (add-time (parse-clock time) :hour n)))
-		    (otherwise (error "Level %d is not implemented!" level)))
-	    :with-seconds (or (= level 3) 
-			      (> (length time) 6))))
+  (let ((etime (parse-clock time)))
+    (iso-time
+     :time (if (listp level)
+	     (case (first level)
+	       (:hour (etime-round etime :hour (second level) n))
+	       (:minute (etime-round etime :minute (second level) n))
+	       (:second (etime-round etime :second (second level) n))
+	       (otherwise
+		(error "Level %S is not implemented!" level)))
+	     (case level
+	       (1 (add-time etime :minute n))
+	       (2 (add-time etime :hour n))
+	       (3 (add-time etime :second n))
+	       (otherwise
+		(error "Level %S is not implemented!" level))))
+     ;; :with-seconds (or (= level 3) 
+     ;; 		       (> (length time) 6))
+     )))
  
 (defun inc-number (x n level)
   (let ((res 

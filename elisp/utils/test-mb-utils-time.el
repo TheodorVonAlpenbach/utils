@@ -360,4 +360,25 @@
   (should (equal (iso-dttm (daystart (parse-time "1972-01-06")))
 		 "1972-01-06T00:00:00CET")))
 
+(ert-deftest test-etime-part ()
+  "Test of `etime-part'"
+  (should (equal (etime-part (parse-time "1972-01-06T08:15:17") :year) 1972))
+  (should (equal (etime-part (parse-time "1972-01-06T08:15:17") :month) 1))
+  (should (equal (etime-part (parse-time "1972-01-06T08:15:17") :day) 6))
+  (should (equal (etime-part (parse-time "1972-01-06T08:15:17") :hour) 8))
+  (should (equal (etime-part (parse-time "1972-01-06T08:15:17") :minute) 15))
+  (should (equal (etime-part (parse-time "1972-01-06T08:15:17") :second) 17)))
+
+(ert-deftest test-etime-round ()
+  "Test of `etime-round'"
+ (should (equal
+	  (iso-dttm (etime-round (parse-time "1972-01-06T08:15:17") :year -10))
+	  "1970-01-06T08:15:17CET"))
+ (should (equal
+	  (iso-dttm (etime-round (parse-time "1972-01-06T08:15:17") :year 10))
+	  "1980-01-06T08:15:17CET"))
+ (should (equal
+	  (iso-dttm (etime-round (parse-time "1972-01-06T08:15:17") :year 10))
+	  "1980-01-06T08:15:17CET")))
+
 (provide 'test-mb-utils-time.el)

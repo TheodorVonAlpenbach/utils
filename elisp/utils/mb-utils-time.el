@@ -73,10 +73,10 @@
   (getenv "TZ"))
 ;;(current-timezone)
 
-(defun --time-encode (dtime &optional universal)
-  "Apply `encode-time' on DTIME. If UNIVERSAL is not nil, discard
+(defun --time-encode (dtime &optional universal-p)
+  "Apply `encode-time' on DTIME. If UNIVERSAL-P is not nil, discard
 time zone offset in DTIME."
-  (if universal
+  (if universal-p
     (time-add (apply #'encode-time dtime) (list 0 (dtime-time-zone dtime)))
     (apply #'encode-time dtime)))
 ;;(--time-encode (decode-time) t)
@@ -317,25 +317,85 @@ Argument may be a time objects itself or a string."
 (cl-defun --dtime-set-time (dtime second minute hour)
   "Set the time parameters in ETIME to SECOND, MINUTE, and HOUR,
 regardless of this changes the status of daylight saving time
-status. If UNIVERSAL is not nil, return result in UTC."
+status."
   (without-tz-modification (dtime dtime)
     (replace-sequence dtime (list second minute hour) 0 3)))
 
-(cl-defun --etime-set-time (etime second minute hour universal)
+(cl-defun --etime-set-time (etime second minute hour universal-p)
   "Set the time parameters in ETIME to SECOND, MINUTE, and HOUR,
 regardless of this changes the status of daylight saving time
-status. If UNIVERSAL is not nil, return result in UTC."
+status. If UNIVERSAL-P is not nil, return result in UTC."
   (--time-encode (--dtime-set-time (decode-time etime) second minute hour)
-		 universal))
+		 universal-p))
 
 ;; Reference times
 (defmacro encode-now ()
   `(apply #'encode-time (decode-time)))
 ;;(encode-now)
 
-(defun iso-dttm (etime &optional universal)
-  (format-time-string "%Y-%m-%dT%H:%M:%S%Z" etime universal))
+(defun iso-dttm (etime &optional universal-p)
+  "Convert ETIME to an ISO 8601 time string.
+If UNIVERSAL-P is not nil, return result in UTC."
+  (format-time-string "%Y-%m-%dT%H:%M:%S%Z" etime universal-p))
 ;;(mapcar #'iso-dttm (list (parse-time (seconds-to-time (float-time))) (encode-now)))
+
+(defun etime-part (etime part &optional universal-p)
+  "Return the time PART of ETIME. The supported parts are :YEAR,
+:MONTH, :DAY, :HOUR, :MINUTE, :SECOND. If UNIVERSAL-P is not nil,
+return result in UTC. This only affects the parts :HOUR and
+:MINUTE."
+  (string-to-number
+   (format-time-string
+    (case part
+      (:year "%Y") (:month "%m") (:day "%d")
+      (:hour "%H") (:minute "%M") (:second "%S"))
+    etime universal-p)))
+;;(etime-part (parse-time "1972-01-06T08:15:17") :hour)
+
+(defun etime-round-1 (etime part quantity &optional universal-p)
+  "Helper for `etime-round', one iteration only."
+  (let ((etime-part (etime-part etime part universal-p)))
+    (funcall (case part
+	       ((:year) #'add-etime-date) ;TODO: need to handle base 1 of m and d
+	       ((:hour :minute :second) #'add-etime-time)
+	       (t (error "Part %S is not supported" part)))
+      etime part (- (funcall (if (minusp quantity) #'floor-to #'ceiling-to)
+		      etime-part (abs quantity))
+		    etime-part))))
+
+(defun etime-round-1 (etime part quantity &optional universal-p)
+  "Helper for `etime-round', one iteration only.
+
+TODO: need to handle base 1 of the month and day cases."
+  (let* ((etime-part (etime-part etime part universal-p))
+	 (diff (- (funcall (if (minusp quantity)
+			     #'next-smaller-multiple #'next-greater-multiple)
+		    etime-part (abs quantity))
+		  etime-part)))
+    (message "%d" diff)
+    (when (and (zerop diff) (plusp quantity))
+      (incf diff quantity))
+    (case part
+      (:year (yearstart (add-etime-date etime part diff)))
+      (:hour (hourstart (add-etime-time etime part diff)))
+      (:minute (minutestart (add-etime-time etime part diff)))
+      (:second (secondstart (add-etime-time etime part diff)))
+      (t (error "Part %S is not supported" part)))))
+;;(iso-dttm (etime-round-1 (parse-time "1972-01-06T08:15:10") :minute -15))
+
+(cl-defun etime-round (etime part quantity &optional (n 1) universal-p)
+  "Rounds ETIME up or down to the closest multiple of quantity if part
+is positive or negative. For furhter information on PART and
+UNIVERSAL-P, see `etime-part'.
+
+Note that PARTs :MONTH and :DAY are currently not supported."
+  (assert (not (minusp n)) t "N cannot be negative")
+  (if (zerop n)
+    etime
+    (add-etime-time
+     (etime-round-1 etime part quantity universal-p)
+     part (* (1- n) quantity))))
+;;(iso-dttm (etime-round (parse-time "1972-01-06T08:15:17") :minute 15 1))
 
 (cl-defun now (&rest args)
   "Return current time as an encoded time object."
@@ -347,36 +407,36 @@ status. If UNIVERSAL is not nil, return result in UTC."
     (apply #'add-etime (--time-encode (decode-time)) args)))
 ;;(now)
 
-(cl-defun midnight (&optional (etime (now)) universal)
+(cl-defun midnight (&optional (etime (now)) universal-p)
   "Return the first time point within the date of ETIME in local time.
-If UNIVERSAL is not nil, return the `midnight' in UTC."
-  (--etime-set-time etime 0 0 0 universal))
+If UNIVERSAL-P is not nil, return the `midnight' in UTC."
+  (--etime-set-time etime 0 0 0 universal-p))
 ;;(iso-dttm (midnight (parse-time "1972-01-06")))
 
-(cl-defun midday (&optional (etime (now)) universal)
+(cl-defun midday (&optional (etime (now)) universal-p)
   "Return the time point 12 hours into the date of ETIME in local time.
-If UNIVERSAL is not nil, return the `midday' in UTC."
-  (--etime-set-time etime 0 0 12 universal))
+If UNIVERSAL-P is not nil, return the `midday' in UTC."
+  (--etime-set-time etime 0 0 12 universal-p))
 ;;(iso-dttm (midday))
 
 (defalias 'noon #'midday)
 ;;(iso-dttm (noon (parse-time "2000-09-07")))
 
-(cl-defun morning (&optional (etime (now)) universal)
+(cl-defun morning (&optional (etime (now)) universal-p)
   "Return the mean time point within the date of ETIME in local time.
-If UNIVERSAL is not nil, return the `midday' in UTC."
-  (--etime-set-time etime 0 0 6 universal))
+If UNIVERSAL-P is not nil, return the `midday' in UTC."
+  (--etime-set-time etime 0 0 6 universal-p))
 ;;(iso-dttm (morning (parse-time "1972-01-06")))
 
-(cl-defun evening (&optional (etime (now)) universal)
+(cl-defun evening (&optional (etime (now)) universal-p)
   "Return the mean time point within the date of ETIME in local time.
-If UNIVERSAL is not nil, return the `midday' in UTC."
-  (--etime-set-time etime 0 0 18 universal))
+If UNIVERSAL-P is not nil, return the `midday' in UTC."
+  (--etime-set-time etime 0 0 18 universal-p))
 
-(cl-defun next-midnight (&optional (etime (now)) universal)
+(cl-defun next-midnight (&optional (etime (now)) universal-p)
   "Return the first time point after the date of ETIME in local time.
-If UNIVERSAL is not nil, return the `next-midnight' in UTC."
-  (--etime-set-time etime 0 0 24 universal))
+If UNIVERSAL-P is not nil, return the `next-midnight' in UTC."
+  (--etime-set-time etime 0 0 24 universal-p))
 ;;(list (midnight (parse-time "2018-03-25")) (next-midnight (parse-time "2018-03-25")))
 ;;(next-midnight (parse-time "2018-03-25"))
 ;;(midnight (parse-time "2018-03-26"))
@@ -443,6 +503,10 @@ day of the week."
 (defun minutestart (&optional etime)
   (--time-encode (without-tz-modification (dtime (decode-time etime))
 		   (append '(0) (subseq dtime 1)))))
+;;(iso-dttm (minutestart (parse-time "1972-01-06T08:15:17")))
+
+(defun secondstart (&optional etime)
+  etime)
 ;;(iso-dttm (minutestart (parse-time "1972-01-06T08:15:17")))
 
 ;; Other utils

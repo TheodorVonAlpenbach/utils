@@ -49,4 +49,26 @@
   (should (equal (sum '(1 2 3 4) :operator #'+ :start 1 :initial-value 1) 10))
   (should (equal (sum '(1 2 3 4) :operator #'* :start 1 :initial-value 1) 24)))
 
+(ert-deftest test-floor-to ()
+  "Test of `floor-to'"
+  (should (equal (floor-to 70 25) 50))
+  (should (equal (floor-to 75 25) 75)))
+
+(ert-deftest test-ceiling-to ()
+  "Test of `ceiling-to'"
+  (should (equal (ceiling-to 70 25) 75))
+  (should (equal (ceiling-to 75 25) 75)))
+
+(ert-deftest test-next-greater-multiple ()
+  "Test of `next-greater-multiple'"
+  (should (equal (next-greater-multiple 4 5) 5))
+  (should (equal (next-greater-multiple 5 5) 10))
+  (should (equal (next-greater-multiple 6 5) 10)))
+
+(ert-deftest test-next-smaller-multiple ()
+  "Test of `next-smaller-multiple'"
+  (should (equal (next-smaller-multiple 4 5) 0))
+  (should (equal (next-smaller-multiple 5 5) 0))
+  (should (equal (next-smaller-multiple 6 5) 5)))
+
 (provide 'test-mb-utils-math)
