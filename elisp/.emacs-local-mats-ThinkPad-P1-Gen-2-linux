@@ -1,4 +1,4 @@
-;;(set-frame-font "--Courier New-normal-normal-normal-mono-28-*-*-*-c-*-iso8859-1")
+;;(set-frame-font "--Courier New-normal-normal-normal-mono-30-*-*-*-c-*-iso8859-1")
 
 ;; Local elisp load paths
 (setf *local-load-paths* '())
