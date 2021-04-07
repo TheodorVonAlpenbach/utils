@@ -20,7 +20,7 @@ N = 0 is the amount at the beginning of year 0, which is C.
 N = 1 is the amount at the beginning of year 1, which is (C+D)*F.
 N = 2 is the amount at the beginning of year 2, which is ((C+D)*F + D)*F etc."
   (+ (* c (expt f n)) (* d f (geometric-series f :end n))))
-;;(growth 1 2 10 1)
+;;(/ (growth 2021 1.02 (/ 0.03 3600)) 1E12)
 
 (cl-defun deposit (n &optional (f 1.0) (c 1.0))
   "Find the yearly deposit that turns an initiaal amount C into
