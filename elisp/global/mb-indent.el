@@ -106,7 +106,7 @@ SYMBOL can be a symbol or a list of symbols. See function
       select-dao define-url-fn fmt if connect-toplevel
       hwhen htm-table htm-banner htm-form-button
       :export :import-from
-      add-hook)
+      add-hooki product)
   'prog1)
 (cl-indent  :table :tr)
 

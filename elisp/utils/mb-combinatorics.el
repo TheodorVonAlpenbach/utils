@@ -80,22 +80,15 @@ resulting sequence."
         collect (/ factor gcd)))
 ;;(remove-factors '(2 3 4 5) 12)
 
-(defun binomial-coefficient (n m &optional float-result)
+(cl-defun binomial-coefficient (n m &optional (method :auto))
   "Returns n!/(m!*(n-m)!"
   (let* ((m* (max m (- n m)))
 	 (factors (loop for denominator-factor in (a-b 1 (- n m*))
 			for numerator-factors = (a-b (1+ m*) n)
 			then (remove-factors numerator-factors denominator-factor)
 			finally return numerator-factors)))
-    (apply #'* (if float-result (mapcar #'float factors) factors))))
-;;(binomial-coefficient 14 10)
-
-(defun binomial-coefficient (n m &optional float-result)
-  "Returns n!/(m!*(n-m)!"
-  (let ((m* (min m (- n m))))
-    (/ (product-a-b (1+ (- n m*)) n)
-       (product-a-b 2 m*))))
-;;(binomial-coefficient 26 9)
+    (product* factors :method method)))
+;;(time (binomial-coefficient 112 100 :auto))
 
 (cl-defun catalan-nth (n)
   "Return the Nth Catalan number.
