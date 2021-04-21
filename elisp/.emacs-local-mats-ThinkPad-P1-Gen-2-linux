@@ -57,6 +57,7 @@ sudo mount -a.")
 	(,+mb-lisp-dir+ "mode-extensions/mb-lisp.el")
 	(,+mb-lisp-dir+ "mode-extensions/mb-evil.el")
 	(,+mb-lisp-dir+ "external/curl.el")
+	(,+mb-lisp-dir+ "div/scratch.el")
 
 	(,+mb-utils-dir+ "lisp/mb-utils.lisp")
 
