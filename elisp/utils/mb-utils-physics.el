@@ -51,5 +51,15 @@
   (at->v (as->t s) a))
 ;;(* 3.6 (as->v 381))
 
+(cl-defun alcohol-unit (percentage &optional (milliliter 1000) (n 1))
+  (if (symbolp percentage)
+    (alcohol-unit
+     (case percentage
+       (:pils .047)
+       (:wine .12)
+       (:ripasso .135))
+     milliliter n)
+    (* milliliter n (/ percentage 15.0))))
+;;(alcohol-unit :ripasso 350)
 
 (provide 'mb-utils-physics)
