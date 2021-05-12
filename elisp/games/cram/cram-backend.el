@@ -123,7 +123,7 @@
 		  return p)
 	    (progn
 	      (message "No recent errors: selecting one at random...")
-	      (cram-db-random-problem :window 10000))))))
+	      (cram-db-random-problem :window 10000 :matches ms))))))
 ;;(cram-get-cram-problem)
 ;;(time- (add-etime-date (now) :day 1))
 

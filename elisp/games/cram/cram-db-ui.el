@@ -69,12 +69,17 @@ from the more primitive function `cram-user-id'"
 ;;TODO
 (cl-defun cram-db-random-problem (&key (rating (car +cram-default-rating+))
 				    (window +cram-default-rating-window+)
-				    (idle-minutes 10))
+				    (idle-minutes 10)
+				    (matches nil))
   "Low level function that accesses internals of a table.
 TODO: Avoid crash on empty db"
-  (aif (ld-select :problem
-	 :where (string-match +cram-ref-filter+ :source-id))
-    (random-elt it)))
+  (if matches
+    (ld-select :problem
+      :where (= :id (random-elt
+		     (project-sequence matches #'cram-match-problem-id))))
+    (awhen (ld-select :problem
+	     :where (string-match +cram-ref-filter+ :source-id))
+      (random-elt it))))
 ;;(cram-db-random-problem)
 
 ;; not working when no questions have been asked?
