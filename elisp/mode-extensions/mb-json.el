@@ -1,3 +1,5 @@
+(require 'json-mode)
+
 (defun json-pretty-print-string ()
   "Pretty print buffer on form '\"{<json-string-with-escaped-double-quotes>}\"."
   (interactive)
@@ -12,4 +14,4 @@
     (json-pretty-print (point-min) (point-max))))
 ;;(json-pretty-print-string)
 
-(provide 'json)
+(provide 'mb-json)

@@ -125,6 +125,7 @@
   (define-key insert-map "[" #'(lambda (n) (interactive "P") (mb-surround "[" (or n 1))))
   (define-key insert-map "{" #'(lambda (n) (interactive "P") (mb-surround "{" (or n 1))))
   (define-key insert-map "<" #'(lambda (n) (interactive "P") (mb-surround "<" (or n 1))))
+  (define-key insert-map "/" #'(lambda (n) (interactive "P") (mb-surround "/" (or n 1))))
   (define-key insert-map "\\" #'(lambda (n) (interactive "P") (mb-undo-surround (or n 1))))
   (define-key insert-map "@" #'texinfo-insert-@var))
 

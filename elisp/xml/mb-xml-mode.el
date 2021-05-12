@@ -38,7 +38,7 @@ XML tag point is looking at."
     (sgml-skip-tag-forward n)
     (sgml-skip-tag-backward (- n))))
 
-(defun* mbxml-down-sexp (&optional (n 1))
+(cl-defun mbxml-down-sexp (&optional (n 1))
   (if (/= n 0)
     (let ((backward (minusp n))
 	  (inc (signum n)))
@@ -48,7 +48,7 @@ XML tag point is looking at."
 	  (forward-sexp inc))
       (mbxml-down-sexp (- n inc)))))
 
-(defun* mbxml-forward-sexp (&optional (n 1))
+(cl-defun mbxml-forward-sexp (&optional (n 1))
   "XML version of forward-sexp"
   (let ((backward (minusp n)))
     (if (mbxml-looking-at-tag (not backward) backward)

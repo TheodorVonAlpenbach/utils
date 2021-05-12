@@ -52,6 +52,8 @@ TODO: move this to some util module?"
   "Insert \"Ankomst\" stamp in mb-org file"
   (interactive)
   (eob t)
+  (just-one-blank-line 1)
+  (newline)
   (mb-org-insert-date)
   (mb-org-insert-time "** " time " Ankomst")
   (eob t))

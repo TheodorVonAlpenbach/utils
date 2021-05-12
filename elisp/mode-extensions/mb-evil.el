@@ -526,6 +526,7 @@ By default the last line."
     ("<" ">")
     ("[" "]")
     ("{" "}")
+    ("/" "/")
     (otherwise left)))
 ;;(mapcar #'mb-surround-lookup-right (list "`" "'" "(" "<"))
 
