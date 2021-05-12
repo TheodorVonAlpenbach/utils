@@ -11,6 +11,11 @@
   (= (mod a n) (mod b n)))
 ;;(modp 3 6 4)
 
+(defun modb (x n base)
+  (+ (cl-mod (- x base) n) base))
+;;(abs (modb 6 (* 2 pi) (- pi)))
+;;(loop for i from -4 to 4 collect (modb i 4 -2))
+
 (defun floor-to (arg divisor)
   (* divisor (first (cl-floor arg divisor))))
 ;;(floor-to 99 25)
@@ -712,10 +717,19 @@ value in the specified interval. Else, it will be an integer."
     (random-integer a b seed)
     (random-float a b seed)))
 
+(defun random-weighted-index (weights)
+  (let ((cumulative-weights (cumsum-list weights)))
+    (cl-position-if (bind #'>= (random-float 0 (last-elt cumulative-weights)))
+      cumulative-weights)))
+;;(random-weighted-index '(1 5 10))
+
+(defun random-weighted-element (elements)
+  (first (nth (random-weighted-index (project-sequence elements 1)) elements)))
+;;(accumulate-list (loop repeat 100 collect (random-weighted-element '((a 1) (b 5) (c 10)))) #'symbol<)
+
 (defun interval-floor (n interval)
   (* (floor n interval) interval))
 ;;(interval-floor 30 10)
-
 
 ;;pool utils
 (defun fractional-ball-angle (fraction &optional with-object-ball-throw-correction)

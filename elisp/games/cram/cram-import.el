@@ -14,7 +14,8 @@ See header of imports.cvs for correct format"
 		 (string= :source-id (first args))
 		 (butlast (rest args))
 		 (:question :answer :picture :alternatives :hints))))))
-;;(cram-import-csv "~/projects/utils/elisp/games/cram/planter.csv")
+;;(cram-import-csv "~/git/utils/elisp/games/cram/norske-fugler.csv")
+;;(cram-import-csv "~/git/utils/elisp/games/cram/planter.csv")
 ;;(cram-import-csv "~/projects/utils/elisp/games/cram/serbokroatisk.csv")
 ;;(length (ld-select :problem))
 ;;(ld-save-database *current-database*)
@@ -69,5 +70,29 @@ See header of imports.cvs for correct format"
     :in "\n"))
 ;;(cram-parse-planter)
 ;;(cl-substitute ?_ ?  "a b")
+
+;;; Norske fugler
+(defun format-norsk-fugl-ancestors (ancestors)
+  (concat* (cl-remove-if #'empty-string-p ancestors) :in " - "))
+;;(format-norsk-fugl-ancestors (subseq qwe 0 3))
+
+(defun format-norsk-fugl (n order family subfamily genus species norsk)
+  (format "csv-norske-fugler-%d;%s - %s %s;%s;norske-fugler/%s_%s.jpg;;;3"
+    n
+    (format-norsk-fugl-ancestors (list order family subfamily))
+    genus species norsk genus species))
+;;(apply #'format-norsk-fugl (cons 1 qwe))
+
+(defun format-norske-fugler ()
+  "Copy columns Order to Norsk from aves.xlsx and paste into
+*scratch*. Then run this."
+  (lines-to-string
+   (loop for l in (remove ""
+		    (string-lines (buffer-string-no-properties "*scratch*")))
+	 for (order family subfamily genus species norsk)
+	 = (project (split-string l "\t") '(0 4 5 6 7 9))
+	 for n from 1
+	 collect (format-norsk-fugl n order family subfamily genus species norsk))))
+;;(insert (format-norske-fugler ))
 
 (provide 'cram-import)

@@ -6,7 +6,9 @@
 (defmacro random-elt (sequence)
   (with-gensyms (gsequence)
     `(let ((,gsequence ,sequence))
+       (message "%S" (length ,gsequence))
        (elt ,gsequence (random (length ,gsequence))))))
+;;(random-elt '((a e) (b) (c) (d)))
 ;;(random-elt (a-b -10 10))
 
 (defun remove-nth (n sequence)

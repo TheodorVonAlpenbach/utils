@@ -73,6 +73,7 @@
 	(,+mb-lisp-dir+ "mode-extensions/mb-evil-map.el")
 	(,+mb-lisp-dir+ "mode-extensions/mb-lisp.el")
 	(,+mb-lisp-dir+ "quiz/quiz-park.el")
+	(,+mb-lisp-dir+ "div/scratch.el")
 
 	;; Common Lisp utils
 	(,+home-dir+ "git/utils/lisp/topology/shapes.lisp")

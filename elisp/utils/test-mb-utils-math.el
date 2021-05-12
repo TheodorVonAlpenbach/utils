@@ -32,10 +32,6 @@
 		 '(0 1 1 1 1 1 1 1 1 1 2)))
   (should (equal (uint-length (0-n 11)) 2)))
 
-(ert-deftest test-L-sum ()
-  "Test of `L-sum'"
- (should (equal (L-sum ) nil)))
-
 (ert-deftest test-cumsum ()
   "Test of `cumsum'"
  (should (equal (cumsum (0-n 3)) '(0 1 3)))
@@ -70,5 +66,19 @@
   (should (equal (next-smaller-multiple 4 5) 0))
   (should (equal (next-smaller-multiple 5 5) 0))
   (should (equal (next-smaller-multiple 6 5) 5)))
+
+(ert-deftest test-random-weighted-element ()
+  "Test of `random-weighted-element'"
+  (should (< (abs (modb (vec-angle
+		      '(1 5 10)
+		      (project-sequence
+		       (accumulate-list
+			(loop repeat 1000
+			      collect (random-weighted-element
+				       '((a 1) (b 5) (c 10))))
+			#'symbol<)
+		       1))
+			 (* 2 pi) (- pi)))
+	      .1)))
 
 (provide 'test-mb-utils-math)

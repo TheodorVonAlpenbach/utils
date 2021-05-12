@@ -568,8 +568,7 @@ By default the last line."
 	 #'(lambda (beg end)
 	     (if last
 	       (let ((s (number-to-string (incf last))))
-		 (overwrite-region s beg end)
-		 (qwe beg end))
+		 (overwrite-region s beg end))
 	       (setf last (string-to-number (region-string beg (1+ end)))))))
        b e nil))))
 ;;(evil-increment-rectangle)

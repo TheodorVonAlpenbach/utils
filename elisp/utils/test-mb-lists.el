@@ -113,6 +113,11 @@
  (should (equal (head 0 '(a b c)) nil))
  (should (equal (head 1 '(a b c)) '(a))))
 
+(ert-deftest test-accumulate-list ()
+  "Test of `accumulate-list'"
+  (should (equal (accumulate-list '(a b c a b a d) #'symbol<)
+		 '((a 3) (b 2) (c 1) (d 1)))))
+
 (ert-deftest test-memcase ()
   "Test of `memcase'"
   (should (equal (memcase '(a b c) (a 'A) (otherwise 'B)) 'A))

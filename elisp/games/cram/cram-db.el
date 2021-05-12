@@ -46,7 +46,7 @@
       (:answer)                     ; what the user :answered
       (:time :type integer)         ; the time (in millisecond) user spent before answering
       ;; TODO: for sanity swap order on the following two columns
-      (:match-id :type integer)     ; reference to match task
+      (:match-id :type integer)     ; reference to match task (should be named :problem-id) 
       (:user-id :type integer)      ; reference to match user
       ;; Glicko ratings with deviation (GR RD) just before the match
       (:user-rating :type (number number))

@@ -56,6 +56,7 @@
     (alcohol-unit
      (case percentage
        (:pils .047)
+       (:imperial-stout .09)
        (:wine .12)
        (:ripasso .135))
      milliliter n)

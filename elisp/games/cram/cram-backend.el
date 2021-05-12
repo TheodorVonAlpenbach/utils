@@ -65,10 +65,35 @@
        :key #'cram-problem-rating-e :test #'>))))
 ;;(cram-get-worst-problem)
 
+(defvar *cram-last-update* (the-creation))
+(defvar *cram-match-cache* nil)
+
+(defun cram-get-matches (&optional reset)
+  (when reset
+    (setf *cram-last-update* (the-creation))
+    (nilf *cram-match-cache*))
+  (let* ((problem-ids
+	  (if +cram-ref-filter+
+	    (ld-select :problem :column :id
+		       :where (string-match +cram-ref-filter+ :source-id))
+	    (ld-select :problem :column :id )))
+	 (matches
+	  (append
+	    (ld-select :match
+	      :where (and (time< *cram-last-update* ::updated)
+			  (and problem-ids
+			       (member :match-id problem-ids))))
+	    *cram-match-cache*)))
+    (setf *cram-last-update* (now))
+    (setf *cram-match-cache* matches)
+    matches))
+;;(length (mapcar #'second (cram-get-matches)))
+;;(sort (mapcar #'second (cram-get-matches )) #'string>)
+
 (cl-defun cram-get-cram-problem (&optional (user (cram-current-user)))
   "Return the most recent problem that has not been solved the last three times"
   (or (first (cram-db-unused-problems))
-      (let ((ms (ld-select :match :where (= (cram-user-id user) :user-id))))
+      (let ((ms (cram-get-matches)))
 	(or (loop for m3 in (mapcar (bind #'head 3 1)
 			      (group (cl-sort ms
 				       #'> :key #'cram-match-problem-id)
@@ -79,17 +104,26 @@
 		  if (and
 		      m3
 		      ;; must have been asked last time more than one minute ago
-		      (> (time- (now)
-				(cram-match-timestamp (first m3)) :minute) 1)
-		      (string-match +cram-ref-filter+
-				    (cram-problem-source-id p))
-		      (< (length m3) 3)
+		      (let ((diff (time-
+				   (now)
+				   (cram-match-timestamp (first m3))
+				   :minute)))
+			;; (message "More than a minute ago: %S vs %S"
+			;; 	 (now) (cram-match-timestamp (first m3)))
+			;; (message "diff: %S" diff)
+			(> diff 1))
+		      
 		      (loop for m in m3
-			    ;; do (message "%s" (cram-match-response m))
-			    thereis (not (cram-correct-response-p
-					  p (cram-match-response m)))))
+			    for false-p = (not (cram-correct-response-p p (cram-match-response m)))
+			    ;; do (message "%s (%s), is false? %S"
+			    ;; 		(cram-match-response m)
+			    ;; 		(cram-problem-answer p)
+			    ;; 		false-p)
+			    thereis false-p))
 		  return p)
-	    (cram-db-random-problem :window 10000)))))
+	    (progn
+	      (message "No recent errors: selecting one at random...")
+	      (cram-db-random-problem :window 10000))))))
 ;;(cram-get-cram-problem)
 ;;(time- (add-etime-date (now) :day 1))
 
@@ -109,6 +143,7 @@ If METHOD is
   :CURRENT return the problem stored in *cram-current-problem*,
   :RATING  return the problem closest to a certain rating, and
   :WORST   return the most difficult problem in database.
+  :CRAM    return the problem most suited to learning.
 
 Many of these methods take additional parameters that can modify
 the selection strategy somewhat. For instance, :RANDOM avoids the last problems presented to the user, see "

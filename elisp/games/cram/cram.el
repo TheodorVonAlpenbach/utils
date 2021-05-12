@@ -2,9 +2,13 @@
 (require 'cram-backend)
 (require 'cram-common)
 
-(defun cram-format-problem (question &optional answer)
-  (format "%s\n" question))
-;;(cram-format-problem "qwe")
+(defun cram-format-problem (question &optional max-length)
+  (format "%s%s"
+    (if max-length
+      (substring question 0 (min max-length (length question)))
+      question)
+    (if max-length "" "\n")))
+;;(cram-format-problem "qwe" 2)
 
 (defun cram-format-match (user problem)
   (concat
@@ -150,13 +154,14 @@ the *cram-current-problem* which is yet another structure."
     ((and (every #'numberp column)
 	  (some #'floatp column)) 'float)
     ((every #'stringp column) 'string)))
+;;(tab-column-type '((1 2)))
 ;;(tab-column-type '("qe" "qe"))
 
 (cl-defun tab-column-width (column &optional (type (tab-column-type column)))
-  (let ((c (case type 
-	     (string column)
-	     (integer (mapcar #'number-to-string column)))))
-    (apply #'max (mapcar #'length c))))
+  (awhen (case type 
+	   (string column)
+	   (integer (mapcar #'number-to-string column)))
+    (apply #'max (mapcar #'length it))))
 ;;(tab-column-width '(1 123))
 
 (defun tab-flag (width &optional type)
@@ -199,22 +204,29 @@ the *cram-current-problem* which is yet another structure."
     (switch-to-buffer-other-window buffer-name)))
 ;;(cram-list-user-ratings)
 
-(defun cram-db-problem-ratings ()
+(cl-defun cram-db-problem-ratings (&optional (filter +cram-ref-filter+))
   "Returns a tree of problem ratings"
   (eval-when (load eval)
     (cl-sort (ld-select :problem
-			:columns (:id :question :answer :rating ::updated))
-      #'> :key #'first)))
-;;(cram-db-problem-ratings)
+	       :columns (:id :question
+			     :answer
+			     (round (first :rating))
+			     (round (second :rating))
+			     ::updated)
+	       :where (string-match filter :source-id))
+      #'> :key #'fourth)))
+;;(cram-db-problem-ratings "fugl")
+;;(minimum (mapcar #'second (cram-db-problem-ratings)) :test #'> :key #'length)
 
-(cl-defun cram-list-problem-ratings (&optional (buffer-name "*Problem Ratings*"))
+(cl-defun cram-list-problem-ratings
+    (&optional (buffer-name "*Problem Ratings*") (max-question-length 70))
   "Prints a table of all problems with their corresponding rating."
   (interactive)
   (with-output-to-temp-buffer buffer-name
     (princ (tab-format
-	    (mapcol (bind #'apply #'cram-format-problem 1)
+	    (mapcol (bind #'cram-format-problem max-question-length)
 		    1 (cram-db-problem-ratings))
-	    :header '("ID" "Problem" "Rating" "RD" "Updated")
+	    :header '("ID" "Problem" "Solution" "Rating" "RD" "Updated")
 	    :column-separator " | "))
     (switch-to-buffer-other-window buffer-name)))
 
@@ -336,5 +348,9 @@ the *cram-current-problem* which is yet another structure."
 (cl-defun quiz-plants (&optional (level 1))
   (interactive)
   (cram-1 "^csv-planter-"))
+
+(cl-defun quiz-norske-fugler (&optional (level 1))
+  (interactive)
+  (cram-1 "^csv-norske-fugler-"))
 
 (provide 'cram)
