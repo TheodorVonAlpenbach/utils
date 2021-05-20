@@ -75,6 +75,9 @@ according to TEST and KEY."
 ;;(group-positions '((1 2) (1 2)) :test #'equal)
 ;;(equal '(1 2) '(1 2))
 
+;; TODO: rename to split-list-if2; the '2' indicates that splitting
+;; is controlled by a /binary/ predicate
+;; Also generalize to split-if2
 (cl-defun group (list &key (test #'eql) (key #'identity))
   "Groups LIST into a list of sublists where all elements are equal
 according to TEST and KEY.
@@ -89,6 +92,20 @@ Note that group to not consider LIST as a set. To do this, LIST must be sorted f
 ;;(group '((1 2) (1 3) (1 2)) :test #'equal)
 ;;(group '(nil nil nil) :test #'equal)
 ;;(group nil)
+
+;; TODO: when the above renaming is done, rename this to GROUP-LIST or
+;; perhaps EQUIVALENCE-CLASS-LIST. Or: generalize with ELT, and rename
+;; to GROUP or EQUIVALENCE-CLASS.
+(cl-defun group-hash (list &key (key #'identity) (size 65))
+  "TODO: rename this."
+  (let ((ht (make-hash-table :sze size)))
+    
+    (loop for x in list
+	  for k = (funcall key x)
+	  do (puthash k (cons x (gethash k ht)) ht))
+    (loop for v the hash-values of ht
+	  collect v)))
+;;(group-hash '((a) (b) (c) (a) (b) (a) (d)) :key #'car)
 
 (defun nzip (&rest lists) 
   (apply #'nconc (transpose lists)))
@@ -267,21 +284,28 @@ where a comes before b in LIST."
 			 (format "%S: %S" args (apply fn args)))))
 ;;(test-arguments #'concat '(("a" "b") ("c") ("e" "f")))
 
-(cl-defun accumulate-sorted-list (list &optional (test #'eql) (min-occurences 1))
+(cl-defun accumulate-sorted-list (list &key (test #'eql)
+					 (min-occurrences 1)
+					 (key #'identity)
+					 (accumulator #'length))
   "Accumulates sorted LIST. See `accumulate-list' for details."
-  (loop for x in (group list :test test)
-	for l = (length x)
-	if (>= l min-occurences) collect (list (first x) l)))
-;;(accumulate-sorted-list '(a a a b b c d c)) ==> ((a 3) (b 2) (c 1) (d 1) (c 1))
-;;(accumulate-sorted-list '(a a a b b c d c) 'equal 2)
+  (loop for x in (group list :test test :key key)
+	for l = (funcall accumulator x)
+	if (>= l min-occurrences) collect (list (funcall key (first x)) l)))
+;;(accumulate-sorted-list '((a 1) (a 2) (b 4) (b 5) (c 100)) :key #'first :accumulator #'(lambda (x) (sum x :key #'second)))
+;;(accumulate-sorted-list '(a a a b b c d c) :test 'equal :min-occurences 2)
 
-(cl-defun accumulate-list (list &optional (test #'<) (min-occurences 1))
+(cl-defun accumulate-list (list &key (test #'<) (min-occurrences 1)
+				  (key #'identity) (accumulator #'length))
   "Returns a list of pairs (X count-X), where X is an element in
 list and count-X is the number of occurrences of X. Note that the
 resulting list is sorted on the value of COUNT-X"
-  (accumulate-sorted-list (sort list test) (lt-equal test) min-occurences))
-;;(accumulate-list '(a b c a b a d) #'symbol<) ==> ((a 3) (b 2) (c 1) (d 1))
-;;(accumulate-list '(a b c a b a d) #'symbol< 2)
+  (accumulate-sorted-list (cl-sort (copy-list list) test :key key)
+    :test (lt-equal test) :key key
+    :min-occurrences min-occurrences :accumulator accumulator))
+;;(accumulate-list '((a 1) (a 2) (b 4) (c 100) (b 5)) :test #'symbol< :key #'first :accumulator #'(lambda (x) (sum x :key #'second)))
+;;(accumulate-list '(a b c a b a d) :test #'symbol<)
+;;(accumulate-list '(a b c a b a d) :test #'symbol< :min-occurences 2)
 
 (cl-defun repetitions-1 (list &optional (start-index 0) (test #'eql))
   "Returns a list of repetitions from first element in list"
