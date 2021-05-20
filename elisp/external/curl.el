@@ -12,7 +12,7 @@
 ;;(curl-super-basic "http://localhost:9200/ada-portal/_doc/_search?pretty")
 
 (defun copy-jwt-token ()
-  "Extract JWT token values from cURL-header at the bottom of buffer to all other occurences.
+  "Extract JWT token values from cURL-header at the bottom of buffer to all other occurrences.
 
 Note, this version assumes that the token is the last property in string, so that it is immediately followed by the single quote character. This might change."
   (interactive)
