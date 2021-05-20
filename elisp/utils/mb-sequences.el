@@ -245,7 +245,7 @@ keywords TEST, KEY, AND FROM-END are #'<, #'IDENTITY, and NIL,
 respectively.
 
 \nKeywords supported:  :test :key :start :end :from-end
-\n(fn SEQ PREDICATE [KEYWORD VALUE]...)"
+\n(fn SEQ [KEYWORD VALUE]...)"
   (when (plusp (length cl-seq))
     (if from-end
       (minimum (nreverse cl-seq) :test test :key key)
@@ -271,8 +271,8 @@ respectively.
 \nKeywords supported:  :test :key :start :end :from-end
 \n(fn SEQ [KEYWORD VALUE]...)"
   (first (apply #'minimum sequence args)))
-;;(min-element '())
 ;;(min-element '(1 2 1 3) :key #'1+)
+;;(min-element '())
 
 (cl-defun min-value (sequence &rest args)
   "Returns minimum value in SEQUENCE
