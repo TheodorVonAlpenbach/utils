@@ -106,7 +106,7 @@ SYMBOL can be a symbol or a list of symbols. See function
       select-dao define-url-fn fmt if connect-toplevel
       hwhen htm-table htm-banner htm-form-button
       :export :import-from
-      add-hooki product)
+      add-hooki product accumulate-sorted-list group-hash)
   'prog1)
 (cl-indent  :table :tr)
 
@@ -116,7 +116,7 @@ SYMBOL can be a symbol or a list of symbols. See function
 	     substitute-if xml-extract-nodes
 	     write-csv call-if cl-set-difference
 	     db-add-user htm-button defclass
-	     cl-position-if)
+	     cl-position-if cl-member)
   'prog2)
 
 (cl-indent '(for define-derived-mode defun-ajax)
