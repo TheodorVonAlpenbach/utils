@@ -1,5 +1,11 @@
 (require 'mb-lists)
 
+(defconst 2pi (* 2 pi))
+
+(defun 2* (number) (* 2 number))
+(defun /2 (number) (/ number 2))
+(defun inv (number &optional float-p) (/ (if float-p 1.0 1) number))
+
 (defun sq (x) (* x x))
 
 (defun between= (x a b)
@@ -723,8 +729,14 @@ value in the specified interval. Else, it will be an integer."
       cumulative-weights)))
 ;;(random-weighted-index '(1 5 10))
 
-(defun random-weighted-element (elements)
+(defun random-weighted-element-1 (elements)
   (first (nth (random-weighted-index (project-sequence elements 1)) elements)))
+
+(defun random-weighted-element (elements &optional inverse)
+  (random-weighted-element-1
+   (if inverse (mapcol (bind #'inv t) 1 elements) elements)))
+
+;;(random-weighted-element '((a 1) (b 5) (c 10)) t)
 ;;(accumulate-list (loop repeat 100 collect (random-weighted-element '((a 1) (b 5) (c 10)))) #'symbol<)
 
 (defun interval-floor (n interval)
