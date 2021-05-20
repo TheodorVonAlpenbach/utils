@@ -21,7 +21,7 @@
 
 (cl-defun ld-make-table-identifier (keyword &optional (database *current-database*))
   (list (ld-database-keyword database) keyword))
-;;(ld-globalize-table :qwe)
+;;(ld-make-table-identifier :problem)
 
 (defun ld-table (table-designator)
   "Convert TABLE-DESIGNATOR to a ld-table object"

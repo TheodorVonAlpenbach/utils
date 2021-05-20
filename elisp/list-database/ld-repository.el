@@ -26,13 +26,13 @@
   "TODO. free-tables should be in a constant"
   (concat-directories +ld-repository+
 		      (ld-database-directory-name db backup)))
-;;(mapcar #'ld-database-repository (list *current-database* nil '(:dyne)))
+;;(loop for x in (list *current-database* nil '(:dyne)) collect (ld-database-repository x :iso-date))
 
 (defun ld-database-file (db &optional backup)
   "TODO. free-tables should be in a constant"
   (concat-directories (ld-database-repository db backup)
 		      +ld-database-metadata-filename+))
-;;(mapcar #'ld-database-file (list *current-DB* nil '(:dyne)))
+;;(loop for x in (list *current-database* nil '(:dyne)) collect (ld-database-file x :iso-date))
 
 (defun ld-table-filename (table)
   (concat (keyword->filename (ld-keyword table)) +ld-file-extension+))
@@ -61,7 +61,7 @@ Optional PRINT-FUNCTION should be a core print function, default is PP."
       (string-to-file "" path))
     (with-temp-file path
       (print-all table (current-buffer)))))
-;;(ld-save-table emps)
+;;(ld-save-table :problem :iso-date)
 
 (defun ld-save-database (db &optional backup)
   ;; First, save metadata
