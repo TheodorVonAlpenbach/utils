@@ -391,7 +391,16 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 	       (insert (format "(message \"%s %d\")" base-message i))
 	       (re-search-forward "[^[:space:]]")
 	       (forward-sexp 1)))))
-					;(switch-to-buffer "*Messages*")
+
+(cl-defun remove-log-messages-in-buffer (&optional (base-message "qwe"))
+  (interactive)
+  (let ((prefix (format "(message \"%s " base-message)))
+    (save-excursion
+       (goto-char (point-min))
+       (while (re-search-forward prefix nil t)
+	 (move-beginning-of-line nil)
+	 (kill-line 1)))))
+
 
 ;;; ido and flx
 (require 'ido)
@@ -402,6 +411,7 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 ;; disable ido faces to see flx highlights.
 (setq ido-enable-flex-matching t)
 (setq ido-use-faces nil)
+
 
 ;;; GC optimize
 (setq gc-cons-threshold 20000000)
@@ -449,11 +459,6 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 (require 'maths)
 (require 'cram)
 (require 'mb-gnuplot)
-
-(defun backward-down-list (&optional arg)
-  (interactive "^p")
-  (down-list (- (or arg 1))))
-(define-key global-map (kbd "C-M-S-d") 'backward-down-list)
 
 (defun backtrace-goto-error ()
   "Parses error message at current line in buffer *Backtrace*, and goes to indicated point."
