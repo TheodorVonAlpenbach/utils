@@ -536,7 +536,7 @@ day of the week."
       (:month mo) (:year y) (:olympiad (* 4 y)) 
       (:decennium (* 10 y)) (:century (* 100 y))
       (:millenium (* 1000 y))
-      (otherwise (error "Unknown unit."))))
+      (otherwise (error "Unknown unit `%S'." unit))))
 
   (defun etime/ (etime divisor)
     "Divide by DIVISOR the number of seconds represented by an encoded time object ETIME."
