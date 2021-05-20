@@ -35,11 +35,19 @@
               (replace-match (car (cdr current)) t nil)))
           (setq table (cdr table)))))))
 
-(defun iso-latin1-2-7bit (iso-latin-string)
-  (aif (assoc iso-latin-string *iso-latin1-encoding*)
-    (second it)
-    (error "Unknown ISO-LATIN-STRING %s." iso-latin-string)))
-;;(iso-latin1-2-7bit "ar")
+(defun iso-latin1-2-7bit-char (iso-latin-char &optional check-error-p encoding)
+  (let ((string (char-to-string iso-latin-char)))
+    (aif (assoc string (or encoding *iso-latin1-encoding*))
+      (second it)
+      (if check-error-p
+	(error "Unknown ISO-LATIN-STRING %c." iso-latin-char)
+	string))))
+;;(mapcar #'iso-latin1-2-7bit-char (list ?æ ?a))
+
+(defun iso-latin1-2-7bit (iso-latin-string &optional encoding)
+  (loop for c across iso-latin-string
+	concat (iso-latin1-2-7bit-char c)))
+;;(iso-latin1-2-7bit "ææ")
 
 (defconst *iso-latin1-encoding*
   '((" " " " "%20" -1)
