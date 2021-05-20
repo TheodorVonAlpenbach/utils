@@ -282,7 +282,7 @@ such the sum of the durations of the resulting notes equals the duration of the 
   (minimums (v-notes voice) #'p> :key #'n-pitch))
 
 (defun v-pitch-minimum-notes (voice)
-  "Returns a list of all occurences of notes with the minimum pitch within VOICE."
+  "Returns a list of all occurrences of notes with the minimum pitch within VOICE."
   (minimums (v-notes voice) #'p< :key #'n-pitch))
 
 (defun v-pitch-maximum (voice)
