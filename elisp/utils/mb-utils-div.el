@@ -763,4 +763,15 @@ Return nil if PROP does not exist."
      (setf ,plist (plist-delete ,plist ,prop))
      it))
 
+(defun modify-if (value test new-value)
+  "Return VALUE if (TEST VALUE) evaluates to nil, otherwise
+return NEW-VALUE"
+  (if (funcall test value) new-value value))
+
+(defmacro dprint (sexp &optional tag)
+  `(if ,tag
+     (message "%s: %s: %S" (iso-time) (sstring ,tag) ,sexp)
+     (message "%s: %S" (iso-time) ,sexp)))
+;;(dprint 123 'qwe)
+
 (provide 'mb-utils-div)
