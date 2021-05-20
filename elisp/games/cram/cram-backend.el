@@ -4,11 +4,33 @@
   (require 'cram-db-ui))
 (require 'glicko)
 
-(defconst +cram-default-rating+ +glicko-init-rating+)
-(defconst +cram-default-user-name+ "Mats")
-(defconst +cram-default-rating-window+ 200)
-(defconst +cram-ref-filter+ "^sk-ref-[3]"
-  "A regular expression that must match every drawable problem")
+(cl-defun cram-list-user-ratings (&optional (buffer-name "*User Ratings*"))
+  (interactive)
+  (with-output-to-temp-buffer buffer-name
+    (princ (tab-format (eval-when (load eval)
+			 (ld-select :user
+				    :columns (:name (round :rating) (round :RD) ::updated)
+				    :order-by :rating
+				    :order :desc)) 
+		       :header '("Name" "Rating" "RD" "Last update")
+		       :column-separator " | "))
+    (switch-to-buffer-other-window buffer-name)))
+;;(cram-list-user-ratings)
+
+(cl-defun cram-db-problem-ratings (&optional (filter *cram-ref-filter*))
+  "Returns a tree of problem ratings"
+  (eval-when (load eval)
+    (cl-sort (ld-select :problem
+	       :columns (:id
+			 :question
+			 :answer
+			 (round (first :rating))
+			 (round (second :rating))
+			 ::updated)
+	       :where (string-match filter :source-id))
+      #'> :key #'fourth)))
+;;(cram-db-problem-ratings "fugl")
+;;(minimum (mapcar #'second (cram-db-problem-ratings)) :test #'> :key #'length)
 
 (defun cram-default-problem-rating (operation level)
   "Eventually this method should take into account the problem nature (level and operation)"
@@ -65,42 +87,100 @@
        :key #'cram-problem-rating-e :test #'>))))
 ;;(cram-get-worst-problem)
 
-(defvar *cram-last-update* (the-creation))
-(defvar *cram-match-cache* nil)
+(defun cram-get-problems ()
+  (if *cram-ref-filter*
+    (ld-select :problem
+	       :where (string-match *cram-ref-filter* :source-id))
+    (ld-select :problem )))
 
-(defun cram-get-matches (&optional reset)
+(defun cram-get-problem-ids ()
+  (if *cram-ref-filter*
+    (ld-select :problem :column :id
+	       :where (string-match *cram-ref-filter* :source-id))
+    (ld-select :problem :column :id )))
+
+(cl-defun cram-get-matches (&optional (user *cram-current-user*) reset)
+  ;; (dprint (length *cram-match-cache*))
   (when reset
     (setf *cram-last-update* (the-creation))
     (nilf *cram-match-cache*))
-  (let* ((problem-ids
-	  (if +cram-ref-filter+
-	    (ld-select :problem :column :id
-		       :where (string-match +cram-ref-filter+ :source-id))
-	    (ld-select :problem :column :id )))
+  (let* ((problem-ids (cram-get-problem-ids))
 	 (matches
 	  (append
-	    (ld-select :match
-	      :where (and (time< *cram-last-update* ::updated)
-			  (and problem-ids
-			       (member :match-id problem-ids))))
-	    *cram-match-cache*)))
+	   (ld-select :match
+	     :where (and (time< *cram-last-update* ::updated)
+			 (= :user-id (cram-user-id user))
+			 (member :problem-id problem-ids)))
+	   *cram-match-cache*)))
     (setf *cram-last-update* (now))
     (setf *cram-match-cache* matches)
+    ;; (dprint (length *cram-match-cache*))
     matches))
-;;(length (mapcar #'second (cram-get-matches)))
+;;(length (cram-get-matches *cram-current-user* t))
+;;(length (cram-get-matches))
+;;(length (mapcar #'second (cram-get-matches *cram-current-user* t)))
 ;;(sort (mapcar #'second (cram-get-matches )) #'string>)
 
+(defun cram-recent-matches (matches seconds)
+  "Return all problem in MATCHES posed during last SECONDS seconds."
+  (loop for m in matches
+	while (< (time- (now) (cram-match-timestamp m) :second) seconds)
+	collect m))
+;;(cram-recent-matches (cram-get-matches *cram-current-user* t) 500)
+;;(first (cram-get-matches *cram-current-user* t))
+;;(length (cram-get-matches *cram-current-user* t))
+;;(recent-problem-ids (mapcar #'cram-match-problem-id (cram-recent-matches (cram-get-matches) 60)))
+
+(cl-defun match-weight (match t0 &optional (tp (* 24 3600)) (r 0.1))
+  (+ (modify-if (cram-match-score match) #'zerop -1)
+     (expt r (/ (- t0 (unix-time (cram-match-timestamp match))) tp))))
+;;(match-weight (car (ld-select :match)) (unix-time))
+
+(cl-defun cram-get-cram-problem-id-1 (&optional (user (cram-current-user)))
+  "Return the most recent problem that has not been solved the
+last three times"
+  (loop for x in (group-hash (cram-get-matches user)
+		    :key #'cram-match-problem-id)
+	 collect (list
+		  (cram-match-problem-id (car x))
+		  (sum x :key (bind #'match-weight (unix-time))))))
+;;(mapcar (compose #'string-remove-props #'fourth #'cram-problem #'car) (cl-sort (cram-get-cram-problem-id-1) #'< :key #'second))
+;;(length (cram-get-cram-problem-id-1))
+
+(cl-defun cram-get-cram-problem-id (&optional (user (cram-current-user)))
+  "Return the most recent problem that has not been solved the
+last three times"
+  (caar (minimum (cram-get-cram-problem-id-1 user) :key #'second)))
+;;(cram-problem (cram-get-cram-problem-id))
+
+(defun cram-problem (id)
+  (first (ld-select :problem :where (= :id id))))
+
 (cl-defun cram-get-cram-problem (&optional (user (cram-current-user)))
+  "Return the most recent problem that has not been solved the
+last three times"
+  (or (first (cram-db-unused-problems))
+      (cram-problem (cram-get-cram-problem-id user))))
+;;(cram-get-cram-problem)
+
+(cl-defun cram-get-cram-problem-old (&optional (user (cram-current-user)) (seconds 60))
   "Return the most recent problem that has not been solved the last three times"
   (or (first (cram-db-unused-problems))
-      (let ((ms (cram-get-matches)))
+      (let* ((ms (cram-get-matches))
+	     (recent-problem-ids (mapcar #'cram-match-problem-id
+				   (cram-recent-matches ms seconds))))
+	;; remove matches with too recent problems
+	(setf ms (cl-remove-if #'(lambda (x)
+				   (member (cram-match-problem-id x)
+					   recent-problem-ids))
+		   ms))
 	(or (loop for m3 in (mapcar (bind #'head 3 1)
-			      (group (cl-sort ms
+			      (group (cl-sort (copy-tree ms)
 				       #'> :key #'cram-match-problem-id)
 				:key #'cram-match-problem-id :test #'=))
 		  for id = (cram-match-problem-id (first m3))
 		  for p = (first (ld-select :problem :where (= id :id)))
-		  ;; do (message "%s" (cram-problem-answer p))
+		  ;; do (dprint (cram-problem-answer p))
 		  if (and
 		      m3
 		      ;; must have been asked last time more than one minute ago
@@ -113,17 +193,23 @@
 			;; (message "diff: %S" diff)
 			(> diff 1))
 		      
-		      (loop for m in m3
-			    for false-p = (not (cram-correct-response-p p (cram-match-response m)))
-			    ;; do (message "%s (%s), is false? %S"
-			    ;; 		(cram-match-response m)
-			    ;; 		(cram-problem-answer p)
-			    ;; 		false-p)
-			    thereis false-p))
+		      (let ((res 
+			     (loop for m in m3
+				   for false-p = (not (cram-correct-response-p
+						       p (cram-match-response m)))
+				   ;; do (message "%s (%s), is false? %S"
+				   ;; 		(cram-match-response m)
+				   ;; 		(cram-problem-answer p)
+				   ;; 		false-p)
+				   thereis false-p)))
+			;; (when res
+			;;   (dprint m3))
+			res))
 		  return p)
 	    (progn
-	      (message "No recent errors: selecting one at random...")
-	      (cram-db-random-problem :window 10000 :matches ms))))))
+	      (message "%s: No recent errors: selecting one at random..."
+		       (iso-time))
+	      (cram-db-random-problem :matches ms))))))
 ;;(cram-get-cram-problem)
 ;;(time- (add-etime-date (now) :day 1))
 
@@ -243,7 +329,7 @@ Why was cram-current-user called with t (update arg)?."
 ;;(mapcar #'cram-operator '(:addition :substraction :multiplication :division))
 
 (defun problem-exists (operation args)
-  (ld-select :problems
+  (ld-select :problem
     :where (and (eql :operation operation)
 		(equal :arguments args))))
 ;;(problem-exists :addition '(0 0))
@@ -318,7 +404,17 @@ The rules can be summarized in these examples:
 		     (split-string it "|"))))))
 ;;(cram-expand-alternatives (car (ld-select :problem :where (string-match* "konstant" :answer))))
 ;;(ld-select :problem)
+(defconst +cram-encoding+
+  '(("å" "aa" "%E5" 229 "Ã¥")
+    ("æ" "ae" "%E6" 230 "Ã¦")
+    ("ø" "oe" "%F8" 248 "Ã¸")))
 
+(defun cram-normalize-string (string)
+  (iso-latin1-2-7bit (downcase string) +cram-encoding+))
+;;(cram-normalize-string "Bergstrøm")
+
+(require 'levenshtein)
+;;(levenshtein-distance "kvinand" "kvinadn")
 (defun cram-correct-response-p (problem response)
   "Return nil if and only if RESPONSE is incorrect according to PROBLEM.
 RESPONSE is correct if it
@@ -330,12 +426,12 @@ where SOLUTION is a column in PROBLEM. Whitespace repetitions are
 ignored both in SOLUTION and RESPONSE. Also these rules apply to
 each item in the ALTERNATIVES column of PROBLEM.
 
-See also cram-extract-alternatives.
-"
-  (cl-member (downcase response)
-	     (mapcar #'downcase
-	       (cram-expand-alternatives problem)) :test #'string=))
-;;(cram-correct-response-p (car (ld-select :problem :where (string-match "Klaus" :answer))) "Doldinger")
+See also cram-extract-alternatives."
+  (cl-member (cram-normalize-string response)
+      (mapcar #'cram-normalize-string
+	(cram-expand-alternatives problem))
+    :test #'(lambda (x y) (< (levenshtein-distance x y) 3))))
+;;(cram-correct-response-p (car (ld-select :problem :where (string-match "Klaus" :answer))) "Dold_inger")
 
 (cl-defun cram-score (problem response time-elapsed
 			      &optional (free-time 5000) (max-time 30000))
@@ -411,14 +507,12 @@ ratings, and hand the onus of DB update to the caller"
 	       (iso-date-and-time :with-seconds t)
 	       response
 	       time-elapsed
+	       score
 	       new-ratings)
       ;; why return this from this destruct form?
       ;; it is never used. Debugging purposes?
       (list updated-user updated-problem))
     score))
-
-(defun cram-init (&optional force)  
-  (cram-db-init force))
 
 (defun cram-reset-all ()
   (when (yes-or-no-p "Are you sure you want to reset everything? ")

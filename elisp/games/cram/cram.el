@@ -1,5 +1,4 @@
 (require 'cram-config)
-(require 'cram-backend)
 (require 'cram-common)
 
 (defun cram-format-problem (question &optional max-length)
@@ -15,7 +14,8 @@
     (format "Your rating: %d (RD = %d)\n"
       (cram-user-rating-e user) (cram-user-rating-d user))
     (format "Problem rating: %d (RD = %d)\n"
-      (cram-problem-rating-e problem) (cram-problem-rating-d problem))
+      (or (cram-problem-rating-e problem) -1)
+      (or (cram-problem-rating-d problem) -1))
     "\n"
     (format "Problem #%d:\n" (cram-problem-id problem))
     (cram-format-problem (cram-problem-question problem))))
@@ -62,7 +62,8 @@
     (format "%s Correct response is %S\nAlternatives: %S"
       (propertize "Incorrect!" 'face
 		  (list :foreground error-color :weight 'bold))
-      answer (format-alternatives alternatives))))
+      (string-remove-props answer)
+      (format-alternatives alternatives))))
 
 (cl-defun long-judgement (response time answer alternatives
 			  score old-ratings new-ratings)
@@ -147,6 +148,20 @@ the *cram-current-problem* which is yet another structure."
 (defun cram-auto-continue-p ()
   *cram-auto-continue*)
 
+(defun cram-help ()
+  (interactive)
+  (message "Not implemented"))
+
+(defun cram-browse-wikipedia ()
+  (interactive)
+  (browse-url (format "https://no.wikipedia.org/wiki/%s"
+		(cram-problem-answer (cram-current-problem)))))
+
+(defun cram-browse-store-norske ()
+  (interactive)
+  (browse-url (format "https://snl.no/%s"
+		(cram-problem-answer (cram-current-problem)))))
+
 ;;; tab format. TODO move this somewhere else
 (cl-defun tab-column-type (column)
   (cond
@@ -190,33 +205,6 @@ the *cram-current-problem* which is yet another structure."
 ;;(insert (tab-format '(("foo" 1 "bar") ("qwe" 1233456 "qwebar")) :header '("qwe" "ewq" "qwebar")))
 ;;(tab-format '((1 "bar") (1233456 "qwebar")) :header '("numb" "string2") :column-separator "|")
 
-;;; Stats
-(cl-defun cram-list-user-ratings (&optional (buffer-name "*User Ratings*"))
-  (interactive)
-  (with-output-to-temp-buffer buffer-name
-    (princ (tab-format (eval-when (load eval)
-			 (ld-select :users 
-				    :columns (:name (round :rating) (round :RD) ::updated)
-				    :order-by :rating
-				    :order :desc)) 
-		       :header '("Name" "Rating" "RD" "Last update")
-		       :column-separator " | "))
-    (switch-to-buffer-other-window buffer-name)))
-;;(cram-list-user-ratings)
-
-(cl-defun cram-db-problem-ratings (&optional (filter +cram-ref-filter+))
-  "Returns a tree of problem ratings"
-  (eval-when (load eval)
-    (cl-sort (ld-select :problem
-	       :columns (:id :question
-			     :answer
-			     (round (first :rating))
-			     (round (second :rating))
-			     ::updated)
-	       :where (string-match filter :source-id))
-      #'> :key #'fourth)))
-;;(cram-db-problem-ratings "fugl")
-;;(minimum (mapcar #'second (cram-db-problem-ratings)) :test #'> :key #'length)
 
 (cl-defun cram-list-problem-ratings
     (&optional (buffer-name "*Problem Ratings*") (max-question-length 70))
@@ -251,7 +239,8 @@ the *cram-current-problem* which is yet another structure."
 (defun cram-answer-mode-map ()
   (let ((map (make-keymap))
 	(list-map (make-sparse-keymap))
-	(user-map (make-sparse-keymap)))
+	(user-map (make-sparse-keymap))
+	(browse-map (make-sparse-keymap)))
 
     (suppress-keymap map)
     (unsuppress-keymap map "+-0123456789")
@@ -281,12 +270,17 @@ the *cram-current-problem* which is yet another structure."
     (define-key map [kp-enter] 'cram-enter)
     (define-key map [backspace] 'delete-backward-char)
     (define-key map [delete] 'delete-forward-char)
+
+    (define-key map "b" browse-map)
+    (define-key browse-map "w" 'cram-browse-wikipedia)
+    (define-key browse-map "s" 'cram-browse-store-norske)
+
     map))
 
 (defvar cram-answer-mode-map ;;(nilf cram-answer-mode-map)
   (cram-answer-mode-map)
   "Keymap containing cram commands.")
-;;(setf cram-answer-mode-map (cram-answer-mode-map))
+;;(setf cram-answer-mode-map (cram-answer-mode-map)) 
 
 ;;; Mode line
 (cl-defun cram-mode-line-user-description ()
@@ -324,8 +318,15 @@ the *cram-current-problem* which is yet another structure."
   (evil-emacs-state)
   (define-key cram-problem-mode-map [return] #'cram-enter))
 
+(defun cram-init (&optional force)  
+  (setf *cram-last-update* (the-creation))
+  (setf *cram-match-cache* nil)
+  (require 'cram-db)
+  (cram-init-database force)
+  (require 'cram-backend))
+
 (cl-defun cram-1 (filter &optional (level 1))
-  (setf +cram-ref-filter+ filter)
+  (setf *cram-ref-filter* filter)
   (cram-init t)
   (switch-to-buffer +cram-buffer+)
   (cram-new level))

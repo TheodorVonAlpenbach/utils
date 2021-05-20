@@ -33,9 +33,10 @@
 (defalias 'cram-match-timestamp #'second)
 (defalias 'cram-match-response #'third)
 (defalias 'cram-match-time #'fourth)
-(defalias 'cram-match-problem-id #'fifth)
+(defalias 'cram-match-score #'fifth)
 (defalias 'cram-match-user-id #'sixth)
-(defalias 'cram-match-user-rating #'seventh)
-(defalias 'cram-match-match-rating #'eighth)
+(defalias 'cram-match-problem-id #'seventh)
+(defalias 'cram-match-user-rating #'eighth)
+(defalias 'cram-match-problem-rating #'ninth)
 
 (provide 'cram-common)

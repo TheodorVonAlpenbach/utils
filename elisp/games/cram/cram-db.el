@@ -43,20 +43,21 @@
       ;; TODO: rename to timestamp
       (:iso-time :type string)      ; the date and time the :match was presented
       ;; TODO: rename to :response
-      (:answer)                     ; what the user :answered
+      (:response)                   ; what the user :answered
       (:time :type integer)         ; the time (in millisecond) user spent before answering
-      ;; TODO: for sanity swap order on the following two columns
-      (:match-id :type integer)     ; reference to match task (should be named :problem-id) 
+      (:score :type number)         ; the calculated score
       (:user-id :type integer)      ; reference to match user
+      (:problem-id :type integer)     ; reference to match task (should be named :problem-id) 
       ;; Glicko ratings with deviation (GR RD) just before the match
       (:user-rating :type (number number))
-      (:match-rating :type (number number)))))
+      (:problem-rating :type (number number)))))
 
   "TODO: this is a constant, but should eventually become a variable
 Note that this is a PLIST format of coldefs. Hence PLIST-P must be set to t in `ld-make-schema'")
 
 ;;(first (fourth (second (first (fourth *cram-db*)))))
 ;;(ld-table-column-definitions (ld-table :users))
+;; match-rating
 
 (defun cram-update-schema (keyword)
   "Not used. Need to rename (table column) and add (table column)"
@@ -81,8 +82,9 @@ Note that this is a PLIST format of coldefs. Hence PLIST-P must be set to t in `
 ;;(setf *current-database* nil)
 ;;(setf *dbcopy* (copy-tree *current-database*))
 ;;(setf *current-database* (copy-tree *dbcopy*))
-;;(ld-replace-table '(:cram :matchs) (ld-table-add-column :matchs '(:level :type integer) :colpos 2))
-;;(ld-table :matchs)
+;;(ld-replace-table '(:cram :match) (ld-table-add-column :match '(:score :type number) :colpos 4) :value .5)
+;;(ld-table-add-column :match '(:score :type number) :colpos 4)
+;;(ld-table :match)
 ;;(loop for task in (cram-db-tasks) do (setf (cram-task-level task) (cram-estimate-level task)))(provide 'cram-db)
 
 (provide 'cram-db)

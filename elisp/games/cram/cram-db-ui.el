@@ -10,11 +10,6 @@
 (require 'cram-db)
 (require 'cram-common)
 
-;;;; Init
-(defun cram-db-init (&optional force) 
-  (cram-init-database force))
-
-
 ;;;; Users
 (defun cram-db-insert-user (name rating)
   (ld-insert :user (list name rating)
@@ -55,7 +50,7 @@ from the more primitive function `cram-user-id'"
 ;;(cram-db-user-names :sans "Ludvik")
 
 (cl-defun cram-db-user-ratings (user-designator)
-  (ld-select :matches :where (= :user-id (cram-user-id* user-designator))
+  (ld-select :match :where (= :user-id (cram-user-id* user-designator))
 	     :columns (:user-rating ::created)))
 ;;(cram-db-user-ratings "Ludvik")
 
@@ -67,20 +62,34 @@ from the more primitive function `cram-user-id'"
 ;;(cram-db-last-problem)
 
 ;;TODO
-(cl-defun cram-db-random-problem (&key (rating (car +cram-default-rating+))
-				    (window +cram-default-rating-window+)
-				    (idle-minutes 10)
-				    (matches nil))
+(cl-defun cram-db-random-problem-1 ()
+  (awhen (ld-select :problem
+	   :where (string-match *cram-ref-filter* :source-id))
+    (random-elt it)))
+;;(cram-db-random-problem-1)
+
+;;; strategy for weighting
+;;; number of attempts
+;;; time since last error
+;;; time since last response
+(cl-defun cram-db-random-problem (&key (matches nil))
   "Low level function that accesses internals of a table.
 TODO: Avoid crash on empty db"
   (if matches
-    (ld-select :problem
-      :where (= :id (random-elt
-		     (project-sequence matches #'cram-match-problem-id))))
-    (awhen (ld-select :problem
-	     :where (string-match +cram-ref-filter+ :source-id))
-      (random-elt it))))
-;;(cram-db-random-problem)
+    (let ((acc (accumulate-list
+		(project-sequence matches #'cram-match-problem-id)))
+	  (dacc (accumulate-list
+		 (project-sequence matches #'cram-match-response)
+		  :test #'string<)))
+      (dprint (pp (cl-sort dacc #'> :key #'second)) 'dacc)
+      (dprint (cl-sort (copy-tree acc) #'> :key #'second) 'acc>)
+      (dprint (cl-sort (copy-tree acc) #'< :key #'second) 'acc<)
+      (dprint (length (copy-tree acc)) 'lacc)
+      (aif (ld-select :problem :where (= :id (random-weighted-element acc t)))
+	(first it)
+	(cram-db-random-problem-1)))
+    (cram-db-random-problem-1)))
+;;(cram-db-random-problem :matches (cram-get-matches))
 
 ;; not working when no questions have been asked?
 (cl-defun cram-db-random-problem-old (&key (rating (car +cram-default-rating+))
@@ -89,7 +98,7 @@ TODO: Avoid crash on empty db"
   "Low level function that accesses internals of a table.
 TODO: Avoid crash on empty db"
   (aif (ld-select :problem
-	 :where (and (string-match +cram-ref-filter+ :source-id)
+	 :where (and (string-match *cram-ref-filter* :source-id)
 		     (awhen rating (within it (1-sphere window rating)))
 		     (time< ::updated (add-time (now) :minute (- idle-minutes)))))
     (random-elt it)
@@ -113,8 +122,8 @@ Two solutions "
   "Same as ld-select :problem, but discards the
 *cram-same-problem-limit* newest.
 Optional QUARANTINE is not implemented."
-  (if +cram-ref-filter+
-    (ld-select :problem :where (string-match +cram-ref-filter+ :source-id))
+  (if *cram-ref-filter*
+    (ld-select :problem :where (string-match *cram-ref-filter* :source-id))
     (ld-select :problem)))
 ;;(cram-db-problems)
 
@@ -124,9 +133,10 @@ Optional QUARANTINE is not implemented."
     (cl-set-difference ps (ld-select :match)
       :test #'(lambda (x y) (= (cram-problem-id x)
 			       (cram-match-problem-id y))))))
+;;(first (cram-db-unused-problems))
 ;;(length (cram-db-unused-problems))
 ;;(ld-select :problem :where (= :id 107))
-;;(ld-select :match :where (= :match-id 107))
+;;(ld-select :match :where (= :problem-id 107))
 ;;(length (ld-select :match))
 ;;(cl-set-difference '((1 2) (2 4)) '((1 1) (3 3)) :test #'(lambda (x y) (= (car x) (car y))))
 
@@ -141,17 +151,16 @@ Optional QUARANTINE is not implemented."
 
 ;;;; Matches
 ;;; Combined operations
-(defun cram-db-report-match (user problem iso-time answer time
+(defun cram-db-report-match (user problem iso-time response time score
 			     new-user-rating new-problem-rating)
   "Add new match to DB, and update user and problem ratings.
 It returns the updates of user and problem as a pair"
   (destructuring-bind (user-id name old-user-rating &rest uargs)
       user
-    (destructuring-bind (problem-id sid q a p
-				    old-problem-rating &rest targs)
-	problem
-      (ld-insert :match (list iso-time answer time
-				problem-id user-id
+    (let ((problem-id (cram-problem-id problem))
+	  (old-problem-rating (cram-problem-rating problem)))
+      (ld-insert :match (list iso-time response time score
+				user-id problem-id
 				old-user-rating old-problem-rating))
       (list (ld-update :user (= (:id) user-id)
 		       `(,new-user-rating) (:rating))
