@@ -1,5 +1,4 @@
 (require 'maths-config)
-(require 'maths-backend)
 (require 'maths-common)
 
 (defun maths-operator-string (operator)
@@ -152,32 +151,6 @@ the *maths-current-task* which is yet another structure."
 ;;(insert (tab-format '(("foo" 1 "bar") ("qwe" 1233456 "qwebar")) :header '("qwe" "ewq" "qwebar")))
 ;;(tab-format '((1 "bar") (1233456 "qwebar")) :header '("numb" "string2") :column-separator "|")
 
-;;; Stats
-(cl-defun maths-list-user-ratings (&optional (buffer-name "*User Ratings*"))
-  (interactive)
-  (with-output-to-temp-buffer buffer-name
-    (princ (tab-format (eval-when (load eval)
-			 (ld-select :users 
-				    :columns (:name :age (round :rating) (round :RD) ::updated)
-				    :order-by :rating
-				    :order :desc)) 
-		       :header '("Name" "Age" "Rating" "RD" "Last update")
-		       :column-separator " | "))
-    (switch-to-buffer-other-window buffer-name)))
-;;(maths-list-user-ratings)
-
-(defun maths-db-task-ratings ()
-  "Returns a tree of task ratings"
-  (eval-when (load eval)
-    (ld-select :tasks
-	       :columns (:id
-			 (list :operation :arguments :solution)
-			 (round :rating)
-			 (round :RD)
-			 ::updated)
-	       :order-by :rating
-	       :order :desc)))
-
 (cl-defun maths-list-task-ratings (&optional (buffer-name "*Task Ratings*"))
   "Prints a table of all tasks with their corresponding rating."
   (interactive)
@@ -274,6 +247,10 @@ the *maths-current-task* which is yet another structure."
 \\{maths-mode-map}"
    (setf buffer-read-only nil)
    (maths-set-mode-line))
+
+(defun maths-init ()
+  (maths-init-database)
+  (require 'maths-backend))
 
 (cl-defun maths (&optional (level 1))
   (interactive)

@@ -8,6 +8,33 @@
 (defconst +maths-default-user-name+ "Mats")
 (defconst +maths-default-rating-window+ 200)
 
+;;; Stats
+(cl-defun maths-list-user-ratings (&optional (buffer-name "*User Ratings*"))
+  (interactive)
+  (with-output-to-temp-buffer buffer-name
+    (princ (tab-format (eval-when (load eval)
+			 (ld-select :users 
+				    :columns (:name :age (round :rating) (round :RD) ::updated)
+				    :order-by :rating
+				    :order :desc)) 
+		       :header '("Name" "Age" "Rating" "RD" "Last update")
+		       :column-separator " | "))
+    (switch-to-buffer-other-window buffer-name)))
+;;(maths-list-user-ratings)
+
+(defun maths-db-task-ratings ()
+  "Returns a tree of task ratings"
+  (eval-when (load eval)
+    (ld-select :tasks
+	       :columns (:id
+			 (list :operation :arguments :solution)
+			 (round :rating)
+			 (round :RD)
+			 ::updated)
+	       :order-by :rating
+	       :order :desc)))
+
+
 (defun maths-default-task-rating (operation level)
   "Eventually this method should take into account the task nature (level and operation)"
   +maths-default-rating+)
@@ -301,9 +328,6 @@ ratings, and hand the onus of DB update to the caller"
       ;; it is never used. Debugging purposes?
       (list updated-user updated-task))
     score))
-
-(defun maths-init ()
-  (maths-db-init))
 
 (defun maths-reset-all ()
   (when (yes-or-no-p "Are you sure you want to reset everything? ")

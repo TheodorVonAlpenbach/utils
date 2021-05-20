@@ -10,10 +10,6 @@
 (require 'maths-db)
 (require 'maths-common)
 
-;;; Init
-(defun maths-db-init () 
-  (maths-init-database))
-
 ;;; Users
 (defun maths-db-insert-user (name age rating RD)
   (ld-insert :users (list name age rating RD)
