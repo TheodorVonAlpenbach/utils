@@ -71,9 +71,10 @@
 	(,+mb-lisp-dir+ "global/mb-indent.el")
 	(,+mb-lisp-dir+ "mode-extensions/mb-evil.el")
 	(,+mb-lisp-dir+ "mode-extensions/mb-evil-map.el")
-	(,+mb-lisp-dir+ "mode-extensions/mb-lisp.el")
-	(,+mb-lisp-dir+ "quiz/quiz-park.el")
+	;; (,+mb-lisp-dir+ "mode-extensions/mb-lisp.el")
+	;; (,+mb-lisp-dir+ "quiz/quiz-park.el")
 	(,+mb-lisp-dir+ "div/scratch.el")
+	(,+mb-lisp-dir+ "games/cram/cram.el")
 
 	;; Common Lisp utils
 	(,+home-dir+ "git/utils/lisp/topology/shapes.lisp")
@@ -81,7 +82,7 @@
 	(,+home-dir+ "data/small-arbeidslog.org" :point :end :keyboard :no
 		     :time-paragraphs t)
 
-	;; remote files (shared with windows)
+	;; ;; remote files (shared with windows)
 	(,pf-dir "progfab/log.org")
 
 	;; Note special treatment of arbeidslog in mb-insert-state-init!
@@ -105,5 +106,4 @@
 (setf scheme-program-name "guile")
 
 ;; lisp
-;; (setf inferior-lisp-program "clisp")
 (setf inferior-lisp-program "clisp")
