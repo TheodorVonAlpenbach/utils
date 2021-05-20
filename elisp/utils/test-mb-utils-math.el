@@ -67,18 +67,24 @@
   (should (equal (next-smaller-multiple 5 5) 0))
   (should (equal (next-smaller-multiple 6 5) 5)))
 
+(defun test-random-weighted-element-1 (weighted-elements inverse)
+  (abs (modb
+	(vec-angle
+	 (if inverse
+	   (mapcar (bind #'inv t) (project-sequence weighted-elements 1))
+	   (project-sequence weighted-elements 1))
+	 (project-sequence
+	  (accumulate-list
+	   (loop repeat 1000
+		 collect (random-weighted-element weighted-elements inverse))
+	   :test #'symbol<)
+	  1))
+	2pi (- pi))))
+;;(test-random-weighted-element-1 '((a 1) (b 5) (c 10)) t)
+
 (ert-deftest test-random-weighted-element ()
   "Test of `random-weighted-element'"
-  (should (< (abs (modb (vec-angle
-		      '(1 5 10)
-		      (project-sequence
-		       (accumulate-list
-			(loop repeat 1000
-			      collect (random-weighted-element
-				       '((a 1) (b 5) (c 10))))
-			#'symbol<)
-		       1))
-			 (* 2 pi) (- pi)))
-	      .1)))
+  (should (< (test-random-weighted-element-1 '((a 1) (b 5) (c 10)) nil) .1))
+  (should (< (test-random-weighted-element-1 '((a 1) (b 5) (c 10)) 1) .1)))
 
 (provide 'test-mb-utils-math)

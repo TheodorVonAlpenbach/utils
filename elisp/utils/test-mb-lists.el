@@ -108,6 +108,13 @@
 		   :test #'(lambda (x y) (eql y 'd)))
 		 '((a) (b d) (a d) (a) (b)))))
 
+(ert-deftest test-group-hash ()
+  "Test of `group-hash'"
+  (should (equal (group-hash '(a b d a d a b) :key #'car)
+		 '(((a) (a) (a)) ((b) (b)) ((c)) ((d)))))
+  (should (equal (group-hash '((a) (b) (c) (a) (b) (a) (d)) :key #'car)
+		 '(((a) (a) (a)) ((b) (b)) ((c)) ((d))))))
+
 (ert-deftest test-head ()
   "Test of `head'"
  (should (equal (head 0 '(a b c)) nil))
@@ -115,7 +122,7 @@
 
 (ert-deftest test-accumulate-list ()
   "Test of `accumulate-list'"
-  (should (equal (accumulate-list '(a b c a b a d) #'symbol<)
+  (should (equal (accumulate-list '(a b c a b a d) :test #'symbol<)
 		 '((a 3) (b 2) (c 1) (d 1)))))
 
 (ert-deftest test-memcase ()

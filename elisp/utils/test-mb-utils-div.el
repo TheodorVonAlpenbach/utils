@@ -117,4 +117,9 @@
 		   (list (plist-pop plist :qwe) plist))
 		 '(1 (:ewq 2)))))
 
+(ert-deftest test-modify-if ()
+  "Test of `modify-if'"
+  (should (equal (modify-if 1 #'zerop 'zero) 1))
+  (should (equal (modify-if 0 #'zerop 'zero) 'zero)))
+
 (provide 'test-mb-utils-div)
