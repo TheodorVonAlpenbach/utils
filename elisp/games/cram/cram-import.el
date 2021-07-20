@@ -18,8 +18,8 @@ See header of imports.cvs for correct format"
 ;;(cram-import-csv "~/git/utils/elisp/games/cram/planter.csv")
 ;;((cram-import-csv "~/projects/utils/elisp/games/cram/serbokroatisk.csv")
 ;;(ld-select :problem :where (string-match "sonne" :answer))
-;;(ld-select :problem :where (string-match "broka" :answer))
-;;(ld-select :problem :where (string-match "brush" :answer))
+;;(ld-select :problem :where (string-match "toppmeis" :answer))
+;;(ld-select :problem :where (string-matopptch "brush" :answer))
 ;;(ld-select :problem :where (string-match "vaktel" :answer))
 ;;(ld-save-database *current-database*)
 ;;(cram-import-csv "~/projects/utils/elisp/games/cram/imports.csv")
@@ -96,6 +96,6 @@ See header of imports.cvs for correct format"
 	 = (project (split-string l "\t") '(0 4 5 6 7 9))
 	 for n from start-index
 	 collect (format-norsk-fugl n order family subfamily genus species norsk))))
-;;(insert (format-norske-fugler 109))
+;;(insert (format-norske-fugler 164))
 
 (provide 'cram-import)

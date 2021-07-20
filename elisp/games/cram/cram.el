@@ -206,6 +206,19 @@ the *cram-current-problem* which is yet another structure."
 ;;(tab-format '((1 "bar") (1233456 "qwebar")) :header '("numb" "string2") :column-separator "|")
 
 
+(cl-defun cram-list-last-matches
+    (&optional (buffer-name "*Last matches") (max-question-length 20))
+  "Prints a table of last matches"
+  (interactive)
+  (with-output-to-temp-buffer buffer-name
+    (princ (tab-format
+	    (mapcol (bind #'cram-format-problem max-question-length)
+		    0 (cram-db-last-matches))
+	    :header '("Timestamp" "Problem" "Answer" "Solution" "Score")
+	    :column-separator " | "))
+    (switch-to-buffer-other-window buffer-name)))
+;;(cram-list-last-matches)
+
 (cl-defun cram-list-problem-ratings
     (&optional (buffer-name "*Problem Ratings*") (max-question-length 70))
   "Prints a table of all problems with their corresponding rating."
@@ -251,6 +264,7 @@ the *cram-current-problem* which is yet another structure."
     (define-key list-map "R" 'cram-list-problem-ratings)    
     (define-key list-map "p" 'cram-plot-user-ratings)
     (define-key list-map "P" 'cram-plot-problem-ratings)
+    (define-key list-map "m" 'cram-list-last-matches)
 
     ;; User
     (define-key map "u" user-map)

@@ -17,6 +17,18 @@
     (switch-to-buffer-other-window buffer-name)))
 ;;(cram-list-user-ratings)
 
+(cl-defun cram-db-last-matches (&optional (n 10))
+  "Returns a tree of problem ratings"
+  (loop for m in (project-sequence (head n (cram-get-matches))
+				   '(cram-match-problem-id
+				     cram-match-timestamp
+				     cram-match-response
+				     cram-match-score))
+	for x = (project (cram-problem (car m)) '(cram-problem-question
+						  cram-problem-answer))
+	collect (project (append (cdr m) x) '(0 3 1 4 2))))
+;;(cram-db-last-matches)
+
 (cl-defun cram-db-problem-ratings (&optional (filter *cram-ref-filter*))
   "Returns a tree of problem ratings"
   (eval-when (load eval)
@@ -131,20 +143,47 @@
 ;;(length (cram-get-matches *cram-current-user* t))
 ;;(recent-problem-ids (mapcar #'cram-match-problem-id (cram-recent-matches (cram-get-matches) 60)))
 
-(cl-defun match-weight (match t0 &optional (tp (* 24 3600)) (r 0.1))
-  (+ (modify-if (cram-match-score match) #'zerop -1)
-     (expt r (/ (- t0 (unix-time (cram-match-timestamp match))) tp))))
-;;(match-weight (car (ld-select :match)) (unix-time))
+(cl-defun cram-modify-scores (scores &optional (success-factor 2))
+  "Set zero scores to -1, and double succesively scores after
+last zero score."
+  (destructuring-bind (head tail) (split2 0 scores)
+    (append
+     (cl-mapcar #'* head (mapcar (bind #'expt success-factor 1)
+			   (n-0 (length head))))
+     (substitute -0.9 0 tail))))
+;;(cram-modify-scores '(.5 .4 .3 0 .5))
+
+(cl-defun cram-get-cram-problem-id-1-old (&optional (user (cram-current-user)))
+  (loop for x in (group-hash (cram-get-matches user)
+		   :key #'cram-match-problem-id)
+	for scores = (cram-modify-scores (mapcar #'cram-match-score x))
+	for timestamps = (mapcar #'cram-match-timestamp x)
+	collect (list
+		 (cram-match-problem-id (car x))
+		 (loop for s in scores for ts in timestamps
+		       sum (match-weight s ts (unix-time))))))
+
+(cl-defun match-weight
+    (score delta-t &optional (tp (* 2 24 3600.0)) (r 0.2))
+  (* score (expt r (/ delta-t tp))))
+;;(loop for i below 10 collect (match-weight 1 (* 3600 24 i)))
 
 (cl-defun cram-get-cram-problem-id-1 (&optional (user (cram-current-user)))
-  "Return the most recent problem that has not been solved the
-last three times"
-  (loop for x in (group-hash (cram-get-matches user)
-		    :key #'cram-match-problem-id)
-	 collect (list
-		  (cram-match-problem-id (car x))
-		  (sum x :key (bind #'match-weight (unix-time))))))
-;;(mapcar (compose #'string-remove-props #'fourth #'cram-problem #'car) (cl-sort (cram-get-cram-problem-id-1) #'< :key #'second))
+  (loop with now = (unix-time)
+	for y in (group-hash (cram-get-matches user)
+		   :key #'cram-match-problem-id)
+	for x = (reverse y)
+	for scores = (mapcar #'cram-match-score x)
+	for timestamps = (mapcar #'cram-match-timestamp x)
+	for n-strike = (or (cl-position 0 scores) (length scores))
+	for weight = (match-weight
+		      (first scores)
+		      (/ (- now (unix-time (first timestamps)))
+			 (expt 2.0 n-strike))) 
+	collect (list
+		 (cram-match-problem-id (car x)) weight)))
+;;(mapcar #'(lambda (x) (list (string-remove-props (fourth (cram-problem (car x)))) (second x))) (cl-sort (cram-get-cram-problem-id-1) #'< :key #'second))
+;;(mapcar #'(lambda (x) (list (string-remove-props (fourth (cram-problem (car x)))) (second x))) (cl-sort (cram-get-cram-problem-id-1) #'> :key #'second))
 ;;(length (cram-get-cram-problem-id-1))
 
 (cl-defun cram-get-cram-problem-id (&optional (user (cram-current-user)))
@@ -434,7 +473,7 @@ See also cram-extract-alternatives."
 ;;(cram-correct-response-p (car (ld-select :problem :where (string-match "Klaus" :answer))) "Dold_inger")
 
 (cl-defun cram-score (problem response time-elapsed
-			      &optional (free-time 5000) (max-time 30000))
+			      &optional (free-time 8000) (max-time 30000))
   "All TIMEs are in milliseconds."
   (let ((answer (cram-problem-answer problem)))
     (if (cram-correct-response-p problem response)
