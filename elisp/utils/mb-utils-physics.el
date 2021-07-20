@@ -32,6 +32,11 @@
 ;;(escape-velocity (* 10000 +moon-apogee+))
 ;;(escape-velocity (* 20000 +moon-apogee+))
 
+
+(defun J-to-cal (J)
+  (* 0.239005736 J))
+;;(J-to-cal 1515)
+
 (defun lbs-to-kg (lbs)
   (* 0.45359237 lbs))
 ;;(mapcar (compose #'round #'lbs-to-kg) '(196.6 193 191.8 190.2))
@@ -56,9 +61,15 @@
     (alcohol-unit
      (case percentage
        (:pils .047)
+       (:stout7 .07)
        (:imperial-stout .09)
+       (:lokkatrollet .07)
        (:wine .12)
-       (:ripasso .135))
+       (:ripasso .135)
+       (:chimay-blue .09)
+       (:heineken .05)
+       (:lager .05)
+       (:ipa .05))
      milliliter n)
     (* milliliter n (/ percentage 15.0))))
 ;;(alcohol-unit :ripasso 350)
