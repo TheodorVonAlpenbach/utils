@@ -1,8 +1,9 @@
 ;;; Generators
 (defun a-b (a &optional b inc) (number-sequence a b inc))
-(defun b-a (b &optional a inc) (nreverse (a-b (or a b) b inc)))
 (defun 0-n (n &optional inc) (a-b 0 (1- n) inc))
 (defun 1-n (n &optional inc) (a-b 1 n inc))
+(defun b-a (b &optional a inc) (nreverse (a-b (or a b) b inc)))
+(defun n-0 (n &optional inc) (nreverse (0-n n inc)))
 ;;(1-n 10 2) ==> (1 2 3 4 5 6 7 8 9 10)
 ;;(a-b 0 10)
 ;;(b-a 10 8 2)
@@ -98,8 +99,7 @@ Note that group to not consider LIST as a set. To do this, LIST must be sorted f
 ;; to GROUP or EQUIVALENCE-CLASS.
 (cl-defun group-hash (list &key (key #'identity) (size 65))
   "TODO: rename this."
-  (let ((ht (make-hash-table :sze size)))
-    
+  (let ((ht (make-hash-table :size size)))
     (loop for x in list
 	  for k = (funcall key x)
 	  do (puthash k (cons x (gethash k ht)) ht))
