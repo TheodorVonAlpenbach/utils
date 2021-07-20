@@ -105,6 +105,14 @@ PREDICATES."
 	while pos collect pos))
 ;;(positions-if #'oddp (vector 0 1 2 3 4 5) :start 2)
 
+(defun split2 (x sequence &rest args)
+  "Split SEQUENCE in two at the first occurrence of X.
+For ARGS, see `cl-position'"
+  (aif (apply #'cl-position x sequence args)
+    (split-at-position sequence it)
+    (list sequence nil)))
+;;(split2 1 '(1 2 3 4))
+
 (defun split-at-position (sequence &rest positions)
   "Split SEQUENCE at POSITIONS and return the resulting subsequences as a list."
   (loop for position in (nreverse (cons (length sequence) (nreverse positions)))
