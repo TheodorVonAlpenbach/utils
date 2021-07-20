@@ -764,4 +764,11 @@ length."
 	      'string))))
 ;;(alphanumerate (a-b 0 26))
 
+(defun split-name (name)
+  (destructuring-bind (firsts last)
+      (split-at-position (split-string name) -1)
+    (list (concat* firsts :in " ") (car last))))
+;;(split-name "Sverre Kristian Valskrå")
+
+
 (provide 'mb-utils-strings)
