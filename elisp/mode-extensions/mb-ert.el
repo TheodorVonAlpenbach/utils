@@ -288,38 +288,6 @@ them before calling (ert t)."
   (ert t))
 ;;(elisp-test-all (get-buffer "mb-utils-div.el"))
 
-;;;; correction of ert
-(defun mb-ert--insert-human-readable-selector (selector)
-  "Insert a human-readable presentation of SELECTOR into the current buffer."
-  ;; This is needed to avoid printing the (huge) contents of the
-  ;; `backtrace' slot of the result objects in the
-  ;; `most-recent-result' slots of test case objects in (eql ...) or
-  ;; (member ...) selectors.
-  (cl-labels ((rec (selector)
-		;; This code needs to match the etypecase in `ert-select-tests'.
-		(etypecase selector
-		  ((or (member nil t
-			       :new :failed :passed
-			       :expected :unexpected)
-		       string
-		       symbol)
-		   selector)
-		  (ert-test
-		   (if (ert-test-name selector)
-		       (make-symbol (format "<%S>" (ert-test-name selector)))
-		     (make-symbol "<unnamed test>")))
-		  (cons
-		   (destructuring-bind (operator &rest operands) selector
-		     (ecase operator
-		       ((member eql and not or)
-			(cons operator (mapcar #'rec operands)))
-		       ((member tag satisfies)
-			selector)))))))
-    (insert (format "%S" (rec selector)))))
-
-(advice-add #'ert--insert-human-readable-selector
-	    :override #'mb-ert--insert-human-readable-selector)
-
 (defun ert-string-to-file (string file)
   "Same as `string-to-file', but indended for use with ERT.
 The reason is that `string-to-file' calls `write-file' which
