@@ -1,5 +1,3 @@
-;;(set-frame-font "--Courier New-normal-normal-normal-mono-30-*-*-*-c-*-iso8859-1")
-
 ;; Local elisp load paths
 (setf *local-load-paths* '())
 
@@ -61,13 +59,14 @@ sudo mount -a.")
 
 	(,+mb-utils-dir+ "lisp/mb-utils.lisp")
 
-	(,+cygwin-home+ "doc/personer.org" :point :end :keyboard :no)
-	(,+cygwin-home+ "doc/technologies.org" :point :end)
-	(,+cygwin-home+ "doc/todo.org" :point :end)
-	(,+cygwin-home+ "doc/howto.org" :point :end)
-	(,+cygwin-home+ "doc/questions.org" :point :end :keyboard :no)
-	(,+cygwin-home+ "doc/log.org" :point :end :keyboard :no)
+	(,+home-dir+ "doc/personer.org" :point :end :keyboard :no)
+	(,+home-dir+ "doc/technologies.org" :point :end)
+	(,+home-dir+ "doc/todo.org" :point :end)
+	(,+home-dir+ "doc/howto.org" :point :end)
+	(,+home-dir+ "doc/questions.org" :point :end :keyboard :no)
+	(,+home-dir+ "doc/log.org" :point :end :keyboard :no)
 
+	(,+home-dir+ "projects/ada/tasks/ADA-7705-Feide2_0.org")
 	))
 ;;/ssh:ssh:~/doc/arbeidslog-new
 
