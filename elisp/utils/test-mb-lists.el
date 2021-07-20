@@ -36,27 +36,6 @@
   (should (equal (combine '(("a" "b") ("c") ("e" "f")) :key #'concat)
 		 '("ace" "acf" "bce" "bcf"))))
 
-(ert-deftest test-tree-leaves ()
-  "Test of `tree-leaves'"
-  (should (equal (tree-leaves '()) nil))
-  (should (equal (tree-leaves '(a)) '(a)))
-  (should (equal (tree-leaves '(a (b))) '(b)))
-  (should (equal (tree-leaves '("a" ("b"))) '("b")))
-  (should (equal (tree-leaves '(a (b) (c))) '(b c)))
-  (should (equal (tree-leaves '(a (c (d (f))) (b (e)))) '(f e))))
-
-(ert-deftest test-tree-member ()
-  "Test of `tree-member'"
-  (should (equal (tree-member 'a ()) nil))
-  (should (equal (tree-member 'a '(a)) '(a)))
-  (should (equal (tree-member 'a '(a (b))) '(a (b))))
-  (should (equal (tree-member 2 '("a" ("bb" ("ccc"))) :key #'length)
-		 '("bb" ("ccc"))))
-  (should (equal (tree-member "b" '("a" ("b" ("c"))) :test #'string=)
-		 '("b" ("c"))))
-  (should (equal (tree-member 'b '(a (b (c)) (b (d))) :from-end nil) '(b (c))))
-  (should (equal (tree-member 'b '(a (b (c)) (b (d))) :from-end t) '(b (d)))))
-
 (ert-deftest test-infix-list ()
   "Test of `infix-list'"
   (should (equal (infix-list '(a b c) #'1+ t)
@@ -110,8 +89,7 @@
 
 (ert-deftest test-group-hash ()
   "Test of `group-hash'"
-  (should (equal (group-hash '(a b d a d a b) :key #'car)
-		 '(((a) (a) (a)) ((b) (b)) ((c)) ((d)))))
+  (should (equal (group-hash '(a b d a d a b)) '((a a a) (b b) (d d))))
   (should (equal (group-hash '((a) (b) (c) (a) (b) (a) (d)) :key #'car)
 		 '(((a) (a) (a)) ((b) (b)) ((c)) ((d))))))
 
@@ -124,6 +102,10 @@
   "Test of `accumulate-list'"
   (should (equal (accumulate-list '(a b c a b a d) :test #'symbol<)
 		 '((a 3) (b 2) (c 1) (d 1)))))
+
+(ert-deftest test-n-0 ()
+  "Test of `n-0'"
+  (should (equal (n-0 3) '(2 1 0))))
 
 (ert-deftest test-memcase ()
   "Test of `memcase'"
