@@ -132,7 +132,7 @@ must be a member of a cycle preceding the cycle of the latter.")
 	 (point (point))
 	 (offset (- (car bounds) (point))))
     (delete-region (car bounds) (cdr bounds))
-    (insert new)
+    (insert (sstring new))
     (goto-char (min (cdr bounds) point))))
 ;;(definteractive number-at-point)
 
@@ -167,7 +167,7 @@ must be a member of a cycle preceding the cycle of the latter.")
     ((word-at-point t))
 
     (t (error "No thing recoginzed"))))
-;;09:07
+;; 2000  (inc-thing-at-point -1 2)
 
 (defun inc-weekday-and-date-at-point (n level)
   "Doesn't work thing-at-point doesn't seem to handle spaces in regexps"
@@ -219,14 +219,18 @@ TIME must be a string."
      )))
  
 (defun inc-number (x n level)
+  "Alter X N times according to LEVEL.
+LEVEL 1, return N + X
+LEVEL 2, add N to first digit in X
+LEVEL 3, return x ^ (2 ^ N)
+"
   (let ((res 
 	 (case level
-	   (1 (+ n x))			;inc/dec X N times
-	   (2 (dotimes (i n x)		;inc/dec first digit in X N times
-		(incf x (* (signum n) (expt 10 (floor (log x 10)))))))
-	   (3 (expt x (expt 2.0 n)))))) ;sqr/sqrt X N times
-    (number-to-string (if (integerp x) (round res) res))))
-;;(inc-number 9 -1 1)
+	   (1 (+ n x))
+	   (2 (+ x (* n (expt 10 (floor (log x 10))))))
+	   (3 (expt x (expt 2.0 n))))))
+    (if (integerp x) (round res) res)))
+;;(inc-number 10 -1 3)
 
 (defun inc-cyclic (string n level &optional thing)
   (let* ((cycle-list (or thing (second (assoc (cycle-type string)
