@@ -647,4 +647,20 @@ Keywords supported:  :test
 	if (funcall test x b) return a))
 ;;(swap 'a '((a b) (c d)))
 
+(defun position-unique (targets list)
+  "Return the TARGETS positions in LIST, without repeating index.
+If a target in TARGETS matches an element in list, this position
+cannot be used for later matches. For example
+
+\(position-unique '(1 1) '(1 2 3 1)) => (0 3)
+\(position-unique '(1 1) '(1 2 3)) => (0 nil)
+"
+  (loop with maps = (loop for x in (remove-duplicates targets)
+			 collect (list x (positions x list)))
+	for x in targets
+	for map = (cl-find x maps :key #'first)
+	collect (pop (second map))))
+;;(position-unique '(1 1 3 2 3) '(1 2 3))
+;;(position-unique '(1 1) '(1 2 3 1))
+
 (provide 'mb-lists)

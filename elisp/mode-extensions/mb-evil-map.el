@@ -91,10 +91,9 @@
   (define-key div-map "j" (lambda (n) (interactive "p") (inc-thing-at-point n 2)))
   (define-key div-map "k" (lambda (n) (interactive "p") (inc-thing-at-point (- n) 2)))
   ;; TODO: revise this mechanism, make it more general
-  (define-key div-map "r" (lambda (n) (interactive "p") (inc-thing-at-point n 4)))
-  (define-key div-map "R" (lambda (n) (interactive "p") (inc-thing-at-point n 5)))
-  (define-key div-map "q" (lambda (n)
-			       (interactive "p") (inc-thing-at-point (* n 15) 1)))
+  (define-key div-map "r" (lambda (n) (interactive "p") (inc-thing-at-point n '(:hour 1))))
+  (define-key div-map "R" (lambda (n) (interactive "p") (inc-thing-at-point n '(:hour -1))))
+  (define-key div-map "q" (lambda (n) (interactive "p") (inc-thing-at-point n '(:minute 15))))
   (define-key div-map "\M-j" (lambda (n) (interactive "p") (inc-thing-at-point n 3)))
   (define-key div-map "\M-k" (lambda (n)
 			       (interactive "p") (inc-thing-at-point (- n) 3))))

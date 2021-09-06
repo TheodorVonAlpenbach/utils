@@ -353,20 +353,12 @@ return result in UTC. This only affects the parts :HOUR and
 ;;(etime-part (parse-time "1972-01-06T08:15:17") :hour)
 
 (defun etime-round-1 (etime part quantity &optional universal-p)
-  "Helper for `etime-round', one iteration only."
-  (let ((etime-part (etime-part etime part universal-p)))
-    (funcall (case part
-	       ((:year) #'add-etime-date) ;TODO: need to handle base 1 of m and d
-	       ((:hour :minute :second) #'add-etime-time)
-	       (t (error "Part %S is not supported" part)))
-      etime part (- (funcall (if (minusp quantity) #'floor-to #'ceiling-to)
-		      etime-part (abs quantity))
-		    etime-part))))
-
-(defun etime-round-1 (etime part quantity &optional universal-p)
   "Helper for `etime-round', one iteration only.
 
-TODO: need to handle base 1 of the month and day cases."
+TODO: need to handle base 1 of the month and day cases.
+
+\(Also, initutition tells me that there must be simpler
+implementation.)"
   (let* ((etime-part (etime-part etime part universal-p))
 	 (diff (- (funcall (if (minusp quantity)
 			     #'next-smaller-multiple #'next-greater-multiple)
@@ -381,6 +373,7 @@ TODO: need to handle base 1 of the month and day cases."
       (:minute (minutestart (add-etime-time etime part diff)))
       (:second (secondstart (add-etime-time etime part diff)))
       (t (error "Part %S is not supported" part)))))
+;;(iso-dttm (etime-round-1 (parse-time "1972-01-06T08:15:10") :hour 1))
 ;;(iso-dttm (etime-round-1 (parse-time "1972-01-06T08:15:10") :minute -15))
 
 (cl-defun etime-round (etime part quantity &optional (n 1) universal-p)
@@ -394,7 +387,8 @@ Note that PARTs :MONTH and :DAY are currently not supported."
     etime
     (add-etime-time
      (etime-round-1 etime part quantity universal-p)
-     part (* (1- n) quantity))))
+     part (* (if (minusp n) n (1- n)) quantity))))
+;;(iso-dttm (etime-round (parse-time "1972-01-06T08:15:17") :hour -1 1))
 ;;(iso-dttm (etime-round (parse-time "1972-01-06T08:15:17") :minute 15 1))
 
 (cl-defun now (&rest args)

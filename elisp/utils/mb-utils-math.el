@@ -36,7 +36,7 @@
 
 (cl-defun next-smaller-multiple (x multiple &optional (n 1))
   (ceiling-to (- x (* n multiple)) multiple))
-;;(next-smaller-multiple 100 25 2)
+;;(next-smaller-multiple 101 25 1)
 
 (cl-defun sum (sequence &rest cl-keys)
   "Sum all elements in SEQUENCE.
