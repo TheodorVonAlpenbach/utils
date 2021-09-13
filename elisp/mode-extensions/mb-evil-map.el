@@ -93,7 +93,10 @@
   ;; TODO: revise this mechanism, make it more general
   (define-key div-map "r" (lambda (n) (interactive "p") (inc-thing-at-point n '(:hour 1))))
   (define-key div-map "R" (lambda (n) (interactive "p") (inc-thing-at-point n '(:hour -1))))
+  (define-key div-map "d" (lambda (n) (interactive "p") (inc-thing-at-point n '(:minute 30))))
+  (define-key div-map "D" (lambda (n) (interactive "p") (inc-thing-at-point n '(:minute -30))))
   (define-key div-map "q" (lambda (n) (interactive "p") (inc-thing-at-point n '(:minute 15))))
+  (define-key div-map "Q" (lambda (n) (interactive "p") (inc-thing-at-point n '(:minute -15))))
   (define-key div-map "\M-j" (lambda (n) (interactive "p") (inc-thing-at-point n 3)))
   (define-key div-map "\M-k" (lambda (n)
 			       (interactive "p") (inc-thing-at-point (- n) 3))))
