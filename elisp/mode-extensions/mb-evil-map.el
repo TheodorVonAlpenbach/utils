@@ -34,7 +34,12 @@
 (define-key evil-normal-state-map "gI" 'mb-show-process-buffer)
 (define-key evil-normal-state-map "gs" 'isearch-forward)
 (define-key evil-normal-state-map "gS" 'isearch-backward)
-(define-key evil-normal-state-map "gb" 'sp-down-sexp)
+
+(let ((evil-sp-map (make-sparse-keymap)))
+  (evil-key-chord-define '(normal motion) global-map "gb" evil-sp-map)
+  (define-key evil-sp-map "j" #'sp-down-sexp)
+  (define-key evil-sp-map "k" #'sp-up-sexp)
+  (define-key evil-sp-map "k" #'sp-backward-up-sexp))
 
 (evil-key-chord-define '(normal visual motion) global-map "GG" 'evil-goto-line-keep-column)
 

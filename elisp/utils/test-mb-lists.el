@@ -101,7 +101,9 @@
 (ert-deftest test-accumulate-list ()
   "Test of `accumulate-list'"
   (should (equal (accumulate-list '(a b c a b a d) :test #'symbol<)
-		 '((a 3) (b 2) (c 1) (d 1)))))
+		 '((a 3) (b 2) (c 1) (d 1))))
+  (should (equal (accumulate-list '("a" "b" "c" "a" "b" "a" "d") :test #'string<)
+		 '(("a" 3) ("b" 2) ("c" 1) ("d" 1)))))
 
 (ert-deftest test-n-0 ()
   "Test of `n-0'"

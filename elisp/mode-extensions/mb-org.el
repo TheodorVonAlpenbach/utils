@@ -4,6 +4,9 @@
   (let ((mb-local-map (make-sparse-keymap))
 	(move-map (make-sparse-keymap))
 	(insert-map (make-sparse-keymap)))
+    ;; Override evil bindings 
+    (define-key (current-local-map) [tab] #'org-cycle)
+    ;; Local map
     (key-chord-define evil-normal-state-local-map "gh" mb-local-map)
     ;; common
     (define-key mb-local-map "t" #'org-todo)
