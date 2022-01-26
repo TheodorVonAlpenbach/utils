@@ -17,6 +17,7 @@ function printUsage {
     echo "  -e ext      Do not search files with EXTENSION. Issues a warning if no EXTENSION is provided"
     echo "  -u N        Searches the directory tree N levels up from current directory."
     echo "  -d M        Limit the search to directories M levels below current directory."
+    echo "  -b          Do not search files with EXTENSION. Issues a warning if no EXTENSION is provided"
     echo "  -i          Ignore case"
     echo "  -v          Verbose mode"
 }
@@ -81,3 +82,11 @@ find "$dir" \
      $extensionModifier-name "*.$extension" \
      -print0 \
     | xargs -0 -r grep $ignoreCase -a --color=auto -n -s "$target"
+
+echo ${verbose+find "$dir" \
+     ${down+-maxdepth $down}\
+     -type f \
+     $extensionModifier-name "*.$extension" \
+     -print0 \
+    | xargs -0 -r grep $ignoreCase -a --color=auto -n -s "$target"
+}

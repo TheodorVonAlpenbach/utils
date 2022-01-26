@@ -22,6 +22,7 @@
     (define-key mb-local-map "i" insert-map)
     (define-key insert-map "d" #'mb-org-insert-date)
     (define-key insert-map "t" #'mb-org-insert-time)
+    (define-key insert-map "f" #'mb-org-insert-fact-of-today)
     (define-key insert-map "a" #'mb-org-insert-arrival)
     (define-key insert-map "h" #'mb-org-insert-departure)))
 
@@ -50,6 +51,15 @@ TODO: move this to some util module?"
   (interactive)
   (insert-line-prefix (concat prefix (iso-time :time time) suffix "\n"))
   (eol))
+
+(cl-defun mb-org-insert-fact-of-today (&rest args)
+  "Insert header for the `fact of today' in mb-org file"
+  (interactive)
+  (let ((text (popf args :text "Dagens lærdom")))
+    (apply #'mb-org-insert-time args)
+    (insert text)
+    (newline)))
+;;(mb-org-insert-fact-of-today :text "Fact of today")
 
 (cl-defun mb-org-insert-arrival (&optional (time (add-etime-time (now) :minute -5)))
   "Insert \"Ankomst\" stamp in mb-org file"

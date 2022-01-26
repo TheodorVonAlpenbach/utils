@@ -4,6 +4,9 @@
 (cl-pushnew
  '(".emacs" ".emacs-local-mats-ThinkPad-P1-Gen-2-linux")
   *simple-swaps* :test #'equal)
+(cl-pushnew
+ '("package.json" "package-lock.json")
+  *simple-swaps* :test #'equal)
 
 ;;(cl-pushnew '(("actions.js" "../reducers") ("reducers.js" "../actions"))
 ;;	    *smart-swaps*)
@@ -20,8 +23,8 @@
 (setf user-full-name "Mats Bergstrøm")
 
 ;; tags
-(setf tags-file-name nil)
-;;(setf tags-table-list (list (expand-file-name "~/.MBTAGS")))
+;; (setf tags-file-name nil)
+(setf tags-table-list (list (expand-file-name "~/.MBTAGS")))
 
 ;; lynx
 (setf *lynx-proxy-dir* (expand-file-name "lynx-proxy" *local-data-dir*))
@@ -35,10 +38,6 @@
 (let ((tramp-file "~/.emacs.d/tramp"))
   (when (file-exists-p tramp-file)
     (delete-file tramp-file)))
-
-(cl-defun mount-windows (&optional (File-mount-directory "/media/mats/Windows"))
-  (unless (file-exists-p File-mount-directory)
-    (do-cmd )))
 
 (defconst +cygwin-home+
   "/media/mats/Windows/cygwin64/home/mats.bergstrom"
@@ -66,16 +65,20 @@ sudo mount -a.")
 	(,+home-dir+ "doc/howto.org" :point :end)
 	(,+home-dir+ "doc/questions.org" :point :end :keyboard :no)
 	(,+home-dir+ "doc/log.org" :point :end :keyboard :no)
+	(,+home-dir+ "doc/web-test.org" :point :end :keyboard :no)
 
-	(,+home-dir+ "projects/ada/tasks/ADA-7705-Feide2_0.org")
+	(,+home-dir+ "ada-tasks/ADA-7705-Feide2/ADA-7705-Feide2_0.org")
 	))
 ;;/ssh:ssh:~/doc/arbeidslog-new
 
-;;scheme
-(setf scheme-program-name "guile")
-
 ;; lisp
-(setf inferior-lisp-program "clisp")
+(setf inferior-lisp-program "sbcl --dynamic-space-size 5000")
+
+;; set slime arguments
+(setf (cadar (cl-member "sbcl" slime-lisp-implementations :test #'string= :key #'car))
+      (list "sbcl" "--dynamic-space-size 6000"))
+;;slime-lisp-implementations
+
 
 ;; dot
 (setf *dot-dir* "c:/Program Files/Graphviz2.30/bin/")

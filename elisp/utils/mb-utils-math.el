@@ -462,7 +462,7 @@ See `cycle-badness' for the measure of a good cycle."
 
 ;;; div
 (defun is-divisible (n m)
-  (= (mod n m) 0))
+  (zerop (mod n m)))
 ;(mapcar #'(lambda (n) (is-divisible n 5)) (loop for i below 11 collect i))
 
 (require 'mb-utils-10000-first-primes)
@@ -482,6 +482,8 @@ See `cycle-badness' for the measure of a good cycle."
 	(while (is-divisible n p)
 	  (push p factors)
 	  (setq n (/ n p)))))
+    (when (> n 1)
+      (push n factors))
     factors))
 ;(mapcar #'factorize (loop for i from 2 to 100 collect i))
 ;(mapcar #'factorize '(324 180))
@@ -491,6 +493,7 @@ See `cycle-badness' for the measure of a good cycle."
 
 (defun all-factors (n)
   (cl-sort (remove-duplicates (mapcar #'product (power-set (factorize n)))) #'<))
+;;(all-factors 120)
 ;;(all-factors 284)
 
 (cl-defun test-factorize (n)

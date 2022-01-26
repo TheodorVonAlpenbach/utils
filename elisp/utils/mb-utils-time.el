@@ -275,6 +275,11 @@ Argument may be a time objects itself or a string."
 ;;(parse-time "2000-01-18T22:31:00CET")
 ;;(parse-time "2000-01-18T22:31:00Z")
 
+(defun parse-ms (ms)
+  "Converts an integer representing unix milliseconds to new time object."
+  (parse-time (/ (coerce ms 'float) 1000)))
+;;(iso-dttm (parse-ms 1643018173697))
+
 ;;; Notion of time extension: time extension atoms are time points
 ;;; (points in timespace) or time intervals (intervals with time point
 ;;; limits). A time extension is a time extension atom or a list of
@@ -776,5 +781,7 @@ designators WEEK-DESIGNATOR1 and WEEK-DESIGNATOR2. See
   "Convert time-designator to the number of seconds since 1970-01-01 UTC."
   (float-time (parse-time time-designator)))
 ;;(cons (unix-time) (mapcar #'unix-time '("2020-03-02T12:26:30")))
+	
+(iso-dttm (parse-time 1642506216))
 
 (provide 'mb-utils-time)

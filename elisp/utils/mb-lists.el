@@ -198,6 +198,14 @@ TODO: implement a mapping key, see `pairs' (when needed)"
     '(())
     (let ((psi-1 (power-set-indices (1- n))))
       (append psi-1 (mapcar (bind #'rcons (1- n)) psi-1)))))
+
+(defun power-set-indices (n)
+  "Return the indices corresponding to a power set for at set with N elements"
+  (if (zerop n)
+    '(())
+    (let ((psi-1 (power-set-indices (1- n))))
+      (append psi-1 (mapcar (lambda (x) (cons (1- n) x)) psi-1)))))
+;;(power-set-indices 3)
 ;;(length (power-set-indices 4))
 
 (defun power-set (list)
@@ -506,11 +514,25 @@ different, see test cases below."
 ;;(time (loop repeat 100000 do (vlist< '(1 2) '(1 1))))
 ;;(time (loop repeat 100000 do (version-list-< '(1 2) '(1 1))))
 
+(defun ninsert-sorted-list (x list)
+  (if list
+    (if (< x (car list))
+      (cons x list)
+      (loop with l = list
+	    while (and (cdr l) (> x (cadr l)))
+	    do (setf l (cdr l))
+	    finally
+	    do (setf (cdr l) (cons x (cdr l)))
+	    return list))
+    (cons x nil)))
+;;(let ((l '(0 2))) (ninsert-sorted-list 1 l) l)
+;;(let ((l '(0))) (ninsert-sorted-list 1 l) l)
+;;(let ((l '())) (ninsert-sorted-list 1 l))
 
 ;;;; Sorted trees
 (defun insert-sorted-tree (x tree)
   (if tree
-    (if (< x (first tree)) ;seach left tree
+    (if (< x (first tree)) ;search left tree
       (if (second tree)
 	(insert-sorted-tree x (second tree))
 	(setf (second tree) (list x nil nil)))

@@ -18,9 +18,9 @@
 
 (defun insertf (&rest args) (insert (apply #'format args)))
 
-(defmacro popf (property-list tag)
+(defmacro popf (property-list tag &optional default)
   "Pops TAG and its value from PROPERTY-LIST"
-  `(prog1 (getf ,property-list ,tag)
+  `(prog1 (cl-getf ,property-list ,tag ,default)
      (remf ,property-list ,tag)))
 ;;(let ((props (list :qwe 1 :ewq 2))) (list (popf props :qwe) props))
 
