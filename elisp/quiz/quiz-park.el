@@ -450,7 +450,7 @@ For LIMIT, see qp-guess-customer-tag."
 Vedlagt ukens quiz. 
 
 Vennlig hilsen 
-Quiz Park
+Quizserien
 "))
 
 (defun qp-copy-news-and-sudden-death-questions-to-clipboard ()
