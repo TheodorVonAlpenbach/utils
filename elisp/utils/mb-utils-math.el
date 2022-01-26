@@ -6,6 +6,16 @@
 (defun /2 (number) (/ number 2))
 (defun inv (number &optional float-p) (/ (if float-p 1.0 1) number))
 
+(defmacro mincf (place &optional x)
+  "Increment PLACE geometrically by X (2 by default).
+PLACE may be a symbol, or any generalized variable allowed by `setf'.
+The return value is the incremented value of PLACE."
+  (declare (debug (place &optional form)))
+  (if (symbolp place)
+    (list 'setq place (if x (list '* place x) (list '2* place)))
+    (list 'cl-callf '* place (or x 2))))
+;;(let ((x 3)) (mincf x) x)
+
 (defun sq (x) (* x x))
 
 (defun between= (x a b)
@@ -194,7 +204,7 @@ converting to float if the product is large for an integer."
   "Returns X degrees Celsius in Fahrenheit. If REVERSE is non-nil, the
 reverse operation is performed. "
   (if reverse (* (- x 32) (/ 5 9.0)) (+ (* 1.8 x) 32)))
-;;(celsius-to-fahrenheit 10)
+;;(celsius-to-fahrenheit 100 t)
 
 (defun pound-to-kg (x &optional reverse)
   "Returns X degrees Celsius in Fahrenheit. If REVERSE is non-nil, the
@@ -218,11 +228,11 @@ http://www.matematikk.org/pub/mattetekst/Persnr/."
 			     personnummer (1-n 10))) 2))
 	 (k1 (asetf (second (floor* (scalar-product
 				     '(3 7 6 1 8 9 4 5 2) parts) 11)) 
-	       (if (zerop it) 0 (- 11 it))))
+		    (if (zerop it) 0 (- 11 it))))
 	 (k2 (asetf (second (floor* (scalar-product
 				     '(5 4 3 2 7 6 5 4 3 2)
 				     (append parts (list k1))) 11))
-	       (if (zerop it) 0 (- 11 it)))))
+		    (if (zerop it) 0 (- 11 it)))))
     (list (int-to-string (+ (* 10 k1) k2)) (substring personnummer 9))))
 ;;(personnummer-check "06017229573")
 
@@ -231,13 +241,13 @@ http://www.matematikk.org/pub/mattetekst/Persnr/."
   "Returns a list where there are M occurrences of SYMBOL-A and N-M
 occurrences of SYMBOL-B and the symbols are evenly distributed." 
   (loop with denominator = 0
-        for i below n
+	for i below n
 	for numerator = (* i m)
 	if (>= numerator denominator)
-	  collect symbol-a and
-	  do (incf denominator n)
+	collect symbol-a and
+	do (incf denominator n)
 	else
-	  collect symbol-b))
+	collect symbol-b))
 ;;(make-distributed-list 2 7) ==> '(1 0 0 0 1 0 0)
 ;;(make-distributed-list 3 7) ==> '(1 0 0 1 0 0 1 0)
 
@@ -250,10 +260,10 @@ way."
 	for i below n
 	for numerator = (* i m)
 	if (>= numerator denominator)
-	  collect (pop list1) and
-	  do (incf denominator n)
+	collect (pop list1) and
+	do (incf denominator n)
 	else
-	  collect (pop list2)))
+	collect (pop list2)))
 ;;(merge-2-lists '(1 1 1) '(0 0))
 
 (defun merge-n-lists-sorted-by-length (lists)
@@ -485,11 +495,11 @@ See `cycle-badness' for the measure of a good cycle."
     (when (> n 1)
       (push n factors))
     factors))
-;(mapcar #'factorize (loop for i from 2 to 100 collect i))
-;(mapcar #'factorize '(324 180))
-;(/ 180 36)
-;(apply #'* (factorize 1047300))
-;(/ 288 36)
+;;(mapcar #'factorize (loop for i from 2 to 100 collect i))
+;;(mapcar #'factorize '(324 180))
+;;(/ 180 36)
+;;(apply #'* (factorize 1047300))
+;;(/ 288 36)
 
 (defun all-factors (n)
   (cl-sort (remove-duplicates (mapcar #'product (power-set (factorize n)))) #'<))
@@ -501,7 +511,17 @@ See `cycle-badness' for the measure of a good cycle."
   (loop for i from 2 to n
 	if (not (= i (apply #'* (factorize i))))
 	do (error "FACTORIZE failed for argument %d" i)))
-;(test-factorize 10000)
+					;(test-factorize 10000)
+
+(defun expand-factor (exponents primes)
+  (product (loop for p in primes
+		 for e in exponents
+		 collect (expt p e))))
+;;(expand-factor '(1 2) '(3 2))
+
+(defun expand-factors (factors primes)
+  (loop for f in factors collect (expand-factor f primes)))
+;;(expand-factors '((1 2) (0 0)) '(3 2))
 
 ;;; Number conversions
 (defun calculate-n-ary (root coefficients)
@@ -524,7 +544,7 @@ See `cycle-badness' for the measure of a good cycle."
     (while (> n 0)
       (push (logand 1 n) res)
       (setq n (lsh n -1)))
-  res))
+    res))
 ;;(int-to-bin-array 1235)
 
 (defun int-to-bin (n)
@@ -602,7 +622,7 @@ NUMBER-OF-BYTES is reached."
 		   (loop for i below number-of-total-bytes
 			 for integer-i = (lsh integer (- (* i number-of-bits)))
 			 collect (logand integer-i mask)))))
-    
+      
       (if number-of-bytes
 	(if (> (length bytes) number-of-bytes)
 	  (nthcdr bytes (- (length bytes) number-of-bytes)) ;;truncate
@@ -729,7 +749,7 @@ value in the specified interval. Else, it will be an integer."
 (defun random-weighted-index (weights)
   (let ((cumulative-weights (cumsum-list weights)))
     (cl-position-if (bind #'>= (random-float 0 (last-elt cumulative-weights)))
-      cumulative-weights)))
+	cumulative-weights)))
 ;;(random-weighted-index '(1 5 10))
 
 (defun random-weighted-element-1 (elements)
@@ -867,7 +887,7 @@ either 0 or 1)"
 			 (/ (first style)
 			    (first x)))
 		      (second x)))
-	    other-styles)))
+      other-styles)))
 ;;(swimming-relative-distances 'crawl 50)
 
 ;;; div js dates (TODO move this later)
@@ -1031,17 +1051,17 @@ quotients by the gcd: (%d, %d)"
   "Tests that F(mlog3) = F(m(F(klog3))/k), for all m and k"
   (let ((log3 (log 3 2)))
     (loop for m to max-m
-       for a = (floor (* m log3))
-       for b = (floor (/ (* m (floor (* k log3))) k))
-       always (= a b))))
+	  for a = (floor (* m log3))
+	  for b = (floor (/ (* m (floor (* k log3))) k))
+	  always (= a b))))
 
 (cl-defun floor-test (k &optional (max-m k))
   "Tests that F(mlog3) = F(m(F(klog3))/k), for all m and k"
   (let ((log3 (log 3 2)))
     (loop for m to max-m
-       for a = (floor (* m k log3))
-       for b = (* m (floor (* k log3)))
-       always (= a b))))
+	  for a = (floor (* m k log3))
+	  for b = (* m (floor (* k log3)))
+	  always (= a b))))
 ;;(mapcar #'floor-test (a-b 20 30))
 ;;(loop for i below 1000 if (floor-test i) collect i)(0 1 2 7 12 24 53 106 359 665)
 ;;(mapcar #'floor-test (list 7 12 24 36 48 63))
@@ -1057,9 +1077,9 @@ quotients by the gcd: (%d, %d)"
   "Tests that F(mlog3) = F(m(F(klog3))/k), for all m and k"
   (let ((log3 (log 3 2)))
     (loop for k from 1 to max-k collect
-	 (list k
-	       (floor (* m log3))
-	       (floor (/ (* m (floor (* k log3))) k))))))
+	  (list k
+		(floor (* m log3))
+		(floor (/ (* m (floor (* k log3))) k))))))
 ;;(floor-test2 7 1)
 ;;(floor (* 28 (log 3 2)))
 ;;(list (log 3 2) (/ 11 7.0))
