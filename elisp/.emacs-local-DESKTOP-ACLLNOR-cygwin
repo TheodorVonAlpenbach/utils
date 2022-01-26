@@ -77,7 +77,6 @@
 	(,+mb-lisp-dir+ "games/cram/cram.el")
 
 	;; Common Lisp utils
-	(,+home-dir+ "git/utils/lisp/topology/shapes.lisp")
 	(,+home-dir+ "projects/quiz/ferskvare" :point :end :keyboard :no :read-only :none)
 	(,+home-dir+ "data/small-arbeidslog.org" :point :end :keyboard :no
 		     :time-paragraphs t)
