@@ -1,3 +1,5 @@
+(require 'factor-table "~/git/utils/elisp/div/euler-project/factor-table.lisp")
+
 (defun modular-inverse-p (i n) (= (mod (* i i) n) 1))
 ;;(modular-inverse-p 11 15)
 

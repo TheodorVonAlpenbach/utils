@@ -1,3 +1,5 @@
+(require '10000-first-primes "~/git/utils/elisp/div/euler-project/10000-first-primes.lisp")
+
 (defun number-of-factor-table-columns (n &optional (primes 10000-first-primes))
   (let ((product 1))
     (position-if #'(lambda (x) (> (setf product (* x product)) n)) primes)) )
@@ -56,11 +58,10 @@
 ;;(ft-count-zeros *ft*)
 
 ;;; visited
-(defun make-visited (&optional (n *n*))
+(defun make-visited (n)
   (make-array (+ 2 n) :element-type 'bit))
 
-(defparameter *visited* (make-visited))
-;;(make-visited)
+(defparameter *visited* (make-visited 0))
 
 (defun reset-visited (&optional (n *n*))
   (setf *visited* (make-visited n))
@@ -82,6 +83,5 @@
     (all-factors-1 n)))
 ;;(all-factors 4)
 ;;(all-factors 80)
-
 
 (provide 'factor-table)

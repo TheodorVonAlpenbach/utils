@@ -1,7 +1,6 @@
 ;;; https://projecteuler.net/problem=451
 ;;; http://www.sbcl.org/manual/#Introspection-and-Tuning
 
-(require '10000-first-primes "~/git/utils/elisp/div/euler-project/10000-first-primes.lisp")
 (require '451-modular-inverses "~/git/utils/elisp/div/euler-project/progress.lisp")
 
 (defparameter *n* (round 1E7))
