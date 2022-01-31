@@ -1,3 +1,8 @@
+(defun number-to-digits (n)
+  (loop for c across (write-to-string n)
+	collect (- (char-int c) 48)))
+;;(number-to-digits 1234567890)
+
 (defun faculty (n)
   (loop for i from 2 to n
 	for f = i then (* i f)
@@ -22,5 +27,31 @@
 	  if (or (null test) (funcall test p)) collect p)))
 ;;(time (let ((ps (primes-below 1E8))) (length ps))) => 5761455
 ;;(primes-below 10.4 :test #'oddp)
+
+(defun li-inverse (x)
+  "Return an approximatino of the inverse logarithmic integral."
+  (let* ((ln (log x))
+	 (ln2 (log (log x))))
+    (* x (+ ln ln2 -1 (/ (- ln 2)
+			 ln)
+	    (- (/ (+ (- (sq ln2) (* 6 ln2))
+		     11)
+		  (* 2 (sq ln))))))))
+;;(li-inverse 25)
+;;(primes-below)
+
+(defun pi-test ()
+  "Verify that li-inv(n) overshoots pi(n) for n > 49."
+  (loop for p in (rest (rest (primes-below 100000)))
+	for n from 3
+	for pi_n = (li-inverse n)
+	for ratio = (/ pi_n p)
+	if (< ratio 1) collect (list n p pi_n ratio)))
+;;(pi-test)
+
+(defun nth-prime (n)
+  "Return the Nth prime, zero-based"
+  (nth n (primes-below (if (< n 50) 250 (li-inverse n)))))
+;;(nth-prime 1)
 
 (provide 'euler-utils)
