@@ -1,13 +1,15 @@
 (require 'euler-utils "~/git/utils/elisp/div/euler-project/euler-utils.lisp")
 
 (defun 009-solution (&optional (n 1000))
-  (loop for a from 1
+  (loop for a from 1 to (ceiling (/ n 3))
 	for a2 = (sq a)
-	while (< a2 n) do
-	(loop for b from a
-	      for b2 = (sq b)
-	      for c2 = (+ a2 b2)
-	      while (<= c2 n)
-	      if (integerp (sqrt c2))
-	      collect (list a b (sqrt c2)))))
-;;(009-solution)
+	if (loop for b from (1+ a) to (ceiling (/ (- n a) 2))
+		 for b2 = (sq b)
+		 for c = (- n a b)
+		 for c2 = (sq c)
+		 if (= (+ a2 b2) c2)
+		 return (let ((list (list a b c)))
+			  (list (reduce #'* list) list)))
+	return it))
+;;(time (009-solution))
+;; => (31875000 (200 375 425))
