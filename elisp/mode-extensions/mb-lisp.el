@@ -129,7 +129,7 @@ should be fairly small"
 (defun repl-current-package-name ()
   (let ((*repl-discard-message* t)
 	(*repl-discard-output* t))
-    (first (lisp-eval-expression-1 "(package-name *package*)" t))))
+    (first (lisp-eval-expression-1 "(package-name *package*)" nil))))
 ;;(repl-current-package-name)
 
 (defun repl-set-package (package-name)
@@ -156,7 +156,7 @@ should be fairly small"
 (defmacro repl-with-buffer-package (&rest body)
   `(let ((current-package-name (repl-current-package-name))
 	 (buffer-package-name (buffer-package-name)))
-     (assert current-package-name)
+     ;; (assert current-package-name)
      (if (equalp current-package-name buffer-package-name)
        (progn ,@body)
        (prog2 

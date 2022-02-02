@@ -1,3 +1,4 @@
+(require 'euler-utils "~/git/utils/elisp/div/euler-project/euler-utils.lisp")
 ;; 600851475143
 
 ;;; Only code

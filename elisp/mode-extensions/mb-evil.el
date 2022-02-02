@@ -293,7 +293,8 @@ between different"
 
 (defun strip-ssh (filename)
   "Strip the ssh prefix of filename"
-  (string-match* "/ssh:[^:]*:\\(.*\\)" filename :num 1))
+  (or (string-match* "/ssh:[^:]*:\\(.*\\)" filename :num 1)
+      filename))
 ;;(strip-ssh "/ssh:pf:/home/mats_progfab_no/git/problem-server/")
 
 (defun mb-eval-buffer (&optional args)

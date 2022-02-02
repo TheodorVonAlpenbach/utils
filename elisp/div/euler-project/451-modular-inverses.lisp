@@ -1,7 +1,8 @@
 ;;; https://projecteuler.net/problem=451
 ;;; http://www.sbcl.org/manual/#Introspection-and-Tuning
 
-(require '451-modular-inverses "~/git/utils/elisp/div/euler-project/progress.lisp")
+(require 'progress "~/git/utils/elisp/div/euler-project/progress.lisp")
+(require 'factor-table "~/git/utils/elisp/div/euler-project/factor-table.lisp")
 
 (defparameter *n* (round 1E7))
 (defparameter *ft* (make-factor-table (+ 2 *n*)))
