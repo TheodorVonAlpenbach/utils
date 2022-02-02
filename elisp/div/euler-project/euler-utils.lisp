@@ -1,19 +1,3 @@
-(defun number-to-digits (n)
-  (loop for c across (write-to-string n)
-	collect (- (char-int c) 48)))
-;;(number-to-digits 1234567890)
-
-(defun faculty (n)
-  (loop for i from 2 to n
-	for f = i then (* i f)
-	finally (return f)))
-;;(faculty 7)
-;;(* 2 2 2 3 3 5 7)
-
-(defun sq (x) (* x x))
-
-(defun li (x) (/ x (log x)))
-
 (defun fill-prime-vector (p pv)
   "Set all factors of P in PV to 1 and return the position in PV of next prime"
   (loop for ip from p by p below (length pv) do (setf (bit pv ip) 1)))

@@ -1,3 +1,24 @@
+(defun number-to-digits (n)
+  (loop for c across (write-to-string n)
+	collect (- (char-int c) 48)))
+;;(number-to-digits 1234567890)
+
+(defun faculty (n)
+  (loop for i from 2 to n
+	for f = i then (* i f)
+	finally (return f)))
+;;(faculty 7)
+;;(* 2 2 2 3 3 5 7)
+
+(defun ! (n) (faculty n))
+
+(defun binomial-coefficient (n k)
+  (/ (! n) (! n) (! (- n k))))
+
+(defun sq (x) (* x x))
+
+(defun li (x) (/ x (log x)))
+
 (defun mb-split-sequence (sequence separator &optional ignore-empty-p)
   "Slow version of cl-utils' SPLIT-SEQUENCE.
 It does not include the SEPARATORs"
@@ -37,49 +58,22 @@ perform better."
     (remf plist key)))
 ;;(let ((plist '(:a 1 :b 2))) (list (popf plist :c) plist))
 
-(defun nminimum-nokey (vec test)
-  "Helper for `nminimum'. Same as nminimum, but without key and from-end.
-Note that the function fails, if VEC is empty. It is the onus of
-the caller to avoid this.
+;; Transfer these to mb-utils
+(defun maximum (seq &key (test #'>) key (start 0) end from-end)
+  (let* ((max (reduce #'max seq :key key :from-end from-end
+		      :start start :end end))
+	 (pos (position max seq :key key :from-end from-end
+			:start start :end end)))
+    (values max pos (elt seq pos))))
 
-This function is not intended for use outside of this module."
-  (loop with min = (elt vec 0)
-	with pos = 0
-	for i from 0
-	for x across vec
-	when (funcall test x min)
-	do (setf min x pos i)
-	finally (return (values min pos))))
-;;(nminimum-nokey (vector 1 2 3 0) #'<)
 
-(defun minimum (seq &key (test #'<) key (start 0) end from-end)
-  "Find the minimum of SEQ.
-The returned object is the value triple (ELEMENT POSITION VALUE) where
-ELEMENT is the minimum element in SEQ and POSITION is the positition
-of that element in SEQ. VALUE is an element identical to (funcall KEY
-ELEMENT). The default values of the supported keywords TEST, KEY,
-START, END, and FROM-END are #'<, #'IDENTITY, 0 NIL, and NIL,
-respectively."
-  (when (plusp (length seq))
-    (if from-end
-      (minimum (nreverse seq) :test test :key key)
-      (multiple-value-bind (min pos)
-	  (nminimum-nokey
-	   (if key
-	     (map 'vector key (subseq seq start end))
-	     (coerce (subseq seq start end) 'vector))
-	   test)
-	(let ((pos* (+ pos start)))
-	  (values (elt seq pos*) pos* min))))))
-;;(minimum (vector 1 2 3 0))
+(defun minimum (seq &key (test #'>) key (start 0) end from-end)
+  (let* ((min (reduce #'min seq :key key :from-end from-end
+		      :start start :end end))
+	 (pos (position min seq :key key :from-end from-end
+			:start start :end end)))
+    (values min pos (elt seq pos))))
 
-(defun maximum (list &rest args)
-  "Find the maximum of SEQ. See MINIMUM for details."  
-  (apply #'minimum list :test (let ((test (popf args :test)))
-				(if test
-				  (complement test)
-				  #'>))
-	 args))
 ;;(maximum '(5 5 3 1 1 4) :start 2)
 ;;(maximum '(0 0 0 1 1 4))
 (provide 'cl-utils)
