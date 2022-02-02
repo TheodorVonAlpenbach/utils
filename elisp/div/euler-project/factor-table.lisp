@@ -59,11 +59,11 @@
 
 ;;; visited
 (defun make-visited (n)
-  (make-array (+ 2 n) :element-type 'bit))
+  (make-array n :element-type 'bit))
 
 (defparameter *visited* (make-visited 0))
 
-(defun reset-visited (&optional (n *n*))
+(defun reset-visited (&optional (n (length *visited*)))
   (setf *visited* (make-visited n))
   (length *visited*))
 
@@ -71,17 +71,31 @@
 (defun unvisited-p (x) (= (bit *visited* x) 0))
 (defun set-visited (x) (setf (bit *visited* x) 1))
 
+(defparameter *ft* nil)
+(defun set-factor-table (ft) (setf *ft* ft))
+(defun get-factor-table () *ft*)
+
 (defun all-factors-1 (n)
   (unless (visited-p n)
     (set-visited n)
     (cons n (loop for f in (factor-table-row-factors *ft* n)
 		  append (all-factors-1 f)))))
 
-(defun all-factors (n &optional reset-visisted-p)
-  (when reset-visisted-p
-    (reset-visisted n)
-    (all-factors-1 n)))
-;;(all-factors 4)
+(defun all-factors (n &optional reset-visited-p ft)
+  (when reset-visited-p
+    (reset-visited (1+ n)))
+  (when ft
+    (set-factor-table ft))
+  (all-factors-1 n))
+;;(all-factors 4 t)
 ;;(all-factors 80)
+
+(defun all-factors-prod (n m &optional ft)
+  (when ft (set-factor-table ft))
+  (remove-duplicates
+      (loop for fn in (cons 1 (all-factors n t ft)) append
+	    (loop for fm in (cons 1 (all-factors m t ft))
+		  collect (* fn fm)))))
+;;(all-factors-prod 4 8)
 
 (provide 'factor-table)

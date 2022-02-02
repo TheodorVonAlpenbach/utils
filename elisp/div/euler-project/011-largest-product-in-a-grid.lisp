@@ -24,20 +24,6 @@
 01 70 54 71 83 51 54 69 16 92 33 48 61 43 52 01 89 19 67 48
 ")
 
-(defun mb-split-sequence (sequence separator &optional ignore-empty-p)
-  "Slow version of cl-utils' SPLIT-SEQUENCE.
-It does not include the SEPARATORs"
-  (let* ((a 0)
-	(res (append
-	      (loop for b = (position separator sequence :start a)
-		    while b
-		    collect (subseq sequence a b) into res
-		    do (setf a (1+ b))
-		    finally (return (append res (list (subseq sequence a))))))))
-    (if ignore-empty-p
-      (remove 0 res :key #'length) res)))
-;;(mb-split-sequence '(5 2 3 4 5) 5 t)
-
 (defun 011-grid-to-list2 ()
   (loop for line in (mb-split-sequence *011-grid* #\Newline t)
 	collect (mapcar #'parse-integer (mb-split-sequence line #\  t))))
@@ -46,7 +32,7 @@ It does not include the SEPARATORs"
   (let* ((l2 (011-grid-to-list2))
 	 (n (length l2))
 	 (m (length (car l2)))
-	 (a2 (make-array (list n m) :element-type :integer)))
+	 (a2 (make-array (list n m) :element-type 'integer)))
     (loop for row in l2
 	  for i from 0 do
 	  (loop for x in row
@@ -73,24 +59,29 @@ It does not include the SEPARATORs"
 ;;(011-tuples-diagonally (011-grid-to-arr2) 19 :diag)
 
 (defun mb-transpose (a2)
-  (destructuring-bind (n m) (array-dimensions a2)
-    (loop for i below n do
-	  (loop for j from (1+ i) below m do
-		(rotatef (aref a2 i j) (aref a2 j i))))))
+  (let ((a2t (copy-array a2)))
+    (destructuring-bind (n m) (array-dimensions a2t)
+      (loop for i below n do
+	    (loop for j from (1+ i) below m do
+		  (rotatef (aref a2t i j) (aref a2t j i)))))
+    a2t))
 
 (defun mb-flip-lr (a2)
-  (destructuring-bind (n m) (array-dimensions a2)
-    (loop for i below n do
-	  (loop for j from below (floor (/ m 2)) do
-		(rotatef (aref a2 i j) (aref a2 i (- m j 1)))))))
+  (let ((a2f (copy-array a2)))
+    (destructuring-bind (n m) (array-dimensions a2f)
+      (loop for i below n do
+	    (loop for j below (floor (/ m 2)) do
+		  (rotatef (aref a2f i j) (aref a2f i (- m j 1))))))
+    a2f))
 
 (defun 011-tuples (a2 k)
   (append
-   (011-tuples-right a2 :right)
-   (011-tuples-right (mb-transpose a2) :down)
-   (011-tuples-diagonally-down a2 :diagonally-down)
-   (011-tuples-diagonally-down (mb-flip-lr a2) :diagonally-down)))
+   (011-tuples-right a2 k :right)
+   (011-tuples-right (mb-transpose a2) k :down)
+   (011-tuples-diagonally a2 k :diagonally-down)
+   (011-tuples-diagonally (mb-flip-lr a2) k :diagonally-up)))
 
 (defun 011-solution (&optional (k 4))
-  (reduce #'max (011-tuples (011-grid-to-arr2) k) :key #'car))
-;;(011-solution)
+  (maximum (011-tuples (011-grid-to-arr2) k) :key #'car))
+;;(time (011-solution))
+;; => (70600674 (89 94 97 87) 12 13 :DIAGONALLY-DOWN)
