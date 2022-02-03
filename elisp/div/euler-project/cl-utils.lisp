@@ -1,7 +1,16 @@
-(defun number-to-digits (n)
-  (loop for c across (write-to-string n)
-	collect (- (char-int c) 48)))
-;;(number-to-digits 1234567890)
+(defun char-to-integer (char)
+  (let ((n (- (char-int char) 48)))
+    (assert (<= 0 n 9))
+    n))
+;;(map 'list #'char-to-integer "0123456789")
+
+(defun number-to-digits (n &optional (sequence-type 'list))
+  (map sequence-type #'char-to-integer (write-to-string n)))
+;;(number-to-digits 1234567890 'vector)
+
+(defun digit-sum (n)
+  (reduce #'+ (number-to-digits n)))
+;;(digit-sum 12345)
 
 (defun faculty (n)
   (loop for i from 2 to n
