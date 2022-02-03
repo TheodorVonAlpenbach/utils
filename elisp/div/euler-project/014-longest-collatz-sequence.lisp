@@ -1,17 +1,43 @@
-(defparameter *014-next-vector*)
+(require 'cl-utils "~/git/utils/elisp/div/euler-project/cl-utils.lisp")
+(require 'progress "~/git/utils/elisp/div/euler-project/progress.lisp")
+
+(defparameter *collatz-length-vector* nil)
 
 (defun next-collatz (n)
-  (evenp n) (/ n 2) (1+ (* 3 n)))
+  (if (evenp n) (/ n 2) (1+ (* 3 n))))
 
-(defun len)
+(defun collatz-sequence (n)
+  (if (< n 2)
+    (list 1)
+    (cons n (collatz-sequence (next-collatz n)))))
+;;(collatz-sequence 3)
 
-(defun handle-nth-collatz (n)
-  (when (zerop (svref *014-next-vector* n))
-    (setf (svref *014-next-vector* n) (next-collatz n))))
+(defun set-collatz-lengths (n)
+  (if (< n (length *collatz-length-vector*))
+    (let ((l (svref *collatz-length-vector* n)))
+      (if (zerop l)
+	(setf (svref *collatz-length-vector* n)
+	      (1+ (set-collatz-lengths (next-collatz n))))
+	l))
+    (1+ (set-collatz-lengths (next-collatz n)))))
 
+(defun make-collatz-length-vector (n)
+  (setf *collatz-length-vector*
+	(make-array (min (sq n) (round 1E8))
+	  :initial-element 0
+	  :element-type 'integer))
+  (setf (svref *collatz-length-vector* 1) 1)
+  (loop with progress = (init-progress 0 n)
+	for i from 2 below n
+	do (progress-handle progress i)
+	do (set-collatz-lengths i))
+  *collatz-length-vector*)
+  
 (defun 014-solution (&optional (n 1000000))
-  (setf *014-next-vector* (make-array n :element-type 'integer))
-  (loop for i from 1 below n do (handle-nth-collatz i)))
-;;(time (013-solution))
-;; => "5537376230"
-;; 5537376230390876637302048746832985971773659831892672
+  (maximum (make-collatz-length-vector n)))
+;;(time (014-solution))
+;;    525 ;
+;; => 837799 ;
+;;    525
+
+
