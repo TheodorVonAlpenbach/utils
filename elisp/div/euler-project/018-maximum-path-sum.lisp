@@ -1,6 +1,6 @@
 (require 'euler-utils "~/git/utils/elisp/div/euler-project/euler-utils.lisp")
 
-(defconstant 018-sample-triangle
+(defparameter 018-sample-triangle
   "
 				  3
 				 7 4
@@ -8,7 +8,7 @@
 			       8 5 9 3"
 )
 
-(defconstant 018-problem-triangle
+(defparameter 018-problem-triangle
   "
 				  75
 				95 64
@@ -27,22 +27,39 @@
 	    04 62 98 27 23 09 70 98 73 93 38 53 60 04 23"
 )
 
-(defun parse-triangle-array (triangle))
+(defun parse-triangle (triangle)
+  (coerce (loop for l in (lines triangle) collect
+		(coerce (loop for s in (mb-split-sequence
+					(string-trim '(#\Space #\Tab) l) #\  t)
+			      collect (parse-integer s))
+			'vector))
+	  'vector))
+;;(length (parse-triangle 018-problem-triangle))
 
-(defun triangle-left-child-index (i triangle))
+(defun copy-triangle (triangle)
+  (map 'vector #'copy-seq triangle))
+;;(copy-triangle (parse-triangle 018-problem-triangle))
 
-(defun triangle-left-child-index (i triangle))
-
-(defun triangle-max-child-value (i triangle))
-
-(defun triangle-max-path-indices (i triangle))
+(defun triangle-max-path-indices (triangle)
+  (cons 0
+	(loop for i below (1- (length triangle))
+	      for j = 0 then (if (< (svref (svref triangle (1+ i)) j)
+				    (svref (svref triangle (1+ i)) (1+ j)))
+			       (1+ j) j)
+	      collect j)))
 
 (defun 018-solution (&optional (triangle 018-problem-triangle))
-  (let* ((triangle-array (parse-triangle-array triangle))
-	 (acc (copy-seq triangle-array)))
-    (loop for i downfrom (1- (length acc) downto 0) do
-	  (incf (svref acc i) (triangle-max-child-value i acc)))
-    (loop for i in (triangle-max-path-indices acc)
-	  collect (svref triangle-array i))))
+  (let* ((value-triangle (parse-triangle triangle))
+	 (acc-triangle (copy-triangle value-triangle)))
+    (loop for i downfrom (- (length acc-triangle) 2) downto 0 do
+	  (loop for j to i do
+		(incf (svref (svref acc-triangle i) j)
+		      (max (svref (svref acc-triangle (1+ i)) j)
+			   (svref (svref acc-triangle (1+ i)) (1+ j))))))
+    (let ((solution-path (loop for ij in (triangle-max-path-indices acc-triangle)
+			       for triangle-level-i across value-triangle
+			       collect (svref triangle-level-i ij))))
+      (values (reduce #'+ solution-path) solution-path))))
 ;;(018-solution)
-;; => 21451
+;; => 1070
+;; (75 95 47 87 82 75 73 28 83 32 91 78 58 73 93)

@@ -42,6 +42,9 @@ It does not include the SEPARATORs"
       (remove 0 res :key #'length) res)))
 ;;(mb-split-sequence '(5 2 3 4 5) 5 t)
 
+(defun lines (string &optional (ignore-empty-p t))
+  (mb-split-sequence string #\Newline ignore-empty-p))
+
 (defun copy-array (array &key
                    (element-type (array-element-type array))
                    (fill-pointer (and (array-has-fill-pointer-p array)
