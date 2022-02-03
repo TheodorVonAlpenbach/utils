@@ -88,4 +88,21 @@ perform better."
 
 ;;(maximum '(5 5 3 1 1 4) :start 2)
 ;;(maximum '(0 0 0 1 1 4))
+
+(defun skip-lines (stream n)
+  "Move to util file"
+  (loop repeat n while (read-line stream nil nil)))
+
+(defun read-lines (stream &key start end remove-empty-p)
+  "Move to util file"
+  (when start (skip-lines stream start))
+  (loop for line = (read-line stream nil nil)
+     for i from (or start 0)
+     while (and line (or (not end) (< i end)))
+     if (not (and remove-empty-p (string= line "")))
+     collect line))
+
+(defun file->lines (filespec &rest args)
+  (with-open-file (in filespec) (apply #'read-lines in args)))
+
 (provide 'cl-utils)
