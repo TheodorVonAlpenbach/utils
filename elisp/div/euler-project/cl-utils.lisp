@@ -22,7 +22,8 @@
 (defun ! (n) (faculty n))
 
 (defun binomial-coefficient (n k)
-  (/ (! n) (! n) (! (- n k))))
+  (/ (! n) (! k) (! (- n k))))
+;;(binomial-coefficient 4 2)
 
 (defun sq (x) (* x x))
 
@@ -104,5 +105,13 @@ perform better."
 
 (defun file->lines (filespec &rest args)
   (with-open-file (in filespec) (apply #'read-lines in args)))
+
+(defun accumulate (list)
+  (loop for x in list
+	for sum = x then (+ sum x)
+	collect sum))
+;;(accumulate '(1 2 3))
+
+(defun sum (sequence) (reduce #'+ sequence))
 
 (provide 'cl-utils)

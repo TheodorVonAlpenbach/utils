@@ -37,12 +37,6 @@
 	  while (> f 1) unless (visited-p f) collect f)))
 ;;(factor-table-row-factors *ft* 7920)
 
-(defun factor-table-row-factors-raw (ft i)
-  (let ((m (array-dimension ft 1)))
-    (loop for j below m
-	  for f = (aref ft i j)
-	  while (> f 1) collect f)))
-
 (defun ft-count-columns (ft)
   (destructuring-bind (n m) (array-dimensions ft)
     (loop for j below m collect
@@ -59,7 +53,7 @@
 
 ;;; visited
 (defun make-visited (n)
-  (make-array n :element-type 'bit))
+  (make-array n :element-type 'bit :initial-element 0))
 
 (defparameter *visited* (make-visited 0))
 
@@ -72,8 +66,9 @@
 (defun set-visited (x) (setf (bit *visited* x) 1))
 
 (defparameter *ft* nil)
-(defun set-factor-table (ft) (setf *ft* ft))
 (defun get-factor-table () *ft*)
+(defun set-factor-table (ft) (setf *ft* ft) (array-dimensions *ft*))
+(defun init-factor-table (n) (set-factor-table (make-factor-table n)))
 
 (defun all-factors-1 (n)
   (unless (visited-p n)
@@ -97,5 +92,9 @@
 	    (loop for fm in (cons 1 (all-factors m t ft))
 		  collect (* fn fm)))))
 ;;(all-factors-prod 4 8)
+
+(defun proper-divisors (n &optional reset-visited-p ft)
+  (remove n (all-factors n reset-visited-p ft)))
+;;(proper-divisors 10 t)
 
 (provide 'factor-table)
