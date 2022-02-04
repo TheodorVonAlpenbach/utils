@@ -934,7 +934,7 @@ file. Returns the pathname of the stream together with the value of last form in
 ;;(first (read-text-file-lines "/home/MBe/projects/imms/data/rao/txt/RAO_FR85_LC78.txt" t))
 
 (defun file->string (path &rest args)
-  (concat (apply #'read-text-file-lines path args) :in (string #\Newline)))
+  (concat (apply #'file->lines path args) :in (string #\Newline)))
 
 (defun read-text-file (&rest args)
   (warn "READ-TEXT-FILE is deprecated. Use FILE->STRING instead.")

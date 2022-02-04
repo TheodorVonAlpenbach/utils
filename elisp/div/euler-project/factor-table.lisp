@@ -80,7 +80,9 @@
   (when reset-visited-p
     (reset-visited (1+ n)))
   (when ft
-    (set-factor-table ft))
+    (if (arrayp ft)
+      (set-factor-table ft)
+      (init-factor-table (1+ n))))
   (all-factors-1 n))
 ;;(all-factors 4 t)
 ;;(all-factors 80)
@@ -93,8 +95,30 @@
 		  collect (* fn fm)))))
 ;;(all-factors-prod 4 8)
 
-(defun proper-divisors (n &optional reset-visited-p ft)
+(defun proper-divisors-1 (n &optional reset-visited-p ft)
   (remove n (all-factors n reset-visited-p ft)))
-;;(proper-divisors 10 t)
+;;(proper-divisors-1 2 t t)
+
+(defun proper-divisors (n &optional reset-visited-p ft)
+  (when (plusp n)
+    (cons 1 (proper-divisors-1 n reset-visited-p ft))))
+;;(proper-divisors 66 t t)
+
+(defun proper-divisors-sum (n &optional reset-visited-p ft)
+  (sum (proper-divisors n reset-visited-p ft)))
+;;(proper-divisors-sum 66 t t)
+
+(defun perfect-number-p (n &optional reset-visited-p ft)
+  (when (plusp n)
+    (= n (proper-divisors-sum n reset-visited-p ft))))
+;;(perfect-number-p 0 t t)
+
+(defun deficient-number-p (n &optional reset-visited-p ft)
+  (> n (proper-divisors-sum n reset-visited-p ft)))
+;;(deficient-number-p 0 t t)
+
+(defun abundant-number-p (n &optional reset-visited-p ft)
+  (< n (proper-divisors-sum n reset-visited-p ft)))
+;;(abundant-number-p 0 t t)
 
 (provide 'factor-table)
