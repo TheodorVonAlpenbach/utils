@@ -101,7 +101,7 @@ This directory is shared, see `+shared-dir+'")
 (defun mb-emacs-local-filename ()
   (let* ((path (expand-file-name
 		(format ".emacs-local-%s-%s"
-			system-name
+		system-name
 			(substring (symbol-name (emacs-os)) 1))
 		+mb-lisp-dir+)))
     (if (file-exists-p path)
@@ -316,7 +316,8 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 			 quiz-park
 			 mb-js-mode
 			 mb-ert
-			 mb-org)
+			 ;; mb-org
+			 )
 		       *local-requires*)
       do (message "Loading package %S..." m)
       do (require m))

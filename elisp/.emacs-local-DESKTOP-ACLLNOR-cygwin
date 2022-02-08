@@ -106,10 +106,3 @@
 
 ;; lisp
 (setf inferior-lisp-program "clisp")
-
-;; set slime arguments
-(setf (cadar (cl-member "clisp" slime-lisp-implementations :test #'string= :key #'car))
-      (list "clisp"))
-;;slime-lisp-implementations
-
-

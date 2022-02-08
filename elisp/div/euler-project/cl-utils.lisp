@@ -86,6 +86,11 @@ perform better."
 			:start start :end end)))
     (values max pos (elt seq pos))))
 
+(defun maximum (seq &key key (start 0) end from-end)
+  (let* ((vseq (if key (map 'vector key seq) seq))
+	 (max (reduce #'max vseq :from-end from-end :start start :end end))
+	 (pos (position max vseq :from-end from-end :start start :end end)))
+    (values max pos (elt seq pos))))
 
 (defun minimum (seq &key key (start 0) end from-end)
   (let* ((min (reduce #'min seq :key key :from-end from-end
