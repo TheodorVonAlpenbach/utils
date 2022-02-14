@@ -316,7 +316,7 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 			 quiz-park
 			 mb-js-mode
 			 mb-ert
-			 ;; mb-org
+			 mb-org
 			 )
 		       *local-requires*)
       do (message "Loading package %S..." m)
