@@ -1,16 +1,10 @@
 ;; Local elisp load paths
 (setf *local-load-paths* '())
 
-(cl-pushnew
- '(".emacs" ".emacs-local-mats-ThinkPad-P1-Gen-2-linux")
-  *simple-swaps* :test #'equal)
-(cl-pushnew
- '("package.json" "package-lock.json")
-  *simple-swaps* :test #'equal)
-
-;;(cl-pushnew '(("actions.js" "../reducers") ("reducers.js" "../actions"))
-;;	    *smart-swaps*)
-;;(setf *smart-swaps* (remove-nth 0 *smart-swaps*))
+(pushnew-list
+ `((".emacs" ,(mb-emacs-local-filename))
+    ("package.json" "package-lock.json"))
+ *simple-swaps* :test #'equal)
 
 (setf *local-requires* '(browse-kill-ring))
 
@@ -75,8 +69,8 @@ sudo mount -a.")
 (setf inferior-lisp-program "sbcl --dynamic-space-size 5000")
 
 ;; set slime arguments
-(setf (cadar (cl-member "sbcl" slime-lisp-implementations :test #'string= :key #'car))
-      (list "sbcl" "--dynamic-space-size 6000"))
+;;(setf (cadar (cl-member "sbcl" slime-lisp-implementations :test #'string= :key #'car))
+;;      (list "sbcl" "--dynamic-space-size 6000"))
 ;;slime-lisp-implementations
 
 

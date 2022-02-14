@@ -2,7 +2,7 @@
 (setf *local-load-paths* '())
 
 (cl-pushnew
- '(".emacs" ".emacs-local-mats-ThinkPad-P1-Gen-2-linux")
+ (list ".emacs" (mb-emacs-local-filename))
   *simple-swaps* :test #'equal)
 
 ;;(cl-pushnew '(("actions.js" "../reducers") ("reducers.js" "../actions"))
