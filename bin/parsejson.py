@@ -16,7 +16,7 @@ else:
 y = json.loads(myJson)
 
 data = y["data"]
-print(len(data))
+# print(len(data))
 
 for datum in data:
     attributes = datum["attributes"]
