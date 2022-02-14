@@ -30,6 +30,9 @@
     (remake-factor-table ft primes)))
 ;;(make-factor-table 100 *ft*)
 
+(defun factor-table-row-empty-p (ft i)
+  (<= (aref ft i 0) 1))
+
 (defun factor-table-row-factors (ft i)
   (let ((m (array-dimension ft 1)))
     (loop for j below m
