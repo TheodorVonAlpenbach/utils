@@ -13,3 +13,5 @@
 game sequence."
   (concat* (fizz-buzz-sequence n) :key #'sstring :in ", "))
 ;;(fizz-buzz 35)
+
+(provide 'fizzbuzz)

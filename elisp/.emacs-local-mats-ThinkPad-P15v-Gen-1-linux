@@ -69,6 +69,7 @@ sudo mount -a.")
 (setf inferior-lisp-program "sbcl --dynamic-space-size 5000")
 
 ;; set slime arguments
+(require 'slime)
 (setf (cadar (cl-member "sbcl" slime-lisp-implementations :test #'string= :key #'car))
      (list "sbcl" "--dynamic-space-size 6000"))
 ;;slime-lisp-implementations

@@ -171,13 +171,6 @@ Not in use. Projects should be shared, at least until we are up and running Git.
   "Path to mb-lib")
 
 
-;;;; local lisp (overrides defaults)
-(load-file +emacs-local+)
-(find-file +emacs-local+)
-(emacs-lisp-mode)
-
-(find-file (expand-file-name ".emacs" (file-name-directory +emacs-local+)))
-
 ;;; non standard packages
 (require 'package)
 (loop for x in '(("marmalade" . "http://marmalade-repo.org/packages/")
@@ -321,6 +314,13 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 		       *local-requires*)
       do (message "Loading package %S..." m)
       do (require m))
+
+;;;; local lisp (overrides defaults)
+(load-file +emacs-local+)
+(find-file +emacs-local+)
+(emacs-lisp-mode)
+
+(find-file (expand-file-name ".emacs" (file-name-directory +emacs-local+)))
 
 ;; autoloads
 (autoload 'turn-on-eldoc-mode "eldoc" nil t)
@@ -493,3 +493,5 @@ Not in use. Projects should be shared, at least until we are up and running Git.
       smtpmail-smtp-server  "smtp.office365.com"
       smtpmail-stream-type  'starttls
       smtpmail-smtp-service 587)
+
+(require 'json-mode)
