@@ -107,7 +107,7 @@ SYMBOL can be a symbol or a list of symbols. See function
       hwhen htm-table htm-banner htm-form-button
       :export :import-from
       add-hooki product accumulate-sorted-list group-hash
-      accumulate-list)
+      accumulate-list emacsql-mysql)
   'prog1)
 (cl-indent  :table :tr)
 

@@ -495,3 +495,4 @@ Not in use. Projects should be shared, at least until we are up and running Git.
       smtpmail-smtp-service 587)
 
 (require 'json-mode)
+(require 'markdown-mode)
