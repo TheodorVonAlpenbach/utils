@@ -750,7 +750,7 @@ value in the specified interval. Else, it will be an integer."
   (let ((cumulative-weights (cumsum-list weights)))
     (cl-position-if (bind #'>= (random-float 0 (last-elt cumulative-weights)))
 	cumulative-weights)))
-;;(random-weighted-index '(1 5 10))
+;;(random-weighted-index '(5 4 3 2 1))
 
 (defun random-weighted-element-1 (elements)
   (first (nth (random-weighted-index (project-sequence elements 1)) elements)))
@@ -758,6 +758,28 @@ value in the specified interval. Else, it will be an integer."
 (defun random-weighted-element (elements &optional inverse)
   (random-weighted-element-1
    (if inverse (mapcol (bind #'inv t) 1 elements) elements)))
+
+(cl-defun random-log-parameters (&optional (h 1) (m 0.1))
+  ""
+  (assert (< 0 m h))
+  (let* ((d (- (/ m h)))
+	 (x (apply #'max (quadratic-root (1+ d) 1 d)))
+	 (k (* 2 (log x)))
+	 (ek (sq x))
+	 (b (/ h (1+ ek)))
+	 (a (- h b)))
+    (list a b k)))
+;;(random-log-parameters)
+
+(cl-defun random-log-fun (&optional (h 1) (m 0.1) seed)
+  ""
+  (cl-destructuring-bind (a b k) (random-log-parameters h m)
+    (lexical-let ((a a) (b b) (k k))
+      (lambda (x)
+	(+ a (* b (exp (* k x))))))))
+;;(funcall (random-log-fun) 0)
+
+
 
 ;;(random-weighted-element '((a 1) (b 5) (c 10)) t)
 ;;(accumulate-list (loop repeat 100 collect (random-weighted-element '((a 1) (b 5) (c 10)))) #'symbol<)
