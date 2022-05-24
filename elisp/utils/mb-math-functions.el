@@ -127,4 +127,19 @@ for numerical implementation basis."
        (geometric-series r :start 0 :end start))))
 ;;(geometric-series 0.5 :end 1)
 
+(defun quadratic-discriminant (a b c)
+  "Return the discriminant of the quadratic polynomial ax2 + bx + c."
+  (- (sq b) (* 4 a c)))
+;;(quadratic-discriminant 1 1 1)
+
+(defun quadratic-root (a b c)
+  "Return the roots of the quadratic polynomial ax2 + bx + c."
+  (let ((d (quadratic-discriminant a b c)))
+    (assert (not (minusp d)) t "The discriminant is negative.")
+    (let* ((2a (* 2.0 a))
+	   (b/2a (/ b 2.0 a))
+	   (sqrt-expr (/ (sqrt d) 2a)))
+      (list (- sqrt-expr b/2a) (- (+ sqrt-expr b/2a))))))
+;;(quadratic-root 1 0 -1)
+
 (provide 'mb-math-functions)
