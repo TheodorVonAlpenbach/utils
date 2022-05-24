@@ -27,6 +27,15 @@
 		      :start2 start2 :end2 end2)))
 ;;(string/= "qwe" "qwe")
 
+;;; Ignore case versions
+(defun istring< (string1 string2)
+  (string-collate-lessp string1 string2 nil t))
+;;(list (string< "qwe" "Rty") (istring< "qwe" "rty"))
+
+(defun istring= (string1 string2)
+  (string-collate-equalp string1 string2 nil t))
+;;(list (string= "qwe" "QWE") (istring= "qwe" "QWE"))
+
 (defun lower-case-p (character)
   "Common Lisp function. Checks if CHARACTER is invariant under
 case-table."
@@ -286,7 +295,7 @@ NEWSTRING."
     (while (re-search-forward regexp nil t)
       (replace-match newstring nil nil))
     (buffer-string)))
-;;(string-replace (setq string-replace-test-string "ababab") "b" "c")
+;;(string-replace (setq string-replace-test-string "") "b" "c")
 
 (defun substitute-string (string subst-string from to)
   "Removes substring [FROM TO) from STRING and inserts
@@ -769,6 +778,5 @@ length."
       (split-at-position (split-string name) -1)
     (list (concat* firsts :in " ") (car last))))
 ;;(split-name "Sverre Kristian Valskrå")
-
 
 (provide 'mb-utils-strings)
