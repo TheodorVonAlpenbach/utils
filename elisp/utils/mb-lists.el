@@ -82,7 +82,7 @@ according to TEST and KEY."
 (cl-defun group (list &key (test #'eql) (key #'identity))
   "Groups LIST into a list of sublists where all elements are equal
 according to TEST and KEY.
-Note that group to not consider LIST as a set. To do this, LIST must be sorted first."
+Note that `group' to not consider LIST as a set. To do this, LIST must be sorted first."
   (when list
     (loop for a = 0 then b
 	  for b in (group-positions list :test test :key key)
@@ -565,6 +565,16 @@ different, see test cases below."
 	   (list (first tree))
 	   (collect-sorted-tree (third tree)))))
 ;;(collect-sorted-tree (test-insert-sorted-tree))
+
+(cl-defun sort-to-order (list order predicate &optional (key #'identity))
+  (let ((order-positions (make-hash-table)))
+    (loop for x in order
+	  for i from 0
+	  do (puthash x i order-positions))
+    (cl-sort list predicate
+	     :key (lambda (x) (gethash (funcall key x) order-positions)))))
+;;(sort-to-order '((0) (1) (2)) '(3 2 1 0) #'< #'first)
+
 
 (defun mapcol (function colpos table)
   "Returns a copy of table, but where the column at COLPOS (only) is mapped by FUNCTION.
