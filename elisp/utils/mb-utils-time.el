@@ -142,7 +142,7 @@ this particular case, use the non-destructive `append', or wrap the expression w
 	    (list second minute hour)
 	    (subseq dtime 0 3))
 	  (subseq dtime 3)))
-;;(--add-dtime (decode-time) :year 1)
+;;(--add-dtime (decode-time) :hour 1)
 
 
 (cl-defun add-etime-time (etime &rest args)
@@ -151,6 +151,7 @@ this particular case, use the non-destructive `append', or wrap the expression w
 Keywords supported: :day :hour :minute :second
 \n(fn ETIME [KEYWORD VALUE]...)"
   (--time-encode (apply #'--add-dtime (decode-time etime) args)))
+;;(add-etime-time (now) :hour -1)
 
 (cl-defun add-etime-date (etime &rest args)
   "Add date parts to encoded time ETIME.
@@ -403,8 +404,8 @@ Note that PARTs :MONTH and :DAY are currently not supported."
     (warn (concat "Calling `now' with arguments has been deprecated.\n "
 		  "Use `add-etime-date' or `add-etime-time' "
 		  "for modifying time, instead."))
-    (apply #'add-etime (--time-encode (decode-time)) args)))
-;;(now)
+    (apply #'add-etime-time (--time-encode (decode-time)) args)))
+;;(now :hour -1)
 
 (cl-defun midnight (&optional (etime (now)) universal-p)
   "Return the first time point within the date of ETIME in local time.
@@ -786,5 +787,10 @@ designators WEEK-DESIGNATOR1 and WEEK-DESIGNATOR2. See
   "Convert time-designator to the number of seconds since 1970-01-01 UTC."
   (* 1000 (unix-time time-designator)))
 ;;(cons (ms-unix-time) (mapcar #'ms-unix-time '("2020-03-02T12:26:30")))
-	
+
+(cl-defun parse-ms-unix-time (ms)
+  "Convert unix-time in milliseconds to ETIME."
+  (iso-dttm (parse-time (/ ms 1000))))
+;;(parse-ms-unix-time 1648028147532)
+
 (provide 'mb-utils-time)
