@@ -3,7 +3,8 @@
 
 (pushnew-list
  `((".emacs" ,(mb-emacs-local-filename))
-    ("package.json" "package-lock.json"))
+   ("package.json" "package-lock.json")
+   (".bashrc" ".bash_profile"))
  *simple-swaps* :test #'equal)
 
 (setf *local-requires* '(browse-kill-ring))
