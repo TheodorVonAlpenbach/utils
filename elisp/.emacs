@@ -194,6 +194,7 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 		 (expand-file-name "games/cube" +mb-lisp-dir+)
 		 (expand-file-name "games/maths" +mb-lisp-dir+)
 		 (expand-file-name "games/cram" +mb-lisp-dir+)
+		 (expand-file-name "projects/ada" +mb-lisp-dir+)
 		 *site-lisp-dir*))
       if (and (file-directory-p x) (not (member x load-path)))
       collect x into res
@@ -255,6 +256,7 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 	 ("\\.pdf$" . doc-view-mode-maybe)
 	 ("\\.texinfo$" . texinfo-mode)
 	 ("\\.tex$" . latex-mode)
+	 ("\\.yml$" . yaml-mode)
 
 	 ;; safe default must come at the end
 	 ("^[^.]*$" . text-mode)))
@@ -289,6 +291,9 @@ Not in use. Projects should be shared, at least until we are up and running Git.
        (dabbrev--same-major-mode-p other-buffer)))
 (setq dabbrev-friend-buffer-function #'mb-dabbrev-friend-buffer-function)
 
+(find-file (expand-file-name ".emacs" (file-name-directory +emacs-local+)))
+(find-file +emacs-local+)
+
 ;; My lisp, finally everything in .emacs should be split into similar
 ;; files. Also, the files should be byte-compiled too.
 ;; autoload?
@@ -317,10 +322,8 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 
 ;;;; local lisp (overrides defaults)
 (load-file +emacs-local+)
-(find-file +emacs-local+)
-(emacs-lisp-mode)
 
-(find-file (expand-file-name ".emacs" (file-name-directory +emacs-local+)))
+(emacs-lisp-mode)
 
 ;; autoloads
 (autoload 'turn-on-eldoc-mode "eldoc" nil t)
