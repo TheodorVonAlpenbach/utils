@@ -3,7 +3,7 @@
 import json, sys, re, time, datetime
 
 def timestruct2isoDate(timestruct):
-    return time.strftime("%Y-%m-%dT%H:%M:%S", timestruct)
+    return time.strftime("%Y-%m-%dT%H:%M:%S%Z", timestruct)
 
 def unix2isoDate(msDate):
     return timestruct2isoDate(time.localtime(msDate))

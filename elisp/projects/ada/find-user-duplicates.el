@@ -1,13 +1,10 @@
 (require 'ada-mysql)
 
-(unless db
-  (setf db (ada-mysql-connect :ada_test)))
-
 (defun find-user-duplicates ()
   "Return a list of user fragment pairs grouped by duplicity."
   (copy-if #'(lambda (x) (> (length x) 1))
     (group (cl-sort (mapcar (bind #'project (list 0 (compose #'sstring #'fourth) 1))
-		      (user-from-name "%elev_no%"))
+		      (user-from-name "c%_no456326499%"))
 	     #'istring< :key #'second)
       :test #'istring= :key #'second)))
 ;;(length (find-user-duplicates))
@@ -32,8 +29,4 @@
   (loop for u in (car (find-superfluous-users)) do (delete-user u)))
 ;;(delete-superfluous-users)
 
-(require 'sql-utils)
-;;(sql-list (delete-superfluous-users))
-
 (provide 'find-user-duplicates)
-
