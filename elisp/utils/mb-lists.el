@@ -94,18 +94,35 @@ Note that `group' to not consider LIST as a set. To do this, LIST must be sorted
 ;;(group '(nil nil nil) :test #'equal)
 ;;(group nil)
 
-;; TODO: when the above renaming is done, rename this to GROUP-LIST or
-;; perhaps EQUIVALENCE-CLASS-LIST. Or: generalize with ELT, and rename
-;; to GROUP or EQUIVALENCE-CLASS.
-(cl-defun group-hash (list &key (key #'identity) (size 65))
-  "TODO: rename this."
-  (let ((ht (make-hash-table :size size)))
+(cl-defun equivalence-class-ht (list &key (key #'identity) (test #'eql) (size 65))
+  "Helper function for `equivalence-class
+Return the hash table"
+  (let ((ht (make-hash-table :test test :size size)))
     (loop for x in list
 	  for k = (funcall key x)
 	  do (puthash k (cons x (gethash k ht)) ht))
-    (loop for v the hash-values of ht
-	  collect v)))
-;;(group-hash '((a) (b) (c) (a) (b) (a) (d)) :key #'car)
+    ht))
+;;(equivalence-class-ht '((a) (b) (c) (a) (b) (a) (d)) :key #'car)
+
+;; TODO: when the above renaming is done, rename this to GROUP-LIST or
+;; perhaps EQUIVALENCE-CLASS-LIST. Or: generalize with ELT, and rename
+;; to GROUP or EQUIVALENCE-CLASS.
+(cl-defun equivalence-class (list &key (key #'identity) (test #'eql) (size 65))
+  "Group LIST into sublist equivalence classes defined by KEY."
+  (loop for v the hash-values of (equivalence-class-ht
+				  list :key key :test test :size size)
+	collect v))
+;;(equivalence-class '((a) (b) (c) (a) (b) (a) (d)) :key #'car)
+
+(cl-defun equivalence-class-with-key (list &key (key #'identity) (test #'eql)
+					     (size 65))
+  "Group LIST into sublists (K ELEMENTS) where for each group
+ELEMENTS are exactly the elements in LIST that evaluates to K."
+  (loop for v the hash-values of (equivalence-class-ht
+				  list :key key :test test :size size)
+	using (hash-keys k)
+	collect (list k v)))
+;;(equivalence-class-with-key '((a) (b) (c) (a) (b) (a) (d)) :key #'car)
 
 (defun nzip (&rest lists) 
   (apply #'nconc (transpose lists)))

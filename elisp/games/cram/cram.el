@@ -162,49 +162,6 @@ the *cram-current-problem* which is yet another structure."
   (browse-url (format "https://snl.no/%s"
 		(cram-problem-answer (cram-current-problem)))))
 
-;;; tab format. TODO move this somewhere else
-(cl-defun tab-column-type (column)
-  (cond
-    ((every #'integerp column) 'integer)
-    ((and (every #'numberp column)
-	  (some #'floatp column)) 'float)
-    ((every #'stringp column) 'string)))
-;;(tab-column-type '((1 2)))
-;;(tab-column-type '("qe" "qe"))
-
-(cl-defun tab-column-width (column &optional (type (tab-column-type column)))
-  (awhen (case type 
-	   (string column)
-	   (integer (mapcar #'number-to-string column)))
-    (apply #'max (mapcar #'length it))))
-;;(tab-column-width '(1 123))
-
-(defun tab-flag (width &optional type)
-  (format "%%%s%ds" (if (eql type 'integer) "" "-") width))
-
-(cl-defun tab-control-string (widths &key (type 'string) (separator " "))
-  (let ((types (if (atom type) (make-list (length widths) type) type)))
-    (concat* (mapcar* #'tab-flag widths types) :in separator)))
-;;(tab-control-string '(4 5 1) :type '(integer integer string))
-
-(cl-defun tab-format (string-table &key header (column-separator " ") (underline-char ?=))
-  (let ((first-row (first string-table)))
-    (when header
-      (assert (and (= (length first-row) (length header))
-		   (eql (tab-column-type header) 'string))))
-    (let* ((columns (transpose string-table))
-	   (types (mapcar #'tab-column-type columns))
-	   (cwidths (mapcar* #'tab-column-width columns types))
-	   (hwidths (and header (mapcar #'length header)))
-	   (widths (if header (mapcar* #'max cwidths hwidths) cwidths))
-	   (header (if header (concat (apply #'format (tab-control-string widths :separator column-separator) header) "\n") "")))
-      (concat* string-table
-	:pre (if underline-char (format "%s%s\n" header (make-string (length header) underline-char)) header)
-	:key #'(lambda (x) (apply #'format (tab-control-string widths :type types :separator column-separator) x))
-	:in "\n"))))
-;;(insert (tab-format '(("foo" 1 "bar") ("qwe" 1233456 "qwebar")) :header '("qwe" "ewq" "qwebar")))
-;;(tab-format '((1 "bar") (1233456 "qwebar")) :header '("numb" "string2") :column-separator "|")
-
 
 (cl-defun cram-list-last-matches
     (&optional (buffer-name "*Last matches") (max-question-length 20))

@@ -5,6 +5,7 @@ up=0
 extension=*
 ignoreCase=
 extensionModifier=""
+grepContext=""
 
 function printUsage {
     echo "Usage: $gfind [OPTION] TARGET [EXTENSION]"
@@ -13,16 +14,17 @@ function printUsage {
     echo "filename extension EXTENSION."
     echo ""
     echo "Options:"
-    echo "  -E ext      Another way to specify file extension, typically used by alias."
-    echo "  -e ext      Do not search files with EXTENSION. Issues a warning if no EXTENSION is provided"
-    echo "  -u N        Searches the directory tree N levels up from current directory."
-    echo "  -d M        Limit the search to directories M levels below current directory."
+    echo "  -E EXT      Another way to specify file extension, typically used by alias."
+    echo "  -e EXT      Do not search files with EXTENSION. Issues a warning if no EXTENSION is provided"
+    echo "  -u NUM      Searches the directory tree NUM levels up from current directory."
+    echo "  -d NUM      Limit the search to directories NUM levels below current directory."
+    echo "  -C NUM      Print NUM lines of output context. See grep manual for more info."
     echo "  -b          Do not search files with EXTENSION. Issues a warning if no EXTENSION is provided"
     echo "  -i          Ignore case"
     echo "  -v          Verbose mode"
 }
 
-while getopts "hE:e:u:d:iv" arg; do
+while getopts "hE:e:u:d:C:iv" arg; do
     case $arg in
 	h)
 	    printUsage
@@ -40,6 +42,9 @@ while getopts "hE:e:u:d:iv" arg; do
 	    ;;
 	d)
 	    down=$OPTARG
+	    ;;
+	C)
+	    grepContext="-C $OPTARG"
 	    ;;
 	i)
 	    ignoreCase=" -i"
@@ -81,12 +86,12 @@ find "$dir" \
      -type f \
      $extensionModifier-name "*.$extension" \
      -print0 \
-    | xargs -0 -r grep $ignoreCase -a --color=auto -n -s "$target"
+    | xargs -0 -r grep $ignoreCase $grepContext -a --color=auto -n -s "$target"
 
 echo ${verbose+find "$dir" \
      ${down+-maxdepth $down}\
      -type f \
      $extensionModifier-name "*.$extension" \
      -print0 \
-    | xargs -0 -r grep $ignoreCase -a --color=auto -n -s "$target"
+    | xargs -0 -r grep $ignoreCase $grepContext -a --color=auto -n -s "$target"
 }

@@ -575,4 +575,18 @@ By default the last line."
        b e nil))))
 ;;(evil-increment-rectangle)
 
+(evil-define-operator evil-rot13 (beg end type)
+  "Convert text to its rot13 counterpart."
+  (if (eq type 'block)
+      (evil-apply-on-block #'evil-rot13 beg end nil)
+    (rot13-region beg end)))
+
+(evil-define-operator evil-rot47 (beg end type)
+  "Convert text to its rot47 counterpart."
+  (if (eq type 'block)
+      (evil-apply-on-block #'evil-rot47 beg end nil)
+    (rot47-region beg end)))
+
+
+
 (provide 'mb-evil)

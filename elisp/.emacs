@@ -58,12 +58,6 @@
     ((:cygwin :linux) "~")
     (:win32 +win32-home-dir+)))
 
-(defconst +shared-dir+
-  (if (string= system-name "NPXMBE")
-      (expand-file-name "/My Documents/Google Drive/" +win32-home-dir+)
-    (expand-file-name "Google Drive" +win32-home-dir+)))
-;;system-name
-
 (cl-defun cygpath (path &optional (type :win32))
   "This should definitetly be moved somewhere else."
   (if (cygwin-emacs-p)
@@ -76,18 +70,6 @@
       (string-trim (call-process* "cygpath" "--type" ctype (expand-file-name path))))
     path))
 ;;(cygpath "/cygdrive/c/Users/MBe.azure/AppData/Roaming/Scilab/scilab-5.5.1/" :unix)
-
-;;;; global defaults (can be overrided in .emacs-local)
-(defvar *shared-data-dir* (expand-file-name "mb-data" +shared-dir+)
-  "Directory for shared data, for instance arbeidslog and adresser.txt")
-
-(defvar *shared-projects-dir* (expand-file-name "projects" +shared-dir+)
-  "Directory for shared projects. See `+shared-dir+'")
-
-(defvar *site-lisp-dir* (expand-file-name "site-lisp" +shared-dir+)
-  "Directory containing extra lisp (eg. mb-lisp).
-This is always the parent directory to the .emacs directory.
-This directory is shared, see `+shared-dir+'")
 
 (defconst +os-root+ (expand-file-name "~")
   "Default directory OS root")
@@ -194,8 +176,7 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 		 (expand-file-name "games/cube" +mb-lisp-dir+)
 		 (expand-file-name "games/maths" +mb-lisp-dir+)
 		 (expand-file-name "games/cram" +mb-lisp-dir+)
-		 (expand-file-name "projects/ada" +mb-lisp-dir+)
-		 *site-lisp-dir*))
+		 (expand-file-name "projects/ada" +mb-lisp-dir+)))
       if (and (file-directory-p x) (not (member x load-path)))
       collect x into res
       finally do (setf load-path (append res load-path)))

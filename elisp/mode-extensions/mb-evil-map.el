@@ -9,6 +9,8 @@
 (define-key evil-normal-state-map " " 'scroll-up-command)
 (define-key evil-normal-state-map [return] 'scroll-down-command)
 (define-key evil-normal-state-map "ga" 'what-cursor-position)
+(define-key evil-normal-state-map "gr" 'evil-rot47)
+(define-key evil-normal-state-map "gR" 'evil-rot13)
 
 ;;(evil-define-key '(motion) global-map [tab] #'forward-button)
 ;;(evil-define-key '(normal) global-map [tab] #'self-insert-command)

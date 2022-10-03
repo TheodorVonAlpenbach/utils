@@ -87,10 +87,10 @@
 		   :test #'(lambda (x y) (eql y 'd)))
 		 '((a) (b d) (a d) (a) (b)))))
 
-(ert-deftest test-group-hash ()
-  "Test of `group-hash'"
-  (should (equal (group-hash '(a b d a d a b)) '((a a a) (b b) (d d))))
-  (should (equal (group-hash '((a) (b) (c) (a) (b) (a) (d)) :key #'car)
+(ert-deftest test-equivalence-class ()
+  "Test of `equivalence-class"
+  (should (equal (equivalence-class '(a b d a d a b)) '((a a a) (b b) (d d))))
+  (should (equal (equivalence-class '((a) (b) (c) (a) (b) (a) (d)) :key #'car)
 		 '(((a) (a) (a)) ((b) (b)) ((c)) ((d))))))
 
 (ert-deftest test-head ()
@@ -108,6 +108,16 @@
 (ert-deftest test-n-0 ()
   "Test of `n-0'"
   (should (equal (n-0 3) '(2 1 0))))
+
+(ert-deftest test-equivalence-class-with-key ()
+  "Test of `equivalence-class-with-key'"
+ (should (equal (equivalence-class-with-key '("a" "ab" "abc" "b" "bc" "bcd")
+					    :key #'length)
+		'((1 ("b" "a")) (2 ("bc" "ab")) (3 ("bcd" "abc")))))
+ (should (equal (equivalence-class-with-key '("a" "ab" "abc" "b" "bc" "bcd")
+					    :key #'(lambda (x) (substring x 0 1))
+					    :test #'equal)
+		'(("a" ("abc" "ab" "a")) ("b" ("bcd" "bc" "b"))))))
 
 (ert-deftest test-memcase ()
   "Test of `memcase'"

@@ -366,13 +366,23 @@ TODO: font-lock face as `defun'."
 (definteractive point-min)
 (definteractive point-max)
 
-(defun vxw (v w) 
+(cl-defun vxw (v w &optional (map #'list)) 
+  ;; (print (list v w))
   (let ((res nil))
     (loop for ev in v
 	  do (loop for ew in w
-		   do (push (list ev ew) res)))
+		   do (push (funcall map ev ew) res)))
+    ;; (print (nreverse res))
     (nreverse res)))
-;;(vxw (0-n 2) (1-n 3))
+;;(vxw (0-n 2) (1-n 3) #'*)
+
+(cl-defun cartesian-product (lists &optional (map #'list))
+  (mapply map (reduce #'(lambda (v w) (vxw v w #'append))
+		(mapcar #'(lambda (x) (mapcar #'list x)) lists))))
+;;(cartesian-product '(("a" "b") ("c" "d") ("e" "f" "g") ("h")) #'concat)
+
+(mapcar #'(lambda (x) (mapcar #'list x)) '(("a" "b") ("c" "d") ("e" "f")))
+;;(cartesian-product (list (0-n 2) (1-n 3) (a-b 3 4)) #'*)
 
 (defmacro with-gensyms (syms &rest body)
   `(let ,(mapcar #'(lambda (s)
@@ -543,7 +553,6 @@ etc. NB! Check if obsolete!"
   `(setf ,x (mod ,x ,y)))
 ;;(let ((x 11)) (modf x 6) x)
 
-
 (defun struct-name (x)
   (if (eq (type-of x) 'vector)
     (let* ((px (split-string (format "%S" x))))
@@ -558,17 +567,16 @@ etc. NB! Check if obsolete!"
 ;;(defstruct qwe)
 ;;(struct-type (make-qwe))
 
-(defun equal* (&rest args)
-  "Deprecated"
-  (message "Warning! this function is deprecated. Use `all-equal' instead")
-  (apply #'all-equal args))
-;;(equal* 1 1)
-
 (defun all-equal (&rest args)
   "Return T if all ARGS are EQUAL and NIL if not."
-  (not (when args (cl-find (first args) (rest args) :test #'nequal))))
-;;(all-equal 1 1)
-;;(all-equal 1 1)
+  (not (and args (some (bind #'nequal (car args)) (cdr args)))))
+
+(cl-defun equal-elements (sequence &optional (test #'equal))
+  "Return T if all ARGS are EQUAL and NIL if not."
+  (not (and (plusp (length sequence))
+	    (some (bind (compose #'not test) (elt sequence 0))
+		  (subseq sequence 1)))))
+;;(equal-elements [1 1])
 
 (defun mequal (map-function &rest args)
   "Tests whether all ARGS are EQUAL after applying MAP-FUNCTION
@@ -643,6 +651,7 @@ converted to optional argument NIL-STRING."
 		(not (minusp string-designator)))
 	   (string string-designator))
 	  ((keywordp string-designator) (keyword-name string-designator))
+	  ((symbolp string-designator) (symbol-name string-designator))
 	  (t (format "%S" string-designator)))
     nil-string))
 ;;(loop for x in '(nil :qwe qwe "qwe" 123 -1 (:read 2 3)) collect (sstring x 0 t))
@@ -666,6 +675,15 @@ converted to optional argument NIL-STRING."
 	(intern symbol-name)))
     symbol-name))
 ;;(mapcar #'symbolp (mapcar #'iintern (list 1 "a" 'b "")))
+
+(defun decolonize-symbol-name (symbol-name)
+  (if (= (char symbol-name 0) ?:)
+    (substring symbol-name 1) symbol-name))
+;;(decolonize-symbol-name ":a")
+
+(defun decolonize-symbol (symbol)
+  (ssymbol (decolonize-symbol-name (symbol-name symbol))))
+;;(mapcar #'decolonize-symbol '(a :b))
 
 (defun llist (x)
   (warn "llist is deprecated. Use listify instead")

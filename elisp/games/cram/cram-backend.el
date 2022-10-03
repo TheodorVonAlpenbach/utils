@@ -154,7 +154,7 @@ last zero score."
 ;;(cram-modify-scores '(.5 .4 .3 0 .5))
 
 (cl-defun cram-get-cram-problem-id-1-old (&optional (user (cram-current-user)))
-  (loop for x in (group-hash (cram-get-matches user)
+  (loop for x in (equivalence-class (cram-get-matches user)
 		   :key #'cram-match-problem-id)
 	for scores = (cram-modify-scores (mapcar #'cram-match-score x))
 	for timestamps = (mapcar #'cram-match-timestamp x)
@@ -170,7 +170,7 @@ last zero score."
 
 (cl-defun cram-get-cram-problem-id-1 (&optional (user (cram-current-user)))
   (loop with now = (unix-time)
-	for y in (group-hash (cram-get-matches user)
+	for y in (equivalence-class (cram-get-matches user)
 		   :key #'cram-match-problem-id)
 	for x = (reverse y)
 	for scores = (mapcar #'cram-match-score x)

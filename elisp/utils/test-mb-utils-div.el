@@ -6,7 +6,18 @@
   (should (equal (all-equal) t))
   (should (equal (all-equal 1) t))
   (should (equal (all-equal 1 1) t))
-  (should (equal (all-equal 1 2) nil)))
+  (should (equal (all-equal 1 2) nil))
+  (should (equal (all-equal 2 2 2) t))
+  (should (equal (all-equal 1 2 2) nil)))
+
+(ert-deftest test-equal-elements ()
+  "Test of `equal-elements'"
+  (should (equal (equal-elements []) t))
+  (should (equal (equal-elements [1]) t))
+  (should (equal (equal-elements [1 1]) t))
+  (should (equal (equal-elements [1 2]) nil))
+  (should (equal (equal-elements [2 2 2]) t))
+  (should (equal (equal-elements [1 2 2]) nil)))
 
 (ert-deftest test-push-list ()
   "Test of `push-list'"

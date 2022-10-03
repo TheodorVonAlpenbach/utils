@@ -732,6 +732,18 @@ behavior when the argument is not an integer"
      a))
 ;;(loop for i below 100000 count (= (random-integer 1 3) 3))
 
+(cl-defun random-unique-integers-n (n m &optional seed)
+  "Return a list of N unique random numbers in [0 M>."
+  (assert (<= n m))
+  (when seed (random t))
+  (loop with list = (0-n m) repeat n collect (draw-random list)))
+;;(random-unique-integers-n 5 5)
+
+(cl-defun random-unique-integers (n &optional (a 0) (b 1) seed)
+  "Return a list of N unique random numbers in [0 M]."
+  (mapcar (bind #'+ a) (random-unique-integers-n n (1+ (- b a)) seed)))
+;;(random-unique-integers 6 10 15)
+
 (cl-defun random-integers (n &optional (a 0) (b 1) seed)
   "Return a list of N random numbers in [a b]."
   (when seed (random t))
@@ -751,6 +763,14 @@ value in the specified interval. Else, it will be an integer."
     (cl-position-if (bind #'>= (random-float 0 (last-elt cumulative-weights)))
 	cumulative-weights)))
 ;;(random-weighted-index '(5 4 3 2 1))
+;;(cumsum-list '(5 4 3 2 1))
+
+(cl-defun random-weights-given-probabilities (n p &optional (num-draws 1))
+  "Return weights so the first element has probability P to be drawn"
+  (let ((w0 (expt p (/ 1.0 num-draws))))
+    (cons w0 (mapcar (bind #'* (/ (* 2 (- 1 w0)) (1- n) n))
+	       (nreverse (1-n (1- n)))))))
+;;(random-weights-given-probabilities 5 .5)
 
 (defun random-weighted-element-1 (elements)
   (first (nth (random-weighted-index (project-sequence elements 1)) elements)))

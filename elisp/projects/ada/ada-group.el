@@ -12,6 +12,7 @@
 ;;(company-group 571179)
 
 (defun group-members (company-group-descriptor)
+  "Return user IDs for all members in COMPANY-GROUP-DESCRIPTOR"
   (mapcar #'car
     (emacsql db [:select user-id
 		 :from user-company-group
