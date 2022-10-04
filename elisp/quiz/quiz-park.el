@@ -447,7 +447,9 @@ For LIMIT, see qp-guess-customer-tag."
   (interactive)
   (kill-new "Hei! 
 
-Vedlagt ukens quiz. 
+Vedlagt ukens quiz.
+
+Gjennomsnittlig vanskelighetsgrad på spørsmålene denne uken er henholdsvis 5.4 og 4.6.
 
 Vennlig hilsen 
 Quizserien
