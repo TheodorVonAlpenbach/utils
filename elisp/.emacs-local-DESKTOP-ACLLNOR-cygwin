@@ -71,6 +71,7 @@
 	(,+mb-lisp-dir+ "global/mb-indent.el")
 	(,+mb-lisp-dir+ "mode-extensions/mb-evil.el")
 	(,+mb-lisp-dir+ "mode-extensions/mb-evil-map.el")
+	(,+mb-lisp-dir+ "mode-extensions/mb-org.el")
 	;; (,+mb-lisp-dir+ "mode-extensions/mb-lisp.el")
 	;; (,+mb-lisp-dir+ "quiz/quiz-park.el")
 	(,+mb-lisp-dir+ "div/scratch.el")
@@ -82,7 +83,7 @@
 		     :time-paragraphs t)
 
 	;; ;; remote files (shared with windows)
-	(,pf-dir "progfab/log.org")
+	;; (,pf-dir "progfab/log.org")
 
 	;; Note special treatment of arbeidslog in mb-insert-state-init!
 	;; (,pfdoc-dir "arbeidslog" :point :end :keyboard :no :time-paragraphs t)
