@@ -215,7 +215,7 @@ Currently only LP-CHORAL-STYLE style is supported"
 	  (bury-buffer "*compilation*")
 	  ;; and return to whatever were looking at before
 	  (replace-buffer-in-windows "*compilation*")
-	  (pdf-view (string-replace ".ly" ".pdf")))
+	  (pdf-view (mb-string-replace ".ly" ".pdf")))
 	;; Always return the anticipated result of compilation-exit-message-function
 	(cons msg code)))
 
@@ -247,7 +247,7 @@ TODO: make a similar function that operates on temporary files"
 		  (bury-buffer "*LilyPond-compile*")
 		  ;; and return to whatever were looking at before
 		  (replace-buffer-in-windows "*LilyPond-compile*")
-		  (pdf-view (string-replace file ".ly$" ".pdf")))
+		  (pdf-view (mb-string-replace file ".ly$" ".pdf")))
 		;; Always return the anticipated result of compilation-exit-message-function
 		(cons msg code))))
       (LilyPond-command-lilypond))))

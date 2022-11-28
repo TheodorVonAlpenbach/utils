@@ -35,11 +35,11 @@ resulting string."
 	  (and (stringp attributes)
 	       (string= attributes "*")))
     "\\([^>]*\\)"
-    (concat* (loop with wildcard-attribute-name = "[^=]+"
-		   with wildcard-attribute-value = "[^\"]*"
-		   for a in (if (listp attributes) attributes (list attributes))
-		   collect (apply #'xml-attribute-regexp (if (listp a) a (list a "*"))))
-	     :pre "[[:space:]]+" :in "[[:space:]]+" :suf (if exact-p "" "[^>]*")))) 
+    (concat* (cl-loop with wildcard-attribute-name = "[^=]+"
+		      with wildcard-attribute-value = "[^\"]*"
+		      for a in (if (listp attributes) attributes (list attributes))
+		      collect (apply #'xml-attribute-regexp (if (listp a) a (list a "*"))))
+      :pre "[[:space:]]+" :in "[[:space:]]+" :suf (if exact-p "" "[^>]*")))) 
 ;;(xml-attributes-regexp '(("qwe" "123222") "itemprop" "*"))
 ;;(mapcar #'xml-attributes-regexp '("*" nil "qwe"))
 	     
@@ -76,18 +76,18 @@ resulting string."
 
 (require 'mb-locale)
 (cl-defun xml-decode-characters (string &optional (encoding *iso-latin1-encoding*))
-  (loop for x in encoding
-	for ascii-code = (fourth x)
-	for xml-code = (format "&#%d;" ascii-code) ;
-	for char = (first x)
-	do (setq string (string-replace string xml-code char))
-	finally return string)
+  (cl-loop for x in encoding
+	   for ascii-code = (fourth x)
+	   for xml-code = (format "&#%d;" ascii-code) ;
+	   for char = (first x)
+	   do (setq string (mb-string-replace string xml-code char))
+	   finally return string)
 
-  (loop for x in *xml-special-chars*
-	for xml-code = (format "&%s;" (first x))
-	for char = (second x)
-	do (setq string (string-replace string xml-code char))
-	finally return string))
+  (cl-loop for x in *xml-special-chars*
+	   for xml-code = (format "&%s;" (first x))
+	   for char = (second x)
+	   do (setq string (mb-string-replace string xml-code char))
+	   finally return string))
 
 (defun html-to-temp-buffer (html-converter html-string buffer-name &rest args)
   "HTML-CONVERTER is a method taking one argument, an

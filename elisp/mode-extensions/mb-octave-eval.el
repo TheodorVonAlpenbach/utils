@@ -48,7 +48,7 @@ standard for where to put the eval output
 * repl
 * echo
 * insert at point."
-  (case current-prefix-arg
+  (cl-case current-prefix-arg
     ((4) (octave-eval-print-last-sexp))
     (0 (octave-eval-print-last-sexp 'size))
     (otherwise

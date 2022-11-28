@@ -48,7 +48,7 @@
 
 ;;; Finally, need to revert .emacs* buffers since they have not yet been
 ;;; hooked by the functionality loaded here
-(loop for b in (list (get-buffer ".emacs") (get-file-buffer +emacs-local+))
+(cl-loop for b in (list (get-buffer ".emacs") (get-file-buffer +emacs-local+))
       do (with-current-buffer b (revert-buffer nil t)))
 
 ;;; Keyboard shortcuts
@@ -78,7 +78,7 @@ STATE can take the same values as in `evil-define-key'."
   "Is made for insert state."
   (interactive)
   (up-list 1)
-  (case major-mode
+  (cl-case major-mode
     (emacs-lisp-mode
      (insert " "))))
 
@@ -93,7 +93,7 @@ STATE can take the same values as in `evil-define-key'."
 
 (defun mb-show-process-buffer ()
   (interactive)
-  (case major-mode
+  (cl-case major-mode
     (mbscilab-mode (mbscilab-show-process-buffer))
     (octave-mode (octave-show-process-buffer))
     (emacs-lisp-mode (display-buffer "*scratch*" '(display-buffer-use-some-window)))
@@ -110,7 +110,7 @@ By default the last line."
       (forward-line (- count (line-number-at-pos))))
     (eol)
     (let ((c (current-column)))
-      (loop while (> (current-column) column) do (backward-char)))))
+      (cl-loop while (> (current-column) column) do (backward-char)))))
 
 (defun ffap-read-file-or-url-no-prompt (prompt guess)
   "Same as `ffap-read-file-or-url' but without prompting."
@@ -159,7 +159,7 @@ A simple split consists of two windows only."
   "Rotate windows."
   (interactive)
   (let ((cb (current-buffer)))
-    (loop with buffers = (loop for w in (window-list) collect (window-buffer w))
+    (cl-loop with buffers = (cl-loop for w in (window-list) collect (window-buffer w))
 	  for b in (rotate-list buffers)
 	  for w in (window-list)
 	  do (set-window-buffer w b))
@@ -214,7 +214,7 @@ A simple split consists of two windows only."
   "This is the core function of the mb-eval machinery. Most other
 eval function should end up here to secure a sort of conformity
 between different"
-  (case major-mode
+  (cl-case major-mode
     (mb-lisp-mode
      (if (slime-p)
        (slime-eval string)
@@ -228,7 +228,7 @@ between different"
 (defun eval-form ()
   "This is special to Lisp languages only."
   (interactive)
-  (case major-mode
+  (cl-case major-mode
     ((emacs-lisp-mode mb-lisp-mode)
      (save-excursion
        (backward-up-list 1)
@@ -239,7 +239,7 @@ between different"
 (defun mb-eval-last-sexp (&rest args)
   "Eval the syntaks expression preceding point."
   (interactive)
-  (case major-mode
+  (cl-case major-mode
     (emacs-lisp-mode (eval-last-sexp args))
     (mb-lisp-mode (if (slime-p)
 		    (if args
@@ -253,7 +253,7 @@ between different"
 
 (defun eval-current-sexp ()
   (interactive)
-  (case major-mode
+  (cl-case major-mode
     ((emacs-lisp-mode mb-lisp-mode)
      (save-excursion
        (forward-sexp 1)
@@ -325,7 +325,7 @@ between different"
 
 (defun mb-eval-region (start end &optional printflag read-function)
   (interactive "r")
-  (case major-mode
+  (cl-case major-mode
     (emacs-lisp-mode (eval-region start end printflag read-function))
     (python-mode (python-shell-send-region start end nil))
     ((mbscilab-mode scilab-mode) (mbscilab-eval-region start end))
@@ -349,7 +349,7 @@ between different"
 
 (defun mb-compile-buffer ()
   (interactive)
-  (case major-mode
+  (cl-case major-mode
     (octave-mode (octave-source-buffer))))
 
 (defun mb-normal-state-init ()
@@ -410,7 +410,7 @@ mentioned\) RESULT is returned unmodified."
 		(set-face-foreground 'mode-line (cdr color))))))
 
 ;; move to mode ext
-(loop for (mode . state) in '((inferior-emacs-lisp-mode . emacs)
+(cl-loop for (mode . state) in '((inferior-emacs-lisp-mode . emacs)
                               (inferior-lisp-mode . emacs)
                               (inferior-octave-mode . emacs)
                               (shell-mode . emacs)
@@ -452,7 +452,7 @@ does not work for me."
 
 (evil-define-text-object mb-evil-inner-variable-name (count &optional beg end type)
   "Smartparens sexp object. E.g. +foobar+ --> foobar"
-  (destructuring-bind (beg end) (last-sexp-region)
+  (cl-destructuring-bind (beg end) (last-sexp-region)
     (evil-range (1+ beg) (1- end) 'inclusive :expanded t)))
 
 (evil-define-operator evil-yank-line (beg end type register yank-handler)
@@ -569,7 +569,7 @@ By default the last line."
        (lexical-let (last)
 	 #'(lambda (beg end)
 	     (if last
-	       (let ((s (number-to-string (incf last))))
+	       (let ((s (number-to-string (cl-incf last))))
 		 (overwrite-region s beg end))
 	       (setf last (string-to-number (region-string beg (1+ end)))))))
        b e nil))))

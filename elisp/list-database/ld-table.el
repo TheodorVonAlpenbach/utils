@@ -47,7 +47,7 @@
 ;;; Cloning manipulations
 (defun ld-clone-table (table &optional table-clone-level)
   ""
-  (case table-clone-level
+  (cl-case table-clone-level
     ((nil) (ld-create-table (ld-table-schema table) nil))
     (:nothing nil)
     (:schema (ld-create-table (copy-tree (ld-table-schema table))))
@@ -55,7 +55,7 @@
 ;;(ld-clone-table emps)
 
 (cl-defun ntable-insert-column (coldata rows &optional colpos)
-  (assert (= (length coldata) (length rows)))
+  (cl-assert (= (length coldata) (length rows)))
   (let ((trows (transpose rows)))
     (list-insert coldata (or colpos (length trows)) trows)
     (transpose trows)))

@@ -46,7 +46,7 @@
   "Probably bad new proposal"
   (if (functionp mode-or-fn)
     mode-or-fn
-    (case mode-or-fn
+    (cl-case mode-or-fn
       (emacs-lisp-mode #'lisp-indent-function)
       (t #'common-lisp-indent-function))))
 ;;(mapcar #'get-indent-function '(if emacs-lisp-mode mb-lisp-mode dummy-mode))
@@ -56,7 +56,7 @@
   "Sets indent of SYMBOL to INDENT. SYMBOL can also be a list of symbols."
   (let ((indent-fn (get-indent-function mode-or-fn)))
     (if (consp symbol)
-      (loop for x in symbol collect (set-indent x indent mode-or-fn))
+      (cl-loop for x in symbol collect (set-indent x indent mode-or-fn))
       (put symbol indent-fn
 	   (if (symbolp indent)
 	     (get indent indent-fn)
@@ -69,7 +69,7 @@ SYMBOL can be a symbol or a list of symbols. See function
   ""
   (let ((indent-fn 'common-lisp-indent-function))
     (if (consp symbol)
-      (loop for x in symbol collect (set-indent x indent))
+      (cl-loop for x in symbol collect (set-indent x indent))
       (put symbol indent-fn
 	   (if (symbolp indent)
 	     (get indent indent-fn)
@@ -109,7 +109,8 @@ SYMBOL can be a symbol or a list of symbols. See function
       add-hooki product accumulate-sorted-list
       equivalence-class equivalence-class-with-key
       accumulate-list emacsql-mysql
-      reduce)
+      reduce
+      emacsql-mysql emacsql)
   'prog1)
 (cl-indent  :table :tr)
 

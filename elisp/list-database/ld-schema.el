@@ -10,7 +10,7 @@
 
 (defun ld-make-empty-schema (keyword name parent-keyword &optional raw-column-definitions)
   (let ((id (list parent-keyword keyword)))
-    (assert (ld-identifier-p id))
+    (cl-assert (ld-identifier-p id))
     (list :schema id name raw-column-definitions)))
 ;;(make-employees)
 
@@ -26,7 +26,7 @@
   "Each column in the list COLUMNS is a list with a mandatory
 keyword as first elements. The rest of the list is a plist with
 some subset of the properties :name :type :primary-key."
-  (loop for col in columns do (apply #'ld-insert-column schema col)))
+  (cl-loop for col in columns do (apply #'ld-insert-column schema col)))
 
 (cl-defun ld-make-schema (keyword &key (name (keyword-name keyword)) column-definitions (plist-p t) parent-keyword)
   "If PLIST-P is nil the COLUMN-DEFINITIONS are inserted into schema as is. Else, they are processed with"
@@ -44,7 +44,7 @@ some subset of the properties :name :type :primary-key."
 The schema is set up like a skeleton of lists which resembles the
 schema structure. This skeleton is here straightforward converted
 to a legal scheme structure."
-  (destructuring-bind (keyword name coldefs) schemadef
+  (cl-destructuring-bind (keyword name coldefs) schemadef
     (ld-make-schema keyword :name name :column-definitions coldefs :plist-p t :parent-keyword parent-keyword)))
 ;;(maths-make-schema (first *maths-db-schema-definitions*))
 ;;(ld-create-database :maths :schemas (mapcar #'ld-schemadef->schema *maths-db-schema-definitions*))
@@ -67,7 +67,7 @@ to a legal scheme structure."
 ;;(ld-schema-p (ld-table-schema (first (ld-database-tables *current-database*))))
 
 (defun ld-find-column-definition (column-designator schema-designator)
-  (assert (not (null schema-designator)) t "schema-designator was nil!")
+  (cl-assert (not (null schema-designator)) t "schema-designator was nil!")
   (cond ((ld-column-p column-designator)
 	 column-designator)
 

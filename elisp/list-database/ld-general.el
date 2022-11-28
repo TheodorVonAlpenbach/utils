@@ -12,7 +12,7 @@
 ;;(ld-autogenerate-p (first (ld-table-column-definitions (ld-table :users))))
 
 (defun ld-identifier (ldobj)
-  (ecase (ld-type ldobj)
+  (cl-ecase (ld-type ldobj)
     (identifier ldobj)
     (database (ld-database-identifier ldobj))
     (table (ld-table-identifier ldobj))
@@ -28,20 +28,20 @@
 ;;(mapcar #'ld-keyword (list '(nil) *current-DB* emps comps))
 
 (defun ld-database-id (ldobj)
-  (ecase (ld-type ldobj)
+  (cl-ecase (ld-type ldobj)
     (identifier ())
     (database ldobj)
     ((schema table) (ld-parent ldobj))
     (column (ld-database (ld-parent ldobj)))))
 
 (defun ld-database (ldobj)
-  (ecase (ld-type ldobj)
+  (cl-ecase (ld-type ldobj)
     (database ldobj)
     ((schema table) (ld-parent ldobj))
     (column (ld-database (ld-parent ldobj)))))
 
 (defun ld-parent-id (ldobj)
-  (ecase (ld-type ldobj)
+  (cl-ecase (ld-type ldobj)
     (identifier (butlast ldobj))
     (t (ld-parent-id (ld-identifier ldobj)))))
 ;;(ld-table-repository emps)
@@ -52,7 +52,7 @@
 
 (defun ld-object (id)
   (when (listp id)
-    (case (length id)
+    (cl-case (length id)
       (0 nil)
       (1 (and (first id) (ld-database id)))
       (2 (ld-table id))

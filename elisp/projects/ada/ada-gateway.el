@@ -62,18 +62,27 @@
     (if (ada-gateway-p gateway-descriptor)
       gateway-descriptor
       (apply #'gateway-from-id gateway-descriptor columns))))
-;;(gateway (gateway "eac62d04-2488-4435-b121-87d90c4db9dc"))
-;;(gateway-from-id 321211)
-;;(gateway 321211)
-;;(gateway '(321211))
-;;(project (gateway-from-name "%claerer_no456326499_1%") '(0 1 2 3 ))
-;;(mapcar #'gateway (list "claerer_no456326499_5%" "336dd2be-94e8-4f95-b184-adf18d58326f"))
- 
+;;(gateway 4)
+
+(defun gateways (&rest columns)
+  (emacsql db
+    (vector :select (column-selection columns)
+	    :from 'gateway)))
+;;(cl-delete "NULL" (mapcar #'car (gateways :service-menu-link-list-id)) :test #'string=)
+
+(defun fgateway (gateway-descriptor &rest columns)
+  "Arugments COLUMNS are not yet supported"
+  (tab-format (butlast (loop for v in (gateway gateway-descriptor)
+			     for (k . rest ) in (ada-columns 'gateway)
+			     collect (list k v)))))
+;;(fgateway 4)
+
 ;;; UPDATE
 (defun update-gateway-name (gateway-id-descriptor gateway-name)
-  (emacsql db
-    [:update gateway :set (= gateway-name $r1) :where (= id $s2)]
-    gateway-name gateway-id-descriptor))
+  (unless (string= (emacsql-psql-dbname db) "ada_prod")
+    (emacsql db
+      [:update gateway :set (= gateway-name $r1) :where (= id $s2)]
+      gateway-name gateway-id-descriptor)))
 ;;(update-gateway-name 322168 "claerer_no456326500_4@feide.no")
 
 (provide 'ada-gateway)

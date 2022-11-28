@@ -10,7 +10,7 @@ If ARGUMENT is a string insert it in the pair of curly parentheses."
   (if (use-region-p)
     (region-replace (format "@%s{%%s}" code))
     (if (symbol-at-point)
-     (destructuring-bind (beg . end) (bounds-of-thing-at-point 'symbol)
+     (cl-destructuring-bind (beg . end) (bounds-of-thing-at-point 'symbol)
        (insert (texinfo-atfiy code (delete-and-extract-region beg end))))
      (insert (format "@%s{}" code))
      (backward-char 1))))
@@ -28,10 +28,10 @@ If ARGUMENT is a string insert it in the pair of curly parentheses."
 
 (cl-defmacro texinfo-define-inserts
     (&optional (symbols +texinfo-inserts+))
-  `(progn ,@(loop for code in symbols collect
-		  `(texinfo-def-insert-@-fn ,(sstring code)))))
+  `(progn ,@(cl-loop for code in symbols collect
+		     `(texinfo-def-insert-@-fn ,(sstring code)))))
 (texinfo-define-inserts)
-;; (macroexpand `(progn ,@(loop for code in '(var xref ref pxref)
+;; (macroexpand `(progn ,@(cl-loop for code in '(var xref ref pxref)
 ;; 		  collect `(texinfo-def-insert-@-fn ,(sstring code)))))
 
 (defun mb-texinfo-ref-map ()
@@ -152,8 +152,8 @@ If ARGUMENT is a string insert it in the pair of curly parentheses."
   "Insert a texinfo commented newline at point"
   (interactive)
   (bol)
-  (loop with s = (format "##%s\n" (if no-trailing-space-p "" " "))
-	repeat (or n 1) do (insert s))
+  (cl-loop with s = (format "##%s\n" (if no-trailing-space-p "" " "))
+	   repeat (or n 1) do (insert s))
   (unless no-trailing-space-p (eol)))
 
 (defun texinfo-insert-env (env &optional no-space-p no-intraspace-p)

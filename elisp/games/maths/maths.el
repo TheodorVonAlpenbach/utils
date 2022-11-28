@@ -42,9 +42,9 @@
 
 (cl-defun long-judgement (answer time solution score old-ratings new-ratings)
   (let ((diff-ratings (maptree* #'- new-ratings old-ratings)))
-    (destructuring-bind ((user-rating user-RD) (task-rating task-RD))
+    (cl-destructuring-bind ((user-rating user-RD) (task-rating task-RD))
 	(maptree #'round new-ratings)
-      (destructuring-bind ((user-rating-diff user-RD-diff) (task-rating-diff task-RD-diff))
+      (cl-destructuring-bind ((user-rating-diff user-RD-diff) (task-rating-diff task-RD-diff))
 	  (maptree #'round diff-ratings)
 	(concat "\n\n"
 		(short-judgement score answer solution) "\n"
@@ -83,7 +83,7 @@ the *maths-current-task* which is yet another structure."
   (interactive)
   (let ((user-name (read-from-minibuffer "New user name: "))
 	(age (string-to-number (read-from-minibuffer "Age: "))))
-    (assert (and (integerp age) (plusp age)) t "Illegal age")
+    (cl-assert (and (integerp age) (plusp age)) t "Illegal age")
     (when (yes-or-no-p (format "Are you sure that you want to register a new user with name '%s'? " user-name))
       (aif (maths-add-user user-name age)
 	(prog1 it
@@ -119,7 +119,7 @@ the *maths-current-task* which is yet another structure."
 ;;(tab-column-type '("qe" "qe"))
 
 (cl-defun tab-column-width (column &optional (type (tab-column-type column)))
-  (let ((c (case type 
+  (let ((c (cl-case type 
 	     (string column)
 	     (integer (mapcar #'number-to-string column)))))
     (apply #'max (mapcar #'length c))))
@@ -136,7 +136,7 @@ the *maths-current-task* which is yet another structure."
 (cl-defun tab-format (string-table &key header (column-separator " ") (underline-char ?=))
   (let ((first-row (first string-table)))
     (when header
-      (assert (and (= (length first-row) (length header))
+      (cl-assert (and (= (length first-row) (length header))
 		   (eql (tab-column-type header) 'string))))
     (let* ((columns (transpose string-table))
 	   (types (mapcar #'tab-column-type columns))
@@ -168,12 +168,12 @@ the *maths-current-task* which is yet another structure."
   (kill-buffer +maths-buffer+))
 
 (defun unsuppress-keymap (map keys)
-  (loop for char across keys
-	for key = (char-to-string char)
-	do (define-key map key (lexical-let ((char char))
-				 #'(lambda () 
-				     (interactive)
-				     (insert char))))))
+  (cl-loop for char across keys
+	   for key = (char-to-string char)
+	   do (define-key map key (lexical-let ((char char))
+				    #'(lambda () 
+					(interactive)
+					(insert char))))))
 ;;(unsuppress-keymap maths-mode-map "0123456789")
 
 (defun maths-plot-user-ratings ()

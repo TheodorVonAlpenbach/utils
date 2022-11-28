@@ -73,11 +73,11 @@ Options:
   (set-marker *mb-octave-debug-marker* (and line (bol* :linum line)) buffer))
 
 (defun scope-region (scope)
-  (case scope
+  (cl-case scope
     ((nil :line) (line-region))
     ((t :buffer) (buffer-region))
     (otherwise
-     (assert (integerp scope) t
+     (cl-assert (integerp scope) t
 	     "SCOPE must be either nil, t, :line, :buffer, or a positive integer.")
      (line-region scope))))
 ;;(scope-region :qwe)
@@ -149,7 +149,7 @@ step line markings, etc"
 
 (defun octave-debug-refresh-display ()
   (if (octave-debug-p)
-    (destructuring-bind (line fn)
+    (cl-destructuring-bind (line fn)
 	(octave-where)
       (when (or (save-excursion
 		  (bol :linum line)

@@ -12,8 +12,8 @@
   (let ((schema (ld-table-schema table))
 	(db-keyword (ld-database-keyword db)))
     (setf (first (ld-schema-identifier schema)) db-keyword)
-    (loop for coldef in (ld-schema-column-definitions schema)
-	  do (setf (first (ld-column-identifier coldef)) db-keyword))
+    (cl-loop for coldef in (ld-schema-column-definitions schema)
+	     do (setf (first (ld-column-identifier coldef)) db-keyword))
     (push table (ld-database-tables db))))
 ;;(ld-create-database :maths :schemas (mapcar #'ld-schemadef->schema *maths-db-schema-definitions*))
 
@@ -48,10 +48,10 @@ application" (ld-database-name *current-database*))))
 
 (cl-defun ld-clone-database (db &optional table-clone-level)
   (ld-create-database
-   (ld-database-keyword db)
-   :name (ld-database-name db)
-   :tables (loop for table in (ld-database-tables db)
-		 collect (ld-clone-table table table-clone-level))))
+      (ld-database-keyword db)
+    :name (ld-database-name db)
+    :tables (cl-loop for table in (ld-database-tables db)
+		     collect (ld-clone-table table table-clone-level))))
 ;;(ld-clone-database deebee)
 
 (cl-defun ld-find-table (id &optional (db *current-database*))

@@ -55,7 +55,7 @@
 ;;; LS utilities
 (require 'mb-utils-time)
 (cl-defun LS-hours (&optional (from (monthstart)) (to (now)) (lunchtime 0.5))
-  (loop for day-log in (LS-log-days (LS-log-string) from to)
+  (cl-loop for day-log in (LS-log-days (LS-log-string) from to)
 	for items = (LS-log-items day-log from to)
 	if items
 	collect (let ((hours (time- (first (last-elt items))
@@ -74,15 +74,15 @@
 
 ;;(cl-defun pathcorr (&optional (root "~/projects/imms/data/amplitudes/75/"))
 (cl-defun newdirname (x y)
-  (destructuring-bind (a b) (split-string x "z" )
-    (destructuring-bind (c d) (split-string y "-C")
+  (cl-destructuring-bind (a b) (split-string x "z" )
+    (cl-destructuring-bind (c d) (split-string y "-C")
       (format "%sz%SC%s" a (/ (float (string-to-number b)) (string-to-number c)) d))))
 ;;(newdirname "Hs0.25-Tz11" "2-Cum33-Dir")
 
 (cl-defun pathcorr (&key (root "~/tmp/") (log t) (execute nil))
   "This could be a powerful operation, so set EXECUTE to NIL and check log output first"
-  (loop for x in (directory-files root t "Hs")
-	do (loop for old in (directory-files x t "Cum")
+  (cl-loop for x in (directory-files root t "Hs")
+	do (cl-loop for old in (directory-files x t "Cum")
 		      for parts = (split-string old "/")
 		      for new = (concat* (rcons (butlast parts 2) (apply #'newdirname (last parts 2))) :in "/")
 		      if log do (princ (format "%s -> %s\n" old new))
@@ -96,7 +96,7 @@
   "Moves every directory DIR under PARENT-DIR to DEST-DIR iff DIR < string by string comparison.
 PARENT-DIR and DEST-DIR are full paths, while STRING should be
 compared to the relative directory names in PARENT-DIR"
-  (loop for x in (directory-files parent-dir nil "Hs")
+  (cl-loop for x in (directory-files parent-dir nil "Hs")
 	if (string< x string)
 	do (let ((target (expand-file-name x parent-dir))
 		 (dest (expand-file-name x dest-dir)))

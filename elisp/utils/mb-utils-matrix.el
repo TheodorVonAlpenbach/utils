@@ -7,11 +7,11 @@
 ;;(vec '(1 1) '(2 2))
 
 (cl-defun vec-constant (&optional (n vec-default-length) (c 0))
-  (loop for i below n collect c))
+  (cl-loop for i below n collect c))
 ;;(vec-constant)
 
 (cl-defun vec-a-b (a b)
-  (loop for i from a to b collect i))
+  (cl-loop for i from a to b collect i))
 ;;(vec-a-b 0 3) 
 
 (cl-defun vec-0-n-1 (n)
@@ -19,8 +19,8 @@
 ;;(vec-0-n-1 3)
 
 (cl-defun vec-random (&optional (n vec-default-length) (a 0) (b 1) (integerp nil) seed)
-  (loop for i below n
-	collect (random* a b integerp seed)))
+  (cl-loop for i below n
+	   collect (random* a b integerp seed)))
 ;;(vec-random 10)
 
 (cl-defun vec-unit (&optional (i 0) (n vec-default-length) (magnitude 1))
@@ -133,13 +133,13 @@ v+ = v'/(v'v)"
   '((1 2) (3 4)))
 
 (cl-defun mat-constant (&optional (n vec-default-length) (m vec-default-length) (c 0))
-  (loop for j below m collect (vec-constant n c)))
+  (cl-loop for j below m collect (vec-constant n c)))
 ;;(mat-constant 2 2 1)
 
 (defun mat-diagonal (vec)
-  (loop for elt in vec
-	for i from 0
-	collect (vec-unit i (length vec) elt)))
+  (cl-loop for elt in vec
+	   for i from 0
+	   collect (vec-unit i (length vec) elt)))
 ;;(mat-diagonal '(1 2 3 4 5 6 7))
 
 (cl-defun mat-identity (&optional (n vec-default-length))

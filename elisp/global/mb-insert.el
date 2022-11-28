@@ -1,3 +1,6 @@
+(require 'mb-calendar)
+(require 'mb-utils-strings)
+
 (cl-defun insert-parentheses* (arg &key (left ?\() (right ?\))
 				   (ensure-space :around))
   "Extension of insert-parentheses. Enclose following ARG sexps in
@@ -23,8 +26,6 @@ only, or left only depending on the surrounding characters. If
 	 (memq (char-syntax (following-char)) '(?w ?_ ?\( ))
 	 (insert " "))))
 ;;(insert-parentheses* 1 :ensure-space :around)
-
-(require 'mb-calendar)
 
 (defun insert-date (prefix)
   "Inserts today's date string at point."
@@ -203,8 +204,6 @@ This function is obsolete. Use C-x 8 _ a instead."
 
 (defvar mb-default-underline-pattern "=")
 
-(require 'mb-utils-strings)
-
 (defun insert-underline (pattern)
   "Underlines the current line with a string of multiple concatenated
 PATTERNs. The underline is inserted imediately after current line and
@@ -252,7 +251,7 @@ Absolut value of prefix defines the language. The sign defines
 the orientation: if it is negative, the alphabet is inserted
 horizontally. Else, it is interted vertically."
   (interactive "p")
-  (let ((a (case (abs n)
+  (let ((a (cl-case (abs n)
 	     (2 (concat (a-b ?A ?Z) '(?Æ ?Ø ?Å)))
 	     (3 (concat (a-b ?A ?Z) '(?Å ?Ä ?Ö)))
 	     (t (a-b ?A ?Z)))))

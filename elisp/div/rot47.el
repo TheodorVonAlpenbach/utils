@@ -3,9 +3,9 @@
 
 (defconst rot47-translate-table
   (let ((table (copy-sequence rot13-translate-table)))
-    (loop for i from 33 below 80
+    (cl-loop for i from 33 below 80
       do (aset table i (+ i 47)))
-    (loop for i from 80 below 127
+    (cl-loop for i from 80 below 127
       do (aset table i (- i 47)))
     table)
   "String table for ROT47 translation.

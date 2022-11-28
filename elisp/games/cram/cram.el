@@ -68,9 +68,9 @@
 (cl-defun long-judgement (response time answer alternatives
 			  score old-ratings new-ratings)
   (let ((diff-ratings (maptree* #'- new-ratings old-ratings)))
-    (destructuring-bind ((user-rating user-RD) (problem-rating problem-RD))
+    (cl-destructuring-bind ((user-rating user-RD) (problem-rating problem-RD))
 	(maptree #'round new-ratings)
-      (destructuring-bind ((user-rating-diff user-RD-diff)
+      (cl-destructuring-bind ((user-rating-diff user-RD-diff)
 			   (problem-rating-diff problem-RD-diff))
 	  (maptree #'round diff-ratings)
 	(concat
@@ -194,12 +194,12 @@ the *cram-current-problem* which is yet another structure."
   (kill-buffer +cram-buffer+))
 
 (defun unsuppress-keymap (map keys)
-  (loop for char across keys
-	for key = (char-to-string char)
-	do (define-key map key (lexical-let ((char char))
-				 #'(lambda () 
-				     (interactive)
-				     (insert char))))))
+  (cl-loop for char across keys
+	   for key = (char-to-string char)
+	   do (define-key map key (lexical-let ((char char))
+				    #'(lambda () 
+					(interactive)
+					(insert char))))))
 ;;(unsuppress-keymap cram-mode-map "0123456789")
 
 (defun cram-plot-user-ratings ()

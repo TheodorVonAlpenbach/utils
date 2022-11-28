@@ -37,9 +37,9 @@ This method guarantees to return a number of type float."
 (defun glicko-d-squared (expected-scores opponent-g-values)
   "The lists opponent-g-values and expected-scores containts the
 g-value and expected score, respectively, for the opponents"
-  (/ 1 +glicko-q-squared+ (loop for g in opponent-g-values
-				for e in expected-scores
-				sum (* (sq g) e (- 1 e)))))
+  (/ 1 +glicko-q-squared+ (cl-loop for g in opponent-g-values
+				   for e in expected-scores
+				   sum (* (sq g) e (- 1 e)))))
 ;;(glicko-d-squared '(.5) '(.94))
 
 (defun glicko-expected-scores (original-rating opponent-ratings opponents-RDs)
@@ -62,10 +62,10 @@ opponent's strength. SCORE is a real number in the interval [0
 1]. Optional TIME is the number of days since last time PLAYERs
 rating was calculated. It is used to modify PLAYERs RD due to the
 TIME passed since his last activity."
-  (destructuring-bind (original-rating
-		       original-RD
-		       opponent-ratings
-		       opponent-RDs scores)
+  (cl-destructuring-bind (original-rating
+			  original-RD
+			  opponent-ratings
+			  opponent-RDs scores)
       (glicko-reorder player matches)
     (let* ((RD (glicko-update-RD original-RD time))
 	   (g-values (mapcar #'glicko-g-function opponent-RDs))
@@ -77,10 +77,10 @@ TIME passed since his last activity."
 	   (new-rating (+ original-rating
 			  (* +glicko-q-constant+
 			     (sq new-RD)
-			     (loop for g in g-values
-				   for s in scores
-				   for e in expected-scores
-				   sum (* g (- s e)))))))
+			     (cl-loop for g in g-values
+				      for s in scores
+				      for e in expected-scores
+				      sum (* g (- s e)))))))
       (list new-rating new-RD))))
 ;;(glicko-rating '(1500 200) '(((1400 30) 1) ((1550 100) 0) ((1700 300) 0)))
 

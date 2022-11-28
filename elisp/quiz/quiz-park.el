@@ -342,7 +342,7 @@ Otherwise it is column based."
 ;;; Conversion between customer entry and table entry
 (defun qp-customer-entry-to-table-entry (customer customer-entry round)
   (awhen (qp-customer-entry-team-name-and-score customer customer-entry)
-    (destructuring-bind (team-name team-score) it
+    (cl-destructuring-bind (team-name team-score) it
       (and (not (empty-string-p team-name))	
 	 (not (empty-string-p team-score))
 	 (not (zerop (string-to-number team-score)))
@@ -363,10 +363,10 @@ Otherwise it is column based."
 (defun count-matches-in-string (regexp string &optional allow-overlap-p)
   "Count the number of substrings in STRING that matches regexp.
 Iff ALLOW-OVERLAP-P is true then overlapping matches are counted"
-  (loop for start = 0 then (if allow-overlap-p (1+ begin) end)
-	for (begin end) = (and (string-match regexp string start)
-			       (list (match-beginning 0) (match-end 0)))
-	while end count 1))
+  (cl-loop for start = 0 then (if allow-overlap-p (1+ begin) end)
+	   for (begin end) = (and (string-match regexp string start)
+				  (list (match-beginning 0) (match-end 0)))
+	   while end count 1))
 ;;(count-matches-in-string "aa" "aaabaaa" nil)
 
 (cl-defun qp-guess-customer-tag (data &optional (limit 5))
@@ -378,10 +378,10 @@ detected pub name."
   (let* ((lines (remove-if #'empty-string-p (string-lines data)))
 	 (numlines (length lines))
 	 (numcols (count 9 (first lines))))
-    (loop for (tag x y z regexp) in (qp-customers numcols)
-	  if (> (count-matches-in-string regexp data)
-		(min limit (/ numlines 2)))
-	  return tag)))
+    (cl-loop for (tag x y z regexp) in (qp-customers numcols)
+	     if (> (count-matches-in-string regexp data)
+		   (min limit (/ numlines 2)))
+	     return tag)))
 ;;(qp-guess-customer-tag "Burums Burums Burums Burums Burums Burums")
 
 (cl-defun qp-read-customer-tag ()
@@ -417,8 +417,8 @@ For LIMIT, see qp-guess-customer-tag."
 (defun qp-legal-table-entries-p (tes)
   (and tes (consp tes)
        (every #'consp tes) (every #'(lambda (x) (= (length x) 7)) tes)
-       (loop for x in (flatten (project-sequence tes '(0 1 6)))
-	     always (integerp (read x)))))
+       (cl-loop for x in (flatten (project-sequence tes '(0 1 6)))
+		always (integerp (read x)))))
 ;;(qp-legal-table-entries-p '(("0" "1" "2a" "3a" "4a" "5a" "6") ("0" "1" "2a" "3a" "4a" "5a" "6")))
 
 (defun qp-customer-results-to-table-buffer (beg end)
@@ -431,14 +431,14 @@ For LIMIT, see qp-guess-customer-tag."
 	 (round (qp-set-round customer-tag (first customer-entries)))
 	 (table-buffer (qp-filename :results))
 	 (table-entries
-	  (loop with max-column = (length (first customer-entries))
-		with customers = (copy-if (bind #'eql customer-tag)
-					  (qp-customers max-column)
-					  :key #'first)
-		for customer in customers
-		for tes = (qp-customer-entries-to-table-entries
-			   customer customer-entries round)
-		if (qp-legal-table-entries-p tes) return tes)))
+	  (cl-loop with max-column = (length (first customer-entries))
+		   with customers = (copy-if (bind #'eql customer-tag)
+				      (qp-customers max-column)
+				      :key #'first)
+		   for customer in customers
+		   for tes = (qp-customer-entries-to-table-entries
+			      customer customer-entries round)
+		   if (qp-legal-table-entries-p tes) return tes)))
     (qp-insert-table-entries table-entries table-buffer)
     (switch-to-buffer table-buffer)))
 ;;(copy-if (bind #'eql 'burums) +qp-customers+ :key #'first)
@@ -462,13 +462,13 @@ and copies it to clipboard"
   (let* ((skip-regexp (format "^%s$" (regexp-opt '("man" "tir" "ons" "tor" "fre" ""))))
 	 (lines (remove-if #'(lambda (x) (string-match* skip-regexp x))
 		  (split-string (thing-at-point 'paragraph) "\n")))
-	 (news (loop for x in (butlast lines 2) collect (let ((entries (split-string x "\t")))
-							  (if (= (length entries) 2)
-							      (push-back nil entries))
-							  entries)))
+	 (news (cl-loop for x in (butlast lines 2) collect (let ((entries (split-string x "\t")))
+							     (if (= (length entries) 2)
+							       (push-back nil entries))
+							     entries)))
 	 (sudden-death (last lines 2)))
-    (kill-new (concat* (loop for l in (cons sudden-death news)
-			  collect (concat* l :in ";")) :in "\n"))))
+    (kill-new (concat* (cl-loop for l in (cons sudden-death news)
+				collect (concat* l :in ";")) :in "\n"))))
 
 (defconst qp-res-map (make-sparse-keymap))
 (define-key global-map "\C-cq" qp-res-map)
@@ -499,7 +499,7 @@ week number of the first round."
 
 (defun qp-check-last-upload ()
   (when (string= (buffer-name) "res_alle.txt")
-    (destructuring-bind (s round day sname pub team points)
+    (cl-destructuring-bind (s round day sname pub team points)
 	(split-string (last-elt (buffer-lines) 1) "[\t]")
       (let ((url (format
 		     ;; TODO util for GET queries

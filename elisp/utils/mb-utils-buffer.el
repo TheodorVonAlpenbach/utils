@@ -132,10 +132,10 @@ one point and so on."
 ;;(goto-char (rpoint -2))
 
 (cl-defun buffer-substring* (&key (start (point-min))
-				  length
-				  (end (if length (+ start length) (point-max)))
-				  (unit :point)
-				  with-properties)
+			       length
+			       (end (if length (+ start length) (point-max)))
+			       (unit :point)
+			       with-properties)
   "Generalized version of `buffer-substring' and `buffer-substring-no-properties'.
 Delimiters START and END are set in relation to UNIT, which may
 currently be either :point, :line or :paragraph.
@@ -149,12 +149,12 @@ If no from entity is set, the from point is point-min. If no to
 entity is set, the to point is set to point-max.
 
 Note that line numbers and paragraph numbers (check) starts from base 0."
-  (let ((a (case unit
+  (let ((a (cl-case unit
 	     (:point (rpoint start))
 	     (:line (buffer-line-point start))
 	     (:paragraph (buffer-paragraph-point start))))
 	(b (if end
-	     (case unit
+	     (cl-case unit
 	       (:point (rpoint end))
 	       (:line (buffer-line-point end))
 	       (:paragraph (buffer-paragraph-point end)))
@@ -169,7 +169,7 @@ Note that line numbers and paragraph numbers (check) starts from base 0."
   "`insert's THING at POINT."
   (save-excursion
     (goto-char point)
-    (loop repeat n do (insert thing))))
+    (cl-loop repeat n do (insert thing))))
 ;;(insert-at "qwe" (point) 3)
 
 (defun overwrite-region (string beg end &optional buffer)
@@ -178,7 +178,7 @@ Note that line numbers and paragraph numbers (check) starts from base 0."
     (insert-at string beg)))
 
 (cl-defun overwrite-line (line linum &optional (buffer (current-buffer)))
-  (destructuring-bind (beg end) (line-region linum buffer)
+  (cl-destructuring-bind (beg end) (line-region linum buffer)
     (overwrite-region line beg end buffer)))
 ;;(overwrite-line "newline" 2 "*scratch*")
 ;;(overwrite-line "newline" 2)
@@ -235,13 +235,13 @@ This function assumes a C-like syntax. In particular, it assumes
 that there is no space between identifiers and delimiters"
   (let ((end (point)))
     (save-excursion
-      (loop for res = (ignore-errors (backward-sexp* 1))
-	    until (or (null res)
-		      (member (char-before) '(9 10 32))))
+      (cl-loop for res = (ignore-errors (backward-sexp* 1))
+	       until (or (null res)
+			 (member (char-before) '(9 10 32))))
       (list (point) end))))
 
 (cl-defun last-sexp-region (&optional (n 1))
-  (case major-mode
+  (cl-case major-mode
     ((js-mode mbscilab-mode) (c-last-sexp-region))
     (otherwise (save-excursion (list (bos n) (eos n))))))
 
@@ -406,7 +406,7 @@ returned. If FROM-POINT is true, only the part of line after
 `point' is returned. If WITH-PROPERTIES is true, properties are
 included in the returned string. For RESTRICT-TO-CURRENT-FIELD,
 see `bol'"
-  (assert (nand to-point from-point)
+  (cl-assert (nand to-point from-point)
 	  "Both to-point and from-point cannot be non-nil!")
   (save-excursion
     (let* ((end (eol :restrict-to-current-field restrict-to-current-field))
@@ -570,10 +570,10 @@ N is optional, and is 1 by default."
   (let ((nwords (count-w-or-s beg end)))
     (when (plusp nwords)
       (save-excursion
-	(loop repeat (mod (- n) nwords)
-	      do (goto-char beg)
-	      do (forward-w-or-s 1)
-	      do (transpose-w-or-s (1- nwords)))))))
+	(cl-loop repeat (mod (- n) nwords)
+		 do (goto-char beg)
+		 do (forward-w-or-s 1)
+		 do (transpose-w-or-s (1- nwords)))))))
 
 (cl-defun rotate-words (&optional (n 1))
   "Rotate words in active region.
@@ -599,9 +599,9 @@ Helper function for `reverse-words'."
     (when (plusp n)
       (save-excursion
 	(goto-char beg)
-	(loop for i from (1- n) downto 1
-	      do (rotate-words-1 (point) end 1)
-	      do (forward-w-or-s 1))))))
+	(cl-loop for i from (1- n) downto 1
+		 do (rotate-words-1 (point) end 1)
+		 do (forward-w-or-s 1))))))
 
 (cl-defun reverse-words (&optional (n 1))
   "Reverse words in active region.
@@ -697,7 +697,7 @@ Should this method be interactive?"
 
 (defun toggle-comment-line (&optional arg)
   "Toggle comment on current line in buffer."
-  (destructuring-bind (beg end) (line-region)
+  (cl-destructuring-bind (beg end) (line-region)
     (if (commented-line-p)
      (uncomment-region beg end arg)
      (comment-region beg end arg))))

@@ -41,9 +41,9 @@
   "Evaluate string in nodejs REPL."
   ;; TODO make sure REPL is already running with (nodejs-repl). Also,
   ;; note that nodejs-repl--send-string is not perfectly implemented.
-  (concat* (loop with re = "\\[[0-9]+m\\([^]*\\)\\[[0-9]+m"
-		 for l in (subseq (js-eval-string-raw-1 string) 1 -1)
-		 collect (string-trim (replace-regexp-in-string re "\\1" l) ""))
+  (concat* (cl-loop with re = "\\[[0-9]+m\\([^]*\\)\\[[0-9]+m"
+		    for l in (subseq (js-eval-string-raw-1 string) 1 -1)
+		    collect (string-trim (replace-regexp-in-string re "\\1" l) ""))
     :in))
 ;;(js-eval-string "bbRecenter(lrbtBB(0, 10, 1, 2), [0, 0])")
 ;;(js-eval-string "arrColumn([[1, 217, 3], [1, 218, 3]], 1)")

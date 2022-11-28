@@ -91,7 +91,7 @@ see `file-name-alter'"
 (defun copy-libs (path1 path2)
   (let* ((apath1 (file-truename path1))
 	 (paths1 (mapcar #'file-truename (unix-find path1 :name "*sc[ie]"))))
-    (loop for p1 in paths1
+    (cl-loop for p1 in paths1
 	  for relative-path = (substring p1 (length apath1))
 	  for p2 = (expand-file-name relative-path path2)
 	  do (when (file-newer-than-file-p p1 p2)
@@ -101,7 +101,7 @@ see `file-name-alter'"
 (defun rename-files (directory pattern replacement)
   "Renames all files containing PATTERN in DIRECTORY."
   (let* ((paths (file-expand-wildcards  (expand-file-name (format "*%s*" pattern) directory))))
-    (loop for path in paths
+    (cl-loop for path in paths
 	  for fn = (file-name-nondirectory path)
 	  for new-fn = (replace-regexp-in-string pattern replacement fn)
 	  for new-path = (expand-file-name new-fn directory)
@@ -120,7 +120,7 @@ see `file-name-alter'"
   "Return parent directory of FILE.
 File can be either a file or a directory. With optional N you can
 retrive the Nth parent directory."
-  (assert (integerp n))
+  (cl-assert (integerp n))
   (parent-directory-1 file n))
 ;;(parent-directory "/a/b/c")
 

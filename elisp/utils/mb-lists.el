@@ -69,7 +69,7 @@ TODO: when bind* is finished this method is obsolete (or becomes a simple one-li
 (cl-defun group-positions (list &key (test #'eql) (key #'identity))
   "Groups LIST into a list of sublists where all elements are equal
 according to TEST and KEY."
-  (loop for p in (pairs list :key key)	
+  (cl-loop for p in (pairs list :key key)	
 	for i from 0
 	if (not (apply test p)) collect (1+ i)))
 ;;(group-positions '(a a b a b) :test #'equal)
@@ -84,7 +84,7 @@ according to TEST and KEY."
 according to TEST and KEY.
 Note that `group' to not consider LIST as a set. To do this, LIST must be sorted first."
   (when list
-    (loop for a = 0 then b
+    (cl-loop for a = 0 then b
 	  for b in (group-positions list :test test :key key)
 	  collect (subseq list a b) into res
 	  finally return (nconc res (list (subseq list a))))))
@@ -98,7 +98,7 @@ Note that `group' to not consider LIST as a set. To do this, LIST must be sorted
   "Helper function for `equivalence-class
 Return the hash table"
   (let ((ht (make-hash-table :test test :size size)))
-    (loop for x in list
+    (cl-loop for x in list
 	  for k = (funcall key x)
 	  do (puthash k (cons x (gethash k ht)) ht))
     ht))
@@ -109,7 +109,7 @@ Return the hash table"
 ;; to GROUP or EQUIVALENCE-CLASS.
 (cl-defun equivalence-class (list &key (key #'identity) (test #'eql) (size 65))
   "Group LIST into sublist equivalence classes defined by KEY."
-  (loop for v the hash-values of (equivalence-class-ht
+  (cl-loop for v the hash-values of (equivalence-class-ht
 				  list :key key :test test :size size)
 	collect v))
 ;;(equivalence-class '((a) (b) (c) (a) (b) (a) (d)) :key #'car)
@@ -118,7 +118,7 @@ Return the hash table"
 					     (size 65))
   "Group LIST into sublists (K ELEMENTS) where for each group
 ELEMENTS are exactly the elements in LIST that evaluates to K."
-  (loop for v the hash-values of (equivalence-class-ht
+  (cl-loop for v the hash-values of (equivalence-class-ht
 				  list :key key :test test :size size)
 	using (hash-keys k)
 	collect (list k v)))
@@ -135,10 +135,10 @@ ELEMENTS are exactly the elements in LIST that evaluates to K."
 (cl-defun nunzip (list &optional (n 2))
   "Destructive version of `ZIP'
 TODO: something is wrong, see test below."
-  (loop with heads = (loop for i below n collect (nthcdr i list))
+  (cl-loop with heads = (cl-loop for i below n collect (nthcdr i list))
 	with pointers = (copy-list heads)
 	while (first pointers)
-	do (loop for p in-ref pointers 
+	do (cl-loop for p in-ref pointers 
 		 while p
 		 do (progn (setf (cdr p) (nthcdr n p))
 			   (setf p (cdr p))))
@@ -193,7 +193,7 @@ I.e. for list \(x11 x2 x3 ... xn-1 xn\), it returns the list
 \((x1 x2) (x2 x3) ... (xn-1 xn)\) See also `tuples' for a more
 generalized version. If flank-p is non-nil the result is
 `flank'ed with pairs of its first and last element."
-  (let ((res (loop for (x y) on (mapcar key list) while y collect (list x y))))
+  (let ((res (cl-loop for (x y) on (mapcar key list) while y collect (list x y))))
     (if flank-p
       (nflank (twins (caar res)) res (twins (cadar (last res))))
       res)))
@@ -204,7 +204,7 @@ generalized version. If flank-p is non-nil the result is
 I.e. for list \(x11 x2 x3 x4 ... xn-2 xn-1 xn\), with N = 3, 
 it returns the list \((x1 x2 x3) (x2 x3 x4) ... (xn-2 xn-1 xn)\)
 TODO: implement a mapping key, see `pairs' (when needed)"
-  (loop for h on list
+  (cl-loop for h on list
 	for i from (- (length list) n) downto 0
 	collect (butlast h i)))
 ;;(tuples '(a b c d e) 3)
@@ -234,8 +234,8 @@ TODO: implement a mapping key, see `pairs' (when needed)"
   "Cuts LIST into sublists of length N while preserving order.
 If INCLUDE-REMAINER is nil and last element in the result list
 has length shorter than N, this last element is discarded."
-  (assert (plusp n)) ;; otherwise we'll fall into an infinite loop
-  (loop for x on list by (bind #'nthcdr n 1)
+  (cl-assert (plusp n)) ;; otherwise we'll fall into an infinite loop
+  (cl-loop for x on list by (bind #'nthcdr n 1)
 	collect (butlast* x (- n)) into res
 	finally return (if (nor include-remainer
 				(zerop (mod (length list) n)))
@@ -247,7 +247,7 @@ has length shorter than N, this last element is discarded."
   "Cut LIST in sublists where PREDICATE is true.
 If INCLUSION is not nil, then the element in LIST matching
 PREDICATE is included in the result."
-  (loop for start = 0 then end
+  (cl-loop for start = 0 then end
 	for end in (apply #'positions-if predicate list args)
 	if (subseq list start end) collect it into res
 	finally (return (if inclusion
@@ -264,8 +264,8 @@ identity relations (a a), (b b), (c c) is included in the result.
 If ORDERED is non-nil, both (a b) and its reflection, (b a), is
 included in the result. Else, only the element (a b) is included,
 where a comes before b in LIST."
-  (loop for sublist1 on list nconc
-	(loop for sublist2 on (if with-identity sublist1 (rest sublist1))
+  (cl-loop for sublist1 on list nconc
+	(cl-loop for sublist2 on (if with-identity sublist1 (rest sublist1))
 	      collect (list (first sublist1) (first sublist2))
 	      if (and ordered
 		      (neq (first sublist1) (first sublist2)))
@@ -276,8 +276,8 @@ where a comes before b in LIST."
   (if ordered
     (nconc (combine2 list1 list2)
 	   (combine2 list2 list1))
-    (loop for x1 in (listify list1) nconc 
-	  (loop for x2 in (listify list2)
+    (cl-loop for x1 in (listify list1) nconc 
+	  (cl-loop for x2 in (listify list2)
 		collect (list x1 x2)))))
 ;;(combine2 '(a) '())
 ;;(combine2 '(a) '(b))
@@ -288,11 +288,11 @@ where a comes before b in LIST."
 
 (cl-defun combine-1 (lists)
   "Generalization of combine2"
-  (case (length lists)
+  (cl-case (length lists)
     (0 nil)
     (1 (list (listify (first lists))))
     (2 (combine2 (first lists) (second lists)))
-    (t  (loop for (x y) in (combine2 (first lists)
+    (t  (cl-loop for (x y) in (combine2 (first lists)
 				  (combine-1 (rest lists)))
 	   collect (cons x y)))))
 ;;(combine-1 '((a b) c (d e)))
@@ -314,7 +314,7 @@ where a comes before b in LIST."
 					 (key #'identity)
 					 (accumulator #'length))
   "Accumulates sorted LIST. See `accumulate-list' for details."
-  (loop for x in (group list :test test :key key)
+  (cl-loop for x in (group list :test test :key key)
 	for l = (funcall accumulator x)
 	if (>= l min-occurrences) collect (list (funcall key (first x)) l)))
 ;;(accumulate-sorted-list '((a 1) (a 2) (b 4) (b 5) (c 100)) :key #'first :accumulator #'(lambda (x) (sum x :key #'second)))
@@ -334,7 +334,7 @@ resulting list is sorted on the value of COUNT-X"
 
 (cl-defun repetitions-1 (list &optional (start-index 0) (test #'eql))
   "Returns a list of repetitions from first element in list"
-  (loop with target-list = list
+  (cl-loop with target-list = list
   	with cycle-length = 1
 	for x in (rest list)
 	for i from 2
@@ -363,20 +363,20 @@ and COUNT is the number of repetitions of the pattern. Note that
 COUNT really counts _repetitions_, so a value of 1 means two
 sucsessive occurences of the pattern.
 Algorithm i O(n^2)."
-  (loop for x on list 
+  (cl-loop for x on list 
 	for i from 0
 	if (repetitions-1 x i test)
 	append (accumulate-sorted-list it #'equal)))
 ;;(repetitions '(a a a a a a)) => (((0 1) 5) ((1 1) 4) ((2 1) 3) ((3 1) 2) ((4 1) 1))
 ;;(repetitions '(a b a b a))
-;;(loop for i below 10 do (repetitions '(a b a b a)))
+;;(cl-loop for i below 10 do (repetitions '(a b a b a)))
 
 (defun x-repetitions (list)
   "A Q&D version of `repetitions'. Its algorith is far simpler in
 code, but is much slower (O(n^3)). Also, the result is not so
 informative."
-  (loop for i from 1 to (floor (length list) 2)
-	append (loop for k below i
+  (cl-loop for i from 1 to (floor (length list) 2)
+	append (cl-loop for k below i
 		     for shifted-list on list
 		     for i-tuples = (cut shifted-list i)
 		     append (accumulate-sorted-list i-tuples #'equal 2))))
@@ -389,7 +389,7 @@ informative."
   "Swaps first element in LIST with the first element in that
 matches PREDICATE"
   (awhen (member-if predicate list)
-    (rotatef (first it) (first list))
+    (cl-rotatef (first it) (first list))
     list))
 ;;(dv-swap-head '(4 3 2 1) (bind #'< 4))
 
@@ -397,7 +397,7 @@ matches PREDICATE"
   "Swaps Ith and Jth elements in LIST"
   (let ((glist (gensym)))
     `(let ((,glist ,list))
-       (rotatef ,@(mapcar #'(lambda (x) `(nth ,x ,glist)) positions))
+       (cl-rotatef ,@(mapcar #'(lambda (x) `(nth ,x ,glist)) positions))
        ,glist)))
 ;;(mrotate-list '(a b c d) 0 2 3)
 
@@ -456,7 +456,7 @@ TODO: this looks like draw. Check out and clean up if necessary"
 
 (cl-defun test-nsplit-nth (&optional (n 3))
   (let ((list (0-n n)))
-    (loop for i below n
+    (cl-loop for i below n
 	  collect (let ((list* (copy-list list)))
 		    (values (nsplit-nth i list*) list*)))))
 ;;(test-split-nth) => (((0 (1 2)) (0 1 2)) ((1 (0 2)) (0 2)) ((2 (0 1)) (0 1)))
@@ -464,7 +464,7 @@ TODO: this looks like draw. Check out and clean up if necessary"
 (cl-defun filter-duplicates (list1 list2 &key (test #'eql) (start 0) end)
   "Removes all elements from row and fasit that are equal and is
 in the same position."
-  (loop for elt1 in (subseq list1 start end)
+  (cl-loop for elt1 in (subseq list1 start end)
 	for elt2 in (subseq list2 start end)
 	unless (funcall test elt1 elt2)
 	collect elt1 into list1* and collect elt2 into list2*
@@ -488,7 +488,7 @@ The function also accepts a :key keyword, which is used in the
 canonical sense, see for instance `cl-find'
 
 TODO: turn this into sequence<"
-  (loop with tests = (if (atom test)
+  (cl-loop with tests = (if (atom test)
 		       (make-list (min (length list1) (length list2)) test)
 		       test)
 	for x1 in list1
@@ -528,14 +528,14 @@ functions is meant as an example of how to use pad-lists. Btw, it
 would be interesting to see why the running times are so extremely
 different, see test cases below."
   (apply #'list< (pad-lists (list l1 l2))))
-;;(time (loop repeat 100000 do (vlist< '(1 2) '(1 1))))
-;;(time (loop repeat 100000 do (version-list-< '(1 2) '(1 1))))
+;;(time (cl-loop repeat 100000 do (vlist< '(1 2) '(1 1))))
+;;(time (cl-loop repeat 100000 do (version-list-< '(1 2) '(1 1))))
 
 (defun ninsert-sorted-list (x list)
   (if list
     (if (< x (car list))
       (cons x list)
-      (loop with l = list
+      (cl-loop with l = list
 	    while (and (cdr l) (> x (cadr l)))
 	    do (setf l (cdr l))
 	    finally
@@ -561,7 +561,7 @@ different, see test cases below."
 (cl-defun test-insert-sorted-tree (&optional (n 5) (limit 20))
   (let (tree)
     (setf tree (insert-sorted-tree 8 tree))
-    (loop for i in (list 14 7 11 5 7 3)
+    (cl-loop for i in (list 14 7 11 5 7 3)
 	  do (insert-sorted-tree i tree))
     (remove-minimum-element-sorted-tree tree)
     tree))
@@ -585,7 +585,7 @@ different, see test cases below."
 
 (cl-defun sort-to-order (list order predicate &optional (key #'identity))
   (let ((order-positions (make-hash-table)))
-    (loop for x in order
+    (cl-loop for x in order
 	  for i from 0
 	  do (puthash x i order-positions))
     (cl-sort list predicate
@@ -603,12 +603,12 @@ The TABLE must be a tree, i.e. a list of lists."
 	  table))
 
 (defun expand-repeat (list n)
-  (destructuring-bind (a b) (cl-floor n (length list))
+  (cl-destructuring-bind (a b) (cl-floor n (length list))
     (append list (flatten (make-list a list)) (subseq list 0 b))))
 ;;(expand-repeat '(1 2 3 4) 6)
 
 (defun diffs-list (list)
-  (loop for (a b) in (pairs list) collect (- b a)))
+  (cl-loop for (a b) in (pairs list) collect (- b a)))
 ;;(diffs-list '(1 2 4))
 
 (cl-defun resize-list (list n &optional (extend-fn #'expand-repeat))
@@ -626,11 +626,11 @@ The TABLE must be a tree, i.e. a list of lists."
 (defun deltas-list (floats)
   "Finds the mid-points between FLOATS and returns the interval
 consisting of each floats neighbouring mid-points."
-  (pairs (loop for (a b) in (pairs floats) collect (/ (- b a) 2.0)) :flank-p t))
+  (pairs (cl-loop for (a b) in (pairs floats) collect (/ (- b a) 2.0)) :flank-p t))
 ;;(deltas-list '(1 3 4))
 
 (defun boundaries-1 (list)
-  (loop for (a b) in (pairs list) collect (/ (+ b a) 2)))
+  (cl-loop for (a b) in (pairs list) collect (/ (+ b a) 2)))
 ;;(boundaries-1 '(1.0 3.0 4.0))
 
 (defun boundaries (list &optional flank-p)
@@ -642,7 +642,7 @@ consisting of each floats neighbouring mid-points."
 ;;(boundaries (list -4.0 -3.0 -1.0) t)
 
 (defun randomize-intervals (pairs)
-  (loop for (a b) in pairs collect (random-float a b)))
+  (cl-loop for (a b) in pairs collect (random-float a b)))
 ;;(randomize-intervals (pairs (0-n 5)))
 
 (cl-defun randomize-elements (sequence)
@@ -691,7 +691,7 @@ element of X in pair.
 
 Keywords supported:  :test
 "
-  (loop for (a b) in pairs
+  (cl-loop for (a b) in pairs
 	if (funcall test x a) return b
 	if (funcall test x b) return a))
 ;;(swap 'a '((a b) (c d)))
@@ -704,7 +704,7 @@ cannot be used for later matches. For example
 \(position-unique '(1 1) '(1 2 3 1)) => (0 3)
 \(position-unique '(1 1) '(1 2 3)) => (0 nil)
 "
-  (loop with maps = (loop for x in (remove-duplicates targets)
+  (cl-loop with maps = (cl-loop for x in (remove-duplicates targets)
 			 collect (list x (positions x list)))
 	for x in targets
 	for map = (cl-find x maps :key #'first)

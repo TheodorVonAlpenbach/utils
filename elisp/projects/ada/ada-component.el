@@ -5,7 +5,12 @@
   (emacsql db (vector :select (column-selection columns)
 		      :from 'component
 		      :where '(= source-id $r1)) source-id))
-;;(components-from-source-id "6333f33ce2789f1fe3071906" :id :version )
+;;(components-from-source-id "630776be9c4a2c4836a730fd" :id :version )
+
+(defun latest-component-id-from-source-id (source-id)
+  (id (min-element (components-from-source-id source-id :id :version)
+		   :test #'> :key (compose #'string-to-integer #'second))))
+;;(latest-component-id-from-source-id "630776be9c4a2c4836a730fd")
 
 (defun component-from-uuid (uuid &rest columns)
   (car (emacsql db (vector :select (column-selection columns)
@@ -14,7 +19,7 @@
 ;;(component-from-uuid "52f60601-6c0b-3b02-a82b-a088b8283c4b" 'id 'source-id)
 ;;(component-from-uuid "59407697-9b4b-3017-aff1-12a738d9a034" 'id 'source-id)
 
-;;(component-from-uuid "1cbb9df2-669c-3b44-8c76-ac7f9c39e103" 'internal-title)
+;;(component-from-uuid "1cbb9df2-669c-3b44-8c76-ac7f9c39e103" 'internal-title 'id)
 
 (defun component-from-string-id (string-id &rest columns)
   (if (= (length string-id) 36)
@@ -38,7 +43,7 @@
 		 :where '(and (= source-id $r1) (= version $s2)))
 	 (first source-id-version)
 	 (string-to-integer (second source-id-version)))))
-;;(component-from-source-id-version '("6333f33ce2789f1fe3071906" "7"))
+;;(component-from-source-id-version '("630776be9c4a2c4836a730fd" "29"))
 
 (defun component (component-descriptor &rest columns)
   (typecase component-descriptor
@@ -47,10 +52,10 @@
     (list (if (source-id-version-p component-descriptor)
 	    (apply #'component-from-source-id-version
 	      component-descriptor columns)
-	    (loop for x in component-descriptor
-		  collect (apply #'component x columns))))
+	    (cl-loop for x in component-descriptor
+		     collect (apply #'component x columns))))
     (otherwise (apply #'component-from-id (id component-descriptor) columns))))
-;;(component 15955 :id :source-id :version)
+;;(cl-loop for id in (list 31962 31963 31964 31967) collect (car (component id :uuid)))
 
 (defun curriculum-ids-from-component-id (component-id)
   (ada-parse-id-list
@@ -117,9 +122,6 @@
     (sub-competence-aim-ids-from-element-ids
      (component-element-ids component-descriptor))))
 
-(defun component-sub-competence-aim-ids (component-descriptor)
-  (emacsql db [:select sub-competence-aim-id from ))
-
 (defun component-sub-competence-aims (component-descriptor)
   (component-sub-competence-aim-ids component-descriptor))
 
@@ -137,21 +139,28 @@
   "Arugments COLUMNS are not yet supported"
   (tab-format
    (butlast
-    (loop for v in (sub-competence-aim sub-competence-aim-descriptor)
+    (cl-loop for v in (sub-competence-aim sub-competence-aim-descriptor)
 		  for (k . rest ) in (ada-columns 'sub-competence-aim)
 		  collect (list k v)))))
 ;;(fsub-competence-aim (string-to-integer (caar (component-sub-competence-aims-from-elements 15959))))
 
 (defun fcomponent (component-descriptor &rest columns)
   "Arugments COLUMNS are not yet supported"
-  (tab-format (butlast (loop for v in (component component-descriptor)
-			     for (k . rest ) in (ada-columns 'component)
-			     collect (list k v)))))
-;;(fcomponent '("6333f33ce2789f1fe3071906" "4"))
+  (tab-format (butlast (cl-loop for v in (component component-descriptor)
+				for (k . rest ) in (ada-columns 'component)
+				collect (list k v)))))
+;;(fcomponent 15742)
 
 ;;(component 15761 'internal-title)
 ;;(car (component 15761 'uuid))
 ;;(parse-ms-unix-time )
 
+(defun delete-component (component-id-descriptor)
+  (let* ((component (component component-id-descriptor))
+	 (id (string-to-integer (car component))))
+    (emacsql db [:delete :from component-element :where (= component-id $s1)] id)
+    (emacsql db [:delete :from component :where (= id $s1)] id)))
+;;(delete-component 15984)
+;;(component 15984)
 
 (provide 'ada-component)

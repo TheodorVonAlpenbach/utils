@@ -1,5 +1,5 @@
 (defun type-of-super (sequence)
-  (typecase sequence
+  (cl-typecase sequence
     (cons 'list)
     (otherwise (type-of sequence))))
 
@@ -14,7 +14,7 @@
 (defun remove-nth (n sequence)
   (concatenate (type-of-super sequence)
     (subseq sequence 0 n)
-    (subseq sequence (incf n))))
+    (subseq sequence (cl-incf n))))
 ;;(progn (setq qwe "abc") (remove-nth 1 qwe))
 ;;(progn (setq qwe '(0 1 2)) (remove-nth 1 qwe))
 
@@ -23,7 +23,7 @@
   (let ((deletions 0))
     (dolist (p positions sequence)
       (setq sequence (remove-nth (- p deletions) sequence))
-      (incf deletions))))
+      (cl-incf deletions))))
 ;;(remove-nths '(1 3 7) "mats bergstrøm")
 ;;(remove-nths '(1 3 7) '(a b c d e f g h))
 
@@ -56,7 +56,7 @@ necessary to avoid corrupting the original SEQ. See also
 Keywords supported:  :key :count :from-end
 \n(fn PREDICATE SEQ [KEYWORD VALUE]...)"
   (if (listp cl-seq)
-    (loop with max-count = (or count most-positive-fixnum)
+    (cl-loop with max-count = (or count most-positive-fixnum)
 	  with current-count = 0
 	  with seq = (if from-end (reverse cl-seq) cl-seq)
 	  with values = (if key (mapcar key seq) seq)
@@ -64,7 +64,7 @@ Keywords supported:  :key :count :from-end
 	  for v in values
 	  if (= current-count max-count) return res
 	  if (funcall cl-pred v)
-	    do (incf current-count) and
+	    do (cl-incf current-count) and
 	    collect x into res
 	  finally (return res))
     ;; else we convert cl-seq to a list, call ourselves, and convert back
@@ -80,7 +80,7 @@ An element Y matches X if (TEST X Y) evaluates to non nil. This
 is a non-destructive function; it makes a copy of SEQ if
 necessary to avoid corrupting the original SEQ.
 
-Keywords supported:  :key :count :from-end
+Keywords supported: :test :key :count :from-end
 \n(fn X SEQ [KEYWORD VALUE]...)"
   (copy-if (bind test x 1) cl-seq :key key :count count :from-end from-end))
 ;;(copy 3 '(1 2 3 4) :key #'1+ :test #'<)
@@ -91,7 +91,7 @@ The Nth sequence in the result are the elements in SEQUENCE that
 satisfy then Nth predicate in PREDICATES. A last element in the
 result is a sequence with elements that do not match any of
 PREDICATES."
-  (loop for p in (push-back (apply #'not-disjoin predicates) predicates)
+  (cl-loop for p in (push-back (apply #'not-disjoin predicates) predicates)
 	collect (copy-if p sequence :key key)))
 
 (cl-defun rotate (sequence &optional (n 1))
@@ -99,7 +99,7 @@ PREDICATES."
   (nrotate-list (copy-list list) n))
 
 (cl-defun positions-if (predicate sequence &key from-end (start 0) end key)
-  (loop for start* = start then (1+ pos)
+  (cl-loop for start* = start then (1+ pos)
 	for pos = (cl-position-if predicate sequence
 		    :from-end from-end :start start* :end end :key key)
 	while pos collect pos))
@@ -115,7 +115,7 @@ For ARGS, see `cl-position'"
 
 (defun split-at-position (sequence &rest positions)
   "Split SEQUENCE at POSITIONS and return the resulting subsequences as a list."
-  (loop for position in (nreverse (cons (length sequence) (nreverse positions)))
+  (cl-loop for position in (nreverse (cons (length sequence) (nreverse positions)))
 	for start = 0 then end
 	for end = position
 	collect (subseq sequence start end)))
@@ -178,7 +178,7 @@ elements.
 (cl-defun randomize (sequence)
   "Return the elements of SEQUENCE in random order."
   (as-list (l sequence)
-    (loop repeat (length sequence)
+    (cl-loop repeat (length sequence)
 	  collect (draw-random sequence))))
 ;;(randomize "Mats Bergstr;m")
 
@@ -188,7 +188,7 @@ X might be an atom or a sequence.
 
 Keywords supported: :test :key"
   (let ((list (listify x)))
-    (loop for y in (if key (map 'list key sequence) (coerce sequence 'list)) 
+    (cl-loop for y in (if key (map 'list key sequence) (coerce sequence 'list)) 
 	  for i from 0
 	  if (cl-member y list :test test)
 	  collect i)))
@@ -216,7 +216,7 @@ This is a destructive function; it reuses the storage of SEQ if possible.
   (let* ((key-fn (second (member :key cl-keys)))
 	 (sorted-seq (apply #'sort* cl-seq cl-pred cl-keys))
 	 (first-min (if key-fn (funcall key-fn (first-elt sorted-seq)) (first-elt sorted-seq))))
-    (loop for elt in sorted-seq
+    (cl-loop for elt in sorted-seq
 	  while (not (funcall cl-pred first-min (if key-fn (funcall key-fn elt) elt)))
 	  collect elt)))
 ;;(nminimums '(1 2 3 0 4 0 5) #'< :key #'1+)
@@ -234,7 +234,7 @@ Note that the function fails, if VEC is empty. It is the onus of
 the caller to avoid this.
 
 This function is not intended for use outside of this module."
-  (loop with min = (elt vec 0)
+  (cl-loop with min = (elt vec 0)
 	with pos = 0
 	for i from 0
 	for x across vec
@@ -257,7 +257,7 @@ respectively.
   (when (plusp (length cl-seq))
     (if from-end
       (minimum (nreverse cl-seq) :test test :key key)
-      (destructuring-bind (min pos)
+      (cl-destructuring-bind (min pos)
 	  (nminimum-nokey
 	   (if key
 	     (map 'vector key (subseq cl-seq start end))
@@ -329,7 +329,7 @@ to the right:
       (error "Required center too long for sequence argument")
       (let ((a (first (funcall (if right #'cl-ceiling #'cl-floor) (- n k) 2))))
 	(subseq sequence a (+ a k))))))
-;;(loop with s = "01234" for k to (length s) collect (center s k t))
+;;(cl-loop with s = "01234" for k to (length s) collect (center s k t))
 
 (defun assoc-project (sequence a b)
   "Map each sequence element ELT of SEQUENCE to (cons (elt ELT A) (elt
@@ -369,7 +369,7 @@ returns SEQUENCE unaltered."
     sequence
     (if (or (integerp projection) (functionp projection))
       (project-1 sequence projection)
-      (coerce (loop for x in (coerce projection 'list)
+      (coerce (cl-loop for x in (coerce projection 'list)
 		    collect (project-1 sequence x))
 	      (type-of-super sequence)))))
 ;;(project '(a b c) '(1 0 2 1))

@@ -7,9 +7,9 @@
 ;;;; of polynomials as described above.
 
 (defun horner (p x)
-  (loop for ai in (reverse p)
-	for sum = ai then (+ (* sum x) ai)
-	finally (return sum)))
+  (cl-loop for ai in (reverse p)
+	   for sum = ai then (+ (* sum x) ai)
+	   finally (return sum)))
 ;;(horner '(2 0 1) 3)
 
 (defun polynom-p (p)
@@ -49,20 +49,20 @@
 ;;(polynom-subtraction '(1 2 1) '(1))
 
 (defun polynom-multiplication-1 (p q)
-  (destructuring-bind (p q) (polynom-align p q)
+  (cl-destructuring-bind (p q) (polynom-align p q)
     (polynom-clean
      (apply #'polynom-addition
-	    (loop for a in p
-		  for order from 0
-		  collect (append (make-list order 0)
-				  (polynom-scalar-multiplication q a)))))))
+       (cl-loop for a in p
+		for order from 0
+		collect (append (make-list order 0)
+				(polynom-scalar-multiplication q a)))))))
 
 (defun polynom-multiplication (&rest polynomials)
   (reduce #'polynom-multiplication-1 polynomials :initial-value '(1)))
 ;;(polynom-multiplication)
 
 (defun polynom-expt (p exponent)
-  (assert (not (minusp exponent)))
+  (cl-assert (not (minusp exponent)))
   (apply #'polynom-multiplication (make-list exponent p)))
 ;;(polynom-expt '(1 1) 0)
 
@@ -77,20 +77,20 @@
 ;;(polynom-division-1 '(0 -1 0) '(1 1))
 
 (defun polynom-division (num den)
-  (loop for num* = num then r
-	for (q r) = (polynom-division-1 num* den)
-	while q collect q into res
-	finally return (mapcar #'polynom-clean (list (apply #'polynom-addition res) num* den))))
+  (cl-loop for num* = num then r
+	   for (q r) = (polynom-division-1 num* den)
+	   while q collect q into res
+	   finally return (mapcar #'polynom-clean (list (apply #'polynom-addition res) num* den))))
 ;;(polynom-division '(0 0 1) '(1 1))
 
 (defun polynom-derivative (p)
-  (loop for a in (rest p)
-	for i from 1
-	collect (* i a)))
+  (cl-loop for a in (rest p)
+	   for i from 1
+	   collect (* i a)))
 ;;(polynom-derivative '(2 2 2))
 
 (cl-defun test-polynom-division (&optional (num '(0 0 1)) (den '(1 1)))
-  (destructuring-bind (q rem den) (polynom-division num den)
+  (cl-destructuring-bind (q rem den) (polynom-division num den)
     (mapcar* #'= num (polynom-addition 
 		     (polynom-multiplication q den)
 		     rem))))
@@ -112,15 +112,15 @@ and floats are formatted with PRECISION"
 
 (cl-defun ppolynom (p &key (variable "x") (multiplication "") (exponent "^"))
   (cl-flet ((pterm (i a symbol)
-	   (when (not (zerop a))
-	     (let ((sa (if (= a 1) "" (concat (print-number a) multiplication))))
-	       (case i
-		 (0 (format "%s" (print-number a)))
-		 (1 (format "%s%s" sa variable))
-		 (t (format "%s%s%s%d" sa variable exponent i)))))))
-    (concat* (loop for i from 0 
-		   for a in p
-		   if (pterm i a variable) collect it)
+	      (when (not (zerop a))
+		(let ((sa (if (= a 1) "" (concat (print-number a) multiplication))))
+		  (cl-case i
+		    (0 (format "%s" (print-number a)))
+		    (1 (format "%s%s" sa variable))
+		    (t (format "%s%s%s%d" sa variable exponent i)))))))
+    (concat* (cl-loop for i from 0 
+		      for a in p
+		      if (pterm i a variable) collect it)
       :in " + ")))
 ;;(ppolynom (list 1 1 pi) :multiplication "*" :exponent "**")
 
@@ -138,7 +138,7 @@ and floats are formatted with PRECISION"
 
 (defun polynom-expand (p order)
   (let ((n (polynom-order p)))
-    (assert (<= n order))
+    (cl-assert (<= n order))
     (append p (make-list (- order n) 0))))
 ;;(polynom-expand '(1 1) 4)
 
@@ -160,21 +160,21 @@ and floats are formatted with PRECISION"
   (if (fp-p fp)
     (when (fp-p fp)
       (apply #'format "(%s)/(%s)" 
-	     (loop for p in fp
-		   collect (apply #'ppolynom p args))))
+	     (cl-loop for p in fp
+		      collect (apply #'ppolynom p args))))
     (apply #'ppolynom fp args)))
 ;;(mapcar #'pfp '(((1 1) (1 2)) (1 2)))
 
 (defun polynom-value-old (p x)
   (apply #'+
-   (loop for coefficient in p
-	 for i from 0
-	 collect (* coefficient (expt x i)))))
+    (cl-loop for coefficient in p
+	     for i from 0
+	     collect (* coefficient (expt x i)))))
 
 (defun expt-sequence (base order)
-  (loop for i to order 
-	for term = 1 then (* term base)
-	collect term))
+  (cl-loop for i to order 
+	   for term = 1 then (* term base)
+	   collect term))
 ;;(expt-sequence 2 10)
 
 (require 'mb-utils-matrix)

@@ -105,8 +105,8 @@ line number, or a list of such numbers, within the Octave
 function DEFUN."
   (with-buffer buffer
     (goto-char beg)
-    (loop while (re-search-forward +octave-breakpoint-regexp+ end t)
-	  collect (list (octave-defun-name) (line-number-at-pos)))))
+    (cl-loop while (re-search-forward +octave-breakpoint-regexp+ end t)
+	     collect (list (octave-defun-name) (line-number-at-pos)))))
 
 (defun octave-buffer-breakpoints (&optional buffer)
   "Return the buffer breakpoints in BUFFER.
@@ -119,23 +119,23 @@ The result is a list of the same format as the result from
   "Return the buffer breakpoints in all active Octave mode buffers.
 The result is organized as the list described in
 `octave-update-dbstops'."
-  (loop for x in (octave-buffers)
-	for bs = (octave-buffer-breakpoints x)
-	if bs collect (list x bs)))
+  (cl-loop for x in (octave-buffers)
+	   for bs = (octave-buffer-breakpoints x)
+	   if bs collect (list x bs)))
 
 
 ;;; dbstops
 (defun octave-dbstop-p (&optional pos)
   "Return not `nil' if the current buffer line is a dbstop in Octave."
   (let ((bl (octave-dbstop-list)))
-    (destructuring-bind (fn line) (mb-octave-location pos)
+    (cl-destructuring-bind (fn line) (mb-octave-location pos)
       (awhen (find fn bl :test #'string= :key #'first)
 	(find line (second it))))))
 
 (defun octave-dbstop-list-1 (oline)
   "Extract function name and dbstop lines in string OLINE.
 This is a helper function for `octave-dbstop-list'."
-  (destructuring-bind (fn lines)
+  (cl-destructuring-bind (fn lines)
       (string-match*
 	  "breakpoint in \\([^ ]+\\) at lines? \\(.*\\)\\."
 	oline :num '(1 2))
@@ -166,13 +166,13 @@ The input argument is a list with elements on the form \(BUFFER
 DEFUN-BREAKPOINTS\), where each element in DEFUN-BREAKPOINTS is a
 list of the same format as the result from
 `octave-region-breakpoints'."
-  (loop for (buffer fn-breakpoints) in buffer-breakpoints
-	unless (in-directory-p
-		(buffer-file-name buffer)
-		"~/git/utils/octave/octave_3_2_patch")
-	do (octave-source-buffer t buffer)
-	and do (loop for (fn lines) in fn-breakpoints
-		     do (octave-set-dbstops fn lines t))))
+  (cl-loop for (buffer fn-breakpoints) in buffer-breakpoints
+	   unless (in-directory-p
+		   (buffer-file-name buffer)
+		   "~/git/utils/octave/octave_3_2_patch")
+	   do (octave-source-buffer t buffer)
+	   and do (cl-loop for (fn lines) in fn-breakpoints
+			   do (octave-set-dbstops fn lines t))))
 
 (defun octave-update-dbstops-buffer (&optional buffer)
   "Convert all buffer breakpoints in BUFFER to Octave dbstops.
@@ -203,7 +203,7 @@ The function adds a dbstop in Octave, and marks the corresponding
 buffer line."
   (if (octave-breakpoint-p pos)
     (message "Breakpoint is alreday present.")
-    (destructuring-bind (fn line) (mb-octave-location pos)
+    (cl-destructuring-bind (fn line) (mb-octave-location pos)
       (octave-set-dbstops (unless (octave-debug-p) fn) line t)
       (octave-set-buffer-breakpoint line)
       (first inferior-octave-output-list))))
@@ -216,7 +216,7 @@ DEFUN-BREAKPOINT was the triple (DEFUN LINUM POS). Then all of
 this info could be passed to this function and the costy call to
 mb-octave-location would be superfluous."
   (if (octave-breakpoint-p pos)
-    (destructuring-bind (fn line) (mb-octave-location pos)
+    (cl-destructuring-bind (fn line) (mb-octave-location pos)
       (octave-send-string (if (octave-debug-p)
 			    (format "dbclear %d" line)
 			    (format "dbclear %s %d" fn line))
@@ -230,8 +230,8 @@ mb-octave-location would be superfluous."
   "Unset every breakpoint in the region (beg end) in BUFFER.
 See implementation note in `octave-unset-breakpoint'."
   (with-buffer buffer
-    (loop for (fn line) in (octave-region-breakpoints beg end buffer)
-	  do (octave-unset-breakpoint (bol* :linum line)))))
+    (cl-loop for (fn line) in (octave-region-breakpoints beg end buffer)
+	     do (octave-unset-breakpoint (bol* :linum line)))))
 
 (defmacro octave-with-temp-dbstop (pos &rest body)
   "Execute BODY with a temparary dbstop set at POS.
@@ -281,9 +281,9 @@ executes BODY."
 
 (defun octave-delete-all-breakpoints ()
   (interactive)
-  (loop for (buffer fn-breakpoints) in (octave-all-buffer-breakpoints)
-	do (with-buffer buffer
-	     (octave-delete-buffer-breakpoints)))
+  (cl-loop for (buffer fn-breakpoints) in (octave-all-buffer-breakpoints)
+	   do (with-buffer buffer
+		(octave-delete-buffer-breakpoints)))
   ;; just to be sure
   (octave-send-string "dbclear all"))
 

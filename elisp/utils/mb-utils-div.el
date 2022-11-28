@@ -21,7 +21,7 @@
 (defmacro popf (property-list tag &optional default)
   "Pops TAG and its value from PROPERTY-LIST"
   `(prog1 (cl-getf ,property-list ,tag ,default)
-     (remf ,property-list ,tag)))
+     (cl-remf ,property-list ,tag)))
 ;;(let ((props (list :qwe 1 :ewq 2))) (list (popf props :qwe) props))
 
 (defmacro mdelf (place &rest tags)
@@ -30,14 +30,14 @@ PLACE may be a symbol, or any generalized variable allowed by
 `setf'. The form returns a list of booleans indicating if the
 corresponding TAG was found and removed.
 \nSee also `mremf', `remf'"
-  `(loop for tag in ',tags collect (cl-remf ,place tag)))
+  `(cl-loop for tag in ',tags collect (cl-remf ,place tag)))
 ;;(let ((p '(:where 123 :columns 321))) (list (mdelf p :where :columns :fitna) p))
 
 (defun mremf (plist &rest tags)
   "Remove the TAGS from property list PLIST.
 \nSee `delf' for a similar destructive version."
   (let ((place (copy-list plist)))
-    (loop for tag in tags do (cl-remf place tag))
+    (cl-loop for tag in tags do (cl-remf place tag))
     place))
 ;;(let ((p '(:where 123 :columns 321))) (list (mremf p :where :columns :fitna) p))
 
@@ -117,7 +117,7 @@ If reverse i non nil, it returns the first popped element"
 ;;(push-list '(1 234 4) qwe)
 
 (defmacro pushnew-list (list place &rest args)
-  `(loop for x in (reverse ,list)
+  `(cl-loop for x in (reverse ,list)
 	 do (cl-pushnew x ,place ,@args)
 	 finally return ,place))
 ;; (let ((l '(c d e))) (progn (pushnew-list '(a b c) l)))
@@ -161,7 +161,7 @@ elements as a list maintaing the order."
 	(gtest (gensym)))
     `(let ((,gelt ,elt)
 	   (,gtest ,test))
-       (loop for x in ,place
+       (cl-loop for x in ,place
 	     while (not (funcall (or ,gtest #'eq) x ,gelt))
 	     collect (pop ,place)))))
 ;;(let ((qwe '(1 2 3 4))) (list (pop-until qwe 3) qwe))
@@ -234,7 +234,7 @@ TODO: implement this. Probably involves some macro magic"
      (lambda (&rest args)
        (let* ((args* (copy-list args))
 	      (all-args (if (first positions)
-			  (loop for i in positions 
+			  (cl-loop for i in positions 
 				for x in fargs
 				do (list-insert x i args*)
 				finally return args*)
@@ -262,7 +262,7 @@ TODO: implement this. Probably involves some macro magic"
   "Return a function that returns t if any of PREDICATES return not nil."
   (lexical-let ((preds predicates))
     (function (lambda (&rest args)
-      (loop for p in preds thereis (apply p args))))))
+      (cl-loop for p in preds thereis (apply p args))))))
 ;;(mapcar (disjoin #'oddp #'primep) (0-n 10))
 
 (defun not-disjoin (&rest predicates)
@@ -274,7 +274,7 @@ TODO: implement this. Probably involves some macro magic"
   "Return a function that returns nil if any of PREDICATES return nil."
   (lexical-let ((preds predicates))
     (function (lambda (&rest args)
-      (loop for p in preds always (apply p args))))))
+      (cl-loop for p in preds always (apply p args))))))
 ;;(mapcar (conjoin #'evenp #'primep) (0-n 10))
 
 (defun not-conjoin (&rest predicates)
@@ -299,6 +299,7 @@ TODO: implement this. Probably involves some macro magic"
 
 ;;; Anaphoric macros
 (defmacro aif (test-form then-form &rest else-forms)
+  "Anaphoric `if'"
   `(let ((it ,test-form))
      (if it ,then-form ,@else-forms)))
 ;(aif (+ 5 5) it nil 1)
@@ -306,12 +307,14 @@ TODO: implement this. Probably involves some macro magic"
 (def-edebug-spec aif t)
 
 (cl-defmacro awhen (test-form &body body)
+  "Anaphoric `when'"
   `(aif ,test-form
         (progn ,@body)))
 ;(awhen (+ 2 2) (princ (1+ it)) (princ (1- it)) (princ " cool!"))
 (def-edebug-spec awhen t)
 
 (defmacro acond (&rest clauses)
+  "Anaphoric `cond'"
   (if (null clauses)
       nil
       (let ((cl1 (car clauses))
@@ -369,8 +372,8 @@ TODO: font-lock face as `defun'."
 (cl-defun vxw (v w &optional (map #'list)) 
   ;; (print (list v w))
   (let ((res nil))
-    (loop for ev in v
-	  do (loop for ew in w
+    (cl-loop for ev in v
+	  do (cl-loop for ew in w
 		   do (push (funcall map ev ew) res)))
     ;; (print (nreverse res))
     (nreverse res)))
@@ -501,7 +504,7 @@ similar to `mapcar'"
 	   (plusp levels))
     (if (and with-assoc (assocp tree))
       (mapassoc function tree)
-      (loop for x in tree
+      (cl-loop for x in tree
 	  collect (maptree function x :levels (1- levels) :with-assoc with-assoc)))
     (funcall function tree)))
 
@@ -509,7 +512,7 @@ similar to `mapcar'"
   "Same as `maptree' but allows for at n-ary FUNCTION. Assumes
 the structures of TREES are the same as for TREE."
   (if (listp tree)
-    (loop for i below (length tree)
+    (cl-loop for i below (length tree)
 	  collect (apply #'maptree* function
 			 (cons (nth i tree)
 			       (mapcar (bind #'nth i 1) trees))))
@@ -654,7 +657,7 @@ converted to optional argument NIL-STRING."
 	  ((symbolp string-designator) (symbol-name string-designator))
 	  (t (format "%S" string-designator)))
     nil-string))
-;;(loop for x in '(nil :qwe qwe "qwe" 123 -1 (:read 2 3)) collect (sstring x 0 t))
+;;(cl-loop for x in '(nil :qwe qwe "qwe" 123 -1 (:read 2 3)) collect (sstring x 0 t))
 
 (defun ssymbol (symbol-designator)
   (acond
@@ -676,13 +679,17 @@ converted to optional argument NIL-STRING."
     symbol-name))
 ;;(mapcar #'symbolp (mapcar #'iintern (list 1 "a" 'b "")))
 
-(defun decolonize-symbol-name (symbol-name)
-  (if (= (char symbol-name 0) ?:)
-    (substring symbol-name 1) symbol-name))
-;;(decolonize-symbol-name ":a")
+(defun decolonize-symbol-name (symbol-name &optional string-key)
+  (let ((res (if (= (char symbol-name 0) ?:)
+	       (substring symbol-name 1) symbol-name)))
+    (if string-key
+      (funcall string-key res)
+      res)))
+;;(decolonize-symbol-name ":a" #'upcase)
+;;(mapcar #'decolonize-symbol-name (list ":a" "a"))
 
-(defun decolonize-symbol (symbol)
-  (ssymbol (decolonize-symbol-name (symbol-name symbol))))
+(defun decolonize-symbol (symbol &optional string-key)
+  (ssymbol (decolonize-symbol-name (symbol-name symbol) string-key)))
 ;;(mapcar #'decolonize-symbol '(a :b))
 
 (defun llist (x)
@@ -752,7 +759,7 @@ Otherwise return x"
 (defun plist-position (plist prop)
   "Return the property position of PROP in PLIST.
 The position includes both property symbol and value."
-  (loop for pos from 0
+  (cl-loop for pos from 0
 	for (property value) = (pop-list plist 2)
 	if (eq property prop) return pos
 	while plist))

@@ -32,7 +32,7 @@ column is returned."
 ;;(ld-primary-key (ld-schema :users))
 
 (defun ld-column-comparator (coldef)
-  (case (ld-column-type coldef)
+  (cl-case (ld-column-type coldef)
     (string #'string=)
     (listp #'equal)
     (otherwise #'eql)))

@@ -62,7 +62,7 @@ This function could be on `comint-output-filter-functions' or bound to a key."
   (interactive)
   (let ((pmark (process-mark (get-buffer-process (current-buffer))))
 	(res (and string 
-		  (string-replace string "?\[[[:digit:]]+m" ""))))
+		  (mb-string-replace string "?\[[[:digit:]]+m" ""))))
     (save-excursion
       (condition-case nil
 	  (goto-char comint-last-input-end) ;another nice var is comint-last-output-start

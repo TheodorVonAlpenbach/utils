@@ -45,8 +45,8 @@
 ;;(mapcar #'iso-latin1-2-7bit-char (list ?æ ?a))
 
 (defun iso-latin1-2-7bit (iso-latin-string &optional encoding)
-  (loop for c across iso-latin-string
-	concat (iso-latin1-2-7bit-char c)))
+  (cl-loop for c across iso-latin-string
+	   concat (iso-latin1-2-7bit-char c)))
 ;;(iso-latin1-2-7bit "ææ")
 
 (defconst *iso-latin1-encoding*

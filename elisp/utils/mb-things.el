@@ -182,7 +182,7 @@ must be a member of a cycle preceding the cycle of the latter.")
 
 (defun inc-date (date n level)
   "LEVEL 1, 2, 3 correspond to day, month, year respectively."
-  (iso-date (case level
+  (iso-date (cl-case level
 	      (1 (add-etime-date (parse-time date) :day n))
 	      (2 (add-etime-date (parse-time date) :month n))
 	      (3 (add-etime-date (parse-time date) :year n))
@@ -202,13 +202,13 @@ TIME must be a string."
   (let ((etime (parse-clock time)))
     (iso-time
      :time (if (listp level)
-	     (case (first level)
+	     (cl-case (first level)
 	       (:hour (etime-round etime :hour (second level) n))
 	       (:minute (etime-round etime :minute (second level) n))
 	       (:second (etime-round etime :second (second level) n))
 	       (otherwise
 		(error "Level %S is not implemented!" level)))
-	     (case level
+	     (cl-case level
 	       (1 (add-time etime :minute n))
 	       (2 (add-time etime :hour n))
 	       (3 (add-time etime :second n))
@@ -225,7 +225,7 @@ LEVEL 2, add N to first digit in X
 LEVEL 3, return x ^ (2 ^ N)
 "
   (let ((res 
-	 (case level
+	 (cl-case level
 	   (1 (+ n x))
 	   (2 (+ x (* n (expt 10 (floor (log x 10))))))
 	   (3 (expt x (expt 2.0 n))))))

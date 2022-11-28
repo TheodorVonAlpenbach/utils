@@ -17,7 +17,7 @@
       (while (not (condition-case nil
 		      (forward-sexp 1)
 		    (error t)))
-	(incf n))
+	(cl-incf n))
       (princ n))))
 ;;(count-sexps sdfd)
 
@@ -41,7 +41,7 @@
   (save-excursion
     (save-restriction
       (narrow-to-region start end)
-      (1- (loop for p = (point-min) then (condition-case nil
+      (1- (cl-loop for p = (point-min) then (condition-case nil
 					     (scan-sexps p 1)
 					   (error nil))
 		while p count 1
@@ -93,7 +93,7 @@ paranthesis."
   "Returns all the defun symbols in BUFFER."
   (save-excursion
     (goto-char (point-min))
-    (loop for symbol = (defun-symbol)
+    (cl-loop for symbol = (defun-symbol)
 	  while (< (point) (point-max))
 	  when symbol collect symbol
 	  do (end-of-defun))))

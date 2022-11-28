@@ -7,7 +7,7 @@
 ;;(ak-temp-buffer-name)
 
 (defun ak-date (time-designator)
-  (destructuring-bind (s mi h d mo y &rest args)
+  (cl-destructuring-bind (s mi h d mo y &rest args)
       (parse-time time-designator)
     (format "%02d-%02d-%04d" d mo y)))
 ;;(ak-date (iso-date))
@@ -22,11 +22,11 @@
 		   (interval-oo "class=\"channel klassisk epg-channel"
 				"class=\"channel ")))
 	 (nodes (xml-extract-nodes ak-xml "div" '(("class" "epg-entry.*")))))
-    (loop for n in nodes
-	  for id = (xml-attribute "data-id" n)
-	  for time-node = (first (xml-extract-nodes n "time"))
-	  for time = (parse-time (xml-attribute "datetime" time-node))
-	  if (string-match* "^mkk" id) collect (list id time))))
+    (cl-loop for n in nodes
+	     for id = (xml-attribute "data-id" n)
+	     for time-node = (first (xml-extract-nodes n "time"))
+	     for time = (parse-time (xml-attribute "datetime" time-node))
+	     if (string-match* "^mkk" id) collect (list id time))))
 
 (defun ak-epg-entry (html-string time)
   "Returns list \(EPG-ID PROGRAM-PERIOD\)"
@@ -40,7 +40,7 @@
 		     "li" nil nil t))
 
 (defun ak-parse-historic-entry (html-entry)
-  (destructuring-bind (artist composer work)
+  (cl-destructuring-bind (artist composer work)
       (string-match* "\\([^-]*\\) - \\([^:]*\\): \\(.*\\)" html-entry :num '(1 2 3))
     (mapcar #'string-trim (list composer work artist))))
 ;(setq html-details (sr-parse-entry html-entry))
@@ -63,12 +63,12 @@
   (let* ((epg-entry (ak-epg-entry html-string time))
 	 (track-entries (ak-historic-entries (first epg-entry)))
 	 (n (length track-entries)))
-    (concat* (loop for track-entry in track-entries
-		   for i from 1
-		   for est-time = (interpolate-time (float i) (second epg-entry) :a 1 :b n)
-		   collect (ak-format-entry-long track-entry est-time))
-	     :pre (format "Tracks in period %s\n" (period-to-string (second epg-entry)))
-	     :in "\n")))
+    (concat* (cl-loop for track-entry in track-entries
+		      for i from 1
+		      for est-time = (interpolate-time (float i) (second epg-entry) :a 1 :b n)
+		      collect (ak-format-entry-long track-entry est-time))
+      :pre (format "Tracks in period %s\n" (period-to-string (second epg-entry)))
+      :in "\n")))
 
 ;; AK today
 (defun ak-url (&optional time)
@@ -77,15 +77,15 @@
 (require 'json)
 (defun ak-entries (html-string &optional n)
   (let* ((json (substring-intv html-string
-		(interval-oo "nrk.state.initState(\"nowNextElements\", " " );")))
+		 (interval-oo "nrk.state.initState(\"nowNextElements\", " " );")))
 	 ;; jsons is a vector
 	 (jsons (json-read-from-string json)))
     (nreverse
-     (loop for entry across (subseq jsons (- (or n (length jsons))))
-	   for time = (cdr (assoc 'st entry))
-	   for artist = (cdr (assoc 't entry))
-	   for (composer work) = (string-match* "^\\([^:]*\\): \\(.*\\)" (cdr (assoc 'd entry)) :num '(1 2))
-	   collect (list time composer work artist)))))
+     (cl-loop for entry across (subseq jsons (- (or n (length jsons))))
+	      for time = (cdr (assoc 'st entry))
+	      for artist = (cdr (assoc 't entry))
+	      for (composer work) = (string-match* "^\\([^:]*\\): \\(.*\\)" (cdr (assoc 'd entry)) :num '(1 2))
+	      collect (list time composer work artist)))))
 
 (cl-defun ak-latest-converter (html-string n)
   (concat* (ak-entries html-string n) :suf "\n" :key #'ak-format-entry-short))
@@ -170,7 +170,7 @@
 	(track-details
 	 (xml-extract-nodes html-entry "div"
 	   '(("class" "track-list-item__detail")) most-positive-fixnum t)))
-    (destructuring-bind (artist work &rest details)
+    (cl-destructuring-bind (artist work &rest details)
 	(mapcar #'xml-inner track-details)
       (list (list (sr-parse-time sr-time) artist title)
 	    (mapcar #'sr-parse-track-detail details)))))
@@ -193,9 +193,9 @@
 ;;(format "%s: %s\n" "17:07" "Mats")
 
 (cl-defun sr-latest-converter (html-string &optional (n 10))
-  (concat* (loop with es = (sr-entries html-string n)
-		 for e in es
-		 collect (sr-format-entry e nil))))
+  (concat* (cl-loop with es = (sr-entries html-string n)
+		    for e in es
+		    collect (sr-format-entry e nil))))
 
 (cl-defun sr-now-converter (html-string)
   (sr-format-entry (first (sr-entries html-string 1))))

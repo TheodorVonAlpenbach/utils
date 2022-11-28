@@ -1,9 +1,7 @@
 ;;; This file is above all devoted to following modification of
 ;;; forward-sentence.
 
-(provide 'mb-paragraph)
-
-(setq sentence-end "[.?!:][]\"')}]*\\([ \t\n]+[A-W]\\)")
+(cl-cl-setq sentence-end "[.?!:][]\"')}]*\\([ \t\n]+[A-W]\\)")
 (setq sentence-end-double-space nil) ; fill commands use one space
 
 ;(debug-on-entry 'forward-sentence)
@@ -60,3 +58,5 @@ Markers are converted to integers." (- number 2))
 (defun 3- (number)
   "Return NUMBER minus three. NUMBER may be a number or a marker.
 Markers are converted to integers." (- number 3))
+
+(provide 'mb-paragraph)

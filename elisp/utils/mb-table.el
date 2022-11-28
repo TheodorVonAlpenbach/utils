@@ -10,10 +10,10 @@
 	     (maxlengths (apply #'mapcar* #'max 
 				(table-collect-sexp-lengths
 				 beg-line end-line)))
-	     (offsets (loop for y = 0 then (+ x y 2)
+	     (offsets (cl-loop for y = 0 then (+ x y 2)
 			    for x in maxlengths
 			    collect y)))
-	(loop for line from beg-line to end-line
+	(cl-loop for line from beg-line to end-line
 	      do (table-clean-line line offsets))))))
 
 (defun table-clean-paragraph ()
@@ -57,8 +57,8 @@ lines should be input instead."
     (goto-line start-line)
     ;; start with point immediately behind first sexp on line
     (forward-sexp 1)
-    (loop for line from start-line to end-line
-	  collect (loop for bounds = (bounds-of-thing-at-point 'sexp)
+    (cl-loop for line from start-line to end-line
+	  collect (cl-loop for bounds = (bounds-of-thing-at-point 'sexp)
 			while (= (point-2-line) line)
 			collect (- (cdr bounds) (car bounds))
 			do (forward-sexp 1)))))
@@ -68,8 +68,8 @@ lines should be input instead."
   (interactive "r")
   (goto-line start-line)
   (backward-char 1)
-  (loop for line from start-line to end-line
-	  collect (loop for start = (progn (forward-whitespace 1)
+  (cl-loop for line from start-line to end-line
+	  collect (cl-loop for start = (progn (forward-whitespace 1)
 					   (point))
 			for end = (progn (forward-whitespace 1)
 					 (forward-whitespace -1)
@@ -83,7 +83,7 @@ LINE. TODO: fix if LINE is last."
   (interactive "P")
   (goto-line line)
   (backward-char 1)
-  (princ (loop for start = (progn (forward-whitespace 1)
+  (princ (cl-loop for start = (progn (forward-whitespace 1)
 				  (point))
 	for end = (progn (forward-whitespace 1)
 			 (forward-whitespace -1)
@@ -96,7 +96,7 @@ LINE. TODO: fix if LINE is last."
   "Returns a ordered list of lengths of all non-whitespace items in
 LINE. TODO: fix if LINE is last."
   (goto-line line)
-  (loop while (and (re-search-forward "[^ \t\n]+" nil t)
+  (cl-loop while (and (re-search-forward "[^ \t\n]+" nil t)
 		   (= (point-2-line) line))
 	collect (length (match-string 0))))
 

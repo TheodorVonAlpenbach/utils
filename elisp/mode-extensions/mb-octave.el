@@ -133,8 +133,8 @@
 
 (defun octave-buffers ()
   "Return a list of all buffers in octave mode."
-  (loop for x being the buffers if
-	(octave-mode-p x) collect x))
+  (cl-loop for x being the buffers if
+	   (octave-mode-p x) collect x))
 
 
 ;;;; Info stuff
@@ -295,9 +295,9 @@ fn2, ..., fnN, if it is not an element in FUNCTIONS."
   (let ((doc (string-match* "## -\\*- texinfo -\\*-\n\\(\\(?:##.*\n\\)*\\)"
 	       (file-string filename) :num 1)))
     (when doc
-      (concat* (loop for l in (string-lines doc)
-		     for nl = (replace-regexp-in-string "^## ?" "" l)
-		     collect (filter-octave-texinfo-line nl functions))
+      (concat* (cl-loop for l in (string-lines doc)
+			for nl = (replace-regexp-in-string "^## ?" "" l)
+			collect (filter-octave-texinfo-line nl functions))
 	:in "\n"
 	:pre (format "@node %s\n@subsection %s\n@cindex subsection, %s\n\n"
 	       fn fn fn)
@@ -319,16 +319,16 @@ fn2, ..., fnN, if it is not an element in FUNCTIONS."
 (defun mb-octave2texinfo (filenames functions)
   "Extract the texinfo part of FILENAMES and convert it to a manual node.
 See also `mb-octave2texinfo-1'."
-  (loop for f in filenames
-	for fn in (mapcar #'path2octave-function filenames)
-	for fnode = (mb-octave2texinfo-1 f fn functions)
-	if fnode
-	collect fn into fns
-	and collect fnode into fnodes
-	finally return (concat
-			 (mb-octave2texinfo-menu fns)
-			 "\n\n"
-			 (concat* fnodes :in "\n\n"))))
+  (cl-loop for f in filenames
+	   for fn in (mapcar #'path2octave-function filenames)
+	   for fnode = (mb-octave2texinfo-1 f fn functions)
+	   if fnode
+	   collect fn into fns
+	   and collect fnode into fnodes
+	   finally return (concat
+			    (mb-octave2texinfo-menu fns)
+			    "\n\n"
+			    (concat* fnodes :in "\n\n"))))
 ;;(mb-octave2texinfo '("~/git/utils/octave/lsbin/lsread.m") '("lsread"))
 ;;(mb-octave2texinfo '("~/git/utils/octave/lsbin/lsdate2tm.m") '("lsdate2tm"))
 
@@ -339,10 +339,10 @@ takes a path as first argument followed by a BODY of forms. The
 point is that if a FILE's buffer is already present it simply
 evaluates BODY. And if not, it opens FILE with find-file and then
 closes it after BODY forms have been evaluated."
-  (loop for f in (second (vc-deduce-fileset nil t 'state-model-only-files))
-	for b = (find-file f)
-	do (when (octave-buffer-breakpoints b)
-	     (error "Breakpoints exists in file %s" f))))
+  (cl-loop for f in (second (vc-deduce-fileset nil t 'state-model-only-files))
+	   for b = (find-file f)
+	   do (when (octave-buffer-breakpoints b)
+		(error "Breakpoints exists in file %s" f))))
 ;;(mb-octave-breakpoints-hook)
 
 (provide 'mb-octave)

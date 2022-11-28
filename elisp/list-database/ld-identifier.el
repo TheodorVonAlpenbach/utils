@@ -10,7 +10,7 @@
   "If this function returns true, FORM is interpreted as a an identifier.
 Identifers are used for databases, tables, schemas columns"
   (and (consp form)
-       (case type
+       (cl-case type
 	 (:database (= (length form) 1))
 	 ((:table :schema) (= (length form) 2))
 	 (:column (= (length form) 3))
@@ -26,7 +26,7 @@ Identifers are used for databases, tables, schemas columns"
 
 (defun ld-identifier-keyword (id &optional type)
   (if type
-    (case type
+    (cl-case type
       (:database (first id))
       (:table (second id))
       (:column (third id)))
@@ -63,7 +63,7 @@ colid?"
 
 (defun ld-identifier-type-p (id)
   (when (ld-identifier-p id)
-    (case (length id) (1 :database) (2 :table) (3 :column))))
+    (cl-case (length id) (1 :database) (2 :table) (3 :column))))
 ;;(mapcar #'ld-identifier-type-p '((nil) (nil :ewq) (:foo :ewq :qwe)))
 
 (provide 'ld-identifier)

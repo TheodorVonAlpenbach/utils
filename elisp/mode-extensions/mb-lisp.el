@@ -97,17 +97,17 @@ If no IN-PACKAGE declaration is found, NIL is returned."
 
 (cl-defun repl-wait-for-ouput (&optional (max-milliseconds *repl-max-waiting-time*))
   (let ((max-waiting-time *repl-max-waiting-time*))
-    (loop for i from 0
-	  for waiting-time = (expt 2 i)
-	  for total-waiting-time = 0 then (+ total-waiting-time waiting-time)
-	  while (and (null *repl-output*)
-		     (not *repl-error*)
-		     (< total-waiting-time max-waiting-time))
-	  do (sleep-for 0 waiting-time)
-	  if *repl-last-output-time*
-	  do (setf max-waiting-time
-		   (+ (diff-current-time-msec *repl-last-output-time* (current-time))
-		      *repl-max-waiting-time-between-outputs*))))
+    (cl-loop for i from 0
+	     for waiting-time = (expt 2 i)
+	     for total-waiting-time = 0 then (+ total-waiting-time waiting-time)
+	     while (and (null *repl-output*)
+			(not *repl-error*)
+			(< total-waiting-time max-waiting-time))
+	     do (sleep-for 0 waiting-time)
+	     if *repl-last-output-time*
+	     do (setf max-waiting-time
+		      (+ (diff-current-time-msec *repl-last-output-time* (current-time))
+			 *repl-max-waiting-time-between-outputs*))))
   *repl-output*)
 ;;(repl-wait-for-ouput)
 
@@ -122,7 +122,7 @@ should be fairly small"
   (if waiting-for-result
     (repl-wait-for-ouput (or (numberp waiting-for-result) 2000))
     *repl-output*))
-;;(lisp-eval-expression-1 "(let ((res (loop for i below 5000 collect i))) (last res))" t)
+;;(lisp-eval-expression-1 "(let ((res (cl-loop for i below 5000 collect i))) (last res))" t)
 ;;(lisp-eval-expression-1 "1" t)
 ;;(comint-simple-send (inferior-lisp-proc) "1")
 
@@ -248,7 +248,7 @@ are allowed.
   "EXPRESSION-STRING is a string that can be sent to repl. Note
 that strings must be quoted withing such strings."
   (if prefix
-    (case prefix
+    (cl-case prefix
       ;; yamal: view music PDF on the fly
       (0 (let ((res (lisp-eval-expression
 		     (format "(print-music %s :lilypond-file)"
@@ -576,7 +576,7 @@ from C to entering :C in the REPL."
 
 (defun exit-mb-lisp-repl-mode (&optional send-abort-message-p)
   ;; (let ((new-windows (cl-set-difference (window-list) *repl-window-list*)))
-  ;;   (loop for w in new-windows
+  ;;   (cl-loop for w in new-windows
   ;; 	  do (delete-window w)))
   (mb-lisp-mode)
   (read-only-mode -1)
@@ -673,7 +673,7 @@ documentation strings of defclass, defconstant etc."
 (defun restrict-to-lisp-doc (orig-fun &rest args)
   "Dette er en setning. Dette er nok en setning. Dette er ogsaa en setning."
   (if (member major-mode '(emacs-lisp-mode mb-lisp-mode lisp-mode))
-    (destructuring-bind (beg end) (lisp-doc-region)
+    (cl-destructuring-bind (beg end) (lisp-doc-region)
       (save-restriction
 	(narrow-to-region (1+ beg) (1- end))
 	(apply orig-fun args)))

@@ -98,7 +98,7 @@ examples of abbreviated time forms:
 
 (cl-defun mb-weekday-languages (&optional (format :description) (skip-number-sequences-p t))
   "Returns a list of the supported week day languages."
-  (mapcar (case format (:description #'third) (t #'first))
+  (mapcar (cl-case format (:description #'third) (t #'first))
 	  (if skip-number-sequences-p
 	    (remove-if #'(lambda (x) (integerp (first (second x)))) *weekdays*)
 	    *weekdays*)))
@@ -130,14 +130,14 @@ examples of abbreviated time forms:
   "Returns weekday of TIME-DESIGNATOR (default is today) in language LANG"
     (nth (etime-day-of-week (parse-time time-designator))
        (second (assoc lang *weekdays*))))
-;;(loop for i below 7 collect (weekday :no (add-etime-date (now) :day i)))
+;;(cl-loop for i below 7 collect (weekday :no (add-etime-date (now) :day i)))
 
 (cl-defun full-date (&optional (lang :no) (time-designator (decode-time)))
   "Returns TIME-DESIGNATOR (default is today) in full date format in language LANG
 TODO: the iso-date part should be changed to corresond with the language"
   (let ((time (parse-time time-designator)))
     (format "%s %s" (weekday lang time) (iso-date time))))
-;;(loop for lang in '(:en :no nil) collect (full-date lang '2015-01-09))
+;;(cl-loop for lang in '(:en :no nil) collect (full-date lang '2015-01-09))
 
 (cl-defun short-date (&optional (time-designator (decode-time)))
   (interactive)

@@ -47,7 +47,7 @@ If such module does not exist, create one."
   "Swap from module filename to ERT test module filename or vice-versa."
   (awhen (string-match* (format "\\(%s\\)?\\(.*\\.el$\\)" *mb-ert-file-prefix*)
 	   (file-name-nondirectory filename) :num '(1 2))
-    (destructuring-bind (test-prefix name) it
+    (cl-destructuring-bind (test-prefix name) it
       (expand-file-name (aif test-prefix name (concat *mb-ert-file-prefix* name))
 			(file-name-directory filename)))))
 ;;(mb-ert-swap-filename "/dir/test-ert.el")
@@ -93,7 +93,7 @@ the left hand side of DEFUN-SYMBOL. For other values of TO, the
 function assumes that DEFUN-SYMBOL is the name of a test function
 if and only if it has PREFIX has prefix. By default, TO is nil.
 \n(fn &optional SYMBOL TO PREFIX)"
-  (case to
+  (cl-case to
     (:ert (concat prefix defun-name))
     (:ert-soft (if (mb-ert-name-p defun-name)
 		 defun-name (concat prefix defun-name)))
@@ -135,13 +135,13 @@ If no such test is found, it returns NIL."
   (with-temp-buffer
     (insert-file test-filename)
     (cl-delete-duplicates
-     (loop while (mb-ert-forward-test)
+     (cl-loop while (mb-ert-forward-test)
 	   collect (defun-symbol (point) '(ert-deftest))))))
 ;;(mb-ert-file-defuns "~/projects/utils/elisp/mode-extensions/test-mb-texinfo.el")
 
 (defun mb-ert-directory-defuns (directory)
   "Return a list of all ERT test function symbols in DIRECTORY."
-  (loop for f in (directory-files directory t "\.el$")
+  (cl-loop for f in (directory-files directory t "\.el$")
 	if (mb-ert-test-filename-p f)
 	append (mb-ert-file-defuns f)))
 ;;(mb-ert-directory-defuns "~/projects/utils/elisp/utils")
@@ -159,7 +159,7 @@ file corresponds to an actual elisp file in DIRECTORY."
   (let ((res (directory-files directory nil "^test-.*\.el$")))
     (awhen (and verify-p
 		(cl-set-difference
-		 (loop for x in res collect (subseq x 5))
+		 (cl-loop for x in res collect (subseq x 5))
 		 (mb-non-ert-files directory)
 		 :test #'string=))
       (warn "The following test files do not have matching elisp files:\n%s"
@@ -250,7 +250,7 @@ Note: Either this or mb-ert-test-file is obsolete."
 (cl-defun mb-ert-test-buffer-directories (dirs)
   "Invoke ERT on every test function in current directory."
   (mb-ert-test-symbols
-   (loop for d in dirs
+   (cl-loop for d in dirs
 	 for fs = (copy-if #'mb-ert-test-filename-p
 		    (directory-files d t "\.el$"))
 	 do (mapc #'mb-eval/load-ert-pair fs)

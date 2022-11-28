@@ -23,7 +23,7 @@ file."
 
 (cl-defun prinl (list)
   "Pretty prints LIST. Each item is printed on a separated line"
-  (loop for x in list
+  (cl-loop for x in list
 	do (insert (format "%S\n" x))))
 ;;(prinl '(a b c))
 
@@ -91,7 +91,7 @@ default value of optional parameter BUFFER is the current buffer."
 
 (defmacro with-buffers (buffers-or-names &rest body)
   "Eval BODY in every buffer in the list BUFFERS-OR-NAMES."
-  `(loop for x in ,buffers-or-names
+  `(cl-loop for x in ,buffers-or-names
 	 do (with-buffer x ,@body)))
 ;;(with-buffer *lynx-buf* (goto-char 2))
 (def-edebug-spec with-buffers t)
@@ -165,7 +165,7 @@ temporary file name as value."
 ;;(parse-csv-column "\n")
 
 (cl-defun parse-csv-line (line &optional (char-separator ?,) (omit-nulls t))
-  (loop with i = 0
+  (cl-loop with i = 0
 	with n = (length line)
 	with s = (string-trim (concat "," line))
 	for (x pos) = (parse-csv-column s 0) then (parse-csv-column s (1+ pos))
@@ -187,7 +187,7 @@ temporary file name as value."
 				   (column-separator ";")
 				   line-separator (omit-nulls t))
   "Parses csv file FILENAME to a list of lists."
-  (loop with lines = (split-string string (or line-separator "\n") omit-nulls)
+  (cl-loop with lines = (split-string string (or line-separator "\n") omit-nulls)
 	for x in lines
 	for i from 0
 	while (and x (not (empty-string-p (string-trim x))))
@@ -250,7 +250,7 @@ See `parse-csv-string' for more details"
   "this has been checked and ok! next step is to make a read file thing."
   (with-buffer buffer
     (hexl-beginning-of-buffer 1)
-    (loop with bytes = (list (hexl-char-after-point))
+    (cl-loop with bytes = (list (hexl-char-after-point))
 	  for n below hexl-max-address
 	  do (progn (hexl-forward-char 1)
 		    (push (hexl-char-after-point) bytes))
@@ -264,7 +264,7 @@ See `parse-csv-string' for more details"
   "Returns the folloing N bytes in the buffer stream as a list.
 Also, stream marker is moved to the point after the NTh byte.
 Must be called in a hexl mode buffer context."
-  (loop for i below n 
+  (cl-loop for i below n 
 	collect (hexl-char-after-point)
 	do (when (< (hexl-current-address) hexl-max-address)
 	     (hexl-forward-char 1))))
@@ -308,7 +308,7 @@ If FILE already exists, it will be overwritten."
 
 (defun read-variable-length-integer ()
   (let ((bytes (nreverse 
-		(loop for byte = (read-byte) then (read-byte)
+		(cl-loop for byte = (read-byte) then (read-byte)
 		      collect (mod byte 128)
 		      until (< byte 128)))))
     (list (calculate-n-ary 128 bytes) (length bytes))))

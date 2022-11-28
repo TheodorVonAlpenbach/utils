@@ -24,7 +24,7 @@
   "(0 0 1 2 2 2 3 3) -> ((0 0) (1) (2 2 2) (3 3))"
   (if (null list)
     list
-    (loop with current = (funcall key (first list))
+    (cl-loop with current = (funcall key (first list))
 	  for elt in list
 	  if (funcall test (funcall key elt) current)
 	  collect elt into acc

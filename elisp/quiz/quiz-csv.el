@@ -53,7 +53,7 @@
 (defun quiz-trim-q-item-string (q-item-string)
   "Trims whitespace at both ends of Q-ITEM-STRING. Also removes
 abundant internal whitespace."
-  (string-replace (string-trim q-item-string) "\\s-+" " "))
+  (mb-string-replace (string-trim q-item-string) "\\s-+" " "))
 
 (defun quiz-parse-q (q-string)
   (mapcar* #'quiz-trim-q-item-string (split-string q-string "[QACS][0-9]+: ")))

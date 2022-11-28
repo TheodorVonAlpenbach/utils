@@ -110,7 +110,7 @@
   "Filter STRING according to DICTIONARY."
   (string-case dictionary
     ("mw" (or (not-empty
-	       (string-replace 
+	       (mb-string-replace 
 		(substring-intv string 
 		  (interval-co "^   Main Entry:" "\n\\s-*.*Learn more"))
 		"\n\n" "\n"))
@@ -145,7 +145,7 @@
 	       (substring-intv string 
 		 (interval-co "^   Ordet '.*' er ikkje eit oppslagsord i Nynorskordboka"
 			      "\n\\s-*$")))))
-    ("lsj" (string-replace 
+    ("lsj" (mb-string-replace 
 	    (or (not-empty
 		 (substring-intv string	;normal entry
 		   (interval-oo "^\\s-*Greek Texts.*\\s-*\n"
@@ -160,7 +160,7 @@
 				"\n   Maximum Minimum")))
 		(error "Unknown lynx output in \"ls\"!"))
 	    *lynx-ref-regexp*))
-    ("ls" (string-replace 
+    ("ls" (mb-string-replace 
 	   (or (not-empty
 		(substring-intv string	;normal entry
 		  (interval-oo "^\\s-*Latin Texts.*\\s-*\n"
@@ -183,10 +183,10 @@
 		       (interval-co (concat "\n\\s-*" *lynx-ref-regexp* "Frequency")
 				    "\\(\n\\s-*\n\\|\\s-*\\'\\)"))
 		   (interval-cc "Entry in" "L&S")))
-    ("saob" (substring-intv (string-replace string "http.*cgi\\?")
+    ("saob" (substring-intv (mb-string-replace string "http.*cgi\\?")
 	      (interval-oo "References\n\n" "^.*http.*")))
-    ("acronym" (string-replace 
-		(string-replace
+    ("acronym" (mb-string-replace 
+		(mb-string-replace
 		 (substring-intv string (interval-oo "   Acronym\\s-*meaning\\s-*\n\\s-*" 
 						     "\\(If you don't find it here\\)\\|\\(\\s-*\\[.*\\]Next page\\)"))
 		 "^.*direct link\\s-*")
@@ -299,7 +299,7 @@ ripe for macro."
   (interactive (dic-proxy-completion
 		(concat "Delete from " *dic-current* ": ") *dic-current*))
   (setq *dic-db* 
-	(delete-if #'(lambda (x) 
+	(cl-delete-if #'(lambda (x) 
 		       (and (string= (first x) (downcase word)) 
 			    (string= (second x) *dic-current*)))
 		   *dic-db*)))

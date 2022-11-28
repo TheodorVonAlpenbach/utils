@@ -33,7 +33,7 @@ For example:
     (mb-swap-ert-defun)))
 
 (defun regexp-swap (file-regexp)
-  (destructuring-bind (regexp num) file-regexp
+  (cl-destructuring-bind (regexp num) file-regexp
     (awhen (string-match* regexp (buffer-string-no-properties) :num 1)
       (find-file it))))
 
@@ -79,7 +79,7 @@ For example:
 	 (match-current-buffer-p (car expr)))))
 
 (cl-defun smart-swap-find-target (&optional (swaps *smart-swaps*))
-  (loop for (from to) in swaps
+  (cl-loop for (from to) in swaps
 	when (or (when (match-current-buffer-p from) (swap-target to))
 		 (when (match-current-buffer-p to) (swap-target from)))
      return it))
@@ -96,7 +96,7 @@ For example:
 
 (cl-defun simple-swap (&optional (swaps *simple-swaps*))
   (interactive)
-  (loop for (f1 f2 d) in swaps
+  (cl-loop for (f1 f2 d) in swaps
 	thereis (simple-swap-1 f1 f2 d)))
 ;;(simple-swap)
 

@@ -26,8 +26,8 @@
   "Convenient grep according to file type."
   (save-excursion
     (when (stringp target)
-      (let ((globs (loop for x in (listify types) collect
-			 (format "/%s%s" (if (eql (char x 0) ?.) "" "*") x))))
+      (let ((globs (cl-loop for x in (listify types) collect
+			    (format "/%s%s" (if (eql (char x 0) ?.) "" "*") x))))
 	(compilation-start
 	 (format "grep -nHs -E '%s' %s"
 	   (substring-no-properties target)
@@ -122,10 +122,10 @@ nil      ./ and all its subdirectories
 	(if (minusp prefix)
 	  (if (> prefix -10)
 	    (setf up 0 maxdepth (abs prefix))
-	    (multiple-value-setq (maxdepth up) (cl-floor (abs prefix) 10)))
+	    (cl-multiple-value-setq (maxdepth up) (cl-floor (abs prefix) 10)))
 	  (if (< prefix 10)
 	    (setf up prefix maxdepth nil)
-	    (multiple-value-setq (up maxdepth) (cl-floor prefix 10))))
+	    (cl-multiple-value-setq (up maxdepth) (cl-floor prefix 10))))
 	(mb-grep-dirs-1 up maxdepth dir)))))
 ;;(mb-grep-dirs 1)
 
@@ -139,7 +139,7 @@ nil      ./ and all its subdirectories
 (cl-defun mb-grep ()
   "Convenient grep according to file type."
   (interactive)
-  (case major-mode
+  (cl-case major-mode
     (emacs-lisp-mode (mb-elisp-grep))
     (mbscilab-mode (mb-scilab-grep))
     (t (mb-gen-grep))))

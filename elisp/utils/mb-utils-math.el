@@ -30,7 +30,7 @@ The return value is the incremented value of PLACE."
 (defun modb (x n base)
   (+ (cl-mod (- x base) n) base))
 ;;(abs (modb 6 (* 2 pi) (- pi)))
-;;(loop for i from -4 to 4 collect (modb i 4 -2))
+;;(cl-loop for i from -4 to 4 collect (modb i 4 -2))
 
 (defun floor-to (arg divisor)
   (* divisor (first (cl-floor arg divisor))))
@@ -75,7 +75,7 @@ See `sum' for a descriptions of the keywords."
   "Return the cumulative sum of LIST.
 Optional argument KEY specifies the operator and INITIAL-VALUE
 the start value for the cumulation."
-  (loop for x in list collect (setf initial-value (funcall key initial-value x))))
+  (cl-loop for x in list collect (setf initial-value (funcall key initial-value x))))
 ;;(cumsum-list (0-n 3))
 
 (cl-defun cumsum (sequence &key (key #'+) (initial-value 0))
@@ -107,7 +107,7 @@ converting to float if the product is large for an integer."
 ;;(product-safe (make-list 19 10))
 
 (cl-defun product* (sequence &key (method :auto) (initial-value 1))
-  (case method
+  (cl-case method
     (:auto (product-safe sequence :initial-value initial-value))
     (:float (product sequence :key #'float :initial-value initial-value))
     (:integer (product sequence :initial-value initial-value))
@@ -240,30 +240,30 @@ http://www.matematikk.org/pub/mattetekst/Persnr/."
 (cl-defun make-distributed-list (m n &optional (symbol-a '1) (symbol-b '0))
   "Returns a list where there are M occurrences of SYMBOL-A and N-M
 occurrences of SYMBOL-B and the symbols are evenly distributed." 
-  (loop with denominator = 0
-	for i below n
-	for numerator = (* i m)
-	if (>= numerator denominator)
-	collect symbol-a and
-	do (incf denominator n)
-	else
-	collect symbol-b))
+  (cl-loop with denominator = 0
+	   for i below n
+	   for numerator = (* i m)
+	   if (>= numerator denominator)
+	   collect symbol-a and
+	   do (cl-incf denominator n)
+	   else
+	   collect symbol-b))
 ;;(make-distributed-list 2 7) ==> '(1 0 0 0 1 0 0)
 ;;(make-distributed-list 3 7) ==> '(1 0 0 1 0 0 1 0)
 
 (defun merge-2-lists (list1 list2)
   "Merges contents of LIST1 and LIST2 and in an optimally distributed
 way."
-  (loop with denominator = 0
-	with m = (length list1)
-	with n = (+ m (length list2 ))
-	for i below n
-	for numerator = (* i m)
-	if (>= numerator denominator)
-	collect (pop list1) and
-	do (incf denominator n)
-	else
-	collect (pop list2)))
+  (cl-loop with denominator = 0
+	   with m = (length list1)
+	   with n = (+ m (length list2 ))
+	   for i below n
+	   for numerator = (* i m)
+	   if (>= numerator denominator)
+	   collect (pop list1) and
+	   do (cl-incf denominator n)
+	   else
+	   collect (pop list2)))
 ;;(merge-2-lists '(1 1 1) '(0 0))
 
 (defun merge-n-lists-sorted-by-length (lists)
@@ -283,9 +283,9 @@ way. Assumes that LISTS is sorted by the length of its elements (lists)."
 
 (cl-defun extract (x list &key (test #'eq) (key #'identity))
   "Same as remove, but returns the extracted elements while LIST is altered"
-  (let ((rest (loop for elt in list
-		    if (funcall test (funcall key elt) (funcall key x))
-		    collect elt)))
+  (let ((rest (cl-loop for elt in list
+		       if (funcall test (funcall key elt) (funcall key x))
+		       collect elt)))
     (setf list (delete* x list :test test :key key))
     rest))
 ;;(let ((list '(a b c d a))) (list (extract 'a list) list))
@@ -310,12 +310,12 @@ x.)"
   "Returns a partition of set LIST corresponding to the
 equivalence relation TEST on LIST."
   (let ((ht (make-hash-table :test test)))
-    (loop with rlist = (reverse list) ; to preserve order inside classes
-	  for x in rlist
-	  for kx in (if key (mapcar key rlist) rlist)
-	  do (pushhash kx x ht))
-    (loop for k being the hash-keys of ht using (hash-values v)
-	  collect v)))
+    (cl-loop with rlist = (reverse list) ; to preserve order inside classes
+	     for x in rlist
+	     for kx in (if key (mapcar key rlist) rlist)
+	     do (pushhash kx x ht))
+    (cl-loop for k being the hash-keys of ht using (hash-values v)
+	     collect v)))
 ;;(npartition (0-n 10) :key (bind #'mod 3))
 
 (cl-defun partition (sequence &rest args)
@@ -356,21 +356,21 @@ the rotation degree."
 (cl-defun cycle-rotate-until (cycle test &optional (max-number-of-rotations (length cycle)))
   "Returns a rotated copy of CYCLE. Optional argument N specifies
 the rotation degree."
-  (loop for i below max-number-of-rotations
-	for rot = cycle then (cycle-rotate rot)
-	if (funcall test rot) return rot))
+  (cl-loop for i below max-number-of-rotations
+	   for rot = cycle then (cycle-rotate rot)
+	   if (funcall test rot) return rot))
 ;;(cycle-rotate-until '(a b a a a) #'(lambda (x) (funcall 'neq (first x) (last-elt x))))
 
 (defun cycle-rotations (cycle)
-  (loop for x in cycle
-	for rot = cycle then (cycle-rotate rot)
-	collect rot))
+  (cl-loop for x in cycle
+	   for rot = cycle then (cycle-rotate rot)
+	   collect rot))
 ;;(cycle-rotations '(a a b b a b a))
 
 (defun maprot (function &rest cycles)
-  (loop for i below (apply #'max (mapcar #'length cycles))
-	for args = cycles then (mapcar #'cycle-rotate args)
-	collect (apply function args)))
+  (cl-loop for i below (apply #'max (mapcar #'length cycles))
+	   for args = cycles then (mapcar #'cycle-rotate args)
+	   collect (apply function args)))
 ;;(maprot #'list '(1 2 3) '(1 2)) => (((1 2 3) (1 2)) ((2 3 1) (2 1)) ((2 3 1) (2 1)))
 
 (cl-defun cycle-grouped-normal-form (list &optional (test #'eq))
@@ -416,23 +416,23 @@ the rotation degree."
   "Calculate how well the elements of CYCLE is distributed,
 assuming the number of non-EQ elements is 2"
   (lexical-let ((test test))
-    (loop for elt in (remove-duplicates cycle)
-	  for badness = (2cycle-badness cycle #'(lambda (x y) 
-						  (xnor (funcall test elt x) 
-							(funcall test elt y))))
-	  sum badness)))
+    (cl-loop for elt in (remove-duplicates cycle)
+	     for badness = (2cycle-badness cycle #'(lambda (x y) 
+						     (xnor (funcall test elt x) 
+							   (funcall test elt y))))
+	     sum badness)))
 ;;(cycle-badness '(a b c a b c b a c a b c))
 
 (cl-defun cycle-best (cycles &optional (test #'eq))
   "Calculate the best distribution of the elements in CYCLE.
 See `cycle-badness' for the measure of a good cycle."
-  (loop with min-cycle = (first cycles)
-	with min = (cycle-badness min-cycle test)
-	for c in cycles
-	for badness = min then (cycle-badness c test)
-	if (zerop badness) return c
-	if (< badness min) do (setf min badness min-cycle c)
-	finally return min-cycle))
+  (cl-loop with min-cycle = (first cycles)
+	   with min = (cycle-badness min-cycle test)
+	   for c in cycles
+	   for badness = min then (cycle-badness c test)
+	   if (zerop badness) return c
+	   if (< badness min) do (setf min badness min-cycle c)
+	   finally return min-cycle))
 ;;(cycle-best '((a a b b) (a b a b)))
 
 (cl-defun distribute-rest (list prefix-cycle &optional (test #'eq))
@@ -473,7 +473,7 @@ See `cycle-badness' for the measure of a good cycle."
 ;;; div
 (defun is-divisible (n m)
   (zerop (mod n m)))
-;(mapcar #'(lambda (n) (is-divisible n 5)) (loop for i below 11 collect i))
+;(mapcar #'(lambda (n) (is-divisible n 5)) (cl-loop for i below 11 collect i))
 
 (require 'mb-utils-10000-first-primes)
 (defun primep (n)
@@ -495,7 +495,7 @@ See `cycle-badness' for the measure of a good cycle."
     (when (> n 1)
       (push n factors))
     factors))
-;;(mapcar #'factorize (loop for i from 2 to 100 collect i))
+;;(mapcar #'factorize (cl-loop for i from 2 to 100 collect i))
 ;;(mapcar #'factorize '(324 180))
 ;;(/ 180 36)
 ;;(apply #'* (factorize 1047300))
@@ -508,27 +508,27 @@ See `cycle-badness' for the measure of a good cycle."
 
 (cl-defun test-factorize (n)
   "Tests factorize for first N integers"
-  (loop for i from 2 to n
-	if (not (= i (apply #'* (factorize i))))
-	do (error "FACTORIZE failed for argument %d" i)))
+  (cl-loop for i from 2 to n
+	   if (not (= i (apply #'* (factorize i))))
+	   do (error "FACTORIZE failed for argument %d" i)))
 					;(test-factorize 10000)
 
 (defun expand-factor (exponents primes)
-  (product (loop for p in primes
-		 for e in exponents
-		 collect (expt p e))))
+  (product (cl-loop for p in primes
+		    for e in exponents
+		    collect (expt p e))))
 ;;(expand-factor '(1 2) '(3 2))
 
 (defun expand-factors (factors primes)
-  (loop for f in factors collect (expand-factor f primes)))
+  (cl-loop for f in factors collect (expand-factor f primes)))
 ;;(expand-factors '((1 2) (0 0)) '(3 2))
 
 ;;; Number conversions
 (defun calculate-n-ary (root coefficients)
   "COEFFICIENTS is a list of integers a0, a1, a2... where ai < ROOT"
-  (loop for coefficient in coefficients
-	for i from 0
-	sum (* (expt root i) coefficient)))
+  (cl-loop for coefficient in coefficients
+	   for i from 0
+	   sum (* (expt root i) coefficient)))
 ;;(calculate-n-ary 128 (list 0 0 64))
 
 (cl-defun int-to-hex (n &optional (length nil))
@@ -554,7 +554,7 @@ See `cycle-badness' for the measure of a good cycle."
 (cl-defun uint-length-1 (n &optional (base 10))
   "Return the number of digits in N in the BASE-number system.
 BASE is 10 by default."
-  (assert (not (minusp n)))
+  (cl-assert (not (minusp n)))
   (ceiling (log (1+ n) base)))
 
 (cl-defun uint-length (n &optional (base 10))
@@ -565,7 +565,7 @@ but you can change this with the optional argument BASE.
 Also, N can be list of non-negative integers. In this case, the
 function returns the greatest digit length of elements in N."
   (if (listp n)
-    (loop for i in n maximize (uint-length i base))
+    (cl-loop for i in n maximize (uint-length i base))
     (uint-length-1 n base)))
 ;;(uint-length (0-n 111))
 
@@ -576,11 +576,11 @@ arbitrary number base with optional argument BASE. The function
 returns by default a minimum number of digits. With the optional
 MIN-LENGTH you can force another length. The result is then
 prefixed by zeros."
-  (let ((res (loop for i in (nreverse (0-n min-length))
-		   collect (cl-mod (/ n (expt base i)) base))))
+  (let ((res (cl-loop for i in (nreverse (0-n min-length))
+		      collect (cl-mod (/ n (expt base i)) base))))
     (append (make-list (- min-length (length res)) 0)
 	    res)))
-;;(loop for i in (a-b 99 101) collect (uint-to-n-base i))
+;;(cl-loop for i in (a-b 99 101) collect (uint-to-n-base i))
 
 (defun bin-to-int-array (binary-string)
   (mapcar #'string-to-int (split-string binary-string "" t)))
@@ -619,9 +619,9 @@ NUMBER-OF-BYTES is reached."
 	   (number-of-total-bytes (ceiling (/ number-of-total-bits number-of-bits)))
 	   (mask (1- (expt 2 number-of-bits)))
 	   (bytes (reverse
-		   (loop for i below number-of-total-bytes
-			 for integer-i = (lsh integer (- (* i number-of-bits)))
-			 collect (logand integer-i mask)))))
+		   (cl-loop for i below number-of-total-bytes
+			    for integer-i = (lsh integer (- (* i number-of-bits)))
+			    collect (logand integer-i mask)))))
       
       (if number-of-bytes
 	(if (> (length bytes) number-of-bytes)
@@ -639,7 +639,7 @@ NUMBER-OF-BYTES is reached."
 
 (cl-defun bytes-to-int (bytes &key (byte-size 8) (endianness :big))
   "Calculates the integer represented by BYTES of bit length BYTE-SIZE."
-  (calculate-n-ary (expt 2 8) (case endianness
+  (calculate-n-ary (expt 2 8) (cl-case endianness
 				((:big) (nreverse bytes))
 				((:little) bytes)
 				(t (error "%s is not a correct :ENDIANNESS value" :endianness)))))
@@ -651,8 +651,8 @@ NUMBER-OF-BYTES is reached."
 See http://en.wikipedia.org/wiki/Variable-length_quantity for a
 definition."
   (let ((7-bit-bytes (int-to-n-bit-bytes integer 7)))
-    (loop for i below (1- (length 7-bit-bytes)) 
-	  do (setf (nth i 7-bit-bytes) (logior (nth i 7-bit-bytes) #x80)))
+    (cl-loop for i below (1- (length 7-bit-bytes)) 
+	     do (setf (nth i 7-bit-bytes) (logior (nth i 7-bit-bytes) #x80)))
     7-bit-bytes))
 ;;(int-to-variable-length-quantity #x0FFFFFFF)
 ;;(int-to-variable-length-quantity 0)
@@ -693,7 +693,7 @@ behavior when the argument is not an integer"
 	(if inverse
 	  (if (minusp x) (+ x 2^n) x)
 	  (if (> x 2^n-1) (- x 2^n) x))
-	(case with-non-integer
+	(cl-case with-non-integer
 	  (:error (error "Argument %S is not an integer" x))
 	  (:leave x)
 	  (:discard nil))))))
@@ -718,7 +718,7 @@ behavior when the argument is not an integer"
   (/ (- (coerce (random) 'float) most-negative-fixnum)
      (- (coerce most-positive-fixnum 'float)
 	(coerce most-negative-fixnum 'float))))
-;;(loop for i below 100000 count (< (random-float-base) .1)) should -> .1
+;;(cl-loop for i below 100000 count (< (random-float-base) .1)) should -> .1
 
 (cl-defun random-float (&optional (a 0.0) (b 1.0) seed)
   "Return a random number in [a b]."
@@ -730,13 +730,13 @@ behavior when the argument is not an integer"
   (when seed (random t))
   (+ (random (1+ (- b a))) 
      a))
-;;(loop for i below 100000 count (= (random-integer 1 3) 3))
+;;(cl-loop for i below 100000 count (= (random-integer 1 3) 3))
 
 (cl-defun random-unique-integers-n (n m &optional seed)
   "Return a list of N unique random numbers in [0 M>."
-  (assert (<= n m))
+  (cl-assert (<= n m))
   (when seed (random t))
-  (loop with list = (0-n m) repeat n collect (draw-random list)))
+  (cl-loop with list = (0-n m) repeat n collect (draw-random list)))
 ;;(random-unique-integers-n 5 5)
 
 (cl-defun random-unique-integers (n &optional (a 0) (b 1) seed)
@@ -747,7 +747,7 @@ behavior when the argument is not an integer"
 (cl-defun random-integers (n &optional (a 0) (b 1) seed)
   "Return a list of N random numbers in [a b]."
   (when seed (random t))
-  (loop repeat n collect (random-integer a b)))
+  (cl-loop repeat n collect (random-integer a b)))
 ;;(random-integers 10 1 3 t)
 
 (cl-defun random* (&optional (a 0) (b 1) (integerp nil) seed)
@@ -781,7 +781,7 @@ value in the specified interval. Else, it will be an integer."
 
 (cl-defun random-log-parameters (&optional (h 1) (m 0.1))
   ""
-  (assert (< 0 m h))
+  (cl-assert (< 0 m h))
   (let* ((d (- (/ m h)))
 	 (x (apply #'max (quadratic-root (1+ d) 1 d)))
 	 (k (* 2 (log x)))
@@ -802,7 +802,7 @@ value in the specified interval. Else, it will be an integer."
 
 
 ;;(random-weighted-element '((a 1) (b 5) (c 10)) t)
-;;(accumulate-list (loop repeat 100 collect (random-weighted-element '((a 1) (b 5) (c 10)))) #'symbol<)
+;;(accumulate-list (cl-loop repeat 100 collect (random-weighted-element '((a 1) (b 5) (c 10)))) #'symbol<)
 
 (defun interval-floor (n interval)
   (* (floor n interval) interval))
@@ -811,7 +811,7 @@ value in the specified interval. Else, it will be an integer."
 ;;pool utils
 (defun fractional-ball-angle (fraction &optional with-object-ball-throw-correction)
   "Optional argument WITH-OBJECT-BALL-THROW-CORRECTION is not implemented"
-  (assert (between= fraction 0 1))
+  (cl-assert (between= fraction 0 1))
   (radians-to-degrees (asin (- 1 fraction))))
 ;;(fractional-ball-angle .5)
 
@@ -844,7 +844,7 @@ http://en.wikipedia.org/wiki/Geographical_distance#Lambert.27s_formulae"
   "Returns a LIST of K numbers that adds to N, and so that the
 numbers are `almost' equal (ie. (- (max LIST) (min LIST)) is
 either 0 or 1)"
-  (destructuring-bind (q r) (cl-floor n k)
+  (cl-destructuring-bind (q r) (cl-floor n k)
     (append (make-list r (1+ q))
 	    (make-list (- k r) q))))
 ;;(generate-addends-fixed 271 3)
@@ -852,8 +852,8 @@ either 0 or 1)"
 (cl-defun generate-addends (n)
   (if (zerop n)
     (list nil)		    ; resulting list consists of the empty set
-    (loop for i below n
-	  append (mapcar (bind #'cons (- n i) 1) (generate-addends i)))))
+    (cl-loop for i below n
+	     append (mapcar (bind #'cons (- n i) 1) (generate-addends i)))))
 ;;(generate-addends 4) => ((4) (3 1) (2 2) (2 1 1) (1 3) (1 2 1) (1 1 2) (1 1 1 1))
 
 (cl-defun aggregate (numbers &optional (init 0))
@@ -909,9 +909,9 @@ either 0 or 1)"
 
 (defun obligation-value (x yield years market-interest)
   (+ (naaverdi-annual x market-interest years)
-     (loop with premium = (* x yield)
-	   for i below years
-	   sum (naaverdi-annual premium market-interest i))))
+     (cl-loop with premium = (* x yield)
+	      for i below years
+	      sum (naaverdi-annual premium market-interest i))))
 ;;(obligation-value 1000 .06 5 0.04)
 
 ;; swimming!
@@ -954,8 +954,8 @@ either 0 or 1)"
 ;;(mapcar #'days-in-year '(1600 1700 1800 1900 2000 2001 2002 2003 2004))
 
 (defun days-between-years (year1 year2)
-  (loop for y from year1 below year2 
-	sum (days-in-year y)))
+  (cl-loop for y from year1 below year2 
+	   sum (days-in-year y)))
 ;;(days-between-years 1970 1971)
 
 (defun current-year () (sixth (decode-time)))
@@ -1023,22 +1023,22 @@ The point is represented as a pair (X0 X1)."
 
 (cl-defun nth-digit (number k &optional (base 10))
   "Returns the Kth digit of NUMBER. The return value is an integer symbol"
-  (assert (< k (log number base)))
+  (cl-assert (< k (log number base)))
   (floor (mod number (expt base (1+ k)))
 	 (expt base k)))
 ;;(nth-digit 123 2)
 
 (cl-defun digit-sum-1 (n &optional (base 10))
   "Inner sum function for `digit-sum'" 
-  (loop for i below (log n base)
+  (cl-loop for i below (log n base)
 	sum (nth-digit n i base)))
 
 (cl-defun digit-sum (n &optional (base 10))
   "Returns the decimal digit sum of integer N" 
-  (loop for n* = n then res
-	for res = (digit-sum-1 n* base) 
-	until (< res base)
-	finally return res))
+  (cl-loop for n* = n then res
+	   for res = (digit-sum-1 n* base) 
+	   until (< res base)
+	   finally return res))
 ;;(digit-sum 123 2)
 
 (defun tall-navn (n &optional intetkjønn-p)
@@ -1092,7 +1092,7 @@ quotients by the gcd: (%d, %d)"
 (cl-defun floor-test1 (k &optional (max-m k))
   "Tests that F(mlog3) = F(m(F(klog3))/k), for all m and k"
   (let ((log3 (log 3 2)))
-    (loop for m to max-m
+    (cl-loop for m to max-m
 	  for a = (floor (* m log3))
 	  for b = (floor (/ (* m (floor (* k log3))) k))
 	  always (= a b))))
@@ -1100,12 +1100,12 @@ quotients by the gcd: (%d, %d)"
 (cl-defun floor-test (k &optional (max-m k))
   "Tests that F(mlog3) = F(m(F(klog3))/k), for all m and k"
   (let ((log3 (log 3 2)))
-    (loop for m to max-m
-	  for a = (floor (* m k log3))
-	  for b = (* m (floor (* k log3)))
-	  always (= a b))))
+    (cl-loop for m to max-m
+	     for a = (floor (* m k log3))
+	     for b = (* m (floor (* k log3)))
+	     always (= a b))))
 ;;(mapcar #'floor-test (a-b 20 30))
-;;(loop for i below 1000 if (floor-test i) collect i)(0 1 2 7 12 24 53 106 359 665)
+;;(cl-loop for i below 1000 if (floor-test i) collect i)(0 1 2 7 12 24 53 106 359 665)
 ;;(mapcar #'floor-test (list 7 12 24 36 48 63))
 ;;(list (log 3 2) (/ 11 7.0))
 
@@ -1113,24 +1113,24 @@ quotients by the gcd: (%d, %d)"
 ;;(fractional 3.4)
 
 (defun test-fractional (k) (< (fractional (* k (log 3 2))) (/ 1.0 k)))
-;;(loop for i from 1 below 1000 if (test i) collect (list i (l-value i) (gcd i (l-value i))))
+;;(cl-loop for i from 1 below 1000 if (test i) collect (list i (l-value i) (gcd i (l-value i))))
 
 (cl-defun floor-test2 (max-k m)
   "Tests that F(mlog3) = F(m(F(klog3))/k), for all m and k"
   (let ((log3 (log 3 2)))
-    (loop for k from 1 to max-k collect
-	  (list k
-		(floor (* m log3))
-		(floor (/ (* m (floor (* k log3))) k))))))
+    (cl-loop for k from 1 to max-k collect
+	     (list k
+		   (floor (* m log3))
+		   (floor (/ (* m (floor (* k log3))) k))))))
 ;;(floor-test2 7 1)
 ;;(floor (* 28 (log 3 2)))
 ;;(list (log 3 2) (/ 11 7.0))
-;;(loop for i to 5 collect (floor (* i (log 3 2))))
-;;(loop for i below 30 collect  (list i (floor (* i (log 3 2)))))
+;;(cl-loop for i to 5 collect (floor (* i (log 3 2))))
+;;(cl-loop for i below 30 collect  (list i (floor (* i (log 3 2)))))
 
 (defun l-value (k) (floor (* k (log 3 2))))
 ;;(mapcar #'l-value (a-b 1 12))
-;;(loop for k from 1 to 12 collect (* (float k) (fractional (* k (log 3 2)))))
+;;(cl-loop for k from 1 to 12 collect (* (float k) (fractional (* k (log 3 2)))))
 
 (cl-defun l-value-test (s &optional (k 12))
   (let ((l (l-value k))
@@ -1140,12 +1140,12 @@ quotients by the gcd: (%d, %d)"
 	  (mod (* l-inverse s) k)
 	  (* l (mod (* l-inverse s) k))
 	  (first (cl-floor (* l (mod (* l-inverse s) k)) k)))))
-;;(loop for s below 10 collect (test3 s))
+;;(cl-loop for s below 10 collect (test3 s))
 
 (defun factors (n)
-  (loop for i from 1 to (/ n 2)
-	if (zerop (mod n i))
-	collect i))
+  (cl-loop for i from 1 to (/ n 2)
+	   if (zerop (mod n i))
+	   collect i))
 ;;(factors 10)
 
 (defun perfect-number-p (n)
@@ -1153,8 +1153,8 @@ quotients by the gcd: (%d, %d)"
 ;;(perfect-number-p 28)
 
 (cl-defun perfect-numbers (&optional (n 10000))
-  (loop for i from 2 to n
-	if (perfect-number-p i) collect i))
+  (cl-loop for i from 2 to n
+	   if (perfect-number-p i) collect i))
 ;;(perfect-numbers 10000)
 
 (defun integer-ceiling (p q)
@@ -1166,28 +1166,28 @@ p) q)))"
 
 (cl-defun test-integer-ceiling (n &optional (max-integer 1000000))
   "Test `integer-ceiling'"
-  (loop repeat n
-	for (p q) = (random-integers 2 1 max-integer)
-	if (/= (coerce (ceiling (/ (float p) q)) 'integer)
-	       (integer-ceiling p q))
-	collect (list p q)))
+  (cl-loop repeat n
+	   for (p q) = (random-integers 2 1 max-integer)
+	   if (/= (coerce (ceiling (/ (float p) q)) 'integer)
+		  (integer-ceiling p q))
+	   collect (list p q)))
 ;;(test-integer-ceiling 100000)
 
 (cl-defun test-another-integer-operation (n &optional (max-integer 1000000))
-  (loop repeat n
-	for (p q r) = (random-integers 3 1 max-integer)
-	for res1 = (coerce (floor (- (float r) (/ (float p) q))) 'integer)
-	for res2 = (- r (integer-ceiling p q))
-	if (/= res1 res2) collect (list r p q res1 res2)))
+  (cl-loop repeat n
+	   for (p q r) = (random-integers 3 1 max-integer)
+	   for res1 = (coerce (floor (- (float r) (/ (float p) q))) 'integer)
+	   for res2 = (- r (integer-ceiling p q))
+	   if (/= res1 res2) collect (list r p q res1 res2)))
 ;;(test-another-integer-operation 1000000)
 
 (provide 'mb-utils-math)
 
 (defun problem (n)
-  (/ (loop with primes = (subseq 10000-first-primes 0 15)
-	   repeat n
-	   for s = (+ (random-integer 1 50) (random-integer 1 50))
-	   count (and (find s primes) (< s 50)))
+  (/ (cl-loop with primes = (subseq 10000-first-primes 0 15)
+	      repeat n
+	      for s = (+ (random-integer 1 50) (random-integer 1 50))
+	      count (and (find s primes) (< s 50)))
      (float n)))
 ;;(* (problem 1000000) (/ 2500 313.0))
 
@@ -1199,14 +1199,14 @@ instead returns nil.
 TODO: move this to some yamal elisp module."
   (cl-flet ((fn (f eps m) (- (log (+ f eps) 2) (* m (log 3.0 2))))
 	    (fz (n m) (expt 2 (+ n (* m (log 3.0 2))))))
-    (loop for m from 73 below max-m
-	  for n-min = (ceiling (fn f (- eps) m))
-	  for n-max = (floor (fn f eps m))
-	  for n-best = (if (< (abs n-min) (abs n-max)) n-min n-max)
-	  unless (< n-max n-min) return (list n-min n-max m (fz n-min m))
-	  for nn-min = (ceiling (fn f (- eps) (- m)))
-	  for nn-max = (floor (fn f eps (- m)))
-	  unless (< nn-max nn-min) return (list nn-min (- m) (fz nn-min (- m))))))
+    (cl-loop for m from 73 below max-m
+	     for n-min = (ceiling (fn f (- eps) m))
+	     for n-max = (floor (fn f eps m))
+	     for n-best = (if (< (abs n-min) (abs n-max)) n-min n-max)
+	     unless (< n-max n-min) return (list n-min n-max m (fz n-min m))
+	     for nn-min = (ceiling (fn f (- eps) (- m)))
+	     for nn-max = (floor (fn f eps (- m)))
+	     unless (< nn-max nn-min) return (list nn-min (- m) (fz nn-min (- m))))))
 ;;(approximate-frequency (* 100 pi) 1)
 
 (cl-defun volume-ellipsoid (r1 &optional (r2 r1) (r3 r2))

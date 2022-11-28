@@ -43,7 +43,7 @@ indeed in Solr."
   (unless (stringp s) (error "lab-time-to-solr-time: Argument S is nil!"))
   (let ((isopart (string-match* *iso-dttm* s)))
     (if isopart
-      (string-replace s isopart (solr-time (parse-time isopart) open-p left-p))
+      (mb-string-replace s isopart (solr-time (parse-time isopart) open-p left-p))
       s)))
 
 (defun lab-open-p (p)

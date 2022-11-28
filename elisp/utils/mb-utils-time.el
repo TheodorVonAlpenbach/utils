@@ -213,7 +213,7 @@ Keywords supported: :year :month :week :day :hour :minute :second
   "Create a regular expression matching a date ending with ZONE's code.
 ZONE is a pair (ZONE-CODE . UTC-OFFSET). The result is on the form
 \(ZONE-CODE UTC-OFFSET ZONE-REGEXP\)."
-  (destructuring-bind (zone-code . zone-offset) zone
+  (cl-destructuring-bind (zone-code . zone-offset) zone
       (list zone-code zone-offset (format "\\(%s\\)$" zone-code))))
 
 (require 'timezone)
@@ -226,12 +226,12 @@ ZONE is a pair (ZONE-CODE . UTC-OFFSET). The result is on the form
 	    timezone-world-timezones)))
 
 (defun clean-time-zone-suffix (string)
-  (or (loop for (code offset regexp) in *mb-time-zones*
+  (or (cl-loop for (code offset regexp) in *mb-time-zones*
 	    if (string-match regexp string)
 	    return (concat (substring string 0 (- (length code)))
 			   (format "%+05d" offset)))
       (awhen (string-match* (iso-time-zone-regexp) string :num '(0 1 2 3))
-	(destructuring-bind (all sign h m) it
+	(cl-destructuring-bind (all sign h m) it
 	  (format "%s%s%s%s"
 	    (substring string 0 (- (length all)))
 	    sign h (or m "00"))))
@@ -264,7 +264,7 @@ ZONE is a pair (ZONE-CODE . UTC-OFFSET). The result is on the form
 (defun parse-time (time-designator)
   "Returns a new time object equal to TIME-DESIGNATOR.
 Argument may be a time objects itself or a string."
-  (typecase time-designator
+  (cl-typecase time-designator
     (cons (if (= (length time-designator) 9)
 	    (--time-encode time-designator)
 	    (copy-time time-designator)))
@@ -352,7 +352,7 @@ return result in UTC. This only affects the parts :HOUR and
 :MINUTE."
   (string-to-number
    (format-time-string
-    (case part
+    (cl-case part
       (:year "%Y") (:month "%m") (:day "%d")
       (:hour "%H") (:minute "%M") (:second "%S"))
     etime universal-p)))
@@ -372,8 +372,8 @@ implementation.)"
 		  etime-part)))
     (message "%d" diff)
     (when (and (zerop diff) (plusp quantity))
-      (incf diff quantity))
-    (case part
+      (cl-incf diff quantity))
+    (cl-case part
       (:year (yearstart (add-etime-date etime part diff)))
       (:hour (hourstart (add-etime-time etime part diff)))
       (:minute (minutestart (add-etime-time etime part diff)))
@@ -388,7 +388,7 @@ is positive or negative. For furhter information on PART and
 UNIVERSAL-P, see `etime-part'.
 
 Note that PARTs :MONTH and :DAY are currently not supported."
-  (assert (not (minusp n)) t "N cannot be negative")
+  (cl-assert (not (minusp n)) t "N cannot be negative")
   (if (zerop n)
     etime
     (add-etime-time
@@ -531,7 +531,7 @@ day of the week."
 	       (w (* 7 d)) (mo (* 30 d)) (y (* 365.24 d)))
 
   (defun unit-factor (unit)
-    (case unit
+    (cl-case unit
       (:second s) (:minute m) (:hour h) (:day d) (:week w)
       (:month mo) (:year y) (:olympiad (* 4 y)) 
       (:decennium (* 10 y)) (:century (* 100 y))
@@ -648,7 +648,7 @@ minute ... ) format, but in that same format as is returned by
 				  (first current-time1)))
 	     (- (second current-time2) (second current-time1))))
      (/ (- (third current-time2) (third current-time1)) 1000)))
-;;(let ((x (current-time))) (loop for i below (expt 10 6)) (diff-current-time-msec x (current-time)))
+;;(let ((x (current-time))) (cl-loop for i below (expt 10 6)) (diff-current-time-msec x (current-time)))
 
 ;;;; Elapsed time
 (defvar *mb-time-reference* 0
@@ -690,7 +690,7 @@ EXPRESSION and VALUE is the corresponding evaluation value."
 (cl-defun american-date-regexp (&optional (short-form nil))
   "Year matches named regexp 1, month 2, day 3"
   (let* ((y +iso-year-regexp+)
-	(m (concat* (loop for i in (0-n 12)
+	(m (concat* (cl-loop for i in (0-n 12)
 			  collect (month-name i :en short-form))
 		    :in "\\|"))
 	(d (regexp-opt (mapcar #'number-to-string (1-n 31))))
@@ -704,7 +704,7 @@ EXPRESSION and VALUE is the corresponding evaluation value."
   "This is not quite right yet. It only converts the date to iso"
   (if (empty-string-p s)
     s
-    (multiple-value-bind (y m d)
+    (cl-multiple-value-bind (y m d)
 	(string-match* (american-date-regexp) s :num '(1 2 3))
       (format "%04d-%02d-%02d"
 	(string-to-number y)
@@ -772,7 +772,7 @@ This function is mainly a helper for `week-number'"
   "Calculates the time difference in :WEEK units between week
 designators WEEK-DESIGNATOR1 and WEEK-DESIGNATOR2. See
 `parse-week' for definition of week designator."
- (destructuring-bind ((y1 w1) (y2 w2))
+ (cl-destructuring-bind ((y1 w1) (y2 w2))
       (list (parse-week week-designator1) (parse-week week-designator2))
     (round (+ (time- (first-week-start y1) (first-week-start y2) :unit :week)
 	      (- w1 w2)))))

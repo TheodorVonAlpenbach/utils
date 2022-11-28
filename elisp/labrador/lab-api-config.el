@@ -23,7 +23,7 @@
   "If expression contains a substring that equals some LHS in
 `lac-definitions' is is substituted with the corresponding RHS."
   (loop for x in definitions do
-	(setf expression (string-replace expression (first x) (second x))))
+	(setf expression (mb-string-replace expression (first x) (second x))))
   expression)
  
 (defun lac-definition-from-line (line &optional definitions)

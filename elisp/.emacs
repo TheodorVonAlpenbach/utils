@@ -17,6 +17,11 @@
 (show-paren-mode 1) ;shows matching parenthesis
 (transient-mark-mode 1)
 
+;; Otherwise packages like slime might shadow the built in cl library
+;; by pushing directories with cl library compatability packages to
+;; load-path:
+(require 'cl)
+
 ;;; MB setups
 (defun emacs-os ()
   (cond ((string-match "linux" (version)) :linux)
@@ -29,13 +34,8 @@
   (eql (emacs-os) :cygwin))
 ;;(cygwin-emacs-p)
 
-;; Otherwise packages like slime might shadow the built in cl library
-;; by pushing directories with cl library compatability packages to
-;; load-path:
-(require 'cl)
-
 (defconst +win32-root+
-  (ecase (emacs-os)
+  (cl-ecase (emacs-os)
     (:cygwin "/cygdrive/c")
     (:linux "/")
     (:win32 "C:/")))
@@ -54,14 +54,14 @@
     (win32-user-profile)))
 
 (defconst +home-dir+
-  (ecase (emacs-os)
+  (cl-ecase (emacs-os)
     ((:cygwin :linux) "~")
     (:win32 +win32-home-dir+)))
 
 (cl-defun cygpath (path &optional (type :win32))
   "This should definitetly be moved somewhere else."
   (if (cygwin-emacs-p)
-    (let ((ctype (case type
+    (let ((ctype (cl-case type
 		   (:dos "dos")
 		   (:win32 "windows")
 		   (:unix "unix")
@@ -155,31 +155,31 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 
 ;;; non standard packages
 (require 'package)
-(loop for x in '(("marmalade" . "http://marmalade-repo.org/packages/")
-		 ;; ("melpa"     . "http://melpa.milkbox.net/packages/")
-		 ("melpa"     . "http://melpa.org/packages/")
-		 ("gnu" . "https://elpa.gnu.org/packages/"))
-      do (unless (member x package-archives)
-	   (push x package-archives)))
+(cl-loop for x in '(("marmalade" . "http://marmalade-repo.org/packages/")
+		    ;; ("melpa"     . "http://melpa.milkbox.net/packages/")
+		    ("melpa"     . "http://melpa.org/packages/")
+		    ("gnu" . "https://elpa.gnu.org/packages/"))
+	 do (unless (member x package-archives)
+	      (push x package-archives)))
 
 ;; path
-(loop for x in (nconc 
-		*local-load-paths*
-		(cl-remove "old" (directory-files +mb-lisp-dir+ t)
-			   :key #'file-name-nondirectory
-			   :test #'string=)
-		(directory-files
-		 ;; The regexp masks the '.' and '..' files
-		 (expand-file-name ".emacs.d/elpa" +home-dir+) t ".*[^.]")
-		(list
-		 (expand-file-name "games/chess" +mb-lisp-dir+)
-		 (expand-file-name "games/cube" +mb-lisp-dir+)
-		 (expand-file-name "games/maths" +mb-lisp-dir+)
-		 (expand-file-name "games/cram" +mb-lisp-dir+)
-		 (expand-file-name "projects/ada" +mb-lisp-dir+)))
-      if (and (file-directory-p x) (not (member x load-path)))
-      collect x into res
-      finally do (setf load-path (append res load-path)))
+(cl-loop for x in (nconc 
+		   *local-load-paths*
+		   (cl-remove "old" (directory-files +mb-lisp-dir+ t)
+			      :key #'file-name-nondirectory
+			      :test #'string=)
+		   (directory-files
+		    ;; The regexp masks the '.' and '..' files
+		    (expand-file-name ".emacs.d/elpa" +home-dir+) t ".*[^.]")
+		   (list
+		    (expand-file-name "games/chess" +mb-lisp-dir+)
+		    (expand-file-name "games/cube" +mb-lisp-dir+)
+		    (expand-file-name "games/maths" +mb-lisp-dir+)
+		    (expand-file-name "games/cram" +mb-lisp-dir+)
+		    (expand-file-name "projects/ada" +mb-lisp-dir+)))
+	 if (and (file-directory-p x) (not (member x load-path)))
+	 collect x into res
+	 finally do (setf load-path (append res load-path)))
 
 (length (directory-files (expand-file-name ".emacs.d/elpa" +home-dir+) t))
 ;; smartparens
@@ -193,15 +193,15 @@ Not in use. Projects should be shared, at least until we are up and running Git.
        '(("\\.h$\\|\\.cpp$" . c++-mode)	; first overules of original alist
 	 ("\\.c$" . c-mode)
 	 ("\\.\\(lisp\\|asd\\|sbclrc\\)$" . mb-lisp-mode)
-	 ("\\.el$\\|\\.emacs$\\|\\.emacs-local-" . emacs-lisp-mode)
+	 ("\\.el$\\|\\.emacs$\\|\\.emacs-local-\\|\\.pwd" . emacs-lisp-mode)
 	 ("\\.bash\\(rc\\|_profile\\)\\|\\.sh\\|\\.profile$" . sh-mode)
-	 ("\\.emacs-local-" . emacs-lisp-mode) ; then safe additions
 	 ("\\.pdmkvars$" . makefile-mode)
 	 ("\\.pdmkroot$" . makefile-mode)
 	 ("Makefile$" . makefile-mode)
 	 ("\\.pro$" . makefile-mode)
 	 ("\\.\\(avsc\\|json\\)$" . json-mode)
 	 ("\\.js$" . js-mode)
+	 ("\\.ts$" . js-mode)
 	 ("\\.md$" . markdown-mode)
 	 ("\\.sql$" . sql-mode)
 	 ("\\.bmp$" . hexl-mode)
@@ -278,28 +278,25 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 ;; My lisp, finally everything in .emacs should be split into similar
 ;; files. Also, the files should be byte-compiled too.
 ;; autoload?
-(loop for m in (append '(global-map
-			 mb-utils-io
-			 mb-evil-map
-			 mb-things
-			 radio-playlists
-			 mb-lisp
-			 mb-python
-			 mb-octave
-			 mb-ruby
-			 mb-texinfo
-			 list-db
-			 ;; mbscilab
-			 ;; dic-map
-			 mb-indent
-			 quiz-park
-			 mb-js-mode
-			 mb-ert
-			 mb-org
-			 )
-		       *local-requires*)
-      do (message "Loading package %S..." m)
-      do (require m))
+(cl-loop for m in (append '(global-map
+			    mb-utils-io
+			    mb-evil-map
+			    mb-things
+			    radio-playlists
+			    mb-lisp
+			    mb-python
+			    mb-octave
+			    mb-ruby
+			    mb-texinfo
+			    list-db
+			    mb-indent
+			    quiz-park
+			    mb-js-mode
+			    mb-ert
+			    mb-org)
+			  *local-requires*)
+	 do (message "Loading package %S..." m)
+	 do (require m))
 
 ;;;; local lisp (overrides defaults)
 (load-file +emacs-local+)
@@ -321,9 +318,9 @@ Not in use. Projects should be shared, at least until we are up and running Git.
        (let ((path (expand-file-name (second x) (first x)))) 	     
 	 (find-file path)
 	 (awhen (getf (rest (rest x)) :point)
-		(goto-char (case it (:end (point-max)) (t it))))
+		(goto-char (cl-case it (:end (point-max)) (t it))))
 	 (awhen (getf (rest (rest x)) :keyboard)
-		(case it 
+		(cl-case it 
 		  (:no (activate-input-method 'norwegian-keyboard))))
 	 (awhen (getf (rest (rest x)) :read-only)
 		(toggle-read-only 1))
@@ -343,7 +340,7 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 
 ;; tags revisited
 (defun mb-tags-file ()
-  (case major-mode
+  (cl-case major-mode
     ((emacs-lisp-mode lisp-interaction-mode) "~/.MBTAGS")
     ((mb-lisp-mode lisp-mode common-lisp-mode) "~/.CLTAGS")
     (mbscilab-mode "~/.SCILABTAGS")
@@ -363,20 +360,20 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 (add-hook 'mbscilab-mode-hook 'mb-visit-tags-table)
 (add-hook 'octave-mode-hook 'mb-visit-tags-table)
 
-;;;; Stuff for debugging init phase
+;;; Stuff for debugging init phase
 (cl-defun disperse-log-messages-in-buffer (&optional (base-message "qwe"))
   (interactive)
   (save-excursion
     (goto-char (point-min))
     (forward-sexp 1)
-    (loop for i from 1
-	  while (< (point) (point-max))
-	  do (progn
-	       (move-end-of-line 1)
-	       (newline)
-	       (insert (format "(message \"%s %d\")" base-message i))
-	       (re-search-forward "[^[:space:]]")
-	       (forward-sexp 1)))))
+    (cl-loop for i from 1
+	     while (< (point) (point-max))
+	     do (progn
+		  (move-end-of-line 1)
+		  (newline)
+		  (insert (format "(message \"%s %d\")" base-message i))
+		  (re-search-forward "[^[:space:]]")
+		  (forward-sexp 1)))))
 
 (cl-defun remove-log-messages-in-buffer (&optional (base-message "qwe"))
   (interactive)
@@ -406,7 +403,7 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 ;;; Where to put this?
 (cl-defun unix-find (ppath &key type regex name)
   (let ((args nil))
-    (when type (push-list (list "-type" (ecase type (:file "f") (:directory "d"))) args))
+    (when type (push-list (list "-type" (cl-ecase type (:file "f") (:directory "d"))) args))
     (when name (push-list (list "-name" name) args))
     (when regex (push-list (list "-regex" regex) args))
     (cl-remove "" (string-to-lines (apply #'call-process* "find" (append (llist ppath) args))) :test #'string=)))
@@ -418,12 +415,12 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 	 (diff-buffer (get-buffer-create "*mb-diff*")))
     (with-buffer diff-buffer
       (erase-buffer))
-    (loop for p1 in paths1
-	  for relative-path = (substring p1 (length apath1))
-	  for p2 = (expand-file-name relative-path path2)
-	  do (with-buffer diff-buffer
-	       (insert (format "Comparing two version of %s:\n" relative-path)))
-	  do (call-process "diff" nil diff-buffer t p1 p2))
+    (cl-loop for p1 in paths1
+	     for relative-path = (substring p1 (length apath1))
+	     for p2 = (expand-file-name relative-path path2)
+	     do (with-buffer diff-buffer
+		  (insert (format "Comparing two version of %s:\n" relative-path)))
+	     do (call-process "diff" nil diff-buffer t p1 p2))
     (switch-to-buffer diff-buffer)))
 ;;(compare-mb-libs "/cygdrive/c/Users/MBe.azure/Google Drive/site-lisp/mb-lisp/" "/home/MBe/tmp/tmp/package/mb-lisp")
 
@@ -472,11 +469,6 @@ Not in use. Projects should be shared, at least until we are up and running Git.
        "Super group for all mb-elisp customizataions."
        :tag 'mb-elisp
        :group 'emacs)
-
-(setq send-mail-function    'smtpmail-send-it
-      smtpmail-smtp-server  "smtp.office365.com"
-      smtpmail-stream-type  'starttls
-      smtpmail-smtp-service 587)
 
 (require 'json-mode)
 (require 'markdown-mode)

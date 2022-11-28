@@ -313,7 +313,7 @@ done transparently"
       (lynx-sn-goto-article-begin))))
 
 (defun lynx-convert-path (path)
-  (string-replace path "^.:/" "/cygdrive/c/"))
+  (mb-string-replace path "^.:/" "/cygdrive/c/"))
 
 (defun* lynx-load-file (filename &key (buffer *lynx-buffer*) (url ""))
   "Processes local html file at FILENAME. Only exception is files
