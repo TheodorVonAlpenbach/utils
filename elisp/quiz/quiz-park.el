@@ -509,4 +509,13 @@ week number of the first round."
 	(browse-url url)))))
 ;;(qp-check-last-upload)
 
+(defun split-5-points-string (string)
+  (replace-regexp-in-string
+   "\\s-+[A-E]:"
+   #'(lambda (match) (concat "\n" (substring match -2)))
+   string))
+;;(split-5-points-string " E:qweqew")
+
+(defun )
+
 (provide 'quiz-park)

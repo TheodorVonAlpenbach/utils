@@ -587,6 +587,12 @@ By default the last line."
       (evil-apply-on-block #'evil-rot47 beg end nil)
     (rot47-region beg end)))
 
-
+(evil-define-operator evil-split-5-points-string (beg end type)
+  "Convert text to its rot47 counterpart."
+  (if (eq type 'block)
+      (evil-apply-on-block #'evil-split-5-points-string beg end nil)
+    (region-replace-raw
+     (split-5-points-string (region-string beg end))
+     (list beg end))))
 
 (provide 'mb-evil)

@@ -11,6 +11,7 @@
 (define-key evil-normal-state-map "ga" 'what-cursor-position)
 (define-key evil-normal-state-map "gr" 'evil-rot47)
 (define-key evil-normal-state-map "gR" 'evil-rot13)
+(define-key evil-normal-state-map "gl" 'evil-split-5-points-string)
 
 ;;(evil-define-key '(motion) global-map [tab] #'forward-button)
 ;;(evil-define-key '(normal) global-map [tab] #'self-insert-command)
