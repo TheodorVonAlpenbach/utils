@@ -202,6 +202,12 @@ This function is obsolete. Use C-x 8 _ a instead."
   (interactive "P")
   (dotimes (i (or n 1)) (insert ?ç)))
 
+(defun insert-1/2 (n)
+  "Inserts c with cedilla (ç) at point."
+  (interactive "P")
+  (dotimes (i (or n 1)) (insert ?½)))
+
+
 (defvar mb-default-underline-pattern "=")
 
 (defun insert-underline (pattern)

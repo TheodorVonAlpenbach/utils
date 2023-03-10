@@ -102,7 +102,7 @@ Return the hash table"
 	  for k = (funcall key x)
 	  do (puthash k (cons x (gethash k ht)) ht))
     ht))
-;;(equivalence-class-ht '((a) (b) (c) (a) (b) (a) (d)) :key #'car)
+;;(equivalence-class-ht '((a) (b) (c) (a) (b) (a) (d)) :test #'equal :key #'car)
 
 ;; TODO: when the above renaming is done, rename this to GROUP-LIST or
 ;; perhaps EQUIVALENCE-CLASS-LIST. Or: generalize with ELT, and rename

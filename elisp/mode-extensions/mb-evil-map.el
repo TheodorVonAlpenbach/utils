@@ -62,6 +62,8 @@
   (evil-key-chord-define '(normal motion) global-map "dp" date-map)
   (define-key date-map "f" #'forward-date)
   (define-key date-map "F" #'backward-date)
+  (define-key date-map "p" #'(lambda (n) (interactive "p") (inc-thing-at-point n '(:minute 5))))
+  (define-key date-map "P" #'(lambda (n) (interactive "p") (inc-thing-at-point n '(:minute -5))))
   (define-key date-map "t" #'(lambda (n) (interactive "p") (inc-thing-at-point n '(:minute 10))))
   (define-key date-map "T" #'(lambda (n) (interactive "p") (inc-thing-at-point n '(:minute -10))))
   (define-key date-map "q" #'(lambda (n) (interactive "p") (inc-thing-at-point n '(:minute 15))))

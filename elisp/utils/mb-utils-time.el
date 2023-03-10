@@ -786,11 +786,17 @@ designators WEEK-DESIGNATOR1 and WEEK-DESIGNATOR2. See
 (cl-defun ms-unix-time (&optional (time-designator (now)))
   "Convert time-designator to the number of seconds since 1970-01-01 UTC."
   (* 1000 (unix-time time-designator)))
-;;(cons (ms-unix-time) (mapcar #'ms-unix-time '("2020-03-02T12:26:30")))
+;;(cons (ms-unix-time) (mapcar #'ms-unix-time '("2022-11-30T00:00:00")))
 
 (cl-defun parse-ms-unix-time (ms)
   "Convert unix-time in milliseconds to ETIME."
   (iso-dttm (parse-time (/ ms 1000))))
-;;(parse-ms-unix-time 1648028147532)
+;;(parse-ms-unix-time 1673608075186 )
+
+(format "%e" (expt 2.0 64))
+(format "%e" (expt 2.0 32))
+(format "%e" 1673608075186)
+
+
 
 (provide 'mb-utils-time)

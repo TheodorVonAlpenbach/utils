@@ -55,6 +55,7 @@ objects (hash tables)"
 	   collect it))
 ;;(ada-get-symbolic-folders (caar (gateway-content-list-jsons 4)))
 
+(require 'ada-component)
 (defun ada-symbolic-folder-ids-in-content-lists (gateway-id)
   (mapcar #'latest-component-id-from-source-id
     (cl-loop for x in (gateway-content-list-jsons gateway-id)

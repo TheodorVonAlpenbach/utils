@@ -6,6 +6,7 @@ extension=*
 ignoreCase=
 extensionModifier=""
 grepContext=""
+grepAfter=""
 
 function printUsage {
     echo "Usage: $gfind [OPTION] TARGET [EXTENSION]"
@@ -19,12 +20,13 @@ function printUsage {
     echo "  -u NUM      Searches the directory tree NUM levels up from current directory."
     echo "  -d NUM      Limit the search to directories NUM levels below current directory."
     echo "  -C NUM      Print NUM lines of output context. See grep manual for more info."
+    echo "  -A NUM      Print also NUM lines of output context. See grep manual for more info."
     echo "  -b          Do not search files with EXTENSION. Issues a warning if no EXTENSION is provided"
     echo "  -i          Ignore case"
     echo "  -v          Verbose mode"
 }
 
-while getopts "hE:e:u:d:C:iv" arg; do
+while getopts "hE:e:u:d:C:A:iv" arg; do
     case $arg in
 	h)
 	    printUsage
@@ -45,6 +47,9 @@ while getopts "hE:e:u:d:C:iv" arg; do
 	    ;;
 	C)
 	    grepContext="-C $OPTARG"
+	    ;;
+	A)
+	    grepAfter="-A $OPTARG"
 	    ;;
 	i)
 	    ignoreCase=" -i"
@@ -86,12 +91,12 @@ find "$dir" \
      -type f \
      $extensionModifier-name "*.$extension" \
      -print0 \
-    | xargs -0 -r grep $ignoreCase $grepContext -a --color=auto -n -s "$target"
+    | xargs -0 -r grep $ignoreCase $grepContext $grepAfter -a --color=auto -n -s "$target"
 
 echo ${verbose+find "$dir" \
      ${down+-maxdepth $down}\
      -type f \
      $extensionModifier-name "*.$extension" \
      -print0 \
-    | xargs -0 -r grep $ignoreCase $grepContext -a --color=auto -n -s "$target"
+    | xargs -0 -r grep $ignoreCase $grepContext $grepAfter -a --color=auto -n -s "$target"
 }

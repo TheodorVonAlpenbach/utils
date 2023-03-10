@@ -45,3 +45,4 @@ p = f^y => ln(p) = y * ln(f) => ln(f) = ln(p)/y => f = p^(1 / y)"
 ;;(profit-to-interest 1.5 3)
 
 (provide 'mb-utils-economy)
+

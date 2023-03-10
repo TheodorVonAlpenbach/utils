@@ -23,14 +23,16 @@
 		 :from 'user
 		 :where '(like user-name $r1))
     user-name))
-;;(user-from-name "%celev%99_1a_20%" :id)
+;;(car (user-from-name "%Haakon%"))
+;;(car (user-from-name "%celev%502%"))
+;;(car (user-from-name "%celev%99_1a_3 %"))
 
 (defun user-id-from-pseudonym (user-pseudonym)
   (string-to-integer
    (caar (emacsql db
 	   [:select user-id :from user-pseudonym :where (= user-pseudonym $r1)]
 	   user-pseudonym))))
-;;(user-id-from-pseudonym "336dd2be-94e8-4f95-b184-adf18d58326f")
+;;(user-id-from-pseudonym "eb999e20-fd63-3705-9ee3-bf4e85a7bf07")
 
 (defun user-from-pseudonym (user-pseudonym &rest columns)
   (car (emacsql db
@@ -38,13 +40,16 @@
 		 :from 'user
 		 :where '(= id $s1))
 	 (user-id-from-pseudonym user-pseudonym))))
-;;(user-from-pseudonym "336dd2be-94e8-4f95-b184-adf18d58326f")
+;;(user-from-pseudonym "d73d4312-ffe3-4630-a3a6-200715af30b1")
+
 
 (defun user-pseudonym (user-descriptor)
   (car (emacsql db
 	  [:select * :from user-pseudonym :where (= user-id $s1)]
 	  (id user-descriptor))))
-;;(second (user-pseudonym (user-from-name "%celev%99_1a_20%" :id)))
+;;(second (user-pseudonym (car (user-from-name "%celev%99_1a_1 %"))))
+
+;; db['state-user-component-170'].find({userPseudonym: "40a520e7-392a-45f6-83e2-47c3923a2f52", componentUuid: "3d02de50-8e53-3c2e-b1e6-ccf84b00662c" }) 
 
 (defun user-pseudonyms (user-ids)
   (mapcar #'second

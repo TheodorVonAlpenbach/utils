@@ -110,7 +110,8 @@ SYMBOL can be a symbol or a list of symbols. See function
       equivalence-class equivalence-class-with-key
       accumulate-list emacsql-mysql
       reduce
-      emacsql-mysql emacsql)
+      emacsql-mysql emacsql
+      cl-member-if-not)
   'prog1)
 (cl-indent  :table :tr)
 
