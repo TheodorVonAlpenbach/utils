@@ -139,7 +139,6 @@
   (key-chord-define evil-normal-state-map "vI" big-insert-map)
   (define-key big-insert-map "\"" #'(lambda (n) (interactive "P") (mb-surround "\\\"" (or n 1)))))
 
-;; TODO: why must *eval-map* be global?
 (defvar *eval-map* (make-sparse-keymap))
 (key-chord-define evil-normal-state-map "kj" *eval-map*)
  (define-key *eval-map* "k" #'mb-compile-buffer)
@@ -154,6 +153,9 @@
  (define-key *eval-map* "e" #'eval-expression)
  (define-key *eval-map* "t" #'eval-defun-test)
  (define-key *eval-map* "T" #'(lambda () (interactive) (eval-defun-test t)))
+
+(defvar *clipboard-map* (make-sparse-keymap))
+(key-chord-define evil-normal-state-map "cv" *clipboard-map*)
 
 (define-key evil-outer-text-objects-map "g" #'mb-evil-buffer)
 (define-key evil-inner-text-objects-map "v" #'mb-evil-inner-variable-name)

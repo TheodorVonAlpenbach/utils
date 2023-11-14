@@ -11,7 +11,7 @@
 ;;(mapcar #'column-selection '(nil (a :b)))
 
 (cl-defun ada-read-pwd (&optional (db :ada))
-  (cl-find db (read* ".pwd") :key #'first))
+  (cl-find db (read* "~/git/utils/elisp/projects/ada/.pwd") :key #'first))
 
 (cl-defun ada-mysql-connect (&optional (db-tag :ada))
   (cl-destructuring-bind (db-tag user password host port)
@@ -44,9 +44,9 @@
 
 (cl-defun ada-copy-to-clipboard (&optional prefix)
   (interactive)
-  (string-to-clipboard
-   (rot47 (third (ada-read-pwd
-		  (ada-prefix-to-environment current-prefix-arg))))))
+  (let ((prefix (ada-prefix-to-environment current-prefix-arg)))
+    (string-to-clipboard (rot47 (third (ada-read-pwd prefix))) t)
+    (message "Password for %s was copied to clipboard" (sstring prefix))))
 
 ;; prefix gh q
 (defun mb-mysql-map ()
@@ -155,8 +155,12 @@
        5))))
 ;;(user-from-name "%elev_no456326499_1a_1 %" :id)
 
-(defun normalize-column-symbols (columns)
-  (de))
+(defun ada-tables (&optional regexp)
+  (let ((table-names (mapcar #'first (emacsql db [:show :tables]))))
+    (if regexp
+      (copy-if #'(lambda (x) (string-match regexp x)) table-names)
+      table-names)))
+;;(ada-tables "element")
 
 (defun ada-columns (table &rest columns)
   (if columns
@@ -168,10 +172,9 @@
 					     (cl-substitute ?_ ?- string))))
 	      'vector))
     (emacsql db [:show columns :from $i1] table)))
-;;(ada-columns 'gateway)
+;;(ada-columns 'task)
 ;;(ada-columns 'user-ntp-module-codes )
 ;;(coerce (mapcar #'decolonize-symbol '(user-id)) 'vector)
 ;;(cl-substitute ?_ ?- "a-ha")
 
 (provide 'ada-mysql)
-

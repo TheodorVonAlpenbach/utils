@@ -26,4 +26,11 @@
     (json-pretty-print (point-min) (point-max))))
 ;;(json-pretty-print-string)
 
+(defun object-id-to-string ()
+  (interactive)
+  (save-excursion
+    (bob)
+    (while (re-search-forward "\\(ObjectId\\|ISODate\\)(\"\\([^\"]+\\)\")" nil t)
+       (replace-match "\"\\1:\\2\""))))
+
 (provide 'mb-json)

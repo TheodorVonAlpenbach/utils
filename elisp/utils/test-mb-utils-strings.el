@@ -120,6 +120,25 @@
 		   '("123" "0" "-123" 123 "a"))
 		 '("123" "0" nil nil nil))))
 
+(ert-deftest test-uuid-regexp ()
+  "Test of `uuid-regexp'"
+  (should (equal (uuid-regexp)
+		 "[a-f0-9]\\{8\\}-[a-f0-9]\\{4\\}-[a-f0-9]\\{4\\}-[a-f0-9]\\{4\\}-[a-f0-9]\\{12\\}"))
+  (should (equal (uuid-regexp nil) (uuid-regexp)))
+  (should (equal (uuid-regexp nil nil) (uuid-regexp)))
+  (should (equal (uuid-regexp nil "_")
+		 "[a-f0-9]\\{8\\}_[a-f0-9]\\{4\\}_[a-f0-9]\\{4\\}_[a-f0-9]\\{4\\}_[a-f0-9]\\{12\\}"))
+  (should (equal (uuid-regexp 3 "_") "[a-f0-9]\\{3\\}"))
+  (should (equal (uuid-regexp '(3)) (uuid-regexp 3)))
+  (should (equal (uuid-regexp '(2 1)) "[a-f0-9]\\{2\\}-[a-f0-9]\\{1\\}"))
+  (should (equal (uuid-regexp '(2 1) nil) (uuid-regexp '(2 1))))
+  (should (equal (uuid-regexp '(2 1) "qwe") "[a-f0-9]\\{2\\}qwe[a-f0-9]\\{1\\}")))
+
+(ert-deftest test-uuid-p ()
+  "Test of `uuid-p'"
+  (should (uuid-p "53bf7368-f985-4061-9283-b3065a578a7f"))
+  (should (uuid-p "53bf7368f98540619283b306")))
+
 (ert-deftest test-andcat ()
   "Test of `andcat'"
   (should (equal (andcat '()) ""))

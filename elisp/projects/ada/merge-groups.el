@@ -35,7 +35,7 @@ This operation does the following:
 	(group-to (company-group group-to-descriptor)))
     (emacsql db [:update user :set (= company-group-id $s1) :where (= company-group-id $s2)]
 	     (id group-to) (id group-from))
-    (delete-members-in-group group-from)
+    (remove-members-from-group group-from)
     (emacsql db [:delete :from company-group :where (= id $s1)] (id group-from))))
 ;;(merge-groups 571184 571156)
 

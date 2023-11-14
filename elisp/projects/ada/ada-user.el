@@ -13,8 +13,8 @@
 		 :from 'user
 		 :where '(like name $r1))
     name))
-;;(user-from-name "%elev_no456326501_vg1_2%")
-;;(fuser (string-to-integer (caar (user-from-name "%elev_no456326501_vg1_2%"))))
+;;(user-from-name "%celev%99_1a_1 %")
+;;(user-from-name "%laerer_no456326499_1%")
 
 (defun user-from-user-name (user-name &rest columns)
   "Return a list of users matching USER-NAME"
@@ -23,16 +23,16 @@
 		 :from 'user
 		 :where '(like user-name $r1))
     user-name))
+;;(car (user-from-name "%celev%99_1a_1 %"))
 ;;(car (user-from-name "%Haakon%"))
 ;;(car (user-from-name "%celev%502%"))
-;;(car (user-from-name "%celev%99_1a_3 %"))
 
 (defun user-id-from-pseudonym (user-pseudonym)
   (string-to-integer
    (caar (emacsql db
 	   [:select user-id :from user-pseudonym :where (= user-pseudonym $r1)]
 	   user-pseudonym))))
-;;(user-id-from-pseudonym "eb999e20-fd63-3705-9ee3-bf4e85a7bf07")
+;;(user-id-from-pseudonym "b1e464dc-b092-46ee-950a-0f9d4ef82d82")
 
 (defun user-from-pseudonym (user-pseudonym &rest columns)
   (car (emacsql db
@@ -40,8 +40,10 @@
 		 :from 'user
 		 :where '(= id $s1))
 	 (user-id-from-pseudonym user-pseudonym))))
-;;(user-from-pseudonym "d73d4312-ffe3-4630-a3a6-200715af30b1")
-
+;;(user-from-pseudonym "b1e464dc-b092-46ee-950a-0f9d4ef82d82")
+;;(user-from-pseudonym "67e26e9c-a618-4241-829b-5d028850af58")
+;;(loop for up in '("21fce84d-c227-48e4-99fc-ccd64f3c905a" "44328a92-a57c-4724-8257-a27e17d71920" "336dd2be-94e8-4f95-b184-adf18d58326f") collect (user-from-pseudonym up :name))
+;;(ada-columns 'user)
 
 (defun user-pseudonym (user-descriptor)
   (car (emacsql db
@@ -68,12 +70,14 @@
  
 (defun user (user-descriptor &rest columns)
   (if (stringp user-descriptor)
-    (apply #'user-from-pseudonym user-descriptor columns)
+    (if (uuid-p user-descriptor)
+      (apply #'user-from-pseudonym user-descriptor columns)
+      (apply #'user-from-name user-descriptor columns))
     (if (ada-user-p user-descriptor)
       user-descriptor
       (apply #'user-from-id user-descriptor columns))))
+;;(user "%laerer_no456326499_1%")(("321211" "1205040" "d697cb89-4695-42ca-b4b2-aad8afc8494d" "Claerer_no456326499_1 CappelenDamm" "claerer_no456326499_1@feide.no" "test@feide.no" "COMPANY_ADMIN" "2585" "aarstrinn1" "571156" "26" "2" ...))
 ;;(user (user "eac62d04-2488-4435-b121-87d90c4db9dc"))
-;;(user-from-id 322181)
 ;;(id (user 322181))
 ;;(fuser '(322190))
 ;;(project (user-from-name "%claerer_no456326499_1%") '(0 1 2 3 ))
@@ -94,9 +98,12 @@
     (emacsql db [:delete :from user-ntp-module-codes :where (= user-id $s1)] id)
     (emacsql db [:delete :from user-pseudonym :where (= user-id $s1)] id)
     (emacsql db [:delete :from user :where (= id $s1)] id)))
-;;(delete-user (user-from-name "Celev_no456326499_7a_5 CappelenDamm"))
-;;(delete-user 322190)
+;;(delete-user 322221)
+;;(delete-user (user-from-name "Celev_no456326499_1a_1 CappelenDamm"))
+;;(user-from-id 671726)
+;;(delete-user 671726)
 ;;(321679 321779 321211)
+;; 479-2ca8-47ad-b261-751a99c1af21, af03c96d-4f0f-4910-ada7-01d7a9dbcbff, c1720b11-7c98-4815-88a1-ab67a9e0aa88, 
 
 (defun delete-users (user-id-descriptors)
   (cl-loop for u in user-id-descriptors do (delete-user u)))
@@ -106,7 +113,7 @@
 	   :in "\n"))
 
  (defun fuser (user-descriptor &rest columns)
-  "Arugments COLUMNS are not yet supported"
+  "Argument COLUMNS is not yet supported"
   (tab-format (butlast (cl-loop for v in (user user-descriptor)
 				for (k . rest ) in (ada-columns 'user)
 				collect (list k v)))))

@@ -22,7 +22,7 @@
 		 :from 'curriculum
 		 :where '(like curriculum-name $r1))
     curriculum-name))
-;;(caar (curriculum-from-name "%laerer%99_5%"))
+;;(caar (curriculum-from-curriculum-name "%laerer%99_5%"))
 
 (defun curriculum-id-from-pseudonym (curriculum-pseudonym)
   (caar (emacsql db

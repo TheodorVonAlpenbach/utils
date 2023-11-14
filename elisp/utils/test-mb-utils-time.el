@@ -305,7 +305,7 @@
 
 (ert-deftest test-unix-time ()
   "Test of `unix-time'"
-  (should (equal "Europe/Oslo" (current-timezone)))
+  (should (equal "CET" (current-timezone)))
   (should (equal (unix-time "1972-01-06T08:15CET") 63530100.0))
   (should (equal (unix-time "1970-01-01T00:00Z") 0.0))
   (should (equal (unix-time "1970-01-01T00:00") -3600.0))
@@ -373,12 +373,21 @@
   "Test of `etime-round'"
  (should (equal
 	  (iso-dttm (etime-round (parse-time "1972-01-06T08:15:17") :year -10))
-	  "1970-01-06T08:15:17CET"))
+	  "1970-01-01T00:00:00CET"))
  (should (equal
 	  (iso-dttm (etime-round (parse-time "1972-01-06T08:15:17") :year 10))
-	  "1980-01-06T08:15:17CET"))
+	  "1980-01-01T00:00:00CET"))
  (should (equal
-	  (iso-dttm (etime-round (parse-time "1972-01-06T08:15:17") :year 10))
-	  "1980-01-06T08:15:17CET")))
+	  (iso-dttm (etime-round (parse-time "1972-01-06T08:15:17") :year -100))
+	  "1900-01-01T00:00:00CET")))
+
+(ert-deftest test-current-timezone ()
+  "Test of `current-timezone'"
+ (should (equal (with-timezone "qwe" (current-timezone)) "qwe")))
+
+(ert-deftest test-time-part-p ()
+  "Test of `time-part-p'"
+  (should (equal (mapcar #'time-part-p '(:year :month :day :hour :minute :second))
+		 '(nil nil nil t t t))))
 
 (provide 'test-mb-utils-time.el)

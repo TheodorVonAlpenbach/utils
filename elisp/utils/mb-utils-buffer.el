@@ -746,8 +746,13 @@ Afterwards delete the file."
 ;;(within-temp-file (+ 2 2))
 (def-edebug-spec within-temp-file progn)
 
-(defun string-to-clipboard (string)
-  (gui-set-selection 'CLIPBOARD string))
+(defun string-to-clipboard (string &optional hide-message)
+  "Copy STRING to clipboard.
+If HIDE-MESSAGE is NIL, the default, a message informing what was
+copied is displayed."
+  (gui-set-selection 'CLIPBOARD string)
+  (unless hide-message
+    (message "Copied string '%s' to clipboard" string)))
 
 (defun buffer-file-name-to-clipboard ()
   (interactive)

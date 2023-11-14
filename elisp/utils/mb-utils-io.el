@@ -202,18 +202,20 @@ See `parse-csv-string' for more details"
   (apply #'parse-csv-string (file-string filename) args))
 ;;(parse-csv-file "")
 
-(cl-defun csv-string (lists &optional (column-separator ";") line-separator)
+(cl-defun csv-string (lists &optional (column-separator ";")
+			      line-separator (nil-conversion ""))
   "Default LINE-SEPARATOR is \\n"
   (concat* lists 
 	   :in (or line-separator "\n")
 	   :key #'(lambda (list)
 		    (concat* list 
 			     :in column-separator 
-			     :key #'(lambda (x) (format "%S" x))))))
-;;(csv-string '((a b c) (1 2 3)))
+			     :key #'(lambda (x)
+				      (if x (format "%S" x) nil-conversion))))))
+;;(csv-string '((a b c) (1 nil 3)))
 
-(cl-defun write-csv (lists filename
-			   &optional column-separator line-separator overwrite)
+(cl-defun write-csv (lists filename &key column-separator line-separator
+				      overwrite )
   "Saves  csv file FILENAME to a list of lists."
   (string-to-file
    (csv-string lists

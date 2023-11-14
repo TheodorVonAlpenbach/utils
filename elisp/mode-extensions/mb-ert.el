@@ -248,7 +248,7 @@ Note: Either this or mb-ert-test-file is obsolete."
   (mb-ert-test-files (directory-files (buffer-directory buffer) t "\.el$")))
 
 (cl-defun mb-ert-test-buffer-directories (dirs)
-  "Invoke ERT on every test function in current directory."
+  "Invoke ERT on every test function in directories DIRS."
   (mb-ert-test-symbols
    (cl-loop for d in dirs
 	 for fs = (copy-if #'mb-ert-test-filename-p

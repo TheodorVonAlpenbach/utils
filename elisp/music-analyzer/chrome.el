@@ -17,7 +17,7 @@
 ;;(chrome-copy (chrome-new) :base 3)
 
 (defun* chrome-new (&optional (chrome-base 0) (accidentals 0))
-  (make-chrome :chrome-base chrome-base :accidentals accidentals))
+  (make-chrome :base chrome-base :accidentals accidentals))
 ;;(chrome-new)
 
 (defun chrome-s-value (pc)

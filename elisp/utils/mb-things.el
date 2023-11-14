@@ -214,9 +214,9 @@ TIME must be a string."
 	       (3 (add-time etime :second n))
 	       (otherwise
 		(error "Level %S is not implemented!" level))))
-     ;; :with-seconds (or (= level 3) 
-     ;; 		       (> (length time) 6))
-     )))
+     :with-seconds (or (= level 3) (> (length time) 6)))))
+;;(inc-clock "08:15:01" 1 3)
+;;(inc-clock "08:15" 1 3)
  
 (defun inc-number (x n level)
   "Alter X N times according to LEVEL.

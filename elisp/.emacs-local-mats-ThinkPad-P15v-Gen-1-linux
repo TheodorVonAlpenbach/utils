@@ -43,6 +43,7 @@ sudo mount -a.")
 (setf *my-favorites*
       `((,+mb-lisp-dir+ ".emacs")
 	(,+mb-lisp-dir+ "utils/mb-utils-strings.el")
+	(,+mb-lisp-dir+ "utils/mb-utils-time.el")
 	(,+mb-lisp-dir+ "utils/mb-utils-buffer.el")
 	(,+mb-lisp-dir+ "utils/mb-sequences.el")
 	(,+mb-lisp-dir+ "global/mb-indent.el")
@@ -52,6 +53,7 @@ sudo mount -a.")
 	(,+mb-lisp-dir+ "external/curl.el")
 	(,+mb-lisp-dir+ "div/scratch.el")
 	(,+mb-lisp-dir+ "projects/ada/ada-mysql.el")
+	(,+mb-lisp-dir+ "projects/ada/ada-logins.el")
 
 	(,+mb-utils-dir+ "lisp/mb-utils.lisp")
 

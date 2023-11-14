@@ -822,4 +822,28 @@ length."
 ;;(insert (tab-format '(("foo" 1 "bar") ("qwe" 1233456 "qwebar")) :header '("qwe" "ewq" "qwebar")))
 ;;(tab-format '((1 "bar") (1233456 "qwebar")) :header '("numb" "string2") :column-separator "|")
 
+(cl-defun uuid-regexp-1 (n)
+  "Generate regexp for an UUID of length N."
+  (format "[a-f0-9]\\{%s\\}" n))
+;;(uuid-regexp-1 8)
+
+(cl-defun uuid-regexp (&optional length separator)
+  "Generate regexp for an UUID of length LEN.
+If LEN is a list of integers it generates UUIDs of the
+corresponding integer lengths and concatenates them with
+SEPARATOR"
+  (let ((len (or length '(8 4 4 4 12))))
+    (if (integerp len)
+      (uuid-regexp-1 len)
+      (concat* (mapcar #'uuid-regexp-1 len) :in (or separator "-")))))
+;;(uuid-regexp '(8 4 4 4 12) "-")
+;;(string-to-integer "1091864")
+
+(defun uuid-p (string)
+  (or (string-match (uuid-regexp 24) string)
+      (string-match (uuid-regexp '(8 4 4 4 12) "-") string)))
+;;(uuid-p "53bf7368-f985-4061-9283-b3065a578a7f")
+;;(length "b3065a578a7f")
+;;(uuid-p "594d3459cb99b500132bc742")
+
 (provide 'mb-utils-strings)

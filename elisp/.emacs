@@ -176,7 +176,7 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 		    (expand-file-name "games/cube" +mb-lisp-dir+)
 		    (expand-file-name "games/maths" +mb-lisp-dir+)
 		    (expand-file-name "games/cram" +mb-lisp-dir+)
-		    (expand-file-name "projects/ada" +mb-lisp-dir+)))
+	    (expand-file-name "projects/ada" +mb-lisp-dir+)))
 	 if (and (file-directory-p x) (not (member x load-path)))
 	 collect x into res
 	 finally do (setf load-path (append res load-path)))
@@ -193,13 +193,14 @@ Not in use. Projects should be shared, at least until we are up and running Git.
        '(("\\.h$\\|\\.cpp$" . c++-mode)	; first overules of original alist
 	 ("\\.c$" . c-mode)
 	 ("\\.\\(lisp\\|asd\\|sbclrc\\)$" . mb-lisp-mode)
-	 ("\\.el$\\|\\.emacs$\\|\\.emacs-local-\\|\\.pwd" . emacs-lisp-mode)
+	 ("\\.el$\\|\\.eld$\\|\\.emacs$\\|\\.emacs-local-\\|\\.pwd" . emacs-lisp-mode)
 	 ("\\.bash\\(rc\\|_profile\\)\\|\\.sh\\|\\.profile$" . sh-mode)
 	 ("\\.pdmkvars$" . makefile-mode)
 	 ("\\.pdmkroot$" . makefile-mode)
 	 ("Makefile$" . makefile-mode)
 	 ("\\.pro$" . makefile-mode)
 	 ("\\.\\(avsc\\|json\\)$" . json-mode)
+	 ("\\.ejson$" . ejson-mode)
 	 ("\\.js$" . js-mode)
 	 ("\\.ts$" . js-mode)
 	 ("\\.md$" . markdown-mode)
@@ -331,7 +332,10 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 		(funcall it))
 	 (awhen (getf (rest (rest x)) :time-paragraphs)
 		(setf fill-paragraph-function #'fill-time-paragraph)))))
- *my-favorites*)
+  *my-favorites*)
+
+(let ((path (expand-file-name "lisp/mb-utils.lisp" +mb-utils-dir+)))
+  (find-file path))
 
 (custom-set-variables
  '(temp-buffer-resize-mode t)

@@ -384,7 +384,7 @@ TODO: font-lock face as `defun'."
 		(mapcar #'(lambda (x) (mapcar #'list x)) lists))))
 ;;(cartesian-product '(("a" "b") ("c" "d") ("e" "f" "g") ("h")) #'concat)
 
-(mapcar #'(lambda (x) (mapcar #'list x)) '(("a" "b") ("c" "d") ("e" "f")))
+;;(mapcar #'(lambda (x) (mapcar #'list x)) '(("a" "b") ("c" "d") ("e" "f")))
 ;;(cartesian-product (list (0-n 2) (1-n 3) (a-b 3 4)) #'*)
 
 (defmacro with-gensyms (syms &rest body)

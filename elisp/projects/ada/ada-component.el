@@ -5,27 +5,30 @@
   (emacsql db (vector :select (column-selection columns)
 		      :from 'component
 		      :where '(= source-id $r1)) source-id))
-;;(caar (components-from-source-id "5f22eee9b379980010b34666" :uuid))
+;;(components-from-source-id "649d70154ed321440ae59611" :id :version :uuid)(("15883" "2" "c7808c46-76b8-3558-9a91-9fb1d30fbd3c") ("15884" "16" "cb6d8e44-02f2-36af-914a-db2f85e8b1be") ("15885" "17" "a26987ec-2e0a-3730-ba74-06a83e2f2467") ("15886" "23" "486116b3-48e8-39a7-b592-a8145f026f34"))
 
 (defun latest-component-id-from-source-id (source-id)
   (id (min-element (components-from-source-id source-id :id :version)
 		   :test #'> :key (compose #'string-to-integer #'second))))
-;;(latest-component-id-from-source-id "5c6d7324d8b46c0013f28ba6")
+;;(latest-component-id-from-source-id "6422c4c1520bcb49b4523f64")
+
+(defun latest-component-from-source-id (source-id &rest columns)
+  (apply #'component (latest-component-id-from-source-id source-id) columns))
+;;(latest-component-from-source-id "6422c4c1520bcb49b4523f64" :uuid)
 
 (defun component-from-uuid (uuid &rest columns)
   (car (emacsql db (vector :select (column-selection columns)
 			   :from 'component
 			   :where '(= uuid $r1)) uuid)))
-;;(component-from-uuid "e0ce4660-b35d-3339-a178-0c170c09ddfa" 'id 'source-id)("15762" "61d3177649bddc70bb40fd71")
-;;(component-from-uuid "59407697-9b4b-3017-aff1-12a738d9a034" 'id 'source-id)
+;;(component-from-uuid "c14292e2-b07d-3dba-8699-04e9af44b71b" :source-id)("")
 
-;;(component-from-uuid "1cbb9df2-669c-3b44-8c76-ac7f9c39e103" 'internal-title 'id)
+;;(component-from-uuid "ec8a92fd-b300-3d18-93e4-89245e4b46a1" 'internal-title 'source-id)
 
 (defun component-from-string-id (string-id &rest columns)
   (if (= (length string-id) 36)
     (apply #'component-from-uuid string-id columns)
-    (apply #'component-from-source-id string-id columns)))
-;;(component-from-string-id "1cbb9df2-669c-3b44-8c76-ac7f9c39e103" 'uuid)
+    (apply #'latest-component-from-source-id string-id columns)))
+;;(component-from-string-id "6422c4c1520bcb49b4523f64" 'uuid)
 
 (defun component-from-id (id &rest columns)
   (car (emacsql db (vector :select (column-selection columns)
@@ -43,11 +46,11 @@
 		 :where '(and (= source-id $r1) (= version $s2)))
 	 (first source-id-version)
 	 (string-to-integer (second source-id-version)))))
-;;(component-from-source-id-version '("630776be9c4a2c4836a730fd" "29"))
+;;(component-from-source-id-version '("5fa944108fdf333a47c0a94d" "4") :id :uuid)("20192" "")
 
 (defun component (component-descriptor &rest columns)
   (cl-typecase component-descriptor
-    (string (apply #'component-from-uuid component-descriptor columns))
+    (string (apply #'component-from-string-id component-descriptor columns))
     (number (apply #'component-from-id component-descriptor columns))
     (list (if (source-id-version-p component-descriptor)
 	    (apply #'component-from-source-id-version
@@ -55,7 +58,8 @@
 	    (cl-loop for x in component-descriptor
 		     collect (apply #'component x columns))))
     (otherwise (apply #'component-from-id (id component-descriptor) columns))))
-;;(cl-loop for id in (list 31962 31963 31964 31967) collect (car (component id :uuid)))
+;;(car (component 16538 :uuid))
+;;(cl-loop for id in (list 16538 31962 31963 31964 31967) collect (car (component id :uuid)))
 
 (defun curriculum-ids-from-component-id (component-id)
   (ada-parse-id-list
@@ -82,7 +86,7 @@
 
 (defun component-id (component-descriptor)
   (car (ada-parse-id-list (component component-descriptor :id))))
-;;(component-id 15955)
+;;(component-id "64a6935f4d2d21688abd1a1d")
 
 (defun component-element-ids (component-descriptor)
   (ada-parse-id-list

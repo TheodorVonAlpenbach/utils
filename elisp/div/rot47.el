@@ -22,7 +22,8 @@ except SPACE."
   (with-temp-buffer
     (insert string)
     (rot47-region (point-min) (point-max))
-    (buffer-string)))
+    (buffer-string-no-properties)))
+;;(rot47-string "Q")
 
 (defun rot47 (object &optional start end)
   "ROT47 encrypt OBJECT, a buffer or string.
@@ -33,5 +34,7 @@ and END, and return the encrypted string."
       (with-current-buffer object
 	(rot47-region start end))
     (rot47-string object)))
+;;(rot47 "-Q")
+;;(string-to-clipboard (rot47 "O.AC.Q?tf0nn.fa"))
 
 (provide 'rot47)

@@ -70,7 +70,7 @@
 ;;(set-timezone nil)
 
 (defun current-timezone ()
-  (getenv "TZ"))
+  (or (getenv "TZ") (second (current-time-zone))))
 ;;(current-timezone)
 
 (defun --time-encode (dtime &optional universal-p)
@@ -379,8 +379,15 @@ implementation.)"
       (:minute (minutestart (add-etime-time etime part diff)))
       (:second (secondstart (add-etime-time etime part diff)))
       (t (error "Part %S is not supported" part)))))
+;;(iso-dttm (etime-round-1 (parse-time "1972-01-06T08:15:10") :year 1))
 ;;(iso-dttm (etime-round-1 (parse-time "1972-01-06T08:15:10") :hour 1))
 ;;(iso-dttm (etime-round-1 (parse-time "1972-01-06T08:15:10") :minute -15))
+
+(defun time-part-p (part)
+  (cl-case part
+    ((:hour :minute :second) t)
+    ((:year :month :day) nil)
+    (otherwise (error "Unknown part %S" part))))
 
 (cl-defun etime-round (etime part quantity &optional (n 1) universal-p)
   "Rounds ETIME up or down to the closest multiple of quantity if part
@@ -391,9 +398,13 @@ Note that PARTs :MONTH and :DAY are currently not supported."
   (cl-assert (not (minusp n)) t "N cannot be negative")
   (if (zerop n)
     etime
-    (add-etime-time
-     (etime-round-1 etime part quantity universal-p)
-     part (* (if (minusp n) n (1- n)) quantity))))
+    (if (time-part-p part)
+      (add-etime-time
+       (etime-round-1 etime part quantity universal-p)
+       part (* (if (minusp n) n (1- n)) quantity))
+      (add-etime-date
+       (etime-round-1 etime part quantity universal-p)
+       part (* (if (minusp n) n (1- n)) quantity)))))
 ;;(iso-dttm (etime-round (parse-time "1972-01-06T08:15:17") :hour -1 1))
 ;;(iso-dttm (etime-round (parse-time "1972-01-06T08:15:17") :minute 15 1))
 
@@ -538,20 +549,28 @@ day of the week."
       (:millenium (* 1000 y))
       (otherwise (error "Unknown unit `%S'." unit))))
 
-  (defun etime/ (etime divisor)
+  (defun etime/-1 (etime1 etime2 divisor)
     "Divide by DIVISOR the number of seconds represented by an encoded time object ETIME."
-    (+ (* (/ 2^16 divisor) (first etime))
-       (/ (second etime) divisor)))
+    (+ (* etime1 (/ 2^16 divisor))
+       (/ etime2 divisor))))
 
-  (cl-defun etime- (etime1 etime2 &optional (unit :day))
-    "Return the number of days from ETIME2 to ETIME1.
+(defun etime/ (etime divisor)
+    "Divide by DIVISOR the number of seconds represented by an encoded time object ETIME."
+    (if (listp etime)
+      (etime/-1 (first etime) (second etime) divisor)
+      (etime/-1 0 etime divisor)))
+;;(etime/ (now) 1000)
+
+(cl-defun etime- (etime1 etime2 &optional (unit :day))
+  "Return the number of days from ETIME2 to ETIME1.
 With keyword :UNIT you can specify another time unit for the time
 difference. Time units from :MONTH and higher are inambiguous,
 and are not recommended."
-    (etime/ (time-subtract etime1 etime2) (unit-factor unit)))
+  (etime/ (time-subtract etime1 etime2) (unit-factor unit)))
+;;(etime- (now) 0 :year)
 
-  (cl-defun change-time-unit (time &key (from-unit :second) (to-unit :second))
-    (* time (/ (unit-factor from-unit) (unit-factor to-unit)))))
+(cl-defun change-time-unit (time &key (from-unit :second) (to-unit :second))
+  (* time (/ (unit-factor from-unit) (unit-factor to-unit))))
 ;;(change-time-unit 3 :from-unit :minute)
 
 (cl-defun time- (time-designator1 &optional (time-designator2 (now)) (unit :day))
@@ -786,17 +805,13 @@ designators WEEK-DESIGNATOR1 and WEEK-DESIGNATOR2. See
 (cl-defun ms-unix-time (&optional (time-designator (now)))
   "Convert time-designator to the number of seconds since 1970-01-01 UTC."
   (* 1000 (unix-time time-designator)))
-;;(cons (ms-unix-time) (mapcar #'ms-unix-time '("2022-11-30T00:00:00")))
+;;(ms-unix-time "2023-11-13T16:00:00")
+;;(ms-unix-time)
 
 (cl-defun parse-ms-unix-time (ms)
   "Convert unix-time in milliseconds to ETIME."
   (iso-dttm (parse-time (/ ms 1000))))
-;;(parse-ms-unix-time 1673608075186 )
-
-(format "%e" (expt 2.0 64))
-(format "%e" (expt 2.0 32))
-(format "%e" 1673608075186)
-
-
+;;(parse-ms-unix-time 1681077600000)"2023-04-10T00:00:00CEST"
+;;(weekday :no (now))
 
 (provide 'mb-utils-time)

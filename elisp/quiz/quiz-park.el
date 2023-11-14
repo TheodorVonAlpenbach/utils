@@ -516,6 +516,4 @@ week number of the first round."
    string))
 ;;(split-5-points-string " E:qweqew")
 
-(defun )
-
 (provide 'quiz-park)

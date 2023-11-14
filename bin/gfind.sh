@@ -9,7 +9,7 @@ grepContext=""
 grepAfter=""
 
 function printUsage {
-    echo "Usage: $gfind [OPTION] TARGET [EXTENSION]"
+    echo "Usage: gfind [OPTION] TARGET [EXTENSION]"
     echo "Finds occurrences of TARGET in files in the current directory tree."
     echo "If optional argument EXTENSION is provided, it searches only files with"
     echo "filename extension EXTENSION."

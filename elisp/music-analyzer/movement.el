@@ -64,7 +64,7 @@
     (error "%S not implemented"))
 
 (defun* mvt-to-string (mvt &optional (print-style mu-default-print-style))
-  (case print-style
+  (cl-case print-style
     ((english lilypond) (format "%S %s %S %s\n%s\n%S" 
 			  (mvt-tempo mvt)
 			  (ts-to-string (mvt-time-signature mvt) print-style)
@@ -95,7 +95,7 @@
   "Returns a copy of MOVEMENT where the start-time of all its notes has been reduced by SHIFT.
 If SHIFT is nil the notes will be shifted so that the first note has start-time 0."
   (mvt-copy movement
-	    :voice-groups (loop for vg in (mvt-voice-groups movement)
+	    :voice-groups (cl-loop for vg in (mvt-voice-groups movement)
 				collect (vg-shift-start-time vg shift))))
 
 (defun mvt-time-signature (mvt)
@@ -132,11 +132,11 @@ If SHIFT is nil the notes will be shifted so that the first note has start-time 
   "Returns (mp1 mp2) for maximum repeat span"
   (let* ((n (mvt-last-bar mvt)) 
 	 (mid-bar (floor (/ n 2))))
-    (loop for nbars from mid-bar downto 1
-	  for ores = (loop for from-bar1 from 1
+    (cl-loop for nbars from mid-bar downto 1
+	  for ores = (cl-loop for from-bar1 from 1
 			   for to-bar1 from (+ from-bar1 nbars) to (- (1+ n) nbars)
 			   for submvt1 = (mvt-submovement mvt from-bar1 to-bar1)
-			   for res1 = (loop for from-bar2 from to-bar1
+			   for res1 = (cl-loop for from-bar2 from to-bar1
 					    for to-bar2 from (+ to-bar1 nbars) to (1+ n)
 					    for submvt2 = (mvt-submovement mvt from-bar2 to-bar2)
 					    when (movement= submvt1 submvt2) 
