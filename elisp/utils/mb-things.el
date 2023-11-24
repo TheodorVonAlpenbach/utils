@@ -202,19 +202,22 @@ TIME must be a string."
   (let ((etime (parse-clock time)))
     (iso-time
      :time (if (listp level)
-	     (cl-case (first level)
-	       (:hour (etime-round etime :hour (second level) n))
-	       (:minute (etime-round etime :minute (second level) n))
-	       (:second (etime-round etime :second (second level) n))
-	       (otherwise
-		(error "Level %S is not implemented!" level)))
+	     (destructuring-bind (unit quantity) level
+	       (cl-case (first level)
+		 (:hour (etime-round etime :hour quantity n))
+		 (:minute (etime-round etime :minute quantity n))
+		 (:second (etime-round etime :second quantity n))
+		 (otherwise
+		  (error "Level unit %S is not implemented!" unit))))
 	     (cl-case level
 	       (1 (add-time etime :minute n))
 	       (2 (add-time etime :hour n))
 	       (3 (add-time etime :second n))
 	       (otherwise
 		(error "Level %S is not implemented!" level))))
-     :with-seconds (or (= level 3) (> (length time) 6)))))
+     :with-seconds (if (listp level)
+		     (eql (first level) :second)
+		     (or (= level 3) (> (length time) 6))))))
 ;;(inc-clock "08:15:01" 1 3)
 ;;(inc-clock "08:15" 1 3)
  
