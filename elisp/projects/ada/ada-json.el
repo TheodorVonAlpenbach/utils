@@ -6,6 +6,6 @@
 		 :from 'json
 		 :where '(= id $s1))
 	 (id json-id-descriptor))))
-;;(json-from-id 195026)
+;;(setf qwe (json-from-id 193551))
 
 (provide 'ada-json)

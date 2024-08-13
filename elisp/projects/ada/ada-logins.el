@@ -48,6 +48,7 @@ INFIX.
 	 (format "celev_no456326%sa_%d" (ada-login-infix pupil-prefix-arg) pupil-number)))
      "celev_no456326499_1a_1")))
 
+;; prefix for *clipboard-map* is "cv"
 (defvar *ada-login-map* (make-sparse-keymap))
 (define-key *clipboard-map* "a" *ada-login-map*)
 

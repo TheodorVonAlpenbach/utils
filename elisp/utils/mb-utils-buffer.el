@@ -291,7 +291,9 @@ If optional ENSURE-NEWLINE-P is not nil, then insert a newline at the
 end of buffer if not already present."
   (goto-char (point-max))
   (when (and ensure-newline-p (plusp (current-column)))
-    (newline)))
+    (newline))
+  (point))
+;;(save-excursion (eob))
 
 (cl-defun buffer-region (&optional (buffer (current-buffer)))
   (with-buffer buffer (save-excursion (list (bob) (eob)))))
@@ -757,5 +759,12 @@ copied is displayed."
 (defun buffer-file-name-to-clipboard ()
   (interactive)
   (string-to-clipboard (buffer-file-name)))
+
+(defun sort-lines-with-comments ()
+  (interactive)
+  (let ((new-lines (sort-strings-with-comments (buffer-lines) comment-start)))
+    (apply #'delete-region (buffer-region))
+    (insert (concat* new-lines :in "\n"))))
+;;(sort-lines-with-comments)
 
 (provide 'mb-utils-buffer)

@@ -34,6 +34,13 @@ This method guarantees to return a number of type float."
 		       -400)))))
 ;;(glicko-expected-score 1500 1300 50)
 
+(defun glicko-expected-opponents-rating (players-rating opponents-rating opponents-RD)
+  "Returns a float"
+  (/ 1 (1+ (expt 10 (/ (* (glicko-g-function opponents-RD)
+			  (- players-rating opponents-rating))
+		       -400)))))
+;;(glicko-expected-score 1500 1300 50)
+
 (defun glicko-d-squared (expected-scores opponent-g-values)
   "The lists opponent-g-values and expected-scores containts the
 g-value and expected score, respectively, for the opponents"

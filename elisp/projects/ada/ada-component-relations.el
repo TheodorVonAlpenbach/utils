@@ -24,7 +24,7 @@
 	:from gateway
 	:where (= id $s1)]
       gateway-id))))
-;;(gateway-content-list-ids 4)
+;;(setf gateway-4 (gateway-content-list-ids 4))
 
 (defun gateway-content-list-json-ids (gateway-id)
   (ids (emacsql db
@@ -155,7 +155,7 @@ objects (hash tables)"
       [:select component-id :from gateway-components
 	:where (= gateway-id $s1)]
       gateway-id)))
-;;(length (gateway-components 4))
+;;(setf gateway-4-components (gateway-components 4))
 ;;(equal (sort (gateway-components 4) #'<) (sort (calculate-gateway-components 4) #'<))
 
 (defun component-gateways (component-id)
@@ -218,6 +218,8 @@ return the pair (target-id source-id)."
 	   do (push-list new-ids all-ids)
 	   do (push-list rels all-rels)
 	   finally return (list all-rels all-ids)))
+;;(remove-duplicates (flatten (setf ancestors-46751 (find-component-ancestors 46751))))
+;;(remove-duplicates (flatten (setf ancestors-46751 (find-component-ancestors 46751))))
 ;;(setf ewq-20192 (find-component-ancestors 20192))
 ;;(setf ewq-16897 (find-component-ancestors 16897))
 ;;(setf ewq-18161 (find-component-ancestors 18161))

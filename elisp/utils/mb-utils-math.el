@@ -1219,4 +1219,7 @@ TODO: move this to some yamal elisp module."
 ;;(* 250 146 128)                                  4672000
 ;; Volume Amalthea according to Wikipedia          2430000 (assuming that it is a true ellipsoid?)
 
+(cl-defun area-secant (theta &optional (radius 1))
+  (* (/ (sq radius) 2.0) (- theta (sin theta))))
+
 (provide 'mb-utils-math)

@@ -2,6 +2,7 @@
 
 defaultContextBeforeArgument=4
 defaultContextAfterArgument=1
+adaTagTemplate="ADA-13500"
 
 function printUsage {
     echo "Usage: gitgrep ADA-NUMBER [CONTEXT1] [CONTEXT2]"
@@ -44,12 +45,13 @@ fi
 contextBeforeArgument=${2:-$defaultContextBeforeArgument}
 contextAfterArgument=${3:-$defaultContextAfterArgument}
 
-adaTag=ADA-12$1
+adaTag="${adaTagTemplate:0:$((${#adaTagTemplate} - ${#adaNumber}))}$adaNumber"
 
 if [ -n "$verbose" ]; then
     echo Verbose mode is on
-    echo adaNumber is \'$adaNumber\'
     echo adaTag is \'$adaTag\'
+    echo adaNumber \(script argument\) is \'$adaNumber\'
+    echo adaTagTemplate is \'$adaTagTemplate\'
     echo contextBeforeArgument is \'$contextBeforeArgument\'
     echo contextAfterArgument is \'$contextAfterArgument\'
 fi

@@ -456,6 +456,7 @@ Not in use. Projects should be shared, at least until we are up and running Git.
     (find-file (match-string 1 curline))
     (goto-char (string-to-number (match-string 2 curline)))))
 
+(setf calendar-week-start-day 1)
 ;;(require 'pcvs)
 (require 'mb-tex)
 (require 'mb-octave)

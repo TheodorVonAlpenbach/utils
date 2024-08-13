@@ -846,4 +846,22 @@ SEPARATOR"
 ;;(length "b3065a578a7f")
 ;;(uuid-p "594d3459cb99b500132bc742")
 
+(defun commented-string-p (string comment-start &optional empty-is-comment-p)
+  (or (and empty-is-comment-p (empty-string-p string))
+      (string-match (format "^%s" comment-start) string)))
+;;(commented-string-p "#!/bin/bash" "#")
+;;(commented-string-p "" "#" t)
+
+(defun sort-strings-with-comments (strings comment-start)
+  (let ((comments ()))
+    (loop for string in strings
+	  if (commented-string-p string comment-start t)
+	  do (push string comments)
+	  else
+	  collect (list (nreverse comments) string) into res
+	  and do (setf comments ())
+	  finally return (flatten (cl-sort res #'string< :key #'second)))))
+;;(sort-strings-with-comments (file-lines "~/git/utils/bin/adafind.sh") "#")
+
+
 (provide 'mb-utils-strings)

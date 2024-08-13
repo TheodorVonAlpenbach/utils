@@ -9,21 +9,21 @@
 
 (defmacro define-degree-trigonometry (fns)
   `(let ((c ,(/ pi 180.0)))
-     ,@(loop for fn in fns
-	     collect `(defun ,(intern (concat (sstring fn) "d")) (d)
-			(,fn (* degrees-to-radians d)))
-	     collect `(defun ,(intern (concat "a" (sstring fn) "d")) (r)
-			(* radians-to-degrees
-			   (,(intern (concat "a" (sstring fn))) r))))))
+     ,@(cl-loop for fn in fns
+		collect `(defun ,(intern (concat (sstring fn) "d")) (d)
+			   (,fn (* degrees-to-radians d)))
+		collect `(defun ,(intern (concat "a" (sstring fn) "d")) (r)
+			   (* radians-to-degrees
+			      (,(intern (concat "a" (sstring fn))) r))))))
 (define-degree-trigonometry (cos sin tan sec scs))
-;;(loop for fn in '(sind cosd tand) collect (funcall fn 45))
+;;(cl-loop for fn in '(sind cosd tand) collect (funcall fn 45))
 ;;(list (asind 0.5) (acosd 0.5) (atand 1))
 
 (cl-defun polylogarithm-abs-lt-1 (x &optional (n 2) (num-iterations 50))
   "Calculates the Li_n function of X.
 See http://mathworld.wolfram.com/Polylogarithm.html for a definition."
-  (loop for i from 1 below num-iterations
-	sum (/ (expt x i) (expt i n))))
+  (cl-loop for i from 1 below num-iterations
+	   sum (/ (expt x i) (expt i n))))
 
 (cl-defun dilog-lt-minus-1 (x &optional (num-iterations 50))
   "http://www.geocities.com/hjsmithh/Numbers/Dilog.html"
@@ -86,8 +86,8 @@ for numerical implementation basis."
   (if (minusp x)
     (- (erf-tau x) 1)
     (- 1 (erf-tau x))))
-;;(loop for x from -3 to 3 by 0.5 collect (erf x))
-;;(loop for x in '(0.8) collect (erf x))
+;;(cl-loop for x from -3 to 3 by 0.5 collect (erf x))
+;;(cl-loop for x in '(0.8) collect (erf x))
 
 (defun erfc (x)
   "Calculate the complimentary error function for X"
@@ -103,12 +103,12 @@ for numerical implementation basis."
     (* (signum x)
        (sqrt (- (sqrt (- (sq subexp) (/ ln1-x2 a)))
 		subexp)))))
-;;(loop for x in '(0 .1 .2 .5 1 1.2 1.5 1.82 2 3) collect (- x (inverse-erf (erf x))))
+;;(cl-loop for x in '(0 .1 .2 .5 1 1.2 1.5 1.82 2 3) collect (- x (inverse-erf (erf x))))
 
 (cl-defun normal-distribution-quantile (p &optional (mu 0) (sigma 1))
-  (assert (< 0 p 1))
+  (cl-assert (< 0 p 1))
   (+ mu (* sigma (sqrt 2) (inverse-erf (- (* 2 p) 1)))))
-;;(loop for p in (list .95 .9 (/ 5 6.0) .75 .5) collect (normal-distribution-quantile p 100 15))
+;;(cl-loop for p in (list .95 .9 (/ 5 6.0) .75 .5) collect (normal-distribution-quantile p 100 15))
 
 (cl-defun geometric-series (r &key (start 0) end)
   "Return the infinite geometric series 1 + r + r^2 + ..."
@@ -135,11 +135,58 @@ for numerical implementation basis."
 (defun quadratic-root (a b c)
   "Return the roots of the quadratic polynomial ax2 + bx + c."
   (let ((d (quadratic-discriminant a b c)))
-    (assert (not (minusp d)) t "The discriminant is negative.")
+    (cl-assert (not (minusp d)) t "The discriminant is negative.")
     (let* ((2a (* 2.0 a))
 	   (b/2a (/ b 2.0 a))
 	   (sqrt-expr (/ (sqrt d) 2a)))
       (list (- sqrt-expr b/2a) (- (+ sqrt-expr b/2a))))))
 ;;(quadratic-root 1 0 -1)
+
+(defun falsi-method (f a b e m)
+  "Return the solution to the equation F(x) = 0.
+Here, A, B are the endpoints of an interval where we search. E is
+half of upper bound for relative error. M is the maximal number
+of iterations."
+  (let ((c 0)
+        (fc 0)
+        (n 0)
+        (side 0)
+	;; starting values at endpoints of interval
+        (fa (funcall f a))
+        (fb (funcall f b)))
+    (while (< n m)
+      (setf c (/ (- (* fa b) (* fb a)) (- fa fb)))
+      (if (< (abs (- b a)) (* e (abs (+ b a))))
+        (setf n m)
+        (setf fc (funcall f c))
+        (if (> (* fc fb) 0)
+	  ;; fc and fb have same sign, copy c to b
+          (progn
+            (setf b c fb fc)
+            (if (= side -1)
+              (/2 fa))
+            (setf side -1))
+          (if (> (* fa fc) 0)
+	    ;; fc and fa have same sign, copy c to a
+            (progn
+              (setf a c fa fc)
+              (if (= side 1)
+                (/2 fb))
+              (setf side 1))
+            (setf n m))))
+      (incf n))
+    c))
+;;(falsi-method #'(lambda (x) (- (cos x) (expt x 3))) 0 1 5E-15 100)
+
+(cl-defun newton-raphson (f df x0 &optional (eps 1E-12) (max-n 20))
+  (loop for n below max-n
+	for xn = x0 then xn+1
+	for fn = (funcall f xn)
+	for dfn = (funcall df xn)
+	for dx = (/ fn dfn)
+	for xn+1 = (- xn dx)
+	collect xn+1 into partial
+	if (< (abs dx) eps) return (list xn+1 (/ dx eps) n partial)))
+;;(setf qwe (newton-raphson #'(lambda (x) (- (area-secant x) (/ pi 3))) #'(lambda (x) (/ (- 1 (cos x)) 2)) 2.0))
 
 (provide 'mb-math-functions)

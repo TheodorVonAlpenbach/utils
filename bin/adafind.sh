@@ -1,4 +1,4 @@
-#!/bin/bash
+# !/bin/bash
 
 cd ~/ada/node/domain-types/src
 /bin/bash ~/bin/gfind $*

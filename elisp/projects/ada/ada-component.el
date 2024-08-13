@@ -5,7 +5,9 @@
   (emacsql db (vector :select (column-selection columns)
 		      :from 'component
 		      :where '(= source-id $r1)) source-id))
-;;(components-from-source-id "649d70154ed321440ae59611" :id :version :uuid)(("15883" "2" "c7808c46-76b8-3558-9a91-9fb1d30fbd3c") ("15884" "16" "cb6d8e44-02f2-36af-914a-db2f85e8b1be") ("15885" "17" "a26987ec-2e0a-3730-ba74-06a83e2f2467") ("15886" "23" "486116b3-48e8-39a7-b592-a8145f026f34"))
+;;(caar (components-from-source-id "65547642c449e9f9df3b835d" :uuid))""
+;;(caar (components-from-source-id "5f57406a9abf8c1727301221" :uuid))
+;;(components-from-source-id "5f57406a9abf8c1727301221" :id :version :uuid)
 
 (defun latest-component-id-from-source-id (source-id)
   (id (min-element (components-from-source-id source-id :id :version)
@@ -14,7 +16,7 @@
 
 (defun latest-component-from-source-id (source-id &rest columns)
   (apply #'component (latest-component-id-from-source-id source-id) columns))
-;;(latest-component-from-source-id "6422c4c1520bcb49b4523f64" :uuid)
+;;(latest-component-from-source-id "6422c4c1520bcb49b4523f64")
 
 (defun component-from-uuid (uuid &rest columns)
   (car (emacsql db (vector :select (column-selection columns)

@@ -139,6 +139,14 @@
   (should (uuid-p "53bf7368-f985-4061-9283-b3065a578a7f"))
   (should (uuid-p "53bf7368f98540619283b306")))
 
+(ert-deftest test-commented-string-p ()
+  "Test of `commented-string-p'"
+  (should (commented-string-p "#comment" "#"))
+  (should (commented-string-p "//comment" "//"))
+  (should-not (commented-string-p "#comment" "//"))
+  (should-not (commented-string-p "" "//" nil))
+  (should (commented-string-p "" "//" t)))
+
 (ert-deftest test-andcat ()
   "Test of `andcat'"
   (should (equal (andcat '()) ""))
