@@ -863,5 +863,18 @@ SEPARATOR"
 	  finally return (flatten (cl-sort res #'string< :key #'second)))))
 ;;(sort-strings-with-comments (file-lines "~/git/utils/bin/adafind.sh") "#")
 
+(defconst +supported-alphabet-languages+ '(:en :no))
+
+(cl-defun alphabet (&optional (language :en))
+  "Return a string of characters in LANGUAGE sorted alphabetically.
+Default language is :en. Other supported languages are: :no"
+  (case language
+    (:en "abcdefghijklmnopqrstuvwxyz")
+    (:no "abcdefghijklmnopqrstuvwxyzæøå")
+    (otherwise (error "Unknown language %S! Supported languages are: "
+		      +supported-alphabet-languages+))))
+
+(defun alphabet (&optional direction language)
+  "")
 
 (provide 'mb-utils-strings)

@@ -767,4 +767,19 @@ copied is displayed."
     (insert (concat* new-lines :in "\n"))))
 ;;(sort-lines-with-comments)
 
+(defun transpose-string (string)
+  "Insert a newline between each character in STRING"
+  (coerce (nbutlast (zip (coerce string 'list) 10)) 'string))
+
+(defun insert-alphabet (n)
+  "Insert alphabet at point"
+  (interactive "P")
+  (unless n (setf n 0))
+  (let ((string (alphabet (if (zerop (logand n 1)) :en :no))))
+    (unless (zerop (logand n 2))
+      (setf string (transpose-string string)))
+    (unless (zerop (logand n 4))
+      (setf string (upcase string)))
+    (insert string)))
+
 (provide 'mb-utils-buffer)

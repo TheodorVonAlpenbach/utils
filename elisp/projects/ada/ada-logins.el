@@ -44,7 +44,7 @@ INFIX.
    (if current-prefix-arg
      (if (< current-prefix-arg 100)
        (format "celev_no456326%sa_1" (ada-login-infix current-prefix-arg))
-       (destructuring-bind (pupil-prefix-arg pupil-number) (cl-floor current-prefix-arg 10)
+       (cl-destructuring-bind (pupil-prefix-arg pupil-number) (cl-floor current-prefix-arg 10)
 	 (format "celev_no456326%sa_%d" (ada-login-infix pupil-prefix-arg) pupil-number)))
      "celev_no456326499_1a_1")))
 

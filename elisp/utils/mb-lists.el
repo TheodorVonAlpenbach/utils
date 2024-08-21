@@ -124,12 +124,18 @@ ELEMENTS are exactly the elements in LIST that evaluates to K."
 	collect (list k v)))
 ;;(equivalence-class-with-key '((a) (b) (c) (a) (b) (a) (d)) :key #'car)
 
+(defun listify-atoms (list-or-atoms)
+  (let* ((list (find-if #'listp list-or-atoms))
+	 (n (length list)))
+    (cl-loop for x in list-or-atoms collect (if (listp x) x (make-list n x)))))
+;;(listify-atoms '(a (1 2 3) (d f)))
+
 (defun nzip (&rest lists) 
   (apply #'nconc (transpose lists)))
 
 (defun zip (&rest lists) 
-  (apply #'nzip (copy-tree lists)))
-;;(zip '(0 2 4) '(1))
+  (apply #'nzip (listify-atoms (copy-tree lists))))
+;;(zip '(0 2 4) 1)
 ;;(butlast (zip '(0 2 4) '(1 3 3)))
 
 (cl-defun nunzip (list &optional (n 2))

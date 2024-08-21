@@ -8,4 +8,10 @@
   "Test of `major-mode-p'"
   (should (major-mode-p 'messages-buffer-mode "*Messages*")))
 
+(ert-deftest test-transpose-string ()
+  "Test of `transpose-string'"
+  (should (equal (transpose-string "abc") "a
+b
+c")))
+
 (provide 'test-mb-utils-buffer.el)

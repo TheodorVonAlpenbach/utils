@@ -55,7 +55,8 @@
 (ert-deftest test-zip ()
   "Test of `zip'"
   (should (equal (zip nil) nil))
-  (should (equal (zip '(0 2 4) '(1 3 3)) '(0 1 2 3 4 3))))
+  (should (equal (zip '(0 2 4) '(1 3 3)) '(0 1 2 3 4 3)))
+  (should (equal (butlast (zip '(1 2 3) 'og)) '(1 og 2 og 3))))
 
 (ert-deftest test-transpose ()
   "Test of `transpose'"
@@ -118,6 +119,10 @@
 					    :key #'(lambda (x) (substring x 0 1))
 					    :test #'equal)
 		'(("a" ("abc" "ab" "a")) ("b" ("bcd" "bc" "b"))))))
+
+(ert-deftest test-listify-atoms ()
+  "Test of `listify-atoms'"
+  (should (equal (listify-atoms '(a (1 2 3) (d f))) '((a a a) (1 2 3) (d f)))))
 
 (ert-deftest test-memcase ()
   "Test of `memcase'"
