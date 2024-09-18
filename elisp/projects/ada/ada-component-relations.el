@@ -3,6 +3,20 @@
 ;; for a definition
 (require 'ada-mysql)
 
+(defun gateway-components (gateway-id)
+  "Retrieve data from table gateway_components"
+  (mapcar (compose #'string-to-integer #'car)
+    (emacsql db
+      [:select component-id :from gateway-components
+	:where (= gateway-id $s1)]
+      gateway-id)))
+;;(setf gateway-4-components (gateway-components 4))
+;;(equal (sort (gateway-components 4) #'<) (sort (calculate-gateway-components 4) #'<))
+;;(component-gateways 3180)
+;;(component-gateways 43043)
+;;(loop for x in (component-gateways 65169) collect (gateway-from-id x :internal-title))
+;;(ada-columns 'gateway)
+
 (defun gateway-conditions (gateway-id &rest columns)
   (emacsql db
     (vector :select (column-selection columns)
@@ -147,24 +161,8 @@ objects (hash tables)"
   (target-components (gateway-root-ids gateway-id)))
 ;;(length (calculate-gateway-components 4))
 ;;(setf qwe (calculate-gateway-components 4))
-;;(find 37021 qwe)
-
-(defun gateway-components (gateway-id)
-  (mapcar (compose #'string-to-integer #'car)
-    (emacsql db
-      [:select component-id :from gateway-components
-	:where (= gateway-id $s1)]
-      gateway-id)))
-;;(setf gateway-4-components (gateway-components 4))
-;;(equal (sort (gateway-components 4) #'<) (sort (calculate-gateway-components 4) #'<))
-
-(defun component-gateways (component-id)
-  (mapcar (compose #'string-to-integer #'car)
-    (emacsql db
-      [:select * :from gateway-components
-	:where (= component-id $s1)]
-      component-id)))
-;;(component-gateways 20192)
+;;(length qwe)
+;;(find 65169 qwe)
 
 (defun all-component-ids ()
   (emacsql db [:select id :from component]))
@@ -178,6 +176,7 @@ objects (hash tables)"
 	  :from component-relations
 	  :where target-component-id :in $v1]
 	(coerce target-ids 'vector)))))
+;;(source-components-1 '(65169))
 
 (defun component-relation (source-id target-id)
   (emacsql db
@@ -206,7 +205,7 @@ return the pair (target-id source-id)."
 	  :from component-relations
 	  :where target-component-id :in $v1]
 	(coerce target-ids 'vector)))))
-;;(parent-relations (list 20192))
+;;(parent-relations (list 65169))
 
 (defun find-component-ancestors (component-id)
   (cl-loop with all-ids = (list component-id)
@@ -220,6 +219,8 @@ return the pair (target-id source-id)."
 	   finally return (list all-rels all-ids)))
 ;;(remove-duplicates (flatten (setf ancestors-46751 (find-component-ancestors 46751))))
 ;;(remove-duplicates (flatten (setf ancestors-46751 (find-component-ancestors 46751))))
+;;(setf ewq-65169 (find-component-ancestors 65169))
+;;(setf ewq-43043 (find-component-ancestors 43043))
 ;;(setf ewq-20192 (find-component-ancestors 20192))
 ;;(setf ewq-16897 (find-component-ancestors 16897))
 ;;(setf ewq-18161 (find-component-ancestors 18161))

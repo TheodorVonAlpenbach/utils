@@ -26,4 +26,14 @@
   (should (equal (mapcar #'derangement (0-n 11))
 		 '(1 0 1 2 9 44 265 1854 14833 133496 1334961))))
 
+(ert-deftest test-binomial-coefficient ()
+  "Test of `binomial-coefficient'"
+  (should (equal (binomial-coefficient 5 0) 1))
+  (should (equal (binomial-coefficient 5 -1) 0)))
+
+(ert-deftest test-stirling-numbers-1 ()
+  "Test of `stirling-numbers-1'"
+  (should (equal (loop for k to 5 collect (stirling-numbers-1 5 k))
+		 '(0 24 50 35 10 1))))
+
 (provide 'test-mb-combinatorics)

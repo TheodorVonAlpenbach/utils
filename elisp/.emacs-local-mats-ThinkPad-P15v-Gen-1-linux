@@ -54,6 +54,7 @@ sudo mount -a.")
 	(,+mb-lisp-dir+ "div/scratch.el")
 	(,+mb-lisp-dir+ "projects/ada/ada-mysql.el")
 	(,+mb-lisp-dir+ "projects/ada/ada-logins.el")
+	(,+mb-lisp-dir+ "data/historie.org")
 
 	(,+mb-utils-dir+ "lisp/mb-utils.lisp")
 

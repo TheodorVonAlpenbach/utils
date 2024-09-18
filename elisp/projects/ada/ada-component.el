@@ -5,7 +5,7 @@
   (emacsql db (vector :select (column-selection columns)
 		      :from 'component
 		      :where '(= source-id $r1)) source-id))
-;;(caar (components-from-source-id "65547642c449e9f9df3b835d" :uuid))""
+;;(car (components-from-source-id "65e0b7be720a665ffafad6db" :id :uuid))("65169" "3b0828c7-5783-377e-9635-3e68c93d747f")
 ;;(caar (components-from-source-id "5f57406a9abf8c1727301221" :uuid))
 ;;(components-from-source-id "5f57406a9abf8c1727301221" :id :version :uuid)
 

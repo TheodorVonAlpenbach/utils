@@ -874,7 +874,4 @@ Default language is :en. Other supported languages are: :no"
     (otherwise (error "Unknown language %S! Supported languages are: "
 		      +supported-alphabet-languages+))))
 
-(defun alphabet (&optional direction language)
-  "")
-
 (provide 'mb-utils-strings)

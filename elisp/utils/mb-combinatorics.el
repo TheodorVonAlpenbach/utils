@@ -25,6 +25,14 @@ For the definition of !N, see https://en.wikipedia.org/wiki/Derangement"
 (defalias 'n! 'factorial)
 (defalias '!n 'derangement)
 
+(cl-defun factorials (n &optional (m 1))
+  "Returns M!, (M + 1)!, ... N!.
+By default, M is 1."
+  (loop for i from m to n
+	for p = (n! m) then (* p i)
+	collect p))
+;;(factorials 5 3)
+
 (cl-defun fibonacci-numbers (n &optional (start-values '(0 1)))
   "Return the N first Fibonacci numbers.
 The optional START-VALUES modifies the two first elements in the
@@ -82,13 +90,30 @@ resulting sequence."
 
 (cl-defun binomial-coefficient (n m &optional (method :auto))
   "Returns n!/(m!*(n-m)!"
-  (let* ((m* (max m (- n m)))
-	 (factors (loop for denominator-factor in (a-b 1 (- n m*))
-			for numerator-factors = (a-b (1+ m*) n)
-			then (remove-factors numerator-factors denominator-factor)
-			finally return numerator-factors)))
-    (product* factors :method method)))
+  (if (minusp m)
+    0
+    (let* ((m* (max m (- n m)))
+	   (factors (loop for denominator-factor in (a-b 1 (- n m*))
+			  for numerator-factors = (a-b (1+ m*) n)
+			  then (remove-factors numerator-factors denominator-factor)
+			  finally return numerator-factors)))
+      (product* factors :method method))))
 ;;(time (binomial-coefficient 112 100 :auto))
+
+(cl-defun binomial-coefficients-n (n1 n2 m &optional (method :auto))
+  "Returns (n1 / m), ((n1 + 1) / m) ... (n2 / m)"
+  (loop for n from n1 to n2
+	for bc = (binomial-coefficient n m method) then (/ (* bc n) (- n m))
+	collect bc))
+;;(binomial-coefficients-n 4 6 3)
+
+(cl-defun binomial-coefficients-m (n m1 m2 &optional (method :auto))
+  "Returns (n / m1), (n / (m1 + 1)) ... (n2 / m2)"
+  (loop for m from m1 to m2
+	for bc = (binomial-coefficient n m method) then (/ (* bc (- n m -1)) m)
+	collect bc))
+;;(binomial-coefficients-m 6 0 5)
+;;(binomial-coefficient 5 2)
 
 (cl-defun catalan-nth (n)
   "Return the Nth Catalan number.
@@ -200,7 +225,7 @@ given PLAYERS number of players each having HANDS initial hands.
 The function is inspired by the film 'The Midnight Sky' where XXX
 claims there are over 60 billions initial rummy hands. Since the
 scene where this quote occurs involves two players, we assume
-PLAYERS is 2 and CARDS is !0.
+PLAYERS is 2 and CARDS is 10.
 
 This assertion seems wrong given the Wikipedia definition of
 standard rummy."
@@ -210,5 +235,35 @@ standard rummy."
 		    do (decf deck cards)))
      (n! players)))
 ;;(rummy-hands 2)
+
+(defun stirling-numbers-2 (n k)
+  "Return coefficients s(n, k), i.e. a Stirling number of the first kind.
+This is the number of permutations of n elements with k disjoint
+cycles."
+  (round
+   (loop with k-i!s = (nreverse (factorials k 0))
+	 for i from 0 to k
+	 for sign = (expt -1 (- k i))
+	 for i! = 1 then (* i! i)
+	 for k-i! in k-i!s
+	 for addend = (* sign (/ (expt i n) 1.0 k-i! i!))
+	 ;; do (print (list i sign i! k-i! addend))
+	 sum addend)))
+;;(stirling-numbers-2 0 0)
+;;(loop for k to 10 collect (stirling-numbers-2 10 k))
+
+(defun stirling-numbers-1 (n k)
+  "Return coefficients s(n, k), i.e. a Stirling number of the first kind.
+This is the number of permutations of n elements with k disjoint
+cycles."
+  (loop with 2n-k = (- (2* n) k)
+	for j from n to 2n-k
+	for signum = (expt -1 (- j k))
+	for addend = (* signum
+			(binomial-coefficient (1- j) (1- k))
+			(binomial-coefficient 2n-k j)
+			(stirling-numbers-2 (- j k) (- j n)))
+	sum addend))
+;;(loop for k to 4 collect (stirling-numbers-1 4 k))
 
 (provide 'mb-combinatorics)

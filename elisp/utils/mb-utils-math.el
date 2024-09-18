@@ -116,7 +116,7 @@ converting to float if the product is large for an integer."
 
 (cl-defun product-a-b (a b)
   (product (a-b a b)))
-;;(product-a-b 1 4)
+;;(product-a-b 2 4)
 
 (defmacro avg (&rest args)
   `(/ (+ ,@args) ,(length args)))

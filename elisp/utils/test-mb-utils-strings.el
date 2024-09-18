@@ -147,11 +147,11 @@
   (should-not (commented-string-p "" "//" nil))
   (should (commented-string-p "" "//" t)))
 
-(ert-deftest test-alphabet-characters ()
-  "Test of `alphabet-characters'"
-  (should (equal (length (alphabet-characters)) 26))
-  (should (equal (length (alphabet-characters :en)) 26))
-  (should (equal (length (alphabet-characters :no)) 29)))
+(ert-deftest test-alphabet ()
+  "Test of `alphabet'"
+  (should (equal (alphabet) "abcdefghijklmnopqrstuvwxyz"))
+  (should (equal (alphabet :en) "abcdefghijklmnopqrstuvwxyz"))
+  (should (equal (alphabet :no) "abcdefghijklmnopqrstuvwxyzæøå")))
 
 (ert-deftest test-andcat ()
   "Test of `andcat'"
