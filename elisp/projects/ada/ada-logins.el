@@ -50,9 +50,11 @@ INFIX.
 
 ;; prefix for *clipboard-map* is "cv"
 (defvar *ada-login-map* (make-sparse-keymap))
-(define-key *clipboard-map* "a" *ada-login-map*)
 
-(define-key *ada-login-map* "p" #'ada-login-pupil)
-(define-key *ada-login-map* "t" #'ada-login-teacher)
+(define-key *ada-login-map* "p" #'ada-copy-to-clipboard)
+(define-key *ada-login-map* "e" #'ada-login-pupil)
+(define-key *ada-login-map* "l" #'ada-login-teacher)
+
+(define-key *clipboard-map* "a" *ada-login-map*)
 
 (provide 'ada-logins)

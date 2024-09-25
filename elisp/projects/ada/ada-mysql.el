@@ -58,6 +58,7 @@
     mysql-map))
 
 (defvar db nil)
+;;(setf db nil)
 
 (defun ada-set-environment (&optional prefix)
   (interactive)
@@ -68,7 +69,9 @@
 
 (cl-defun ada-name (&optional (db db))
   (interactive)
-  (princ (emacsql-psql-dbname db)))
+  (princ
+   (if db (emacsql-psql-dbname db)
+       "You are currently not connected to a database")))
 ;;(ada-name)
 
 ;;(setf db (ada-mysql-connect :adam))

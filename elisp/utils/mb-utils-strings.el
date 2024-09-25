@@ -1,6 +1,7 @@
 (require 'mb-utils-div)
 (require 'mb-utils-sets)
 (require 'mb-sequences)
+(require 'mb-utils-math)
 
 (defun string> (string1 string2)
   "Returns non-nil iif string1 > string2. See `string<'"
@@ -168,7 +169,10 @@ ENDP is non-nil, the split is at end of regexp match."
 	      pos))
     (let ((res-first (split-string-2 string regexp nil))
 	  (res-second (split-string-2 string regexp t)))
-      (values (first res-first) (second res-second) (third res-first) (third res-second)))))
+      (values (first res-first)
+	      (second res-second)
+	      (third res-first)
+	      (third res-second)))))
 ;;(split-string-2 "abcdef" "g" nil t)
 
 (cl-defun split-string-3 (string regexp-interval)
@@ -220,7 +224,8 @@ REGEXP and SIDE arguments, respectively, in `split-string'."
       res)))
 ;;(split-string-regexp-list "babc db efg b " "b" t)
 
-(cl-defun split-string-regexp-pairs (string regexp &key trim (side :both) (prefixed t))
+(cl-defun split-string-regexp-pairs (string regexp
+				     &key trim (side :both) (prefixed t))
   "Split STRING at places where REGEXP matches a substring of STRING.
 
 It returns a list similiar to what `split-string-regexp-list'
@@ -231,17 +236,20 @@ PREFIXED is nil and to \(\(substring-1 regexp-match-1\)
 
 For the use of TRIM and SEPARATOR, see `split-string-regexp-list'"
   (cut (funcall (if prefixed #'rest #'butlast)
-		(split-string-regexp-list string regexp trim side))))
+	 (split-string-regexp-list string regexp trim side))))
 ;;(split-string-regexp-pairs "babcdbefgb" "b" :trim nil :side :left)
 
-(cl-defun split-string-regexp (string regexp &optional omit-nulls trim (side :both))
-  "Split STRING to a list of substrings at places where REGEXP matches a substring of STRING.
+(cl-defun split-string-regexp (string regexp
+			       &optional omit-nulls trim (side :both))
+  "Split STRING to a list of substrings at places where REGEXP
+matches a substring of STRING.
 
 If OMIT-NULLS is true, it detracts from the result all substrings
 that are empty strings.
 
 For the use of TRIM and SEPARATOR, see `split-string-regexp-list'."
-  (let ((res (first (nunzip (split-string-regexp-list string regexp trim side)))))
+  (let ((res (first
+	      (nunzip (split-string-regexp-list string regexp trim side)))))
     (if omit-nulls (cl-delete "" res :test #'string=) res)))
 ;;(split-string-regexp "bab cd bqwerb" "b" t nil)
 
@@ -252,11 +260,12 @@ For the use of TRIM and SEPARATOR, see `split-string-regexp-list'."
 		       (split-string-3 string regexp-interval)))
 
 (cl-defun substring-intv (string regexp-interval &optional (n :once))
-  "Returns substring of STRING matching REGEXP-INTERVAL (see `split-string-3' for more details).
-If optional argument N is :ONCE, the method returns either the
-first match or an empty string. If N is :ALL it returns all
-matches in a list of strings. If N is a non-negative it returns
-the the first N matches in a list of strings."
+  "Returns substring of STRING matching REGEXP-INTERVAL
+(see `split-string-3' for more details). If optional argument N
+is :ONCE, the method returns either the first match or an empty
+string. If N is :ALL it returns all matches in a list of strings.
+If N is a non-negative it returns the the first N matches in a
+list of strings."
   (let ((count (cl-case n 
 		 (:once 1)
 		 (:all most-positive-fixnum)
@@ -265,12 +274,13 @@ the the first N matches in a list of strings."
     (cl-assert (and (numberp count) (>= count 0)))
     (while (and (> (length string) 0)
 		(> count 0))
-	  (cl-multiple-value-bind (beg mid end match) (split-string-3 string regexp-interval)
-	    (if match
-	      (push mid res)
-	      (setq count 0))
-	    (setq string end))
-	  (cl-decf count))
+      (cl-multiple-value-bind (beg mid end match)
+	  (split-string-3 string regexp-interval)
+	(if match
+	  (push mid res)
+	  (setq count 0))
+	(setq string end))
+      (cl-decf count))
     (if (eq n :once)
       (if (first res) (first res) "")
       (nreverse res))))
@@ -279,13 +289,15 @@ the the first N matches in a list of strings."
 (cl-defun string-replace-intv (string regexp-interval &optional (newstring ""))
   "Replaces all substrings in STRING that matches REGEXP-INTERVAL with
 NEWSTRING (empty string by default)."
-  (cl-multiple-value-bind (beg mid end match) (split-string-3 string regexp-interval)
+  (cl-multiple-value-bind (beg mid end match)
+      (split-string-3 string regexp-interval)
     (if match 
       (concat beg newstring (string-replace-intv end regexp-interval newstring)) 
       string)))
 ;;(string-replace-intv "weqwesadqweqwe" (interval-cc "q" "w") "qu")
 
-(cl-defun mb-string-replace (string regexp &optional (newstring "") (preserve-case-p))
+(cl-defun mb-string-replace (string regexp
+			     &optional (newstring "") (preserve-case-p))
   "Replaces all substrings in STRING that matches REGEXP with
 NEWSTRING."
   (with-temp-buffer
@@ -301,7 +313,8 @@ NEWSTRING."
   SUBST-STRING at position FROM in STRING"
   (let ((substrings (split-at-position string from to)))
     (if (/= 3 (length substrings))
-      (error "FROM (%d) and TO (%d) arguments are invalid for STRING %s" string from to)
+      (error "FROM (%d) and TO (%d) arguments are invalid for STRING %s"
+	     string from to)
       (concat (first substrings) subst-string (third substrings)))))
 ;;(substitute-string "012qwe678" "ewq" 3 6)
 
@@ -321,7 +334,6 @@ result of FUNCTION."
 	  (setq string (substitute-string string subst-string from to))
 	  (cl-incf pos (length subst-string)))))
     string))
-;;(string-replace-f "-qwewe-" "\\(qw\\)e" #'(lambda (string) (upcase (match-string 1 string))))
 
 (cl-defun string-replace-map (string map)
   "Alters STRING according to MAP. A map is an list of pairs
@@ -463,7 +475,8 @@ overruled by keywords :START and :END."
 (defun match-string* (num string &optional no-properties)
   "Same as `match-string', but if NO-PROPERTIES is non-nil,
 `match-string-no-properties' is called instead."
-  (funcall (if no-properties #'match-string-no-properties #'match-string) num string))
+  (funcall (if no-properties #'match-string-no-properties #'match-string)
+    num string))
 
 (cl-defun string-match* (regexp string &key (num 0) (start 0)
 					 (return-null nil)
@@ -479,17 +492,25 @@ tree. Then a tree of corresponding matches is returned."
 ;;(string-match* "\\(e\\)" "sdkjhalkqweee " :num '(1 0) :no-properties nil)
 ;;(string-match* "[[:alpha:]][[:alnum:]]*" "daystart")
 
-(cl-defun string-matches-exact (regexp string &key (count most-positive-fixnum) start (num 0) from-end)
+(cl-defun string-matches-exact (regexp string &key
+						(count most-positive-fixnum)
+						start (num 0) from-end)
   (with-temp-buffer
     (insert string)
     (goto-char (or start (if from-end (point-max) (point-min))))
     (cl-loop for i below count
-	  for beg = (funcall (if from-end #'re-search-backward #'re-search-forward) regexp nil t)
-	  while beg collect (buffer-substring (match-beginning num) (match-end num)) into res
-	  finally return res)))
-;;(string-matches-exact "\\(a.\\)b" "axbayb" :num 1 :count 123 :from-end t) --> ("ayb" "axb")
+	     for beg = (funcall (if from-end
+				  #'re-search-backward
+				  #'re-search-forward)
+			 regexp nil t)
+	     while beg
+	     collect (buffer-substring (match-beginning num) (match-end num))
+	     into res
+	     finally return res)))
+;;(string-matches-exact "\\(a.\\)b" "axbayb" :num 1 :count 123 :from-end t)
 
-(cl-defun string-match-exact (regexp string &optional (num 0) (start 0) (count :once))
+(cl-defun string-match-exact (regexp string &optional
+					      (num 0) (start 0) (count :once))
   "Returns the part of STRING that matches REGEXP."
   (and (string-match regexp string start)
        (string= (match-string num string) string)
@@ -535,15 +556,14 @@ consider `buffer-substring-no-properties'"
   (set-text-properties 0 (length string) nil string) string)
 
 (defun string-fill-paragraph (string)
-  "Modyfies STRING as if it were a substring in a text buffer and one applied `fill-paragraph' to it"
+  "Modyfies STRING as if it were a substring in a text buffer and
+one applied `fill-paragraph' to it"
   (string-trim (with-temp-buffer
 		 (text-mode)
 		 (insert string)
 		 (fill-paragraph nil)
 		 (buffer-string))))
 ;;(string-fill-paragraph "asdf\n                 asdf\nesf")
-
-;;(let ((string #("http://www.aftenposten.no/nyheter/siste100/" 0 43 (fontified nil)))) (string-remove-props string) string)
 
 (cl-defun substring* (string &optional (start 0) (end nil))
   "Same as SUBSTRING but takes negative limit arguments (meaning from end)"
@@ -568,11 +588,10 @@ consider `buffer-substring-no-properties'"
 (defun integer-to-ordinal (n)
   (if (<= n 0)
     (error "Integer must be positive")
-    (if (between (mod n 100) 3 21)
+    (if (< 3 (mod n 100) 21)
       (format "%dth" n)
       (format "%d%s" n (cl-case (mod n 10) 
 			 (1 "st") (2 "nd") (3 "rd") (t "th"))))))
-;;(prin1 (mapcar #'integer-to-ordinal '(1 2 3 4 9 10 11 12 13 14 20 21 22 23 24 100003)))
 
 (defun integer-to-ordinal-string (n)
   (if (<= n 0)
@@ -582,20 +601,22 @@ consider `buffer-substring-no-properties'"
       (6 "sixth") (7 "seventh") (8 "eighth") (9 "ninth")
       (20 "twentieth") (30 "thirtieth") (40 "fourtieth") (50 "fiftieth")
       (60 "sixtieth") (70 "seventieth") (80 "eightieth") (90 "ninetieth")
-      (t (cond ((between (mod n 100) 9 20)
+      (t (cond ((< 9 (mod n 100) 20)
 		(format "%sth" (integer-to-literary-string n)))
-	       ((between (mod n 100) 20 100)
+	       ((< 20 (mod n 100) 100)
 		(format "%s-%s" 
 		  (integer-to-literary-string (interval-floor n 10))
 		  (integer-to-ordinal-string (mod n 10))))
-	       ((between (mod n 10) 0 6)
+	       ((< 0 (mod n 10) 6)
 		(format "%s %s" 
 		  (integer-to-literary-string (interval-floor n 10))
 		  (integer-to-ordinal-string (mod n 10)))))))))
-;;(prin1 (mapcar #'integer-to-ordinal-string '(1 2 3 4 9 10 11 12 13 14 20 21 22 23 24 100003)))
-;;(mapcar #'integer-to-ordinal-string '( 14 20 21 100003))
+;;(mapcar #'integer-to-ordinal-string '(14 20 21 100003))
 
-(cl-defun integer-to-literary-string (n &key ordinal-p (short-separator "-") (long-separator " "))
+(cl-defun integer-to-literary-string (n &key
+					  ordinal-p
+					  (short-separator "-")
+					  (long-separator " "))
   (cond (ordinal-p 
 	 (integer-to-ordinal-string n))
 	((< n 0) 
@@ -606,7 +627,8 @@ consider `buffer-substring-no-properties'"
 	   (6 "six") (7 "seven") (8 "eight") (9 "nine") (10 "ten") (11 "eleven")
 	   (12 "twelve") (13 "thirteen") (14 "fourteen") (15 "fifteen")
 	   (16 "sixteen")  (17 "seventeen")  (18 "eighteen")  (19 "nineteen") 
-	   (100 "hundred") (1000 "thousand") (1000000 "million") (1000000000 "billion")))
+	   (100 "hundred") (1000 "thousand") (1000000 "million")
+	   (1000000000 "billion")))
 	((< n 100)
 	 (format "%s%s"
 	   (cl-case (interval-floor n 10)
@@ -627,19 +649,21 @@ consider `buffer-substring-no-properties'"
 	   (if (zerop (mod n 1000))
 	     ""
 	     (concat long-separator (integer-to-literary-string (mod n 1000))))))
-	((< n 10E9)
+	((< n (expt 10 9))
 	 (format "%s million%s"
 	   (integer-to-literary-string (/ n 1000000))
 	   (if (zerop (mod n 1000))
 	     ""
 	     (concat long-separator (integer-to-literary-string (mod n 1000))))))
-	((< n 10E12)
+	((< n (expt 10 12))
 	 (format "%s billion"
-	   (integer-to-literary-string (/ n 1000000000.0))
+	   (integer-to-literary-string (round (/ n 1000000000.0)))
 	   (if (zerop (mod n 1000))
 	     ""
-	     (concat long-separator (integer-to-literary-string (mod n 1000))))))))
-;;(mapcar (bind #'integer-to-literary-string nil) (list 21 99 100 100003 most-positive-fixnum))
+	     (concat long-separator
+		     (integer-to-literary-string (mod n 1000))))))
+	(t (error "Number %d is not supported" n))))
+(integer-to-literary-string 1234567890)
 
 (defconst +password-special-characters+
   " !\"#$%&'()*+,-./:;<=>?@[\]^_`{|}~"
@@ -753,7 +777,7 @@ See also `group-consequtive-integers'."
   (apply #'concat
     (mapcar #'alliterate-word
       (split-string-regexp-list string "[^[:alpha:]]"))))
-;;(alliterate "Some are born great, some achieve greatness, and some have greatness thrust upon them.")
+;;(alliterate "Some are born great, some achieve greatness...")
 
 (cl-defun alphanumerate (n &optional min-length (chars (a-b ?A ?Z)))
   "Convert N to string: 0 to A, 1 to B etc.
@@ -765,9 +789,10 @@ of these integers to a string where all strings have the same
 length."
   (let ((b (length chars)))
     (if (listp n)
-      (cl-loop with l = (or min-length (cl-loop for i in n maximize (uint-length i b)))
-	    for i in n
-	    collect (alphanumerate i l chars))
+      (cl-loop with l = (or min-length
+			    (cl-loop for i in n maximize (uint-length i b)))
+	       for i in n
+	       collect (alphanumerate i l chars))
       (coerce (mapcar (bind #'nth chars)
 		(uint-to-n-base n b (or min-length 1)))
 	      'string))))
@@ -804,23 +829,37 @@ length."
     (concat* (mapcar* #'tab-flag widths types) :in separator)))
 ;;(tab-control-string '(4 5 1) :type '(integer integer string))
 
-(cl-defun tab-format (string-table &key header (column-separator " ") (underline-char ?=))
+(cl-defun tab-format (string-table
+		      &key header (column-separator " ") (underline-char ?=))
   (let ((first-row (first string-table)))
     (when header
       (cl-assert (and (= (length first-row) (length header))
-		   (eql (tab-column-type header) 'string))))
+		      (eql (tab-column-type header) 'string))))
     (let* ((columns (transpose string-table))
 	   (types (mapcar #'tab-column-type columns))
 	   (cwidths (mapcar* #'tab-column-width columns types))
 	   (hwidths (and header (mapcar #'length header)))
 	   (widths (if header (mapcar* #'max cwidths hwidths) cwidths))
-	   (header (if header (concat (apply #'format (tab-control-string widths :separator column-separator) header) "\n") "")))
+	   (header (if header
+		     (concat (apply #'format
+			       (tab-control-string widths
+				 :separator column-separator)
+			       header)
+			     "\n")
+		     "")))
       (concat* string-table
-	:pre (if underline-char (format "%s%s\n" header (make-string (length header) underline-char)) header)
-	:key #'(lambda (x) (apply #'format (tab-control-string widths :type types :separator column-separator) x))
+	:pre (if underline-char
+	       (format "%s%s\n"
+		 header (make-string (length header) underline-char))
+	       header)
+	:key #'(lambda (x)
+		 (apply #'format
+		   (tab-control-string widths
+		     :type types :separator column-separator)
+		   x))
 	:in "\n"))))
-;;(insert (tab-format '(("foo" 1 "bar") ("qwe" 1233456 "qwebar")) :header '("qwe" "ewq" "qwebar")))
-;;(tab-format '((1 "bar") (1233456 "qwebar")) :header '("numb" "string2") :column-separator "|")
+;;(tab-format '(("foobar" 1) ("qwe" 123456)) :header '("qwe" "ewq"))
+;;(tab-format '((1 "xo") (123 "qwe")) :header '("n" "s") :column-separator "|")
 
 (cl-defun uuid-regexp-1 (n)
   "Generate regexp for an UUID of length N."
@@ -854,13 +893,13 @@ SEPARATOR"
 
 (defun sort-strings-with-comments (strings comment-start)
   (let ((comments ()))
-    (loop for string in strings
-	  if (commented-string-p string comment-start t)
-	  do (push string comments)
-	  else
-	  collect (list (nreverse comments) string) into res
-	  and do (setf comments ())
-	  finally return (flatten (cl-sort res #'string< :key #'second)))))
+    (cl-loop for string in strings
+	     if (commented-string-p string comment-start t)
+	     do (push string comments)
+	     else
+	     collect (list (nreverse comments) string) into res
+	     and do (setf comments ())
+	     finally return (flatten (cl-sort res #'string< :key #'second)))))
 ;;(sort-strings-with-comments (file-lines "~/git/utils/bin/adafind.sh") "#")
 
 (defconst +supported-alphabet-languages+ '(:en :no))
@@ -868,7 +907,7 @@ SEPARATOR"
 (cl-defun alphabet (&optional (language :en))
   "Return a string of characters in LANGUAGE sorted alphabetically.
 Default language is :en. Other supported languages are: :no"
-  (case language
+  (cl-case language
     (:en "abcdefghijklmnopqrstuvwxyz")
     (:no "abcdefghijklmnopqrstuvwxyzæøå")
     (otherwise (error "Unknown language %S! Supported languages are: "

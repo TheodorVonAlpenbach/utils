@@ -130,14 +130,16 @@ nil      ./ and all its subdirectories
 ;;(mb-grep-dirs 1)
 
 (cl-defun mb-grep-interactive ()
-  "Convenient grep according to file type."
+  "Convenient grep according to file type.
+See `mb-grep-dirs' for a description of possible prefixes."
   (interactive)
   (mb-grep-basic
    :target (read-from-minibuffer "Grep string: ")
    :directories (mb-grep-dirs current-prefix-arg)))
 
 (cl-defun mb-grep ()
-  "Convenient grep according to file type."
+  "Convenient grep according to file type. 
+See `mb-grep-dirs' for a description of possible prefixes."
   (interactive)
   (cl-case major-mode
     (emacs-lisp-mode (mb-elisp-grep))

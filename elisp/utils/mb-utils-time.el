@@ -815,17 +815,17 @@ designators WEEK-DESIGNATOR1 and WEEK-DESIGNATOR2. See
 ;;(weekday :no (now))
 
 (defun minutes-to-mmss (minutes)
-  (destructuring-bind (mm rest) (cl-floor minutes)
+  (cl-destructuring-bind (mm rest) (cl-floor minutes)
     (cons mm (cl-floor (* 60 rest)))))
 ;;(minutes-to-mmss )
 
 (defun mmss-to-minutes (mmss)
-  (destructuring-bind (mm ss rest) mmss
+  (cl-destructuring-bind (mm ss rest) mmss
     (+ mm (/ (+ ss rest) 60.0))))
 ;;(mmss-to-minutes '(1 29 .99))
 
 (defun hours-to-hhmmss (hours)
-  (destructuring-bind (hh rest) (cl-floor hours)
+  (cl-destructuring-bind (hh rest) (cl-floor hours)
     (cons hh (minutes-to-mmss (* 60 rest)))))
 ;;(mapcar #'hours-to-hhmmss '(59.9529019 10.7646353))((59 57 10 0.4468400000018846) (10 45 52 0.6870800000004635))
 ;;(mapcar #'hours-to-hhmmss '(59.914804 10.742518))((59 54 53 0.2943999999878315) (10 44 33 0.06480000000163955))
@@ -834,7 +834,7 @@ designators WEEK-DESIGNATOR1 and WEEK-DESIGNATOR2. See
 ;;(cl-floor 59.9529019)
 
 (defun hhmmss-to-hours (hhmmss)
-  (destructuring-bind (hh &rest mmss) hhmmss
+  (cl-destructuring-bind (hh &rest mmss) hhmmss
     (+ hh (/ (mmss-to-minutes mmss) 60.0))))
 ;;(hhmmss-to-hours '(59 59 59 0))
 ;;(hhmmss-to-hours '(1 29 59 .99))

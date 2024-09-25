@@ -202,7 +202,7 @@ TIME must be a string."
   (let ((etime (parse-clock time)))
     (iso-time
      :time (if (listp level)
-	     (destructuring-bind (unit quantity) level
+	     (cl-destructuring-bind (unit quantity) level
 	       (cl-case (first level)
 		 (:hour (etime-round etime :hour quantity n))
 		 (:minute (etime-round etime :minute quantity n))

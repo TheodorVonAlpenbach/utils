@@ -153,6 +153,44 @@
   (should (equal (alphabet :en) "abcdefghijklmnopqrstuvwxyz"))
   (should (equal (alphabet :no) "abcdefghijklmnopqrstuvwxyzæøå")))
 
+(ert-deftest test-integer-to-ordinal-string ()
+  "Test of `integer-to-ordinal-string'"
+  (should
+   (equal
+    (mapcar #'integer-to-ordinal-string
+      '(1 2 3 4 9
+	10 11 12 13 14
+	20 21 22 23 24
+	100003))
+    '("first" "second" "third" "fourth" "ninth"
+      "tenth" "eleventh" "twelveth" "thirteenth" "fourteenth"
+      "twentieth" "twenty-first" "twenty-second" "twenty-third" "twenty-fourth"
+      "one hundred thousand third"))))
+
+(ert-deftest test-integer-to-ordinal ()
+  "Test of `integer-to-ordinal'"
+  (should
+   (equal
+    (mapcar #'integer-to-ordinal
+      '(1 2 3 4 9 10 11 12 13 14
+	20 21 22 23 24 100003))
+    '("1st" "2nd" "3rd" "4th" "9th" "10th" "11th" "12th" "13th" "14th"
+      "20th" "21st" "22nd" "23rd" "24th" "100003rd") )))
+
+(ert-deftest test-string-replace-f ()
+  "Test of `string-replace-f'"
+  (should (equal (string-replace-f
+		  "-qwewe-" "\\(qw\\)e"
+		  #'(lambda (string) (upcase (match-string 1 string))))
+		 "-QWwe-")))
+
+(ert-deftest test-integer-to-literary-string ()
+  "Test of `integer-to-literary-string'"
+  (should
+   (equal
+    (mapcar #'integer-to-literary-string (list 21 99 100 123456789012))
+    '("twenty-one" "ninety-nine" "one hundred" "one hundred thousand three"))))
+
 (ert-deftest test-andcat ()
   "Test of `andcat'"
   (should (equal (andcat '()) ""))

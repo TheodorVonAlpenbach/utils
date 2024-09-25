@@ -7,7 +7,7 @@
    (".bashrc" ".bash_profile"))
  *simple-swaps* :test #'equal)
 
-(setf *local-requires* '(browse-kill-ring))
+(require 'ada-logins)
 
 ;; Sentences, see info node Sentences
 (setf sentence-end "[.?!][]\"')]*\\($\\|\t\\| \\)[ \t\n]*")
@@ -26,7 +26,7 @@
 (setf *lynx-auth* "")
 
 ;; diary file (mandatory to use #'calendar)
-(setf diary-file (setf diary-file (expand-file-name "office/diary" *local-data-dir*)))
+(setf diary-file (expand-file-name "office/diary" *local-data-dir*))
 
 ;; load favorite files (note that nil/t means position cursor at top/bottom)
 ;; but first we have to get rid of the tramp file, which may block ssh:
@@ -55,8 +55,6 @@ sudo mount -a.")
 	(,+mb-lisp-dir+ "projects/ada/ada-mysql.el")
 	(,+mb-lisp-dir+ "projects/ada/ada-logins.el")
 	(,+mb-lisp-dir+ "data/historie.org")
-
-	(,+mb-utils-dir+ "lisp/mb-utils.lisp")
 
 	(,+home-dir+ "doc/personer.org" :point :end :keyboard :no)
 	(,+home-dir+ "doc/technologies.org" :point :end)

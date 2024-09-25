@@ -111,7 +111,8 @@ SYMBOL can be a symbol or a list of symbols. See function
       accumulate-list emacsql-mysql
       reduce
       emacsql-mysql emacsql
-      cl-member-if-not)
+      cl-member-if-not
+      tab-control-string)
   'prog1)
 (cl-indent  :table :tr)
 

@@ -20,7 +20,7 @@
 ;; Otherwise packages like slime might shadow the built in cl library
 ;; by pushing directories with cl library compatability packages to
 ;; load-path:
-(require 'cl)
+;;(require 'cl)
 
 ;;; MB setups
 (defun emacs-os ()
@@ -67,9 +67,9 @@
 		   (:unix "unix")
 		   (:mixed "mixed")
 		   (t "windows"))))
-      (string-trim (call-process* "cygpath" "--type" ctype (expand-file-name path))))
+      (string-trim
+       (call-process* "cygpath" "--type" ctype (expand-file-name path))))
     path))
-;;(cygpath "/cygdrive/c/Users/MBe.azure/AppData/Roaming/Scilab/scilab-5.5.1/" :unix)
 
 (defconst +os-root+ (expand-file-name "~")
   "Default directory OS root")
@@ -120,7 +120,7 @@ for example,
 (defvar *lilypond-home* nil
   "Default directory for LilyPond hierarchy")
 
-(defvar *my-favourites* ()
+(defvar *my-favorites* ()
   "List of files to be found initially. Each element in list is of
 form (FILE ENDP), where FILE is the path of file to be loaded. If ENDP
 is not nil, the point is set at end of the corresponding file.")
@@ -142,7 +142,8 @@ is not nil, the point is set at end of the corresponding file.")
 
 (defvar *local-projects-dir*  (expand-file-name "projects" +home-dir+)
   "Root directory for private projects.
-Not in use. Projects should be shared, at least until we are up and running Git.")
+Not in use. Projects should be shared, at least until we are up
+and running Git.")
 
 (defvar *mb-hyperspec-root* nil)
 
@@ -185,15 +186,12 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 ;; smartparens
 (add-to-list 'load-path "~/.emacs.d/smartparens-master")
 
-;; Move this to mode-extensions 
-;; (autoload 'LilyPond-mode "lilypond-mode" "Major mode for editing BNF definitions." t)
-;; (autoload 'mbscilab-mode "scilab-mode" "Major mode for editing Scilab files." t)
-
 (let* ((my-mode-alist
        '(("\\.h$\\|\\.cpp$" . c++-mode)	; first overules of original alist
 	 ("\\.c$" . c-mode)
 	 ("\\.\\(lisp\\|asd\\|sbclrc\\)$" . mb-lisp-mode)
-	 ("\\.el$\\|\\.eld$\\|\\.emacs$\\|\\.emacs-local-\\|\\.pwd" . emacs-lisp-mode)
+	 ("\\.el$\\|\\.eld$\\|\\.emacs$\\|\\.emacs-local-\\|\\.pwd" .
+	  emacs-lisp-mode)
 	 ("\\.bash\\(rc\\|_profile\\)\\|\\.sh\\|\\.profile$" . sh-mode)
 	 ("\\.pdmkvars$" . makefile-mode)
 	 ("\\.pdmkroot$" . makefile-mode)
@@ -243,12 +241,12 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 	 ;; safe default must come at the end
 	 ("^[^.]*$" . text-mode)))
 
-       (new-alist (delete-if #'(lambda (x)
+       (new-alist (cl-delete-if #'(lambda (x)
 				 (member x auto-mode-alist))
 			     my-mode-alist)))
   (setf auto-mode-alist (append new-alist auto-mode-alist)))
 ;;(length auto-mode-alist)
-;;(setf auto-mode-alist (copy 'mb-lisp-mode auto-mode-alist :key #'cdr :test #'neql))
+;;(copy 'mb-lisp-mode auto-mode-alist :key #'cdr :test #'neql)
 
 ;; encoding: the following specifies encoding based on file path
 (setq file-coding-system-alist
@@ -334,13 +332,12 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 		(setf fill-paragraph-function #'fill-time-paragraph)))))
   *my-favorites*)
 
-(let ((path (expand-file-name "lisp/mb-utils.lisp" +mb-utils-dir+)))
-  (find-file path))
-
 (custom-set-variables
  '(temp-buffer-resize-mode t)
  '(visible-bell t))
 (custom-set-faces)
+
+(setq-default display-fill-column-indicator-column 80)
 
 ;; tags revisited
 (defun mb-tags-file ()
@@ -350,17 +347,21 @@ Not in use. Projects should be shared, at least until we are up and running Git.
     (mbscilab-mode "~/.SCILABTAGS")
     (octave-mode "~/.OTAGS")
     ((rjsx-mode js-mode) nil)
-    (t (error "Couldn't resolve major mode %S for buffer %s" major-mode (buffer-name)))))
+    (t (error "Couldn't resolve major mode %S for buffer %s"
+	      major-mode (buffer-name)))))
 ;;(mb-tags-file)
 
 (defun mb-visit-tags-table ()
-  "Note that this function and its invokations must precede init loading of files."
+  "Set the current tags file.
+Note that this function and its invokations must precede init
+loading of files."
   (awhen (mb-tags-file)
     (setq-local tags-file-name it)))
 
 ;; set hooks (NB! should these hooks be set here?)
 (add-hook 'emacs-lisp-mode-hook 'mb-visit-tags-table)
-(add-hook 'lisp-mode-hook 'mb-visit-tags-table) ;caters for mb-lisp-mode-hook as well
+;; caters for mb-lisp-mode-hook as well:
+(add-hook 'lisp-mode-hook 'mb-visit-tags-table)
 (add-hook 'mbscilab-mode-hook 'mb-visit-tags-table)
 (add-hook 'octave-mode-hook 'mb-visit-tags-table)
 
@@ -407,10 +408,15 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 ;;; Where to put this?
 (cl-defun unix-find (ppath &key type regex name)
   (let ((args nil))
-    (when type (push-list (list "-type" (cl-ecase type (:file "f") (:directory "d"))) args))
+    (when type
+      (push-list
+       (list "-type" (cl-ecase type (:file "f") (:directory "d"))) args))
     (when name (push-list (list "-name" name) args))
     (when regex (push-list (list "-regex" regex) args))
-    (cl-remove "" (string-to-lines (apply #'call-process* "find" (append (llist ppath) args))) :test #'string=)))
+    (cl-remove ""
+      (string-to-lines
+       (apply #'call-process* "find" (append (llist ppath) args)))
+      :test #'string=)))
 ;;(last (unix-find "~/tmp" :name "*el"))
 
 (defun compare-mb-libs (path1 path2)
@@ -423,13 +429,18 @@ Not in use. Projects should be shared, at least until we are up and running Git.
 	     for relative-path = (substring p1 (length apath1))
 	     for p2 = (expand-file-name relative-path path2)
 	     do (with-buffer diff-buffer
-		  (insert (format "Comparing two version of %s:\n" relative-path)))
+		  (insert
+		   (format "Comparing two version of %s:\n" relative-path)))
 	     do (call-process "diff" nil diff-buffer t p1 p2))
     (switch-to-buffer diff-buffer)))
-;;(compare-mb-libs "/cygdrive/c/Users/MBe.azure/Google Drive/site-lisp/mb-lisp/" "/home/MBe/tmp/tmp/package/mb-lisp")
+;; (compare-mb-libs
+;;  "/cygdrive/c/Users/MBe.azure/Google Drive/site-lisp/mb-lisp/"
+;;  "/home/MBe/tmp/tmp/package/mb-lisp")
 
-(add-to-list 'Info-default-directory-list (expand-file-name ".emacs.d/info" +home-dir+))
-(add-to-list 'Info-additional-directory-list (expand-file-name ".emacs.d/info" +home-dir+))
+(add-to-list 'Info-default-directory-list
+	     (expand-file-name ".emacs.d/info" +home-dir+))
+(add-to-list 'Info-additional-directory-list
+	     (expand-file-name ".emacs.d/info" +home-dir+))
 
 (defun eval-defun-with-test (orig-fun &rest args)
   (interactive "P")

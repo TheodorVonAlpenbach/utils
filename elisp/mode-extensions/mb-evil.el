@@ -17,7 +17,8 @@
 ;;;; TODO: tweek keys. L <--> l and H <--> h in evil-cleverparens.
 ;;;; TODO: norsk i insert-mode og overwrite-mode
 
-;;;; Also useful to look at key bindings in ~/.emacs.d/elpa/evil-20160525.1148/evil-maps.el
+;;;; Also useful to look at key bindings in
+;;;; ~/.emacs.d/elpa/evil-20160525.1148/evil-maps.el
 (require 'evil)
 (require 'evil-cleverparens)
 (require 'evil-cleverparens-text-objects)
@@ -34,7 +35,8 @@
 (defun set-mb-lisp-locals ()
   "My local modifications of lisp modes."
   (evil-cleverparens-mode)
-  (setf evil-symbol-word-search t))
+  (setf evil-symbol-word-search t)
+  (display-fill-column-indicator-mode))
 
 (add-hook 'emacs-lisp-mode-hook #'set-mb-lisp-locals)
 (add-hook 'lisp-mode-hook #'set-mb-lisp-locals)
