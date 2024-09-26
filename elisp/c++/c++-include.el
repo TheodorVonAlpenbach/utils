@@ -4,7 +4,6 @@
 ;; 2) smarter placement
 ;; 3) take optional argument filename (or just prefix in the .h-case)
 
-(require 'cl)
 (require 'mb-utils-regexp)
 (require 'mb-utils-file)
 (require 'mb-utils-div)

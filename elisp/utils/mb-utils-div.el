@@ -1,4 +1,3 @@
-(require 'cl)
 (require 'mb-indent)
 
 (cl-defmacro without-message (&body body)

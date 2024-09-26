@@ -1,5 +1,4 @@
 (require 'compile)
-(require 'cl)
 
 (setq compilation-window-height 12)
 

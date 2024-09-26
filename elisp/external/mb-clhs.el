@@ -1,5 +1,4 @@
 ;;; This is a tiny modification of clhs.el, see this file for copyrights and other information.
-(eval-when-compile (require 'cl)) ; push
 (require 'browse-url)
 (require 'thingatpt)
 (require 'url)

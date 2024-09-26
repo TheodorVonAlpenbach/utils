@@ -6,9 +6,6 @@
 (defvar *mb-hyperspec-root* nil)
 (defvar *mb-hyperspec-function* nil)
 
-;; usually copied from .emacs
-(require 'cl)
-
 (setf 
  ;; div local 
  *my-home* "c:/Users/eier/Documents/"

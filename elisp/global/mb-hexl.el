@@ -1,6 +1,3 @@
-(provide 'mb-hexl)
-
-(require 'cl)
 (require 'hexl)
 
 (defvar hex-to-int-list 
@@ -118,3 +115,5 @@ Ex: \"abcd efgh\" equals integer badcfehg with base 16"
 ;(hexl-to-int-byte "01")
 ;(hexl-char-to-int (aref "0a" 1))
 ;(hexl-string-to-int "03 00 00 00" nil) 3+0+0+0
+
+(provide 'mb-hexl)
