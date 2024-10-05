@@ -20,7 +20,7 @@
 ;; html only
 (define-key html-mode-map "\C-ci\r" 'asp-insert-endl)
 
-(defun asp-toggle-vb-html-modes () ""
+(cl-defun asp-toggle-vb-html-modes () ""
   (interactive)
   (if (string= mode-name "Visual Basic") (html-mode)
     (if (string= mode-name "HTML") (visual-basic-mode))))

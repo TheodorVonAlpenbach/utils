@@ -16,7 +16,7 @@
     `(progn
        (defconst ,name-regxp ,regexp (format "Regular expression for %d" ,sname))
 
-       (defun ,thing-at-point-bounds-of-name (&optional ,as-list-p)
+       (cl-defun ,thing-at-point-bounds-of-name (&optional ,as-list-p)
 	 ,(format
 	      "Return the region bounds of the %s at point.
 By default the bounds are returned as the cons pair (START END).
@@ -71,11 +71,11 @@ This function is generated with macro `defthing' in module
 	 (interactive "p")
 	 (,forward-name (- ,n)))
 
-       (defun ,name-at-point (&optional no-properties) 
+       (cl-defun ,name-at-point (&optional no-properties) 
 	 ,(format "%s is generated with macro `defthing' in module 'mb-things." name-at-point)
 	 (thing-at-point ',symbol no-properties))
 
-       (defun ,type-name (string)
+       (cl-defun ,type-name (string)
 	 ,(format "%s is generated with macro `defthing' in module 'mb-things." type-name)
 	 (integerp (string-match ,regexp string)))
       
@@ -119,7 +119,7 @@ must be a member of a cycle preceding the cycle of the latter.")
 (defthing 'time *iso-time*)
 ;;(defthing 'weekday-and-date *weekday-and-date*)
 
-(defun cycle-type (string)
+(cl-defun cycle-type (string)
   "If STRING is 'CYCLIC it returns the cycle type."
   (first (find string *cyclic-things* 
 	       :test #'(lambda (o e) (find o e :test #'string-equal*))
@@ -169,7 +169,7 @@ must be a member of a cycle preceding the cycle of the latter.")
     (t (error "No thing recoginzed"))))
 ;; 2000  (inc-thing-at-point -1 2)
 
-(defun inc-weekday-and-date-at-point (n level)
+(cl-defun inc-weekday-and-date-at-point (n level)
   "Doesn't work thing-at-point doesn't seem to handle spaces in regexps"
   (let ((original-point (point)) 
 	(bounds (thing-at-point-bounds-of-weekday-and-date)))
@@ -180,7 +180,7 @@ must be a member of a cycle preceding the cycle of the latter.")
     (goto-char original-point)))
 ;;(inc-weekday-and-date (weekday-and-date-at-point) n level)
 
-(defun inc-date (date n level)
+(cl-defun inc-date (date n level)
   "LEVEL 1, 2, 3 correspond to day, month, year respectively."
   (iso-date (cl-case level
 	      (1 (add-etime-date (parse-time date) :day n))
@@ -189,14 +189,14 @@ must be a member of a cycle preceding the cycle of the latter.")
 	      (otherwise (error "Level %d is not implemented!" level)))))
 ;;(inc-date "2001-10-20" 1 1)
 
-(defun parse-clock (clock-string)
+(cl-defun parse-clock (clock-string)
   "Parse clock-string and return the time object for date 1970-01-01."
   (apply #'encode-time
     (append (subseq (parse-time-string clock-string) 0 3)
 	    (list 1 1 1970))))
 ;;(parse-clock "09:45")
 
-(defun inc-clock (time n level)
+(cl-defun inc-clock (time n level)
   "LEVEL 1, 2, 3 correspond to day, month, year respectively.
 TIME must be a string."
   (let ((etime (parse-clock time)))
@@ -221,7 +221,7 @@ TIME must be a string."
 ;;(inc-clock "08:15:01" 1 3)
 ;;(inc-clock "08:15" 1 3)
  
-(defun inc-number (x n level)
+(cl-defun inc-number (x n level)
   "Alter X N times according to LEVEL.
 LEVEL 1, return N + X
 LEVEL 2, add N to first digit in X
@@ -235,7 +235,7 @@ LEVEL 3, return x ^ (2 ^ N)
     (if (integerp x) (round res) res)))
 ;;(inc-number 10 -1 3)
 
-(defun inc-cyclic (string n level &optional thing)
+(cl-defun inc-cyclic (string n level &optional thing)
   (let* ((cycle-list (or thing (second (assoc (cycle-type string)
 					      *cyclic-things*)))))
     (copy-case
@@ -246,7 +246,7 @@ LEVEL 3, return x ^ (2 ^ N)
 ;;(inc-cyclic "2004-03-29" 2 1)
 
 ;;;;;; templates
-; (defun thing-at-point-bounds-of-lynx-reference ()
+; (cl-defun thing-at-point-bounds-of-lynx-reference ()
 ;   (when (thing-at-point-looking-at *lynx-ref-regexp*)
 ;     (cons (match-beginning 0) (match-end 0))))
 ; (put 'lynx-reference 'end-op

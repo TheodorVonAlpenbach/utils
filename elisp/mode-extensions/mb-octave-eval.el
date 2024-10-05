@@ -13,7 +13,7 @@
 ;;;; T, c: output result to REPL 
 ;;;; l: insert result at point  
 
-(defun octave-source-buffer (&optional no-help-p buffer)
+(cl-defun octave-source-buffer (&optional no-help-p buffer)
   "Source current Octave buffer, and show documentation when
 point is in the texinfo region, except when NO-HELP-P is not
 nil."
@@ -40,7 +40,7 @@ nil."
 	(forward-sexp -1))
       (buffer-substring-no-properties (point) point))))
 
-(defun octave-eval-last-sexp ()
+(cl-defun octave-eval-last-sexp ()
   "Evaluate Octave sexp before point; print value in the echo area.
 Interactively, with prefix argument, print output into current
 buffer. Obsolete for now. In the future we should have a common
@@ -58,7 +58,7 @@ standard for where to put the eval output
        (octave-send-string sexp)
        (prin1 (mapconcat 'identity inferior-octave-output-list "\n"))))))
 
-(defun octave-update-proc-buffer (line print-repl-p)
+(cl-defun octave-update-proc-buffer (line print-repl-p)
   "Perhaps concat of inferior-octave-output-list and
 inferior-octave-output-string should be done by caller and sent
 to this function as a string."
@@ -71,7 +71,7 @@ to this function as a string."
 		 (list inferior-octave-output-string))
 		"\n"))))
 
-(defun octave-send-string (string &optional print-repl-p)
+(cl-defun octave-send-string (string &optional print-repl-p)
   "Send STRING to the inferior Octave process."
   (interactive "r")
   (inferior-octave t)
@@ -90,10 +90,10 @@ to this function as a string."
   (if octave-send-show-buffer
     (display-buffer inferior-octave-buffer)))
 
-(defun octave-send-string-silently (string)
+(cl-defun octave-send-string-silently (string)
   (octave-send-string string t))
 
-(defun octave-eval-current-line ()
+(cl-defun octave-eval-current-line ()
   "Sends one-line expressions to the SQL output buffer. 
 It handles also lines commented with #.
 Examples:
@@ -115,7 +115,7 @@ the output buffer prompt.)"
 (defvar *octave-last-debug-expression* nil)
 ;;(nilf *octave-last-debug-expression*)
 
-(defun octave-eval-defun-test ()
+(cl-defun octave-eval-defun-test ()
   "Eval comment expression after defun at point.
 Also stores this expression in `*octave-last-debug-expression*'."
   (end-of-defun)
@@ -124,7 +124,7 @@ Also stores this expression in `*octave-last-debug-expression*'."
 (defvar *octave-eval-history* nil)
 ;;(nilf *octave-eval-history*)
 
-(defun octave-eval-expression ()
+(cl-defun octave-eval-expression ()
   "Interactive evaluation of Octave expression."
   (interactive)
   (let* ((default (first *octave-eval-history*))

@@ -51,7 +51,7 @@ TODO
 · inner defun (i.e. top level form)
 "
 
-(defun evil-normal-state-sexp-mode (arg)
+(cl-defun evil-normal-state-sexp-mode (arg)
   "Enters sexp minor mode in evil normal state. If prefixed, and
 in sexp minor mode, exits mode.
 TODO Handle crossline."
@@ -69,7 +69,7 @@ TODO Handle crossline."
       (define-key evil-outer-text-objects-map "s" 'evil-a-paren)
       (define-key evil-inner-text-objects-map "s" 'evil-inner-sexp))))
 
-(defun evil-exit-normal-state-sexp-mode ()
+(cl-defun evil-exit-normal-state-sexp-mode ()
   "Exits sexp minor mode in evil normal state."
   (interactive)
 
@@ -102,28 +102,28 @@ TODO: ensure that normal state is kept even if there are errors within function.
      ,body))
 (cl-indent 'with-char-offset-if 2)
 
-(defun evil-bounds-of-sexp-at-point ()
+(cl-defun evil-bounds-of-sexp-at-point ()
   (let ((bounds (bounds-of-thing-at-point 'sexp))
 	(point (point)))
     (and bounds
 	 (/= point (cdr bounds)) ;Emacs' right bounds does not exist in VI
 	 (cons (car bounds) (1- (cdr bounds))))))
 
-(defun evil-beginning-of-sexp ()
+(cl-defun evil-beginning-of-sexp ()
   (car (evil-bounds-of-sexp-at-point)))
 
-(defun evil-end-of-sexp ()
+(cl-defun evil-end-of-sexp ()
   (cdr (evil-bounds-of-sexp-at-point)))
 
-(defun evil-at-beginning-of-sexp-p ()
+(cl-defun evil-at-beginning-of-sexp-p ()
   (let ((eos (evil-beginning-of-sexp)))
     (and eos (= (point) eos))))
 
-(defun evil-at-end-of-sexp-p ()
+(cl-defun evil-at-end-of-sexp-p ()
   (let ((eos (evil-end-of-sexp)))
     (and eos (= (point) eos))))
 
-(defun evil-outside-sexp-p ()
+(cl-defun evil-outside-sexp-p ()
   (not (evil-bounds-of-sexp-at-point)))
 
 (evil-define-motion evil-backward-sexp-begin (count) 

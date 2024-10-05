@@ -150,7 +150,7 @@
 (defvar kusto-indent-offset 2
   "*Indentation offset for `kusto-mode'.")
 
-(defun kusto-indent-line ()
+(cl-defun kusto-indent-line ()
   "Indent current line for `kusto-mode'."
   (interactive)
   (let ((indent-col 0))

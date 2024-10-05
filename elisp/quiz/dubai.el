@@ -139,16 +139,16 @@
 (setq player (first table))
 (setq res (first (results qwe)))
 
-(defun seeding (player) (first player))
+(cl-defun seeding (player) (first player))
 ;;(seeding qwe)
-(defun name (player) (second player))
+(cl-defun name (player) (second player))
 ;;(name qwe)
-(defun results (player) 
+(cl-defun results (player) 
   (mapcar #'parse-result (third player)))
 ;;(results qwe)
-(defun score (player) (fifth player))
+(cl-defun score (player) (fifth player))
 ;;(score qwe)
-(defun parse-result (result)
+(cl-defun parse-result (result)
   (let ((s (if (symbolp result) (symbol-name result) result)))
     (if (string-match "\\([0-9]+\\)\\([bw]\\)\\([10½]\\)" s)
       (let ((opponent (string-to-number (match-string 1 s)))
@@ -158,31 +158,31 @@
 	(list opponent color result)))))
 ;;(parse-result res)
 
-(defun oppenents (player) (mapcar #'get-player (oppenents-seeding player)))
+(cl-defun oppenents (player) (mapcar #'get-player (oppenents-seeding player)))
 ;;(oppenents player)
 
-(defun oppenents-seeding (player) (mapcar #'first (results player)))
+(cl-defun oppenents-seeding (player) (mapcar #'first (results player)))
 ;;(oppenents-seeding player)
 
-(defun opponent-seeding (result) (first result))
+(cl-defun opponent-seeding (result) (first result))
 ;;(opponent (first (results player)))
 
-(defun points (result) (or (third result) 0))
+(cl-defun points (result) (or (third result) 0))
 ;;(points (first (results player)))
 
-(defun get-player (seeding)
+(cl-defun get-player (seeding)
   (find seeding table :key #'first))
 ;;(get-player 6)
 
-(defun wp (player) (apply #'+ (mapcar #'score (oppenents player))))
+(cl-defun wp (player) (apply #'+ (mapcar #'score (oppenents player))))
 ;;(wp player)
 
-(defun sb (player) (apply #'+ (mapcar* #'* 
+(cl-defun sb (player) (apply #'+ (mapcar* #'* 
 			  (mapcar #'score (oppenents player))
 			  (mapcar #'points (results player)))))
 ;;(mapcar #'sb table)
 
-(defun ps (player) (apply #'+ (mapcar* #'* 
+(cl-defun ps (player) (apply #'+ (mapcar* #'* 
 			  (mapcar #'score (oppenents player))
 			  (mapcar #'(lambda (result) (if (= (third result) 1) 1 0)) (results player)))))
 ;;(ps player)

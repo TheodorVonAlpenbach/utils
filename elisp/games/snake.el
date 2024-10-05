@@ -4,27 +4,27 @@
 (defvar *sn-buffer* "*SNAKE*")
 (defvar *sn-canvas* '(30 . 10))
 
-(defun get-sn-buffer ()
+(cl-defun get-sn-buffer ()
   (get-buffer-create *sn-buffer*))
 ;;(get-sn-buffer)
 
-(defun sn-quit ()
+(cl-defun sn-quit ()
   (interactive)
   (setf *current-status* nil))
 
-(defun sn-draw-canvas (canvas)
+(cl-defun sn-draw-canvas (canvas)
   (destructuring-bind (w . h) canvas
     (let ((horizontal-frame-bar (make-string (+ 2 w) ?#)))
       (with-buffer (get-sn-buffer)
 	(insert horizontal-frame-bar)
 	(newline)
-	(loop with intermediate-frame-line = (format "#%s#\n" (make-string w ? ))
+	(cl-loop with intermediate-frame-line = (format "#%s#\n" (make-string w ? ))
 	      for i below h
 	      do (insert intermediate-frame-line))
 	(insert horizontal-frame-bar)))))
 ;;(sn-draw-canvas '(30 . 10))
 
-(defun sn-move (start-point tail direction)
+(cl-defun sn-move (start-point tail direction)
   (with-buffer (get-sn-buffer)
     (overwrite-mode)
     (goto-char start-point)
@@ -42,13 +42,13 @@
       new-head)))
 ;;(sn-move 105 nil :east)
 
-(defun snake ()
+(cl-defun snake ()
   (interactive)
   (let ((start-point 40)
 	(start-tempo 1)
 	(tail nil))
     (setf *sn-current-status* :playing)
-    (loop for point = start-point then (sn-move point nil *current-direction*)
+    (cl-loop for point = start-point then (sn-move point nil *current-direction*)
 	  while (eql *sn-current-status* :playing)
 	  do (sleep-for 1))))
 ;;(snake)

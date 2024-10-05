@@ -4,7 +4,7 @@ o create a temporary .dat file for the points
 * invoke gnuplot from emacs with the script file as argument
 "
 
-(defun gp-path (prefix &optional type)
+(cl-defun gp-path (prefix &optional type)
   (concat prefix (cl-case type (:pdf ".pdf") (:script ".gp") (:data ".dat") (t ""))))
 ;;(gp-path "qwe" :pdf)
 
@@ -15,7 +15,7 @@ o create a temporary .dat file for the points
       (insert (format "set output '| ps2pdf - %s'\n" (gp-path prefix :pdf)))
       (insert script)))
 
-(defun gp-format-range (range)
+(cl-defun gp-format-range (range)
   (if range
     (format "[%s:%s]" (first range) (second range))
     ""))
@@ -63,7 +63,7 @@ instead"
 		       prefix))
 
 (require 'mb-polynomials)
-(defun gp-pfp (fractional-polynomial)
+(cl-defun gp-pfp (fractional-polynomial)
   "Formats FRACTIONAL-POLYNOMIAL in gnuplot style"
   (pfp fractional-polynomial :multiplication "*" :exponent "**"))
 ;;(gp-pfp '(1 2 3.123))
@@ -72,13 +72,13 @@ instead"
   "Creates a gnuplot script file and returns its file path."
   (apply #'gp-function-script (gp-pfp expression) prefix args))
 
-(defun call-gnuplot (path)
+(cl-defun call-gnuplot (path)
   (message "Waiting for gnuplot...")
   (call-process* "gnuplot" path)
   (message "gnuplot finished!")
   (find-file (gp-path path-prefix :pdf))  )
 
-(defun gp-float (x)
+(cl-defun gp-float (x)
   (cl-float-limits)
   (cond
     ((= cl-most-positive-float x) "∞")

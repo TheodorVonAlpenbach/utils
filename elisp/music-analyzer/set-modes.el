@@ -5,7 +5,7 @@
     (minor-harmonic (0 2 3 5 7 8 11))
     (minor-melodic (0 2 3 5 7 9 11))))
 
-(defun set-scale (mode)
+(cl-defun set-scale (mode)
   (if (symbolp mode)
     (find mode set-scales :key #'first)
     (find mode set-scales :test #'string-equal :key (compose #'symbol-name #'first))))

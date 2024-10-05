@@ -6,7 +6,7 @@
 (defalias 'maths-user-rating #'fourth)
 (defalias 'maths-user-RD #'fifth)
 (defalias 'maths-user-metadata #'sixth)
-(defun maths-user-last-updated (user)
+(cl-defun maths-user-last-updated (user)
   (ld-get-metadatum :updated (maths-user-metadata user)))
 ;;(maths-user-last-updated (maths-db-get-user "Mats"))
 

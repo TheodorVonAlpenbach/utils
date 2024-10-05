@@ -68,7 +68,7 @@
   (backward-lynx-reference n)
   (lynx-browse-url-at-point ))
 
-(defun lynx-move-to-last-article ()
+(cl-defun lynx-move-to-last-article ()
   (interactive)
   (goto-char (second (lynx-aftenposten-siste-100-region))))
 
@@ -83,7 +83,7 @@
   (string-encode string encoding))
 ;;(url-file-encode "øre")
 
-(defun lynx-reference-active-at-point ()
+(cl-defun lynx-reference-active-at-point ()
   "Returns integer of current lynx reference."
   (interactive)
   (save-excursion
@@ -92,17 +92,17 @@
     (princ (string-to-int (match-string 0)))))
 (definteractive lynx-reference-active-at-point)
 
-(defun lynx-references-in-region (beg end)
+(cl-defun lynx-references-in-region (beg end)
   "Returns integer of current lynx reference."
   (interactive "r")
   (setq end (max beg end))
   (save-excursion
     (goto-char beg)
-    (loop for pos = (re-search-forward "\\[\\([0-9]+\\)\\]" end t)
+    (cl-loop for pos = (re-search-forward "\\[\\([0-9]+\\)\\]" end t)
 	  while pos
 	  collect (string-to-int (match-string 1)))))
 
-(defun lynx-references-section ()
+(cl-defun lynx-references-section ()
   "Returns substring in lynx buffer covering the references section
 \(at the end\)."
   (interactive)
@@ -111,16 +111,16 @@
     (buffer-substring (re-search-backward "^References")
 		      (point-max))))
 
-; (defun qwe () (interactive) (re-search-backward "[/?]\\([^/?\n]+\\)/?$" nil t))
-; (defun qwe () (interactive) (re-search-backward "/[^/\n]+[/]?$" nil t))
-; (defun qwe () (interactive) (re-search-backward "/\\([^/\n]+[/]?\\)$\\|\?\\(.*\\)$" nil t))
-; (defun qwe () (interactive) (re-search-backward "\?\\(.*\\)$" nil t))
-; (defun qwe () (interactive) (re-search-backward "^\\s-*\\([0-9]+\\)\\. \\(.*\\)$" nil t))
-; (defun qwe () (interactive) (re-search-backward "[/?]\\([^/?\n]+/?$\\)" nil t))
-; (defun qwe () (interactive) (re-search-backward "^ *\\([0-9]+\\)\\. \\(.*\\)$" nil t))
+; (cl-defun qwe () (interactive) (re-search-backward "[/?]\\([^/?\n]+\\)/?$" nil t))
+; (cl-defun qwe () (interactive) (re-search-backward "/[^/\n]+[/]?$" nil t))
+; (cl-defun qwe () (interactive) (re-search-backward "/\\([^/\n]+[/]?\\)$\\|\?\\(.*\\)$" nil t))
+; (cl-defun qwe () (interactive) (re-search-backward "\?\\(.*\\)$" nil t))
+; (cl-defun qwe () (interactive) (re-search-backward "^\\s-*\\([0-9]+\\)\\. \\(.*\\)$" nil t))
+; (cl-defun qwe () (interactive) (re-search-backward "[/?]\\([^/?\n]+/?$\\)" nil t))
+; (cl-defun qwe () (interactive) (re-search-backward "^ *\\([0-9]+\\)\\. \\(.*\\)$" nil t))
 (defvar *lynx-parse-references-regexp* "^ *\\([0-9]+\\)\\. \\(.*\\)$")
 
-(defun ewq () 
+(cl-defun ewq () 
   (interactive)
   (re-search-backward *lynx-parse-references-regexp* nil t)
 ;  (message "%s" (list (match-string 1) (match-string 2)))
@@ -139,7 +139,7 @@ in proxy DB."
       res)))
 (definteractive lynx-references-in-proxy)
 
-(defun lynx-url-from-reference (ref)
+(cl-defun lynx-url-from-reference (ref)
   "Returns url corresponding to REF."
   (interactive "P")
   (save-excursion
@@ -150,7 +150,7 @@ in proxy DB."
 	(message "Couldn't find url!")
 	*lynx-current-url*))))
 
-(defun url= (url1 url2)
+(cl-defun url= (url1 url2)
   "Checks if URL1 and URL2 are equivalent. TODO: use some trim
 function."
   (let ((lasti-1 (1- (length url1)))
@@ -163,7 +163,7 @@ function."
 
 ;;(expand-file-name "asdf/" "c:/foo/bar/quux")
 
-(defun html-subst (url)
+(cl-defun html-subst (url)
   "In current buffer subistutes all urls relative to URL with absolute
 urls. Eg. /foo -> http://www.bar.com/foo."
   (goto-char (point-min))
@@ -180,7 +180,7 @@ urls. Eg. /foo -> http://www.bar.com/foo."
 ;;(expand-file-name "../oslo" "/http://www.foo.no/a/b")
 ;(replace-match (substring (expand-file-name (string-left-trim ?/ (match-string 1)) "/http://www.foo.no/") 1) nil nil nil 1)
 
-(defun expand-file-name* (file directory)
+(cl-defun expand-file-name* (file directory)
   (with-constant-match-data
       (let (pos
 	    (string (if (nor (= (last-elt directory) (first-elt file)))
@@ -199,7 +199,7 @@ urls. Eg. /foo -> http://www.bar.com/foo."
 ;;(try-completion "ab" '(("a") ("ac")))
 
 ;;(require 'mb-mail)
-(defun lynx-mail-region (begin end refresh)
+(cl-defun lynx-mail-region (begin end refresh)
   "Insert region as the text in a new message."
   (interactive "r\nP")
   (if refresh (mb-refresh-addresses))

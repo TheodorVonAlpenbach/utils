@@ -1,16 +1,16 @@
-(defun roll-dice (&optional base)
+(cl-defun roll-dice (&optional base)
   (if base (random-integer base (+ base 5)) (random 6)))
 ;; (roll-dice 1)
 
-(defun roll-dices-no-sort (n)
-  (loop repeat n collect (roll-dice)))
+(cl-defun roll-dices-no-sort (n)
+  (cl-loop repeat n collect (roll-dice)))
 ;;(roll-dices-no-sort 3)
 
-(defun roll-dices (n)
-  (sort (loop repeat n collect (roll-dice)) #'>))
+(cl-defun roll-dices (n)
+  (sort (cl-loop repeat n collect (roll-dice)) #'>))
 ;;(roll-dices 3)
 
-(defun risk-roll-loss (blacks reds)
+(cl-defun risk-roll-loss (blacks reds)
   "Returns the losses in a single roll as (BLACKS-LOST REDS-LOST).
 T means a black win, NIL means a red win."
   (let* ((bd (roll-dices blacks))
@@ -22,15 +22,15 @@ T means a black win, NIL means a red win."
 (cl-defun risk-roll-loss-prediction (blacks reds &optional (n 100000))
   "Simulate N single rolls"
   (mapcar #'average
-    (transpose (loop repeat n collect (head 2 (risk-roll-loss blacks reds))))))
+    (transpose (cl-loop repeat n collect (head 2 (risk-roll-loss blacks reds))))))
 ;;(risk-roll-loss-prediction 3 2)
 ;;(0.421116 0.578884)
 ;;(risk-roll-loss-prediction 1 1)
 ;;(/ 5.0 12)
 ;;(- 1 (/ 49.0 144))
 
-(defun risk-simulate (blacks reds)
-  (loop while (and (plusp blacks)
+(cl-defun risk-simulate (blacks reds)
+  (cl-loop while (and (plusp blacks)
 		   (plusp reds))
 	for loss = (risk-roll-loss (min blacks 3) (min reds 2))
 	for (blacks-lost reds-lost) = loss
@@ -42,7 +42,7 @@ T means a black win, NIL means a red win."
 
 (cl-defun risk-simulate-prediction (blacks reds &optional (n 10000))
   "Simulate N single rolls"
-  (let* ((res (loop repeat n collect (head 2 (risk-simulate blacks reds))))
+  (let* ((res (cl-loop repeat n collect (head 2 (risk-simulate blacks reds))))
 	 (bwins (copy-if #'(lambda (x) (apply #'> x)) res)))
     (list (/ (length bwins) (float n))
 	  (average bwins :key #'first))))

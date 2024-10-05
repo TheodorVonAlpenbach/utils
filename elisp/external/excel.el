@@ -1,4 +1,4 @@
-(defun xls-to-csv1 (filename args &optional copy)
+(cl-defun xls-to-csv1 (filename args &optional copy)
   (let ((res (apply #'call-process* "xlsx2csv" filename args)))
     (if (string-match "^Invalid" res)
       (error "Conversion failed. Is the document open in LibreOffice?")

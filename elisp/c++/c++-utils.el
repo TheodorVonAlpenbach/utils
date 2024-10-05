@@ -4,18 +4,18 @@
 (defconst c++-base-type-list '("int" "bool" "double" "char")
   "List of base C++ types")
 
-(defun push-front (elt lst)
+(cl-defun push-front (elt lst)
   "Returns a list with ELT prepended to LST"
   (cons elt lst))
 
-(defun mb-fill-list (elt size)
+(cl-defun mb-fill-list (elt size)
   "Returns a list with SIZE ELTs: '(ELT ELT ... ELT)"
   (let ((lst))
     (dotimes (i size lst)
       (setq lst (cons elt lst)))))
 ;(mb-fill-list 'a 10)
 
-(defun mb-insert-between (lst elt)
+(cl-defun mb-insert-between (lst elt)
   "Inserts ELT between each pair of consequtive elements of LST
 Example: (mb-insert-between '(a b c) d) -> (a d b d c)" 
   (rest (mapcan 'list (mb-fill-list elt (length lst)) lst)))
@@ -25,14 +25,14 @@ Example: (mb-insert-between '(a b c) d) -> (a d b d c)"
 ;(apply 'list (mapcar* 'list '(a b c) '(_ _ _)))
 ;(mb-insert-between '("a" "b" "c") "_")
 
-(defun c++-compose-variable-string (words)
+(cl-defun c++-compose-variable-string (words)
   "Converts list of words to standard variable format.
 Example: '(\"foo\" \"bar\" \"quux\") -> foo_bar_quux" 
   (setq words (mb-insert-between words "_"))
   (downcase (apply 'concat words)))
 ;(c++-compose-variable-string '("foo" "bar" "Quux"))
 
-(defun c++-split-method-string (method)
+(cl-defun c++-split-method-string (method)
   "Split a standard method string into a word list
 Example: fooBarQuux -> '(\"foo\" \"bar\" \"quux\")" 
   (save-excursion
@@ -42,7 +42,7 @@ Example: fooBarQuux -> '(\"foo\" \"bar\" \"quux\")"
 	(insert (substring method index (match-beginning 0)))
 	(setq index (match-beginning 0))))))
 
-(defun c++-split-method-string (method) ""
+(cl-defun c++-split-method-string (method) ""
   (let ((lst nil) ( index 0))
     (setq case-fold-search nil)
     (while (string-match "[a-z]+" method index)
@@ -65,17 +65,17 @@ Example: fooBarQuux -> '(\"foo\" \"bar\" \"quux\")"
 ;(c++-method-2-variable "foB")
 ;(c++-method-2-member-variable "foB")
 
-(defun c++-method-2-variable (method)
+(cl-defun c++-method-2-variable (method)
   "Converts standard method format to standard variable format.
 Example: fooBarQuux -> foo_bar_quux" 
   (c++-compose-variable-string (c++-split-method-string method)))
 
-(defun c++-method-2-member-variable (method)
+(cl-defun c++-method-2-member-variable (method)
   "Converts standard method format to standard member variable format.
 Example: fooBarQuux -> foo_bar_quux_" 
   (concat (c++-method-2-variable method) "_"))
 
-(defun c++-reference-non-base-type (type)
+(cl-defun c++-reference-non-base-type (type)
   "Returns TYPE + '& if TYPE is not in c++-base-type-list, else TYPE" 
   (if (not (member type c++-base-type-list))
       (concat type "&")

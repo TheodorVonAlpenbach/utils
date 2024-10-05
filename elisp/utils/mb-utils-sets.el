@@ -1,6 +1,6 @@
 (provide 'mb-utils-sets)
 
-(defstruct
+(cl-defstruct
   (interval
     (:constructor interval-oo (l r &aux (open-left t) (open-right t)))
     (:constructor interval-oc (l r &aux (open-left t) (open-right nil)))
@@ -8,14 +8,14 @@
     (:constructor interval-cc (l r &aux (open-left nil) (open-right nil))))
   l r (open-left t) (open-right t))
 
-(defun open-left-p (intv) (interval-open-left intv))
-(defun open-right-p (intv) (interval-open-right intv))
-(defun closed-left-p (intv) (not (open-left-p intv)))
-(defun closed-right-p (intv) (not (open-right-p intv)))
+(cl-defun open-left-p (intv) (interval-open-left intv))
+(cl-defun open-right-p (intv) (interval-open-right intv))
+(cl-defun closed-left-p (intv) (not (open-left-p intv)))
+(cl-defun closed-right-p (intv) (not (open-right-p intv)))
 ;(interval-l (make-interval :l 1 :r 2))
 ;(open-left-p (interval-oo 1 1))
 
-(defun interval-list (interval)
+(cl-defun interval-list (interval)
   (list (interval-l interval) (interval-r interval)))
 ;;(interval-list (interval-oo 1 2))
 

@@ -11,7 +11,7 @@
 ;;(/ (* +gravitational-constant+ +earth-mass+) (sq +earth-radius-mean+))
 ;;(* +gravitational-constant+ +earth-mass+)
 
-(defun escape-velocity2 (h m)
+(cl-defun escape-velocity2 (h m)
   (/ (* 2 +standard-gravitational-parameter-earth+) h))
 ;;(escape-velocity2 +earth-radius-mean+ +earth-mass+)
 
@@ -33,11 +33,11 @@
 ;;(escape-velocity (* 20000 +moon-apogee+))
 
 
-(defun J-to-cal (J)
+(cl-defun J-to-cal (J)
   (* 0.239005736 J))
 ;;(J-to-cal 1515)
 
-(defun lbs-to-kg (lbs)
+(cl-defun lbs-to-kg (lbs)
   (* 0.45359237 lbs))
 ;;(mapcar (compose #'round #'lbs-to-kg) '(196.6 193 191.8 190.2))
 

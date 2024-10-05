@@ -43,41 +43,41 @@
 (defconst +oll-tex-direction+ '(6 7 8  3 4 5  0 1 2)
   "The order the upper faces are listed in the TeX module rubik.")
 
-(defun oll-expand-corners (uf roc)
+(cl-defun oll-expand-corners (uf roc)
   "Return OC"
   (assert (= (length (cl-set-difference '(1 3 9 7) uf))
 	     (length roc))
 	  nil "Malformed oll. UF: %S, ROC: %S" uf roc)
-  (loop for x in '(1 3 9 7)
+  (cl-loop for x in '(1 3 9 7)
 	collect (if (member x uf) 'u (pop roc))))
 ;;(oll-expand-corners '(5 9) '(r r r))
 ;;(oll-expand-corners '(3 4 5 6 9) '(r l))
 
-(defun oll-uf-p (i uf)
+(cl-defun oll-uf-p (i uf)
   "Return not nil if upper face I is yellow given UF."
   (not-null (member i uf)))
 
-(defun oll-ufs (uf)
+(cl-defun oll-ufs (uf)
   "Map each upper face to nil if it is not yellow. Otherwise map it to t."
-  (loop for i from 1 to 9 collect (oll-uf-p i uf)))
+  (cl-loop for i from 1 to 9 collect (oll-uf-p i uf)))
 ;;(oll-ufs '(2 3 5 6 7))
 
-(defun mapnil (list value &optional true-value)
-  (loop for x in list collect (if x (or true-value x) value)))
+(cl-defun mapnil (list value &optional true-value)
+  (cl-loop for x in list collect (if x (or true-value x) value)))
 ;;(mapnil '(nil 1 nil 2) 'x 'y)
 
-(defun oll-uf-xy-tex (uf)
+(cl-defun oll-uf-xy-tex (uf)
   "Convert UF to X's and Y's in the TeX direction"
   (mapnil (project (oll-ufs uf) +oll-tex-direction+) 'X 'Y))
 ;;(oll-uf-xy-tex '(2 3 5 6 7))
 
-(defun oll-swap-xy (color) (if (eql color 'X) 'Y 'X))
+(cl-defun oll-swap-xy (color) (if (eql color 'X) 'Y 'X))
 
-(defun oll-side (lc mid rc)
+(cl-defun oll-side (lc mid rc)
   (list (if (eql lc 'r) 'Y 'X) (if mid 'X 'Y) (if (eql rc 'l) 'Y 'X)))
 ;;(oll-side 'l nil 'l)
 
-(defun oll-sides (uf roc)
+(cl-defun oll-sides (uf roc)
   (let ((oc (oll-expand-corners uf roc))
 	(xy (oll-ufs uf)))
     (list (oll-side (nth 0 oc) (nth 1 xy) (nth 1 oc))
@@ -87,12 +87,12 @@
 ;;(oll-sides '(2 3 4 5 6 8 9) '(r l))
 
 ;;;; TeX output
-(defun oll{} (color)
+(cl-defun oll{} (color)
   "Embrace color."
   (format "{%S}" color))
 ;;(oll{} 'X)
 
-(defun oll-face-tex (uf)
+(cl-defun oll-face-tex (uf)
   (concat* (oll-uf-xy-tex uf) :pre "  \\RubikFaceUp" :key #'oll{}))
 ;;(oll-face-tex '(2 3 5 6 7))
 
@@ -101,14 +101,14 @@
     :key #'oll{} :pre (format "\\RubikFace%s" side)))
 ;;(oll-side-tex "Back" '(X Y Y))
 
-(defun oll-sides-tex (uf roc)
-  (concat* (loop for side in '("Front" "Right" "Back" "Left")
+(cl-defun oll-sides-tex (uf roc)
+  (concat* (cl-loop for side in '("Front" "Right" "Back" "Left")
 		 for sf in (oll-sides uf roc)
 		 collect (oll-side-tex side sf))
     :pre "  " :in "\n  "))
 ;;(oll-sides-tex '(5 9) '(r r r))
 
-(defun oll-parse (oll)
+(cl-defun oll-parse (oll)
   (let ((soll (split-string oll nil t)))
     (list (mapcar #'string-to-integer (split-string (first soll) "" t))
 	  (when (rest soll)
@@ -121,12 +121,12 @@
       cm ratio (oll-face-tex uf) (oll-sides-tex uf roc))))
 ;;(oll-tex "59 rrr")
 
-(defun oll-fliplr-if-G (alg anti)
+(cl-defun oll-fliplr-if-G (alg anti)
   (if (string= anti "G")
     (cube-with-algorithm #'cube-fliplr alg)
     anti))
 
-(defun oll-table-row (x tree)
+(cl-defun oll-table-row (x tree)
   (destructuring-bind (name oll alg anti rev) x
     (concat* (list (oll-tex oll)
 		   name

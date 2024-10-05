@@ -35,13 +35,13 @@ this trick by adding 100 years.")
 
 (defconst *num-days-last-century* (+ (* 365 100) 24))
 
-(defun* DATE (&optional (time (now)))
+(cl-defun DATE (&optional (time (now)))
   "Returns the value of MS type DATE for TIME."
   (+ (time- time *DATE-start+100* :unit :day)
      *num-days-last-century*))
 ;;(DATE)
 
-(defun DATE-decode (DATE)
+(cl-defun DATE-decode (DATE)
   "Transforms MS DATE to an Emacs decoded time. See \(decode-time\)."
   (let* ((days (floor DATE))
 	 (secs (round (* (- DATE days) 60 60 24))))
@@ -50,19 +50,19 @@ this trick by adding 100 years.")
       :second secs)))
 ;;(list (now) (DATE-decode (DATE (now))))
 
-(defun DATE-weekday (DATE)
+(cl-defun DATE-weekday (DATE)
   "Returns 0 for Sunday, 1 for Monday, ..., 6 for Saturday."
   (mod (floor (- DATE *DATE-first-sunday*)) 7))
-;;(loop for day from 0 to 7 for d = (DATE (now :day day)) collect (list d (DATE-weekday d)))
+;;(cl-loop for day from 0 to 7 for d = (DATE (now :day day)) collect (list d (DATE-weekday d)))
 
-(defun DATE-weekend-p (DATE)
+(cl-defun DATE-weekend-p (DATE)
   "Non-nil iff DATE is a Sunday or a Monday."
   (case (DATE-weekday DATE)
     ((0 6) t)
     (otherwise nil)))
-;;(loop for day from 0 to 7 collect (DATE-weekend-p (DATE (now :day day))))
+;;(cl-loop for day from 0 to 7 collect (DATE-weekend-p (DATE (now :day day))))
 
-(defun DATE-round (from-DATE weekday &optional backward strictly)
+(cl-defun DATE-round (from-DATE weekday &optional backward strictly)
   "Returns nearest DATE to FROM-DATE that is WEEKDAY \(see
 DATE-weekday\). If option BACKWARD is non-nil the rounding is
 performed backwards in time, e.g. 'previous Friday'. Else, rounding is
@@ -82,9 +82,9 @@ FROM-DATE is not itself a valid result."
 ;;(DATE-round (floor (DATE)) 3 t t)
 ;;(DATE-round (floor (DATE)) 3 nil t)
 
-(defun DATE-interval (DATE1 DATE2) (list DATE1 DATE2))
+(cl-defun DATE-interval (DATE1 DATE2) (list DATE1 DATE2))
 
-(defun DATE-interval-round (DATE-iv &optional ignore-weekend-p)
+(cl-defun DATE-interval-round (DATE-iv &optional ignore-weekend-p)
   "Returns the interval of DATEs [DATE1 DATE2]. If IGNORE-WEEKEND-P is
 non-nil neither DATE1 nor DATE2 is allowed to be weekend days. Then
 the left limit of DATE-IV is rounded backwards to nearest Friday and
@@ -97,27 +97,27 @@ the right limit is rounded forwards to nearest Monday. Note that DATE1
       (list (if (DATE-weekend-p a) (DATE-round (first DATE-iv) 5 t) a)
 	    (if (DATE-weekend-p b) (DATE-round (second DATE-iv) 1 nil) b)))))
 
-(defun D-IV-R (time1 time2 &optional iw-p)
+(cl-defun D-IV-R (time1 time2 &optional iw-p)
   (DATE-interval-iso (DATE-interval-round (DATE-interval (DATE time1) (DATE time2)) iw-p)))
-;;(loop for day from 0 to 7 collect (D-IV-R (now :day day) (now :day (+ day 7)) t))
+;;(cl-loop for day from 0 to 7 collect (D-IV-R (now :day day) (now :day (+ day 7)) t))
 ;;(D-IV-R (now) (now :day 7) t)
 
-(defun DATE-iso (DATE)
+(cl-defun DATE-iso (DATE)
   "Prints DATE in iso date format."
   (iso-date (DATE-decode DATE)))
 ;;(DATE-iso (DATE (now)))
 
-(defun DATE-interval-iso (DATE-interval)
+(cl-defun DATE-interval-iso (DATE-interval)
   (format "[%s %s]"
 	  (DATE-iso (first DATE-interval))
 	  (DATE-iso (second DATE-interval))))
 ;;(DATE-interval-iso (DATE-interval (now) (now :month 1)))
 
-(defun* DATE-generate-sequence (from-DATE to-DATE &optional ignore-weekend-p)
+(cl-defun DATE-generate-sequence (from-DATE to-DATE &optional ignore-weekend-p)
   "Generates a list of DATEs in range [FROM-DATE TO-DATE]. If
 IGNORE-WEEKEND-P is non-nil, then the resulting sequence will skip all
 weekend dates. "
-  (loop for D from from-DATE to to-DATE 
+  (cl-loop for D from from-DATE to to-DATE 
 	if (not (and ignore-weekend-p
 		     (DATE-weekend-p D)))
 	collect D))

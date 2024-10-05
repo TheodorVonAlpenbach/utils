@@ -159,7 +159,7 @@
 ;;   !    ! !      !   !!! 
 (setf greek-map (make-sparse-keymap "Greek"))
 (define-key global-map (kbd "C-x 8 g") greek-map)
-(loop for lc across "ABCDEFGHIJKLMNOPRSTUVWXYZabcdefghijklmnoprstuvwxyz"
+(cl-loop for lc across "ABCDEFGHIJKLMNOPRSTUVWXYZabcdefghijklmnoprstuvwxyz"
       for gc across "ΑΒΨΔΕΦΓΗΙΞΚΛΜΝΟΠΡΣΤΘΩςΧΥΖαβψδεφγηιξκλμνοπρστθωςχυζ"
       do (define-key greek-map (string lc) (insert-n (string gc))))
 

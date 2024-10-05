@@ -1,10 +1,10 @@
 ;;;; Import questions
-(defun cram-import-csv (path)
+(cl-defun cram-import-csv (path)
   "Import cram tasks from CSV file at PATH.
 See header of imports.cvs for correct format"
   (let ((rows (maptree #'(lambda (s) (if (empty-string-p s) nil s))
 		(parse-csv-file path))))
-    (loop for row in (rest rows)
+    (cl-loop for row in (rest rows)
 	  ;; ignore ratings / levels for now
 	  for args = (rcons (butlast row) +cram-default-rating+)
 	  do (unless (cram-db-insert-problem args)
@@ -24,7 +24,7 @@ See header of imports.cvs for correct format"
 ;;(ld-save-database *current-database*)
 ;;(cram-import-csv "~/projects/utils/elisp/games/cram/imports.csv")
 
-(defun ld-columns (table-designator)
+(cl-defun ld-columns (table-designator)
   (mapcar (compose #'third #'ld-column-identifier)
     (ld-schema-column-definitions (ld-schema table-designator))))
 ;;(ld-columns :problem)
@@ -47,11 +47,11 @@ See header of imports.cvs for correct format"
 ;;(cram-db-problems)
 ;;(CAUTION! ld-delete-if #'always :problem)
 
-(defun cram-format-question (s)
+(cl-defun cram-format-question (s)
   (andcat (split-string s ", ") ", " " og " " og "))
 ;;(cram-format-question "Parnassia palustris")
 
-(defun cram-format-picture (s)
+(cl-defun cram-format-picture (s)
   (destructuring-bind (f . r) (split-string s " ")
     (concat* (cons (capitalize f) r) :in "_" :suf ".jpg")))
 ;;(cram-format-picture "Parnassia palustris")
@@ -59,7 +59,7 @@ See header of imports.cvs for correct format"
 (cl-defun cram-parse-planter (&optional (startindex 1)
 				(buffer "plantescratch")
 				(refprefix "csv-planter-"))
-  (concat* (loop for (k l p) in (parse-csv-string
+  (concat* (cl-loop for (k l p) in (parse-csv-string
 				 (buffer-string-no-properties buffer) "\t")
 		 for i from startindex
 		 collect (concat*
@@ -75,11 +75,11 @@ See header of imports.cvs for correct format"
 ;;(cl-substitute ?_ ?  "a b")
 
 ;;; Norske fugler
-(defun format-norsk-fugl-ancestors (ancestors)
+(cl-defun format-norsk-fugl-ancestors (ancestors)
   (concat* (cl-remove-if #'empty-string-p ancestors) :in " - "))
 ;;(format-norsk-fugl-ancestors (subseq qwe 0 3))
 
-(defun format-norsk-fugl (n order family subfamily genus species norsk)
+(cl-defun format-norsk-fugl (n order family subfamily genus species norsk)
   (format "csv-norske-fugler-%d;%s - %s %s;%s;norske-fugler/%s_%s.jpg;;;3"
     n
     (format-norsk-fugl-ancestors (list order family subfamily))
@@ -90,7 +90,7 @@ See header of imports.cvs for correct format"
   "Copy columns Order to Norsk from aves.xlsx and paste into
 *scratch*. Then run this."
   (lines-to-string
-   (loop for l in (remove ""
+   (cl-loop for l in (remove ""
 		    (string-lines (buffer-string-no-properties "*scratch*")))
 	 for (order family subfamily genus species norsk)
 	 = (project (split-string l "\t") '(0 4 5 6 7 9))

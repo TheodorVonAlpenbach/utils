@@ -18,13 +18,13 @@
 (setf reftex-plug-into-AUCTeX t)
 (setf reftex-insert-label-flags '("s" "sfte"))
 
-(defun master-prefix  ()
+(cl-defun master-prefix  ()
   (expand-file-name
    (file-name-sans-extension (TeX-master-file))
    (TeX-master-directory)))
 ;;(master-prefix)
 
-(defun open-my-pdf (&optional x)
+(cl-defun open-my-pdf (&optional x)
   "Find master file and view the corresponding PDF file in a buffer.
 Need to include this function in some view parameter. Check this
 at work."
@@ -46,22 +46,22 @@ at work."
 	    (revert-buffer t t t)))))))
 
 ;;; Add this viewer to TeX-expand-list. (Check if lambda is necessary.)
-(pushnew '("%V" (lambda () "open-my-pdf")) TeX-expand-list :test #'equal)
+(cl-pushnew '("%V" (lambda () "open-my-pdf")) TeX-expand-list :test #'equal)
 ;;(nilf TeX-expand-list)
 
 ;; NB! Make this an ...
-(defun TeX-run-function (_name command _file)
+(cl-defun TeX-run-function (_name command _file)
   "Execute Lisp function or function call given as the string COMMAND.
 Parameters NAME and FILE are ignored."
   (let ((fun (car (read-from-string command))))
     (if (functionp fun) (funcall fun file) (eval fun))))
 
-(defun mb-open-pdf (fn)
+(cl-defun mb-open-pdf (fn)
   "First version of 'open pdf'"
   (warn "This function is deprecated")
   (find-file-other-window (format "%s.pdf" fn) t))
 
-(defun mb-describe-mode (&optional buffer)
+(cl-defun mb-describe-mode (&optional buffer)
   (interactive "@")
   (describe-mode buffer)
   (save-excursion
@@ -70,7 +70,7 @@ Parameters NAME and FILE are ignored."
     (forward-char 1)
     (push-button)))
 
-(defun mode-help-follow-mode-advice ()
+(cl-defun mode-help-follow-mode-advice ()
   (save-excursion
     (other-window 1)
     (re-search-forward ":override advice: " nil t)

@@ -1,26 +1,26 @@
-(defun pft-closed-path (subpaths)
+(cl-defun pft-closed-path (subpaths)
   ())
 
-(defun pft-bezier3 (p1 c1 c2 p2)
+(cl-defun pft-bezier3 (p1 c1 c2 p2)
   "Writes cubic bezier to pft format"
   ())
 
-(defun rdir () (1 0))
-(defun ldir () (-1 0))
-(defun udir () (0 1))
-(defun ddir () (0 -1))
+(cl-defun rdir () (1 0))
+(cl-defun ldir () (-1 0))
+(cl-defun udir () (0 1))
+(cl-defun ddir () (0 -1))
 
-(defun bcircle ()
+(cl-defun bcircle ()
   "http://spencermortensen.com/articles/bezier-circle/"
   ())
 
-(defun cserif (corner right-dir left-dir)
+(cl-defun cserif (corner right-dir left-dir)
   ())
 
-(defun pft-area (path &rest holes)
+(cl-defun pft-area (path &rest holes)
   )
 
-(defun pft-point (p)
+(cl-defun pft-point (p)
   (format "rline" ))
 
 (deffont "alberti"
@@ -58,7 +58,7 @@
 	    (cserif z3 (rdir) rleg))
 	   (pft-path z4 z5 z6)))))
 
-(defun bcircle (p1 p2 center)
+(cl-defun bcircle (p1 p2 center)
   "Return a bezier representation of a circular arch going from
 point P1 to point P2 on a circle centered at point CENTER. The
 bezier curve is formatted as the list (P1 C1 C2 P2), where C1 and

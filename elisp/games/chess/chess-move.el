@@ -1,7 +1,7 @@
 (require 'chess-piece)
 (require 'sboard)
 
-(defstruct (chess-move 
+(cl-defstruct (chess-move 
 	    (:conc-name cm-))
   board ;sboard
   from ;snumber
@@ -12,7 +12,7 @@
   promotion; chess-piece
 )
 
-(defun cm-new (cb from to)
+(cl-defun cm-new (cb from to)
   "Returns nil if trying to capture own piece"
   (let ((piece (sb-get cb from))
 	(capture (sb-get cb to)))
@@ -34,14 +34,14 @@
        ;;:check
        ))))
 
-(defun cm-pawn-2rows-p (cm)
+(cl-defun cm-pawn-2rows-p (cm)
   (= (- (cm-to cm) (cm-from cm)) 16))
 
-(defun cm-pawn-jump-p (cm)
+(cl-defun cm-pawn-jump-p (cm)
   (and (cm-pawn-2rows-p cm)
        (sb-get (cm-board cm) (+ from 8))))
 
-(defun cm-new-pawn (cb from to)
+(cl-defun cm-new-pawn (cb from to)
   "Special constructor for pawn move"
   (awhen (cm-new cb from to)
     (let ((same-column-p (snumber-on-same-column-p from to)))
@@ -50,15 +50,15 @@
        (when same-column-p
 	 (unless (cm-pawn-jump-p it) it))))))
 
-(defun cm-new-promotions (cm)
+(cl-defun cm-new-promotions (cm)
   "Returns a list of (four) moves involving promotion.
 Assumes that the move is legal"
-  (loop for type in '(queen rook bishop knight)
+  (cl-loop for type in '(queen rook bishop knight)
 	do (setf (cm-promotion cm) 
 		 (make-chess-piece type (chess-piece-side (cm-piece cm)) (cm-to cm)))
 	collect cm))
 
-(defun cm-execute (cm)
+(cl-defun cm-execute (cm)
   "Returns the captured piece (or nil if no capture)"
   (let* ((piece (or (cm-promotion cm) (cm-piece cm)))
 	 (cb (cm-board cm))
@@ -68,7 +68,7 @@ Assumes that the move is legal"
     (setf (chess-piece-snumber piece) (cm-to cm))
     capture))
 
-(defun cm-take-back (cm)
+(cl-defun cm-take-back (cm)
   "Returns the captured piece (or nil if no capture)"
   (let* ((piece (cm-piece cm))
 	 (capture (cm-capture cm))
@@ -78,19 +78,19 @@ Assumes that the move is legal"
     (setf (chess-piece-snumber piece) (cm-from cm))
     capture))
 
-(defun cm-side (cm)
+(cl-defun cm-side (cm)
   (chess-piece-side (cm-piece cm)))
 
-(defun cm-print (cm)
+(cl-defun cm-print (cm)
   (list (cm-from cm) (cm-to cm) (cm-piece cm) (cm-capture cm) (cm-promotion cm)))
 
-(defun cm-to-string (cm &optional first-move-p style)
+(cl-defun cm-to-string (cm &optional first-move-p style)
   "Optional argument and STYLE is currently unsupported.
 Assumes move has been executed "
   (chess-piece-print (cm-piece cm) first-move-p nil))
 ;;(cm-to-string (parse-chess-move "Nb1"))
 
-(defun cm-range-print (cms)
+(cl-defun cm-range-print (cms)
   (print-board-positions (mapcar #'cm-to cms)))
 
 (provide 'chess-move)

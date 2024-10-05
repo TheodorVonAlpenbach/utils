@@ -1,7 +1,7 @@
 (require 'key)
 
-(defun generate-closest-spc-list ()
-  (loop for i below 12 collect 
+(cl-defun generate-closest-spc-list ()
+  (cl-loop for i below 12 collect 
 	(let ((spc (mod (* 7 i) 12)))
 	  (if (> spc 6)
 	    (- spc 12)
@@ -20,16 +20,16 @@ corresponds to transpositions of fourths), ie.
  (nth 3 closest-spc-list) = -3, 
 ie. 3 fourth transpositions from D flat, ie. F flat")
 
-(defun spc-transpose (set-pitch-class n)
+(cl-defun spc-transpose (set-pitch-class n)
   "Transposes SET-PITCH-CLASS up N semitones. If N is negative,
 it transposes SET-PITCH-CLASS |N| semitones down."
   (mod (+ set-pitch-class n) 12))
 
-(defun spc-dominant (set-pitch-class)
+(cl-defun spc-dominant (set-pitch-class)
   "Returns the dominant of SET-PITCH-CLASS"
   (spc-transpose set-pitch-class 7))
 
-(defun spc-dominant-relation-p (spc1 spc2)
+(cl-defun spc-dominant-relation-p (spc1 spc2)
   "Returns t iff SPC1 is the dominant of SPC2. Name is perhaps a
 bit confusing. This concerns a true dominant, while sometimes we
 write dominant about dominant class"
@@ -37,22 +37,22 @@ write dominant about dominant class"
 ;;(mapcar (bind #'spc-dominant-relation-p 0) (0-n 12))
 
 ;; conversions
-(defun spc-from-spitch (spitch)
+(cl-defun spc-from-spitch (spitch)
   (mod spitch 12))
 
-(defun spc-from-chrome (chrome)
+(cl-defun spc-from-chrome (chrome)
   "Converts CHROME to set pitch class"
   (spc-from-spitch (chrome-to-spitch chrome)))
 ;;(spc-from-chrome (chrome-new))
 
-(defun* spc-to-chrome (spc &optional (reference-chrome (make-chrome)))
+(cl-defun spc-to-chrome (spc &optional (reference-chrome (make-chrome)))
   "Returns closest pitch class of set pitch class SPC relative to REFERENCE-PC.
 See constant `closest-spc-list' for a definition of 'closest'."
   (chrome-transpose reference-chrome (p-chrome (i-from-symbol 'P5))
 		    (nth (mod (- spc (chrome-to-spitch reference-chrome)) 12)
 			 closest-spc-list)))
 
-(defun* spc-to-string (spc &optional (print-style mu-default-print-style))
+(cl-defun spc-to-string (spc &optional (print-style mu-default-print-style))
   ;;for now
   (chrome-to-string-symbol pc print-style))
 

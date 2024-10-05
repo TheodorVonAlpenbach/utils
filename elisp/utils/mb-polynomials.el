@@ -6,49 +6,49 @@
 ;;;; (numerator denomintator) where both elements are representations
 ;;;; of polynomials as described above.
 
-(defun horner (p x)
+(cl-defun horner (p x)
   (cl-loop for ai in (reverse p)
 	   for sum = ai then (+ (* sum x) ai)
 	   finally (return sum)))
 ;;(horner '(2 0 1) 3)
 
-(defun polynom-p (p)
+(cl-defun polynom-p (p)
   (and (listp p)
        (plusp (length p))
        (numberp (first p))))
 ;;(mapcar #'polynom-p '(nil () (1) (2 3) (a 1)))
 
-(defun polynom-clean (p)
+(cl-defun polynom-clean (p)
   (let ((pos (position 0 p :test-not #'= :from-end t)))
     (if pos
       (subseq p 0 (1+ pos))
       '())))
 ;;(polynom-clean '(0))
 
-(defun polynom-order (p)
+(cl-defun polynom-order (p)
   (1- (length (polynom-clean p))))
 ;;(polynom-order '(1 0 0))
 
-(defun polynom-align (&rest polynomials)
+(cl-defun polynom-align (&rest polynomials)
   (pad-lists polynomials))
 ;;(polynom-align '(1 2 3) '(1))
 
-(defun polynom-addition (&rest polynomials)
+(cl-defun polynom-addition (&rest polynomials)
   (apply #'mapcar* #'+ (pad-lists polynomials)))
 ;;(polynom-addition '(1 2 1) '(1))
 
-(defun polynom-scalar-multiplication (polynomial scalar)
+(cl-defun polynom-scalar-multiplication (polynomial scalar)
   "Multiply all coefficients in POLYNOMIAL with SCALAR"
   (mapcar (bind #'* scalar) polynomial))
 ;;(polynom-scalar-multiplication '(1 2 3) 123)
 
-(defun polynom-subtraction (&rest polynomials)
+(cl-defun polynom-subtraction (&rest polynomials)
   (apply #'polynom-addition
 	 (first polynomials)
 	 (mapcar (bind #'polynom-scalar-multiplication -1) (rest polynomials))))
 ;;(polynom-subtraction '(1 2 1) '(1))
 
-(defun polynom-multiplication-1 (p q)
+(cl-defun polynom-multiplication-1 (p q)
   (cl-destructuring-bind (p q) (polynom-align p q)
     (polynom-clean
      (apply #'polynom-addition
@@ -57,16 +57,16 @@
 		collect (append (make-list order 0)
 				(polynom-scalar-multiplication q a)))))))
 
-(defun polynom-multiplication (&rest polynomials)
+(cl-defun polynom-multiplication (&rest polynomials)
   (reduce #'polynom-multiplication-1 polynomials :initial-value '(1)))
 ;;(polynom-multiplication)
 
-(defun polynom-expt (p exponent)
+(cl-defun polynom-expt (p exponent)
   (cl-assert (not (minusp exponent)))
   (apply #'polynom-multiplication (make-list exponent p)))
 ;;(polynom-expt '(1 1) 0)
 
-(defun polynom-division-1 (num den)
+(cl-defun polynom-division-1 (num den)
   (let ((d (- (polynom-order num) (polynom-order den)))
 	(num (polynom-clean num))
 	(den (polynom-clean den)))
@@ -76,14 +76,14 @@
 	(list q r)))))
 ;;(polynom-division-1 '(0 -1 0) '(1 1))
 
-(defun polynom-division (num den)
+(cl-defun polynom-division (num den)
   (cl-loop for num* = num then r
 	   for (q r) = (polynom-division-1 num* den)
 	   while q collect q into res
 	   finally return (mapcar #'polynom-clean (list (apply #'polynom-addition res) num* den))))
 ;;(polynom-division '(0 0 1) '(1 1))
 
-(defun polynom-derivative (p)
+(cl-defun polynom-derivative (p)
   (cl-loop for a in (rest p)
 	   for i from 1
 	   collect (* i a)))
@@ -96,7 +96,7 @@
 		     rem))))
 ;;(test-polynom-division)
 
-(defun pole-polynom (poles)
+(cl-defun pole-polynom (poles)
   "Returns the polynomial defined by the POLES a1, a2, ... aN as
 \(x - a1)(x - a2)...(x - aN)"
   (reduce #' polynom-multiplication 
@@ -130,26 +130,26 @@ and floats are formatted with PRECISION"
 (defalias #'p^ 'polynom-expt)
 
 ;;; Polynomial fractions
-(defun fpolynom (numerator denomintator)
+(cl-defun fpolynom (numerator denomintator)
   (list numerator denomintator))
 
 (defsubst fp* (qp1 qp2) (mapcar* #'p* qp1 qp2))
 ;(fp* (qpolynom '(1 1) '(1 1)) (fpolynom '(1 1) '(1 1)))
 
-(defun polynom-expand (p order)
+(cl-defun polynom-expand (p order)
   (let ((n (polynom-order p)))
     (cl-assert (<= n order))
     (append p (make-list (- order n) 0))))
 ;;(polynom-expand '(1 1) 4)
 
-(defun fp-expand (fp order)
+(cl-defun fp-expand (fp order)
   (mapcar (bind #'polynom-expand order) fp))
 ;;(fp-expand '((1 2 3 4) (1)) 4)
 
-(defun fp-order (fp)
+(cl-defun fp-order (fp)
   (max (polynom-order (first fp)) (polynom-order (second fp))))
 
-(defun fp-p (fp)
+(cl-defun fp-p (fp)
   (and (listp fp)
        (= (length fp) 2) 
        (polynom-p (first fp))
@@ -165,36 +165,36 @@ and floats are formatted with PRECISION"
     (apply #'ppolynom fp args)))
 ;;(mapcar #'pfp '(((1 1) (1 2)) (1 2)))
 
-(defun polynom-value-old (p x)
+(cl-defun polynom-value-old (p x)
   (apply #'+
     (cl-loop for coefficient in p
 	     for i from 0
 	     collect (* coefficient (expt x i)))))
 
-(defun expt-sequence (base order)
+(cl-defun expt-sequence (base order)
   (cl-loop for i to order 
 	   for term = 1 then (* term base)
 	   collect term))
 ;;(expt-sequence 2 10)
 
 (require 'mb-utils-matrix)
-(defun polynom-value (p x)
+(cl-defun polynom-value (p x)
   (scalar-product p (expt-sequence x (polynom-order p))))
 ;;(with-complex (polynom-value '(1 1) '(0 1)))
 
-(defun fp-value (fp x)
+(cl-defun fp-value (fp x)
   (if (fp-p fp)
     (/ (polynom-value (first fp) x)
        (polynom-value (second fp) x))
     (polynom-value fp x)))
 
-(defun fp-value (fp x)
+(cl-defun fp-value (fp x)
   (if (fp-p fp)
     (apply #'/ (mapcar (bind #'scalar-product (expt-sequence x (fp-order fp))) fp))
     (polynom-value fp x)))
 ;;(fp-value '((1 2 1) (1 -2 1)) 2)
 
-;; (defun ewq (x y) (+ x y))
+;; (cl-defun ewq (x y) (+ x y))
 
 ;; (let ((fn1 'ewq)
 ;;       (fn2 '-)

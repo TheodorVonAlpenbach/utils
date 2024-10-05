@@ -33,7 +33,7 @@
 
 (ert-deftest test-stirling-numbers-1 ()
   "Test of `stirling-numbers-1'"
-  (should (equal (loop for k to 5 collect (stirling-numbers-1 5 k))
+  (should (equal (cl-loop for k to 5 collect (stirling-numbers-1 5 k))
 		 '(0 24 50 35 10 1))))
 
 (provide 'test-mb-combinatorics)

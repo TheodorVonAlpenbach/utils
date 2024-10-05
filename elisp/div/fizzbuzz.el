@@ -1,6 +1,6 @@
 (cl-defun fizz-buzz-sequence (&optional (n 20))
   "Return the first N words in a correct Fizz buzz game sequence."
-  (loop for i from 1 to n collect
+  (cl-loop for i from 1 to n collect
 	(if (zerop (mod i 3))
 	  (if (zerop (mod i 5))
 	    "Fizz Buzz" i)

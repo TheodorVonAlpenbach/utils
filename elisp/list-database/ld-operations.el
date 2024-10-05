@@ -2,7 +2,7 @@
 (require 'ld-general)
 (require 'ld-metadata)
 
-(defun ld-sort-predicate (order column-definition)
+(cl-defun ld-sort-predicate (order column-definition)
   "ORDER is either :desc or :asc"
  (let ((order-pair (cl-case (ld-column-type column-definition)
 		      (string (list #'string> #'string<))
@@ -11,7 +11,7 @@
       ((:desc :descending) (first order-pair))
       ((:asc :ascending nil) (second order-pair)))))
 
-(defun default-identifier-scope (column-keyword schema verify-column-p)
+(cl-defun default-identifier-scope (column-keyword schema verify-column-p)
   "Returns the column in SCHEMA that matches COLUMN-KEYWORD. If
 VERIFY-COLUMN-P is true, it also checks for ambiguity."
   (cl-flet ((exists-p (keyword coldefs)
@@ -59,7 +59,7 @@ VERIFY-COLUMN-P is true, it also checks for ambiguity."
 (cl-defun ld-mapper-1 (table column-identifier &rest args)
   "Returns a function that takes a row and returns the value or
   values at the specified slot or slots."
-  (lexical-let ((pos (apply #'ld-column-position column-identifier (ld-table-schema table) args)))
+  (let ((pos (apply #'ld-column-position column-identifier (ld-table-schema table) args)))
     #'(lambda (row) (nth pos row))))
 ;;(ld-join `(,emps :company-id) `(,comps :id))
 ;;(ld-example-0)
@@ -75,22 +75,22 @@ VERIFY-COLUMN-P is true, it also checks for ambiguity."
 ;;;; Operations
 
 ;;; Insert
-(defun ld-check-row (row schema)
+(cl-defun ld-check-row (row schema)
   (let ((coldefs (ld-schema-column-definitions schema))) 
     (and (= (length row) (length coldefs))
 	 (every #'ld-check-type row coldefs))))
 
-(defun ld-check-rows (rows schema)
+(cl-defun ld-check-rows (rows schema)
   (every (bind #'ld-check-row schema) rows))
 
 ;;; insert
-(defun ld-insert-row-list (table rows)
+(cl-defun ld-insert-row-list (table rows)
   (when *ld-check-data-p*
     (unless (ld-check-rows rows (ld-table-schema table))
       (error "Bad data")))
   (push-list rows (ld-table-data table)))
 
-(defun ld-insert-row (table &rest rows)
+(cl-defun ld-insert-row (table &rest rows)
   (ld-insert-row-list rows))
 
 (cl-defun ld-column-position (column-designator &optional schema-designator)
@@ -167,7 +167,7 @@ It autogenerates values if this is specified and checks for the property unique"
 ;;(ld-table-data (ld-table :users))
 
 ;;; Join
-(defun ld-join (table-column1 table-column2)
+(cl-defun ld-join (table-column1 table-column2)
   "Joins tables"
   (cl-flet ((tabsort (tabcol)
 	      (cl-destructuring-bind (tab col) tabcol
@@ -210,15 +210,15 @@ It autogenerates values if this is specified and checks for the property unique"
 		       (nreverse res)))))
 ;;(ld-join `(,emps :company-id) `(,comps :id))
 
-(defun ld-joined-p (table)
+(cl-defun ld-joined-p (table)
   (eql (first table) :joined))
 
-(defun ld-metadata-identifier-p (form)
+(cl-defun ld-metadata-identifier-p (form)
   "Metadata column identifier starts with ::, e.g. ::created"
   (and (keywordp form)
        (= (char (symbol-name form) 1) ?:)))
 
-(defun ld-metadata-identifier (form)
+(cl-defun ld-metadata-identifier (form)
   "Metadata column identifier starts with ::, e.g. ::created
 Returns nil iif form is not a metadata identifier"
   (and (ld-metadata-identifier-p form)
@@ -226,7 +226,7 @@ Returns nil iif form is not a metadata identifier"
 ;;(ld-metadata-identifier ::created)
 
 ;;; Expressions
-(defun ld-expression-rec (form schema row)
+(cl-defun ld-expression-rec (form schema row)
   (unless (ld-schema-p schema)
     (error "Schema is not valid: form = %S, schema = %S, row = %S" form schema row))
   (cond 
@@ -256,7 +256,7 @@ Returns nil iif form is not a metadata identifier"
 ;;(ld-expressions (:rating :name) :users)
 ;;(every #'functionp (ld-expressions (:rating :name) :users))
 
-(defun ld-colexp (form schema-designator)
+(cl-defun ld-colexp (form schema-designator)
   (ld-column-position (ld-make-column-identifier form schema-designator)
 		      schema-designator))
 
@@ -280,7 +280,7 @@ Returns nil iif form is not a metadata identifier"
 		       (ld-sort-predicate
 			order (nth order-by
 				   (ld-schema-column-definitions schema)))
-		       :key (lexical-let
+		       :key (let
 				((col (or order-by
 					  (ld-colexp
 					   (ld-primary-key (ld-schema schema))
@@ -326,7 +326,7 @@ Keywords supported"
 
 
 ;;; Delete
-(defun ld-delete-if (predicate table-designator)
+(cl-defun ld-delete-if (predicate table-designator)
   (let ((table (ld-table table-designator)))
     (setf (ld-table-data table)
 	  (cl-delete-if predicate (ld-table-data table)))))
@@ -336,7 +336,7 @@ Keywords supported"
 ;;(pp (ld-delete :users (= (:id) 1)))
 
 ;;; Update
-(defun ld-update-1 (table-designator where-function values columns)
+(cl-defun ld-update-1 (table-designator where-function values columns)
   "Skipping properties for now"
   (cl-assert (= (length (listify values)) (length (listify columns)))
 	     t "The number of values and the number columns are not the same")

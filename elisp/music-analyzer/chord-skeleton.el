@@ -31,12 +31,12 @@
   "Each element is a list on form (chord-skeleton chord-name-symbol chord-type-string)")
 
 ;;; style based
-(defun chord-type-group-flatten (ctg-definitions)
+(cl-defun chord-type-group-flatten (ctg-definitions)
   (let ((res ()))
-    (loop for definition in ctg-definitions
+    (cl-loop for definition in ctg-definitions
 	  for name = (first definition)
 	  for values = (second definition)
-	  for values-extended = (loop for value in values
+	  for values-extended = (cl-loop for value in values
 				      for referenced-definition = (find value res :key #'first)
 				      collect (if referenced-definition 
 						(second referenced-definition)
@@ -59,13 +59,13 @@
      (minor-sevenths (minor-seventh minor-seventh-without-fifth minor-major))
      (sevenths (major-sevenths minor-majors minor-sevenths)))))
 
-(defun* chord-type-groups (chord-type &optional symbols-only (groups chord-type-group-list))
+(cl-defun chord-type-groups (chord-type &optional symbols-only (groups chord-type-group-list))
   "Returns the chord type groups that contains CHORD-TYPE"
   (let ((result (copy-if (bind #'find chord-type 1) groups :key #'second)))
     (if symbols-only (mapcar #'first result) result)))
 ;;(chord-type-groups 'major-triad t)
 
-(defun chord-type-group-p (chord-type chord-type-group)
+(cl-defun chord-type-group-p (chord-type chord-type-group)
   "Returns nil iff CHORD-TYPE belongs to CHORD-TYPE-GROUP"
   (find chord-type (second (find chord-type-group chord-type-group-list :key #'first))))
 ;;(chord-type-group-p 'major-triad 'dominantic)
@@ -74,19 +74,19 @@
 (defalias 'chosk-info-chord-type 'second) ;;TODO: rename to chord-type
 (defalias 'chosk-info-chord-abbrev 'third) ;;TODO: rename to chord-abbrev or chord-symbol
 
-(defun chosk-new ()
+(cl-defun chosk-new ()
   (chosk-info-chosk (third chord-skeleton-info-list)))
 ;;(chosk-new)
 
-(defun chosk-info-from-chosk (chord-skeleton)
+(cl-defun chosk-info-from-chosk (chord-skeleton)
   (find chord-skeleton chord-skeleton-info-list :key #'chosk-info-chosk :test #'equal))
 ;;(mapcar #'chosk-info-from-chosk (mapcar #'chosk-info-to-chosk chord-skeleton-info-list))
 
-(defun chosk-info-from-chord-type (chord-type)
+(cl-defun chosk-info-from-chord-type (chord-type)
   (find chord-type chord-skeleton-info-list :key #'chosk-info-chord-type :test #'equal))
 ;;(mapcar #'chosk-info-from-chord-type (mapcar #'chosk-info-chord-type chord-skeleton-info-list))
 
-(defun chosk-info-from-chord-abbrev (chord-type)
+(cl-defun chosk-info-from-chord-abbrev (chord-type)
   (find chord-type chord-skeleton-info-list :key #'chosk-info-chord-abbrev :test #'equal))
 ;;(mapcar #'chosk-info-from-chord-abbrev (mapcar #'chosk-info-chord-abbrev chord-skeleton-info-list))
 

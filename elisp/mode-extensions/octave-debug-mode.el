@@ -1,13 +1,13 @@
 (require 'octave-breakpoint)
 
 ;;;; old, deprecated shortcuts, 
-(defun deprecate-message (fn new-key)
-  (lexical-let ((lfn fn) (lnew-key new-key))
+(cl-defun deprecate-message (fn new-key)
+  (let ((lfn fn) (lnew-key new-key))
     (lambda ()
       (interactive)
       (message "This key for %S is deprecated! Use \"%s\" instead." lfn lnew-key))))
 
-(defun octave-debug-map ()
+(cl-defun octave-debug-map ()
   (let ((map (make-sparse-keymap)))
     (define-key map "r" #'octave-run)
     (define-key map "l" #'octave-run-last)
@@ -72,7 +72,7 @@ Options:
     (setf overlay-arrow-position *mb-octave-debug-marker*))
   (set-marker *mb-octave-debug-marker* (and line (bol* :linum line)) buffer))
 
-(defun scope-region (scope)
+(cl-defun scope-region (scope)
   (cl-case scope
     ((nil :line) (line-region))
     ((t :buffer) (buffer-region))
@@ -83,7 +83,7 @@ Options:
 ;;(scope-region :qwe)
 
 
-(defun mb-octave-location (&optional pos)
+(cl-defun mb-octave-location (&optional pos)
   "Returns (FUNCTION-NAME LINUM), where FUNCTION-NAME is the
 function at point and LINUM is the current line number.
 
@@ -94,13 +94,13 @@ specific."
     (list (substring-no-properties (add-log-current-defun))
 	  (line-number-at-pos))))
 
-(defun octave-debug-p ()
+(cl-defun octave-debug-p ()
   "Returns not nil if octave is in debugging mode."
   (octave-send-string "dbstack")
   (awhen (car inferior-octave-output-list)
     (not (empty-string-p it))))
 
-(defun octave-where ()
+(cl-defun octave-where ()
   "Return the line and buffer of the stop line in the current debug session."
   (interactive)
   (octave-send-string "dbwhere" t)
@@ -108,24 +108,24 @@ specific."
     (list (string-to-number (sixth tokens))
 	  (third tokens))))
 
-(defun octave-status ()
+(cl-defun octave-status ()
   "Return the line and buffer of the stop line in the current debug session."
   (interactive)
   (octave-send-string "dbstatus" t))
 
-(defun mb-octave-parse-ans (line)
+(cl-defun mb-octave-parse-ans (line)
   "Handles only single line answers"
   (and (stringp line)
        (string-match* "ans = \\(.\\)" line :num 1)))
 ;;(mapcar #'mb-octave-parse-ans (list nil "ans = 0"))
 
 
-(defun mb-octave-debug-mode-p ()
+(cl-defun mb-octave-debug-mode-p ()
   (octave-send-string "isdebugmode")
   (awhen (first inferior-octave-output-list)
     (not (equal (mb-octave-parse-ans it) "0"))))
 
-(defun octave-exit-debug-mode ()
+(cl-defun octave-exit-debug-mode ()
   "Not implemented Should make current buffer writeable, remove
 step line markings, etc"
   (mb-octave-set-debug-marker nil)
@@ -135,19 +135,19 @@ step line markings, etc"
   (with-buffers (octave-buffers)
     (octave-debug-mode -1)))
 
-(defun octave-enter-debug-mode ()
+(cl-defun octave-enter-debug-mode ()
   "Not implemented Should make current buffer read-only, amplify breakpoints, etc.
   markings, etc"
   (octave-update-all-dbstop))
 
-(defun octave-debug-start ()
+(cl-defun octave-debug-start ()
   "Start debugging with comment statement after the defun at point."
   (octave-debug-mode 1)
   (save-excursion
     (octave-update-dbstops-buffer (current-buffer))
     (octave-eval-defun-test)))
 
-(defun octave-debug-refresh-display ()
+(cl-defun octave-debug-refresh-display ()
   (if (octave-debug-p)
     (cl-destructuring-bind (line fn)
 	(octave-where)
@@ -163,13 +163,13 @@ step line markings, etc"
 	(eol)))
     (octave-exit-debug-mode)))
 
-(defun octave-resume ()
+(cl-defun octave-resume ()
   (octave-send-string "dbcont" t)
   (octave-debug-refresh-display))
 
 
 ;;; UI
-(defun octave-step ()
+(cl-defun octave-step ()
   (interactive)
   (if (mb-octave-debug-mode-p)
     (octave-send-string "dbstep" t)
@@ -177,7 +177,7 @@ step line markings, etc"
      (octave-debug-start))) 
   (octave-debug-refresh-display))
 
-(defun octave-step-in ()
+(cl-defun octave-step-in ()
   (interactive)
   (if (mb-octave-debug-mode-p)
     (octave-send-string "dbstep in" t)
@@ -186,33 +186,33 @@ step line markings, etc"
      (octave-debug-start)))  
   (octave-debug-refresh-display))
 
-(defun octave-step-out ()
+(cl-defun octave-step-out ()
   "Not documented"
   (interactive)
   (octave-send-string "dbstep out" t)
   (octave-debug-refresh-display))
 
-(defun octave-quit-debug ()
+(cl-defun octave-quit-debug ()
   (interactive)
   (when (mb-octave-debug-mode-p)
     (octave-send-string "dbquit" t))
   (octave-debug-refresh-display))
 
-(defun octave-run ()
+(cl-defun octave-run ()
   (interactive)
   (if (mb-octave-debug-mode-p)
     (octave-resume)
     (octave-debug-start)
     (octave-debug-refresh-display)))
 
-(defun octave-run-last ()
+(cl-defun octave-run-last ()
   "Re-eval last defun test expression."
   (interactive)
   (octave-update-all-dbstop)
   (octave-send-string *octave-last-debug-expression* t)
   (octave-debug-refresh-display))
 
-(defun octave-run-to-cursor ()
+(cl-defun octave-run-to-cursor ()
   (interactive)
   (octave-with-temp-dbstop (point)
    (octave-run)))

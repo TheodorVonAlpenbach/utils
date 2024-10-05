@@ -1,4 +1,4 @@
-(defun copy-tree (tree)
+(cl-defun copy-tree (tree)
   "Return a clone of TREE which has no shared list structures with it."
   (if (consp tree)
     (cons (copy-tree (car tree)) (copy-tree (cdr tree)))
@@ -15,7 +15,7 @@ interpreted as the parent of X."
   (let ((nodes (mapcar #'list
 		 (cl-remove-duplicates (flatten relations) :test test))))
     ;; the loop builds child node lists and returns non-top nodes
-    (let ((x (loop for (p c) in (if reverse-p
+    (let ((x (cl-loop for (p c) in (if reverse-p
 				  (mapcar #'reverse relations) relations)
 		   for pn = (cl-find p nodes :key #'car :test test)
 		   for cn = (cl-find c nodes :key #'car :test test)
@@ -30,7 +30,7 @@ interpreted as the parent of X."
 
 (cl-defun tree->relations (tree)
   (when tree
-    (loop for sn in (cdr tree)
+    (cl-loop for sn in (cdr tree)
 	  append (cons (list (car tree) (car sn)) (tree->relations sn)))))
 ;;(tree->relations (car (relations->tree '((a b) (a c) (c d) (b e)))))
 
@@ -38,7 +38,7 @@ interpreted as the parent of X."
   "Return first subtree in TREE having X has its top node"
   (if (funcall test x (if key (funcall key (car tree)) (car tree)))
     tree
-    (loop for cn in (if from-end (reverse (cdr tree)) (cdr tree))
+    (cl-loop for cn in (if from-end (reverse (cdr tree)) (cdr tree))
 	  if (tree-member x cn :test test :key key :from-end from-end)
 	  return it)))
 ;;(tree-member 'b '(a (b (c)) (b (d))) :from-end t :key nil)
@@ -51,7 +51,7 @@ traverses TREE from left to right otherwise in the other
 direction."
   (if (funcall test x (if key (funcall key (car tree)) (car tree)))
     (if with-subtree tree (list (car tree)))
-    (loop for sn in (if from-end (reverse (cdr tree)) (cdr tree))
+    (cl-loop for sn in (if from-end (reverse (cdr tree)) (cdr tree))
 	  if (prune-tree-to-target
 	      x sn :test test :key key :with-subtree with-subtree)
 	  collect (list (car tree) it))))
@@ -59,7 +59,7 @@ direction."
 
 (cl-defun copy-subtree-1 (x trees copy-p filter test key from-end tree-from-end)
   "Helper for `copy-subtree' and `find-subtree'."
-  (loop for ft in (if from-end (reverse trees) trees)
+  (cl-loop for ft in (if from-end (reverse trees) trees)
 	for res = (case filter
 		    (:down (tree-member
 			    x ft :test test :key key :from-end tree-from-end))
@@ -90,10 +90,10 @@ containing X."
   (copy-subtree-1 x trees t filter test key from-end tree-from-end))
 ;;(copy-subtree 'f '((a (b (f (d)))) (e (f (g (h))))) :filter :up)
 
-(defun tree-leaves (tree)
+(cl-defun tree-leaves (tree)
   (when tree
     (aif (cdr tree)
-      (loop for x in it append (tree-leaves x))
+      (cl-loop for x in it append (tree-leaves x))
       (list (car tree)))))
 ;;(tree-leaves '(a))
 ;;(tree-leaves '(a))

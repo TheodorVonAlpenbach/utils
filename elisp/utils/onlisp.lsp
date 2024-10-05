@@ -784,7 +784,7 @@
 
 (defconstant unforced (gensym))
 
-(defstruct delay  forced closure)
+(cl-defstruct delay  forced closure)
 
 (defmacro delay (expr)
   (let ((self (gensym)))
@@ -1205,7 +1205,7 @@
       (funcall (pop *paths*))
       failsym))
 
-(defstruct proc  pri state wait) 
+(cl-defstruct proc  pri state wait) 
 
 (proclaim '(special *procs* *proc*))
 
@@ -1683,7 +1683,7 @@
         (apply meth obj args)
         (error "No ~A method for ~A." name obj))))
 
-(defstruct meth  around before primary after)
+(cl-defstruct meth  around before primary after)
 
 (defmacro meth- (field obj)
   (let ((gobj (gensym)))
@@ -1786,7 +1786,7 @@
           (delete obj (children p))))
   (setf (gethash 'parents obj) pars)
   (dolist (p pars)
-    (pushnew obj (children p)))
+    (cl-pushnew obj (children p)))
   (maphier #'(lambda (obj) 
                (setf (gethash 'ancestors obj) 
                      (get-ancestors obj)))

@@ -9,7 +9,7 @@
 (defvar c++-method-signature-suffix c++-method-signature-prefix
  "see c++-insert-method") 
 
-(defun c++-insert-method (name rett scope)
+(cl-defun c++-insert-method (name rett scope)
 
 "Inserts simple c++ method template: <hp>RETT SCOPE::NAME()<hs>{}
 If corresponding h-file exists, all arguments are optional (if then

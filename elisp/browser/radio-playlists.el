@@ -6,7 +6,7 @@
   (format "*NRK Klassisk%s*" (if tag (concat " " tag) "")))
 ;;(ak-temp-buffer-name)
 
-(defun ak-date (time-designator)
+(cl-defun ak-date (time-designator)
   (cl-destructuring-bind (s mi h d mo y &rest args)
       (parse-time time-designator)
     (format "%02d-%02d-%04d" d mo y)))
@@ -16,7 +16,7 @@
   (format "http://radio.nrk.no/guide/%s" (ak-date time-designator)))
 ;;(ak-historic-url)
 
-(defun ak-epg-entries (html-string)
+(cl-defun ak-epg-entries (html-string)
   "Returns a list of summary epg entries for today. News entries are deleted."
   (let* ((ak-xml (substring-intv html-string 
 		   (interval-oo "class=\"channel klassisk epg-channel"
@@ -28,7 +28,7 @@
 	     for time = (parse-time (xml-attribute "datetime" time-node))
 	     if (string-match* "^mkk" id) collect (list id time))))
 
-(defun ak-epg-entry (html-string time)
+(cl-defun ak-epg-entry (html-string time)
   "Returns list \(EPG-ID PROGRAM-PERIOD\)"
   (let* ((rest (cl-member-if (bind #'time< time) (nreverse (ak-epg-entries html-string)) :key #'second))
 	 (id (first (first rest))))
@@ -39,7 +39,7 @@
   (xml-extract-nodes (wget-to-string (format "http://radio.nrk.no/programplaylist/%s/html" epg-id))
 		     "li" nil nil t))
 
-(defun ak-parse-historic-entry (html-entry)
+(cl-defun ak-parse-historic-entry (html-entry)
   (cl-destructuring-bind (artist composer work)
       (string-match* "\\([^-]*\\) - \\([^:]*\\): \\(.*\\)" html-entry :num '(1 2 3))
     (mapcar #'string-trim (list composer work artist))))
@@ -71,11 +71,11 @@
       :in "\n")))
 
 ;; AK today
-(defun ak-url (&optional time)
+(cl-defun ak-url (&optional time)
   "radio.nrk.no/direkte/klassisk")
 
 (require 'json)
-(defun ak-entries (html-string &optional n)
+(cl-defun ak-entries (html-string &optional n)
   (let* ((json (substring-intv html-string
 		 (interval-oo "nrk.state.initState(\"nowNextElements\", " " );")))
 	 ;; jsons is a vector
@@ -123,7 +123,7 @@
 (cl-defun ak-at (time)
   (ak-to-temp-buffer #'ak-at-converter (ak-url) "spilles nå" time))
 
-(defun ak-open-browser () (interactive)
+(cl-defun ak-open-browser () (interactive)
   (w32-shell-execute "open" (ak-url)))
 
 ;;;; SR Klassisk
@@ -142,26 +142,26 @@
   '("Artist" "Album" "Ensemble/Orkester" "Dirigent" "Etikett")
   "Order is significant")
 
-(defun sr-parse-track-detail-old (track-detail)
+(cl-defun sr-parse-track-detail-old (track-detail)
   "item is one of Artist, Album, Ensemble/Orkester Dirigent Etikett"
   (let ((detail-name (first (xml-extract-nodes track-detail "span" () 1 t))))
     (list (substring* detail-name 0 -1) ; skip last semicolon
 	  (string-match* (format "<span>%s</span> \\(.*\\)" detail-name) track-detail :num 1))))
 ;;(sr-parse-track-detail "            <span>Etikett:</span> Sterling")
 
-(defun sr-parse-track-detail (track-detail)
+(cl-defun sr-parse-track-detail (track-detail)
   "Split track-detail into a pair.
 \"Solist: Mr. Holtermann\" -> \(\"Solist\" \"Mr. Holtermann\"\)."
   (awhen track-detail
     (mapcar #'string-trim (split-string it ":"))))
 ;;(sr-parse-track-detail "Solist: Mr. Holtermann")
 
-(defun sr-parse-time (sr-time)
+(cl-defun sr-parse-time (sr-time)
   "Convert SR time to ISO short time format HH:MM."
   (substitute ?: ?. sr-time))
 ;;(sr-parse-time "12.00")
 
-(defun sr-parse-entry (html-entry)
+(cl-defun sr-parse-entry (html-entry)
   "Return a list (time artist title detail1 detail2 ...)."
   (let ((sr-time (xml-inner (first (xml-extract-nodes html-entry "div"
 				  '(("class" "track-list-item__time-wrapper"))))))
@@ -221,24 +221,24 @@
 (cl-defun sr-at (time)
   (sr-to-temp-buffer #'sr-at-converter "just nu" time))
 
-(defun sr-open-browser () (interactive)
+(cl-defun sr-open-browser () (interactive)
   (w32-shell-execute "open" (sr-url)))
 
 ;;; General UI
-(defun radio-playlists-is-latest-buffer-p ()
+(cl-defun radio-playlists-is-latest-buffer-p ()
   (string-match "sist" (buffer-name)))
 
-(defun radio-playlists-current-display ()
+(cl-defun radio-playlists-current-display ()
   (let* ((title (buffer-name))
 	 (channel (if (string-match "SR" title) 'sr 'ak))
 	 (type (if (string-match "sist" title) 'latest 'now)))
     (list channel type)))
 
-(defun google-url (search-string)
+(cl-defun google-url (search-string)
   (format "https://www.google.no/webhp?sourceid=chrome-instant&ie=UTF-8&ion=1#hl=no&output=search&sclient=psy-ab&q=%s&oq=&gs_l=&pbx=1&fp=aec8b35b704dcc84&ion=1&bav=on.2,or.r_gc.r_pw.r_qf.&biw=1680&bih=959"
     search-string))
 
-(defun wikipedia-en-url (search-string)
+(cl-defun wikipedia-en-url (search-string)
   (format "http://en.wikipedia.org/w/index.php?title=Spesial:S%C3%B8k&search=%s"
     search-string))
 
@@ -247,7 +247,7 @@
 ;; How should this be done otherwise?
 ;; Probably the best thing is to avoid help mode alltogether...
 (require 'help-mode) 
-(defun help-follow ()
+(cl-defun help-follow ()
   (interactive)
   "Overrides original help follow. Must take care not doing anything if format strings doesn't match"
   (let ((display (radio-playlists-current-display)))
@@ -267,17 +267,17 @@
 	(browse-url (google-url search-string))))))
 ;;(help-follow)
 
-(lexical-let ((radio-playlist-functions '(sr-now sr-latest ak-now ak-latest))
+(let ((radio-playlist-functions '(sr-now sr-latest ak-now ak-latest))
 	      (current-playlist 'ak-latest)
 	      (current-now 'ak-now))
-  (defun radio-read-playlist ()
+  (cl-defun radio-read-playlist ()
     (intern-soft
      (completing-read
       "Select radio-channel: "
       (mapcar #'symbol-name radio-playlist-functions)
       nil t)))
 
-  (defun radio-playlist (prefix)
+  (cl-defun radio-playlist (prefix)
     (interactive "P")
     "Can be called with F9"
     (when prefix
@@ -286,7 +286,7 @@
 					  (mapcar #'symbol-name radio-playlist-functions)
 					  nil t))))
     (funcall current-playlist))
-  (defun radio-now (prefix)
+  (cl-defun radio-now (prefix)
     (interactive "P")
     "Can be called with F9"
     (when prefix

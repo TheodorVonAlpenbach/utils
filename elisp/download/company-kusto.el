@@ -22,7 +22,7 @@
           kusto-data-types))
 
 ;;;###autoload
-(defun company-kusto (command &optional arg &rest ignored)
+(cl-defun company-kusto (command &optional arg &rest ignored)
   "`company-mode' completion backend for `kusto-mode'."
   (interactive (list 'interactive))
   (cl-case command

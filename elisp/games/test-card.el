@@ -4,13 +4,13 @@
 (ert-deftest test-card-color ()
   "Test of `card-color'"
  (should (equal (mapcar #'card-color (0-n 52))
-		(loop for c below 4
+		(cl-loop for c below 4
 		      append (make-list 13 c)))))
 
 (ert-deftest test-card-value ()
   "Test of `card-value'"
   (should (equal (mapcar #'card-value (0-n 52))
-		 (loop repeat 4
+		 (cl-loop repeat 4
 		       append (0-n 13)))))
 
 (ert-deftest test-card-red-p ()

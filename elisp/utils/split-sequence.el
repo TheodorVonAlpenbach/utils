@@ -70,7 +70,7 @@ stopped."
                             (position-if-not predicate sequence :start start :key key))
                           sequence start end count remove-empty-subseqs)))
 
-(defun split-from-end (position-fn sequence start end count remove-empty-subseqs)
+(cl-defun split-from-end (position-fn sequence start end count remove-empty-subseqs)
   (loop
      for right = end then left
      for left = (max (or (funcall position-fn sequence right) -1)
@@ -86,9 +86,9 @@ stopped."
      until (< left start)
    finally (return (values (nreverse subseqs) (1+ left)))))
 
-(defun split-from-start (position-fn sequence start end count remove-empty-subseqs)
+(cl-defun split-from-start (position-fn sequence start end count remove-empty-subseqs)
   (let ((length (length sequence)))
-    (loop for left = start then (+ right 1)
+    (cl-loop for left = start then (+ right 1)
 	  for right = (min (or (funcall position-fn sequence left) length)
 			   end)
 	  unless (and (= right left)

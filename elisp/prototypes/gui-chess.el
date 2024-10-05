@@ -11,10 +11,10 @@
 ;;(gcfa "SCAWV0" "type" "label")
 
 (defalias 'gcfa #'gui-chess-format-assignment)
-(defun gcfa-type (tag value) (gcfa tag "type" value))
-(defun gcfa-geo (tag geometry) (gcfa tag "geometry" geometry "rect"))
-(defun gcfa-sensor (tag name) (gcfa tag "sensor" name))
-(defun gcfa-text (tag text) (gcfa tag "text" text))
+(cl-defun gcfa-type (tag value) (gcfa tag "type" value))
+(cl-defun gcfa-geo (tag geometry) (gcfa tag "geometry" geometry "rect"))
+(cl-defun gcfa-sensor (tag name) (gcfa tag "sensor" name))
+(cl-defun gcfa-text (tag text) (gcfa tag "text" text))
 
 (cl-defun gcfa-displaynumber (tag geometry sensor-name)
   (concat* (list (gcfa-type tag "displaynumber")
@@ -28,10 +28,10 @@
 		 (gcfa-text tag text))
     :in "\n"))
 
-(defun gui-chess-extract-positions (gui)
+(cl-defun gui-chess-extract-positions (gui)
   "Calculate the envelopes of the rectangles in GUI."
   (if (eql (car gui) :frame)
-    (loop for x in (third gui)
+    (cl-loop for x in (third gui)
 	  append (gui-extract-scilab-positions x))
     (if (stringp (car gui))
       (destructuring-bind (name (left top) (width height)) gui

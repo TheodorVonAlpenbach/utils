@@ -1,10 +1,10 @@
-(defun sm-incorrect-p (grade)
+(cl-defun sm-incorrect-p (grade)
   (< grade 3))
 
-(defun sm-new-state ()
+(cl-defun sm-new-state ()
   (list 0 2.5 1))
 
-(defun sm-2 (grade state)
+(cl-defun sm-2 (grade state)
   "Return new state from user GRADE and old STATE \(N EASY-FACTOR INTERVAL\).
 INTERVAL unit is days by default
 TODO: add interval unit"
@@ -20,7 +20,7 @@ TODO: add interval unit"
       (incf easy-factor (- 0.1 (* nq (+ 0.08 (* nq 0.02))))))
     (list n (max easy-factor 1.3) interval)))
 
-(defun sm-2-1 (grade state)
+(cl-defun sm-2-1 (grade state)
   "SM-2 with float INTERVAL"
   (destructuring-bind (n easy-factor interval) state
     (if (sm-incorrect-p grade)
@@ -30,7 +30,7 @@ TODO: add interval unit"
     (let ((nq (- 5 grade)))
       (incf easy-factor (- 0.1 (* nq (+ 0.08 (* nq 0.02))))))
     (list n (max easy-factor 1.3) interval)))
-;;(loop for grade below 6 collect (sm-2 grade (list 2 2.7 1)))
+;;(cl-loop for grade below 6 collect (sm-2 grade (list 2 2.7 1)))
 
 
 (provide 'sm-2)

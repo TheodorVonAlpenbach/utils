@@ -1,19 +1,19 @@
 ;;; Generation
-(defun* sparsity-function (sparsity)
+(cl-defun sparsity-function (sparsity)
   (case sparsity
     (:normal (sparsity-function 1.1))
     (:dense (sparsity-function 1.05))
     (:very-dense (sparsity-function 1.03))
     (:spread (sparsity-function 2.0))
-    (t (lexical-let ((c sparsity))
+    (t (let ((c sparsity))
 	 #'(lambda (i) (expt c i))))))
 
-(defun format-float (number decimals)
+(cl-defun format-float (number decimals)
   (format (format "%%.%df" decimals) number))
-;;(loop for i in (0-n 4) collect (format-float pi i "m"))
+;;(cl-loop for i in (0-n 4) collect (format-float pi i "m"))
 
-(defun* required-decimals (x y &optional (maximum 10))
-  (let ((res (loop for i to maximum
+(cl-defun required-decimals (x y &optional (maximum 10))
+  (let ((res (cl-loop for i to maximum
 		   while (string= (format-float x i)
 				  (format-float y i))
 		   finally return i)))
@@ -22,20 +22,20 @@
       res)))
 ;;(required-decimals 1.106 1.11)
 
-(defun* integer-alternatives (answer sparsity n)
+(cl-defun integer-alternatives (answer sparsity n)
   (assert (integerp answer) t)
   (let ((pos (min answer (random n))))
     (a-b (- answer pos) (- (+ answer n) 1 pos))))
 ;;(length (integer-alternatives 11 nil 10))
 
-(defun* alternatives (answer sparsity &optional (n 10) (pos (random n)))
+(cl-defun alternatives (answer sparsity &optional (n 10) (pos (random n)))
   (if (eql sparsity :integer)
     (integer-alternatives answer sparsity n)
-    (loop for i from (- pos) below (- n pos)
+    (cl-loop for i from (- pos) below (- n pos)
 	  collect (* (funcall (sparsity-function sparsity) i) answer))))
 ;;(alternatives 3 :integer)
 
-(defun* compile-question (text answer unit &optional (minimum-decimals 1) (sparsity :normal))
+(cl-defun compile-question (text answer unit &optional (minimum-decimals 1) (sparsity :normal))
   (let* ((alternatives (alternatives answer sparsity))
 	 (decimals (max minimum-decimals 
 			(required-decimals (first alternatives) (second alternatives)))))
@@ -45,21 +45,21 @@
 	  unit)))
 ;;(apply #'compile-question qwe)
 
-(defun compile-all-questions ()
-  (loop for q in +questions+ 
+(cl-defun compile-all-questions ()
+  (cl-loop for q in +questions+ 
 	collect (apply #'compile-question q)))
 ;;(compile-all-questions)
 
-(defun add-unit (answer-string unit)
+(cl-defun add-unit (answer-string unit)
   (format "%s %s" answer-string unit))
 
-(defun format-question (q)
+(cl-defun format-question (q)
   (destructuring-bind (text alternatives answer unit) q
     (flatten (list text 
 		   (mapcar (bind #'add-unit unit) alternatives)
 		   (add-unit answer unit)))))
 
-(defun* questions-to-csv (&optional (header (flatten (list "Spørsmål" (split-string "ABCDEFGHIJ" "" t) "Svar"))))
+(cl-defun questions-to-csv (&optional (header (flatten (list "Spørsmål" (split-string "ABCDEFGHIJ" "" t) "Svar"))))
   (let ((formatted-questions (mapcar #'format-question *compiled-questions*)))
     (awhen header (push it formatted-questions))
     (csv-string formatted-questions)))

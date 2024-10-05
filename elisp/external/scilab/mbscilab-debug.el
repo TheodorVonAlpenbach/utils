@@ -14,7 +14,7 @@
   (if predicate (+ number addend) number))
 ;;(add-if t 10)
 
-(defun scilab-vector (list)
+(cl-defun scilab-vector (list)
   (concat* list :pre "[" :in ", " :suf "]" :key #'sstring))
 ;;(scilab-vector (a-b 1 10))
 
@@ -28,7 +28,7 @@
 ;;; Deactivate breakpoint: removes a breakpoint from SciLab (but not from *scilab-breakpoints*) and hides it
 
 ;;; bpt handling, simple UI to turn 'SciLab breakpoint's == 'bpt's on and off
-(defun scilab-toggle-fn-bpts (toggle function-name relative-linums)
+(cl-defun scilab-toggle-fn-bpts (toggle function-name relative-linums)
   "Toggles bpt at the RELATIVE-LINUMS in function FUNCTION-NAME.
 RELATIVE-LINUMS could be either a list of integer or a single integer."
   (message "toggle bpt: %S" (list toggle function-name relative-linums))
@@ -42,11 +42,11 @@ RELATIVE-LINUMS could be either a list of integer or a single integer."
 	 function-name (scilab-vector (remove 0 (mapcar #'1- relative-linums)))))
     (error (message "%s" (second var)))))
 
-(defun scilab-toggle-bpt (toggle bpt)
+(cl-defun scilab-toggle-bpt (toggle bpt)
   "Toggles bpt at line corresponding to soft breakpoint BPT."
   (scilab-toggle-fn-bpts toggle (first bpt) (list (second bpt))))
 
-(defun scilab-unset-all-bpts ()
+(cl-defun scilab-unset-all-bpts ()
   "Deletes all soft breakpoints in every loaded function. Obsolete?"
   (mbscilab-eval-raw "delbpt()"))
 ;;(scilab-unset-all-bpts)
@@ -91,57 +91,57 @@ If BUFFER is specified the operation is restricted to this buffer."
 
 (cl-defun scilab-show-all-breakpoints ()
   "Reformats all breakpoints in all buffers"
-  (loop for b in *scilab-breakpoints* do (scilab-toggle-breakpoint-visibility :on b)))
+  (cl-loop for b in *scilab-breakpoints* do (scilab-toggle-breakpoint-visibility :on b)))
 ;;(scilab-show-all-breakpoints t)
 
 ;;; breakpoint activation
-(defun scilab-activate-breakpoint (breakpoint)
+(cl-defun scilab-activate-breakpoint (breakpoint)
   "Activates the existing BREAKPOINT at the current line"
   (when (not (member breakpoint *scilab-breakpoints*))
     (error "Breakpoint %S is not an existing breakpoint" breakpoint))
   (scilab-toggle-bpt :on breakpoint)
   (scilab-toggle-breakpoint-visibility :on breakpoint))
 
-(defun scilab-activate-all-breakpoints ()
-  (loop for b in *scilab-breakpoints* do (scilab-activate-breakpoint b)))
+(cl-defun scilab-activate-all-breakpoints ()
+  (cl-loop for b in *scilab-breakpoints* do (scilab-activate-breakpoint b)))
 
-(defun scilab-deactivate-breakpoint (breakpoint)
+(cl-defun scilab-deactivate-breakpoint (breakpoint)
   (scilab-toggle-bpt :off breakpoint)
   (scilab-toggle-breakpoint-visibility :off breakpoint))
 
-(defun scilab-deactivate-all-breakpoints ()
-  (loop for b in *scilab-breakpoints* do (scilab-deactivate-breakpoint b)))
+(cl-defun scilab-deactivate-all-breakpoints ()
+  (cl-loop for b in *scilab-breakpoints* do (scilab-deactivate-breakpoint b)))
 
-(defun scilab-refresh-all-breakpoints ()
+(cl-defun scilab-refresh-all-breakpoints ()
   (interactive)
   (scilab-deactivate-all-breakpoints)
   (scilab-activate-all-breakpoints))
 
 ;;; breakpoint handling
-(defun scilab-create-breakpoint ()
+(cl-defun scilab-create-breakpoint ()
   "Creates a breakpoint for the current line.
 See `*scilab-breakpoints*' for breakpoint format."
   (mapprop (scilab-fn-info) '(:name :current-line)))
 
-(defun scilab-breakpoint-exists-p (breakpoint)
+(cl-defun scilab-breakpoint-exists-p (breakpoint)
   (find breakpoint *scilab-breakpoints* :test #'equal))
 ;;(scilab-breakpoint-exists-p "mbfct" 2)
 
-(defun scilab-add-breakpoint (breakpoint)
+(cl-defun scilab-add-breakpoint (breakpoint)
   "Adds a BREAKPOINT at the current line"
   (when (member breakpoint *scilab-breakpoints*)
     (message "Warning! %S is already added to system"))
   (push-unique breakpoint *scilab-breakpoints* #'equal)
   (scilab-activate-breakpoint breakpoint))
 
-(defun scilab-delete-breakpoint (breakpoint)
+(cl-defun scilab-delete-breakpoint (breakpoint)
   "Deletes the BREAKPOINT from the current line"
   (if (not (member breakpoint *scilab-breakpoints*))
     (message "Warning! %S does not exist in system")
     (scilab-deactivate-breakpoint breakpoint)
     (draw breakpoint *scilab-breakpoints* :test #'equal)))
 
-(defun scilab-toggle-breakpoint ()
+(cl-defun scilab-toggle-breakpoint ()
   "Toggles breakpoint at the current line"
   (interactive)
   (let ((breakpoint (scilab-create-breakpoint)))
@@ -149,9 +149,9 @@ See `*scilab-breakpoints*' for breakpoint format."
       (scilab-delete-breakpoint breakpoint)
       (scilab-add-breakpoint breakpoint))))
 
-(defun scilab-delete-all-breakpoints ()
+(cl-defun scilab-delete-all-breakpoints ()
   (interactive)
-  (loop for b in *scilab-breakpoints*
+  (cl-loop for b in *scilab-breakpoints*
 	do (scilab-delete-breakpoint b)))
 
 
@@ -170,7 +170,7 @@ See `*scilab-breakpoints*' for breakpoint format."
     ((:buffer :file :global) (apply #'a-b (getf fn-info :lines)))
     ((:function t) (relative-linums (scilab-fn-linums :file fn-info)))))
 
-(defun scilab-code-line-p (global-linum buffer)
+(cl-defun scilab-code-line-p (global-linum buffer)
   "Returns t is line GLOBAL-LINUM in current buffer is a code line"
   (with-buffer buffer
     (goto-line global-linum)
@@ -184,7 +184,7 @@ See `*scilab-breakpoints*' for breakpoint format."
     ((:function t) (relative-linums (scilab-bpt-linums :file fn-info)))))
 ;;(scilab-bpt-linums :buffer ())
 
-(defun fringe-helper-convert (&rest strings)
+(cl-defun fringe-helper-convert (&rest strings)
   "Convert STRINGS into a vector usable for `define-fringe-bitmap'.
 Each string in STRINGS represents a line of the fringe bitmap.
 Periods (.) are background-colored pixel; Xs are foreground-colored. The
@@ -227,13 +227,13 @@ For example, the following code defines a diagonal line.
 	      'display
 	      '(left-fringe dot font-lock-keyword-face)))
 
-(defun scilab-toggle-visibility-soft-breakpoints (toggle linums buffer)
+(cl-defun scilab-toggle-visibility-soft-breakpoints (toggle linums buffer)
   "Toggles the soft breakpoint marks in the left fringe of code buffer.
 Note: Important to specify BUFFER, since at this point, current buffer could be *scilab*."
   (with-buffer buffer
     (case toggle
       (:on
-       (loop for l in linums
+       (cl-loop for l in linums
 	     do (goto-line l)
 	     do (let ((overlay (make-overlay (point) (point))))
 		  (overlay-put overlay 'before-string +scilab-soft-breakpoint-glyph+))))
@@ -241,7 +241,7 @@ Note: Important to specify BUFFER, since at this point, current buffer could be 
        (destructuring-bind (beg end) (line-as-region linums buffer)
 	 (remove-overlays beg end 'before-string +scilab-soft-breakpoint-glyph+))))))
 
-(defun scilab-toggle-soft-breakpoints (toggle fn-info)
+(cl-defun scilab-toggle-soft-breakpoints (toggle fn-info)
   (let ((linums (scilab-bpt-linums :file fn-info)))
     (scilab-toggle-fn-bpts toggle (getf fn-info :name) (relative-linums linums))
     (scilab-toggle-visibility-soft-breakpoints toggle linums (getf fn-info :buffer))))
@@ -254,9 +254,9 @@ TODO: check if "
 		    (scilab-fn-info-from-name function-name)
 		    (scilab-fn-info))))
     (scilab-toggle-soft-breakpoints toggle fn-info)
-    (loop for b in *scilab-breakpoints* do (scilab-activate-breakpoint b))))
+    (cl-loop for b in *scilab-breakpoints* do (scilab-activate-breakpoint b))))
 
-(defun scilab-next-statement-line (current-line)
+(cl-defun scilab-next-statement-line (current-line)
   "Returns the line number of the next statement after CURRENT-LINE.
 The line numbers are local to the current function."
   (let ((lines (scilab-defun-lines)))
@@ -265,35 +265,35 @@ The line numbers are local to the current function."
 	   (1+ it)))))
 ;;(scilab-next-statement-line 3)
 
-(defun scilab-parse-value (string)
+(cl-defun scilab-parse-value (string)
   (if (= (char string 0) ?!)
     (string-trim* string "[!\n\t ]*")
     (string-to-number string)))
 ;;(mapcar #'scilab-parse-value '("!qwe    !" "1.2" "456"))
 
-(defun scilab-parse-answer-group (group)
+(cl-defun scilab-parse-answer-group (group)
   (let* ((lines (cl-remove "" (mapcar #'string-trim group) :test #'string=))
 	 (symbol (first (read-from-string (first lines))))
 	 (values (mapcar #'scilab-parse-value (rest lines))))
     (list symbol (if (stringp (first values))
-		   (loop for x in values for i from 1 if (oddp i) collect x)
+		   (cl-loop for x in values for i from 1 if (oddp i) collect x)
 		   values))))
 ;;(scilab-parse-answer-group "   ")
 
-(defun scilab-parse-answer (string)
+(cl-defun scilab-parse-answer (string)
   "Returns the current stack at debug stop point"
-  (lexical-let ((re "[A-Za-z0-9]+  ="))
+  (let ((re "[A-Za-z0-9]+  ="))
     (let ((groups (rest (cut-list-if #'(lambda (x) (string-match* re x))
 			  (string-to-lines string) t))))
       (mapcar #'scilab-parse-answer-group groups))))
 ;;(transpose (mapcar #'second (scilab-parse-answer qwe)))
 
-(defun scilab-debug-stack ()
+(cl-defun scilab-debug-stack ()
   (awhen (mapcar #'second (scilab-parse-answer (mbscilab-eval-raw "[x,y]=where()" t)))
     (transpose it)))
 ;;(scilab-debug-stack)
 
-(defun scilab-debug-current-env () (second (scilab-debug-stack)))
+(cl-defun scilab-debug-current-env () (second (scilab-debug-stack)))
 
 (cl-defun scilab-comint-move-step (&optional (point (point)))
   "Sets soft breakpoint at next breakpoint place in scilab and deletes current soft breakpoint
@@ -318,7 +318,7 @@ Note that scilab actually evaluates the statement at a current scilab line"
 		     (first (scilab-function-buffer (first de))))
   (scilab-show-all-breakpoints))
 
-(defun scilab-mark-step-line (function-name relative-linum)
+(cl-defun scilab-mark-step-line (function-name relative-linum)
   (let* ((fn-info (scilab-fn-info-from-name function-name))
 	 (global-linum (scilab-global-linum relative-linum fn-info))
 	 (buffer (getf fn-info :buffer)))
@@ -333,26 +333,26 @@ Note that scilab actually evaluates the statement at a current scilab line"
       (goto-line global-linum))))
 ;;(scilab-mark-step-line :on nil)
 
-(defun scilab-function-name (name-or-env)
+(cl-defun scilab-function-name (name-or-env)
   (if (stringp name-or-env)
     name-or-env
     (getf (or name-or-env (scilab-fn-info))
 	  :name)))
 
-(defun scilab-continue ()
+(cl-defun scilab-continue ()
   "Continue should never care about break points"
   (awhen (scilab-debug-current-env)
     (scilab-unmark-step-line it)
     (mbscilab-eval-raw "resume")))
 
-(defun scilab-resume ()
+(cl-defun scilab-resume ()
   "By now, this method (or `scilab-continue') has become superfluous"
   (interactive)
   ;; delete every soft breakpoint in current function
   (scilab-instrument-function :off (first (scilab-debug-current-env)))
   (scilab-continue))
 
-(defun scilab-resume-to-cursor ()
+(cl-defun scilab-resume-to-cursor ()
   (interactive)
   (let ((breakpoint (scilab-create-breakpoint)))
     (if (scilab-breakpoint-exists-p breakpoint)
@@ -366,7 +366,7 @@ Note that scilab actually evaluates the statement at a current scilab line"
       (scilab-resume)
       (scilab-delete-breakpoint breakpoint))))
 
-(defun scilab-step-outof ()
+(cl-defun scilab-step-outof ()
   "TODO"
   (interactive)
   (scilab-instrument-function :off))
@@ -396,7 +396,7 @@ Note that scilab actually evaluates the statement at a current scilab line"
       (mbscilab-eval-raw "abort"))))
 
 
-(defun scilab-debug-status (&optional string)
+(cl-defun scilab-debug-status (&optional string)
   "This is a comint filter function. The purpose is to look for debug status output from Scilab.
 If Scilab reports 'Stop after row 6 in function GenerateFFIAOG'
 it will mark line 6 in GenerateFFIAOG as a step line."

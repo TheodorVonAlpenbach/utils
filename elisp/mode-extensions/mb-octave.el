@@ -4,7 +4,7 @@
 (require 'mb-octave-insert)
 (require 'mb-texinfo)
 
-(defun mb-octave-kbd-maps ()
+(cl-defun mb-octave-kbd-maps ()
   (let ((mb-local-map (make-sparse-keymap))
 	(test-map (make-sparse-keymap)))
     (key-chord-define evil-normal-state-local-map "gh" mb-local-map)
@@ -16,7 +16,7 @@
     (define-key mb-local-map "b" (octave-breakpoint-map))
     (define-key mb-local-map "d" (octave-debug-map))))
 
-(defun mb-octave-test-map ()
+(cl-defun mb-octave-test-map ()
   (let ((map (make-sparse-keymap)))
     (define-key map "f" #'mb-octave-test-buffer-file)
     (define-key map "d" (mb-octave-test-directory-fn (file-name-directory (buffer-file-name)) nil))
@@ -27,7 +27,7 @@
     (define-key map "A" (mb-octave-test-directory-fn "/home/mbe/git/imms/src/octave/" t))
     map))
  
-(defun mb-octave-init ()
+(cl-defun mb-octave-init ()
   (mb-octave-kbd-maps)
   (turn-on-eldoc-mode)
   (linum-mode)
@@ -37,12 +37,12 @@
 
 (add-hook 'octave-mode-hook 'mb-octave-init)
 
-(defun octave-mode-p (buffer-or-name)
+(cl-defun octave-mode-p (buffer-or-name)
   "Return non nil if BUFFER-OR-NAME is in Octave mode."
   (major-mode-p 'octave-mode buffer-or-name))
 ;;(octave-mode-p "dealmat.m")
 
-(defun octave-help (fn)
+(cl-defun octave-help (fn)
   "Display the documentation of FN."
   (interactive (list (octave-completing-read)))
   (inferior-octave-send-list-and-digest
@@ -105,40 +105,40 @@
         (octave-help-mode)))))
 ;;(inferior-octave-send-list-and-digest (list (format "help ('%s');\n" "egina_export")))
 
-(defun octave-main-defun-name ()
+(cl-defun octave-main-defun-name ()
   "Return the name of the function at point"
   (apply #'buffer-substring-no-properties (last (octave-function-file-p) 2)))
 
-(defun octave-main-defun-string ()
+(cl-defun octave-main-defun-string ()
   "Return the complete function defintion as a string."
   (apply #'buffer-substring-no-properties (subseq (octave-function-file-p) 0 2)))
 
-(defun octave-parse-defun-header (string)
+(cl-defun octave-parse-defun-header (string)
   "Return the name of the Octave function defined by STRING."
   (string-match* octave-function-header-regexp string :num '(1 2 3)))
 ;;(octave-parse-defun-header "function induce_index_ (s, y, m, d, h);\nqwe\nqwe")
 
-(defun octave-parse-defun-output-parameters (string)
+(cl-defun octave-parse-defun-output-parameters (string)
   "Return the output parameters in the Octave function defined by STRING."
   (string-trim (second (octave-parse-defun-header string))))
 ;;(octave-parse-defun-output-parameters "function induce_index_ (s, y, m, d, h);\nqwe\nqwe")
 
-(defun octave-parse-defun-name (string)
+(cl-defun octave-parse-defun-name (string)
   (third (octave-parse-defun-header string)))
 ;;(octave-parse-defun-name "function induce_index_ (s, y, m, d, h);\nqwe\nqwe")
 
-(defun octave-defun-name ()
+(cl-defun octave-defun-name ()
   "Return the name of the Octave function surrounding point"
   (octave-parse-defun-name (defun-string)))
 
-(defun octave-buffers ()
+(cl-defun octave-buffers ()
   "Return a list of all buffers in octave mode."
   (cl-loop for x being the buffers if
 	   (octave-mode-p x) collect x))
 
 
 ;;;; Info stuff
-(defun octave-info (prefix)
+(cl-defun octave-info (prefix)
   "Open the Info page for Octave.
 If the current buffer mode is Octave mode, the Info buffer is
 shown in the other window. The other window is created if
@@ -157,13 +157,13 @@ mode in Emacs."
       (main "(octave-mode.info)Top" "*Octave-mode-info*")
       (main "(octave.info)Top" "*Octave-info*"))))
 
-(defun inferior-octave-info ()
+(cl-defun inferior-octave-info ()
   (interactive)
   (aif (get-buffer "*Octave-info*")
     (switch-to-buffer it)
     (info "(octave.info)Top" "*Octave-info*")))
 
-(defun octave-fill-documentation-paragraph ()
+(cl-defun octave-fill-documentation-paragraph ()
   "Fills an Octave documentation paragraph.
 This functionality is not well covered by octave-fill-paragraph"
   (let ((fill-prefix "## ")
@@ -176,7 +176,7 @@ This functionality is not well covered by octave-fill-paragraph"
       (fill-region (region-beginning) (region-end))
       (fill-paragraph))))
 
-(defun octave-fill-example-comment-paragraph ()
+(cl-defun octave-fill-example-comment-paragraph ()
   "Fills an Octave documentation paragraph.
 This functionality is not well covered by octave-fill-paragraph"
   (let ((fill-prefix "## ## ")
@@ -191,15 +191,15 @@ This functionality is not well covered by octave-fill-paragraph"
       (fill-region (region-beginning) (region-end))
       (fill-paragraph))))
 
-(defun octave-in-main-documentation-p ()
+(cl-defun octave-in-main-documentation-p ()
   "Returns non-nil iff POINT is in the function file comment region."
   (i-contain-p (octave-function-file-comment) (point)))
 
-(defun octave-comment-line-p ()
+(cl-defun octave-comment-line-p ()
   "Return non-nil if point is in a commented line."
   (string-match "^[ \t]*#+" (line-string)))
 
-(defun octave-in-documentation-p ()
+(cl-defun octave-in-documentation-p ()
   "Return non-nil if point is a larger Octave comment section.
 Currently only the documentation of the main function is
 supported. To implement the general version we need to know if we
@@ -209,12 +209,12 @@ Consider also `octave-function-file-comment'."
   (string-match "\\(^##.*\\)"
 		(line-string)))
 
-(defun octave-in-example-comment-p ()
+(cl-defun octave-in-example-comment-p ()
   "Returns non-nil if point is in a comment above a doc example."
   (string-match "\\(^##[[:space:]]+##.*\\)"
 		(line-string)))
 
-(defun mb-octave-fill-paragraph ()
+(cl-defun mb-octave-fill-paragraph ()
   (interactive)
   (if (octave-in-example-comment-p)
     (octave-fill-example-comment-paragraph)
@@ -224,7 +224,7 @@ Consider also `octave-function-file-comment'."
 
 
 ;;;; testing
-(defun mb-octave-test-buffer-file ()
+(cl-defun mb-octave-test-buffer-file ()
   "Run tests for the current buffer's file."
   (interactive)
   (let ((octave-send-echo-input nil)
@@ -234,11 +234,11 @@ Consider also `octave-function-file-comment'."
     (octave-send-string (format "test (\"%s\");" (buffer-file-name)) t)))
 ;;(mb-octave-test-buffer-file)
 
-(defun mb-octave-test-directory-fn (directory &optional recursively-p verbose-p)
+(cl-defun mb-octave-test-directory-fn (directory &optional recursively-p verbose-p)
   "Run tests for all files in the current buffer's directory.
 If RECURSIVELY-P is not NIL, then the test covers the files in
 all the subdirectories as well."
-  (lexical-let ((dir directory)
+  (let ((dir directory)
 		(recursively-p* recursively-p)
 		(verbose-p* verbose-p))
     (lambda (prefix)
@@ -261,7 +261,7 @@ all the subdirectories as well."
 
 (define-key octave-mode-map (kbd "C-c i @") #'texinfo-insert-@var*)
 
-(defun filter-octave-texinfo-line (string functions)
+(cl-defun filter-octave-texinfo-line (string functions)
   "Expand the @seealso macro to @xref-s and @ref-s.
 The macro @seealso is not a part of standard texinfo, so it is
 converted like this:
@@ -290,7 +290,7 @@ fn2, ..., fnN, if it is not an element in FUNCTIONS."
     string))
 ;;(filter-octave-texinfo-line "@seealso{strptime, localtime}" '("strptime" "localtime"))
 
-(defun mb-octave2texinfo-1 (filename fn functions)
+(cl-defun mb-octave2texinfo-1 (filename fn functions)
   "Extract the texinfo part of FILENAME and convert it to a manual node."
   (let ((doc (string-match* "## -\\*- texinfo -\\*-\n\\(\\(?:##.*\n\\)*\\)"
 	       (file-string filename) :num 1)))
@@ -304,11 +304,11 @@ fn2, ..., fnN, if it is not an element in FUNCTIONS."
 	:discard-nil t))))
 ;;(mb-octave2texinfo-1 "~/git/utils/octave/lsbin/ls2unixtime.m" "ls2unixtime" '("ls2unixtime"))
 
-(defun path2octave-function (filename)
+(cl-defun path2octave-function (filename)
   (file-name-sans-extension (file-name-nondirectory filename)))
 ;;(path2octave-function "~/git/utils/octave/lsbin/ls2unixtime.m")
 
-(defun mb-octave2texinfo-menu (functions)
+(cl-defun mb-octave2texinfo-menu (functions)
   (concat* functions
     :key #'(lambda (x) (format "* %s::" x))
     :pre "@menu\n"
@@ -316,7 +316,7 @@ fn2, ..., fnN, if it is not an element in FUNCTIONS."
     :suf "\n@end menu"))
 ;;(mb-octave2texinfo-menu '("lsdate2tm" "lsdate2tm"))
 
-(defun mb-octave2texinfo (filenames functions)
+(cl-defun mb-octave2texinfo (filenames functions)
   "Extract the texinfo part of FILENAMES and convert it to a manual node.
 See also `mb-octave2texinfo-1'."
   (cl-loop for f in filenames
@@ -332,7 +332,7 @@ See also `mb-octave2texinfo-1'."
 ;;(mb-octave2texinfo '("~/git/utils/octave/lsbin/lsread.m") '("lsread"))
 ;;(mb-octave2texinfo '("~/git/utils/octave/lsbin/lsdate2tm.m") '("lsdate2tm"))
 
-(defun mb-octave-breakpoints-hook ()
+(cl-defun mb-octave-breakpoints-hook ()
   "Issue error if breakpoints exists in some of the files to be checked in.
 TODO: need a macro a la 'with-file-buffer FILE &rest BODY, that
 takes a path as first argument followed by a BODY of forms. The

@@ -1,7 +1,7 @@
 (require 'cc-mode)
 ;;java-mode
 
-(defun mb-java-mode-hook-function ()
+(cl-defun mb-java-mode-hook-function ()
   (linum-mode)
   (electric-pair-local-mode)
   (setq java-indent-level 4)

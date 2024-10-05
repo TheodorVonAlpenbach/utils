@@ -245,7 +245,7 @@
 (defconst *district-current* (first *districts*)
   "")
 
-(defun district-set-current ()
+(cl-defun district-set-current ()
   "Set currents district. District must be a symbol equal to some FIRST
 of *districts*. The variable *district-current* always contains
 the current district."

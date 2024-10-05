@@ -10,7 +10,7 @@
       (setq *lynx-favorites* (nconc *lynx-favorites* (list url))))
     (lynx-print-favorites)))
 
-(defun lynx-goto-favorite (&optional n)
+(cl-defun lynx-goto-favorite (&optional n)
   "Goes to first favorite in *lynx-favorites* or to the N-th if
 prefix argument is given."
   (interactive "p")
@@ -27,17 +27,17 @@ argument is given."
       (lynx-print-favorites))
     (message "No current favorites")))
 
-(defun lynx-print-favorites ()
+(cl-defun lynx-print-favorites ()
   "Prints favorite urls in temporary buffer *lynx-info*."
   (interactive)
   (with-output-to-temp-buffer "*lynx-info*"
-    (loop for f in *lynx-favorites*
+    (cl-loop for f in *lynx-favorites*
 	  for i from 1 do
 	  (princ (format "%d:  %s\n" i f))))
   (message "Invoke lynx-goto-favorite ARG to enter an url."))
 
-(defun lynx-save-favorites () (print* *lynx-favorites* *lynx-favorites-path*))
-(defun lynx-read-favorites () (setq *lynx-favorites* (read* *lynx-favorites-path*)))
+(cl-defun lynx-save-favorites () (print* *lynx-favorites* *lynx-favorites-path*))
+(cl-defun lynx-read-favorites () (setq *lynx-favorites* (read* *lynx-favorites-path*)))
 
 (unless *lynx-favorites* (lynx-read-favorites)) ;(nil! *lynx-favorites*)
 (add-hook 'kill-emacs-hook 'lynx-save-favorites)

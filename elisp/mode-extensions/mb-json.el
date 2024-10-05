@@ -1,6 +1,6 @@
 (require 'json-mode)
 
-(defun json-remove-outer-quotes ()
+(cl-defun json-remove-outer-quotes ()
   (save-excursion
     (bob)
     (when (looking-at "\\\\")
@@ -10,13 +10,13 @@
       (while (re-search-forward "\\\\\"" nil t)
 	(replace-match "\"")))))
 
-(defun json-quote-iso-time ()
+(cl-defun json-quote-iso-time ()
   (save-excursion
     (bob)
     (while (re-search-forward "....-..-..T..:..:..\\.[^,]*Z" nil t)
       (replace-match "\"\\&\""))))
 
-(defun json-pretty-print-string ()
+(cl-defun json-pretty-print-string ()
   "Pretty print buffer on form '\"{<json-string-with-escaped-double-quotes>}\"."
   (interactive)
   (json-mode)			  ; ensure that buffer is in json-mode
@@ -26,7 +26,7 @@
     (json-pretty-print (point-min) (point-max))))
 ;;(json-pretty-print-string)
 
-(defun object-id-to-string ()
+(cl-defun object-id-to-string ()
   (interactive)
   (save-excursion
     (bob)

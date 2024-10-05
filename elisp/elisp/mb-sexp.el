@@ -1,13 +1,13 @@
 (require 'mb-utils-div)
 
-(defun goto-first-sexp ()
+(cl-defun goto-first-sexp ()
   "Go safely back to beginning of first sexp at point's level."
   (interactive)				;or not?
   (while (not (condition-case nil
 		    (forward-sexp -1)
 		(error t)))))
 
-(defun count-sexps-current-level ()
+(cl-defun count-sexps-current-level ()
   "Counts number of sexps at current level \(at point\)"
   (interactive)
   (save-excursion
@@ -21,7 +21,7 @@
       (princ n))))
 ;;(count-sexps sdfd)
 
-(defun count-sexps-region* (start end)
+(cl-defun count-sexps-region* (start end)
   "Return the number of sexps between START and END."
   (interactive "r")
   (message "%d" (count-sexps-region start end)))
@@ -36,7 +36,7 @@
 ;; 3. It fails and returns a condition. This means that we are at the
 ;; end of a sexp contained in another sexp
 
-(defun count-sexps-region (start end)
+(cl-defun count-sexps-region (start end)
   "Return the number of sexps between START and END."
   (save-excursion
     (save-restriction
@@ -63,7 +63,7 @@ paranthesis."
 ;;(a b (c d))
 
 (defconst +defun-symbols+
-  '(defun cl-defun
+  '(cl-defun cl-defun
     defmacro cl-defmacro
     defparameter defconstant
     ert-deftest))
@@ -99,7 +99,7 @@ paranthesis."
 	  do (end-of-defun))))
 (definteractive defun-symbols)
 
-(defun insert-defun-symbols ()
+(cl-defun insert-defun-symbols ()
   (interactive)
   (insert (format "%S" (defun-symbols))))
 

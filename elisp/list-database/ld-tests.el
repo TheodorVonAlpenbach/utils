@@ -1,4 +1,4 @@
-(defun make-companies ()
+(cl-defun make-companies ()
   (let ((cols '((:id :type integer :primary-key t)
 		(:name :type string)
 		(:president-id :type integer)))
@@ -8,7 +8,7 @@
     (ld-create-table (ld-make-schema :company :column-definitions cols) data)))
 ;;;;(setf comps (make-companies))
 
-(defun make-employees ()
+(cl-defun make-employees ()
   (let* ((cols '((:id :type integer :primary-key t)
 		 (:name :type string)
 		 (:company-id :type integer)))
@@ -22,7 +22,7 @@
 (defvar comps (make-companies)) ;;(setf comps (make-companies))
 (defvar deebee nil) ;;(setf deebee (ld-create-database :deebee :tables (list (make-employees) (make-companies))))
 
-(defun ld-example-0 ()
+(cl-defun ld-example-0 ()
   ;; This works today
   (ld-select (ld-join `(,emps :company-id) `(,comps :id))
 	     :where (oddp (:employee :id))
@@ -30,12 +30,12 @@
 	     :format "%s works for %s (squared id is %d)\n"))
 ;;(ld-example-0)
 
-(defun ld-example-1 ()
+(cl-defun ld-example-1 ()
   ;; This works today
   (ld-select comps :where (oddp (:company :id))))
 ;;(ld-example-1)
 
-(defun ld-example-2 ()
+(cl-defun ld-example-2 ()
   "This will work some day... It requires that 
 * ld-join becomes a macro
 * column extraction becomes a macro

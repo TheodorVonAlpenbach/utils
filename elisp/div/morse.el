@@ -13,40 +13,40 @@
     (?0 "-----") (?1 ".----") (?2 "..---") (?3 "...--") (?4 "....-")
     (?5 ".....") (?6 "-....") (?7 "--...") (?8 "---..") (?9 "----.")))
 
-(defun sign-to-morse (sign)
+(cl-defun sign-to-morse (sign)
   (case (ssymbol sign)
     (?. dit-length)
     (?- dash-length)
     (otherwise (error "Unknown morse sign %c" sign))))
 ;;(mapcar #'sign-to-morse '(?. ?-))
 
-(defun morse-char-to-sign (char)
+(cl-defun morse-char-to-sign (char)
   (second (cl-find char +morse-code-international+ :key #'car)))
 ;;(morse-char-to-sign ?a)
 
-(defun char-to-morse (char)
+(cl-defun char-to-morse (char)
   (infix-list
    (mapcar #'sign-to-morse (string-to-list (morse-char-to-sign char)))
    +morse-sign-space+))
 ;;(char-to-morse ?a)
 
-(defun word-to-morse (word)
+(cl-defun word-to-morse (word)
   (flatten
    (infix-list (mapcar #'char-to-morse word) (list +morse-char-space+))))
 ;;(word-to-morse "be")
 
-(defun string-to-morse (string)
+(cl-defun string-to-morse (string)
   (flatten (infix-list (mapcar #'word-to-morse (split-string string))
 		       (list +morse-word-space+))))
 ;;(string-to-morse "ae  be ")
 
-(defun morsebeep (morse-string)
+(cl-defun morsebeep (morse-string)
   (let ((durations (mapcar #'sstring (string-to-morse morse-string))))
-    (concat* (loop for (off on) in (cut (rest durations))
+    (concat* (cl-loop for (off on) in (cut (rest durations))
 		   collect (format "-D %s -l %s" off on))
       :pre (format "beep -l %s " (car durations))
       :in " ")))
 ;;(morsebeep "ae  be ")
-(loop for (a b) in '((1 2) (3 2)) collect a)
+(cl-loop for (a b) in '((1 2) (3 2)) collect a)
 
 (provide 'morse)

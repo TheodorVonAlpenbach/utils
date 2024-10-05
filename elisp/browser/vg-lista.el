@@ -14,39 +14,39 @@ http://lista.vg.no/liste/topp-20-single/1/dato")
 (defconst +vg-db-directory+ "~/data/vg-listen"
   "No doc")
 
-(defun vg-path (decade)
+(cl-defun vg-path (decade)
   (expand-file-name (format "vg-listene-%02d.eldata" decade) +vg-db-directory+))
 ;;(mapcar #'vg-path '(90 0 10))
 
-(defun vg-some-date-first-vg-week ()
+(cl-defun vg-some-date-first-vg-week ()
   "Returns first VG week as a date (within that week).
 Note that we are using that fact that January 4 is _always_ in week 1."
   (add-time '1958-01-04 :week 41))
 ;;(week-number (vg-some-date-first-vg-week)) ==> 42
 
-(defun vg-week-exists-p (year week)
+(cl-defun vg-week-exists-p (year week)
   (or (> year (first +vg-first-week+))
       (and (= year (first +vg-first-week+))
 	   (>= week (second +vg-first-week+)))))
 
-(defun vg-url (year week)
+(cl-defun vg-url (year week)
   "Returns the URL to VG-lista for WEEK in YEAR."
   (assert (vg-week-exists-p year week) t "VG-lista wasn't even started in this week!")
   (format "%s/%d/uke/%02d" +vg-url-prefix+ year week))
 ;;(vg-url 2011 1)
 
-(defun vg-download-list-html (year week)
+(cl-defun vg-download-list-html (year week)
   "Returns the html content of URL"
   (wget-to-string (vg-url year week)))
 ;;(vg-download-list-html 2011 1)
 
-(defun vg-extract-table (html)
+(cl-defun vg-extract-table (html)
   (first (xml-extract-nodes html "table" '(("class" "chart")))))
 
-(defun vg-extract-rows (html)
+(cl-defun vg-extract-rows (html)
   (xml-extract-nodes (vg-extract-table html) "tr" '(("onclick" "*"))))
 
-(defun vg-parse-row (html)
+(cl-defun vg-parse-row (html)
   (let* ((place (string-to-number (xml-inner-text (first (xml-extract-nodes html "th" '(("scope" "row")))))))
 	 (tdleft (first (xml-extract-nodes html "td" '(("class" "left")))))
 	 (2anchors (xml-extract-nodes tdleft "a"))
@@ -56,19 +56,19 @@ Note that we are using that fact that January 4 is _always_ in week 1."
     (list place artist title previous-place)))
 ;;(vg-update-db '2014-04-01 '2014-04-03 nil)
 
-(defun vg-parse-list (html)
+(cl-defun vg-parse-list (html)
   "Downloads and parses a list"
-  (loop for row in (vg-extract-rows html)
+  (cl-loop for row in (vg-extract-rows html)
 	collect (vg-parse-row row)))
 
-(defun vg-download-list (year week)
+(cl-defun vg-download-list (year week)
   "Downloads and parses an list entry"
   (list 'vg-lista :year year :week week :list (vg-parse-list (vg-download-list-html year week))))
 
 (cl-defmacro do-vg-weeks ((year week from &optional to) &rest body)
   "FROM and TO are time designators. YEAR and WEEK are symbols
 for use in BODY."
-  `(loop with end-date = (parse-time (or ,to (now)))
+  `(cl-loop with end-date = (parse-time (or ,to (now)))
 	for date = (parse-time ,from) then (add-time date :week 1)
 	for ,year = (week-year date)
 	for ,week = (week-number date)
@@ -76,7 +76,7 @@ for use in BODY."
 	do (progn ,@body)))
 ;;(do-vg-weeks (year week '2013-03-15) (message "year = %d and week-number = %d" year week))
 
-(defun vg-add-db-entry (entry db)
+(cl-defun vg-add-db-entry (entry db)
   "Updates database DB with all lists in time span FROM TO."
   (insert "'")
   (prin1 entry db)
@@ -119,7 +119,7 @@ TODO! See above."
       (progress-reporter-done progress-reporter))))
 ;;(vg-update-db (now :month -1) (now) "~/data/vg-listen/test.eldata")
 
-(defun vg-update-all ()
+(cl-defun vg-update-all ()
   (vg-update-db (vg-some-date-first-vg-week) '1969-12-31 (vg-path 60))
   (vg-update-db '1970-01-04 '1979-12-31 (vg-path 70))
   (vg-update-db '1980-01-04 '1989-12-31 (vg-path 80))
@@ -128,9 +128,9 @@ TODO! See above."
   (vg-update-db '2010-01-04 (vg-path 10)))
 ;;(vg-update-all)
 
-(defun vg-valid-week-p-old (curr prev)
+(cl-defun vg-valid-week-p-old (curr prev)
   "Obsolete. See new version below."
-  (loop for (place artist song place-prev) in (seventh curr)
+  (cl-loop for (place artist song place-prev) in (seventh curr)
 	never (and (typep place-prev '(integer 1 10))
 		   (destructuring-bind (prev-place prev-artist prev-song &rest args)
 		       (elt (seventh prev) (1- place-prev))
@@ -145,7 +145,7 @@ TODO! See above."
      (float (length (apply #'cl-union x y args)))))
 ;;(list-similarity '(1 2 3) '(1 7))
 
-(defun vg-song-list-similarity (x y)
+(cl-defun vg-song-list-similarity (x y)
   (list-similarity x y :key #'(lambda (pair) (apply #'concat pair)) :test #'string=))
 
 (cl-defun vg-valid-week-p (curr prev &optional (limit 0.3))
@@ -158,13 +158,13 @@ TODO! See above."
 ;;(vg-valid-week-p (third qwe) (second qwe))
 ;;(vg-read-file-to-hashtable (vg-path 0))
 
-(defun vg-add-entry-to-ht (entry hashtable)
+(cl-defun vg-add-entry-to-ht (entry hashtable)
   "Adds week ENTRY to HASHTABLE.
 ENTRY has the form '(VG-LISTA :YEAR YEAR :WEEK WEEK :LIST ((1
 ARTIST1 SONG-TITLE1 PREV-PLACE1) (2 ARTIST2 SONG-TITLE2
 PREV-PLACE2)...)). The PREV-PLACEs are integers and are the place
 of the song in the previous week entry."
-  (loop with year = (third entry)
+  (cl-loop with year = (third entry)
 	with week = (fifth entry)
 	for song-parameters in (seventh entry)
 	for place = (first song-parameters)
@@ -185,7 +185,7 @@ of the song in the previous week entry."
   '((:year 2010 :week 46 "Doesn't exist")
     (:year 2010 :week 48 "Doesn't exist")))
 
-(defun vg-manually-validated-p (entry)
+(cl-defun vg-manually-validated-p (entry)
   (let ((year (getf (rest entry) :year))
 	(week (getf (rest entry) :week)))
     (find (list year week) +vg-ok-weeks+ :test #'equal)))
@@ -212,12 +212,12 @@ of the song in the previous week entry."
 ;;(vg-read-file-to-hashtable (vg-path 10))
 
 (cl-defun vg-read-all-files-to-hashtable (&optional (ht (make-hash-table :test #'equal)))
-  (loop for decade in '(60 70 80 90 00 10)
+  (cl-loop for decade in '(60 70 80 90 00 10)
 	do (vg-read-file-to-hashtable (vg-path decade) ht))
   ht)
 ;;(vg-read-all-files-to-hashtable)
 
-(defun vg-place-score (appearances &optional max-place-score)
+(cl-defun vg-place-score (appearances &optional max-place-score)
   (let ((absolute-score (reduce #'+ (mapcar (compose (bind #'- 21 1) #'first) appearances))))
     (if max-place-score 
       (/ (coerce absolute-score 'float) max-place-score)
@@ -225,7 +225,7 @@ of the song in the previous week entry."
 ;;(vg-place-score '((10 1958 49) (10 1958 48) (7 1958 47) (3 1958 46) (2 1958 45) (1 1958 44) (1 1958 43) (1 1958 42)) 1007)
 ;;(vg-place-score (second (find '("Nazareth" "Love Hurts") *vg-vector* :key #'car :test #'equal)))
 
-(defun vg-duration-score (appearances &optional max-duration-score)
+(cl-defun vg-duration-score (appearances &optional max-duration-score)
   (let ((absolute-score (length appearances)))
     (if max-duration-score
       (/ (coerce absolute-score 'float) max-duration-score)
@@ -233,7 +233,7 @@ of the song in the previous week entry."
 ;;(vg-duration-score '((10 1958 49) (10 1958 48)) 1007)
 ;;(vg-duration-score (second (find '("Nazareth" "Love Hurts") *vg-vector* :key #'car :test #'equal)))
 
-(defun max-value (sequence &rest key-args)
+(cl-defun max-value (sequence &rest key-args)
   (third (apply #'minimum (coerce sequence 'list) :test #'> key-args)))
 ;;(max-value (vector '(0 a) '(1 a) '(2 a) '(3 a) '(4 a) '(10 a) '(-30 a)) :key #'first)
 
@@ -250,7 +250,7 @@ of the song in the previous week entry."
      (* (- 1 wlambda) (vg-duration-score appearances max-duration-score))))
 ;;(vg-score (second (find '("Nazareth" "Love Hurts") *vg-vector* :key #'car :test #'equal)) (vg-max-place-score) (vg-max-duration-score))
 
-(defun vg-list-sorted ()
+(cl-defun vg-list-sorted ()
   (let* ((vec (copy-sequence *vg-vector*))
 	 (max-place-score (vg-max-place-score vec))
 	 (max-duration-score (vg-max-duration-score vec)))
@@ -258,16 +258,16 @@ of the song in the previous week entry."
 
 (defvar *vg-list-sorted* (vg-list-sorted))
 
-(defun vg-weeks (appearances)
+(cl-defun vg-weeks (appearances)
   (mapcar #'(lambda (x) (apply #'format "%d-%02d" (rest x))) appearances))
 
-(defun vg-week-span (appearances)
+(cl-defun vg-week-span (appearances)
   (let ((weeks (vg-weeks appearances)))
     (list (min-value weeks :test #'string<)
 	  (min-value weeks :test #'string>))))
 ;;(min-value qwe :test #'string>)
 
-(defun vg-week-span-length (appearances)
+(cl-defun vg-week-span-length (appearances)
   (1+ (- (apply #'week- (vg-week-span appearances)))))
 
 (cl-defun vg-list-print-top (n &key stream (list *vg-list-sorted*))
@@ -291,19 +291,19 @@ of the song in the previous week entry."
 ;;(vg-list-print-top 100 :stream (get-buffer "*scratch*") :list dsa)
 ;;(length *vg-list-sorted*)
 (setf ewq (mapcar (compose #'vg-week-span-length #'second) *vg-list-sorted*))
-(setf ewq (loop for x across *vg-list-sorted*
+(setf ewq (cl-loop for x across *vg-list-sorted*
 	     for i from 0 below 5000
 	     collect (list i (vg-week-span-length (second x)))))
 (time (setf asd (cl-sort ewq #'> :key #'second)))
-(setf dsa (loop for i below 100 for (pos weeks) in asd collect (elt *vg-list-sorted* pos)))
+(setf dsa (cl-loop for i below 100 for (pos weeks) in asd collect (elt *vg-list-sorted* pos)))
 
 (defvar *vg-hashtable* nil)
 (defvar *vg-max-place-score* nil "Now, what is this?!")
 (defvar *vg-vector* nil)
 
-(defun vg-init-globals ()
+(cl-defun vg-init-globals ()
   (setf *vg-hashtable* (vg-read-all-files-to-hashtable))
-  (setf *vg-max-place-score* (loop for v being the hash-values of *vg-hashtable* maximize (vg-place-score v)))
+  (setf *vg-max-place-score* (cl-loop for v being the hash-values of *vg-hashtable* maximize (vg-place-score v)))
   (setf *vg-vector* (cl-loop with vec = (make-vector (hash-table-count *vg-hashtable*) nil)
 			     for i from 0
 			     for k being the hash-keys of *vg-hashtable* using (hash-values v) ;

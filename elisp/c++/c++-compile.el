@@ -7,7 +7,7 @@
   (setq *mb-default-makefile* "e:/projects/VaR/main/Calc/Calc.mak"))
 
 
-(defun mb-make (command) "" 
+(cl-defun mb-make (command) "" 
   (interactive
    (if (or compilation-read-command current-prefix-arg)
      (list (read-from-minibuffer "Compile command: "
@@ -28,15 +28,15 @@
 ; exists a makefile there. Else returns the same as when last called
 ; (default first time makefile is 'mb-current-makefile) .
 
-(lexical-let ((current-makefile *mb-default-makefile*))
-  (defun mb-current-makefile ()
+(let ((current-makefile *mb-default-makefile*))
+  (cl-defun mb-current-makefile ()
     (let ((current-directory (file-name-directory (buffer-file-name (current-buffer)))))
       (aif (makefile-in-dir current-directory)
 	(setq current-makefile it)
 	current-makefile))))
 ;;(mb-current-makefile)
 
-(defun makefile-in-dir (directory)
+(cl-defun makefile-in-dir (directory)
   "Returns the name of makefile in DIRECTORY if exists or nil."
   (concat 
    directory 
@@ -86,7 +86,7 @@ compilation-path-regexp
       (cons (list compilation-collect2-regexp 2 3) 
 	    compilation-error-regexp-alist))
 
-(defun compilation-reset-error-regexp-alist () "" (interactive)
+(cl-defun compilation-reset-error-regexp-alist () "" (interactive)
   (setq compilation-error-regexp-alist '(
     ;; NOTE!  See also grep-regexp-alist, below.
 
@@ -207,7 +207,7 @@ of[ \t]+\"?\\([a-zA-Z]?:?[^\":\n]+\\)\"?:" 3 2)
 (provide 'c++-compile)
 
 ;; garbage
-; (defun set-current-makefile-to-this-old (n) 
+; (cl-defun set-current-makefile-to-this-old (n) 
 ;   (interactive "p")
 ;   (if (< n 0) 
 ;       (setq mb-current-makefile nil)

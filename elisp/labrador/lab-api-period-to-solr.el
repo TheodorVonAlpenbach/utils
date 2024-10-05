@@ -6,7 +6,7 @@
 ;;;; Logge seg inn på pbl-login01.osl.basefarm.net (>ssh dagen)
 ;;;; Derfra til pbl-php01.dev (>ssh pbl-php01.dev)
 
-(defun lab-api-period-regexp ()
+(cl-defun lab-api-period-regexp ()
   (let ((space "[[:space:]]*")
 	(lp "[[(]")
 	(lv "[^[:space:]]+")
@@ -16,11 +16,11 @@
 	(mod "[^()]*"))
     (format "\\(%s\\)%s\\(%s\\)\\(%s\\)\\(%s\\)\\(%s\\)\\(%s\\)" lp space lv to rv rp mod)))
 
-(defun* lab-dttm (time &optional (with-seconds t))
+(cl-defun lab-dttm (time &optional (with-seconds t))
   "Local shortcut for `iso-date-and-time'"
   (iso-date-and-time :time time :with-seconds with-seconds))
 
-(defun solr-time (time open-p left-p)
+(cl-defun solr-time (time open-p left-p)
   "Assumes the time resolution is in seconds.
 Solr does note have a notion of different interval types. Both
 interval boundaries are converted to the '< operator. Hence, to
@@ -34,7 +34,7 @@ intervals by altering the interval times."
 	      (format "%s.999" (lab-dttm (add-time time :second -1) t)))
 	    "Z")))
 
-(defun lab-time-to-solr-time (s open-p left-p)
+(cl-defun lab-time-to-solr-time (s open-p left-p)
   "Converts time string allowed by lab-api to the more strict Solr time string.
 lab-api allows parts of time: date only (time part then defaults
 to 00:00:00), and time only (date part then defaults to today).
@@ -46,11 +46,11 @@ indeed in Solr."
       (mb-string-replace s isopart (solr-time (parse-time isopart) open-p left-p))
       s)))
 
-(defun lab-open-p (p)
+(cl-defun lab-open-p (p)
   "Returns nil iff P is not an open parenthesis string"
   (or (equal p "(") (equal p ")")))
 
-(defun lab-api-period-to-solr (s)
+(cl-defun lab-api-period-to-solr (s)
   "Converts a lab-api time period expression to an equivalent
 Solr expression."
   (multiple-value-bind (match lp lv to rv rp mod)

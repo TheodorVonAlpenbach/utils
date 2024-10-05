@@ -5,7 +5,7 @@
 (require 'mu-globals)
 (require 'interval)
 
-(defun me-find-next-note-start (events)
+(cl-defun me-find-next-note-start (events)
   ""
   (member-if #'(lambda (e)
 		 (and (eq (me-subsubtype e) 'note-on)
@@ -13,7 +13,7 @@
 	     events))
 ;;(me-find-next-note-start (nthcdr 6 (test-events)))
 
-(defun me-find-matching-note-end (note-on events)
+(cl-defun me-find-matching-note-end (note-on events)
   (member-if #'(lambda (e)
 		 (or (and (eq (me-subsubtype e) 'note-off)
 			  (string-equal 
@@ -24,8 +24,8 @@
 	     events))
 ;;(let ((events (me-find-next-note-start (nthcdr 4 (test-events))))) (list (first events) (first (me-find-matching-note-end (me-subsubevent (first events)) (rest events)))))
 
-(defun me-find-notes (events)
-  (loop for result-list = (me-find-next-note-start events) then (me-find-next-note-start result-list)
+(cl-defun me-find-notes (events)
+  (cl-loop for result-list = (me-find-next-note-start events) then (me-find-next-note-start result-list)
 	for note-start = (first result-list)
 	for result-list = (rest result-list)
 	while note-start
@@ -33,40 +33,40 @@
 		      (first (me-find-matching-note-end (me-subsubevent note-start) result-list)))))
 ;;(prin1 (me-find-notes (test-events)))
 
-(defun parse-ansi-pitch (x))
+(cl-defun parse-ansi-pitch (x))
 
-(defun create-note-from-midi-note (midi-note)
+(cl-defun create-note-from-midi-note (midi-note)
   (make-note
    :pitch (p-from-string (note-on-pitch (me-subsubevent (first midi-note))))
    :start-time (me-delta-time (first midi-note))
    :duration (d-new (- (me-delta-time (second midi-note))
 		       (me-delta-time (first midi-note))))))
 
-(defun midi-track-to-voice (mt)
+(cl-defun midi-track-to-voice (mt)
   "Converts a MIDI track to a VOICE object.
 TODO include instrument."
   (make-voice :notes (mapcar #'create-note-from-midi-note
 			     (me-find-notes (mt-events mt)))))
 
-(defun mode-root (midi-accidentals mode)
+(cl-defun mode-root (midi-accidentals mode)
   (chrome-transpose-iv (make-chrome) 'perfect-fifth
 		   (if (eq mode 'major)
 		     midi-accidentals
 		     (+ midi-accidentals 3))))
 ;;(chrome-to-string (mode-root 0 'minor))
 
-(defun create-key-from-accidentals (midi-accidentals mode)
+(cl-defun create-key-from-accidentals (midi-accidentals mode)
   (make-key
    :root (mode-root midi-accidentals mode)
    :mode mode))
 
-(defun create-key-from-midi-key (ks)
+(cl-defun create-key-from-midi-key (ks)
   (create-key-from-accidentals (key-signature-accidentals ks) (key-signature-mode ks)))
 
-(defun create-time-from-midi-key (ks)
+(cl-defun create-time-from-midi-key (ks)
   (create-key-from-accidentals (key-signature-accidentals ks) (key-signature-mode ks)))
 
-(defun n-modify-to-orignal-pitch (n key)
+(cl-defun n-modify-to-orignal-pitch (n key)
   (let ((key-pitch (find (n-set-chrome n) 
 			 (flatten (k-scale key))
 			 :key #'spc-to-chrome)))
@@ -75,13 +75,13 @@ TODO include instrument."
 ;;(n-modify-to-orignal-pitch (first (v-notes (nth 0 (vg-voices (mvt-voice-group mats))))) (make-key :mode 'major))
 
 (defmacro v-do-notes (voice n &rest body)
-  `(loop for x in (v-notes ,voice)
+  `(cl-loop for x in (v-notes ,voice)
 	 do (setf ,n x)
 	 do (progn ,@body)))
 ;;(v-do-notes (nth 0 (vg-voices (mvt-voice-group mats))) n (n-to-string n 'lilypond))
 
 (defmacro vg-do-notes (voice-group n &rest body)
-  `(loop for v in (vg-voices ,voice-group)
+  `(cl-loop for v in (vg-voices ,voice-group)
 	 do (v-do-notes v n ,@body)))
 ;;(vg-do-notes (mvt-voice-group mats) n (insert (n-to-string n 'lilypond)))
 
@@ -89,7 +89,7 @@ TODO include instrument."
   `(vg-do-notes (mvt-voice-group ,mvt) n ,@body))
 ;;(mvt-do-notes mats n (insert (n-to-string n 'lilypond)))
 
-(defun midi-file-to-movement (midi-file)
+(cl-defun midi-file-to-movement (midi-file)
   "Parses MIDI-FILE into an MA movement object. 
 The parser is simplified and is applying the following assumptions:
 * only one simple voice per track (i.e. only one frequency at a time)
@@ -151,7 +151,7 @@ TODO:
 	    (list (mvt-find-maximum-repeat-span debug-mvt))) ;; TODO: try to find several
       (when (mvt-repeats debug-mvt)
 	(setf debug-mvt
-	      (loop for repeat in (mvt-repeats debug-mvt)
+	      (cl-loop for repeat in (mvt-repeats debug-mvt)
 		    do (apply #'mvt-remove-measures debug-mvt repeat)
 		    finally return debug-mvt)))
       debug-mvt)))

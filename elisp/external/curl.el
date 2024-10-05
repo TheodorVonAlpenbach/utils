@@ -1,17 +1,17 @@
 (require 'curl-for-url)
 
-(defun curl-super-basic (url)
+(cl-defun curl-super-basic (url)
   "Display content from URL in other window"
-  (lexical-let*
+  (let*
       ((buffer (url-retrieve url 'mycallback))
        (url-request-data "{\"from\":0,\"size\":1}")
        (url-request-method "GET")
        (url-request-extra-headers "Content-Type: application/json"))
-    (defun mycallback (cbargs)
+    (cl-defun mycallback (cbargs)
       (switch-to-buffer-other-window buffer))))
 ;;(curl-super-basic "http://localhost:9200/ada-portal/_doc/_search?pretty")
 
-(defun copy-jwt-token ()
+(cl-defun copy-jwt-token ()
   "Extract JWT token values from cURL-header at the bottom of buffer to all other occurrences.
 
 Note, this version assumes that the token is the last property in string, so that it is immediately followed by the single quote character. This might change."

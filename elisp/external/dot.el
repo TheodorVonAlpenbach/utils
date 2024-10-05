@@ -21,7 +21,7 @@
 
 
 ;;; Generation
-(defun dot-node-base (identifier properties)
+(cl-defun dot-node-base (identifier properties)
   "Creates a dot node definition string. PROPERTIES is an alist
 where each element defines a dot node property \(name . value)"
   (format "%s [%s];" identifier
@@ -35,7 +35,7 @@ where each element defines a dot node property \(name . value)"
 				  (cons 'style style))))
 ;;(dot-node 'n "nodeName" 'yellow)
 
-(defun dot-relation (parent-identifier child-identifier)
+(cl-defun dot-relation (parent-identifier child-identifier)
   (format "%s -> %s;" parent-identifier child-identifier))
 ;;(dot-relation "A" "B")
 
@@ -45,19 +45,19 @@ where each element defines a dot node property \(name . value)"
 	 (node (if node-address (dot-node identifier (sstring tree))))
 	 (relation (if (butlast node-address) (dot-relation parent-identifier identifier)))
 	 (subnodes (if (listp tree)
-		     (loop for node in tree
+		     (cl-loop for node in tree
 			   for i from ?A
 			   collect (dot-statements-from-tree node (append node-address (list i)))))))
     (delete nil (flatten (list node relation subnodes)))))
 ;;(dot-statements-from-tree '((c f) g c))
 
-(defun dot-string (dot-statements)
+(cl-defun dot-string (dot-statements)
   (concat* dot-statements :pre "digraph g {\n" :in "\n" :suf "\n}"))
 ;;(dot-string (dot-statements-from-tree '((c f) g c)))
 
 
 ;;; Printing
-(defun dot-tmp-path (dot-string)
+(cl-defun dot-tmp-path (dot-string)
   (format "%s%s.dot" temporary-file-directory (md5 dot-string)))
 ;;(dot-tmp-path "qwe")
 
@@ -66,7 +66,7 @@ where each element defines a dot node property \(name . value)"
   (unless (rename-file file newname ok-if-already-exists)
     newname))
 
-(defun dot-to-png-buffer ()
+(cl-defun dot-to-png-buffer ()
   (interactive)
   (dot-to-png (buffer-string)
 	      :path (file-name-change-extension (buffer-file-name) "png")))
@@ -83,10 +83,10 @@ The function uses `dot-program' to convert the DOT-STRING to a PNG image."
 ;;(dot-to-png (dot-string (dot-statements-from-tree '((c f) g c))))
 (concat (substring "abc.def" 0 -3) "png")
 
-(defun dotify-node-name (x)
+(cl-defun dotify-node-name (x)
   (cl-substitute ?_ ?- x))
 
-(defun dot-view-file (path)
+(cl-defun dot-view-file (path)
   (png-view (dot-to-png (file-string path))))
 
 (cl-defun dot-view (dot-string &key (path (dot-tmp-path dot-string)) extern-p)
@@ -97,7 +97,7 @@ The function uses `dot-program' to convert the DOT-STRING to a PNG image."
 ;;(dot-view (dot-string (dot-statements-from-tree '(((c f) g c)))))
 ;;(dot-view (file-string "~/projects/dot/CHESS-process.gv"))
 
-(defun png-view (filename)
+(cl-defun png-view (filename)
   (auto-image-file-mode 1)
   (find-file filename))
 
@@ -105,7 +105,7 @@ The function uses `dot-program' to convert the DOT-STRING to a PNG image."
   (interactive)
   (call-process* "xdg-open" filename))
 
-(defun png-print ()
+(cl-defun png-print ()
   "Print png buffer.
 See http://localhost:631/ for further print options"
   (interactive)
@@ -113,7 +113,7 @@ See http://localhost:631/ for further print options"
 ;;alias pr2l='lpr -P SHARP_MX-2640NPCL_PS -o media=A4,sides=two-sided-long-edge'
 
 ;;;; this could be moved to lilypond-<something>
-(defun pdf-view (filename)
+(cl-defun pdf-view (filename)
   (browse-url filename))
 
 (provide 'dot)

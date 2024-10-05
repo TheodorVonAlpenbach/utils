@@ -11,13 +11,13 @@
   "String table for ROT47 translation.
 See `rot47-region` for the definition of ROT47")
 
-(defun rot47-region (start end)
+(cl-defun rot47-region (start end)
   "Rotate through all 47 printable ASCII characters,
 except SPACE."
   (interactive "r")
   (translate-region start end rot47-translate-table))
   
-(defun rot47-string (string)
+(cl-defun rot47-string (string)
   "Return ROT47 encryption of STRING."
   (with-temp-buffer
     (insert string)
@@ -25,7 +25,7 @@ except SPACE."
     (buffer-string-no-properties)))
 ;;(rot47-string "Q")
 
-(defun rot47 (object &optional start end)
+(cl-defun rot47 (object &optional start end)
   "ROT47 encrypt OBJECT, a buffer or string.
 If OBJECT is a buffer, encrypt the region between START and END.
 If OBJECT is a string, encrypt it in its entirety, ignoring START

@@ -5,7 +5,7 @@
 (defsubst ld-table-data* (table-designator)
   (ld-table-data (ld-table table-designator)))
 
-(defun ld-create-table (schema &optional data)
+(cl-defun ld-create-table (schema &optional data)
   (list :table schema data))
 
 ;; shortcuts to schema properties
@@ -15,7 +15,7 @@
   (ld-schema-column-definitions (ld-table-schema table)))
 ;;(ld-schema-column-definitions '(x y z ae oe aa))
 
-(defun ld-table-p (obj)
+(cl-defun ld-table-p (obj)
   (and (consp obj) (eql (first obj) :table)))
 ;;(ld-table-p emps)
 
@@ -23,7 +23,7 @@
   (list (ld-database-keyword database) keyword))
 ;;(ld-make-table-identifier :problem)
 
-(defun ld-table (table-designator)
+(cl-defun ld-table (table-designator)
   "Convert TABLE-DESIGNATOR to a ld-table object"
   (cond 
     ((ld-table-p table-designator) table-designator)
@@ -37,7 +37,7 @@
      (ld-table (ld-identifier table-designator)))))
 ;;(ld-table :user)
 
-(defun ld-schema (schema-designator)
+(cl-defun ld-schema (schema-designator)
   "Almost a corrollary to `ld-table'"
   (if (ld-schema-p schema-designator)
     schema-designator
@@ -45,7 +45,7 @@
 ;;(ld-schema :user)
 
 ;;; Cloning manipulations
-(defun ld-clone-table (table &optional table-clone-level)
+(cl-defun ld-clone-table (table &optional table-clone-level)
   ""
   (cl-case table-clone-level
     ((nil) (ld-create-table (ld-table-schema table) nil))
@@ -61,7 +61,7 @@
     (transpose trows)))
 ;;(let ((table '((a b) (a b) (a b)))) (list (ntable-insert-column '(1 2 3) table 2) table))
 
-(defun* ld-table-add-column (table-designator coldef &key value colpos)
+(cl-defun ld-table-add-column (table-designator coldef &key value colpos)
   "Returns a copy of the table designated by TABLE-DESIGNATOR,
   and with the insertion of a new column defined by COLDEF. VALUE
   is either a lisp value or a function that take a row as

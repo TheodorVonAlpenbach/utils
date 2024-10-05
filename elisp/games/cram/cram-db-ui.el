@@ -11,20 +11,20 @@
 (require 'cram-common)
 
 ;;;; Users
-(defun cram-db-insert-user (name rating)
+(cl-defun cram-db-insert-user (name rating)
   (ld-insert :user (list name rating)
 	     :columns (list :name :rating)))
 ;;(cram-db-insert-user "Ludvik" '(1500 350))
 ;;(ld-update :user (string= :name "Ludvik") '((1500 350)) (:rating))
 
-(defun cram-db-get-user (user-designator)
+(cl-defun cram-db-get-user (user-designator)
   (typecase user-designator
     (string (first (ld-select :user :where (string= user-designator :name))))
     (integer (first (ld-select :user :where (= user-designator :id))))
     (t user-designator)))
 ;;(cram-db-get-user "Ludvik")
 
-(defun cram-user-id* (user-designator &optional check-validity)
+(cl-defun cram-user-id* (user-designator &optional check-validity)
   "Return ID of USER-DESIGNATOR. If USER-DESIGNATOR is an integer
 it assumes by default that it is a valid user ID, unless
 check-validity is non-nil, when it verifies that the given ID is
@@ -37,7 +37,7 @@ from the more primitive function `cram-user-id'"
     (cram-user-id (cram-db-get-user user-designator))))
 ;;(cram-user-id* -1)
 
-(defun cram-db-last-user ()
+(cl-defun cram-db-last-user ()
   "Return the user with last timestamp in DB"
   (min-element (ld-select :user)
 	       :key #'cram-user-last-updated
@@ -56,7 +56,7 @@ from the more primitive function `cram-user-id'"
 
 
 ;;;; Problems
-(defun cram-db-last-problem ()
+(cl-defun cram-db-last-problem ()
   "Low level function that 'knows' that the first row in a table is the last"
   (first (ld-table-data* :match)))
 ;;(cram-db-last-problem)
@@ -107,11 +107,11 @@ TODO: Avoid crash on empty db"
       (cram-db-random-problem :rating rating :window window :idle-minutes 0))))
 ;;(cram-db-random-problem :rating 3000)
 
-(defun cram-db-insert-problem (problem-args)
+(cl-defun cram-db-insert-problem (problem-args)
   "problem-args is a problem without :id (and (:metadata...))"
   (ld-insert :problem problem-args))
 
-(defun cram-db-get-problem (id)
+(cl-defun cram-db-get-problem (id)
   "TODO: this doesn't work when function is loaded, when (:id) is
 interpreted as a form to be evaluated later, and which then fails.
 Two solutions "
@@ -141,7 +141,7 @@ Optional QUARANTINE is not implemented."
 ;;(cl-set-difference '((1 2) (2 4)) '((1 1) (3 3)) :test #'(lambda (x y) (= (car x) (car y))))
 
 ;;TODO
-(defun cram-db-ratings-by-type (operation level)
+(cl-defun cram-db-ratings-by-type (operation level)
   "Returns the rating average of all problems with same :operation and :level as PROBLEM"
   (ld-select :problem
 	     :where (and (eql :operation operation) (= :level level))
@@ -151,7 +151,7 @@ Optional QUARANTINE is not implemented."
 
 ;;;; Matches
 ;;; Combined operations
-(defun cram-db-report-match (user problem iso-time response time score
+(cl-defun cram-db-report-match (user problem iso-time response time score
 			     new-user-rating new-problem-rating)
   "Add new match to DB, and update user and problem ratings.
 It returns the updates of user and problem as a pair"

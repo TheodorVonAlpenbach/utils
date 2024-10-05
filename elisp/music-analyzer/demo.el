@@ -46,7 +46,7 @@
 
 ;;(movement-to-lilypond (mvt-submovement final-mvt 2 4) :title "Difficult voice" :file (concat *local-data-dir* "ly/difficult.ly") :start t :view nil)
 
-(defun chrome-from-spc (spc &optional pcb)
+(cl-defun chrome-from-spc (spc &optional pcb)
   (if pcb
     (let* ((pc (chrome-new pcb 0))
 	   (pc-spc (chrome-to-spitch pc)))
@@ -55,22 +55,22 @@
     (spc-to-chrome spc)))
 ;;(chrome-from-spc 8 5)
 
-(defun chrome-sans-accidentals (chrome)
+(cl-defun chrome-sans-accidentals (chrome)
   (chrome-new (chrome-base chrome)))
 ;;(chrome-sans-accidentals (chrome-new 4 1))
 
-(defun* notes-deduce-pitches (notes &optional (key (k-from-string "G minor")))
+(cl-defun notes-deduce-pitches (notes &optional (key (k-from-string "G minor")))
   (let ((scale-pcs (flatten (k-scale key))))
 
     ;; first simple matching with key
-    (loop for n in notes
+    (cl-loop for n in notes
 	  for chrome = (n-chrome n)
 	  for spc = (chrome-to-spitch chrome)
 	  for x = (find spc scale-pcs :key #'chrome-to-spitch)
 	  if x do (setf (n-chrome n) x))
 
     ;; chromatic pairs
-    (loop for 2n in (pairs notes)
+    (cl-loop for 2n in (pairs notes)
 	  for n1 = (first 2n)
 	  for n2 = (second 2n)
 	  for pc1 = (n-chrome n1)
@@ -103,10 +103,10 @@
 ;;(notes-to-string (notes-deduce-pitches (v-notes (v-test 3))))
 ;;(notes-to-string (notes-deduce-pitches (list (n-new (p-new (chrome-new 5 -1))) (n-new (p-new (chrome-new 4 0))))))
 
-(defun* mvt-deduce-pitches (mvt &optional (key (k-from-string "G minor")))
+(cl-defun mvt-deduce-pitches (mvt &optional (key (k-from-string "G minor")))
   (let ((mvt-new (mvt-copy mvt)))
     (mvt-set-key mvt-new key)
-    (loop for v in (vg-voices (mvt-voice-group mvt-new))
+    (cl-loop for v in (vg-voices (mvt-voice-group mvt-new))
 	  do (notes-deduce-pitches (v-notes v) key))
     mvt-new))
 ;;(mvt-deduce-pitches (mvt-test t))
@@ -157,7 +157,7 @@
 (setf (mvt-voice-groups mvt1)
       (append 
        (mvt-voice-groups mvt1)
-       (loop for segmentation-type in '(total dense metric harmonic)
+       (cl-loop for segmentation-type in '(total dense metric harmonic)
 	     for m = (mvt-copy mvt1)
 	     for s = (segmentation m segmentation-type)
 	     for vg = (mvt-voice-group s)

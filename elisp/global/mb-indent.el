@@ -42,7 +42,7 @@
 ;;(setq lisp-indent-function #'general-lisp-indent-function) probably bad new proposal
 (setq lisp-indent-function #'common-lisp-indent-function)
 
-(defun get-indent-function (mode-or-fn)
+(cl-defun get-indent-function (mode-or-fn)
   "Probably bad new proposal"
   (if (functionp mode-or-fn)
     mode-or-fn
@@ -51,7 +51,7 @@
       (t #'common-lisp-indent-function))))
 ;;(mapcar #'get-indent-function '(if emacs-lisp-mode mb-lisp-mode dummy-mode))
 
-(defun set-indent (symbol indent mode-or-fn)
+(cl-defun set-indent (symbol indent mode-or-fn)
   "Probably bad new proposal"
   "Sets indent of SYMBOL to INDENT. SYMBOL can also be a list of symbols."
   (let ((indent-fn (get-indent-function mode-or-fn)))
@@ -62,7 +62,7 @@
 	     (get indent indent-fn)
 	     indent)))))
 
-(defun set-indent (symbol indent)
+(cl-defun set-indent (symbol indent)
   "Set the indentation of SYMBOL to INDENT.
 SYMBOL can be a symbol or a list of symbols. See function
 `lisp-indent-function' for possible INDENT values."
@@ -78,7 +78,7 @@ SYMBOL can be a symbol or a list of symbols. See function
 (put 'if 'lisp-indent-function 1)
 (put 'if 'common-lisp-indent-function-for-elisp 1)
 
-(defun cl-indent (symbol indent)
+(cl-defun cl-indent (symbol indent)
   (set-indent symbol indent))
 
 (cl-indent 'cl-indent 1)
@@ -141,7 +141,7 @@ SYMBOL can be a symbol or a list of symbols. See function
 
 (cl-indent '(find-music collaps-multi-spectrum map-spectra
 	     with-transposed-tree grid-transform-data
-	     format-list remove-if remove-if-not copy-if draw-if
+	     format-list remove-if copy-if draw-if
 	     sort cl-sort find-if-not cl-find find-if cl-find-if
 	     remove cl-remove cl-position
 	     cl-remove-if-not group mapcar cl-mapcar mapcan maptree copy-object-to
@@ -193,7 +193,7 @@ SYMBOL can be a symbol or a list of symbols. See function
   (regexp-opt (mapcar #'symbol-name keywords)))
 ;;(loop-keyword-regexp)
 
-(defun common-lisp-loop-keyword-length (loop-start)
+(cl-defun common-lisp-loop-keyword-length (loop-start)
   "Return the length of the preceding loop keyword.
 Stop looking before LOOP-START."
   (save-excursion
@@ -211,7 +211,7 @@ Stop looking before LOOP-START."
       length)))
 
 ;;(setf lisp-loop-forms-indentation nil)
-(defun common-lisp-loop-part-indentation (indent-point state)
+(cl-defun common-lisp-loop-part-indentation (indent-point state)
   "Compute the indentation of loop form constituents."
   (let ((loop-indentation-old (save-excursion
 				(goto-char (elt state 1))
@@ -239,7 +239,7 @@ Stop looking before LOOP-START."
      ;; though it doesn't start a sexp.
      loop-indentation)))
 
-(defun mb-common-lisp-indent-function (indent-point state)
+(cl-defun mb-common-lisp-indent-function (indent-point state)
   "Check to see what happens to loop if this"
   ;; handle concat separately
   (cl-indent 'concat (if (eql major-mode 'emacs-lisp-mode) 'progn 'prog1))

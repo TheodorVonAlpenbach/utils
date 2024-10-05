@@ -16,17 +16,17 @@
 (defconst +matlab-root+ "~/git/utils/matlab")
 
 ;(setf *version-swaps* nil)
-(loop with pdir1 = +octave-root+
+(cl-loop with pdir1 = +octave-root+
       with pdir2 = +matlab-root+
       for dir in (mapcar #'sstring '(lscommon lsbin div time file string timeseries math))
       for p = (list (expand-file-name dir pdir1) (expand-file-name dir pdir2))
       do (push-unique p *version-swaps* #'equal))
 
-(defun o2m-validate-buffer ()
+(cl-defun o2m-validate-buffer ()
   (in-directory-p (buffer-file-name) +matlab-root+))
 ;;(o2m-validate-buffer)
 
-(defun o2m-forward-multiassign ()
+(cl-defun o2m-forward-multiassign ()
   "Find next multiassign line in buffer and return indent."
   (when (re-search-forward "=[^<>;=\n]+=" nil t)
     (back-to-indentation)
@@ -41,17 +41,17 @@
   a = b;
   ..."
   (let ((line-prefix (blanks indent)))
-    (concat* (loop for (l r) in (nreverse (pairs (split-string s "=" t trim)))
+    (concat* (cl-loop for (l r) in (nreverse (pairs (split-string s "=" t trim)))
 		   collect (format "%s = %s;" l r))
       :in "\n"
       :indent-string line-prefix)))
 ;;(o2m-split-multiassign-string "  a = b = c = v; " 0)
 
-(defun o2m-split-multiassign ()
+(cl-defun o2m-split-multiassign ()
   "Next: split on =. Reassemble"
   (save-excursion
     (bob)
-    (loop for p = (o2m-forward-multiassign)
+    (cl-loop for p = (o2m-forward-multiassign)
 	  while p
 	  do (region-replace-raw
 	      (o2m-split-multiassign-string (line-string) p)
@@ -60,11 +60,11 @@
 
 (defconst +o2m-ends-regexp+
   (concat*
-      (loop for s in '(function for switch while if unwind_protect_ try_catch_)
+      (cl-loop for s in '(function for switch while if unwind_protect_ try_catch_)
 	    collect (concat "end" (sstring s)))
     :in "\\|"))
 
-(defun o2m-convert-ends ()
+(cl-defun o2m-convert-ends ()
   "Substitue Octave ending keywords with 'end'"
   (assert (o2m-validate-buffer))
   (save-excursion
@@ -73,7 +73,7 @@
       (replace-match "end"))))
 ;;(o2m-convert-ends)
 
-(defun o2m-convert-defun-names ()
+(cl-defun o2m-convert-defun-names ()
   "Convert _defun_name to defun_name_."
   (assert (o2m-validate-buffer))
   (save-excursion
@@ -83,7 +83,7 @@
 	(replace-match "\\1_")))))
 ;;(o2m-convert-defun-names)
 
-(defun o2m-convert-NA ()
+(cl-defun o2m-convert-NA ()
   "Convert defun_name_ to defun_name_."
   (assert (o2m-validate-buffer))
   (save-excursion
@@ -95,7 +95,7 @@
       (replace-match "isnan" t))))
 ;;(o2m-convert-NA)
 
-(defun o2m-convert-empty-curls ()
+(cl-defun o2m-convert-empty-curls ()
   "Substitute dubious Octave empty curls, {} with the more explicit {:}.
 The function avoids commented lines."
   (assert (o2m-validate-buffer))
@@ -106,7 +106,7 @@ The function avoids commented lines."
 	(replace-match "{:}")))))
 ;;(o2m-convert-empty-curls)
 
-(defun o2m-comments-buffer ()
+(cl-defun o2m-comments-buffer ()
   "Convert octave style comments (## / #) to MATLAB style (% / %)"
   (assert (o2m-validate-buffer))
   (save-excursion
@@ -119,7 +119,7 @@ The function avoids commented lines."
 	(replace-match "%")))))
 ;;(o2m-comments-buffer)
 
-(defun o2m-not-ify-buffer ()
+(cl-defun o2m-not-ify-buffer ()
   "Convert octave style not (!) to MATLAB style (~)."
   (assert (o2m-validate-buffer))
   (save-excursion
@@ -129,7 +129,7 @@ The function avoids commented lines."
 		  (= (char-before (1- (point))) ?%)) 
 	(replace-match "~")))))
 
-(defun o2m-convert-colon-string (s prefix)
+(cl-defun o2m-convert-colon-string (s prefix)
   (destructuring-bind (l r)
       (split-string s "=" t " +")
     (let ((pos (1+ (string-match ")(:)" r)))
@@ -140,7 +140,7 @@ The function avoids commented lines."
 	  prefix l ltmp)))))
 ;;(o2m-convert-colon-string "  foo = barcode (x)(:);" "  ")
 
-(defun o2m-convert-colon ()
+(cl-defun o2m-convert-colon ()
   "Split condense colon expression.
 E.g. replace
 v = foo (x)(:)
@@ -160,7 +160,7 @@ v = v_tmp_(:);"
 	   (line-region)))))))
 ;;(o2m-convert-colon)
 
-(defun o2m-sign-outer-region ()
+(cl-defun o2m-sign-outer-region ()
   "Return the outer signature parenthesis region.
 It assumes that point is on the signature line in the current
 buffer."
@@ -171,7 +171,7 @@ buffer."
     (backward-char 1)
     (sexp-region)))
 
-(defun o2m-sign-inner-region ()
+(cl-defun o2m-sign-inner-region ()
   "As `o2m-sign-outer-region' but without the parenthesis characters."
   (destructuring-bind (a b) (o2m-sign-outer-region)
     (list (1+ a) (1- b))))
@@ -183,21 +183,21 @@ buffer."
   (apply #'buffer-substring-no-properties region))
 ;;(o2m-inner-sign-string)
 
-(defun o2m-arguments (inner-sign)
+(cl-defun o2m-arguments (inner-sign)
   "Return the currrent functions arguments.
 The result is a list ((arg1) (arg2) ... (opt1 val1) ... (opt2 val2)),
 where argNs, optNs, valNs are all strings."
-  (loop for p in (split-string inner-sign "," t " +")
+  (cl-loop for p in (split-string inner-sign "," t " +")
 	collect (split-string p "=" t " +")))
 ;;(o2m-arguments (o2m-inner-sign-string))
 
-(defun o2m-new-default (opt val i)
+(cl-defun o2m-new-default (opt val i)
   (format "  if (nargin < %d)\n    %s = %s;\n  end" (1+ i) opt val))
 ;;(o2m-new-default "period" "NA" 1)
 
-(defun o2m-convert-arguments (args)
+(cl-defun o2m-convert-arguments (args)
   (list (concat* (mapcar #'car args) :in ", ")
-	(aif (loop for (arg val) in args
+	(aif (cl-loop for (arg val) in args
 		   for i from 0
 		   if val
 		   collect (o2m-new-default arg val i))
@@ -205,7 +205,7 @@ where argNs, optNs, valNs are all strings."
 	  "")))
 ;;(o2m-convert-arguments '(("prefix") ("period" "NA") ("s" "NA") ("verbose" "false")))
 
-(defun o2m-convert-defaults-1 ()
+(cl-defun o2m-convert-defaults-1 ()
   "Rewrite function foo (a = initval1, b = initval2) ...
 to
 
@@ -227,12 +227,12 @@ function foo (a)
       (when new-defaults
 	(insert new-defaults)))))
 
-(defun o2m-forward-defun ()
+(cl-defun o2m-forward-defun ()
   (when (re-search-forward "^[[:space:]]*function" nil t)
     (bol)))
 ;;(o2m-forward-defun)
 
-(defun o2m-convert-defaults ()
+(cl-defun o2m-convert-defaults ()
   "Apply `o2m-convert-defaults' to all defuns in buffer."
   (assert (o2m-validate-buffer))
   (save-excursion
@@ -242,7 +242,7 @@ function foo (a)
       (forward-line 1))))
 ;;(o2m-convert-defaults)
 
-(defun o2m-convert-strings ()
+(cl-defun o2m-convert-strings ()
   (assert (o2m-validate-buffer))
   (save-excursion
     (bob)
@@ -256,7 +256,7 @@ function foo (a)
       (replace-match "'"))))
 ;;(o2m-convert-strings)
 
-(defun o2m-all ()
+(cl-defun o2m-all ()
   (o2m-convert-defaults)
   (o2m-not-ify-buffer)
   (o2m-comments-buffer)
@@ -269,7 +269,7 @@ function foo (a)
   (o2m-convert-tests))
 ;;(o2m-all)
 
-(defun o2m-add-test-defun (code defun file)
+(cl-defun o2m-add-test-defun (code defun file)
   (with-file file
     (bob)
     (unless (re-search-forward "%% Fixures")
@@ -280,26 +280,26 @@ function foo (a)
 	      defun code))))
 ;;(o2m-add-test-defun "  y = 2 + 2;" "foo" "~/projects/matlab/ls/div/divTest.m")
 
-(defun o2m-test-module-name ()
+(cl-defun o2m-test-module-name ()
   (file-name-nondirectory
    (directory-file-name (file-name-directory (buffer-file-name)))))
 ;;(o2m-test-module-name)
 
-(defun o2m-test-defun-name-obsolete (name)
+(cl-defun o2m-test-defun-name-obsolete (name)
   "I thought for a moment that 0-9 were not allowed in test function names.
 I was wrong."
   (string-replace-map name
     (transpose
      (list (mapcar #'number-to-string (0-n 10))
-	   (loop for i below 10
+	   (cl-loop for i below 10
 		 collect (capitalize (integer-to-literary-string i)))))))
 ;;(o2m-test-defun-name-1 "qwe1")
 
-(defun o2m-test-defun-name ()
+(cl-defun o2m-test-defun-name ()
   (file-name-sans-extension (file-name-nondirectory (buffer-file-name))))
 ;;(o2m-test-defun-name)
 
-(defun o2m-convert-assert (s)
+(cl-defun o2m-convert-assert (s)
   ""
   (format "  verifyEqual (testCase, %s"
     (string-match*
@@ -307,7 +307,7 @@ I was wrong."
       s :num 1)))
 ;;(o2m-convert-assert "assert (a, b);")
 
-(defun o2m-convert-test-line (s)
+(cl-defun o2m-convert-test-line (s)
   "Assume %! is stripped."
   (case (read s)
     (assert (o2m-convert-assert s))
@@ -315,9 +315,9 @@ I was wrong."
     (t (concat "  " (string-trim-left s)))))
 ;;(o2m-convert-test-line "assert (a, b);")
 
-(defun o2m-convert-test-string (s)
+(cl-defun o2m-convert-test-string (s)
   (concat*
-      (loop for l in (string-lines s)
+      (cl-loop for l in (string-lines s)
 	    for i from 0
 	    do (message "%d" i)
 	    if (and (not (empty-string-p (string-trim* l "[%! ]*")))
@@ -326,11 +326,11 @@ I was wrong."
     :in "\n"))
 ;;(o2m-convert-test-string "%!test\n%! x = randi (100, 10);\n%! assert (a, b);")
 
-(defun o2m-convert-block (s defun-name file)
+(cl-defun o2m-convert-block (s defun-name file)
   (o2m-add-test-defun (o2m-convert-test-string s) defun-name file))
 ;;(o2m-convert-block "%!test\n%! x = randi (100, 10);\n%! assert (a, b);" "dealnumTest" "~/projects/matlab/ls/div/divTest.m")
 
-(defun o2m-convert-tests ()
+(cl-defun o2m-convert-tests ()
   (let ((defun-name (o2m-test-defun-name))
 	(file (format "%sTest.m" (o2m-test-module-name))))
     (bob)
@@ -342,13 +342,13 @@ I was wrong."
 			   (point) (point-max))
 			  "%!\\(test\\||assert\\)"
 			  :left))))
-      (loop for s in test-blocks 
+      (cl-loop for s in test-blocks 
 	    for suffix in (alphanumerate (0-n (length test-blocks)) 1)
 	    for fn = (concat defun-name suffix "Test") 
 	    do (o2m-convert-block s fn file)))))
 ;;(o2m-convert-tests)
 
-(defun o2m-convert-doc ()
+(cl-defun o2m-convert-doc ()
   (smart-swap)
   (octave-help (octave-main-defun-name))
   (other-window 1)
@@ -383,7 +383,7 @@ I was wrong."
     (save-buffer)))
 ;;(o2m-convert-doc)
 
-(defun o2m-all ()
+(cl-defun o2m-all ()
   (o2m-convert-defaults)
   (o2m-not-ify-buffer)
   (o2m-comments-buffer)

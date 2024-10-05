@@ -40,7 +40,7 @@
   :type 'string
   :group 'evil-textobj-line)
 
-(defun evil-line-range (count beg end type &optional inclusive)
+(cl-defun evil-line-range (count beg end type &optional inclusive)
   (if inclusive
       (evil-range (line-beginning-position) (line-end-position) 'line :expand t)
     (let ((start (save-excursion

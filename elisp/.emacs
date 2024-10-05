@@ -16,11 +16,21 @@
 (global-font-lock-mode t)
 (show-paren-mode 1) ;shows matching parenthesis
 (transient-mark-mode 1)
+;;find . -type f -name "*.el" -exec sed -i 's/(pushnew /(cl-pushnew /g' {} +
 
-;; Otherwise packages like slime might shadow the built in cl library
-;; by pushing directories with cl library compatability packages to
-;; load-path:
-;;(require 'cl)
+(require 'cl-lib)
+(defalias 'subseq 'cl-subseq)
+(defalias 'first 'cl-first)
+(defalias 'second 'cl-second)
+(defalias 'third 'cl-third)
+(defalias 'fourth 'cl-fourth)
+(defalias 'fifth 'cl-fifth)
+(defalias 'sixth 'cl-sixth)
+(defalias 'seventh 'cl-seventh)
+(defalias 'eighth 'cl-eighth)
+(defalias 'rest 'cl-rest)
+(defalias 'find-if 'cl-find-if)
+(defalias 'getf 'cl-getf)
 
 ;;; MB setups
 (defun emacs-os ()
@@ -79,6 +89,14 @@
 
 (defconst +mb-lisp-dir+ (expand-file-name "elisp" +mb-utils-dir+)
   "Default directory for mb-lisp files.")
+
+(defun mb-emacs-expected-local-filename ()
+  (expand-file-name
+   (format ".emacs-local-%s-%s"
+     system-name
+     (substring (symbol-name (emacs-os)) 1))
+   +mb-lisp-dir+))
+;;(mb-emacs-expected-local-filename)
 
 (defun mb-emacs-local-filename ()
   (let* ((path (expand-file-name
@@ -156,9 +174,7 @@ and running Git.")
 
 ;;; non standard packages
 (require 'package)
-(cl-loop for x in '(("marmalade" . "http://marmalade-repo.org/packages/")
-		    ;; ("melpa"     . "http://melpa.milkbox.net/packages/")
-		    ("melpa"     . "http://melpa.org/packages/")
+(cl-loop for x in '(("melpa" . "http://melpa.org/packages/")
 		    ("gnu" . "https://elpa.gnu.org/packages/"))
 	 do (unless (member x package-archives)
 	      (push x package-archives)))
@@ -478,8 +494,8 @@ loading of files."
 (unless (server-running-p) (server-start))
 
 ;; ignore some tex output files
-(pushnew "\\.\\(dvi\\|aux\\|out\\|bbl\\|blg\\)\\'" ido-ignore-files)
-(pushnew "\\.\\([0-9]*gf\\|pk\\)\\'" ido-ignore-files)
+(cl-pushnew "\\.\\(dvi\\|aux\\|out\\|bbl\\|blg\\)\\'" ido-ignore-files)
+(cl-pushnew "\\.\\([0-9]*gf\\|pk\\)\\'" ido-ignore-files)
 
 (defgroup mb-elisp nil
        "Super group for all mb-elisp customizataions."

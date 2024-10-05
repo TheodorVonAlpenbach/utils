@@ -18,7 +18,7 @@
 ;; BREAKPOINT: a line in an Octave file that is both a BUFFER
 ;; BREAKPOINT and a DBSTOP.
 
-(defun octave-breakpoint-map ()
+(cl-defun octave-breakpoint-map ()
   (let ((map (make-sparse-keymap)))
     (define-key map "i" #'octave-toggle-breakpoint)
     (define-key map "t" #'octave-toggle-breakpoint)
@@ -29,7 +29,7 @@
     (define-key map "d" (octave-delete-breakpoint-map))
     map))
 
-(defun octave-delete-breakpoint-map ()
+(cl-defun octave-delete-breakpoint-map ()
   (let ((map (make-sparse-keymap)))
     (define-key map "r" #'octave-delete-breakpoints-region)
     (define-key map "l" #'octave-delete-breakpoint-line)
@@ -53,13 +53,13 @@
   '(left-fringe hollow-rectangle octave-breakpoint-indicator))
 
 ;;; Buffer breakpoints
-(defun octave-buffer-breakpoint-p (&optional pos)
+(cl-defun octave-buffer-breakpoint-p (&optional pos)
   "Return not `nil' if the current buffer line is a buffer breakpoint."
   (save-excursion
     (bol :point pos)
     (re-search-forward +octave-breakpoint-regexp+ (line-end-position) t)))
 
-(defun octave-set-buffer-breakpoint (&optional line)
+(cl-defun octave-set-buffer-breakpoint (&optional line)
   "The breakpoint mark at LINE.
 The default LINE is the current line."
   (save-excursion
@@ -72,7 +72,7 @@ The default LINE is the current line."
 	  +octave-breakpoint-display+))))
 ;;(octave-unset-buffer-breakpoint)
 
-(defun octave-unset-buffer-breakpoint (&optional scope)
+(cl-defun octave-unset-buffer-breakpoint (&optional scope)
   "Delete buffer breakpoint at line and return T.
 If scope is a number, then delete breakpoint at that line. If
 SCOPE is :BUFFER then delete every breakpoint mark in the current
@@ -96,7 +96,7 @@ implemented."
 	(replace-match "")
 	(bol)))))
 
-(defun octave-region-breakpoints (beg end &optional buffer)
+(cl-defun octave-region-breakpoints (beg end &optional buffer)
   "Return the buffer breakpoints BUFFER's region (BEG END).
 The result is organized as a list (DEFUN-BREAKPOINT1
 DEFUN-BREAKPOINT2 ...), where each element is a pair (DEFUN
@@ -108,14 +108,14 @@ function DEFUN."
     (cl-loop while (re-search-forward +octave-breakpoint-regexp+ end t)
 	     collect (list (octave-defun-name) (line-number-at-pos)))))
 
-(defun octave-buffer-breakpoints (&optional buffer)
+(cl-defun octave-buffer-breakpoints (&optional buffer)
   "Return the buffer breakpoints in BUFFER.
 The result is a list of the same format as the result from
 `octave-region-breakpoints'."
   (with-buffer buffer
     (octave-region-breakpoints (point-min) (point-max) buffer)))
 
-(defun octave-all-buffer-breakpoints (&optional buffer)
+(cl-defun octave-all-buffer-breakpoints (&optional buffer)
   "Return the buffer breakpoints in all active Octave mode buffers.
 The result is organized as the list described in
 `octave-update-dbstops'."
@@ -125,14 +125,14 @@ The result is organized as the list described in
 
 
 ;;; dbstops
-(defun octave-dbstop-p (&optional pos)
+(cl-defun octave-dbstop-p (&optional pos)
   "Return not `nil' if the current buffer line is a dbstop in Octave."
   (let ((bl (octave-dbstop-list)))
     (cl-destructuring-bind (fn line) (mb-octave-location pos)
       (awhen (find fn bl :test #'string= :key #'first)
 	(find line (second it))))))
 
-(defun octave-dbstop-list-1 (oline)
+(cl-defun octave-dbstop-list-1 (oline)
   "Extract function name and dbstop lines in string OLINE.
 This is a helper function for `octave-dbstop-list'."
   (cl-destructuring-bind (fn lines)
@@ -142,17 +142,17 @@ This is a helper function for `octave-dbstop-list'."
     (list fn (mapcar #'string-to-number (split-string lines ", " t)))))
 ;;(mapcar #'string-to-number (split-string "1, 2" ", " t))
 
-(defun octave-dbstop-list (&optional fn)
+(cl-defun octave-dbstop-list (&optional fn)
   (octave-send-string (if fn (format "dbstatus %s" fn) "dbstatus"))
   (mapcar #'octave-dbstop-list-1 inferior-octave-output-list))
 
-(defun octave-set-dbstops-1 (fn lines)
+(cl-defun octave-set-dbstops-1 (fn lines)
   "Compose string for `octave-set-dbstops'."
   (awhen (mapcar #'number-to-string (listify lines))
     (concat* (if fn (cons fn it) it) :pre "dbstop " :in " ")))
 ;;(octave-set-dbstops-1 "fn" 1)
 
-(defun octave-set-dbstops (defun-name lines &optional show-output-p)
+(cl-defun octave-set-dbstops (defun-name lines &optional show-output-p)
   "Set Octave breakpoints for function with DEFUN-NAME.
 If defun-name is nil then skip discard function name argument,
 which you typically will do in debug mode. If optional argument
@@ -160,7 +160,7 @@ show-output-p is not nil, then print Octave response in REPL."
   (awhen (octave-set-dbstops-1 defun-name lines)
     (octave-send-string it show-output-p)))
 
-(defun octave-update-dbstops (buffer-breakpoints)
+(cl-defun octave-update-dbstops (buffer-breakpoints)
   "Convert all BUFFER-BREAKPOINTS to Octave dbstops.
 The input argument is a list with elements on the form \(BUFFER
 DEFUN-BREAKPOINTS\), where each element in DEFUN-BREAKPOINTS is a
@@ -174,14 +174,14 @@ list of the same format as the result from
 	   and do (cl-loop for (fn lines) in fn-breakpoints
 			   do (octave-set-dbstops fn lines t))))
 
-(defun octave-update-dbstops-buffer (&optional buffer)
+(cl-defun octave-update-dbstops-buffer (&optional buffer)
   "Convert all buffer breakpoints in BUFFER to Octave dbstops.
 A side effect is that the BUFFER file will be source-d in
 Octave."
   (awhen (octave-buffer-breakpoints buffer)
     (octave-update-dbstops (list (list buffer it)))))
 
-(defun octave-update-all-dbstop ()
+(cl-defun octave-update-all-dbstop ()
   "Convert all buffer breakpoints in all buffers to Octave dbstops.
 A side effect is that the corresponding octave files will be
 source-d in Octave."
@@ -189,7 +189,7 @@ source-d in Octave."
 
 
 ;;; Breakpoints
-(defun octave-breakpoint-p (&optional pos)
+(cl-defun octave-breakpoint-p (&optional pos)
   "Return not `nil' if the current buffer line is an Octave breakpoint."
   (let ((dbstop-p (octave-dbstop-p pos))
 	(buffer-breakpoint-p (octave-buffer-breakpoint-p pos)))
@@ -197,7 +197,7 @@ source-d in Octave."
       (message "Buffer breakpoint and dbstop settings differ!"))
     (or dbstop-p buffer-breakpoint-p)))
 
-(defun octave-set-breakpoint (&optional pos)
+(cl-defun octave-set-breakpoint (&optional pos)
   "Set breakpoint at the line covering the point POS.
 The function adds a dbstop in Octave, and marks the corresponding
 buffer line."
@@ -209,7 +209,7 @@ buffer line."
       (first inferior-octave-output-list))))
 ;;(octave-set-breakpoint)
 
-(defun octave-unset-breakpoint (&optional pos)
+(cl-defun octave-unset-breakpoint (&optional pos)
   "Unset any breakpoint at the line covering point POS.
 Implementaion note. This mechanism could be more effective if a
 DEFUN-BREAKPOINT was the triple (DEFUN LINUM POS). Then all of
@@ -226,7 +226,7 @@ mb-octave-location would be superfluous."
     (message "No breakpoint to unset")))
 ;;(octave-unset-breakpoint)
 
-(defun octave-unset-breakpoints-region (beg end &optional buffer)
+(cl-defun octave-unset-breakpoints-region (beg end &optional buffer)
   "Unset every breakpoint in the region (beg end) in BUFFER.
 See implementation note in `octave-unset-breakpoint'."
   (with-buffer buffer
@@ -249,37 +249,37 @@ executes BODY."
 
 
 ;;; UI
-(defun octave-toggle-breakpoint ()
+(cl-defun octave-toggle-breakpoint ()
   (interactive)
   (if (octave-breakpoint-p)
     (octave-unset-breakpoint)
     (octave-set-breakpoint)))
 
-(defun octave-list-all-breakpoints ()
+(cl-defun octave-list-all-breakpoints ()
   (interactive)
   (octave-send-string "dbstatus" t))
 
-(defun octave-refresh-breakpoints ()
+(cl-defun octave-refresh-breakpoints ()
   (interactive)
   (octave-update-all-dbstop))
 
-(defun octave-delete-breakpoint-line ()
+(cl-defun octave-delete-breakpoint-line ()
   (interactive)
   (octave-unset-breakpoint))
 
-(defun octave-delete-region-breakpoints (beg end)
+(cl-defun octave-delete-region-breakpoints (beg end)
   (interactive "r")
   (octave-unset-breakpoints-region beg end))
 
-(defun octave-delete-defun-breakpoints ()
+(cl-defun octave-delete-defun-breakpoints ()
   (interactive)
   (apply #'octave-delete-region-breakpoints (defun-region)))
 
-(defun octave-delete-buffer-breakpoints ()
+(cl-defun octave-delete-buffer-breakpoints ()
   (interactive)
   (octave-delete-region-breakpoints (point-min) (point-max)))
 
-(defun octave-delete-all-breakpoints ()
+(cl-defun octave-delete-all-breakpoints ()
   (interactive)
   (cl-loop for (buffer fn-breakpoints) in (octave-all-buffer-breakpoints)
 	   do (with-buffer buffer

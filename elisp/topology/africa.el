@@ -1,9 +1,9 @@
-(defun* africa-read-csv (&optional (filename-hav "hav.csv")
+(cl-defun africa-read-csv (&optional (filename-hav "hav.csv")
 				   (filename-boundaries "afrika.csv")
 				   (path "c:/cygwin/usr/libs/emacs-21.3/site-lisp/mb-lisp/topology/"))
   (let ((hav (mapcar #'first (parse-csv-file (concat path filename-hav))))
 	(boundaries (parse-csv-file (concat path filename-boundaries))))
-    (loop for boundary in boundaries
+    (cl-loop for boundary in boundaries
 		for country1 = (first boundary)
 		for country2 = (second boundary) 
 		if (and (not (member country2 hav))
@@ -15,7 +15,7 @@
 ;;(africa-read-csv)
 ;;(prin1 (extract-nodes (africa-read-csv)))
 
-(defun* print-africa-matrix (&optional (filename-hav "hav.csv")
+(cl-defun print-africa-matrix (&optional (filename-hav "hav.csv")
 				      (filename-boundaries "afrika.csv")
 				      (filename-csv "africa-matrix.csv")
 				      (path "c:/cygwin/usr/libs/emacs-21.3/site-lisp/mb-lisp/topology/"))

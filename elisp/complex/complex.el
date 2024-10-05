@@ -3,28 +3,28 @@
 (defconst complex-operators
   '(+ - * / expt abs sqrt))
 
-(defun non-complex-symbol-name (symbol)
+(cl-defun non-complex-symbol-name (symbol)
   (concat "non-complex-" (symbol-name symbol)))
 
-(defun non-complex-symbol (symbol &optional intern-hard)
+(cl-defun non-complex-symbol (symbol &optional intern-hard)
   (funcall (if intern-hard #'intern #'intern-soft) 
 	   (non-complex-symbol-name symbol)))
 ;;(non-complex-symbol '+ nil)
 
-(defun complex-symbol (symbol &optional intern-hard)
+(cl-defun complex-symbol (symbol &optional intern-hard)
   (intern-soft (concat "complex-" (symbol-name symbol))))
 ;;(complex-symbol #'+)
 
-(defun* init-non-complex-operators (&optional (operators complex-operators))
-  (loop for op in operators
+(cl-defun init-non-complex-operators (&optional (operators complex-operators))
+  (cl-loop for op in operators
 	do (fset (non-complex-symbol op t) (symbol-function op))))
 
-(defun* admin-non-complex-operators (action &optional (operators complex-operators))
+(cl-defun admin-non-complex-operators (action &optional (operators complex-operators))
   "ACTION is one of :init :redefine :reset"
   (case action
-    (:redefine (loop for op in operators
+    (:redefine (cl-loop for op in operators
 		     do (fset op (symbol-function (complex-symbol op)))))
-    (:reset (loop for op in operators
+    (:reset (cl-loop for op in operators
 		     do (fset op (symbol-function (non-complex-symbol op)))))))
 ;(init-non-complex-operators)
 ;;(admin-non-complex-operators :reset)
@@ -38,7 +38,7 @@
 ;;(with-complex (abs '(1 1)))
 
 ;;; complex closure
-(defun with-complex-p ()
+(cl-defun with-complex-p ()
   (nequal (symbol-function '+) (symbol-function 'non-complex-+)))
 ;;(with-complex-p)
 
@@ -79,46 +79,46 @@
 (defalias 'complex-re #'first)
 (defalias 'complex-im #'second)
 
-(defun* complex (x &optional (y 0)) (list x y))
+(cl-defun complex (x &optional (y 0)) (list x y))
 
-(defun* complex-p (c)
+(cl-defun complex-p (c)
   (and (listp c) (= (length c) 2) (every #'numberp c)))
 ;;(mapcar #'complex-p '((1 2) 1 (1) (0 2)))
 
-(defun complex-ify (x &optional signal-on-error)
+(cl-defun complex-ify (x &optional signal-on-error)
   (cond ((complex-p x) x)
 	((numberp x) (complex x))
 	(t (when signal-on-error (error "Argument %S is neither a number nor a complex" x)))))
 ;;(mapcar #'complex-ify '((1 2) 1 (1) (0 2)))
 
-(defun complex-clean (c)
+(cl-defun complex-clean (c)
   (if (zerop (complex-im c))
     (complex-re c) c))
 ;;(mapcar #'complex-clean '((1 2)(1 0)(0 2)))
 
-(defun complex-add (c1 c2)
+(cl-defun complex-add (c1 c2)
   (complex-clean (mapcar* #'non-complex-+ (complex-ify c1) (complex-ify c2))))
 ;;(mapcar* #'complex-add '((1 2)(1 0)(0 2)) '((1 2)(1 0)(0 2)))
 
-(defun complex-sum (complex-numbers)
+(cl-defun complex-sum (complex-numbers)
   (reduce #'complex-add complex-numbers :initial-value '(0 0)))
 
-(defun complex-+ (&rest complex-numbers)
+(cl-defun complex-+ (&rest complex-numbers)
   (complex-sum complex-numbers))
 ;;(complex-+ '(1 2) '(1 0) '(0 2))
 
-(defun complex-negate (c) 
+(cl-defun complex-negate (c) 
   (complex-clean (mapcar #'non-complex-- (complex-ify c))))
 ;;(complex-negate '(1 1))
 
-(defun complex-- (complex-number &rest complex-numbers)
+(cl-defun complex-- (complex-number &rest complex-numbers)
   (if complex-numbers
     (complex-add complex-number 
 		 (complex-negate (complex-sum complex-numbers)))
     (complex-negate complex-number)))
 ;;(complex-- '(1 2) '(1 0) '(0 2) '(123 123))
 
-(defun complex-multiply (c1 c2)
+(cl-defun complex-multiply (c1 c2)
   (destructuring-bind ((a b) (c d)) 
       (list (complex-ify c1) (complex-ify c2))
     (complex (non-complex-- (non-complex-* a c) 
@@ -127,31 +127,31 @@
 			    (non-complex-* a d)))))
 ;;(mapcar* #'complex-multiply '((1 2)(1 0)(0 2)) '((1 2)(1 0)(0 2)))
 
-(defun complex-product (complex-numbers)
+(cl-defun complex-product (complex-numbers)
   (reduce #'complex-multiply complex-numbers :initial-value 1))
 
-(defun complex-* (&rest complex-numbers)
+(cl-defun complex-* (&rest complex-numbers)
   (complex-product complex-numbers))
 ;;(complex-* '(1 2) '(1 0) '(0 2))
 
-(defun complex-inverse (c) 
+(cl-defun complex-inverse (c) 
   (destructuring-bind (c d) (complex-ify c)
     (with-non-complex
 	(let ((denominator (float (+ (sq c) (sq d)))))
 	  (complex (/ c denominator)(/ (- d) denominator))))))
 ;;(complex-inverse '(1 1))
 
-(defun complex-/ (complex-number &rest complex-numbers)
+(cl-defun complex-/ (complex-number &rest complex-numbers)
   (complex-multiply complex-number
 		    (complex-inverse (complex-product complex-numbers))))
 ;;(complex-/ '(1 2) '(1 0) '(0 2) '(123 123))
 
 ;;; polar
-(defun complex-abs-squared (x)
+(cl-defun complex-abs-squared (x)
   (with-non-complex
     (+ (sq (complex-re x)) (sq (complex-im x)))))
 
-(defun complex-abs (x)
+(cl-defun complex-abs (x)
   (with-non-complex
     (if (complex-p x)
       (sqrt (complex-abs-squared x))
@@ -160,12 +160,12 @@
 ;;(with-complex (abs '(1 1)))
 ;;(init-non-complex-operators)
 
-(defun complex-argument (c)
+(cl-defun complex-argument (c)
   (with-non-complex 
     (atan2 (complex-re c) (complex-im c))))
 ;;(complex-argument '(-1 0))
 
-(defun complex-polar (x &optional reverse)
+(cl-defun complex-polar (x &optional reverse)
   (if reverse
     (with-non-complex
       (complex (* (first x) (cos (second x))) 
@@ -182,20 +182,20 @@ cf. `complex-expt'"
 (cl-indent 'complex-as-polar 'case)
 
 ;;; derived functions
-(defun complex-expt (arg1 arg2)
+(cl-defun complex-expt (arg1 arg2)
   (destructuring-bind (r arg) (complex-polar arg1)
     (complex-polar (with-non-complex 
 		     (list (expt r arg2) (* arg arg2)))
 		   t)))
 ;;(complex-expt '(-1 0) .5)
 
-(defun complex-sqrt (arg)
+(cl-defun complex-sqrt (arg)
   (complex-expt (complex-ify arg) 0.5))
 ;;(complex-sqrt -1)
 ;;(with-complex (sqrt -1))
 
 ;;; print
-(defun complex-to-string (c)
+(cl-defun complex-to-string (c)
   (apply #'format "%s+i%s" c))
 
 (provide 'complex)

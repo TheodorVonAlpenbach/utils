@@ -10,18 +10,18 @@
 (defalias 'ld-column-type #'fourth)
 (defalias 'ld-column-properties #'fifth)
 
-(defun ld-column-property-p (property coldef)
+(cl-defun ld-column-property-p (property coldef)
   (member property (ld-column-properties coldef)))
-(defun ld-column-primary-key-p (coldef)
+(cl-defun ld-column-primary-key-p (coldef)
   (ld-column-property-p :primary-key coldef))
 
-(defun ld-column-p (obj)
+(cl-defun ld-column-p (obj)
   (and (consp obj) (eql (first obj) :column)))
 
-(defun ld-column-keyword (coldef)
+(cl-defun ld-column-keyword (coldef)
   (ld-identifier-keyword (ld-column-identifier coldef)))
 
-(defun ld-primary-key (schema &optional as-column-definition-p)
+(cl-defun ld-primary-key (schema &optional as-column-definition-p)
   "Returns the column that is the primary key. If
 AS-COLUMN-DEFINITION-P is non nil the schema definition for that
 column is returned."
@@ -31,7 +31,7 @@ column is returned."
       coldef (ld-column-identifier coldef))))
 ;;(ld-primary-key (ld-schema :users))
 
-(defun ld-column-comparator (coldef)
+(cl-defun ld-column-comparator (coldef)
   (cl-case (ld-column-type coldef)
     (string #'string=)
     (listp #'equal)

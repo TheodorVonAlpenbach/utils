@@ -1,7 +1,7 @@
 (require 'mb-utils-io)
 
 ;;;; Process utils (this particular one could be moved elsewhere)
-(defun call-process* (program &rest args)
+(cl-defun call-process* (program &rest args)
   "Returns the output of PROGRAM with ARGS. The method is based
 on `call-process', so the underlying process is treated
 synchronously. See `call-process' for more control of processes" 
@@ -10,7 +10,7 @@ synchronously. See `call-process' for more control of processes"
     (buffer-string-no-properties)))
 ;;(call-process* "file" (expand-file-name "~/projects/utils/elisp/external/excel.el"))
 
-(defun call-process-shell-command* (command &rest args)
+(cl-defun call-process-shell-command* (command &rest args)
   "Same as `call-process*' but calling
 `call-process-shell-command' instead of `call-process'"
   (with-temp-buffer
@@ -19,18 +19,18 @@ synchronously. See `call-process' for more control of processes"
 ;;(call-process-shell-command* "ls")
 
 ;;;; Wget methods
-(defun wget-unique-filename ()
+(cl-defun wget-unique-filename ()
   "Creates a quasi unique filename based on current time with resolution of a microsecond.
 TODO: should be made a global util, or substitued with one if not already existing"
   (make-temp-file "wget" nil))
 
-(defun wget-basic (url filename &optional synchronous-p header)
+(cl-defun wget-basic (url filename &optional synchronous-p header)
   (if synchronous-p
     (start-process "wget" nil "wget" url "-O" filename)
     (call-process "wget" nil "*wget*" nil url "-O" (file-truename filename))))
 ;;(wget-basic "http://www.musedata.org/cgi-bin/mddata?composer=bach&edition=rasmuss&genre=inventio&work=0774&format=stage2&multi=zip" "~/data/musedata/BWV-0774.zip")
 
-(defun wget (url coding-system wget-after-method &rest args)
+(cl-defun wget (url coding-system wget-after-method &rest args)
   "WGET-AFTER-METHOD is a method that is called when the
 asynchronous process has finished. It's signature should be
 \(HTML-STRING ARGS...\), where HTML-STRING is the html content just
@@ -43,9 +43,9 @@ downloaded by wget."
       (wget-basic url tmp nil))
     nil))
 
-(defun wget-html-sentinel (filename coding-system html-sentinel-function &rest args)
+(cl-defun wget-html-sentinel (filename coding-system html-sentinel-function &rest args)
   "TODO: assure that process was ok."
-  (lexical-let ((filename filename)
+  (let ((filename filename)
 		(coding-system coding-system)
 		(html-sentinel-function html-sentinel-function)
 		(args args))
@@ -54,10 +54,10 @@ downloaded by wget."
 	(delete-file filename)
 	(message "Finished!"))))
 
-(defun* wget-to-temp-buffer (url coding-system buffer-name string-converter &rest args)
+(cl-defun wget-to-temp-buffer (url coding-system buffer-name string-converter &rest args)
   '??)
 
-(defun wget-to-string (url)
+(cl-defun wget-to-string (url)
   "TODO: handle coding-system"
  (let ((tmp (wget-unique-filename)))
    (wget-basic url tmp nil)

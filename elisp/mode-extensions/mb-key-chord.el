@@ -6,7 +6,7 @@
        (insert (format "%S = %S\n" ',form ,form)))))
 ;;(qddebug (+ 2 2))
 
-(defun mb-key-chord-input-method (first-char)
+(cl-defun mb-key-chord-input-method (first-char)
   "Input method controlled by key bindings with the prefix `key-chord'."
   (qddebug first-char)
   (qddebug key-chord-last-unmatched)

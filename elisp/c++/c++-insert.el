@@ -1,4 +1,4 @@
-(defun indentation-column ()
+(cl-defun indentation-column ()
   "Returns point "
   (save-excursion
     (back-to-indentation)
@@ -9,12 +9,12 @@
 (require 'mb-insert)
 ;(definteractive word-at-point)
 ;(definteractive symbol-at-point)
-(defun symbol-at-point* (&optional point)
+(cl-defun symbol-at-point* (&optional point)
   (save-excursion
     (goto-char (or point (point)))
     (symbol-at-point)))
 
-(defun c++-insert-parentheses (arg)
+(cl-defun c++-insert-parentheses (arg)
   (interactive "*P")
   (let* ((space-symbols '(if for while))
 	 (space (if (find (symbol-at-point* (1- (point))) space-symbols)
@@ -22,7 +22,7 @@
     (insert-parentheses* arg :ensure-space space)))
 ;(insert-parentheses* 0 :ensure-space :before)
 
-(defun c-electric-brace (arg)
+(cl-defun c-electric-brace (arg)
   "Overrides standard c-electric-brace, see
 c:/unix/emacs-20.7/lisp/progmodes/cc-cmds.el."
   (interactive "*P")

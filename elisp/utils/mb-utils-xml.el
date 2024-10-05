@@ -2,7 +2,7 @@
 
 (defconst xml-test-node "<tr itemprop=\"albums\" itemscope itemtype=\"http://schema.org/MusicAlbum\"><a name=\"6159\"></a>Some inner text<a></a></tr>")
 
-(defun xml-attribute-regexp (name &optional value)
+(cl-defun xml-attribute-regexp (name &optional value)
   (let ((wildcard-name "[^=[:space:]]+")
 	(wildcard-value "[^\"]*"))
     (when (string= name "*") (setf name wildcard-name))
@@ -14,11 +14,11 @@
 ;;(xml-attribute-regexp "qwe")
 ;;(xml-attribute-regexp "*" "*")
 
-(defun xml-attribute (name xml)
+(cl-defun xml-attribute (name xml)
   (string-match* (xml-attribute-regexp name "*") xml :num 1))
 ;;(xml-attribute "itemprop" xml-test-node)
 
-(defun xml-attributes-regexp (attributes &optional exact-p)
+(cl-defun xml-attributes-regexp (attributes &optional exact-p)
   "Converts list designator ATTRIBUTES to a regular expression
 for matching the attribute part in an XML node. ATTRIBUTES is a
 list where each element is either a pair of strings, (NAME
@@ -89,7 +89,7 @@ resulting string."
 	   do (setq string (mb-string-replace string xml-code char))
 	   finally return string))
 
-(defun html-to-temp-buffer (html-converter html-string buffer-name &rest args)
+(cl-defun html-to-temp-buffer (html-converter html-string buffer-name &rest args)
   "HTML-CONVERTER is a method taking one argument, an
 HTML-STRING, and returns a string to be output in a temp buffer
 named BUFFER-NAME. HTML-STRING is the HTML content of the file
@@ -104,7 +104,7 @@ that wget just did dowdload."
  the string according to HTML-STRING-CONVERTER taking arguments
  ARGS, and send the result to a temporary buffer named
  TEMP-BUFFER-NAME."
-  (lexical-let ((html-string-converter html-string-converter)
+  (let ((html-string-converter html-string-converter)
 		(temp-buffer-name temp-buffer-name)
 		(args args))
     #'(lambda (html-string)

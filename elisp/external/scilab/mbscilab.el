@@ -18,12 +18,12 @@
 (define-error :mbscilab-no-process "General error in mbscilab mode" 'error)
 
 ;;; Comint methods
-(defun scilab-command ()
+(cl-defun scilab-command ()
   (if (eql (emacs-os) :linux)
     "scilab-adv-cli"
     "/cygdrive/c/Program Files (x86)/scilab-5.5.2/bin/Scilex.exe"))
 
-(defun scilab-command-line-string ()
+(cl-defun scilab-command-line-string ()
   (if +scilab-init-file+
     (format "%s -f %s" (scilab-command) +scilab-init-file+)
     (scilab-command)))
@@ -41,21 +41,21 @@
       (cygpath path))))
 ;;(cygpath "~/sources/SciLab/toolboxes/LSSensorViewer/macros/LSSensorViewer.ini")
 
-(defun inferior-mbscilab-buffer ()
+(cl-defun inferior-mbscilab-buffer ()
   "TODO scilab here and scilab there. Make this a variable with a suitable name!"
   (get-buffer "*scilab*"))
 
-(defun mbscilab-show-process-buffer ()
+(cl-defun mbscilab-show-process-buffer ()
   "Make sure that `inferior-inferior-mbscilab-buffer' is displayed."
   (interactive)
   (aif (get-buffer (inferior-mbscilab-buffer))
     (display-buffer it '(display-buffer-use-some-window))
     (message "No buffer named %s" (inferior-mbscilab-buffer))))
 
-(defun scilab-process ()
+(cl-defun scilab-process ()
   (get-buffer-process (inferior-mbscilab-buffer)))
 
-(defun mbscilab-comint-clean-prompt (&optional string)
+(cl-defun mbscilab-comint-clean-prompt (&optional string)
   "TODO: write scilab-last-output.
 Strip trailing `^M' characters from the current output group.
 This function could be on `comint-output-filter-functions' or bound to a key."
@@ -75,14 +75,14 @@ This function could be on `comint-output-filter-functions' or bound to a key."
 (defconst +scilab-prompt+ "-\\([[:digit:]]*\\)->")
 (defconst +scilab-prompt-regexp+ (format "^%s" +scilab-prompt+))
 
-(defun mbscilab-comint-add-prompt (string)
+(cl-defun mbscilab-comint-add-prompt (string)
   (concat string +scilab-prompt+))
 
-(defun mbscilab-comint-prompt-substringp (string)
+(cl-defun mbscilab-comint-prompt-substringp (string)
   (and string (string-match +scilab-prompt-regexp+ string)))
 ;;(mbscilab-comint-prompt-substringp +scilab-prompt+)
 
-(defun mbscilab-comint-show-result (&optional string)
+(cl-defun mbscilab-comint-show-result (&optional string)
   "Prints a `message' with the result of the last scilab evaluation.
 Also, strips STRING from any ^M's
 TODO: better name?"
@@ -100,7 +100,7 @@ TODO: better name?"
   "An extension of comint mode
 \\{scilab-comint-mode-map\\}")
 
-(defun scilab-comint-mode-set-filter-functions ()
+(cl-defun scilab-comint-mode-set-filter-functions ()
   (setq-local comint-output-filter-functions
 	      '(scilab-output-garbage-filter
 		mbscilab-comint-clean-prompt
@@ -110,7 +110,7 @@ TODO: better name?"
 		scilab-debug-status
 		mbscilab-comint-show-result)))
 
-(defun scilab-comint-mode-set-locals ()
+(cl-defun scilab-comint-mode-set-locals ()
   (scilab-comint-mode-set-filter-functions)
   (setq-local comint-move-point-for-output t)
   (setq-local comint-prompt-regexp "-[1-100]?-> *")
@@ -118,14 +118,14 @@ TODO: better name?"
 (add-hook (derived-mode-hook-name 'scilab-comint-mode) #'scilab-comint-mode-set-locals)
 
 ;;; Eval methods
-(defun mbscilab-eval-raw (expression &optional wait-for-result-p)
+(cl-defun mbscilab-eval-raw (expression &optional wait-for-result-p)
   (message "About to send scilab expression: %s" expression)
   (comint-simple-send
    (scilab-process)
    (format "disp('TEPPEABO-START');%s\ndisp('TEPPEABO-END');" expression))
   (when wait-for-result-p
     (let ((*scilab-answer* nil))
-      (loop with ms-interval = 10
+      (cl-loop with ms-interval = 10
 	    for ms below 1000 by ms-interval
 	    if *scilab-answer* return (let ((res (copy-sequence *scilab-answer*)))
 					(setf *scilab-answer* nil)
@@ -134,13 +134,13 @@ TODO: better name?"
 	    do (sleep-for 0 10)))))
 ;;(let ((*scilab-display-answer* t)) (mbscilab-eval-raw "[r c] = where()" t))
 
-(defun mbscilab-eval (expression &optional wait-for-result-p)
+(cl-defun mbscilab-eval (expression &optional wait-for-result-p)
   (scilab-refresh-all-breakpoints)
   (let ((*scilab-display-answer* (not wait-for-result-p)))
     (mbscilab-eval-raw expression wait-for-result-p)))
 ;;(mbscilab-eval "2+2" t)
 
-(defun my-cygpath (path)
+(cl-defun my-cygpath (path)
   (if (eql (emacs-os) :linux)
     path
     (format "C:\\cygwin64%s" (replace-regexp-in-string "/" "\\\\" path))))
@@ -154,7 +154,7 @@ TODO: better name?"
 (defvar *scilab-eval-history* nil)
 ;;(nilf *scilab-eval-history*)
 
-(defun eval-scilab-expression ()
+(cl-defun eval-scilab-expression ()
   "Interactive evaluation of SciLab expression."
   (interactive)
   (let* ((default (first *scilab-eval-history*))
@@ -193,7 +193,7 @@ The rules for expression extraction depends on point context. Examples:
 	      (if (member s1 '("if" "elseif" "for"))         ; if|elseif|for !(expr)
 		s2 (concat s1 s2)))))))))
 
-(defun mbscilab-eval-sexp (prefix)
+(cl-defun mbscilab-eval-sexp (prefix)
   (interactive "P")
   (let ((expression (scilab-expression-at-point)))
     (message "Evaluating SciLab expression '%s' ..." expression)
@@ -201,16 +201,16 @@ The rules for expression extraction depends on point context. Examples:
       (scilab-step-into (scilab-function-at-line expression))
       (mbscilab-eval expression))))
 
-(defun mbscilab-eval-defun ()
+(cl-defun mbscilab-eval-defun ()
   (interactive)
   (let ((env (scilab-fn-info)))
     (mbscilab-eval (apply #'buffer-substring-no-properties (getf env :region)))))
 
-(defun mbscilab-eval-region (beg end)
+(cl-defun mbscilab-eval-region (beg end)
   (interactive "r")
   (mbscilab-eval (buffer-substring-no-properties beg end)))
 
-(defun mbscilab-eval-buffer ()
+(cl-defun mbscilab-eval-buffer ()
   (interactive "")
   (aif (buffer-file-name (current-buffer))
     (mbscilab-exec it)
@@ -218,12 +218,12 @@ The rules for expression extraction depends on point context. Examples:
 
 (defconst +scilab-tags-path+ "~/.SCILABTAGS")
 
-(defun scilab-tags-buffer ()
+(cl-defun scilab-tags-buffer ()
   (or (get-buffer (file-name-nondirectory +scilab-tags-path+))
       (find-file-noselect +scilab-tags-path+)))
 ;;(scilab-tags-buffer)
 
-(defun mbscilab-delete-autosaved-files ()
+(cl-defun mbscilab-delete-autosaved-files ()
   "Locates and deletes any auto saved files for the current buffer.
 NOTE: This could method could be obsolete since line markings in
 debug mode no longer triggers the buffer's modified mark."
@@ -284,24 +284,24 @@ debug mode no longer triggers the buffer's modified mark."
      (setq-local ,place (cons ,newelt ,place))))
 
 
-(defun scilab-switch-to-repl ()
+(cl-defun scilab-switch-to-repl ()
   (interactive))
 
-(defun scilab-whereami ()
+(cl-defun scilab-whereami ()
   (interactive)
   (scilab-debug-stack))
 
-(defun scilab-insert-parentheses ()
+(cl-defun scilab-insert-parentheses ()
   (interactive)
   (insert-parentheses* 0 :ensure-space :none))
 
-(defun scilab-beginning-of-defun-p ()
+(cl-defun scilab-beginning-of-defun-p ()
   (let ((point (point)))
     (save-excursion
       (scilab-beginning-of-defun)
       (= point (point)))))
 
-(defun mbscilab-beginning-of-defun ()
+(cl-defun mbscilab-beginning-of-defun ()
   "Move backward to the beginning of a defun.
 Unfortunately, this had to be written, since
 scilab-beginning-of-defun do not move point if point is already
@@ -311,7 +311,7 @@ at the beginning of a defun."
     (scilab-beginning-of-prev-defun)
     (scilab-beginning-of-defun)))
 
-(defun scilab-mark-function ()
+(cl-defun scilab-mark-function ()
   (interactive)
   (scilab-end-of-defun)
   (forward-line 1)

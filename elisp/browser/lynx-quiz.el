@@ -5,15 +5,15 @@
 (defvar *lynx-save-quiz-buffer-after-nth-question* 5 
   "Auto saves after this many appended questions to default quiz buffer")
 
-(defun lynx-insert-region-in-quiz-outline (beg end)
+(cl-defun lynx-insert-region-in-quiz-outline (beg end)
   (interactive "r")
   (lynx-insert-region-in-quiz-buffer beg end (quiz-get-buffer)))
 
-(defun lynx-insert-region-in-quiz-scratch (beg end)
+(cl-defun lynx-insert-region-in-quiz-scratch (beg end)
   (interactive "r")
   (lynx-insert-region-in-quiz-buffer beg end (quiz-get-buffer *quiz-scratch-buffername*)))
 
-(defun lynx-insert-region-in-quiz-buffer (beg end quiz-buffer)
+(cl-defun lynx-insert-region-in-quiz-buffer (beg end quiz-buffer)
   "Insert region as the text in a quiz question. If a prefix argument
 N is given, the function saves the quiz buffer after each Nth question
 generated. If N is negative, if never saves buffer. If prefix argument

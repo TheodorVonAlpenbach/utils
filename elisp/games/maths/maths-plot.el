@@ -5,7 +5,7 @@ o create a temporary .dat file for the points
 * open the, say, pdf file
 "
 
-(defun gnuplot-ratings-user (user &optional (time-unit :hour))
+(cl-defun gnuplot-ratings-user (user &optional (time-unit :hour))
   "RATINGS is a list of points. Each point is pair (DTTM RATING)"
   (maths-ratings-user user))
 
@@ -13,12 +13,12 @@ o create a temporary .dat file for the points
   "RATINGS is a list of points. Each point is pair (DTTM RATING)"
   (let ((temp-gp-file (format "%s.dat" path-prefix)))
     (with-temp-file temp-gp-file
-      (loop with now = (now)
+      (cl-loop with now = (now)
 	    for (rating iso-dttm) in (nreverse ratings)
 	    do (insert (format "%s %s\n" (time- iso-dttm now :unit time-unit) rating))))
     temp-gp-file))
 
-(defun maths-make-gnuplot-script (path-prefix)
+(cl-defun maths-make-gnuplot-script (path-prefix)
   (let ((gp-script-path (format "%s.gp" path-prefix))
 	(dat-path (format "%s.dat" path-prefix))
 	(pdf-path (format "%s.pdf" path-prefix)))
@@ -28,7 +28,7 @@ o create a temporary .dat file for the points
       (insert (format "plot \"%s\" with lines\n" dat-path)))
     gp-script-path))
 
-(defun gnuplot-plot-script (expression path-prefix)
+(cl-defun gnuplot-plot-script (expression path-prefix)
   (let ((gp-script-path (format "%s.gp" path-prefix))
 	(pdf-path (format "%s.pdf" path-prefix)))
     (with-temp-file gp-script-path

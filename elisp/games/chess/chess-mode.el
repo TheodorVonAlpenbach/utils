@@ -6,11 +6,11 @@
 
 (defconst chess-buffer-name "*chess*")
 
-(defun chess ()
+(cl-defun chess ()
   (switch-to-buffer chess-buffer-name)
   (chess-mode))
 
-(defun chess-mode () 
+(cl-defun chess-mode () 
   "Mode for playing chess. Creates a new chess-board 
 buffer with name `chess-buffer-name' if no such buffer is already existing.
 

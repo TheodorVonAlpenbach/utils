@@ -3,7 +3,7 @@
 (require 'mb-utils-strings)
 (require 'district)
 
-(defun ph-url (name &optional district)
+(cl-defun ph-url (name &optional district)
   "Returns correct url to lookup NAME in the phonemap corresponding
 to DISTRICT."
   (setq district (or district *district-current*))
@@ -12,19 +12,19 @@ to DISTRICT."
     (otherwise (error (format "Do not support phone district %s" district)))))
 ;;(ph-url "Ketil Næss Kristensen" nil)
 
-(defun* ph-lookup-base (name &optional (district *district-current*))
+(cl-defun ph-lookup-base (name &optional (district *district-current*))
   "Display location of NAME in the phonemap corresponding to DISTRICT."
   (let ((url (ph-url (string-encode name) district)))
     (browse-url url)))
 ;;(ph-lookup-base "Mats Bergstrøm")
 
-(defun ph-lookup (name)
+(cl-defun ph-lookup (name)
   "Display location of NAME in the phonemap corresponding to DISTRICT."
   (interactive "sName: ")
   (ph-lookup-base))
 ;;(ph-lookup "Mats Bergstrøm")
 
-(defun ph-search (arg)
+(cl-defun ph-search (arg)
   "Shows the sexp at point string in the intermap corresponding to
 DISTRICT. If optional prefix argument is a number, the address base is
 updated. If given and not a number, the user may change distict before

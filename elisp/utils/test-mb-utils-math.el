@@ -67,7 +67,7 @@
   (should (equal (next-smaller-multiple 5 5) 0))
   (should (equal (next-smaller-multiple 6 5) 5)))
 
-(defun test-random-weighted-element-1 (weighted-elements inverse)
+(cl-defun test-random-weighted-element-1 (weighted-elements inverse)
   (abs (modb
 	(vec-angle
 	 (if inverse

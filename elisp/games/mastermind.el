@@ -16,10 +16,10 @@
 	colors :key #'second))
 ;;(mapcar #'peg-char->color "rygcbw")
 
-(defun draw-list (sequence n &optional with-redrawal-p)
+(cl-defun draw-list (sequence n &optional with-redrawal-p)
   (if with-redrawal-p
-    (loop repeat n collect (elt sequence (random (length sequence))))
-    (loop with seq = (copy-sequence sequence)
+    (cl-loop repeat n collect (elt sequence (random (length sequence))))
+    (cl-loop with seq = (copy-sequence sequence)
 	  repeat n collect (draw-random seq))))
 ;;(sort (draw-list '(1 2 3 4 5 6 7 8 9) 9 t) #'<)
 
@@ -27,14 +27,14 @@
   (draw-list (copy-tree +colors+) n allow-same-color-p))
 ;;(draw-pegs 4 t)
 
-(defun count-whites (row fasit)
+(cl-defun count-whites (row fasit)
   "Assumes that the 'black' positions have been removed"
-  (loop for r in row
+  (cl-loop for r in row
 	for pos = (position r fasit :test #'equal)
 	if pos do (draw-nth pos fasit) and sum 1))
 ;;(count-whites '(2 1 3 4) '(1 5 1 2))
 
-(defun check-peg-row (row fasit)
+(cl-defun check-peg-row (row fasit)
   "Returns the number of black pegs and white pegs for a ROW in
 comparison with the current mastermind FASIT"
   (let ((n (length row)))
@@ -44,14 +44,14 @@ comparison with the current mastermind FASIT"
 	    (count-whites row* fasit*)))))
 ;;(check-peg-row '(2 1 3 4) '(0 5 1 3))
 
-(defun read-pegs ()
+(cl-defun read-pegs ()
   "Parses the current peg row."
   (save-excursion
     (move-beginning-of-line 1)
     (mapcar #'peg-char->color
-	    (loop repeat +number-of-pegs+ collect (symbol-name (read (current-buffer)))))))
+	    (cl-loop repeat +number-of-pegs+ collect (symbol-name (read (current-buffer)))))))
 
-(defun insert-judgement (judgement)
+(cl-defun insert-judgement (judgement)
   "JUDGEMENT is a list (blacks whites)"
   (move-beginning-of-line 1)
   (forward-sexp +number-of-pegs+)
@@ -59,10 +59,10 @@ comparison with the current mastermind FASIT"
   (insert (format "  %d %d" (first judgement) (second judgement))))
 ;;(insert-judgement '(1 1))
 
-(defun mm-solution-found-p (judgement)
+(cl-defun mm-solution-found-p (judgement)
   (= +number-of-pegs+ (first judgement)))
 
-(defun judge-peg-row ()
+(cl-defun judge-peg-row ()
   (interactive)
   (if *current-fasit*
     (let* ((row (read-pegs))
@@ -72,14 +72,14 @@ comparison with the current mastermind FASIT"
 	(insert "\n\nCongratulations, you solved the problem! Press 'n' for starting a new game, or 'q' to quit Mastermind.")))
     (message "Error! no current fasit is available")))
 
-(defun mastermind-buffer ()
+(cl-defun mastermind-buffer ()
   (get-buffer-create "*Mastermind*"))
 ;;(mastermind-buffer)
 
-(defun mm-clear-board ()
+(cl-defun mm-clear-board ()
   (kill-region (point-min) (point-max)))
 
-(defun mm-submit-row ()
+(cl-defun mm-submit-row ()
   (interactive)
   (judge-peg-row)
   (newline))
@@ -106,11 +106,11 @@ comparison with the current mastermind FASIT"
       (when show-instructions-p (mm-insert-instructions allow-same-color-p))
       (setf *current-fasit* (draw-pegs +number-of-pegs+ allow-same-color-p)))))
 
-(defun mm-quit ()
+(cl-defun mm-quit ()
   (interactive)
   (kill-buffer (mastermind-buffer)))
 
-(defun char->color (color-char)
+(cl-defun char->color (color-char)
   (first (find color-char +colors+ :key #'second)))
 ;;(char->color ?b)
 
@@ -128,14 +128,14 @@ comparison with the current mastermind FASIT"
 The function should be evaluated in a mode free from any
 disturbing font locks. It will not work properly in this
 Emacs-Lisp mode, for instance."
-  (loop for (color char) in colors do (insert-peg char color)))
+  (cl-loop for (color char) in colors do (insert-peg char color)))
 
-(defun rgb-complement (rgb-color)
+(cl-defun rgb-complement (rgb-color)
   "I thought this functionality was part of Emacs. But where is it. 
 This is a pure matematical interpretation, but it works for now."
   (mapcar (bind #'- #xffff 1) '(0 0 0)))
 
-(defun invert-color (color)
+(cl-defun invert-color (color)
   "A more convenient way to calculate the the hex value
 `color-complement' of a color in some format."
   (rgb-complement (sstring color)))
@@ -146,12 +146,12 @@ This is a pure matematical interpretation, but it works for now."
    "Master mind mode
 \\{mastermind-mode-map}")
 
-(defun mastermind-mode-map ()
+(cl-defun mastermind-mode-map ()
   (let ((map (make-keymap)))
     (suppress-keymap map)
-    (loop for (color char) in +colors+
+    (cl-loop for (color char) in +colors+
 	  do (define-key map (char-to-string char)
-	       (lexical-let ((color color) (char char))
+	       (let ((color color) (char char))
 		 #'(lambda ()
 		     (interactive)
 		     (insert-peg char color)))))
@@ -170,7 +170,7 @@ This is a pure matematical interpretation, but it works for now."
   "Keymap containing mastermind commands.")
 ;;(setf mastermind-mode-map (mastermind-mode-map))
 
-(defun mastermind ()
+(cl-defun mastermind ()
   "Start a new Mastermind game. If a prefix argument is given, then duplicate colors are allowed"
   (interactive)
   (switch-to-buffer (mastermind-buffer))

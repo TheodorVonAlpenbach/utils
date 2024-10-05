@@ -1,6 +1,6 @@
 (defvar *meta-compilation-buffer-name* "*Metafont-compilation*")
 
-(defun gftodvi (filename)
+(cl-defun gftodvi (filename)
   (let ((default-directory (file-name-directory filename)))
     ;; Iff gftodvi is successful call-process returns 0
     (when (zerop (call-process "gftodvi" nil "*GFtoDVI-compilation*" nil filename))
@@ -8,11 +8,11 @@
 ;;(gftodvi "~/projects/mf/alberti/A.600gf")
 
 
-(defun meta-compilation-buffer ()
+(cl-defun meta-compilation-buffer ()
   (get-buffer *meta-compilation-buffer-name*))
 ;;(display-buffer (meta-compilation-buffer))
 
-(defun meta-check-compilation ()
+(cl-defun meta-check-compilation ()
   (with-buffer (meta-compilation-buffer)
     (save-excursion
       (let ((end (eob)))
@@ -35,7 +35,7 @@
       (other-window 1))))
 ;;(meta-compile-file "~/projects/mf/alberti/A.mf")
 
-(defun meta-eval-buffer (&optional buffer)
+(cl-defun meta-eval-buffer (&optional buffer)
   (with-buffer (or buffer (current-buffer))
     (save-buffer)
     (aif (meta-compile-file (buffer-file-name) nil)

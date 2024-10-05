@@ -1,6 +1,6 @@
 (require 'ada-mysql)
 
-(defun json-from-id (json-id-descriptor &rest columns)
+(cl-defun json-from-id (json-id-descriptor &rest columns)
   (car (emacsql db
 	 (vector :select (column-selection columns)
 		 :from 'json

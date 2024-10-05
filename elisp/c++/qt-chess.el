@@ -1,4 +1,4 @@
-(defun prefix-p (prefix string)
+(cl-defun prefix-p (prefix string)
   "Returns T iff prefix is a prefix of string"
   (awhen (string-match prefix string)
     (zerop it)))
@@ -29,7 +29,7 @@
     one-liner-defun)
    (defun-open . 0)))
 
-(defun chess-hook ()
+(cl-defun chess-hook ()
   (when (chess-file-p (current-buffer))
     (setf c-default-style "qt-gnu")
     (setf c-electric-brace t)
@@ -39,7 +39,7 @@
     (linum-mode 1)
     (chess-kbd-maps)))
 
-(defun chess-pro-hook ()
+(cl-defun chess-pro-hook ()
   "Set local qt key map for .pro files (Makefile mode)"
   (when (chess-file-p)
     (chess-kbd-maps)))
@@ -48,14 +48,14 @@
 (add-hook 'makefile-mode-hook #'chess-hook)
 ;;(nilf c-mode-common-hook)
 
-(defun clean-chess-code-test-string-ops ()
+(cl-defun clean-chess-code-test-string-ops ()
   (append (split-string "=+-*/" "" t)
-	  (loop for op2 in '(= + - * / % & | ^ < > !)
+	  (cl-loop for op2 in '(= + - * / % & | ^ < > !)
 		  collect (format "%S=" op2))))
 ;;(clean-chess-code-test-string-ops)
 
-(defun clean-chess-code-test-string ()
-  (loop for op in (clean-chess-code-test-string-ops)
+(cl-defun clean-chess-code-test-string ()
+  (cl-loop for op in (clean-chess-code-test-string-ops)
 	append (list (format "a%sb" op)
 		     (format "a %sb" op)
 		     (format "a  %sb" op)
@@ -68,16 +68,16 @@
 ;;(clean-chess-code-test-string)
 ;;(insert (concat* (clean-chess-code-test-string) :in "\n"))
 
-(defun qt3-p ()
+(cl-defun qt3-p ()
   (string-match "sources/CHESS" (file-name-directory (buffer-file-name))))
 ;;(qt3-p)
 
-(defun qt-eob ()
+(cl-defun qt-eob ()
   "Same as `eob', but ignores the section after #endif declarations."
   (or (re-search-forward "^#endif" nil t)
       (point-max)))
 
-(defun clean-chess-code ()
+(cl-defun clean-chess-code ()
   "Note that - should be put at the end in the [] construct"
   (interactive)
   (let ((substitutions
@@ -120,7 +120,7 @@
 	   ("{[[:space:]]+}" "{}")
 	   ("\\_<ConfigKey\\_>" "configKey"))))
     (save-excursion
-      (loop for (re s) in (if (qt3-p)
+      (cl-loop for (re s) in (if (qt3-p)
 			    ;; remove substitutions tagged with v > 3
 			    ;; see for instance the latin1 substitution
 			    (remove-if #'(lambda (x)
@@ -139,14 +139,14 @@
       (indent-region (bob) (qt-eob)))))
 ;;(re-search-forward "^[\t]+" nil t)
 
-(pushnew "~/.CTAGS" tags-table-list)
+(cl-pushnew "~/.CTAGS" tags-table-list)
 
-(defun qt-help ()
+(cl-defun qt-help ()
   (interactive)
   (let ((tag (string-trim* (find-tag-default) "'")))
     (browse-url (format "http://doc.qt.io/qt-5/%s.html" (downcase tag)))))
 
-(defun chess-goto-error ()
+(cl-defun chess-goto-error ()
   (interactive)
   (destructuring-bind (fn linum)
       (string-match* "\\(/.*\\.\\(?:h\\|cpp\\)\\):\\([0-9]*\\): "
@@ -155,7 +155,7 @@
     (goto-line (string-to-number linum))))
 ;;(chess-goto-error)
 
-(defun chess-insert-error ()
+(cl-defun chess-insert-error ()
   (interactive)
   (just-one-blank-line 2)
   (insert "** ")
@@ -172,7 +172,7 @@
   (newline)
   (org-kill-line))
 
-(defun find-qt3-brother ()
+(cl-defun find-qt3-brother ()
   (interactive)
   (find-file-read-only
    (replace-regexp-in-string
@@ -182,17 +182,17 @@
      (buffer-file-name)))))
 ;;(find-qt3-brother)
 
-(defun qt-latin1 ()
+(cl-defun qt-latin1 ()
   "Append the common toLatin1().data() string to a QString variable."
   (interactive)
   (eow)
   (insert ".toLatin1().data()"))
 
-(defun yes-or-no-p* (string &rest objects)
+(cl-defun yes-or-no-p* (string &rest objects)
   "A variant of `yes-or-no-p' with `format' arguments."
   (yes-or-no-p (apply #'format string objects)))
 
-(defun replace-symbols (old new)
+(cl-defun replace-symbols (old new)
   "Replace all symbols OLD with NEW in current buffer"
   (let ((regexp (format "\\_<%s\\_>" old)))
     (save-excursion
@@ -200,7 +200,7 @@
       (while (re-search-forward regexp nil t)
 	(replace-match new t t)))))
 
-(defun chess-replace-symbols (old new query-p)
+(cl-defun chess-replace-symbols (old new query-p)
   "Replace all symbols OLD with NEW in current buffer"
   (let ((case-fold-search nil))
     (case query-p
@@ -237,7 +237,7 @@ before carrying out its actions."
       (chess-replace-symbols old new query-p)
       (smart-swap))))
 
-(defun qt-align-line (indent)
+(cl-defun qt-align-line (indent)
   (save-excursion
     (let ((a (bol)))
       (if (re-search-forward "=" (line-end-position) t 1)
@@ -267,18 +267,18 @@ Consider move this functionality to a makefile-mode extension module"
   (interactive)
   (if (string= (file-name-extension (buffer-file-name)) "pro")
     (let ((max-lhs
-	  (loop for l in (buffer-lines)
+	  (cl-loop for l in (buffer-lines)
 		for s = (string-match* "^[[:space:]]*\\([[:alpha:]_]*\\)"
 			  l :num 1)
 		maximize (length (sstring s)))))
      (save-excursion
        (bob)
-       (loop for i below (1- (length (buffer-lines)))
+       (cl-loop for i below (1- (length (buffer-lines)))
 	     do (qt-align-line (+ max-lhs min-space 2))
 	     do (forward-line 1))))
     (message "Current buffer is not a .pro file")))
 
-(defun swap-emacs-and-qtcreator-paths (emacs->qtcreator-p start end)
+(cl-defun swap-emacs-and-qtcreator-paths (emacs->qtcreator-p start end)
   (save-excursion
     (save-restriction
       (narrow-to-region start end)
@@ -288,17 +288,17 @@ Consider move this functionality to a makefile-mode extension module"
 	(while (re-search-forward from nil t)
 	  (replace-match to))))))
 
-(defun emacs->qtcreator-paths (start end)
+(cl-defun emacs->qtcreator-paths (start end)
   (interactive "r")
   (swap-emacs-and-qtcreator-paths t start end))
 
-(defun qtcreator->emacs-paths (start end)
+(cl-defun qtcreator->emacs-paths (start end)
   (interactive "r")
   (swap-emacs-and-qtcreator-paths nil start end))
 
 (defvar *qmake-program* "/home/mbe/Qt/5.11.2/gcc_64/bin/qmake")
 
-(defun qmake ()
+(cl-defun qmake ()
   (interactive)
   (let ((pro-files (directory-files "." nil "\\.pro$")))
     (if (= (length pro-files) 1)
@@ -308,25 +308,25 @@ Consider move this functionality to a makefile-mode extension module"
 
 (setf compilation-read-command nil)
 
-(defun chess-compile (&optional with-clean-p)
+(cl-defun chess-compile (&optional with-clean-p)
   (interactive)
   (when with-clean-p
     (call-process* "make" "clean"))
   (compilation-start "make -k"))
 
-(defun chess-grep ()
+(cl-defun chess-grep ()
   "Greps in this project and in the whole of chess"
   (interactive)
   (mb-grep-basic :directories "~/git/chess/lib*/src/" :types "{h,cpp}"))
 
-(defun chess-lookup-qtlog ()
+(cl-defun chess-lookup-qtlog ()
   (interactive)
   (awhen (thing-at-point 'symbol)
     (switch-to-buffer-other-window "qtportlog.org")
     (goto-char (point-min))
     (re-search-forward (substring-no-properties it))))
 
-(defun qt-for2while ()
+(cl-defun qt-for2while ()
   "Convert old-fashion while construct with iterators to a for loop."
   (interactive)
   (let ((var (symbol-at-point)))
@@ -338,10 +338,10 @@ Consider move this functionality to a makefile-mode extension module"
       (backward-kill-word 1)
       (insert "for "))))
 
-(defun qt-used-modules-1 (dir)
+(cl-defun qt-used-modules-1 (dir)
   "Return a list of used modules used in project under DIR"
   (cl-remove-duplicates
-      (cl-sort (loop for l in (string-lines
+      (cl-sort (cl-loop for l in (string-lines
 			       (string-trim
 				(call-process-shell-command*
 				 "gfind.sh" "-D" dir "^start_prog" "sh")))
@@ -350,18 +350,18 @@ Consider move this functionality to a makefile-mode extension module"
     :test #'string=))
 ;;(qt-used-modules-1 "/home/mbe/cvs/systems/17_001_Marshal_CandoII")
 
-(defun qt-used-modules ()
+(cl-defun qt-used-modules ()
   "For all projects, return a list of modules used"
   (mapcar #'qt-used-modules-1 (directory-files "~/cvs/systems" t "^[1][7-9]")))
 ;;(qt-used-modules)
 
-(defun qt-count-modules ()
+(cl-defun qt-count-modules ()
   "For all projects, return a list of modules used"
-  (loop for p in (partition (flatten (qt-used-modules)) :test #'equal)
+  (cl-loop for p in (partition (flatten (qt-used-modules)) :test #'equal)
 	collect (list (first p) (length p))))
 ;;(qt-count-modules)
 
-(defun qt-module-usage ()
+(cl-defun qt-module-usage ()
   "Return a string displaying CHESS module usage"
   (flet ((pr (x)
 	   (format "%-20s  %S%s" (first x) (second x) (or (third x) ""))))
@@ -369,7 +369,7 @@ Consider move this functionality to a makefile-mode extension module"
       :pre (pr '("Module" Projects "\n")) :in "\n" :key #'pr)))
 ;;(qt-module-usage)
 
-(defun chess-kbd-maps ()
+(cl-defun chess-kbd-maps ()
   (let ((qt-map (make-sparse-keymap))
 	(make-map (make-sparse-keymap))
 	(substitute-map (make-sparse-keymap))

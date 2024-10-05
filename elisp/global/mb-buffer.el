@@ -1,4 +1,4 @@
-(defun back-to-indentation-and-indent ()
+(cl-defun back-to-indentation-and-indent ()
   (interactive)
   (back-to-indentation)
   (just-one-space)
@@ -14,21 +14,21 @@
     (insert text)))
 ;;(insert-at-point "qwe" 10 "*scratch*")
 
-(defun buffer-replace-region (string beg end)
+(cl-defun buffer-replace-region (string beg end)
   "Replaces all content in region from point BEG to point END
 with STRING"
   (kill-region beg end)
   (insert-at-point string beg))
 
-(defun sort-chars (beg end &optional reverse)
+(cl-defun sort-chars (beg end &optional reverse)
   "Sort characters alphabetically in region."
   (interactive "r")
   (insert (cl-sort (delete-and-extract-region beg end) #'<)))
 
-(defun get-window-size (&optional side window)
+(cl-defun get-window-size (&optional side window)
   (if side (window-width window) (window-height window)))
 
-(defun set-window-size (arg &optional side)
+(cl-defun set-window-size (arg &optional side)
   (shrink-window (- (get-window-size side) arg) side))
 ;;(set-window-size 12 t)
 

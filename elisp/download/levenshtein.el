@@ -35,7 +35,7 @@
 ;;; Code:
 
 
-(defun levenshtein-distance (str1 str2)
+(cl-defun levenshtein-distance (str1 str2)
   "Return the edit distance between strings STR1 and STR2."
   (if (not (stringp str1))
       (error "Argument was not a string: %s" str1))

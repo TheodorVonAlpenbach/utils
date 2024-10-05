@@ -15,11 +15,11 @@
   (let ((draw-defun-name (intern (format "draw-%s" name)))
 	(typep-defun-name (intern (format "%s-p" name))))
     `(progn
-       (defun ,typep-defun-name (,(car (first args)) ,(car (second args)))
+       (cl-defun ,typep-defun-name (,(car (first args)) ,(car (second args)))
 	 (and (cl-typep ,(car (first args)) (list 'integer ,@(cdadr (first args))))
 	      (cl-typep ,(car (second args)) (list 'integer ,@(cdadr (second args))))))
 
-       (defun ,draw-defun-name ()
+       (cl-defun ,draw-defun-name ()
 	 (let* ((,(car (first args)) (random-integer ,@(cdadr (first args))))
 		(,(car (second args)) (random-integer ,@(cdadr (second args)))))
 	   (list ,(car (first args)) ,(car (second args))))))))
@@ -48,15 +48,15 @@
 	      :documentation documentation)
 	     *maths-categories*))))
 
-(defun draw-category (category-symbol)
+(cl-defun draw-category (category-symbol)
   (funcall (third (assoc category-symbol *maths-categories*))))
 ;;(draw-category 'ewq1)
 
-(defun category-p (category-symbol args)
+(cl-defun category-p (category-symbol args)
   (apply (second (assoc category-symbol *maths-categories*)) args))
 ;;(category-p 'ewq1 '(2 4))
 
-(defun category (args)
+(cl-defun category (args)
   (find-if (bind #'category-p args) *maths-categories* :key #'first))
 ;;(category '(9 0))
 

@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 ;;;; My evil adaptations
 ;;;; See also http://wikemacs.org/wiki/Evil
 
@@ -32,7 +33,7 @@
 (require 'evil-exchange)
 (evil-exchange-install)
 
-(defun set-mb-lisp-locals ()
+(cl-defun set-mb-lisp-locals ()
   "My local modifications of lisp modes."
   (evil-cleverparens-mode)
   (setf evil-symbol-word-search t)
@@ -54,7 +55,7 @@
       do (with-current-buffer b (revert-buffer nil t)))
 
 ;;; Keyboard shortcuts
-(defun evil-key-chord-define (state keymap key def &rest bindings)
+(cl-defun evil-key-chord-define (state keymap key def &rest bindings)
   "Bind KEY to DEF in evil STATE in keymap.
 STATE can take the same values as in `evil-define-key'."
   (let ((aux-maps
@@ -76,7 +77,7 @@ STATE can take the same values as in `evil-define-key'."
     (dolist (map aux-maps)
       (evil-set-keymap-prompt map (keymap-prompt map)))))
 
-(defun evil-move-past-close ()
+(cl-defun evil-move-past-close ()
   "Is made for insert state."
   (interactive)
   (up-list 1)
@@ -84,7 +85,7 @@ STATE can take the same values as in `evil-define-key'."
     (emacs-lisp-mode
      (insert " "))))
 
-(defun save-buffer-file ()
+(cl-defun save-buffer-file ()
   "Same as `save-buffer', but only if buffer-file exists."
   (interactive)
   (when (buffer-file-name)
@@ -93,7 +94,7 @@ STATE can take the same values as in `evil-define-key'."
 (add-hook 'evil-insert-state-exit-hook 'save-buffer-file)
 ;;(pop evil-insert-state-exit-hook)
 
-(defun mb-show-process-buffer ()
+(cl-defun mb-show-process-buffer ()
   (interactive)
   (cl-case major-mode
     (mbscilab-mode (mbscilab-show-process-buffer))
@@ -114,7 +115,7 @@ By default the last line."
     (let ((c (current-column)))
       (cl-loop while (> (current-column) column) do (backward-char)))))
 
-(defun ffap-read-file-or-url-no-prompt (prompt guess)
+(cl-defun ffap-read-file-or-url-no-prompt (prompt guess)
   "Same as `ffap-read-file-or-url' but without prompting."
   (or guess (setq guess default-directory))
   (let (dir)
@@ -126,24 +127,24 @@ By default the last line."
     (or (ffap-url-p guess)
 	(substitute-in-file-name guess))))
 
-(defun ffap-no-prompt (&optional filename)
+(cl-defun ffap-no-prompt (&optional filename)
   "Same as `ffap' but without prompting."
   (interactive)
   (advice-add #'ffap-read-file-or-url :override #'ffap-read-file-or-url-no-prompt)
   (ffap filename)
   (advice-remove #'ffap-read-file-or-url #'ffap-read-file-or-url-no-prompt))
 
-(defun ffap-no-prompt-read-only (&optional filename)
+(cl-defun ffap-no-prompt-read-only (&optional filename)
   "Same as `ffap-no-prompt' with read only mode."
   (interactive)
   (ffap-no-prompt filename)
   (setf buffer-read-only t))
 
-(defun ffap-previous ()
+(cl-defun ffap-previous ()
   (interactive)
   (ffap-next t))
 
-(defun transpose-split-orientation ()
+(cl-defun transpose-split-orientation ()
   "If there is a simple horizontal split, change to vertical, and vice versa.
 A simple split consists of two windows only."
   (interactive)
@@ -157,7 +158,7 @@ A simple split consists of two windows only."
 	(other-window 1)
 	(switch-to-buffer (other-buffer))))))
 
-(defun rotate-windows ()
+(cl-defun rotate-windows ()
   "Rotate windows."
   (interactive)
   (let ((cb (current-buffer)))
@@ -167,14 +168,14 @@ A simple split consists of two windows only."
 	  do (set-window-buffer w b))
     (select-window (get-buffer-window cb))))
 
-(defun swap-windows ()
+(cl-defun swap-windows ()
   "Rotate windows."
   (interactive)
   (rotate-windows)
   (other-window -1))
 ;;(swap-windows)
 
-(defun find-tag-no-prompt ()
+(cl-defun find-tag-no-prompt ()
   (interactive)
   (let* ((tagname (find-tag-default))
 	 (buf (find-tag-noselect tagname))
@@ -185,7 +186,7 @@ A simple split consists of two windows only."
     (goto-char pos)))
 ;;(find-tag-no-prompt)
 
-(defun find-tag-no-prompt-read-only ()
+(cl-defun find-tag-no-prompt-read-only ()
   (interactive)
   (let ((n (length (buffer-list))))
     (find-tag-no-prompt)
@@ -197,7 +198,7 @@ A simple split consists of two windows only."
 (require 'mb-utils-buffer)
 (require 'mb-metafont)
 
-(defun minor-mode-p (mode)
+(cl-defun minor-mode-p (mode)
   "Check if symbol MODE is an active minor-mode in the current buffer."
   (condition-case nil
       (and (symbolp mode)
@@ -206,13 +207,13 @@ A simple split consists of two windows only."
     (error nil)))
 ;;(mapcar #'minor-mode-p '(slime-mode undo-tree-mode))
 
-(defun slime-p ()
+(cl-defun slime-p ()
   "Return nil iff slime-mode is not active"
   (minor-mode-p 'slime-mode))
 ;;(slime-p)
 
 ;;; Eval machinery
-(defun mb-eval-string (string &rest args)
+(cl-defun mb-eval-string (string &rest args)
   "This is the core function of the mb-eval machinery. Most other
 eval function should end up here to secure a sort of conformity
 between different"
@@ -227,7 +228,7 @@ between different"
     (mbscilab-mode (mbscilab-eval string))))
 ;;(mb-eval-string "(+ 2 2)")
 
-(defun eval-form ()
+(cl-defun eval-form ()
   "This is special to Lisp languages only."
   (interactive)
   (cl-case major-mode
@@ -238,7 +239,7 @@ between different"
        (mb-eval-last-sexp)))
     (octave-mode (octave-send-block))))
 
-(defun mb-eval-last-sexp (&rest args)
+(cl-defun mb-eval-last-sexp (&rest args)
   "Eval the syntaks expression preceding point."
   (interactive)
   (cl-case major-mode
@@ -253,7 +254,7 @@ between different"
     (octave-mode (apply #'octave-eval-last-sexp args))
     (t (apply #'mb-eval-region (append (last-sexp-region) args)))))
 
-(defun eval-current-sexp ()
+(cl-defun eval-current-sexp ()
   (interactive)
   (cl-case major-mode
     ((emacs-lisp-mode mb-lisp-mode)
@@ -270,7 +271,7 @@ between different"
 	       (line-string) :num 1))))))
 ;;(+ (+ 111 2) 3)
 
-(defun eval-defun-test (&optional no-eval-p)
+(cl-defun eval-defun-test (&optional no-eval-p)
   (interactive)
   (unless no-eval-p (mb-eval-defun))
   (save-excursion
@@ -286,20 +287,20 @@ between different"
        (mb-eval-last-sexp)))))
 ;;(eval-defun-test)
 
-(defun gp-eval-buffer ()
+(cl-defun gp-eval-buffer ()
   (interactive)
   (gnuplot-run-buffer)
   (let ((filename (string-match* "set[\t ]+output[\t ]+['\"]\\([^'\"]*\\)"
 		    (buffer-string-no-properties) :num 1)))
     (find-file-other-window filename)))
 
-(defun strip-ssh (filename)
+(cl-defun strip-ssh (filename)
   "Strip the ssh prefix of filename"
   (or (string-match* "/ssh:[^:]*:\\(.*\\)" filename :num 1)
       filename))
 ;;(strip-ssh "/ssh:pf:/home/mats_progfab_no/git/problem-server/")
 
-(defun mb-eval-buffer (&optional args)
+(cl-defun mb-eval-buffer (&optional args)
   (interactive)
   (cl-case major-mode
     (emacs-lisp-mode (apply #'eval-buffer args))
@@ -325,7 +326,7 @@ between different"
     (python-mode (apply #'python-shell-send-region (mb-python-defun-region)))
     (otherwise (mb-eval-region (bod*) (eod*) t))))
 
-(defun mb-eval-region (start end &optional printflag read-function)
+(cl-defun mb-eval-region (start end &optional printflag read-function)
   (interactive "r")
   (cl-case major-mode
     (emacs-lisp-mode (eval-region start end printflag read-function))
@@ -339,26 +340,26 @@ between different"
 	     (buffer-substring-no-properties start end)
 	     printflag)))))
 
-(defun mb-eval-region-from-point (&optional printflag read-function)
+(cl-defun mb-eval-region-from-point (&optional printflag read-function)
   "Evalutates content from POINT to the end of the buffer."
   (interactive "r")
   (mb-eval-region (bol*) (point-max) printflag read-function))
 
-(defun mb-eval-region-to-point (&optional printflag read-function)
+(cl-defun mb-eval-region-to-point (&optional printflag read-function)
   "Evalutates content from the end of the buffer to POINT."
   (interactive "r")
   (mb-eval-region (point-min) (eol*) printflag read-function))
 
-(defun mb-compile-buffer ()
+(cl-defun mb-compile-buffer ()
   (interactive)
   (cl-case major-mode
     (octave-mode (octave-source-buffer))))
 
-(defun mb-normal-state-init ()
+(cl-defun mb-normal-state-init ()
   (key-chord-mode 1))
 ;;(add-hook 'evil-normal-state-entry-hook 'mb-normal-state-init)
 
-(defun quailify-key-chord-input-method (result)
+(cl-defun quailify-key-chord-input-method (result)
   "Modify the RESULT of `key-chord-input-method'.
 If RESULT is a key-chord, i.e. it is a list on the form
 \(KEYCHORD CHAR1 CHAR2 ...\), RESULT is returned unmodified. If
@@ -382,12 +383,12 @@ mentioned\) RESULT is returned unmodified."
       (quail-input-method (first result))
       (error "Unexpected output from KEY-CHORD-INPUT-METHOD: %S" result))))
 
-(defun mb-key-chord-advice (x)
+(cl-defun mb-key-chord-advice (x)
   (setq input-method-function 'key-chord-input-method))
 ;; activate-input-method overrides input-method-function, so therfore:
 (advice-add #'activate-input-method :after #'mb-key-chord-advice)
 
-(defun mb-insert-state-init ()
+(cl-defun mb-insert-state-init ()
   ;;(key-chord-mode 1)
   (when (member (buffer-name) '("arbeidslog" "log.org"))
     (activate-input-method 'norwegian-keyboard))
@@ -395,11 +396,11 @@ mentioned\) RESULT is returned unmodified."
 	      :filter-return #'quailify-key-chord-input-method))
 (add-hook 'evil-insert-state-entry-hook #'mb-insert-state-init)
 
-(defun mb-insert-state-cleanup ()
+(cl-defun mb-insert-state-cleanup ()
   (advice-remove #'key-chord-input-method #'quailify-key-chord-input-method))
 (add-hook 'evil-insert-state-exit-hook #'mb-insert-state-cleanup)
 
-(lexical-let ((default-color (cons (face-background 'mode-line)
+(let ((default-color (cons (face-background 'mode-line)
 				   (face-foreground 'mode-line))))
   (add-hook 'post-command-hook
 	    (lambda ()
@@ -429,7 +430,7 @@ mentioned\) RESULT is returned unmodified."
                               (wdired-mode . normal))
       do (evil-set-initial-state mode state))
 
-(defun alf/key-chord-undefine (keys)
+(cl-defun alf/key-chord-undefine (keys)
   "Undefine the key chord identified by KEYS.
 This should be done by key-chord-unset-global, however that
 does not work for me."
@@ -507,7 +508,7 @@ By default the last line."
     (evil-goto-column c)))
 (define-key evil-normal-state-map "gG" 'evil-goto-line-preserve-column)
 
-(defun print-last-pdf-in-Messages ()
+(cl-defun print-last-pdf-in-Messages ()
   (interactive)
   (with-buffer "*Messages*"
     (save-excursion
@@ -536,14 +537,14 @@ By default the last line."
 (cl-defun mb-surround-region (region left n)
   (mb-surround-region-1 region left (mb-surround-lookup-right left) n))
 
-(defun mb-surround-word (left n)
+(cl-defun mb-surround-word (left n)
   (mb-surround-region (cons (bow*) (eow* n)) left 1))
 
-(defun mb-surround-symbol (left n)
+(cl-defun mb-surround-symbol (left n)
   (message "%S" (list (point) (bos*) (eos*)))
   (mb-surround-region (list (bos*) (eos* n)) left 1))
 
-(defun mb-surround (left n)
+(cl-defun mb-surround (left n)
   (if (use-region-p)
     (mb-surround-region (region) left n)
     ;; (mb-surround-word left n)
@@ -551,7 +552,7 @@ By default the last line."
 
 ;; Undo surround: strictly assume surround is 1 char wide on both
 ;; sides
-(defun mb-undo-surround (n)
+(cl-defun mb-undo-surround (n)
   (if (use-region-p)
     (error "Undo surround region not implemented!")
     (save-excursion
@@ -560,7 +561,7 @@ By default the last line."
       (eow)
       (delete-char n))))
 
-(defun evil-increment-rectangle ()
+(cl-defun evil-increment-rectangle ()
   (interactive)
   (let ((p (point))
 	(m (mark)))
@@ -568,7 +569,7 @@ By default the last line."
 	  (e (1- (max p m))))
       (message "%d %d" b e)
       (evil-apply-on-block
-       (lexical-let (last)
+       (let (last)
 	 #'(lambda (beg end)
 	     (if last
 	       (let ((s (number-to-string (cl-incf last))))

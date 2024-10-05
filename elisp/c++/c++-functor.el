@@ -1,4 +1,4 @@
-(defun c++-insert-generator (name rett memt memn)
+(cl-defun c++-insert-generator (name rett memt memn)
   "Inserts the definition of a generator \(class\) NAME. RETT denotes
 the the function return type, MEMT the optional member type, MEMN the
 optional member name. If MEMT is given, a constructor signature with
@@ -33,7 +33,7 @@ smember name (first letter of type): ")
   name)
 ;;(c++-insert-generator "foo" "int" "int" "i")
 
-(defun c++-insert-unary-function (class argt argn rett memt memn)
+(cl-defun c++-insert-unary-function (class argt argn rett memt memn)
 "Inserts the class definition of unary_function object at point. CLASS
 denotes the class name, ARGT the function argument template type, ARGN
 the function argument template name, RETT the function return type,

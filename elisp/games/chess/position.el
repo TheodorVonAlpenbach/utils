@@ -1,21 +1,21 @@
 (provide 'square)
 (provide 'chess-square)
 
-(defstruct (chess-piece
+(cl-defstruct (chess-piece
 	    (:constructor nil)
 	    (:constructor make-chess-piece (type side snumber)))
   (type :read-only t)
   (side :read-only t)
   snumber)
 
-(defun new-chess-piece (piece-description side)
+(cl-defun new-chess-piece (piece-description side)
  (if (symbolp piece-description)
    (new-chess-piece (symbol-name piece-description) side)
    (destructuring-bind (type snumber) (parse-chess-move piece-description)
      (make-chess-piece type side snumber))))
 ;;(new-chess-piece 'Nb1 'white)
 
-(defun chess-piece-char (piece)
+(cl-defun chess-piece-char (piece)
   (let ((char (case (chess-piece-type piece)
 		('king ?K)
 		('queen ?Q)
@@ -26,7 +26,7 @@
     (if (eq (chess-piece-side piece) 'white) char (downcase char))))
 ;;(char-to-string (chess-piece-char (new-chess-piece 'Nb1 'white)))
 
-(defun parse-chess-move (string)
+(cl-defun parse-chess-move (string)
   (if (= (length string) 2)
     (list 'pawn (snumber string))
     (list (case (char string 0)
@@ -34,11 +34,11 @@
 	  (snumber (substring string 1)))))
 ;;(parse-chess-move "Nb1")
 
-(defun copy-pieces (pieces)
+(cl-defun copy-pieces (pieces)
   (mapcar #'copy-chess-piece pieces))
 ;;(copy-pieces white-pieces)
 
-(defun make-pieces (piece-descriptions side)
+(cl-defun make-pieces (piece-descriptions side)
   (mapcar (bind #'new-chess-piece side) piece-descriptions))
 ;; (let ((ps (copy-pieces white-pieces)))
 ;;   (setf (chess-piece-snumber (first ps)) 'qwe))
@@ -50,13 +50,13 @@
 (defconst all-pieces (append white-pieces black-pieces))
 
 ;;simple conversions
-(defun piece-to-bposition (piece) (bp-from-snumber (chess-piece-snumber piece)))
-(defun pieces-to-snumbers (pieces) (mapcar #'chess-piece-snumber pieces))
-(defun pieces-to-bposition (pieces) (bp-from-snumbers (pieces-to-snumbers pieces)))
+(cl-defun piece-to-bposition (piece) (bp-from-snumber (chess-piece-snumber piece)))
+(cl-defun pieces-to-snumbers (pieces) (mapcar #'chess-piece-snumber pieces))
+(cl-defun pieces-to-bposition (pieces) (bp-from-snumbers (pieces-to-snumbers pieces)))
 
-(defun pieces-to-board-matrix (pieces)
+(cl-defun pieces-to-board-matrix (pieces)
   (let ((bm (make-board-matrix)))
-    (loop for p in pieces
+    (cl-loop for p in pieces
 	  do (bm-setf bm 
 		      (square (chess-piece-snumber p))
 		      (chess-piece-char p)))

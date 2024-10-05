@@ -1,35 +1,35 @@
 ;;; Generators
-(defun a-b (a &optional b inc) (number-sequence a b inc))
-(defun 0-n (n &optional inc) (a-b 0 (1- n) inc))
-(defun 1-n (n &optional inc) (a-b 1 n inc))
-(defun b-a (b &optional a inc) (nreverse (a-b (or a b) b inc)))
-(defun n-0 (n &optional inc) (nreverse (0-n n inc)))
+(cl-defun a-b (a &optional b inc) (number-sequence a b inc))
+(cl-defun 0-n (n &optional inc) (a-b 0 (1- n) inc))
+(cl-defun 1-n (n &optional inc) (a-b 1 n inc))
+(cl-defun b-a (b &optional a inc) (nreverse (a-b (or a b) b inc)))
+(cl-defun n-0 (n &optional inc) (nreverse (0-n n inc)))
 ;;(1-n 10 2) ==> (1 2 3 4 5 6 7 8 9 10)
 ;;(a-b 0 10)
 ;;(b-a 10 8 2)
 
-(defun transpose (lists)
+(cl-defun transpose (lists)
   (when lists (apply #'cl-mapcar #'list lists)))
 
-(defun nrcons (list x)
+(cl-defun nrcons (list x)
   (nconc list (list x)))
 ;;(nrcons '() 1)
 
-(defun rcons (list x)
+(cl-defun rcons (list x)
   (append list (list x)))
 ;;(rcons '() 1)
 
-(defun nth* (n list)
+(cl-defun nth* (n list)
   "Same as NTH but accepts negative indexes: -1 means last
 element, -2 second last and so on."
   (nth (mod n (length list)) list))
 ;;(mapcar* (bind #'nth* (0-n 4)) (a-b -5 5))
 
-(defun head (n list)
+(cl-defun head (n list)
   (butlast list (- (length list) n)))
 ;;(head 2 '(a b c))
 
-(defun l-explicit*< (x y list &rest cl-keys)
+(cl-defun l-explicit*< (x y list &rest cl-keys)
   "Returns a binary predicate (less-than-type) that evalutes to t
 iff first argument comes before second argument in LIST. If not both arguments are in list, 'NA is returned. Else, it returns nil"
   (let* ((fkey (or (popf cl-keys :fkey) #'identity))
@@ -40,25 +40,25 @@ iff first argument comes before second argument in LIST. If not both arguments a
       'na)))
 ;;(l-explicit*< '(c) '(d) '(c a b c d) :fkey #'first)
 
-(defun l-explicit< (x y list &rest cl-keys)
+(cl-defun l-explicit< (x y list &rest cl-keys)
   "Same as l-explicit*<, but returns nil instead of 'na"
   (awhen (apply #'l-explicit*< x y list cl-keys)
     (neq it 'na)))
 ;;(l-explicit< 'c 'e '(c a b c d))
 
-(defun explicit*< (list &rest cl-keys)
+(cl-defun explicit*< (list &rest cl-keys)
   "Returns a binary predicate similar to `l-explicit*<', but binding the list argument.
 TODO: when bind* is finished this method is obsolete (or becomes a simple one-liner):
 \\(bind* #'l-explicit*< list 2)"
-  (lexical-let ((list* list)
+  (let ((list* list)
 		(cl-keys* cl-keys))
     (lambda (x y)
       (l-explicit*< x y list* cl-keys*))))
 ;;(funcall (explicit*< '(c a b c d)) 'c 'e)
 
-(defun explicit< (list &rest cl-keys)
+(cl-defun explicit< (list &rest cl-keys)
   "Is to `l-explicit<' what `explicit*<' is to `l-explicit*<'."
-  (lexical-let ((list* list)
+  (let ((list* list)
 		(cl-keys* cl-keys))
     (lambda (x y)
       (let ((x-pos (apply #'position x list* cl-keys*))
@@ -124,16 +124,16 @@ ELEMENTS are exactly the elements in LIST that evaluates to K."
 	collect (list k v)))
 ;;(equivalence-class-with-key '((a) (b) (c) (a) (b) (a) (d)) :key #'car)
 
-(defun listify-atoms (list-or-atoms)
+(cl-defun listify-atoms (list-or-atoms)
   (let* ((list (find-if #'listp list-or-atoms))
 	 (n (length list)))
     (cl-loop for x in list-or-atoms collect (if (listp x) x (make-list n x)))))
 ;;(listify-atoms '(a (1 2 3) (d f)))
 
-(defun nzip (&rest lists) 
+(cl-defun nzip (&rest lists) 
   (apply #'nconc (transpose lists)))
 
-(defun zip (&rest lists) 
+(cl-defun zip (&rest lists) 
   (apply #'nzip (listify-atoms (copy-tree lists))))
 ;;(zip '(0 2 4) 1)
 ;;(butlast (zip '(0 2 4) '(1 3 3)))
@@ -154,13 +154,13 @@ TODO: something is wrong, see test below."
 (cl-defun unzip (list &optional (n 2)) (nunzip (copy-list list) n))
 ;;(unzip (0-n 10) 3)
 
-(defun repeat-elements (x &optional n)
+(cl-defun repeat-elements (x &optional n)
   (awhen (make-list (or n 2) x)
     (apply #'zip it)))
 ;;(repeat-elements (0-n 3) 2)
 
 (require 'function-signature)
-(defun infix-list (list infix &optional infix-is-function-p) 
+(cl-defun infix-list (list infix &optional infix-is-function-p) 
   "Zip list with INFIX-es.
 '(a b c) => '(a INFIX b INFIX c).
 
@@ -205,7 +205,7 @@ generalized version. If flank-p is non-nil the result is
       res)))
 ;;(pairs '(1 2 3 4 5) :key #'1+ :flank-p t)
 
-(defun tuples (list n)
+(cl-defun tuples (list n)
   "Returns the elements in list as consecutive tuples.
 I.e. for list \(x11 x2 x3 x4 ... xn-2 xn-1 xn\), with N = 3, 
 it returns the list \((x1 x2 x3) (x2 x3 x4) ... (xn-2 xn-1 xn)\)
@@ -215,14 +215,14 @@ TODO: implement a mapping key, see `pairs' (when needed)"
 	collect (butlast h i)))
 ;;(tuples '(a b c d e) 3)
 
-(defun power-set-indices (n)
+(cl-defun power-set-indices (n)
   "Return the indices corresponding to a power set for at set with N elements"
   (if (zerop n)
     '(())
     (let ((psi-1 (power-set-indices (1- n))))
       (append psi-1 (mapcar (bind #'rcons (1- n)) psi-1)))))
 
-(defun power-set-indices (n)
+(cl-defun power-set-indices (n)
   "Return the indices corresponding to a power set for at set with N elements"
   (if (zerop n)
     '(())
@@ -231,7 +231,7 @@ TODO: implement a mapping key, see `pairs' (when needed)"
 ;;(power-set-indices 3)
 ;;(length (power-set-indices 4))
 
-(defun power-set (list)
+(cl-defun power-set (list)
   "Return the set of all subsets of list taken as a set."
   (maptree (bind #'nth list) (power-set-indices (length list))))
 ;;(power-set '(a b c))
@@ -249,7 +249,7 @@ has length shorter than N, this last element is discarded."
 ;;(cut (0-n 5) 3 nil)
 ;;(cut '(1 2 3 4 5) 2 t)
 
-(defun cut-list-if (predicate list inclusion &rest args)
+(cl-defun cut-list-if (predicate list inclusion &rest args)
   "Cut LIST in sublists where PREDICATE is true.
 If INCLUSION is not nil, then the element in LIST matching
 PREDICATE is included in the result."
@@ -263,7 +263,7 @@ PREDICATE is included in the result."
 ;;(cut-list-if #'primep (0-n 10) t)
 (cl-indent 'cut-list-if 'prog1)
 
-(defun relations (list &optional with-identity ordered)
+(cl-defun relations (list &optional with-identity ordered)
   "Returns a list containing all possible binary relations of the
 elements in LIST = (a b c ...). Iff WITH-IDENTITY is non-nil the
 identity relations (a a), (b b), (c c) is included in the result.
@@ -310,7 +310,7 @@ where a comes before b in LIST."
     (combine-1 lists)))
 ;;(combine '((0 1 2) (("3" 1) ("7" 1))))
 
-(defun test-arguments (fn args)
+(cl-defun test-arguments (fn args)
   (combine args :key #'(lambda (&rest args)
 			 (format "%S: %S" args (apply fn args)))))
 ;;(test-arguments #'concat '(("a" "b") ("c") ("e" "f")))
@@ -377,7 +377,7 @@ Algorithm i O(n^2)."
 ;;(repetitions '(a b a b a))
 ;;(cl-loop for i below 10 do (repetitions '(a b a b a)))
 
-(defun x-repetitions (list)
+(cl-defun x-repetitions (list)
   "A Q&D version of `repetitions'. Its algorith is far simpler in
 code, but is much slower (O(n^3)). Also, the result is not so
 informative."
@@ -391,7 +391,7 @@ informative."
 ;;(repetitions (0-n 500))
 
 ;;; List functions
-(defun swap-head (list predicate)
+(cl-defun swap-head (list predicate)
   "Swaps first element in LIST with the first element in that
 matches PREDICATE"
   (awhen (member-if predicate list)
@@ -444,12 +444,12 @@ Optional LENGTH defines length of substituted sublist."
   (setf (nthcdr n list) (nconc newlist (nthcdr (+ n length) list))))
 ;;(let ((qwe '(a b c d)) (ewq '(x y))) (list-substitute-list '(x y) 1 qwe 1) (list qwe ewq))
 
-(defun butlast* (list &optional n)
+(cl-defun butlast* (list &optional n)
   "Same as `butlast' but accepts negative argument, meaning counting from start."
   (butlast list (mod (or n 1) (length list))))
 ;;(butlast* '(a b c d e) -2)
 
-(defun nsplit-nth (n list)
+(cl-defun nsplit-nth (n list)
   "Returns Nth element in LIST and the remainder of LIST. Destructive.
 TODO: this looks like draw. Check out and clean up if necessary"
   (if (zerop n)
@@ -528,7 +528,7 @@ list is prefixed with ELTs, otherwise it is suffixed."
 	       lists (mapcar (bind #'- (minimum lengths #'>) 1) lengths))))
 ;;(pad-lists '((1) (1 1) (1 1 0)) :elt 'qwe :from-end nil)
 
-(defun vlist< (l1 l2)
+(cl-defun vlist< (l1 l2)
   "A simple, but much slower version of `version-list-<'. The
 functions is meant as an example of how to use pad-lists. Btw, it
 would be interesting to see why the running times are so extremely
@@ -537,7 +537,7 @@ different, see test cases below."
 ;;(time (cl-loop repeat 100000 do (vlist< '(1 2) '(1 1))))
 ;;(time (cl-loop repeat 100000 do (version-list-< '(1 2) '(1 1))))
 
-(defun ninsert-sorted-list (x list)
+(cl-defun ninsert-sorted-list (x list)
   (if list
     (if (< x (car list))
       (cons x list)
@@ -553,7 +553,7 @@ different, see test cases below."
 ;;(let ((l '())) (ninsert-sorted-list 1 l))
 
 ;;;; Sorted trees
-(defun insert-sorted-tree (x tree)
+(cl-defun insert-sorted-tree (x tree)
   (if tree
     (if (< x (first tree)) ;search left tree
       (if (second tree)
@@ -573,7 +573,7 @@ different, see test cases below."
     tree))
 ;;(test-insert-sorted-tree)
 
-(defun remove-minimum-element-sorted-tree (tree)
+(cl-defun remove-minimum-element-sorted-tree (tree)
   (if (second tree)
     (setf (second tree) (remove-minimum-element-sorted-tree (second tree)))
     (if (third tree)
@@ -599,7 +599,7 @@ different, see test cases below."
 ;;(sort-to-order '((0) (1) (2)) '(3 2 1 0) #'< #'first)
 
 
-(defun mapcol (function colpos table)
+(cl-defun mapcol (function colpos table)
   "Returns a copy of table, but where the column at COLPOS (only) is mapped by FUNCTION.
 The TABLE must be a tree, i.e. a list of lists."
   (mapcar #'(lambda (x) 
@@ -608,12 +608,12 @@ The TABLE must be a tree, i.e. a list of lists."
 		x*))
 	  table))
 
-(defun expand-repeat (list n)
+(cl-defun expand-repeat (list n)
   (cl-destructuring-bind (a b) (cl-floor n (length list))
     (append list (flatten (make-list a list)) (subseq list 0 b))))
 ;;(expand-repeat '(1 2 3 4) 6)
 
-(defun diffs-list (list)
+(cl-defun diffs-list (list)
   (cl-loop for (a b) in (pairs list) collect (- b a)))
 ;;(diffs-list '(1 2 4))
 
@@ -629,17 +629,17 @@ The TABLE must be a tree, i.e. a list of lists."
     (resize-list diffs n)))
 ;;(expand-list (list 1 2 4))
 
-(defun deltas-list (floats)
+(cl-defun deltas-list (floats)
   "Finds the mid-points between FLOATS and returns the interval
 consisting of each floats neighbouring mid-points."
   (pairs (cl-loop for (a b) in (pairs floats) collect (/ (- b a) 2.0)) :flank-p t))
 ;;(deltas-list '(1 3 4))
 
-(defun boundaries-1 (list)
+(cl-defun boundaries-1 (list)
   (cl-loop for (a b) in (pairs list) collect (/ (+ b a) 2)))
 ;;(boundaries-1 '(1.0 3.0 4.0))
 
-(defun boundaries (list &optional flank-p)
+(cl-defun boundaries (list &optional flank-p)
   (boundaries-1 (if flank-p
 		  (nflank (- (* 2 (car list)) (cadr list))
 			  list
@@ -647,7 +647,7 @@ consisting of each floats neighbouring mid-points."
 		  list)))
 ;;(boundaries (list -4.0 -3.0 -1.0) t)
 
-(defun randomize-intervals (pairs)
+(cl-defun randomize-intervals (pairs)
   (cl-loop for (a b) in pairs collect (random-float a b)))
 ;;(randomize-intervals (pairs (0-n 5)))
 
@@ -657,7 +657,7 @@ consisting of each floats neighbouring mid-points."
 	    ivs)))
 ;;(randomize-elements (vector -4.0 -3.0 -1.0))
 
-(defun group-consequtive-integers (integers &optional sorted-p)
+(cl-defun group-consequtive-integers (integers &optional sorted-p)
   "Group list of INTEGERS into lists of consequtive integers.
 E.g. '(1 2 3 6 7 8 11) ==> '((1 2 3) (6 7 8) (11)).
 
@@ -702,7 +702,7 @@ Keywords supported:  :test
 	if (funcall test x b) return a))
 ;;(swap 'a '((a b) (c d)))
 
-(defun position-unique (targets list)
+(cl-defun position-unique (targets list)
   "Return the TARGETS positions in LIST, without repeating index.
 If a target in TARGETS matches an element in list, this position
 cannot be used for later matches. For example

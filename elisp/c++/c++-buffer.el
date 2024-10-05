@@ -1,6 +1,6 @@
 ;;; This lib contains functions that handle invoking appropriate buffer
 
-(defun c++-swap-h-cpp-filename (filename)
+(cl-defun c++-swap-h-cpp-filename (filename)
   "Returns FILENAME with suffix swapped from .h to .cpp (or viceversa)
 If suffix is neither .h nor .cpp, function returns FILENAME unchanged."
   (if (string-match "\\.cpp$" filename)
@@ -48,7 +48,7 @@ read-minibuffer.") ;(setq *c++-std-tags* nil)
 			 (ostream istream istringstream ostringstream ios)
 			 (cout cin cerr endl flush))))
 
-(defun c++-std-ify-region (beg end)
+(cl-defun c++-std-ify-region (beg end)
   "Inserts `std::' before each std symbol, except when preceded by
 `::', `<' \(templates\). TODO: collect all tags in a list. Takes
 prefix argument, see `*c++-std-tags*'."

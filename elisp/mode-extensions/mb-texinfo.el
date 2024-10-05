@@ -6,7 +6,7 @@ If ARGUMENT is a string insert it in the pair of curly parentheses."
   (format "@%s{%s}" function-name argument))
 ;;(texinfo-atfiy "foo" "bar")
 
-(defun texinfo-insert-@ (code)
+(cl-defun texinfo-insert-@ (code)
   (if (use-region-p)
     (region-replace (format "@%s{%%s}" code))
     (if (symbol-at-point)
@@ -17,7 +17,7 @@ If ARGUMENT is a string insert it in the pair of curly parentheses."
 
 (defmacro texinfo-def-insert-@-fn (code)
   "Define an interactive function with only form (texinfo-insert-@ code)."
-  `(defun ,(intern (concat "texinfo-insert-@" code)) ()
+  `(cl-defun ,(intern (concat "texinfo-insert-@" code)) ()
      "Not documented."
      (interactive)
      (texinfo-insert-@ ,code)))
@@ -34,7 +34,7 @@ If ARGUMENT is a string insert it in the pair of curly parentheses."
 ;; (macroexpand `(progn ,@(cl-loop for code in '(var xref ref pxref)
 ;; 		  collect `(texinfo-def-insert-@-fn ,(sstring code)))))
 
-(defun mb-texinfo-ref-map ()
+(cl-defun mb-texinfo-ref-map ()
   (let ((map (make-sparse-keymap)))
     (define-key map "x" 'texinfo-insert-@xref)
     (define-key map "r" 'texinfo-insert-@ref)
@@ -42,7 +42,7 @@ If ARGUMENT is a string insert it in the pair of curly parentheses."
     (define-key map "u" 'texinfo-insert-@uref)
     map))
 
-(defun mb-texinfo-insert-map ()
+(cl-defun mb-texinfo-insert-map ()
   (let ((map (make-sparse-keymap)))
     (define-key map "c" 'texinfo-insert-@code)
     (define-key map "d" 'texinfo-insert-@dots)
@@ -67,7 +67,7 @@ If ARGUMENT is a string insert it in the pair of curly parentheses."
     (define-key map "x" 'texinfo-insert-@example)
     map))
 
-(defun mb-texinfo-snippet-map ()
+(cl-defun mb-texinfo-snippet-map ()
   (let ((map (make-sparse-keymap)))
     (define-key map "e" 'texinfo-insert-group/example-snippet)
     (define-key map "E" 'texinfo-insert-example-snippet)
@@ -75,7 +75,7 @@ If ARGUMENT is a string insert it in the pair of curly parentheses."
     (define-key map "i" 'texinfo-insert-newline)
     map))
 
-(defun mb-texinfo-map ()
+(cl-defun mb-texinfo-map ()
   (let ((map (make-sparse-keymap))
 	(update-map         (make-sparse-keymap))  ; u
 	(tex-map            (make-sparse-keymap))  ; t
@@ -138,17 +138,17 @@ If ARGUMENT is a string insert it in the pair of curly parentheses."
 
 (add-hook 'Texinfo-mode-hook 'mb-texinfo-map)
 
-(defun mb-texinfo-make-html ()
+(cl-defun mb-texinfo-make-html ()
   (interactive)
   (makeinfo-buffer)
   (call-process* "makeinfo" "--html" (buffer-file-name)))
 
-(defun mb-texinfo-install-html ()
+(cl-defun mb-texinfo-install-html ()
   (interactive)
   (call-process* "cp" "-r" "lsbin" "/ls/platinum/u1/mbe/html/"))
 
 ;;; Snippets
-(defun texinfo-insert-newline (&optional n no-trailing-space-p)
+(cl-defun texinfo-insert-newline (&optional n no-trailing-space-p)
   "Insert a texinfo commented newline at point"
   (interactive)
   (bol)
@@ -156,7 +156,7 @@ If ARGUMENT is a string insert it in the pair of curly parentheses."
 	   repeat (or n 1) do (insert s))
   (unless no-trailing-space-p (eol)))
 
-(defun texinfo-insert-env (env &optional no-space-p no-intraspace-p)
+(cl-defun texinfo-insert-env (env &optional no-space-p no-intraspace-p)
   "Insert an texinfo ENV enviroment snippet within a comment
 region surrounded by empty lines. If optional NO-SPACE-P is nil,
 then skip the surrounding empty lines. If optional
@@ -171,17 +171,17 @@ environment delimiter lines is skipped."
   (previous-line (+ 2 (if no-space-p 0 1)))
   (eol))
 
-(defun texinfo-insert-group-snippet (&optional no-space-p)
+(cl-defun texinfo-insert-group-snippet (&optional no-space-p)
   "Insert a group snippet within a comment region."
   (interactive)
   (texinfo-insert-env 'group no-space-p))
 
-(defun texinfo-insert-example-snippet (&optional no-space-p)
+(cl-defun texinfo-insert-example-snippet (&optional no-space-p)
   "Insert a example snippet within a comment region."
   (interactive)
   (texinfo-insert-env 'example no-space-p))
 
-(defun texinfo-insert-group/example-snippet (&optional no-space-p)
+(cl-defun texinfo-insert-group/example-snippet (&optional no-space-p)
   "Insert a group example snippet within a comment region."
   (interactive)
   (texinfo-insert-env 'group nil t)
@@ -189,7 +189,7 @@ environment delimiter lines is skipped."
   (kill-line 1)
   (texinfo-insert-env 'example t))
 
-(defun texinfo-goto-source ()
+(cl-defun texinfo-goto-source ()
   (interactive)
   (save-excursion
     (re-search-backward "@subsection")

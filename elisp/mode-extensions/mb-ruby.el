@@ -1,6 +1,6 @@
 (require 'ruby-mode)
 
-(defun mb-ruby-init ()
+(cl-defun mb-ruby-init ()
   (make-local-variable 'parens-require-spaces)
   (setf parens-require-spaces nil)
   (setf evil-symbol-word-search t)

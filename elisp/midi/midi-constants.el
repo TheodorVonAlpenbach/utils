@@ -1,36 +1,36 @@
-(defun mce-type-id (type)
+(cl-defun mce-type-id (type)
   (tmap-1-0 type midi-channel-events))
 ;;(mce-type-id 'note-off) ==> 8
 
-(defun mce-type (type-id)
+(cl-defun mce-type (type-id)
   (tmap-0-1 type-id midi-channel-events))
 ;;(mce-type 8) ==> note-off
 
-(defun midi-controller-type-id (type)
+(cl-defun midi-controller-type-id (type)
   (tmap-1-0 type controller-types))
 ;;(controller-type-id 'pan) ==> 10
 
-(defun midi-controller-type (type-id)
+(cl-defun midi-controller-type (type-id)
   (tmap-0-1 type-id controller-types))
 ;;(controller-type 10) ==> pan
 
-(defun mme-type-id (type)
+(cl-defun mme-type-id (type)
   (tmap-1-0 type midi-meta-events))
 ;;(mme-type-id 'cue-point) ==> 7
 
-(defun mme-type (type-id)
+(cl-defun mme-type (type-id)
   (tmap-0-1 type-id midi-meta-events))
 ;;(mme-type 9) ==> cue-point
 
-(defun midi-instrument-id (instrument-name)
+(cl-defun midi-instrument-id (instrument-name)
   (tmap-1-0 instrument-name midi-instruments))
 ;;(midi-instrument-id 'gunshot) ==> 128
 
-(defun midi-instrument-name (instrument-id)
+(cl-defun midi-instrument-name (instrument-id)
   (tmap-0-1 instrument-id midi-instruments))
 ;;(midi-instrument-name 128) ==> gunshot
 
-(defun midi-chrome-id (chrome)
+(cl-defun midi-chrome-id (chrome)
   (position chrome midi-chromees))
 ;;()
 

@@ -18,8 +18,8 @@
     (?e . 14)
     (?f . 15)))
 
-(defun hexl-char-to-int (char) "" (cdr (assoc char hex-to-int-list)))
-(defun hexl-int-to-char (int) "" (car (rassoc char hex-to-int-list)))
+(cl-defun hexl-char-to-int (char) "" (cdr (assoc char hex-to-int-list)))
+(cl-defun hexl-int-to-char (int) "" (car (rassoc char hex-to-int-list)))
 
 (defvar hexl-be-byte-map-list
   '((0 . 7) (1 . 6) (2 . 5) (3 . 4) (4 . 3) (5 . 2) (6 . 1) (7 . 0)))
@@ -27,27 +27,27 @@
 (defvar hexl-le-byte-map-list
   '((0 . 1) (1 . 0) (2 . 3) (3 . 2) (4 . 5) (5 . 4) (6 . 7) (7 . 6)))
 
-(defun hexl-ith-char-be (s i) "returns char I of S in BE"
+(cl-defun hexl-ith-char-be (s i) "returns char I of S in BE"
   (aref s (cdr (assoc i hexl-be-byte-map-list))))
 
-(defun hexl-ith-char-be (s i) "returns char I of S in LE"
+(cl-defun hexl-ith-char-be (s i) "returns char I of S in LE"
   (aref s (cdr (assoc i hexl-le-byte-map-list))))
 
-(defun 2* (number) "Return NUMBER * 2. Should become macro" (* 2 number))
-(defun 2+ (number) "Return NUMBER + 2. Should become macro" (+ 2 number))
+(cl-defun 2* (number) "Return NUMBER * 2. Should become macro" (* 2 number))
+(cl-defun 2+ (number) "Return NUMBER + 2. Should become macro" (+ 2 number))
 
-(defun hexl-to-int-byte (hex)
+(cl-defun hexl-to-int-byte (hex)
   "Returns HEX, which must be a string of two characters, as int."
   (+ (* 16 (hexl-char-to-int (aref hex 0)))
      (hexl-char-to-int (aref hex 1))))
 
-(defun hexl-split-to-bytes (s) "Splits abcd to '((ab) (bc))."
+(cl-defun hexl-split-to-bytes (s) "Splits abcd to '((ab) (bc))."
   (let ((bytes) (len (/ (length s) 2)))
     (dotimes (i len bytes)
       (setq bytes (cons (hexl-to-int-byte
 			 (substring s (2* i) (2+ (2* i)))) bytes)))))
 
-(defun hexl-string-to-int (string endian)
+(cl-defun hexl-string-to-int (string endian)
   "Converts little-endian 4 B hexadecimal integer string to int.
 Requires thus that string is 8 characters long
 Ex: \"abcd efgh\" equals integer badcfehg with base 16"
@@ -58,17 +58,17 @@ Ex: \"abcd efgh\" equals integer badcfehg with base 16"
 
 ;(hexl-string-to-int  "0000 0030")
 
-(defun remove-spaces (string)
+(cl-defun remove-spaces (string)
   "Returns copy of STRING with space characters removed."
   (remove 32 string))
 
-(defun hexl-region-to-int-le (beg end)
+(cl-defun hexl-region-to-int-le (beg end)
   "Interprets region as hexl-string and converts it to LE integer"
   (interactive "r")
   (let ((s (buffer-substring beg end)))
     (message "%d" (hexl-string-to-int s "le"))))
 
-(defun hexl-region-to-int-be (beg end)
+(cl-defun hexl-region-to-int-be (beg end)
   "Interprets region as hexl-string and converts it to BE integer"
   (interactive "r")
   (let ((s (buffer-substring beg end)))
@@ -79,8 +79,8 @@ Ex: \"abcd efgh\" equals integer badcfehg with base 16"
 
 ;other stuff
 
-(defun mb-point () "" (interactive) (message "%d" (point)))
-(defun mb-buffer-substring (beg end) "" (interactive "r") 
+(cl-defun mb-point () "" (interactive) (message "%d" (point)))
+(cl-defun mb-buffer-substring (beg end) "" (interactive "r") 
   (message "%s" (buffer-substring beg end)))
 
 ;;(hexl-string-to-int (remove 32 "0000 270a") "be")
@@ -89,7 +89,7 @@ Ex: \"abcd efgh\" equals integer badcfehg with base 16"
 ;;(setq idar "idar")
 ;;(append idar nil)
 
-(defun hexl-int-to-hexl (int) "Converts int to hex string"
+(cl-defun hexl-int-to-hexl (int) "Converts int to hex string"
   (interactive "ninteger: ")
   (message "%x" int))
 

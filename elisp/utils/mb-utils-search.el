@@ -1,4 +1,4 @@
-(defun* exists-match-p (regexp &optional (buffer (current-buffer)))
+(cl-defun exists-match-p (regexp &optional (buffer (current-buffer)))
   "Returns posistion of match of string in BUFFER with REGEXP. If no
 match, NIL is returned."
   (save-excursion

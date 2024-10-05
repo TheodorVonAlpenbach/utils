@@ -1,7 +1,7 @@
 (defconst *mb-ert-file-prefix* "test-")
 (defconst *mb-ert-defun-prefix* "test-")
 
-(defun mb-ert-map ()
+(cl-defun mb-ert-map ()
   "Return a sub map for functions related to ERT."
   (let ((ert-map (make-sparse-keymap)))
     (define-key ert-map "i" #'insert-ert-test-skeleton)
@@ -27,7 +27,7 @@ BUFFER is optional with the current buffer as default value."
   (mb-ert-test-filename-p (buffer-name buffer)))
 ;;(mb-ert-test-buffer-p (get-buffer "test-mb-utils-div.el"))
 
-(defun mb-ert-insert-skeleton (defun-name)
+(cl-defun mb-ert-insert-skeleton (defun-name)
   "Add test for the function DEFUN-NAME to the ERT test module.
 If such module does not exist, create one."
   (when (empty-buffer-p)
@@ -43,7 +43,7 @@ If such module does not exist, create one."
   (backward-char 10))
 
 ;;; Swapping
-(defun mb-ert-swap-filename (filename)
+(cl-defun mb-ert-swap-filename (filename)
   "Swap from module filename to ERT test module filename or vice-versa."
   (awhen (string-match* (format "\\(%s\\)?\\(.*\\.el$\\)" *mb-ert-file-prefix*)
 	   (file-name-nondirectory filename) :num '(1 2))
@@ -123,12 +123,12 @@ For more swap options, use `mb-ert-swap-defun-name'.
 	(elisp-goto-defun (mb-ert-swap-defun-name defun-name :non-ert))))))
 ;;(mb-swap-ert-defun)
 
-(defun mb-ert-forward-test ()
+(cl-defun mb-ert-forward-test ()
   "Move point to next ERT test in buffer.
 If no such test is found, it returns NIL."
   (re-search-forward "^[[:space:]]*([[:space:]]*ert-deftest[[:space:]]*" nil t))
 
-(defun mb-ert-file-defuns (test-filename)
+(cl-defun mb-ert-file-defuns (test-filename)
   "Return a list of all ERT test function symbols in FILENAME."
   (unless (mb-ert-test-filename-p test-filename)
     (error "Argument is not a path to an ERT test file."))
@@ -139,7 +139,7 @@ If no such test is found, it returns NIL."
 	   collect (defun-symbol (point) '(ert-deftest))))))
 ;;(mb-ert-file-defuns "~/projects/utils/elisp/mode-extensions/test-mb-texinfo.el")
 
-(defun mb-ert-directory-defuns (directory)
+(cl-defun mb-ert-directory-defuns (directory)
   "Return a list of all ERT test function symbols in DIRECTORY."
   (cl-loop for f in (directory-files directory t "\.el$")
 	if (mb-ert-test-filename-p f)
@@ -167,7 +167,7 @@ file corresponds to an actual elisp file in DIRECTORY."
     res))
 ;;(mb-ert-files "." t)
 
-(defun mb-test-ert-symbols (symbols)
+(cl-defun mb-test-ert-symbols (symbols)
   (ert (cons 'member (listify symbols))))
 
 (cl-defun mb-eval/load (&optional (buffer-or-file (current-buffer)))
@@ -204,7 +204,7 @@ associated function."
     ;; just skip output from ert
     t)
 
-(defun mb-ert-test-defun ()
+(cl-defun mb-ert-test-defun ()
   "Perform ERT test of defun at point
 Does not support testing of defun when point is at its test function."
   (interactive)
@@ -288,7 +288,7 @@ them before calling (ert t)."
   (ert t))
 ;;(elisp-test-all (get-buffer "mb-utils-div.el"))
 
-(defun ert-string-to-file (string file)
+(cl-defun ert-string-to-file (string file)
   "Same as `string-to-file', but indended for use with ERT.
 The reason is that `string-to-file' calls `write-file' which
 issues an `args-out-of-range' error, which is catched by ERT, and

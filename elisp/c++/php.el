@@ -10,7 +10,7 @@
 
 ;; (add-to-list 'c-default-style '(php-mode . "php"))
 (add-hook 'php-mode-hook 'mb-php-mode-hook)
-(defun mb-php-mode-hook ()
+(cl-defun mb-php-mode-hook ()
   "My PHP mode configuration."
   (linum-mode)
   (setq indent-tabs-mode nil
@@ -18,7 +18,7 @@
         tab-width 4
         c-basic-offset 4))
 
-(defun php-mode-p ()
+(cl-defun php-mode-p ()
   (equal major-mode 'php-mode))
 
 (defadvice php-evil-indent (after qwe first (beg end))
@@ -28,13 +28,13 @@
 	   (php-mode))
     (evil-indent beg end)))
 
-(defun php-in-sgml-p ()
+(cl-defun php-in-sgml-p ()
   "Return NIL if POINT is not in an SGML section."
   (>= (save-excursion (or (re-search-backward "[?]>" nil t) 0))
      (save-excursion (or (re-search-backward "<\\?php" nil t) 0))))
 ;;(php-in-sgml-p)
 
-(defun php-insert-log-string (s)
+(cl-defun php-insert-log-string (s)
   (when s
     (move-beginning-of-line 1)
     (next-line 1)
@@ -42,7 +42,7 @@
     (c-indent-line-or-region)
     (insert "\n")))
 
-(defun php-insert-Logger-string (s)
+(cl-defun php-insert-Logger-string (s)
   (when s
     (move-beginning-of-line 1)
     (next-line 1)
@@ -50,7 +50,7 @@
     (c-indent-line-or-region)
     (insert "\n")))
 
-(defun php-insert-echo-log-string (s)
+(cl-defun php-insert-echo-log-string (s)
   (when s
     (move-beginning-of-line 1)
     (next-line 1)
@@ -58,7 +58,7 @@
     (c-indent-line-or-region)
     (insert "\n")))
 
-(defun php-insert-echo-string (s)
+(cl-defun php-insert-echo-string (s)
   (when s
     (move-beginning-of-line 1)
     (next-line 1)
@@ -76,7 +76,7 @@
   (funcall method
    (buffer-substring-no-properties (region-beginning) (region-end))))
 
-(defun php-insert-echo-kilroy ()
+(cl-defun php-insert-echo-kilroy ()
   (interactive "")
   (move-beginning-of-line 1)
   (next-line 1)
@@ -93,7 +93,7 @@
 ;;(php-insert-log-region)
 
 ;; mb adds
-(defun php-backward-kill-word (arg)
+(cl-defun php-backward-kill-word (arg)
   "Same as backward-kill-word, but stops at $ if this is the
 first character"
   (interactive "p")
@@ -103,7 +103,7 @@ first character"
       (forward-char 1))
     (kill-region (point) end)))
 
-(defun php-insert-curly-brackets (n)
+(cl-defun php-insert-curly-brackets (n)
   (interactive "P")
   (insert-curly-brackets n)
   (indent-for-tab-command)
@@ -112,13 +112,13 @@ first character"
   (previous-line 1)
   (indent-for-tab-command))
 
-(defun php-prepend-this ()
+(cl-defun php-prepend-this ()
   (interactive)
   (save-excursion
     (backward-word 1)
     (insert "$this->")))
 
-(defun php-current-scope ()
+(cl-defun php-current-scope ()
   (save-excursion
     (unless (condition-case nil
 		(backward-up-list 1)
@@ -149,15 +149,15 @@ first character"
 	      (forward-char 1)
 	      (list 'class (substring-no-properties (thing-at-point 'sexp))))))))))
 
-(defun php-scope ()
+(cl-defun php-scope ()
   (nreverse
    (save-excursion
-     (loop for scope = (php-current-scope)
+     (cl-loop for scope = (php-current-scope)
 	   while scope
 	   do (backward-up-list 1)
 	   collect scope))))
 
-(defun php-scope-string ()
+(cl-defun php-scope-string ()
   (let* ((scope (mapcar #'second (subseq (php-scope) 0 2)))
 	 (outer-scope (first scope))
 	 (inner-scope (second scope)))
@@ -167,7 +167,7 @@ first character"
 	(format "%s::%s()" outer-scope inner-scope)
 	(format "%s" outer-scope))))
 
-(defun php-format-debug-print-backtrace ()
+(cl-defun php-format-debug-print-backtrace ()
   "Assumes that the buffer contains output from the PHP function
   debug_print_backtrace()." 
   (interactive)
@@ -192,7 +192,7 @@ first character"
   "å"
   'php-prepend-this)
 
-(defun lab-base-url-archived-article (environment)
+(cl-defun lab-base-url-archived-article (environment)
   "Returns the front article base url for an archived (escenic)
 article in ENVIRONMENT."
   (case environment
@@ -202,7 +202,7 @@ article in ENVIRONMENT."
     (:prod (error))))
 ;;(lab-base-url-archived-article :stage)
 
-(defun lab-base-path-archived-article (environment)
+(cl-defun lab-base-path-archived-article (environment)
   "Returns the front article base url for an archived (escenic)
 article in ENVIRONMENT."
   (case environment
@@ -256,17 +256,17 @@ article in ENVIRONMENT."
     ids))
 ;;(tv2-get-ids :vbox)
 
-(defun is-nontrivial-directory (x)
+(cl-defun is-nontrivial-directory (x)
   (and (file-directory-p x)
        (let ((basename (file-name-nondirectory x)))
 	 (and (string/= basename ".")
 	      (string/= basename "..")))))
 ;;(is-nontrivial-directory "/cygdrive/c/")
 
-(defun rscandir (directory from-level to-level current-level)
+(cl-defun rscandir (directory from-level to-level current-level)
   (when (< from-level to-level)
     (let* ((items (directory-files directory t))
-	 (subitems (loop for x in items
+	 (subitems (cl-loop for x in items
 			 if (and (< current-level to-level)
 				 (is-nontrivial-directory x))
 			 append (rscandir x from-level to-level (1+ current-level)))))

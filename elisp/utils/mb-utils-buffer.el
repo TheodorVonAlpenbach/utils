@@ -3,12 +3,12 @@
     (empty-string-p (buffer-string))))
 ;;(empty-buffer-p)
 
-(defun buffer-major-mode (buffer-or-name)
+(cl-defun buffer-major-mode (buffer-or-name)
   "Return the major mode of the buffer designated by BUFFER-OR-NAME.
 The result type is SYMBOL."
   (buffer-local-value 'major-mode (get-buffer buffer-or-name)))
 
-(defun major-mode-p (mode buffer-or-name)
+(cl-defun major-mode-p (mode buffer-or-name)
   "Return non nil if the major mode of BUFFER-OR-NAME is MODE."
   (eql (buffer-major-mode buffer-or-name) mode))
 
@@ -21,20 +21,20 @@ The result type is SYMBOL."
 ;;(buffer-directory)
 ;;(def-edebug-spec buffer-directory (&optional (symbolp form)))
 
-(defun region-beginning* (&optional force)
+(cl-defun region-beginning* (&optional force)
   "See `region-beginning' and `mark'"
   (min (point) (mark force)))
 
-(defun region-end* (&optional force)
+(cl-defun region-end* (&optional force)
   "See `region-end' and `mark'"
   (max (point) (mark force)))
 ;;(region-end*)
 
-(defun region (&optional force)
+(cl-defun region (&optional force)
   (list (region-beginning*) (region-end*)))
 ;;(region)
 
-(defun mark-region (beg-or-region &optional end)
+(cl-defun mark-region (beg-or-region &optional end)
   (if (not end)
     (apply #'mark-region beg-or-region)
     (push-mark beg-or-region nil t)
@@ -86,7 +86,7 @@ executed. No validation checks in this version."
       (previous-line n)
       (buffer-substring-no-properties (point) (point-max)))))
 
-(defun buffer-line-point (line)
+(cl-defun buffer-line-point (line)
   "Returns point at beginning of the current buffer's n'th LINE.
   If LINE is negative, it is interpreted as the n'th last LINE in
   buffer. For large buffers this is also a faster way to identify
@@ -107,7 +107,7 @@ executed. No validation checks in this version."
     (point)))
 ;;(buffer-line-point 1)
 
-(defun buffer-paragraph-point (line)
+(cl-defun buffer-paragraph-point (line)
   "Returns point at beginning of the current buffer's n'th PARAGRAPH.
   If PARAGRAPH is negative, it is interpreted as the n'th last PARAGRAPH in
   buffer. For large buffers this is also a faster way to identify
@@ -172,7 +172,7 @@ Note that line numbers and paragraph numbers (check) starts from base 0."
     (cl-loop repeat n do (insert thing))))
 ;;(insert-at "qwe" (point) 3)
 
-(defun overwrite-region (string beg end &optional buffer)
+(cl-defun overwrite-region (string beg end &optional buffer)
   (with-current-buffer (or buffer (current-buffer))
     (kill-region beg end)
     (insert-at string beg)))
@@ -183,7 +183,7 @@ Note that line numbers and paragraph numbers (check) starts from base 0."
 ;;(overwrite-line "newline" 2 "*scratch*")
 ;;(overwrite-line "newline" 2)
 
-(defun next-line-point () "Return position of point after nextline"
+(cl-defun next-line-point () "Return position of point after nextline"
   (save-excursion
     (next-line 1)
     (point)))
@@ -197,7 +197,7 @@ Note that line numbers and paragraph numbers (check) starts from base 0."
     (when n (forward-thing thing (- 1 n)))
     (point)))
 
-(defun eo-thing (thing &optional n)
+(cl-defun eo-thing (thing &optional n)
   "Move to the end of the current word and return POINT."
   (awhen (bounds-of-thing-at-point thing)
     (goto-char (cdr it))
@@ -208,28 +208,28 @@ Note that line numbers and paragraph numbers (check) starts from base 0."
 ;;; Sexp stuff
 ;;; TODO rename these as bof, eof etc, and reserve bos, eos etc to symbols
 ;;; because sexp and form is indeed the same
-(defun bos (&optional n)
+(cl-defun bos (&optional n)
   "Move POINT back N sexps and return point"
   (bo-thing 'sexp n))
 
-(defun eos (&optional n)
+(cl-defun eos (&optional n)
   "Move POINT forward N sexps and return point"
   (eo-thing 'sexp n))
 
-(defun bos* (&optional n)
+(cl-defun bos* (&optional n)
   "Return the POINT at the beginning of the Nth sexp before current point."
   (save-excursion (bos n)))
 
-(defun eos* (&optional n)
+(cl-defun eos* (&optional n)
   "Return the POINT at the beginning of the Nth sexp before current point."
   (save-excursion (eos n)))
 
-(defun sexp-region () (list (bos* 1) (eos* 1)))
+(cl-defun sexp-region () (list (bos* 1) (eos* 1)))
 
-(defun backward-sexp* (&optional n)
+(cl-defun backward-sexp* (&optional n)
   (backward-sexp n) (point))
 
-(defun c-last-sexp-region ()
+(cl-defun c-last-sexp-region ()
   "Return the region of the sexp preceeding point.
 This function assumes a C-like syntax. In particular, it assumes
 that there is no space between identifiers and delimiters"
@@ -271,12 +271,12 @@ For optional argument point, see `region-replace-raw'."
    region point))
 ;;(region-replace "(%s)") test reg(i){i}on
 
-(defun region-lines (beg end)
+(cl-defun region-lines (beg end)
   "Returns a list of strings, each string being line in region"
   (interactive "r")
   (string-to-lines (region-string beg end)))
 
-(defun region-as-line-strings (beg end)
+(cl-defun region-as-line-strings (beg end)
   (interactive "r")
   (warn "Deprecated. Use REGION-LINES instead."))
 
@@ -322,20 +322,20 @@ end of buffer if not already present."
   (point))
 ;;(eop)
 
-(defun paragraph-region ()
+(cl-defun paragraph-region ()
   "Return the region of the current paragraph.
 The return value is a pair of points \(START END\)."
   (save-excursion
     (list (bop) (eop))))
 ;;(paragraph-region)
 
-(defun paragraph-string ()
+(cl-defun paragraph-string ()
   "Return the paragraph around POINT as a string."
   (save-excursion
     (buffer-substring-no-properties (bop) (eop))))
 ;;(paragraph-string)
 
-(defun current-paragraph-as-string ()
+(cl-defun current-paragraph-as-string ()
   (warn "Deprecated. Use PARAGRAPH-STRING instead.")
   (paragraph-string))
 
@@ -366,7 +366,7 @@ For RESTRICT-TO-CURRENT-FIELD, see `bol'."
 ;;(eol :point 10000)
 ;;(save-excursion (list (bol) (eol) (bob) (eob)))
 
-(defun bol* (&rest args)
+(cl-defun bol* (&rest args)
   "Return the same as `bol' without moving the POINT.
 Note: if you are not using any of the keyword arguments, see
 `bol', you should stick to the standard function
@@ -378,7 +378,7 @@ Note: if you are not using any of the keyword arguments, see
 	  (second (backtrace-frame 6))))
   (save-excursion (apply #'bol args)))
 
-(defun eol* (&rest args)
+(cl-defun eol* (&rest args)
   "Return the same as `eol' without moving the POINT.
 Note: if you are not using any of the keyword arguments, see
 `eol', you should stick to the standard function
@@ -420,12 +420,12 @@ see `bol'"
 	(buffer-substring-no-properties beg end)))))
 ;;(current-line-as-string :to-point t :from-point nil)
 
-(defun current-line-as-string (&rest args)
+(cl-defun current-line-as-string (&rest args)
   (warn "Deprecated. Use LINE-STRING instead.")
   (apply #'line-string args))
 
 ;;; Defun stuff 
-(defun bod (&optional n)
+(cl-defun bod (&optional n)
   "Move to beginning of the current defun and return POINT."
   ;; Can't use bo-thing since bounds-of-thing-at-point fails when
   ;; defun is not indented according to common style!
@@ -434,7 +434,7 @@ see `bol'"
   (point))
 ;;(bod)
 
-(defun eod (&optional n)
+(cl-defun eod (&optional n)
   "Move to end of the current defun and return POINT."
   ;; See implementation note in `bod'.
   (condition-case nil (backward-char 1) (error nil))
@@ -443,59 +443,59 @@ see `bol'"
   (point))
 ;;(eod)
 
-(defun bod* (&optional n)
+(cl-defun bod* (&optional n)
   "Return the POINT at the beginning of the current defun."
   (save-excursion (bod)))
 ;;(bod*)
 
-(defun eod* (&optional n)
+(cl-defun eod* (&optional n)
   "Return the POINT at the end of the current defun."
   (save-excursion (eod)))
 ;;(eod*)
 
-(defun defun-region ()
+(cl-defun defun-region ()
   "Return the region of the current defun.
 The return value is a pair of points \(START END\)."
   (list (bod*) (eod*)))
 
-(defun defun-string ()
+(cl-defun defun-string ()
   (buffer-substring-no-properties (bod*) (eod*)))
 
 ;;; form
-(defun bof (&optional n)
+(cl-defun bof (&optional n)
   "Move to the beginning of the current form and return POINT."
   (bo-thing 'list n))
 
-(defun eof (&optional n)
+(cl-defun eof (&optional n)
   "Move to the end of the current form and return POINT."
   (eo-thing 'list n))
 ;;(eof)
 
-(defun bof* (&optional n)
+(cl-defun bof* (&optional n)
   "Return the POINT at the beginning of the current form."
   (save-excursion (bof)))
 ;;(bof*)
 
-(defun eof* (&optional n)
+(cl-defun eof* (&optional n)
   "Return the POINT at the end of the current form."
   (save-excursion (eof)))
 ;;(eof*)
 
 ;;; word
-(defun bow (&optional n)
+(cl-defun bow (&optional n)
   "Move to the beginning of the current word and return POINT."
   (bo-thing 'word n))
 
-(defun eow (&optional n)
+(cl-defun eow (&optional n)
   "Move to the end of the current word and return POINT."
     (eo-thing 'word n))
 
-(defun bow* (&optional n)
+(cl-defun bow* (&optional n)
   "Return the POINT at the beginning of the current word."
   (save-excursion (bow n)))
 ;;(bow*)
 
-(defun eow* (&optional n)
+(cl-defun eow* (&optional n)
   "Return the POINT at the end of the current defun."
   (save-excursion (eow n)))
 ;;(eow* 3)
@@ -511,17 +511,17 @@ The return value is a pair of points \(START END\)."
     (eol)
     (current-column)))
 
-(defun blank-line-p ()
+(cl-defun blank-line-p ()
   "Returns non-nil iff current line is an empty string."
   (save-excursion (= (bol) (eol))))
 ;;(blank-line-p)
 
-(defun number-of-lines ()
+(cl-defun number-of-lines ()
   (save-excursion
     (eob) (line-number-at-pos)))
 ;;(number-of-lines)
 
-(defun flatten-paragraph ()
+(cl-defun flatten-paragraph ()
   "Remove all newline characters from current paragraph"
   (let ((fill-column (- (reduce #'- (paragraph-region))))
 	(fill-paragraph-function nil))
@@ -530,12 +530,12 @@ The return value is a pair of points \(START END\)."
 ;;;; time paragraphs (used arbeidslog, for instance):
 (defconst time-paragraph-start (format "^%s " (iso-time-regexp)))
 
-(defun in-time-paragraph-p ()
+(cl-defun in-time-paragraph-p ()
   "Returns non-nil iff point is in a time paragraph."
   (save-excursion
     (string-match time-paragraph-start (paragraph-string))))
 
-(defun fill-time-paragraph (&optional justify region)
+(cl-defun fill-time-paragraph (&optional justify region)
   "A fill-paragraph-function suited for time paragraphs.
 See arbeidslog for an example of a time paragraph"
   (interactive)
@@ -551,17 +551,17 @@ See arbeidslog for an example of a time paragraph"
 ;; A few helpers
 (defvar *sexp-statt-word* nil)
 
-(defun count-w-or-s (beg end)
+(cl-defun count-w-or-s (beg end)
   (if *sexp-statt-word*
     (count-sexps-region beg end)
     (count-words beg end)))
 
-(defun transpose-w-or-s (n)
+(cl-defun transpose-w-or-s (n)
   (if *sexp-statt-word*
     (transpose-sexps n)
     (transpose-words n)))
 
-(defun forward-w-or-s (n)
+(cl-defun forward-w-or-s (n)
   (if *sexp-statt-word*
     (forward-sexp n)
     (forward-word n)))
@@ -594,7 +594,7 @@ If region is not active this function is equivalent with
   (let ((*sexp-statt-word* t))
     (rotate-words n)))
 
-(defun reverse-words-1 (beg end)
+(cl-defun reverse-words-1 (beg end)
   "Reverse words in region from BEG to END.
 Helper function for `reverse-words'."
   (let ((n (count-w-or-s beg end)))
@@ -626,7 +626,7 @@ If region is not active this function is equivalent with
 
 (defalias 'reverse-lines #'reverse-region)
 
-(defun toggle-window-split ()
+(cl-defun toggle-window-split ()
   "Toggle between horizontal and vertical split of two windows.
 Copied from http://stackoverflow.com/questions/14881020/\
 emacs-shortcut-to-switch-from-a-horizontal-split-to-a-vertical-split-in-one-move"
@@ -656,7 +656,7 @@ emacs-shortcut-to-switch-from-a-horizontal-split-to-a-vertical-split-in-one-move
 
 (global-set-key (kbd "C-x |") 'toggle-window-split)
 
-(defun just-one-blank-line (&optional n)
+(cl-defun just-one-blank-line (&optional n)
   "Delete all blank lines above and below current leaving one blank line
 \(or N blank lines\).
 Should this method be interactive?"
@@ -674,58 +674,58 @@ Should this method be interactive?"
        (progn ,@body)
      (other-window 1)))
 
-(defun comment-region* (beg end &optional arg)
+(cl-defun comment-region* (beg end &optional arg)
   (interactive "*r\nP")
   (if (use-region-p)
     (comment-region beg end arg)
     (comment-region (line-beginning-position) (line-end-position) arg)))
 
-(defun uncomment-region* (beg end &optional arg)
+(cl-defun uncomment-region* (beg end &optional arg)
   (interactive "*r\nP")
   (if (use-region-p)
     (uncomment-region beg end arg)
     (uncomment-region (line-beginning-position) (line-end-position) arg)))
 
 ;;; Smart comment stuff
-(defun commented-string-p (string)
+(cl-defun commented-string-p (string)
   "Returns nil iff current line is not commented"
   (warn "commented-string-p is not supported!")
   (string-match* "^[[:space:]]*;" string))
 
-(defun commented-line-p ()
+(cl-defun commented-line-p ()
   "Returns nil iff current line is not commented"
   (comment-only-p (line-beginning-position) (line-end-position)))
 ;;(commented-line-p)
 
-(defun toggle-comment-line (&optional arg)
+(cl-defun toggle-comment-line (&optional arg)
   "Toggle comment on current line in buffer."
   (cl-destructuring-bind (beg end) (line-region)
     (if (commented-line-p)
      (uncomment-region beg end arg)
      (comment-region beg end arg))))
 
-(defun toggle-comment-region (beg end &optional arg)
+(cl-defun toggle-comment-region (beg end &optional arg)
   (save-excursion
     (goto-char beg)
     (while (< (point) end)
       (toggle-comment-line arg)
       (forward-line 1))))
 
-(defun toggle-comment-region* (beg end &optional arg)
+(cl-defun toggle-comment-region* (beg end &optional arg)
   (interactive "*r\nP")
   (if (use-region-p)
     (toggle-comment-region beg end arg)
     (toggle-comment-region (line-beginning-position) (line-end-position) arg)))
 
 ;;;; Save as for images etc
-(defun save-as-1 (filename)
+(cl-defun save-as-1 (filename)
   "Write current buffer file to FILENAME, and rename buffer.
 It assumes that there will be no write conflicts."
   (copy-file (buffer-file-name) new)
   (set-visited-file-name new)
   (set-buffer-modified-p nil))
 
-(defun save-as ()
+(cl-defun save-as ()
   "Generalization of `write-to': also handles png-files etc."
   (interactive)
   (let ((new (read-file-name "Save as: ")))
@@ -748,7 +748,7 @@ Afterwards delete the file."
 ;;(within-temp-file (+ 2 2))
 (def-edebug-spec within-temp-file progn)
 
-(defun string-to-clipboard (string &optional hide-message)
+(cl-defun string-to-clipboard (string &optional hide-message)
   "Copy STRING to clipboard.
 If HIDE-MESSAGE is NIL, the default, a message informing what was
 copied is displayed."
@@ -756,22 +756,22 @@ copied is displayed."
   (unless hide-message
     (message "Copied string '%s' to clipboard" string)))
 
-(defun buffer-file-name-to-clipboard ()
+(cl-defun buffer-file-name-to-clipboard ()
   (interactive)
   (string-to-clipboard (buffer-file-name)))
 
-(defun sort-lines-with-comments ()
+(cl-defun sort-lines-with-comments ()
   (interactive)
   (let ((new-lines (sort-strings-with-comments (buffer-lines) comment-start)))
     (apply #'delete-region (buffer-region))
     (insert (concat* new-lines :in "\n"))))
 ;;(sort-lines-with-comments)
 
-(defun transpose-string (string)
+(cl-defun transpose-string (string)
   "Insert a newline between each character in STRING"
   (coerce (nbutlast (zip (coerce string 'list) 10)) 'string))
 
-(defun insert-alphabet (n)
+(cl-defun insert-alphabet (n)
   "Insert alphabet at point"
   (interactive "P")
   (unless n (setf n 0))

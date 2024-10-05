@@ -34,7 +34,7 @@ imenu and completion-list .")
 
 (defvar after-change-functions nil )
 
-(defun bn-mode nil
+(cl-defun bn-mode nil
   "A major mode for well writing context-free grammars in
 Backus-Naur notation."
   (interactive)
@@ -158,11 +158,11 @@ Backus-Naur notation."
 
 (defalias 'backus-naur-mode 'bn-mode)
 
-(defun bn-jump (p)
+(cl-defun bn-jump (p)
   (push-mark)
   (goto-char p) )
 
-(defun bn-stop-timer ()
+(cl-defun bn-stop-timer ()
   "stop the timer for fontification"
   (and bn-timer-var
        (progn
@@ -290,7 +290,7 @@ Backus-Naur notation."
     (t (:weight bold :underline t)))
   "font used for the character that comments a line" )
 
-(defun bn-indent-old ()
+(cl-defun bn-indent-old ()
   " The lines that contain a left nonterminal are indented from
   0. These are the lines that match the regular expression
  `bn-left-nonterminal-definition'.
@@ -337,7 +337,7 @@ The lines which contain a rule are indented with a tab."
     (move-to-column (+ (current-column)
 		       (max 0 (- cc bot) ) ) ) ) )
 
-(defun bn-commented-line-p ()
+(cl-defun bn-commented-line-p ()
   "return t when the point is inside a commented line, and nil
 otherwise."
   (equal
@@ -346,7 +346,7 @@ otherwise."
      (following-char) )
    (elt bn-comment-char 0 ) ) )
 
-(defun bn-lazy-font-lock ()
+(cl-defun bn-lazy-font-lock ()
   "called after every buffer change to re-fontify the text."
   (bn-stop-timer)
   (save-excursion
@@ -476,7 +476,7 @@ otherwise."
       (setq buffer-undo-list ul )
       ) ) )
 
-(defun bn-change (x y z)
+(cl-defun bn-change (x y z)
   "hook which is called after every buffer change. it starts a
 timer that fontify the current buffer, according to the rules
 defined in the grammar. if a previous timer is active, stop it
@@ -488,11 +488,11 @@ before starting the new timer."
 	(run-with-idle-timer
 	 1 nil 'bn-lazy-font-lock) ) )
 
-(defun bn-beginning-of-defun ()
+(cl-defun bn-beginning-of-defun ()
   "jump at the beginning of a left nonterminal definition."
   (search-backward-regexp bn-left-nonterminal-definition nil t) )
 
-(defun bn-end-of-defun ()
+(cl-defun bn-end-of-defun ()
   "jump at the end of a left nonterminal definition."
  (if (search-forward-regexp bn-left-nonterminal-definition nil t)
       (beginning-of-line)
@@ -507,7 +507,7 @@ before starting the new timer."
   (and (not (eobp) )
        (forward-char) ) )
 
-(defun bn-search ()
+(cl-defun bn-search ()
   "Search for the left nonterminal under the cursor"
   (interactive)
   (let* ((left-nonterminal (get-text-property (point) 'nonterminal ) )
@@ -580,7 +580,7 @@ before starting the new timer."
      (t
       (error " `%s' : cannot loop for a right symbol. " left-nonterminal ) ) ) ) )
 
-'(defun bn-imenu ()
+'(cl-defun bn-imenu ()
   (mapcar
    (lambda (l)
      (cons (caar l)
@@ -589,7 +589,7 @@ before starting the new timer."
 	     0) ) )
    bn-left-nonterminal-list) )
 
-(defun bn-imenu ()
+(cl-defun bn-imenu ()
   (mapcar
    (lambda (l)
      (cons (car l)
@@ -601,7 +601,7 @@ before starting the new timer."
 ;;; MB changes
 ;;; buffer utils
 
-(defun buffer-lines (start end)
+(cl-defun buffer-lines (start end)
   "Returns the lines between point START and END as a list of
 strings"
   (interactive "r")
@@ -615,7 +615,7 @@ strings"
     (forward-line forward-line)
     (point)))
 
-(defun buffer-region-whole-lines (start end)
+(cl-defun buffer-region-whole-lines (start end)
   (interactive "r") ;;just for debugging
   (buffer-lines
    (point-beginning-of-line start)
@@ -626,18 +626,18 @@ strings"
       ""))
 
 ;;; indent
-(defun bn-first-line-of-definition-p ()
+(cl-defun bn-first-line-of-definition-p ()
   ""
   (string-match bn-left-nonterminal-definition (substring-no-properties (buffer-current-line))))
 
-(defun bn-definition-start-line-p (line)
+(cl-defun bn-definition-start-line-p (line)
   (string-match bn-left-nonterminal-definition line))
 
-(defun bn-definition-start-lines (star)
+(cl-defun bn-definition-start-lines (star)
   (copy-if #'bn-definition-start-line-p
 	   (string-to-lines (buffer-string-no-properties))))
 
-(defun bn-alignment-column (lines)
+(cl-defun bn-alignment-column (lines)
   "Returns the first column that aligns all BNF definitions.
 Aligment is on assigment sign.
 Assumes one space from end of "
@@ -645,7 +645,7 @@ Assumes one space from end of "
 		       lines)))
 ;;(string-match "::=" "af ::= adf")
 
-(defun bn-indent-assigment-first-line (column)
+(cl-defun bn-indent-assigment-first-line (column)
   "Indents current line?"
   (save-excursion
     (move-end-of-line nil)
@@ -655,12 +655,12 @@ Assumes one space from end of "
 	(insert (make-string n ? ))
 	(delete-char n)))))
 
-(defun bn-indent-assigment-rest-lines (column)
+(cl-defun bn-indent-assigment-rest-lines (column)
   (save-excursion
     (move-beginning-of-line nil)
     (just-one-space (+ column (length bn-assignment)))))
 
-(defun bn-indent-current-line (column)
+(cl-defun bn-indent-current-line (column)
   (save-excursion
     (move-beginning-of-line nil)
     (if (bn-first-line-of-definition-p)
@@ -675,15 +675,15 @@ Assumes one space from end of "
 	(bn-indent-current-line column)
 	(forward-line 1))))
 
-(defun bn-goto-previous-assigment ()
+(cl-defun bn-goto-previous-assigment ()
   (re-search-backward bn-assignment nil t)
   (current-column))
 
-(defun bn-previous-assigment-column ()
+(cl-defun bn-previous-assigment-column ()
   (save-excursion
     (bn-goto-previous-assigment)))
 
-(defun bn-indent ()
+(cl-defun bn-indent ()
   "Indent to previous"
   (interactive)
   (bn-indent-region (point) (point) (bn-previous-assigment-column)))

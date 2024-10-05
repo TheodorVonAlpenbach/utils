@@ -20,7 +20,7 @@ POPULATION is a triple (CHILDREN ADULTS ELDER)."
 			start-population
 			average-number-of-children
 			&optional (premature-death-rate '(0.01 0.1)))
-  (loop for x to num-generations
+  (cl-loop for x to num-generations
 	for new-population = start-population
 	    then (sds-next-generation
 		  new-population
@@ -40,7 +40,7 @@ POPULATION is a triple (CHILDREN ADULTS ELDER)."
 			     generation-length
 			     args))
 	 (pop-size (mapcar #'sum populations)))
-    (expt (average (loop for (a b) in (pairs pop-size)
+    (expt (average (cl-loop for (a b) in (pairs pop-size)
 			 collect (/ (float b) a)))
 	  (/ 1.0 generation-length))))
 
@@ -60,5 +60,5 @@ POPULATION is a triple (CHILDREN ADULTS ELDER)."
 ;;(sds-estimate-growth 10 30 '(1 1 1) 70 '(0.1 0.1))
 ;;(sds-estimate-growth 100 30 '(1 1 1) 3.1)
 ;;(sds-estimate-growth 100 30 '(1 1 1) 1.7)
-;;(pp (loop for y from 0 to 50 by 5 collect (* .2 (expt 1.08 y))))
-;;(pp (loop for y from 0 downto -10 collect (* .2 (expt 1.08 y))))
+;;(pp (cl-loop for y from 0 to 50 by 5 collect (* .2 (expt 1.08 y))))
+;;(pp (cl-loop for y from 0 downto -10 collect (* .2 (expt 1.08 y))))

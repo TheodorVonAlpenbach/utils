@@ -13,50 +13,50 @@
 
 ;;Node structure: (A 134217727 (#B 4) (#D 6) (#F 2))
 
-(defun read-segments (filename)
+(cl-defun read-segments (filename)
   (setq *segments* (africa-read-csv filename)))
 ;;(read-segments "c:/cygwin/usr/libs/emacs-21.3/site-lisp/mb-lisp/topology/afrika.csv")
 
-(defun extract-nodes (segments)
+(cl-defun extract-nodes (segments)
   (remove-duplicates 
-   (loop for segment in segments
+   (cl-loop for segment in segments
 	 collect (first segment)
 	 collect (second segment))))
 ;;(extract-nodes *segments*)
 
-(defun node-symbol (node)
+(cl-defun node-symbol (node)
   (first node))
 ;;(symbolp (node-symbol (first *network*)))
 
-(defun node-string (node)
+(cl-defun node-string (node)
   (symbol-name (node-symbol)))
 ;;(symbolp (node-symbol (first *network*)))
 
-(defun get-node (node-symbol network)
+(cl-defun get-node (node-symbol network)
   (find node-symbol network :key #'first))
 
-(defun set-neighbor-nodes (node segments network)
-  (loop with node-symbol = (first node)
+(cl-defun set-neighbor-nodes (node segments network)
+  (cl-loop with node-symbol = (first node)
 	for segment in segments
 	for res = (remove node-symbol segment)
 	if (= 2 (length res))
 	collect (list (get-node (first res) network)
 		      (third segment))))
 
-(defun* init-network (segments &optional (init-distance most-positive-fixnum))
+(cl-defun init-network (segments &optional (init-distance most-positive-fixnum))
   (let ((network (mapcar #'(lambda (x) 
 				  (list x init-distance nil ()))
 			      (extract-nodes segments))))
 
     network))
 
-(defun* fill-network (network segments &optional (init-distance most-positive-fixnum))
-  (loop for node in network
+(cl-defun fill-network (network segments &optional (init-distance most-positive-fixnum))
+  (cl-loop for node in network
 	do (setf (fourth node)
 		 (set-neighbor-nodes node segments network))))
 
-(defun* reset-network (network &optional (init-distance most-positive-fixnum))
-  (loop for node in network
+(cl-defun reset-network (network &optional (init-distance most-positive-fixnum))
+  (cl-loop for node in network
 	do (setf (second node) init-distance
 		 (third node) nil)))
 
@@ -66,34 +66,34 @@
 ;;(fill-network *network* qwe)
 ;;(print-network *network*)
 
-(defun print-node (node)
+(cl-defun print-node (node)
   (list (first node) 
 	(second node)
 	(first (third node)) ;only node-symbol
-	(loop for node-segment in (fourth node)
+	(cl-loop for node-segment in (fourth node)
 	      for node-neighbor = (first node-segment) collect
 	      (list (first node-neighbor) (second node-segment)))))
 
-(defun print-network (network)
-  (loop for node in network collect
+(cl-defun print-network (network)
+  (cl-loop for node in network collect
 	(print-node node)))
 ;;(print-network *network*)
 
-(defun dijkstra-1 (node-queue network)
+(cl-defun dijkstra-1 (node-queue network)
   "Fills out distances from NODE to all other nodes in NETWORK. Result
 is returned as a node network"
   (while node-queue
     (setq node-queue (sort* node-queue #'< :key #'second))
     (let ((node (pop node-queue)))
-      (loop for node-segment in (fourth node)
+      (cl-loop for node-segment in (fourth node)
 	    for node-neighbor = (first node-segment)
 	    for new-distance = (+ (second node) (second node-segment))
 	    do (when (< new-distance (second node-neighbor))
 		 (setf (second node-neighbor) new-distance)
 		 (setf (third node-neighbor) node)
-		 (pushnew node-neighbor node-queue))))))
+		 (cl-pushnew node-neighbor node-queue))))))
 
-(defun dijkstra (node-symbol network)
+(cl-defun dijkstra (node-symbol network)
   "Fills out distances from NODE to all other nodes in SEGMENTS. Result
 is returned as a node segments"
   (let* ((node (get-node node-symbol network)))    
@@ -103,28 +103,28 @@ is returned as a node segments"
     network))
 ;;(mapcar #'butlast (dijkstra 'dz *network*))
 
-(defun dijkstra-path (a b network &optional dijkstra-run-p)
+(cl-defun dijkstra-path (a b network &optional dijkstra-run-p)
   (unless dijkstra-run-p (dijkstra a network))
-  (loop for node = (get-node b network) then (third node)
+  (cl-loop for node = (get-node b network) then (third node)
 	while node collect (first node)))
 ;;(dijkstra-path 'za 'gm *network*)
 
-(defun dijkstra-distance (a b network &optional dijkstra-run-p)
+(cl-defun dijkstra-distance (a b network &optional dijkstra-run-p)
   (unless dijkstra-run-p (dijkstra a network))
   (1- (length (dijkstra-path a b network dijkstra-run-p))))
 ;;(dijkstra-distance 'ls 'gm *network*)
 
-(defun* dijkstra-vector (network &optional (node-a (first network)))
+(cl-defun dijkstra-vector (network &optional (node-a (first network)))
   (let ((a (node-symbol node-a)))
     (dijkstra a network)
-    (loop for node-b in network
+    (cl-loop for node-b in network
 	  for b = (node-symbol node-b) 
 	  collect (dijkstra-distance a b network t) into res
 	  finally return (cons a res))))
 ;;(prin1 (dijkstra-vector *network* (get-node 'mq *network*)))
 
-(defun dijkstra-matrix (network)
-  (loop for node-a in network
+(cl-defun dijkstra-matrix (network)
+  (cl-loop for node-a in network
 	for i from 1 
 	do (message "%d" i)
 	collect (dijkstra-vector network node-a) into res

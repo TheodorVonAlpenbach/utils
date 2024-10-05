@@ -2,9 +2,9 @@
 
 (defconst 2pi (* 2 pi))
 
-(defun 2* (number) (* 2 number))
-(defun /2 (number) (/ number 2))
-(defun inv (number &optional float-p) (/ (if float-p 1.0 1) number))
+(cl-defun 2* (number) (* 2 number))
+(cl-defun /2 (number) (/ number 2))
+(cl-defun inv (number &optional float-p) (/ (if float-p 1.0 1) number))
 
 (defmacro mincf (place &optional x)
   "Increment PLACE geometrically by X (2 by default).
@@ -16,27 +16,27 @@ The return value is the incremented value of PLACE."
     (list 'cl-callf '* place (or x 2))))
 ;;(let ((x 3)) (mincf x) x)
 
-(defun sq (x) (* x x))
+(cl-defun sq (x) (* x x))
 
-(defun between= (x a b)
+(cl-defun between= (x a b)
   (and (<= a x) (<= x b)))
 ;;(between= 5 1 5)
 
-(defun modp (a b n)
+(cl-defun modp (a b n)
   "Returns t iff x and y are identical modulo n"
   (= (mod a n) (mod b n)))
 ;;(modp 3 6 4)
 
-(defun modb (x n base)
+(cl-defun modb (x n base)
   (+ (cl-mod (- x base) n) base))
 ;;(abs (modb 6 (* 2 pi) (- pi)))
 ;;(cl-loop for i from -4 to 4 collect (modb i 4 -2))
 
-(defun floor-to (arg divisor)
+(cl-defun floor-to (arg divisor)
   (* divisor (first (cl-floor arg divisor))))
 ;;(floor-to 99 25)
 
-(defun ceiling-to (arg divisor)
+(cl-defun ceiling-to (arg divisor)
   (* divisor (first (cl-ceiling arg divisor))))
 ;;(ceiling-to 99 25)
 
@@ -122,7 +122,7 @@ converting to float if the product is large for an integer."
   `(/ (+ ,@args) ,(length args)))
 ;;(avg 1 2 3)
 
-(defun distance (x y)
+(cl-defun distance (x y)
   (abs (- x y)))
 ;;(distance 2 1)
 
@@ -152,7 +152,7 @@ converting to float if the product is large for an integer."
   (apply #'* (mapcar #'signum factors)))
 ;;(signum* -1 -2)
 
-(defun unsignum (&rest factors)
+(cl-defun unsignum (&rest factors)
   (- (apply #'signum* factors)))
 
 (cl-defun num-digits (n &optional (base 10))
@@ -161,23 +161,23 @@ converting to float if the product is large for an integer."
   (1+ (truncate (log n base))))
 ;;(num-digits 10 2) ==> 4 ("1010")
 
-(defun fixnum-floor (n m)
+(cl-defun fixnum-floor (n m)
   (* m (first (floor* n m))))
 ;;(mapcar #'(lambda (x) (list x (fixnum-floor x 8))) (0-n 10))
 
-(defun fixnum-ceiling (n m)
+(cl-defun fixnum-ceiling (n m)
   (* m (first (ceiling* n m))))
 ;;(mapcar #'(lambda (x) (list x (fixnum-ceiling x 8))) (0-n 10))
 
-(defun eq-parity (x y)
+(cl-defun eq-parity (x y)
   (eq (oddp x) (oddp y)))
 ;;(eq-parity 2 'a)
 
 ;;chess math
-(defun elo-expected-score-ratio (elo1 elo2)
+(cl-defun elo-expected-score-ratio (elo1 elo2)
   (/ 1 (1+ (expt 10 (/ (- elo2 elo1) 400.0)))))
 
-(defun elo-expected-score (elo1 elo2 num-games)
+(cl-defun elo-expected-score (elo1 elo2 num-games)
   (* num-games (elo-expected-score-ratio elo1 elo2)))
 ;;(elo-expected-score 2713 2606 9)
 
@@ -185,28 +185,28 @@ converting to float if the product is large for an integer."
   (* -400 (log (1- (/ 1.0 score-percentage)))))
 ;;(elo-relative-performance 1)
 
-(defun elo-performance (score-percentage elo-average)
+(cl-defun elo-performance (score-percentage elo-average)
   (+ elo-average (elo-relative-performance score-percentage)))
 ;;(elo-performance 1 (avg 2578 2435))
 ;;(+ 2558 748)
 
-(defun elo-coefficient-fide (elo &optional has-played-less-than-30-games)
+(cl-defun elo-coefficient-fide (elo &optional has-played-less-than-30-games)
   (if has-played-less-than-30-games
     25
     (if (< elo 2400) 15 10)))
 
-(defun elo-new (elo-old score num-games elo-average &optional has-played-less-than-30-games)
+(cl-defun elo-new (elo-old score num-games elo-average &optional has-played-less-than-30-games)
   (+ elo-old (* (elo-coefficient-fide elo-old has-played-less-than-30-games)
 		(- score (elo-expected-score elo-old elo-average num-games)))))
 ;;(elo-new 2713 5.5 9 2713)
 
-(defun celsius-to-fahrenheit (x &optional reverse)
+(cl-defun celsius-to-fahrenheit (x &optional reverse)
   "Returns X degrees Celsius in Fahrenheit. If REVERSE is non-nil, the
 reverse operation is performed. "
   (if reverse (* (- x 32) (/ 5 9.0)) (+ (* 1.8 x) 32)))
 ;;(celsius-to-fahrenheit 100 t)
 
-(defun pound-to-kg (x &optional reverse)
+(cl-defun pound-to-kg (x &optional reverse)
   "Returns X degrees Celsius in Fahrenheit. If REVERSE is non-nil, the
 reverse operation is performed. "
   (if reverse
@@ -215,11 +215,11 @@ reverse operation is performed. "
 ;;(mapcar #'pound-to-kg '(215 160 178))
 
 (defconst +inch->cm+ 2.54)
-(defun foot-to-cm (feets inches)
+(cl-defun foot-to-cm (feets inches)
   (* +inch->cm+ (+ (* feets 12) inches)))
 ;;(format "Leonardo was 194 cm high, while Michelangelo was just %s cm" (foot-to-cm 5 2))
 
-(defun personnummer-check (personnummer)
+(cl-defun personnummer-check (personnummer)
   "Checks that personnummer is valid according to its check digits
 \(the last two digits\). The formulas are taken from
 http://www.matematikk.org/pub/mattetekst/Persnr/."
@@ -251,7 +251,7 @@ occurrences of SYMBOL-B and the symbols are evenly distributed."
 ;;(make-distributed-list 2 7) ==> '(1 0 0 0 1 0 0)
 ;;(make-distributed-list 3 7) ==> '(1 0 0 1 0 0 1 0)
 
-(defun merge-2-lists (list1 list2)
+(cl-defun merge-2-lists (list1 list2)
   "Merges contents of LIST1 and LIST2 and in an optimally distributed
 way."
   (cl-loop with denominator = 0
@@ -266,7 +266,7 @@ way."
 	   collect (pop list2)))
 ;;(merge-2-lists '(1 1 1) '(0 0))
 
-(defun merge-n-lists-sorted-by-length (lists)
+(cl-defun merge-n-lists-sorted-by-length (lists)
   "Merges contents of the each list in LISTS and in an optimally distributed
 way. Assumes that LISTS is sorted by the length of its elements (lists)."
   (if lists
@@ -274,7 +274,7 @@ way. Assumes that LISTS is sorted by the length of its elements (lists)."
       (merge-2-lists (first lists) (merge-n-lists (rest lists)))
       (first lists))))
 
-(defun merge-n-lists (lists)
+(cl-defun merge-n-lists (lists)
   "Merges contents of the each list in LISTS and in an optimally distributed
 way. Assumes that LISTS is sorted by the length of its elements (lists)."
   (merge-n-lists-sorted-by-length (sort* lists #'> :key #'length)))
@@ -338,7 +338,7 @@ The equivalence relation is given by keyword :test.
   (merge-n-lists (partition list test)))
 ;;(distribute '(a b c a d e f))
 
-(defun distribute-categories (distribution-list &optional categories-list)
+(cl-defun distribute-categories (distribution-list &optional categories-list)
   "Special application for Munkholmserien"
   (merge-n-lists 
    (mapcar* #'(lambda (n sym) (make-list n sym))
@@ -361,13 +361,13 @@ the rotation degree."
 	   if (funcall test rot) return rot))
 ;;(cycle-rotate-until '(a b a a a) #'(lambda (x) (funcall 'neq (first x) (last-elt x))))
 
-(defun cycle-rotations (cycle)
+(cl-defun cycle-rotations (cycle)
   (cl-loop for x in cycle
 	   for rot = cycle then (cycle-rotate rot)
 	   collect rot))
 ;;(cycle-rotations '(a a b b a b a))
 
-(defun maprot (function &rest cycles)
+(cl-defun maprot (function &rest cycles)
   (cl-loop for i below (apply #'max (mapcar #'length cycles))
 	   for args = cycles then (mapcar #'cycle-rotate args)
 	   collect (apply function args)))
@@ -375,7 +375,7 @@ the rotation degree."
 
 (cl-defun cycle-grouped-normal-form (list &optional (test #'eq))
   "One problem: the highest number of a's should come first"
-  (lexical-let ((test test)) 
+  (let ((test test)) 
     (min-element
      (cycle-rotations
       (group (cycle-rotate-until 
@@ -415,7 +415,7 @@ the rotation degree."
 (cl-defun cycle-badness (cycle &optional (test #'eq))
   "Calculate how well the elements of CYCLE is distributed,
 assuming the number of non-EQ elements is 2"
-  (lexical-let ((test test))
+  (let ((test test))
     (cl-loop for elt in (remove-duplicates cycle)
 	     for badness = (2cycle-badness cycle #'(lambda (x y) 
 						     (xnor (funcall test elt x) 
@@ -436,7 +436,7 @@ See `cycle-badness' for the measure of a good cycle."
 ;;(cycle-best '((a a b b) (a b a b)))
 
 (cl-defun distribute-rest (list prefix-cycle &optional (test #'eq))
-  (lexical-let* ((rots )
+  (let* ((rots )
 		 (test test))
     (cycle-best (mapcar (bind #'append prefix-cycle) (cycle-rotations (distribute list test))))))
 ;;(cycle-badness (distribute-rest '(a c a b e b) '(a a b)))
@@ -447,7 +447,7 @@ See `cycle-badness' for the measure of a good cycle."
 ;;(p/th-to-NOK/MWh 90)352.935
 
 ;; trondheim
-(defun trondheim-percentage (n-games game-price n-qs-delivered received-price/q wanted-price/q)
+(cl-defun trondheim-percentage (n-games game-price n-qs-delivered received-price/q wanted-price/q)
   (/ (* n-qs-delivered (- wanted-price/q received-price/q))
      (* 1.0 n-games game-price)))
 ;;(trondheim-percentage 5000 500 1000 10 35)
@@ -471,12 +471,12 @@ See `cycle-badness' for the measure of a good cycle."
 
 
 ;;; div
-(defun is-divisible (n m)
+(cl-defun is-divisible (n m)
   (zerop (mod n m)))
 ;(mapcar #'(lambda (n) (is-divisible n 5)) (cl-loop for i below 11 collect i))
 
 (require 'mb-utils-10000-first-primes)
-(defun primep (n)
+(cl-defun primep (n)
   (not-null (find n 10000-first-primes)))
 ;;(remove-if nil (mapcar #'primep (1-n 20)))
 
@@ -501,7 +501,7 @@ See `cycle-badness' for the measure of a good cycle."
 ;;(apply #'* (factorize 1047300))
 ;;(/ 288 36)
 
-(defun all-factors (n)
+(cl-defun all-factors (n)
   (cl-sort (remove-duplicates (mapcar #'product (power-set (factorize n)))) #'<))
 ;;(all-factors 120)
 ;;(all-factors 284)
@@ -513,18 +513,18 @@ See `cycle-badness' for the measure of a good cycle."
 	   do (error "FACTORIZE failed for argument %d" i)))
 					;(test-factorize 10000)
 
-(defun expand-factor (exponents primes)
+(cl-defun expand-factor (exponents primes)
   (product (cl-loop for p in primes
 		    for e in exponents
 		    collect (expt p e))))
 ;;(expand-factor '(1 2) '(3 2))
 
-(defun expand-factors (factors primes)
+(cl-defun expand-factors (factors primes)
   (cl-loop for f in factors collect (expand-factor f primes)))
 ;;(expand-factors '((1 2) (0 0)) '(3 2))
 
 ;;; Number conversions
-(defun calculate-n-ary (root coefficients)
+(cl-defun calculate-n-ary (root coefficients)
   "COEFFICIENTS is a list of integers a0, a1, a2... where ai < ROOT"
   (cl-loop for coefficient in coefficients
 	   for i from 0
@@ -539,7 +539,7 @@ See `cycle-badness' for the measure of a good cycle."
     (format format-string n)))
 ;;(int-to-hex 10 10) ==> "000000000a"
 
-(defun int-to-bin-array (n)
+(cl-defun int-to-bin-array (n)
   (let ((res ()))
     (while (> n 0)
       (push (logand 1 n) res)
@@ -547,7 +547,7 @@ See `cycle-badness' for the measure of a good cycle."
     res))
 ;;(int-to-bin-array 1235)
 
-(defun int-to-bin (n)
+(cl-defun int-to-bin (n)
   (apply #'concat (mapcar #'int-to-string (int-to-bin-array n))))
 ;;(int-to-bin 10450)
 
@@ -582,22 +582,22 @@ prefixed by zeros."
 	    res)))
 ;;(cl-loop for i in (a-b 99 101) collect (uint-to-n-base i))
 
-(defun bin-to-int-array (binary-string)
+(cl-defun bin-to-int-array (binary-string)
   (mapcar #'string-to-int (split-string binary-string "" t)))
 ;;(bin-to-int-array "01101")
 
-(defun byte-to-2hex (byte) (format "%02x" byte))
+(cl-defun byte-to-2hex (byte) (format "%02x" byte))
 
-(defun byte-to-char (byte) (format "%c" byte))
+(cl-defun byte-to-char (byte) (format "%c" byte))
 ;;(mapcar #'byte-to-2hex (read-bytes-from-buffer midi-buffer))
 
-(defun bytes-to-string (bytes)
+(cl-defun bytes-to-string (bytes)
   "Converts a list of 8-bits bytes to a unibyte STRING.
 TODO: handle multibyte strings."
   (apply #'concat (mapcar #'byte-to-char bytes)))
 ;;(bytes-to-string '(65 66 67 68))
 
-(defun string-to-bytes (string)
+(cl-defun string-to-bytes (string)
   "Converts a unibyte STRING to a list of 8-bits bytes. 
 TODO: handle multibyte strings."
   (mapcar #'string-to-char (split-string string "" t)))
@@ -646,7 +646,7 @@ NUMBER-OF-BYTES is reached."
 ;;(bytes-to-int (list 1 0) :endianness :little)
 ;;(bytes-to-int (list 1 0) :endianness :big)
 
-(defun int-to-variable-length-quantity (integer)
+(cl-defun int-to-variable-length-quantity (integer)
   "Converts iNTEGER to a variable length integer.
 See http://en.wikipedia.org/wiki/Variable-length_quantity for a
 definition."
@@ -684,7 +684,7 @@ definition."
   "Returns a function that converts a number to its 2's complement of bit length NUMBER-OF-BITS.
 Optional argument WITH-NON-INTEGER controls the functions
 behavior when the argument is not an integer"
-  (lexical-let ((2^n (expt 2 number-of-bits))
+  (let ((2^n (expt 2 number-of-bits))
 		(2^n-1 (expt 2 (1- number-of-bits)))
 		(with-non-integer with-non-integer)
 		(inverse inverse))
@@ -712,7 +712,7 @@ behavior when the argument is not an integer"
 ;;(join-ints 15 15) ==> 255 
 
 ;;;random numbers
-(defun random-float-base (&optional seed)
+(cl-defun random-float-base (&optional seed)
   "Return a random number in [0 1]."
   (when seed (random t))
   (/ (- (coerce (random) 'float) most-negative-fixnum)
@@ -758,7 +758,7 @@ value in the specified interval. Else, it will be an integer."
     (random-integer a b seed)
     (random-float a b seed)))
 
-(defun random-weighted-index (weights)
+(cl-defun random-weighted-index (weights)
   (let ((cumulative-weights (cumsum-list weights)))
     (cl-position-if (bind #'>= (random-float 0 (last-elt cumulative-weights)))
 	cumulative-weights)))
@@ -772,10 +772,10 @@ value in the specified interval. Else, it will be an integer."
 	       (nreverse (1-n (1- n)))))))
 ;;(random-weights-given-probabilities 5 .5)
 
-(defun random-weighted-element-1 (elements)
+(cl-defun random-weighted-element-1 (elements)
   (first (nth (random-weighted-index (project-sequence elements 1)) elements)))
 
-(defun random-weighted-element (elements &optional inverse)
+(cl-defun random-weighted-element (elements &optional inverse)
   (random-weighted-element-1
    (if inverse (mapcol (bind #'inv t) 1 elements) elements)))
 
@@ -794,7 +794,7 @@ value in the specified interval. Else, it will be an integer."
 (cl-defun random-log-fun (&optional (h 1) (m 0.1) seed)
   ""
   (cl-destructuring-bind (a b k) (random-log-parameters h m)
-    (lexical-let ((a a) (b b) (k k))
+    (let ((a a) (b b) (k k))
       (lambda (x)
 	(+ a (* b (exp (* k x))))))))
 ;;(funcall (random-log-fun) 0)
@@ -804,12 +804,12 @@ value in the specified interval. Else, it will be an integer."
 ;;(random-weighted-element '((a 1) (b 5) (c 10)) t)
 ;;(accumulate-list (cl-loop repeat 100 collect (random-weighted-element '((a 1) (b 5) (c 10)))) #'symbol<)
 
-(defun interval-floor (n interval)
+(cl-defun interval-floor (n interval)
   (* (floor n interval) interval))
 ;;(interval-floor 30 10)
 
 ;;pool utils
-(defun fractional-ball-angle (fraction &optional with-object-ball-throw-correction)
+(cl-defun fractional-ball-angle (fraction &optional with-object-ball-throw-correction)
   "Optional argument WITH-OBJECT-BALL-THROW-CORRECTION is not implemented"
   (cl-assert (between= fraction 0 1))
   (radians-to-degrees (asin (- 1 fraction))))
@@ -862,11 +862,11 @@ either 0 or 1)"
       (cons head (aggregate (rest numbers) head)))))
 ;;(aggregate '(1 2 3 4))
 
-(defun normalize (numbers)
+(cl-defun normalize (numbers)
   (map (type-of numbers) (bind #'/ (float (sum numbers))) numbers))
 ;;(normalize (vector 1 2 3))
 
-(defun waverage (list)
+(cl-defun waverage (list)
   "Returns the Weighted average of the number and weight pairs in LIST: ((x1 w1) (x2 w2) ...)"
   (/ (sum (mapcar (bind #'apply #'* 1) list))
      (float (sum (mapcar #'second list)))))
@@ -883,14 +883,14 @@ either 0 or 1)"
     (list hourly-salary hourly-salary-with-company-costs hourly-salary-with-holiday-money hourly-salary-raw)))
 ;;(hourly-from-yearly-salary 567875)
 
-(defun quadratic-solver (a b c)
+(cl-defun quadratic-solver (a b c)
   (let ((r (/ (- b) (* 2.0 a)))
 	(q (/ (sqrt (- (* b b) (* 4.0 a c)))
 	      2.0)))
     (list (+ r q) (- r q))))
 ;;(quadratic-solver 1 1 -6)
 
-(defun ceilx*x-solver (y)
+(cl-defun ceilx*x-solver (y)
   "Assume y and solution is positive"
   (let* ((min (first (quadratic-solver 1 1 (- y))))
 	 (max (first (quadratic-solver 1 0 (- y))))
@@ -900,14 +900,14 @@ either 0 or 1)"
 ;;(ceilx*x-solver 3.1)
 
 ;; financial
-(defun interest-annual (x interest year)
+(cl-defun interest-annual (x interest year)
   (* x (expt (1+ interest) years)))
 ;;(interest-annual 1000 .06 5)
 
-(defun naaverdi-annual (x interest years)
+(cl-defun naaverdi-annual (x interest years)
   (/ x (expt (1+ interest) years)))
 
-(defun obligation-value (x yield years market-interest)
+(cl-defun obligation-value (x yield years market-interest)
   (+ (naaverdi-annual x market-interest years)
      (cl-loop with premium = (* x yield)
 	      for i below years
@@ -938,27 +938,27 @@ either 0 or 1)"
 ;; then enter the text in that file's own buffer.
 
 ;;;;
-(defun div-sec-min (seconds) (floor* seconds 60.0))
-(defun div-min-hour (minutes) (floor* minutes 60.0))
-(defun div-hour-day (hours) (floor* hours 24.0))
+(cl-defun div-sec-min (seconds) (floor* seconds 60.0))
+(cl-defun div-min-hour (minutes) (floor* minutes 60.0))
+(cl-defun div-hour-day (hours) (floor* hours 24.0))
 ;;(div-sec-min 72)
 
-(defun leap-year-p (year)
+(cl-defun leap-year-p (year)
   (and (modp year 0 4)
        (or (modp year 0 400)
 	   (not (modp year 0 100)))))
 ;;(mapcar #'leap-year-p '(1600 1700 1800 1900 2000 2001 2002 2003 2004))
 
-(defun days-in-year (year)
+(cl-defun days-in-year (year)
   (if (leap-year-p year) 366 365))
 ;;(mapcar #'days-in-year '(1600 1700 1800 1900 2000 2001 2002 2003 2004))
 
-(defun days-between-years (year1 year2)
+(cl-defun days-between-years (year1 year2)
   (cl-loop for y from year1 below year2 
 	   sum (days-in-year y)))
 ;;(days-between-years 1970 1971)
 
-(defun current-year () (sixth (decode-time)))
+(cl-defun current-year () (sixth (decode-time)))
 
 (cl-defun days-after-year (&optional (year1 1970) (year2 (current-year)))
   (sum (mapcar #'days-in-year (a-b year1 year2))))
@@ -996,17 +996,17 @@ either 0 or 1)"
 ;;(jstime 1199290500)
 ;;(floor* 1199290500 60.0)
 
-(defun linear-function-slope-point (slope x)
+(cl-defun linear-function-slope-point (slope x)
   "Returns a linear function with SLOPE going through point X.
 The point is represented as a pair (X0 X1)."
-  (lexical-let* ((x0 (first x))
+  (let* ((x0 (first x))
 		 (x1 (second x))
 		 (a slope)
 		 (b (- x1 (* a x0))))
     #'(lambda (x) (+ (* a x) b))))
 ;;(mapcar (linear-function-slope-point 2 '(1 2)) (a-b -3 3))
 
-(defun linear-function-point-to-point (x y)
+(cl-defun linear-function-point-to-point (x y)
   "Returns a linear function going through points X and Y. Both
   poings are represented as a pair of numbers. See
   `linear-function-slope-point'"
@@ -1015,7 +1015,7 @@ The point is represented as a pair (X0 X1)."
 			       x))
 ;;(mapcar (linear-function-point-to-point '(0 0) '(1 2)) (a-b -3 3))
 
-(defun linear-function (slope-or-point point)
+(cl-defun linear-function (slope-or-point point)
   (if (consp slope-or-point)
     (linear-function-point-to-point slope-or-point point)
     (linear-function-slope-point slope-or-point point)))
@@ -1041,7 +1041,7 @@ The point is represented as a pair (X0 X1)."
 	   finally return res))
 ;;(digit-sum 123 2)
 
-(defun tall-navn (n &optional intetkjønn-p)
+(cl-defun tall-navn (n &optional intetkjønn-p)
   (cond ((= n 0) "null")
 	((= n 1) (if intetkjønn-p "ett" "en"))
 	((< n 20) 
@@ -1061,7 +1061,7 @@ The point is represented as a pair (X0 X1)."
 	(t (error))))
 ;;(tall-navn 221134923)
 
-(defun extended-gcd (a b)
+(cl-defun extended-gcd (a b)
   (let* ((s 0) (old-s 1)
 	 (t* 1) (old-t* 0)
 	 (r b) (old-r a)
@@ -1109,10 +1109,10 @@ quotients by the gcd: (%d, %d)"
 ;;(mapcar #'floor-test (list 7 12 24 36 48 63))
 ;;(list (log 3 2) (/ 11 7.0))
 
-(defun fractional (x) (- (float x) (floor x)))
+(cl-defun fractional (x) (- (float x) (floor x)))
 ;;(fractional 3.4)
 
-(defun test-fractional (k) (< (fractional (* k (log 3 2))) (/ 1.0 k)))
+(cl-defun test-fractional (k) (< (fractional (* k (log 3 2))) (/ 1.0 k)))
 ;;(cl-loop for i from 1 below 1000 if (test i) collect (list i (l-value i) (gcd i (l-value i))))
 
 (cl-defun floor-test2 (max-k m)
@@ -1128,7 +1128,7 @@ quotients by the gcd: (%d, %d)"
 ;;(cl-loop for i to 5 collect (floor (* i (log 3 2))))
 ;;(cl-loop for i below 30 collect  (list i (floor (* i (log 3 2)))))
 
-(defun l-value (k) (floor (* k (log 3 2))))
+(cl-defun l-value (k) (floor (* k (log 3 2))))
 ;;(mapcar #'l-value (a-b 1 12))
 ;;(cl-loop for k from 1 to 12 collect (* (float k) (fractional (* k (log 3 2)))))
 
@@ -1142,13 +1142,13 @@ quotients by the gcd: (%d, %d)"
 	  (first (cl-floor (* l (mod (* l-inverse s) k)) k)))))
 ;;(cl-loop for s below 10 collect (test3 s))
 
-(defun factors (n)
+(cl-defun factors (n)
   (cl-loop for i from 1 to (/ n 2)
 	   if (zerop (mod n i))
 	   collect i))
 ;;(factors 10)
 
-(defun perfect-number-p (n)
+(cl-defun perfect-number-p (n)
   (= (sum (factors n)) n))
 ;;(perfect-number-p 28)
 
@@ -1157,7 +1157,7 @@ quotients by the gcd: (%d, %d)"
 	   if (perfect-number-p i) collect i))
 ;;(perfect-numbers 10000)
 
-(defun integer-ceiling (p q)
+(cl-defun integer-ceiling (p q)
   "Return the ceiling of P/Q, where P and Q are positive integers.
 This is an effective implementation of (coerce (ceiling (/ (float
 p) q)))"
@@ -1183,7 +1183,7 @@ p) q)))"
 
 (provide 'mb-utils-math)
 
-(defun problem (n)
+(cl-defun problem (n)
   (/ (cl-loop with primes = (subseq 10000-first-primes 0 15)
 	      repeat n
 	      for s = (+ (random-integer 1 50) (random-integer 1 50))

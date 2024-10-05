@@ -7,7 +7,7 @@
 (defsubst ld-database-keyword (db)
   (first (ld-database-identifier db)))
 
-(defun ld-add-table (table db)
+(cl-defun ld-add-table (table db)
   "Adds TABLE to DB"
   (let ((schema (ld-table-schema table))
 	(db-keyword (ld-database-keyword db)))
@@ -42,7 +42,7 @@ application" (ld-database-name *current-database*))))
 (cl-indent '(ld-create-database) 'prog1)
 ;;(ld-create-database :maths :schemas (mapcar #'ld-make-schema *maths-db-schemas*))
 
-(defun ld-database-p (obj)
+(cl-defun ld-database-p (obj)
   (and (consp obj) (eql (first obj) :database)))
 ;;(ld-database-p *current-database*)
 
@@ -64,7 +64,7 @@ application" (ld-database-name *current-database*))))
 	(tablepos (position id tables :key #'ld-table-identifier :test #'equal)))
     (setf (nth tablepos tables) new-table)))
 
-(defun ld-rename-column (table-designator column-keyword new-keyword)
+(cl-defun ld-rename-column (table-designator column-keyword new-keyword)
   (setf (car (cddadr
 	      (cl-find column-keyword
 		(ld-schema-column-definitions (ld-schema table-designator))

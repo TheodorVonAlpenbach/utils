@@ -5,7 +5,7 @@
 (defconst scilab-valid-variable-name "\\<[A-Za-z$#_%][A-Za-z0-9$#_]*\\>"
   "Regexp describing all valid variable names")
 
-(defun scilab-function-call-regexp ()
+(cl-defun scilab-function-call-regexp ()
   "Ok, this is much more complicated than I thought. 
 In addition to identifiers, all valid expressions should accepted as well, i.e.
 1, [], x + y, (expt(3, 4) + 1)/myfun(123, %T)
@@ -20,12 +20,12 @@ This is indeed not feasable, so just check for the presence of parentheses"
 ;;(string-match* (scilab-function-call-regexp) "// FFITimeSeries(3, \"20010101_0000\", \"20990101_2359\")" :num '(1 2 3 4 5))
 
 
-(defun scilab-function-head-regexp (name)
+(cl-defun scilab-function-head-regexp (name)
   (format "^[[:space:]]*function[[:space:].]*\\(\\(\\[[^]]*\\]\\|%s\\)[[:blank:]]*=[[:blank:]]*\\)?[[:space:].]*\\(%s\\)"
     +scilab-identifier-regexp+ name))
 ;;(re-search-forward (scilab-function-head-regexp "mbfct"))
 
-(defun scilab-parse-statement (string)
+(cl-defun scilab-parse-statement (string)
   "Parses a scilab statement on the form LHS = NAME(ARGS);
 and returns the list (LHS NAME ARGS), where
 LHS is the left hand side of an assignment (or nil if the statement is not an assigment)
@@ -43,7 +43,7 @@ custom `scilab-builtin-list'. So it can work slowly. You can disable this option
   :group 'scilab-setup
   :type 'boolean)
 
-(defun scilab-which-function()
+(cl-defun scilab-which-function()
   "Gets the name of the current function"
   (interactive)
   (let ((name nil))
@@ -54,7 +54,7 @@ custom `scilab-builtin-list'. So it can work slowly. You can disable this option
       (setq name (match-string-no-properties 3)))
     (message name)))
 
-(defun scilab-beginning-of-defun ()
+(cl-defun scilab-beginning-of-defun ()
   "This overrides the scilab.el definition"
   (interactive)
   (end-of-line)
@@ -62,30 +62,30 @@ custom `scilab-builtin-list'. So it can work slowly. You can disable this option
     (match-beginning 0)
     (progn (goto-char (point-min)) nil)))
 
-(defun scilab-end-of-defun ()
+(cl-defun scilab-end-of-defun ()
   "This overrides the scilab.el definition"
   (interactive)
   (re-search-forward scilab-endfun-regex nil t))
 
-(defun scilab-defun-region ()
+(cl-defun scilab-defun-region ()
   "Return the region of current function"
   (save-excursion
     (let ((beg (scilab-beginning-of-defun))
 	  (end (scilab-end-of-defun)))
       (and beg end (list beg end)))))
 
-(defun scilab-defun-lines ()
+(cl-defun scilab-defun-lines ()
   "Return the region of current function"
   (string-to-lines (apply #'buffer-substring-no-properties (scilab-defun-region))))
 
-(defun scilab-statement-p (line)
+(cl-defun scilab-statement-p (line)
   "Return true iff line is neither blank or a comment"
   (let ((trimmed-line (string-trim line)))
     (nor (empty-string-p trimmed-line) 
 	 (string-match "^//" trimmed-line))))
 ;;(mapcar #'scilab-statement-p '("  // something " "   "))
 
-(defun mbscilab-fn-start (name &optional filename)
+(cl-defun mbscilab-fn-start (name &optional filename)
   "Returns point of start of function NAME"
   (save-excursion
     (goto-char (point-min))
@@ -132,10 +132,10 @@ project search, or, again, just provide the current buffer."
 
 ;;; Equation for next to fns is
 ;;; global-line-number = relative-line-number + fn-start-line - 1
-(defun scilab-relative-linum (linum fn-info)
+(cl-defun scilab-relative-linum (linum fn-info)
   (1+ (- linum (first (getf fn-info :lines)))))
 
-(defun scilab-global-linum (relative-linum fn-info)
+(cl-defun scilab-global-linum (relative-linum fn-info)
   (1- (+ relative-linum (first (getf fn-info :lines)))))
 
 (cl-defun scilab-last-line-p (fn-info &optional (point (point)))
@@ -146,7 +146,7 @@ project search, or, again, just provide the current buffer."
 (cl-defun scilab-function-at-line (&optional (line (line-string)))
   (second (scilab-parse-statement line)))
 
-(defun scilab-function-path (function)
+(cl-defun scilab-function-path (function)
   "Returns the pair (PATH-TO-FUNCTION-DEFINITION START-LINE) corresponding to FUNCTION."
   (with-buffer (scilab-tags-buffer)
     (goto-char (point-min))
@@ -157,7 +157,7 @@ project search, or, again, just provide the current buffer."
 	(list (match-string 1) line)))))
 ;;(scilab-function-path "mbfct")
 
-(defun scilab-function-buffer (function-name &optional open-buffer-file-p)
+(cl-defun scilab-function-buffer (function-name &optional open-buffer-file-p)
   "Returns the pair (BUFFER START-LINE) corresponding to FUNCTION-NAME.
 BUFFER is nil then path to FUNCTION-NAME is not in any buffer. If
 open-buffer-file-p is true, then the file containing
@@ -172,7 +172,7 @@ set to the file's buffer. See also `scilab-function-path'"
       nil)))
 ;;(scilab-function-buffer "GenerateFFIAOG")
 
-(defun scilab-function-start-line (function)
+(cl-defun scilab-function-start-line (function)
   "TODO: Should go back to point if search fails.
 Note! This only applies to current buffer."
   (with-buffer (first (scilab-function-buffer function))
@@ -181,7 +181,7 @@ Note! This only applies to current buffer."
 	 (line-number-at-pos))))
 ;;(scilab-function-start-line "GenerateFFIAOG")
 
-(defun scilab-goto-function (name &optional function-linum)
+(cl-defun scilab-goto-function (name &optional function-linum)
   "FUNCTION-LINUM is relative to function [1 num-lines-function]"
   (interactive)
   (awhen (scilab-function-path name)

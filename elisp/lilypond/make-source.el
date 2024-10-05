@@ -108,42 +108,42 @@
 \(symbol long-instrument-name short-instrument-name midi-instrument-name clef instrument-class)")
 
 ;;; property functions
-(defun ly-instrument-symbol (instrument) (first instrument))
-(defun ly-long-instrument-name (instrument) (second instrument))
-(defun ly-short-instrument-name (instrument) (third instrument))
-(defun ly-midi-instrument-name (instrument) (fourth instrument))
-(defun ly-default-clef (instrument) (fifth instrument))
-(defun ly-instrument-class (instrument) (sixth instrument))
-(defun ly-instrument-key (instrument) (seventh instrument))
-(defun ly-instrument-abbrevation-symobol (instrument) (eighth instrument))
+(cl-defun ly-instrument-symbol (instrument) (first instrument))
+(cl-defun ly-long-instrument-name (instrument) (second instrument))
+(cl-defun ly-short-instrument-name (instrument) (third instrument))
+(cl-defun ly-midi-instrument-name (instrument) (fourth instrument))
+(cl-defun ly-default-clef (instrument) (fifth instrument))
+(cl-defun ly-instrument-class (instrument) (sixth instrument))
+(cl-defun ly-instrument-key (instrument) (seventh instrument))
+(cl-defun ly-instrument-abbrevation-symobol (instrument) (eighth instrument))
 
-(defun ly-find-instrument (instrument-symbol)
+(cl-defun ly-find-instrument (instrument-symbol)
   (assoc instrument-symbol ly-instruments))
 ;;(ly-find-instrument 'oboa)
 
-(defun ly-get-instrument (instrument-symbol)
+(cl-defun ly-get-instrument (instrument-symbol)
   (aif (ly-find-instrument instrument-symbol)
     it (error "No such instrument as %S" instrument-symbol)))
 ;;(ly-get-instrument 'oboea)
 
 
-(defun ly-get-long-instrument-name (instrument-symbol)
+(cl-defun ly-get-long-instrument-name (instrument-symbol)
   (ly-long-instrument-name (ly-get-instrument instrument-symbol)))
 ;;(ly-long-instrument-name 'fagotto)
 
-(defun ly-get-short-instrument-name (instrument-symbol)
+(cl-defun ly-get-short-instrument-name (instrument-symbol)
   (ly-short-instrument-name (ly-get-instrument instrument-symbol)))
 
-(defun ly-get-midi-instrument-name (instrument-symbol)
+(cl-defun ly-get-midi-instrument-name (instrument-symbol)
   (ly-midi-instrument-name (ly-get-instrument instrument-symbol)))
 
-(defun ly-get-default-clef (&optional instrument-symbol)
+(cl-defun ly-get-default-clef (&optional instrument-symbol)
   (if instrument-symbol
     (ly-default-clef (ly-get-instrument instrument-symbol))
     'treble))
 ;;(ly-default-clef 'fagotto)
 
-(defun ly-get-instrument-class (instrument-symbol)
+(cl-defun ly-get-instrument-class (instrument-symbol)
   (ly-instrument-class (ly-get-instrument instrument-symbol)))
 ;;(ly-get-instrument-class 'fagotto)
 
@@ -157,15 +157,15 @@
 
 
 
-(defun ly-instrument-filename (ly-instrument)
+(cl-defun ly-instrument-filename (ly-instrument)
   (format "%s%s%s" (symbol-name ly-instrument) ly-project-tag ly-instrument-file-extension))
 ;;(ly-instrument-filename 'flauto)
 
-(defun ly-score-filename ()
+(cl-defun ly-score-filename ()
   (format "score%s%s" ly-project-tag ly-score-file-extension))
 ;;(ly-score-filename)
 
-(defun ly-voices-sections-variable (instrument sections)
+(cl-defun ly-voices-sections-variable (instrument sections)
   (if (symbolp sections)
     (format "\\%sVoices%s"
       (ly-instrument-symbol instrument)
@@ -173,13 +173,13 @@
     (mapcar (bind #'ly-voices-sections-variable instrument 1) sections)))
 ;;(ly-voices-sections-variable (ly-get-instrument 'oboe) '(a b c))
 
-(defun ly-with-staff-args (instrument)
+(cl-defun ly-with-staff-args (instrument)
   (list (ly-variable-definition 'instrumentName (ly-long-instrument-name instrument))
 	(ly-variable-definition 'shortInstrumentName (ly-short-instrument-name instrument))
 	(ly-variable-definition 'midiInstrument (ly-midi-instrument-name instrument))))
 ;;(ly-with-staff-args (ly-get-instrument 'clarinetto))
 
-(defun ly-make-staff (instrument sections global-symbol)
+(cl-defun ly-make-staff (instrument sections global-symbol)
   (ly-new-staff 
    (ly-sequential-music-lines
     (ly-clef (ly-default-clef instrument))
@@ -191,28 +191,28 @@
    (ly-with-staff-args instrument)))
 ;;(insert "\n\n" (ly-make-staff (ly-get-instrument 'fagotto) '(a b c) 'global))
 
-(defun ly-staff-variable-name (instrument-symbol)
+(cl-defun ly-staff-variable-name (instrument-symbol)
   (concat (symbol-name instrument-symbol) "Staff"))
 ;;(ly-staff-variable-name 'oboe)
 
-(defun ly-staff-variable (instrument-symbol)
+(cl-defun ly-staff-variable (instrument-symbol)
   (ly-variable (ly-staff-variable-name instrument-symbol)))
 ;;(ly-staff-variable 'oboe)
 
-(defun ly-make-staff-variables (instrument-symbols sections global-symbol)
+(cl-defun ly-make-staff-variables (instrument-symbols sections global-symbol)
   (concat* 
-   (loop for x in instrument-symbols
+   (cl-loop for x in instrument-symbols
 	 collect (ly-variable-definition 
 		  (ly-staff-variable-name x)
 		  (ly-make-staff (ly-get-instrument x) sections global-symbol)))
    :in "\n\n"))
 ;;(insert "\n\n" (ly-make-staff-variables '(flauto oboe) '(a b c) 'global))
 
-(defun ly-make-staff-group (instrument-group instrument-symbols)
+(cl-defun ly-make-staff-group (instrument-group instrument-symbols)
   "Returns empty string if instrument-symbols is nil"
   (when instrument-symbols
     (ly-new-staff-group 
-     (loop for x in instrument-symbols
+     (cl-loop for x in instrument-symbols
 	   for key = (ly-instrument-key (ly-get-instrument x))
 	   for staff-variable = (ly-staff-variable x)
 	   collect (if key 
@@ -222,52 +222,52 @@
 ;;(insert "\n\n" (ly-make-staff-group 'winds '(oboe clarinetto)))
 
 
-(defun ly-make-staff-groups (instrument-symbols)
-  (loop for group in ly-instrument-groups
+(cl-defun ly-make-staff-groups (instrument-symbols)
+  (cl-loop for group in ly-instrument-groups
 	for instruments = (ly-get-instruments group (mapcar #'ly-get-instrument instrument-symbols))
 	for staff-group = (ly-make-staff-group group (mapcar #'ly-instrument-symbol instruments))
 	if staff-group collect staff-group))
 ;;(ly-make-staff-groups '(flauto oboe corno))
 
-(defun ly-make-global-varible (sections global-symbol)
+(cl-defun ly-make-global-varible (sections global-symbol)
   (ly-variable-definition
    global-symbol
    (ly-sequential-music*
-    (loop for x in sections
+    (cl-loop for x in sections
 	  collect (ly-variable (concat (sstring global-symbol)
 				       (capitalize (sstring x))))))))
 ;;(ly-make-global-varible '(a b c) 'global)
 
-(defun ly-make-layout-score (instrument-symbols)
+(cl-defun ly-make-layout-score (instrument-symbols)
   (ly-new-score
    (ly-sequential-music-lines
     (ly-simultaneous-music* (ly-make-staff-groups instrument-symbols) t) 
     (ly-layout-block))))
 ;;(insert "\n" (ly-make-layout-score '(flauto oboe corno)))
 
-(defun ly-make-midi-score (instrument-symbols)
+(cl-defun ly-make-midi-score (instrument-symbols)
   (ly-new-score 
    (ly-sequential-music-lines
     (ly-simultaneous-music* (mapcar #'ly-staff-variable instrument-symbols) t)
     (ly-midi-block))))
 ;;(insert "\n" (ly-make-midi-score '(flauto oboe corno violinoI)))
 
-(defun ly-make-include (instrument-symbol)
+(cl-defun ly-make-include (instrument-symbol)
   (ly-include (concat (symbol-name instrument-symbol)
 		      ly-instrument-file-extension)))
 ;;(insert (ly-make-include 'oboe))
 
-(defun ly-make-includes (instrument-symbols)
+(cl-defun ly-make-includes (instrument-symbols)
   (concat* (mapcar #'ly-make-include instrument-symbols) :in "\n"))
 ;;(insert "\n\n" (ly-make-includes '(oboe corno)))
 
-(defun ly-expand-instrument-symbols (instrument-symbols)
+(cl-defun ly-expand-instrument-symbols (instrument-symbols)
   (if (symbolp instrument-symbols)
     (ly-expand-instrument-symbols (list instrument-symbols))
     (let ((all-symbols (ly-instrument-symbols)))
       (sort  
        (remove-duplicates 
-	(loop for x in instrument-symbols
+	(cl-loop for x in instrument-symbols
 	      if (eq x 'tutti) return (mapcan #'ly-expand-instrument-symbols '(winds brass strings))
 	      else if (member x ly-instrument-groups) append (mapcar #'ly-instrument-symbol (ly-get-instruments x))
 	      else if (member x all-symbols) collect x))
@@ -290,20 +290,20 @@
 ;;;;(insert (ly-make-source 'oboe '( e f) 'global))
 ;;;;(insert (ly-make-source '(violinoI violinoII) '(d e f) 'global))
 
-(defun ly-find-part-at-buffer-position (instrument-name)
+(cl-defun ly-find-part-at-buffer-position (instrument-name)
   (let ((regexp (format "%s.*Notes\\([^[[:space:]]]*\\)" instrument-name)))
     (save-excursion
       (re-search-backward regexp)
       (string-remove-props (match-string 1)))))
 
-(defun ly-abbrevate-symbol (instrument-symbol)
+(cl-defun ly-abbrevate-symbol (instrument-symbol)
   (let ((instrument (ly-find-instrument instrument-symbol)))
     (if instrument 
       (ly-instrument-abbrevation-symobol instrument)
       instrument-symbol)))
 ;;(mapcar #'ly-abbrevate-symbol '(flauto strings tutti))
 
-(defun ly-make-buffer-name (instrument-symbols sections)
+(cl-defun ly-make-buffer-name (instrument-symbols sections)
   "Nice to have: sort parts"
   (let ((instruments-part (concat* (mapcar #'ly-abbrevate-symbol
 				     (listify instrument-symbols))
@@ -338,12 +338,12 @@
 ;;(ly-make-and-compile 'oboe '(a b c d))
 ;;(ly-make-and-compile 'violoncello '(a b c))
 
-(defun ly-make-and-compile-part ()
+(cl-defun ly-make-and-compile-part ()
   (let* ((instrument-name (file-name-sans-extension (buffer-name)))
 	 (section (ly-find-part-at-buffer-position instrument-name)))
     (ly-make-and-compile (intern instrument-name) (intern section))))
 
-(defun LilyPond-command-master ()
+(cl-defun LilyPond-command-master ()
   "Run command on the current document."
   (interactive)
   (if (ly-ily-buffer-p)
@@ -352,10 +352,10 @@
   (LilyPond-command (LilyPond-command-query (LilyPond-get-master-file))
 		    'LilyPond-get-master-file))
 
-(defun ly-ily-buffer-p ()
+(cl-defun ly-ily-buffer-p ()
   (string= (file-extension (buffer-name)) ly-instrument-file-extension))
 
-(defun ly-make-and-compile ()
+(cl-defun ly-make-and-compile ()
   (if (ly-ily-buffer-p)
     (ly-make-and-compile-part))) 
 

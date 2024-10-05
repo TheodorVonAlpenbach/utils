@@ -19,7 +19,7 @@
 
 (cl-defun cram-db-last-matches (&optional (n 10))
   "Returns a tree of problem ratings"
-  (loop for m in (project-sequence (head n (cram-get-matches))
+  (cl-loop for m in (project-sequence (head n (cram-get-matches))
 				   '(cram-match-problem-id
 				     cram-match-timestamp
 				     cram-match-response
@@ -44,7 +44,7 @@
 ;;(cram-db-problem-ratings "fugl")
 ;;(minimum (mapcar #'second (cram-db-problem-ratings)) :test #'> :key #'length)
 
-(defun cram-default-problem-rating (operation level)
+(cl-defun cram-default-problem-rating (operation level)
   "Eventually this method should take into account the problem nature (level and operation)"
   +cram-default-rating+)
 
@@ -54,17 +54,17 @@
 (cl-defun cram-add-user (name &optional (rating +cram-default-rating+))
   (cram-db-insert-user name rating))
 
-(defun cram-set-current-user (user)
+(cl-defun cram-set-current-user (user)
   (setf *cram-current-user* (if (stringp user) (cram-db-get-user user) user)))
 
-(defun cram-current-user-old (&optional update) 
+(cl-defun cram-current-user-old (&optional update) 
   (when (or update (null *cram-current-user*))
     (cram-set-current-user (cram-db-get-user +cram-default-user-name+)))
   (unless *cram-current-user*
     (cram-set-current-user (cram-db-last-user)))
   *cram-current-user*)
 
-(defun cram-current-user (&optional update)
+(cl-defun cram-current-user (&optional update)
   (when *current-database*
     (when (or update
               (null *cram-current-user*))
@@ -78,7 +78,7 @@
 (defvar *cram-current-problem* nil ;;(nilf *cram-current-problem*)
   "This should be a tuple on the form (PROBLEM RATING LAST-TIMESTAMP)")
 
-(defun cram-set-current-problem (problem)
+(cl-defun cram-set-current-problem (problem)
   (setf *cram-current-problem* problem))
 
 (cl-defun cram-get-problem-method (&optional (new/old-ratio 0.5))
@@ -86,7 +86,7 @@
   ;; only new problems at this stage
   (if (< (random-float) new/old-ratio)
     :new :random))
-;;(let ((n 1000000)) (/ (loop for i below n if (eql (cram-get-problem-method) :new) count 1) (float n)))
+;;(let ((n 1000000)) (/ (cl-loop for i below n if (eql (cram-get-problem-method) :new) count 1) (float n)))
 
 (cl-defun cram-get-worst-problem ()
   "Use this method to retrive a copy of current problem"
@@ -99,13 +99,13 @@
        :key #'cram-problem-rating-e :test #'>))))
 ;;(cram-get-worst-problem)
 
-(defun cram-get-problems ()
+(cl-defun cram-get-problems ()
   (if *cram-ref-filter*
     (ld-select :problem
 	       :where (string-match *cram-ref-filter* :source-id))
     (ld-select :problem )))
 
-(defun cram-get-problem-ids ()
+(cl-defun cram-get-problem-ids ()
   (if *cram-ref-filter*
     (ld-select :problem :column :id
 	       :where (string-match *cram-ref-filter* :source-id))
@@ -133,9 +133,9 @@
 ;;(length (mapcar #'second (cram-get-matches *cram-current-user* t)))
 ;;(sort (mapcar #'second (cram-get-matches )) #'string>)
 
-(defun cram-recent-matches (matches seconds)
+(cl-defun cram-recent-matches (matches seconds)
   "Return all problem in MATCHES posed during last SECONDS seconds."
-  (loop for m in matches
+  (cl-loop for m in matches
 	while (< (time- (now) (cram-match-timestamp m) :second) seconds)
 	collect m))
 ;;(cram-recent-matches (cram-get-matches *cram-current-user* t) 500)
@@ -154,22 +154,22 @@ last zero score."
 ;;(cram-modify-scores '(.5 .4 .3 0 .5))
 
 (cl-defun cram-get-cram-problem-id-1-old (&optional (user (cram-current-user)))
-  (loop for x in (equivalence-class (cram-get-matches user)
+  (cl-loop for x in (equivalence-class (cram-get-matches user)
 		   :key #'cram-match-problem-id)
 	for scores = (cram-modify-scores (mapcar #'cram-match-score x))
 	for timestamps = (mapcar #'cram-match-timestamp x)
 	collect (list
 		 (cram-match-problem-id (car x))
-		 (loop for s in scores for ts in timestamps
+		 (cl-loop for s in scores for ts in timestamps
 		       sum (match-weight s ts (unix-time))))))
 
 (cl-defun match-weight
     (score delta-t &optional (tp (* 2 24 3600.0)) (r 0.2))
   (* score (expt r (/ delta-t tp))))
-;;(loop for i below 10 collect (match-weight 1 (* 3600 24 i)))
+;;(cl-loop for i below 10 collect (match-weight 1 (* 3600 24 i)))
 
 (cl-defun cram-get-cram-problem-id-1 (&optional (user (cram-current-user)))
-  (loop with now = (unix-time)
+  (cl-loop with now = (unix-time)
 	for y in (equivalence-class (cram-get-matches user)
 		   :key #'cram-match-problem-id)
 	for x = (reverse y)
@@ -192,7 +192,7 @@ last three times"
   (caar (minimum (cram-get-cram-problem-id-1 user) :key #'second)))
 ;;(cram-problem (cram-get-cram-problem-id))
 
-(defun cram-problem (id)
+(cl-defun cram-problem (id)
   (first (ld-select :problem :where (= :id id))))
 
 (cl-defun cram-get-cram-problem (&optional (user (cram-current-user)))
@@ -213,7 +213,7 @@ last three times"
 				   (member (cram-match-problem-id x)
 					   recent-problem-ids))
 		   ms))
-	(or (loop for m3 in (mapcar (bind #'head 3 1)
+	(or (cl-loop for m3 in (mapcar (bind #'head 3 1)
 			      (group (cl-sort (copy-tree ms)
 				       #'> :key #'cram-match-problem-id)
 				:key #'cram-match-problem-id :test #'=))
@@ -233,7 +233,7 @@ last three times"
 			(> diff 1))
 		      
 		      (let ((res 
-			     (loop for m in m3
+			     (cl-loop for m in m3
 				   for false-p = (not (cram-correct-response-p
 						       p (cram-match-response m)))
 				   ;; do (message "%s (%s), is false? %S"
@@ -303,34 +303,34 @@ Why was cram-current-user called with t (update arg)?."
 	(cram-problem-rating problem)))
 ;;(cram-current-ratings)
 
-(defun cram-operators ()
+(cl-defun cram-operators ()
   '(:addition :substraction :multiplication :division))
 ;;(cram-operators)
 
-(defun cram-random-operation ()
+(cl-defun cram-random-operation ()
   (first (elt-random *cram-problem-range*)))
 ;;(cram-random-operation)
 
-(defun cram-random-level (operation)
+(cl-defun cram-random-level (operation)
   (elt-random (apply #'a-b (second (assoc operation *cram-problem-range*)))))
 ;;(cram-random-level :substraction)
 
-(defun combine< (&rest predicates)
-  (lexical-let ((preds predicates))
+(cl-defun combine< (&rest predicates)
+  (let ((preds predicates))
     #'(lambda (x y)
-	(loop for (pred key) in preds
+	(cl-loop for (pred key) in preds
 	      for x* = (funcall key x)
 	      for y* = (funcall key y)
 	      if (funcall pred x* y*) return t
 	      if (funcall pred y* x*) return nil))))
 ;;(funcall (combine< (list #'< #'first) (list #'string< #'second)) '(1 "a") '(1 "b"))
 
-(defun lt->equal (lt)
-  (lexical-let ((lt lt))
+(cl-defun lt->equal (lt)
+  (let ((lt lt))
     #'(lambda (x y) (nor (funcall lt x y) (funcall lt y x)))))
 ;;(funcall (lt->equal #'<) 1 1)
 
-(defun cram-sort-problem-predicate ()
+(cl-defun cram-sort-problem-predicate ()
   "Not in use. However an example on use of `combine<'"
   (combine< (list #'(lambda (x y)
 		      (l-explicit< x y (cram-operators)))
@@ -339,27 +339,27 @@ Why was cram-current-user called with t (update arg)?."
 ;;(sort (cram-db-problems) (cram-sort-problem-predicate))
 ;;(ld-select :problems :columns (:operation :level))
 
-(defun cram-group-problems-by-type (problem)
+(cl-defun cram-group-problems-by-type (problem)
   "Not in use, but a good example on advanced use of
   #'cram-sort-problem-predicate"
   (let ((problems (cram-db-problems))
 	(pred (cram-sort-problem-predicate)))
     (group (sort problems pred) :test (lt->equal pred))))
 
-(defun cram-estimate-problem-rating (operation level)
+(cl-defun cram-estimate-problem-rating (operation level)
   "Direct select, violates policy on "
   (aif (cram-db-ratings-by-type operation level)
     (average it)
     +cram-default-rating+))
 ;;(cram-estimate-problem-rating :substraction 2)
 
-(defun cram-init-rating (&optional operation level)
+(cl-defun cram-init-rating (&optional operation level)
   +cram-default-rating+)
 
-(defun cram-calculate (operation args)
+(cl-defun cram-calculate (operation args)
   (apply (cram-operator operation) args))
 
-(defun cram-operator (operation)
+(cl-defun cram-operator (operation)
   (case operation
     (:addition #'+)
     (:substraction #'-)
@@ -367,7 +367,7 @@ Why was cram-current-user called with t (update arg)?."
     (:division #'/)))
 ;;(mapcar #'cram-operator '(:addition :substraction :multiplication :division))
 
-(defun problem-exists (operation args)
+(cl-defun problem-exists (operation args)
   (ld-select :problem
     :where (and (eql :operation operation)
 		(equal :arguments args))))
@@ -384,7 +384,7 @@ of tries is quite limited"
 	      (or (fifth problem*)
 		  (error "qwe")))
 	    (genproblem (level &optional (RD +cram-default-RD+))
-	      (loop for i below 1000
+	      (cl-loop for i below 1000
 		    for args = (cram-arguments level operation)
 		    unless (problem-exists operation args)
 		    return (list operation level args
@@ -397,24 +397,24 @@ of tries is quite limited"
 	  (level-range (second (assoc operation *cram-problem-range*))))
       (when problem* ;; else, probably all possible problems is already in db
 	(if (< (problem*-rating problem*) min-rating)
-	  (loop for l from level to (max level (last-elt level-range))
+	  (cl-loop for l from level to (max level (last-elt level-range))
 		for problem* = (genproblem l)
 		if (and problem*
 			(>= (problem*-rating problem*) min-rating))
 		return problem*
 		finally return problem*)
-	  (loop for l from level downto (min level (first level-range))
+	  (cl-loop for l from level downto (min level (first level-range))
 		for problem* = (genproblem l)
 		if (and problem*
 			(<= (fifth problem*) max-rating))
 		return problem*
 		finally return problem*))))))
-;;(loop repeat 1 collect (cram-create-problem :rating 1771.5996682195228 :operation :addition))
-;;(loop repeat 1 collect (cram-create-problem :rating 1500))
-;;(count nil (loop repeat 100 collect (cram-create-problem :rating 1653.5199667679983)))
+;;(cl-loop repeat 1 collect (cram-create-problem :rating 1771.5996682195228 :operation :addition))
+;;(cl-loop repeat 1 collect (cram-create-problem :rating 1500))
+;;(count nil (cl-loop repeat 100 collect (cram-create-problem :rating 1653.5199667679983)))
 
 (require 'mb-utils-strings)
-(defun expand-alternatives (pattern)
+(cl-defun expand-alternatives (pattern)
   "Expand parentheses alternatives in solution string.
 The rules can be summarized in these examples:
 
@@ -424,7 +424,7 @@ The rules can be summarized in these examples:
 \"(a) (c) b\" -> (\"(a) (c) b\" \"(a) c b\" \"(a) b\"
 		\"a (c) b\"   \"a c b\"   \"a b\"
 		\"(c) b\"     \"c b\"     \"b\")"
-  (loop for x in (combine (loop for x in (read-whole-string pattern)
+  (cl-loop for x in (combine (cl-loop for x in (read-whole-string pattern)
 				for s = (format "%S" x)
 				collect (if (listp x)
 					  (list s (substring s 1 -1) nil)
@@ -435,7 +435,7 @@ The rules can be summarized in these examples:
 ;;(expand-alternatives "(a) b")
 ;;(combine '((a nil) (b nil)))
 
-(defun cram-expand-alternatives (problem)
+(cl-defun cram-expand-alternatives (problem)
   "Collect expansions of PROBLEM solution and all alternatives."
   (flatten (mapcar #'expand-alternatives
 	     (cons (cram-problem-answer problem)
@@ -448,13 +448,13 @@ The rules can be summarized in these examples:
     ("æ" "ae" "%E6" 230 "Ã¦")
     ("ø" "oe" "%F8" 248 "Ã¸")))
 
-(defun cram-normalize-string (string)
+(cl-defun cram-normalize-string (string)
   (iso-latin1-2-7bit (downcase string) +cram-encoding+))
 ;;(cram-normalize-string "Bergstrøm")
 
 (require 'levenshtein)
 ;;(levenshtein-distance "kvinand" "kvinadn")
-(defun cram-correct-response-p (problem response)
+(cl-defun cram-correct-response-p (problem response)
   "Return nil if and only if RESPONSE is incorrect according to PROBLEM.
 RESPONSE is correct if it
 1. matches SOLUTION perfectly
@@ -485,7 +485,7 @@ See also cram-extract-alternatives."
 (defsubst cram-invert-score (score) (- 1 score))
 
 ;;; Ratings
-(defun glicko-new-ratings (user problem score &optional time)
+(cl-defun glicko-new-ratings (user problem score &optional time)
   "Calculate new ratings for USER and PROBLEM given SCORE.
 Optional TIME is the amount of days since the last time problem
 was SOLVED."
@@ -501,12 +501,12 @@ was SOLVED."
 ;;(glicko-rating '(1776 47) '((1413 217) .85) nil)
 ;;(glicko-rating '(1413 217) '((1776 47) .15) nil)
 
-(defun extract-ratings (user problem)
+(cl-defun extract-ratings (user problem)
   "Return a pair of ratings. Superfluous util?!"
   (list (cram-user-rating user)
 	(cram-problem-rating problem)))
 
-(defun cram-report-response-strange-error (response time-elapsed)
+(cl-defun cram-report-response-strange-error (response time-elapsed)
   (let* ((user (cram-current-user))
 	 (problem (cram-current-problem))
 	 (score (cram-score problem response time-elapsed))
@@ -524,7 +524,7 @@ was SOLVED."
       (cram-set-current-problem updated-problem))
     score))
 
-(defun cram-report-response (response time-elapsed)
+(cl-defun cram-report-response (response time-elapsed)
   "Return result score based on RESPONSE and the TIME-ELAPSED.
 Also, calculate new ratings for current user and problem,
 and update the current database concordingly.
@@ -553,13 +553,13 @@ ratings, and hand the onus of DB update to the caller"
       (list updated-user updated-problem))
     score))
 
-(defun cram-reset-all ()
+(cl-defun cram-reset-all ()
   (when (yes-or-no-p "Are you sure you want to reset everything? ")
     (cram-init-database t)
     (nilf *cram-current-user* *cram-current-problem*)))
 ;;(cram-reset-all)
 
-(defun cram-save ()
+(cl-defun cram-save ()
   (ld-save-database *current-database*))
 ;;(cram-save)
 

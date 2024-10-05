@@ -1,6 +1,6 @@
 (require 'org)
 
-(defun mb-org-kbd-maps ()
+(cl-defun mb-org-kbd-maps ()
   (let ((mb-local-map (make-sparse-keymap))
 	(move-map (make-sparse-keymap))
 	(insert-map (make-sparse-keymap)))
@@ -26,13 +26,13 @@
     (define-key insert-map "a" #'mb-org-insert-arrival)
     (define-key insert-map "h" #'mb-org-insert-departure)))
 
-(defun mb-org-init ()
+(cl-defun mb-org-init ()
   (mb-org-kbd-maps))
 
 (add-hook 'org-mode-hook 'mb-org-init)
 
 ;;; Insert
-(defun insert-line-prefix (string)
+(cl-defun insert-line-prefix (string)
   "Insert STRING at the beginning of the line where POINT is.
 TODO: move this to some util module?"
   (save-excursion

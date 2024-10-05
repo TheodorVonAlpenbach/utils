@@ -77,11 +77,11 @@
 
 (defconst +qp-backup-extension+ ".0")
 
-(defun qp-backup-filename (filename)
+(cl-defun qp-backup-filename (filename)
   "Returns the full path to the backup file FILENAME"
   (concat filename +qp-backup-extension+))
 
-(defun qp-download-brinkster-file (item)
+(cl-defun qp-download-brinkster-file (item)
   "Downloads file at URL to LOCAL-PATH, and opens the file at LOCAL-PATH."
   (let ((local-path (qp-local-path item))
 	(url (qp-url item)))
@@ -100,11 +100,11 @@
     (auto-fill-mode 0)))
 ;;(qp-download-brinkster-file (qp-res-url) "~/tmp/qwe.txt")
 
-(defun file-size (filename)
+(cl-defun file-size (filename)
   (nth 7 (file-attributes filename)))
 ;;(file-size "/cygdrive/c/Users/mat_ber/Google Drive/site-lisp/mb-lisp/quiz/qp.el")
 
-(defun qp-compare-new-and-orig (filename)
+(cl-defun qp-compare-new-and-orig (filename)
   "Returns nil iff the new file's size differs considerably from the original."
   (let ((orig-size (file-size (qp-backup-filename filename)))
 	(new-size (file-size filename)))
@@ -131,7 +131,7 @@
 ;;(qp-upload-brinkster-file "~/tmp/res_alle.txt_20190401")
 ;;See ftp://ftps8.brinkster.com/webroot/data/
 
-(defun qp-upload-brinkster-item (item)
+(cl-defun qp-upload-brinkster-item (item)
   "Save, i.e. upload file specified by ITEM to Brinkster via FTP."
   (let ((local-path (qp-local-path item)))
      (when (or (not (buffer-modified-p))
@@ -161,11 +161,11 @@
 ;;(qp-upload :generate-table)
 ;;(qp-download :transform-utils)
 
-(defun qp-asp-item-entry (keyword)
+(cl-defun qp-asp-item-entry (keyword)
   (when (cl-find keyword +qp-asp-items+)
     (list keyword (format "%s.asp" (downcase (keyword-name keyword))) "webroot")))
 
-(defun qp-item-entry (item)
+(cl-defun qp-item-entry (item)
   (if (keywordp item)
     (or (cl-find item +qp-files+ :key #'first)
 	(qp-asp-item-entry item))
@@ -175,16 +175,16 @@
 (defalias 'qp-item-tag #'first)
 (defalias 'qp-item-filename #'second)
 (defalias 'qp-item-ftp-dir #'third)
-(defun  qp-item-local-dir () "~/tmp")
+(cl-defun  qp-item-local-dir () "~/tmp")
 
-(defun qp-tag (item) (qp-item-tag (qp-item-entry item)))
-(defun qp-filename (item) (qp-item-filename (qp-item-entry item)))
-(defun qp-ftp-dir (item) (qp-item-ftp-dir (qp-item-entry item)))
-(defun qp-local-dir (item) "~/tmp/")
-(defun qp-local-path (item) (expand-file-name (qp-filename item) "~/tmp/"))
-(defun qp-url (item) (format "%s/%s/%s" +qp-ftp-root+ (qp-ftp-dir item) (qp-filename item)))
-(defun qp-download (item) (qp-download-brinkster-file item))
-(defun qp-upload (item) (qp-upload-brinkster-item item))
+(cl-defun qp-tag (item) (qp-item-tag (qp-item-entry item)))
+(cl-defun qp-filename (item) (qp-item-filename (qp-item-entry item)))
+(cl-defun qp-ftp-dir (item) (qp-item-ftp-dir (qp-item-entry item)))
+(cl-defun qp-local-dir (item) "~/tmp/")
+(cl-defun qp-local-path (item) (expand-file-name (qp-filename item) "~/tmp/"))
+(cl-defun qp-url (item) (format "%s/%s/%s" +qp-ftp-root+ (qp-ftp-dir item) (qp-filename item)))
+(cl-defun qp-download (item) (qp-download-brinkster-file item))
+(cl-defun qp-upload (item) (qp-upload-brinkster-item item))
 ;;(mapcar #'qp-url (mapcar #'first +qp-files+))
 ;;(qp-download :0101)
 ;;(qp-upload :0101)
@@ -195,12 +195,12 @@
       (append `((,(regexp-quote (qp-local-path :results)) iso-8859-1 . iso-8859-1))
 	      file-coding-system-alist))
 
-(defun qp-download-results ()
+(cl-defun qp-download-results ()
   "Opens, i.e. downloads buffer from Brinkster via FTP"
   (interactive)
   (qp-download :results))
 
-(defun qp-upload-results ()
+(cl-defun qp-upload-results ()
   "Saves, i.e. uploads buffer to Brinkster via FTP"
   (interactive)
   (qp-upload :results))
@@ -210,8 +210,8 @@
 
 ;;; General config
 (defconst qp-season '(33 "Allmennquiz"))
-(defun qp-season-number () (number-to-string (first qp-season)))
-(defun qp-season-name () (second qp-season))
+(cl-defun qp-season-number () (number-to-string (first qp-season)))
+(cl-defun qp-season-name () (second qp-season))
 
 
 ;;; Customer config
@@ -237,7 +237,7 @@
   "Whats the third number number?
 Format is (tag pubstring day columns pubregexp)")
 
-(defun qp-customers (&optional max-column)
+(cl-defun qp-customers (&optional max-column)
   "Returns a list of qp-customers, and only one entry for each pub.
 If MAX-COLUMN is an integer, then first delete all entries
 calling for a greater number of columns than max-column."
@@ -252,13 +252,13 @@ calling for a greater number of columns than max-column."
    :key #'first :from-end t))
 ;;(qp-customers 3)
 
-(defun qp-customer (tag &optional max-column)
+(cl-defun qp-customer (tag &optional max-column)
   (find tag (qp-customers max-column) :key #'first))
 ;;(qp-customer 'burums 2)
 
 (defalias 'qp-customer-pub 'first)
 (defalias 'qp-customer-pub-name 'second)
-(defun qp-customer-day (customer) (capitalize (symbol-name (third customer))))
+(cl-defun qp-customer-day (customer) (capitalize (symbol-name (third customer))))
 (defalias 'qp-customer-columns 'fourth)
 (defsubst qp-customer-columns-list (x) (awhen (qp-customer-columns x) (when (consp it) it)))
 (defsubst qp-customer-team-column (x) (first (qp-customer-columns-list x)))
@@ -270,12 +270,12 @@ calling for a greater number of columns than max-column."
 ;;(qp-customer-round-column (first (qp-customers)))
 
 ;;; Customer entry
-(defun qp-customer-entry-from-string (string)
+(cl-defun qp-customer-entry-from-string (string)
   "Converts STRING to a customer entry"
   (mapcar #'string-trim (split-string string "[\t]")))
 ;;(qp-customer-entry-from-string "2	Onsdag	Allmennquiz	Onkel Oskar (Namsos)	Purkene	20")
 
-(defun qp-string-filter (string)
+(cl-defun qp-string-filter (string)
   "Replace non-ASCII characters with ASCII counterparts"
   (let ((res (string-replace-map (string-trim string)
 	       '(("’" . "'")
@@ -288,14 +288,14 @@ calling for a greater number of columns than max-column."
       res)))
 ;;(qp-string-filter "bryr M'ække mer")
 
-(defun qp-customer-entries-from-string (string)
+(cl-defun qp-customer-entries-from-string (string)
   "Converts STRING, i.e. the results entered by a customer, to a
   list of customer-result-entry's."
   (mapcar #'qp-customer-entry-from-string
 	  (remove-if #'empty-string-p
 	    (string-to-lines (qp-string-filter string)))))
 
-(defun qp-customer-entries-from-region (beg end)
+(cl-defun qp-customer-entries-from-region (beg end)
   "Converts region to a list of customer-result-entry's and kills the region.
 The killing can be avoided by entering a prefix argument (not
 implemented TODO)."
@@ -303,12 +303,12 @@ implemented TODO)."
 	  (buffer-substring-no-properties beg end))
     (unless current-prefix-arg (kill-region beg end))))
 
-(defun qp-customer-data-regexp-based-p (customer)
+(cl-defun qp-customer-data-regexp-based-p (customer)
   "Returns true iff name and scores are extracted using a regexp.
 Otherwise it is column based."
   (stringp (qp-customer-columns customer)))
 
-(defun qp-customer-entry-team-name-and-score (customer entry)
+(cl-defun qp-customer-entry-team-name-and-score (customer entry)
   "Returns a pair (TEAM-NAME TEAM-SCORE) for team ENTRY at CUSTOMER"
   (if (qp-customer-data-regexp-based-p customer)
     (string-match* (qp-customer-columns customer) (first entry) :num '(1 2))
@@ -318,21 +318,21 @@ Otherwise it is column based."
 	      (last-elt entry)
 	      (nth sc entry))))))
 
-(defun qp-customer-round (customer entry)
+(cl-defun qp-customer-round (customer entry)
   (let ((column (qp-customer-round-column customer)))
     (when (integerp column) (nth column entry))))
 ;;(qp-customer-round (car +qp-customers+) '(1))
 
 ;;; Table entry
-(defun qp-table-entry-to-string (entry)
+(cl-defun qp-table-entry-to-string (entry)
   "Converts table ENTRY to a string"
   (concat* entry :in "\t"))
 
-(defun qp-table-entires-to-string (entires)
+(cl-defun qp-table-entires-to-string (entires)
   "Converts table ENTRIES to a string"
   (concat* (mapcar #'qp-table-entry-to-string entries) :in "\n"))
 
-(defun qp-insert-table-entries (entries buffer &optional at-point-p)
+(cl-defun qp-insert-table-entries (entries buffer &optional at-point-p)
   "Converts table ENTRIES a string and inserts it at POINT"
   (with-buffer buffer
     (unless at-point-p
@@ -340,7 +340,7 @@ Otherwise it is column based."
     (insert (qp-table-entires-to-string entries))))
 
 ;;; Conversion between customer entry and table entry
-(defun qp-customer-entry-to-table-entry (customer customer-entry round)
+(cl-defun qp-customer-entry-to-table-entry (customer customer-entry round)
   (awhen (qp-customer-entry-team-name-and-score customer customer-entry)
     (cl-destructuring-bind (team-name team-score) it
       (and (not (empty-string-p team-name))	
@@ -355,12 +355,12 @@ Otherwise it is column based."
 ;;(qp-customer-entry-to-table-entry (find 'onkel-oskar-namsos +qp-customers+ :key #'first) (qp-customer-entry-from-string "1	Onsdag	Allmennquiz	Onkel Oskar (Namsos)	Cranium	45") 1)
 ;;(capitalize "Bryr M'ække")
 
-(defun qp-customer-entries-to-table-entries (customer-tag customer-entries round)
+(cl-defun qp-customer-entries-to-table-entries (customer-tag customer-entries round)
   (remove-if #'null
     (mapcar #'(lambda (x) (qp-customer-entry-to-table-entry customer x round))
       customer-entries)))
 
-(defun count-matches-in-string (regexp string &optional allow-overlap-p)
+(cl-defun count-matches-in-string (regexp string &optional allow-overlap-p)
   "Count the number of substrings in STRING that matches regexp.
 Iff ALLOW-OVERLAP-P is true then overlapping matches are counted"
   (cl-loop for start = 0 then (if allow-overlap-p (1+ begin) end)
@@ -395,7 +395,7 @@ For LIMIT, see qp-guess-customer-tag."
   (or (qp-guess-customer-tag data) (qp-read-customer-tag)))
 ;;(qp-get-customer-tag "burums burums burums burums burums")
 
-(defun qp-guess-round (customer)
+(cl-defun qp-guess-round (customer)
   "Customer is ..."
   (with-buffer (qp-filename :results)
     (goto-char (point-max))
@@ -407,21 +407,21 @@ For LIMIT, see qp-guess-customer-tag."
 	(when (plusp res) (number-to-string (1+ res)))))))
 ;;(qp-guess-round (first (qp-customers)))
 
-(defun qp-set-round (customer-tag customer-entry)
+(cl-defun qp-set-round (customer-tag customer-entry)
   "Set current round"
   (let ((customer (qp-customer customer-tag customer-entry)))
     (or (qp-customer-round customer customer-entry)
       (qp-guess-round customer)
       (number-to-string (read-minibuffer "Round: ")))))
 
-(defun qp-legal-table-entries-p (tes)
+(cl-defun qp-legal-table-entries-p (tes)
   (and tes (consp tes)
        (every #'consp tes) (every #'(lambda (x) (= (length x) 7)) tes)
        (cl-loop for x in (flatten (project-sequence tes '(0 1 6)))
 		always (integerp (read x)))))
 ;;(qp-legal-table-entries-p '(("0" "1" "2a" "3a" "4a" "5a" "6") ("0" "1" "2a" "3a" "4a" "5a" "6")))
 
-(defun qp-customer-results-to-table-buffer (beg end)
+(cl-defun qp-customer-results-to-table-buffer (beg end)
   "TODO: Fix encoding. The region somehow must be converted from utf8 (?) to iso-8859-1."
   (interactive "r")
   ;; (error "Called with customer '%S' in region from %d to %d" customer beg end)
@@ -443,7 +443,7 @@ For LIMIT, see qp-guess-customer-tag."
     (switch-to-buffer table-buffer)))
 ;;(copy-if (bind #'eql 'burums) +qp-customers+ :key #'first)
 
-(defun qp-copy-mail-body-to-clipboard ()
+(cl-defun qp-copy-mail-body-to-clipboard ()
   (interactive)
   (kill-new "Hei! 
 
@@ -455,7 +455,7 @@ Vennlig hilsen
 Quizserien
 "))
 
-(defun qp-copy-news-and-sudden-death-questions-to-clipboard ()
+(cl-defun qp-copy-news-and-sudden-death-questions-to-clipboard ()
   "Formats news questions and sudden-death question to a semi-colon separated list
 and copies it to clipboard"
   (interactive)
@@ -497,7 +497,7 @@ week number of the first round."
 ;;(mapcar #'qp-current-round (list 38 "2016-09-22" "2016-09-15"))
 ;;(qp-current-round)
 
-(defun qp-check-last-upload ()
+(cl-defun qp-check-last-upload ()
   (when (string= (buffer-name) "res_alle.txt")
     (cl-destructuring-bind (s round day sname pub team points)
 	(split-string (last-elt (buffer-lines) 1) "[\t]")
@@ -509,7 +509,7 @@ week number of the first round."
 	(browse-url url)))))
 ;;(qp-check-last-upload)
 
-(defun split-5-points-string (string)
+(cl-defun split-5-points-string (string)
   (replace-regexp-in-string
    "\\s-+[A-E]:"
    #'(lambda (match) (concat "\n" (substring match -2)))

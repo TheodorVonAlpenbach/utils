@@ -11,24 +11,24 @@
 (require 'maths-common)
 
 ;;; Users
-(defun maths-db-insert-user (name age rating RD)
+(cl-defun maths-db-insert-user (name age rating RD)
   (ld-insert :users (list name age rating RD)
 	     :columns (list :name :age :rating :RD)))
 ;;(maths-add-user "Ludvik" "7" 1500 350)
 
-(defun maths-db-get-user (user-designator)
+(cl-defun maths-db-get-user (user-designator)
   (typecase user-designator
     (string (first (ld-select :users :where (string= user-designator :name))))
     (integer (first (ld-select :users :where (= user-designator :id))))
     (t user-designator)))
 
-(defun maths-user-id* (user-designator &optional check-validity)
+(cl-defun maths-user-id* (user-designator &optional check-validity)
   (if (and (integerp user-designator) (not check-validity))
     user-designator
     (maths-user-id (maths-db-get-user user-designator))))
 ;;(maths-user-id* 5)
 
-(defun maths-db-last-user ()
+(cl-defun maths-db-last-user ()
   (min-element (ld-select :users) :key #'maths-user-last-updated :test #'string>=))
 ;;(maths-db-last-user)
 
@@ -44,7 +44,7 @@
 
 
 ;;; Tasks
-(defun maths-db-last-task ()
+(cl-defun maths-db-last-task ()
   "Low level function that 'knows' that the first row in a table is the last"
   (first (ld-table-data* :tasks)))
 ;;(maths-db-last-task)
@@ -63,22 +63,22 @@ TODO: Avoid crash on empty db"
       (maths-db-random-task :rating rating :window window :idle-minutes 0))))
 ;;(maths-db-random-task :rating 3000)
 
-(defun maths-db-insert-task (task-args)
+(cl-defun maths-db-insert-task (task-args)
   "task-args is a task without :id (and (:metadata...))"
   (ld-insert :tasks task-args))
 
-(defun maths-db-get-task (id)
+(cl-defun maths-db-get-task (id)
   "TODO: this doesn't work when function is loaded, when (:id) is
 interpreted as a form to be evaluated later, and which then fails.
 Two solutions "
   (first (ld-select :tasks :where (= :id id))))
 ;;(maths-db-get-task 10)
 
-(defun maths-db-tasks ()
+(cl-defun maths-db-tasks ()
   (ld-select :tasks))
 ;;(maths-db-tasks)
 
-(defun maths-db-ratings-by-type (operation level)
+(cl-defun maths-db-ratings-by-type (operation level)
   "Returns the rating average of all tasks with same :operation and :level as TASK"
   (ld-select :tasks
     :where (and (eql :operation operation) (= :level level))
@@ -87,7 +87,7 @@ Two solutions "
 
 ;;; Matches
 ;;; Combined operations
-(defun maths-db-report-match (user task iso-time answer time new-user-rating-RD new-task-rating-RD)
+(cl-defun maths-db-report-match (user task iso-time answer time new-user-rating-RD new-task-rating-RD)
   "The core of all updates. It adds a new match into DB, and updates the ratings for both user and task.
 It returns the updates of user and task as a pair"
   (destructuring-bind (user-id name age old-user-rating old-user-RD &rest uargs) user

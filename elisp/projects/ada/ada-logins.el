@@ -1,10 +1,10 @@
-(defun ada-login-infix-1 (org-digit group-digit)
+(cl-defun ada-login-infix-1 (org-digit group-digit)
   (format "%s_%d"
     (if (= org-digit 9) "499" (format "50%d" org-digit))
     group-digit))
 ;;(ada-login-infix-1 9 7)
 
-(defun ada-login-infix (prefix)
+(cl-defun ada-login-infix (prefix)
   "Return user name for a PU user.
 
 By default, return \"499_1\".
@@ -18,7 +18,7 @@ Called with a two-digit prefix SY, return
   (apply #'ada-login-infix-1 (if prefix (cl-floor prefix 10) '(9 1))))
 ;;(ada-login-infix 22)
 
-(defun ada-login-teacher ()
+(cl-defun ada-login-teacher ()
   "Return user name for a PU teacher.
 
 The name is on the format \"claerer_no456326<INFIX>\", where
@@ -31,7 +31,7 @@ INFIX.
    (format "claerer_no456326%s" (ada-login-infix current-prefix-arg))))
 ;;(ada-login-teacher)
 
-(defun ada-login-pupil ()
+(cl-defun ada-login-pupil ()
   "Return user name for a PU pupil.
 
 The name is on the format \"celev_no456326<INFIX><SUFFIX>\", where

@@ -1,4 +1,4 @@
-(defun numbers-regexp (a b)
+(cl-defun numbers-regexp (a b)
   (regexp-opt (mapcar (bind #'format "%02d" 1) (a-b a b))))
 ;;(numbers-regexp 1 31)
 
@@ -6,22 +6,22 @@
 (defconst +iso-month-regexp+ "\\(?:0[1-9]\\|1[0-2]\\)")
 (defconst +iso-day-regexp+ "\\(?:0[1-9]\\|[12][0-9]\\|3[01]\\)")
 
-(defun iso-date-regexp ()
+(cl-defun iso-date-regexp ()
   (let* ((y +iso-year-regexp+)
 	(m +iso-month-regexp+)
 	(d +iso-day-regexp+))
     (format "\\b\\(?1:%s\\)-\\(?2:%s\\)-\\(?3:%s\\)" y m d)))
 ;;(string-match* (iso-date-regexp) "2014-10-30")
 
-(defun 0-23-regexp ()
+(cl-defun 0-23-regexp ()
   "Return a optimized regular expression matching 1, ... 23"
   "\\(?:\\(?:[0-1][0-9]\\)\\|\\(?:2[0-3]\\)\\)")
 
-(defun 0-59-regexp ()
+(cl-defun 0-59-regexp ()
   "Return a optimized regular expression matching 1, ... 59."
   "\\(?:[0-5][0-9]\\)")
 
-(defun iso-time-hm-regexp (h-index m-index)
+(cl-defun iso-time-hm-regexp (h-index m-index)
   (let* ((hm-0-23 (format "\\(?h:%s\\):\\(?m:%s\\)" (0-23-regexp) (0-59-regexp)))
 	 (hm-24 "\\(?h:24\\):\\(?m:00\\)")) ;; who the f*** allowed this in the ISO standard!?
     (string-replace-map
@@ -55,7 +55,7 @@ regexp here allows every time from 00:00 to 23:59."
 	("m" ,(sstring m-index))))))
 ;;(iso-time-zone-regexp)
 
-(defun iso-time-regexp ()
+(cl-defun iso-time-regexp ()
   "Return a regular expression for ISO 8601 time.
 The most complete time is on the form 'hh:mm:ss.ms+HH:MM'. In
 this case, the matching indices of the parts hh, mm, ss, ms, +,
@@ -77,7 +77,7 @@ examples of abbreviated time forms:
 (defconst *iso-date* (iso-date-regexp))
 (defconst *iso-time* (iso-time-regexp))
 
-(defun iso-dttm-regexp (date-time-split-regexp)
+(cl-defun iso-dttm-regexp (date-time-split-regexp)
   (format "%s\\(?:%s%s\\)?\\|\\(?:%s\\)"
     *iso-date* date-time-split-regexp *iso-time* *iso-time*))
 

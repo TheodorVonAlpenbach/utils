@@ -39,7 +39,7 @@ Note that this is a PLIST format of coldefs. Hence PLIST-P must be set to t in `
 ;;(first (fourth (second (first (fourth *maths-db*)))))
 ;;(ld-table-column-definitions (ld-table :users))
 
-(defun maths-update-schema (keyword)
+(cl-defun maths-update-schema (keyword)
   (setf (ld-table-schema (ld-find-table (list +maths-db-keyword+ keyword) *maths-db*))
 	(ld-schemadef->schema (find keyword *maths-db-schema-definitions*
 				    :key #'first))))
@@ -48,7 +48,7 @@ Note that this is a PLIST format of coldefs. Hence PLIST-P must be set to t in `
 (defconst +maths-db-keyword+ :maths)
 
 ;;(require 'ld-repository)
-(defun maths-init-database ()
+(cl-defun maths-init-database ()
   "TODO: this is a constant, but should eventually become a variable"
   (setf *current-database*
 	(or (ld-load-database +maths-db-keyword+)
@@ -60,6 +60,6 @@ Note that this is a PLIST format of coldefs. Hence PLIST-P must be set to t in `
 ;;(setf *current-database* (copy-tree *dbcopy*))
 ;;(ld-replace-table '(:maths :tasks) (ld-table-add-column :tasks '(:level :type integer) :colpos 2))
 ;;(ld-table :tasks)
-;;(loop for task in (maths-db-tasks) do (setf (maths-task-level task) (maths-estimate-level task)))
+;;(cl-loop for task in (maths-db-tasks) do (setf (maths-task-level task) (maths-estimate-level task)))
 
 (provide 'maths-db)

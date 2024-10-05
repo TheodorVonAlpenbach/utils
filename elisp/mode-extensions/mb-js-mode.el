@@ -3,17 +3,17 @@
 
 (setf nodejs-repl-process-name "node -i")
 
-(defun nodejs-repl-buffer-name ()
+(cl-defun nodejs-repl-buffer-name ()
   "Return the active node REPL buffer name."
   (format "*%s*" nodejs-repl-process-name))
 ;;(nodejs-repl-buffer-name)
 
-(defun nodejs-repl-buffer ()
+(cl-defun nodejs-repl-buffer ()
   "Return the active node REPL buffer."
   (get-buffer (nodejs-repl-buffer-name)))
 ;;(nodejs-repl-buffer)
 
-(defun mb-js-mode-hook-function ()
+(cl-defun mb-js-mode-hook-function ()
   (linum-mode)
   (electric-pair-local-mode)
   ;;(setq tab-width 4)
@@ -26,18 +26,18 @@
 (add-hook 'js-mode-hook 'mb-js-mode-hook-function)
 (add-hook 'rjsx-mode-hook 'mb-js-mode-hook-function)
 
-(defun mb-nodejs-repl-mode-hook-function ()
+(cl-defun mb-nodejs-repl-mode-hook-function ()
   (setq-local parens-require-spaces nil))
 (add-hook 'nodejs-repl-mode 'mb-nodejs-repl-mode-hook-function)
 
-(defun js-eval-string-raw-1 (string)
+(cl-defun js-eval-string-raw-1 (string)
   "Helper for `js-eval-string-raw'."
   ;; TODO make sure REPL is already running with (nodejs-repl). Also,
   ;; note that nodejs-repl--send-string is not perfectly implemented.
   (unless (get-buffer "*nodejs*") (nodejs-repl))
   (string-lines (nodejs-repl--send-string (concat string "\n"))))
 
-(defun js-eval-string-raw-old (string)
+(cl-defun js-eval-string-raw-old (string)
   "Evaluate string in nodejs REPL."
   ;; TODO make sure REPL is already running with (nodejs-repl). Also,
   ;; note that nodejs-repl--send-string is not perfectly implemented.
@@ -48,7 +48,7 @@
 ;;(js-eval-string "bbRecenter(lrbtBB(0, 10, 1, 2), [0, 0])")
 ;;(js-eval-string "arrColumn([[1, 217, 3], [1, 218, 3]], 1)")
 
-(defun js-eval-string-raw (string)
+(cl-defun js-eval-string-raw (string)
   "Helper for `js-eval-string-raw'."
   ;; TODO make sure REPL is already running with (nodejs-repl). Also,
   ;; note that nodejs-repl--send-string is not perfectly implemented.
@@ -65,7 +65,7 @@
        (or (re-search-backward "^> " nil t) 1)))))
 ;;(js-eval-string-raw "1+1")
 
-(defun js-eval-string (string &optional printflag)
+(cl-defun js-eval-string (string &optional printflag)
   "Evaluate string and show result in minibuffer."
   (let ((res (js-eval-string-raw string)))
     (if printflag (intern "") res)))

@@ -86,8 +86,8 @@
 
 (ert-deftest test-notf ()
   "Test of `notf'"
-  (eval '(defun mb-test-notf ()
-	  (lexical-let ((a t)
+  (eval '(cl-defun mb-test-notf ()
+	  (let ((a t)
 		(b '(t nil))
 		(res nil))
 	    (notf a)
@@ -97,10 +97,10 @@
 	    (push (not-null b) res)
 	    (notf b)
 	    (push (not b) res))))
-  (lexical-let ((res (mb-test-notf))) 
+  (let ((res (mb-test-notf))) 
     (should (apply #'all-true res))))
 
-;; (defun mb-test-notf ()
+;; (cl-defun mb-test-notf ()
 ;;   (let ((a t)
 ;; 	(b '(t nil))
 ;; 	(res nil))

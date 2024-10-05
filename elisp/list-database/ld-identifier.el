@@ -3,10 +3,10 @@
 ;;;; Tables (database-keyword table-keyword) (nil table-keyword)
 ;;;; Columns (database-keyword table-keyword column-keyword) (nil table-keyword column-keyword) (nil nil column-keyword)
 
-(defun keywordp-or-null (x)
+(cl-defun keywordp-or-null (x)
   (or (keywordp x) (null x)))
 
-(defun ld-identifier-p (form &optional type)
+(cl-defun ld-identifier-p (form &optional type)
   "If this function returns true, FORM is interpreted as a an identifier.
 Identifers are used for databases, tables, schemas columns"
   (and (consp form)
@@ -24,7 +24,7 @@ Identifers are used for databases, tables, schemas columns"
 ;;(mapcar (bind #'ld-identifier-p '(:top :ewq :qwe) 1) '(:database :table :column))
 ;;(ld-identifier-p '(round :rating))
 
-(defun ld-identifier-keyword (id &optional type)
+(cl-defun ld-identifier-keyword (id &optional type)
   (if type
     (cl-case type
       (:database (first id))
@@ -34,13 +34,13 @@ Identifers are used for databases, tables, schemas columns"
 ;;(mapcar (bind #'ld-identifier-keyword '(:a :b :c) 1) '(:database :table :column))
 ;;(mapcar #'ld-identifier-keyword '((:a :b :c) (:a :b) (:a)))
 
-(defun ld-column-identifier-p (colid-designator schema-designator)
+(cl-defun ld-column-identifier-p (colid-designator schema-designator)
   (let* ((schema (ld-schema schema-designator))
 	 (colid (ld-make-column-identifier colid-designator schema)))
     (find colid (ld-schema-column-definitions schema) :key #'ld-column-identifier :test #'equal)))
 ;;(mapcar (compose #'null #'null (bind #'ld-column-identifier-p :users)) (list '(:name) :name '(:users :name) '(:maths :users :name) '(:nomaths :users :name)))
 
-(defun* ld-make-column-identifier (colid-designator schema-designator)
+(cl-defun ld-make-column-identifier (colid-designator schema-designator)
   "COLID-DESIGNATOR is either a keyword or a list one, two or three keywords.
 In the case of a two keywords list, the butlast elements must
 match the identifer of schema-designator.
@@ -61,7 +61,7 @@ colid?"
 	     (append tabid colid-designator))))))
 ;;(mapcar (bind #'ld-make-column-identifier :users) (list '(:qwe) :qwe '(:users :qwe) '(:maths :users :qwe) '(:nomaths :users :qwe)))
 
-(defun ld-identifier-type-p (id)
+(cl-defun ld-identifier-type-p (id)
   (when (ld-identifier-p id)
     (cl-case (length id) (1 :database) (2 :table) (3 :column))))
 ;;(mapcar #'ld-identifier-type-p '((nil) (nil :ewq) (:foo :ewq :qwe)))

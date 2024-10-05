@@ -1,4 +1,4 @@
-(defun type-of-super (sequence)
+(cl-defun type-of-super (sequence)
   (cl-typecase sequence
     (cons 'list)
     (otherwise (type-of sequence))))
@@ -11,14 +11,14 @@
 ;;(random-elt '((a e) (b) (c) (d)))
 ;;(random-elt (a-b -10 10))
 
-(defun remove-nth (n sequence)
+(cl-defun remove-nth (n sequence)
   (concatenate (type-of-super sequence)
     (subseq sequence 0 n)
     (subseq sequence (cl-incf n))))
 ;;(progn (setq qwe "abc") (remove-nth 1 qwe))
 ;;(progn (setq qwe '(0 1 2)) (remove-nth 1 qwe))
 
-(defun remove-nths (positions sequence)
+(cl-defun remove-nths (positions sequence)
   "Intuitive extension of DELETE-NTH. POSITIONS is a integer list."
   (let ((deletions 0))
     (dolist (p positions sequence)
@@ -32,7 +32,7 @@
 ;;(length* '(1 2 3) :start nil :end nil)
 ;;(subseq (a-b 1 10) -3)
 
-(defun sequence-type (sequence)
+(cl-defun sequence-type (sequence)
   (cond ((listp sequence) 'list)
 	((vectorp sequence) 'vector)
 	((stringp sequence) 'string)))
@@ -85,7 +85,7 @@ Keywords supported: :test :key :count :from-end
   (copy-if (bind test x 1) cl-seq :key key :count count :from-end from-end))
 ;;(copy 3 '(1 2 3 4) :key #'1+ :test #'<)
 
-(defun select (sequence predicates &key key)
+(cl-defun select (sequence predicates &key key)
   "Return a list of sequences, matching PREDICATES on SEQUENCE.
 The Nth sequence in the result are the elements in SEQUENCE that
 satisfy then Nth predicate in PREDICATES. A last element in the
@@ -105,7 +105,7 @@ PREDICATES."
 	while pos collect pos))
 ;;(positions-if #'oddp (vector 0 1 2 3 4 5) :start 2)
 
-(defun split2 (x sequence &rest args)
+(cl-defun split2 (x sequence &rest args)
   "Split SEQUENCE in two at the first occurrence of X.
 For ARGS, see `cl-position'"
   (aif (apply #'cl-position x sequence args)
@@ -113,7 +113,7 @@ For ARGS, see `cl-position'"
     (list sequence nil)))
 ;;(split2 1 '(1 2 3 4))
 
-(defun split-at-position (sequence &rest positions)
+(cl-defun split-at-position (sequence &rest positions)
   "Split SEQUENCE at POSITIONS and return the resulting subsequences as a list."
   (cl-loop for position in (nreverse (cons (length sequence) (nreverse positions)))
 	for start = 0 then end
@@ -121,12 +121,12 @@ For ARGS, see `cl-position'"
 	collect (subseq sequence start end)))
 ;;(split-at-position "qweqwe" 2 4)
 
-(defun split-if (predicate sequence &rest args)
+(cl-defun split-if (predicate sequence &rest args)
   "Slits SEQUENCE into two at the positions where unary PREDICATE is true."
   (apply #'split-at-position sequence (apply #'positions-if predicate sequence args)))
 ;;(split-if #'oddp '(1 2 3 4 5))
 
-(defun elt-random (sequence)
+(cl-defun elt-random (sequence)
   "Returns a random element in SEQUENCE"
   (elt sequence (random (length sequence))))
 
@@ -208,7 +208,7 @@ Keywords supported: :test :key"
 ;;; these changes. Best to log off here first, and then make sure
 ;;; Drive updates and then do this at home
 
-(defun nminimums (cl-seq cl-pred &rest cl-keys)
+(cl-defun nminimums (cl-seq cl-pred &rest cl-keys)
   "Find all the minimum objects in SEQ according to PREDICATE.
 This is a destructive function; it reuses the storage of SEQ if possible.
 \nKeywords supported:  :key
@@ -221,7 +221,7 @@ This is a destructive function; it reuses the storage of SEQ if possible.
 	  collect elt)))
 ;;(nminimums '(1 2 3 0 4 0 5) #'< :key #'1+)
 
-(defun minimums (cl-seq cl-pred &rest cl-keys)
+(cl-defun minimums (cl-seq cl-pred &rest cl-keys)
   "Find all the minimum objects in SEQ according to PREDICATE.
 \nKeywords supported:  :key
 \n(fn SEQ PREDICATE [KEYWORD VALUE]...)"
@@ -306,13 +306,13 @@ Note! This function is now obsolete. Use `subseq' instead."
 ;;(subseq* nil 1 -1)
 
 ;;; Here is the sequence version (not so fast)
-(defun deltas (sequence)
+(cl-defun deltas (sequence)
   "Returns the canonical deltas around numbers in sequence.
 If A, B, C are consecutive numbers, the delta for B is (- (/ (+ A C) 2) B)."
   (coerce (deltas-list (coerce sequence 'list)) (type-of sequence)))
 ;;(deltas (vector 0 5 10 14 17 20 22))
 
-(defun center (sequence k &optional right)
+(cl-defun center (sequence k &optional right)
   "Return SEQUENCE's central subsequence of length K.
 If the parity of SEQUENCE's length and K differs, the result
 cannot be perfectly centered. By default, the returned center
@@ -331,13 +331,13 @@ to the right:
 	(subseq sequence a (+ a k))))))
 ;;(cl-loop with s = "01234" for k to (length s) collect (center s k t))
 
-(defun assoc-project (sequence a b)
+(cl-defun assoc-project (sequence a b)
   "Map each sequence element ELT of SEQUENCE to (cons (elt ELT A) (elt
 ELT B))."
   (mapcar #'(lambda (x) (cons (elt x a) (elt x b))) sequence))
 ;;(assoc-project '((a aa aaa) (b bb bbb)) 0 1)
 
-(defun project-1 (sequence x)
+(cl-defun project-1 (sequence x)
   "Apply projection object X on SEQUENCE.
 X is either an integer or a function. If X is an integer, the
 function returns the Xth element of SEQUENCE. Otherwise, X must
@@ -346,7 +346,7 @@ be a function, and the function will return (funcall X SEQUENCE)."
     (elt sequence x)
     (funcall x sequence)))
 
-(defun project (sequence projection)
+(cl-defun project (sequence projection)
   "Project SEQUENCE according to PROJECTION.
 
 PROJECTION is either a projection element, a sequence of
@@ -378,7 +378,7 @@ returns SEQUENCE unaltered."
 ;;(project "abc" '(2))
 ;;(project '(0 1 2 3) #'(lambda (x) (elt x 2)))
 
-(defun project-sequence (sequence projection)
+(cl-defun project-sequence (sequence projection)
   "Project multi-dimensional SEQUENCE according to PROJECTION-ARGS."
   (coerce (mapcar #'(lambda (x) (project x projection)) sequence)
 	  (type-of-super sequence)))

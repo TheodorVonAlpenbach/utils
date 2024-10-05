@@ -2,7 +2,7 @@
 
 (defconst +mb-echo-indent+ 29) ;'ls --help' style
 
-(defun in-echo-paragraph-p ()
+(cl-defun in-echo-paragraph-p ()
   (string-match "^[\t ]*echo[\t ]*\".*\"$" (line-string)))
 ;;(in-echo-paragraph-p)
 

@@ -1,3 +1,4 @@
+;; -*- lexical-binding: t; -*-
 (require 'mb-indent)
 
 (cl-defmacro without-message (&body body)
@@ -15,7 +16,7 @@
 (cl-defun tmap-1-0 (item table &key (test #'eq)) (tmap-n-m item 1 0 table :test test))
 (cl-defun tmap-n-m (item n m table &key (test #'eq)) (nth m (tmap-n item n table :test test)))
 
-(defun insertf (&rest args) (insert (apply #'format args)))
+(cl-defun insertf (&rest args) (insert (apply #'format args)))
 
 (defmacro popf (property-list tag &optional default)
   "Pops TAG and its value from PROPERTY-LIST"
@@ -32,7 +33,7 @@ corresponding TAG was found and removed.
   `(cl-loop for tag in ',tags collect (cl-remf ,place tag)))
 ;;(let ((p '(:where 123 :columns 321))) (list (mdelf p :where :columns :fitna) p))
 
-(defun mremf (plist &rest tags)
+(cl-defun mremf (plist &rest tags)
   "Remove the TAGS from property list PLIST.
 \nSee `delf' for a similar destructive version."
   (let ((place (copy-list plist)))
@@ -40,16 +41,16 @@ corresponding TAG was found and removed.
     place))
 ;;(let ((p '(:where 123 :columns 321))) (list (mremf p :where :columns :fitna) p))
 
-(defun remf* (&rest args)
+(cl-defun remf* (&rest args)
   (warn "This function has been deprecated. Use mremf instead.")
   (apply #'mremf args))
 ;;(remf* '(:where 123 :columns 321 :qwe) :where :columns :fitna)
 
-(defun mapprop (proplist propnames)
+(cl-defun mapprop (proplist propnames)
   (mapcar (bind #'getf proplist 1) propnames))
 ;;(mapprop '(:a 1 :b 2) '(:a :a :b))
 
-(defun smart-insert (&rest line)
+(cl-defun smart-insert (&rest line)
   "Opens a new line, inserts any number of strings or characters, and
 indents it."
   (interactive)
@@ -58,7 +59,7 @@ indents it."
   (newline))
 
 ;; boolean
-(defun eq* (&rest args) 
+(cl-defun eq* (&rest args) 
   "Returns the common value if all ARGS are EQ, else nil.
 If no arguments is given, t is returned."
   (if (not args) t
@@ -68,15 +69,15 @@ If no arguments is given, t is returned."
 	nil))))
 ;;(eq* 2 1 2 2 )
 
-(defun neq (x y) (not (eq x y)))
-(defun neql (x y) (not (eql x y)))
+(cl-defun neq (x y) (not (eq x y)))
+(cl-defun neql (x y) (not (eql x y)))
 
-(defun neq* (&rest args)
+(cl-defun neq* (&rest args)
   "Returns T if not all ARGS are EQ, else NIL."
   (not (apply 'eq* args)))
 ;;(neq* 1 2)
 
-(defun nequal (x y) (not (equal x y)))
+(cl-defun nequal (x y) (not (equal x y)))
 
 (defmacro nand (&rest conditions)
   "Return nil if at least one of CONDITIONS is nil, otherwise return t."
@@ -88,12 +89,12 @@ If no arguments is given, t is returned."
   `(and ,@(mapcar #'(lambda (x) `(not ,x)) conditions)))
 (def-edebug-spec nor t)
 
-(defun xor (&rest conditions)
+(cl-defun xor (&rest conditions)
   "Return nil iff there are an even number of conditions that evaluates to nil."
   (oddp (count nil conditions)))
 ;;(xor t nil t)
 
-(defun xnor (&rest conditions)
+(cl-defun xnor (&rest conditions)
   "Return nil iff there are an even number of conditions that evaluates to non nil."
   (oddp (count-if (complement #'null) conditions)))
 ;;(xnor t t nil)
@@ -125,7 +126,7 @@ If reverse i non nil, it returns the first popped element"
 (defmacro push-back (x place)
   `(setf ,place (nconc ,place (list ,x))))
 
-(defun test-push-back1 ()
+(cl-defun test-push-back1 ()
   (let ((l (list 'a)))
     (list (push-back 'b l) l)))
 ;;(test-push-back1)
@@ -168,21 +169,21 @@ elements as a list maintaing the order."
 (defmacro nor (&rest args) `(not (or ,@args)))
 ;;(nor nil nil t)
 
-(defun min* (&rest args)
+(cl-defun min* (&rest args)
   (minimum args #'<))
 ;;(min* 1 2 3)
 
-(defun max* (&rest args)
+(cl-defun max* (&rest args)
   (minimum args #'>))
 ;;(max* 1)
 
 ;;; Function objects
-(defun always (&rest args) "Returns t, ALWAYS" t)
-(defun never (&rest args) "Returns nil, always" nil)
+(cl-defun always (&rest args) "Returns t, ALWAYS" t)
+(cl-defun never (&rest args) "Returns nil, always" nil)
 
-(defun complement (function)
+(cl-defun complement (function)
   "Returns a function that is the complement of FUNCTION"
-  (lexical-let ((x function))
+  (let ((x function))
     #'(lambda (&rest arguments) (not (apply x arguments)))))
 ;;(mapcar (complement #'oddp) (0-n 4))
 
@@ -200,7 +201,7 @@ FLOATING-ARGUMENT-POSITIONS.
 
 TODO: parse FUNCTIONs argument list and return a function accordingly.
 Also take an argument FIXED-ARGUMENTS and and optional FLOATING-ARGUMENT-POSITIONS"
-  (lexical-let ((f function)
+  (let ((f function)
 		(a fixed-argument)
 		(pos floating-argument-position))
     (function 
@@ -226,7 +227,7 @@ simplicity:
 \(funcall (bind* #'/ 2 0) 16.0 4 2) => 0.015625 ie. (/ 2 16.0 4 2)
 
 TODO: implement this. Probably involves some macro magic"
-  (lexical-let ((f function)
+  (let ((f function)
 		(fargs (listify fixed-arguments))
 		(positions (listify fixed-argument-positions)))
     (function 
@@ -245,9 +246,9 @@ TODO: implement this. Probably involves some macro magic"
 
 (cl-defun compose (&rest fns)
   "Return a function that applies functions FNS from right to left."
-  (lexical-let ((fns fns))
+  (let ((fns fns))
     (if fns
-      (lexical-let ((fn1 (car (last fns)))
+      (let ((fn1 (car (last fns)))
 		    (fns (butlast fns)))
 	(function (lambda (&rest args)
 	  (reduce #'funcall fns 
@@ -257,26 +258,26 @@ TODO: implement this. Probably involves some macro magic"
 ;;(funcall (compose #'sq #'1+) 1)
 ;;(funcall (compose #'1+ #'sq) 1)
 
-(defun disjoin (&rest predicates)
+(cl-defun disjoin (&rest predicates)
   "Return a function that returns t if any of PREDICATES return not nil."
-  (lexical-let ((preds predicates))
+  (let ((preds predicates))
     (function (lambda (&rest args)
       (cl-loop for p in preds thereis (apply p args))))))
 ;;(mapcar (disjoin #'oddp #'primep) (0-n 10))
 
-(defun not-disjoin (&rest predicates)
+(cl-defun not-disjoin (&rest predicates)
   "Return a function that returns t if all PREDICATES return nil."
   (complement (apply #'disjoin predicates)))
 ;;(mapcar (not-disjoin #'evenp #'primep) (0-n 12))
 
-(defun conjoin (&rest predicates)
+(cl-defun conjoin (&rest predicates)
   "Return a function that returns nil if any of PREDICATES return nil."
-  (lexical-let ((preds predicates))
+  (let ((preds predicates))
     (function (lambda (&rest args)
       (cl-loop for p in preds always (apply p args))))))
 ;;(mapcar (conjoin #'evenp #'primep) (0-n 10))
 
-(defun not-conjoin (&rest predicates)
+(cl-defun not-conjoin (&rest predicates)
   "Return a function that returns nil if all PREDICATES return not nil."
   (complement (apply #'conjoin predicates)))
 ;;(mapcar (not-conjoin #'evenp #'primep) (0-n 10))
@@ -289,9 +290,9 @@ TODO: implement this. Probably involves some macro magic"
   (apply function args))
 ;;(arg-apply (compose #'+) 1 2)
 
-(defun lt-equal (less-than-function)
+(cl-defun lt-equal (less-than-function)
   "Returns the equality induced by the ordering LESS-THAN-FUNCTION"
-  (lexical-let ((lt less-than-function))
+  (let ((lt less-than-function))
     #'(lambda (&rest args)
       (nor (apply lt args) (apply lt (nreverse args))))))
 ;;(funcall (lt-equal #'<) 1 1 1)
@@ -360,7 +361,7 @@ TODO: implement this. Probably involves some macro magic"
 (defmacro definteractive (defun)
   "Make DEFUN interactive with name CL-DEFUN. DEFUN takes no arguments.
 TODO: font-lock face as `defun'."
-  `(defun ,(intern (concat (symbol-name defun) "*")) ()
+  `(cl-defun ,(intern (concat (symbol-name defun) "*")) ()
     (interactive)
     (princ (,defun))))
 ;(definteractive1 qwe)
@@ -398,7 +399,7 @@ TODO: font-lock face as `defun'."
   (elt sequence (- (length sequence) 1 n)))
 ;;(last-elt '(a b c) 1)
 
-(defun first-elt (sequence)
+(cl-defun first-elt (sequence)
   "Return first element of SEQUENCE."
   (and (plusp (length sequence))
        (elt sequence 0)))
@@ -442,7 +443,8 @@ This is useful for such constructs as
      body))
 
 (cl-defun constantly (x)
-  (lexical-let ((x x)) #'(lambda (&rest args) x)))
+  (let ((x x)) #'(lambda (&rest args) x)))
+;;(mapcar (constantly 1) '(a b c))
 
 (cl-defmacro with-syntax-table (table &body body)
   "See doc at emacs lisp info."
@@ -465,7 +467,7 @@ to get return value, default nil."
   "Obsolete.  See `cut'"
   (error "Obsolete, use cut instead"))
 
-(defun rmapcar (fn &rest args)
+(cl-defun rmapcar (fn &rest args)
   "A recursive generalization of `mapcar*'"
   (if (some #'atom args)
       (apply fn args)
@@ -487,10 +489,10 @@ number, only flatten down this many tree levels."
 ;;(flatten '((1) 2 (2 (3))))
 ;;(flatten '(nil))
 
-(defun assocp (x) (and (consp x) (not (listp (cdr x)))))
+(cl-defun assocp (x) (and (consp x) (not (listp (cdr x)))))
 ;;(assocp '(1 . 2))
 
-(defun mapassoc (fn x)
+(cl-defun mapassoc (fn x)
   (cons (funcall fn (car x)) (funcall fn (cdr x))))
 ;;(mapassoc #'1+ '(1 . 2))
 
@@ -526,13 +528,13 @@ arguments to FUNCTION"
   (mapcar (bind #'apply function 1) list))
 ;;(mapply #'+ '((1 2) (3 4)))
 
-(defun mapfun (function-list &rest args)
+(cl-defun mapfun (function-list &rest args)
   "Maps FUNCTION-LIST = (fn1 fn2 ...) and ARGS = arg1 arg2 ... to
 the list ((fn1 arg1 arg2 ...) (fn2 arg1 arg2 ...) ...)"
   (mapcar (bind #'apply args) function-list))
 ;;(mapfun (list #'+ #'* #'list) 2 3) => (5 6 (2 3))
 
-(defun not-null (x) (not (null x)))
+(cl-defun not-null (x) (not (null x)))
 
 (cl-defun position-num (cl-item cl-seq &rest cl-keys)
   "Same as `POSITION', but returns always a number, even if CL-ITEM is
@@ -555,7 +557,7 @@ etc. NB! Check if obsolete!"
   `(setf ,x (mod ,x ,y)))
 ;;(let ((x 11)) (modf x 6) x)
 
-(defun struct-name (x)
+(cl-defun struct-name (x)
   (if (eq (type-of x) 'vector)
     (let* ((px (split-string (format "%S" x))))
       (substring (first px) (1+ (length "cl-struct-"))))
@@ -564,12 +566,12 @@ etc. NB! Check if obsolete!"
 ;;(struct-name (make-key))
 ;;(intern-soft "qwe")
 
-(defun struct-type (x)
+(cl-defun struct-type (x)
   (intern-soft (struct-name x)))
 ;;(defstruct qwe)
 ;;(struct-type (make-qwe))
 
-(defun all-equal (&rest args)
+(cl-defun all-equal (&rest args)
   "Return T if all ARGS are EQUAL and NIL if not."
   (not (and args (some (bind #'nequal (car args)) (cdr args)))))
 
@@ -580,7 +582,7 @@ etc. NB! Check if obsolete!"
 		  (subseq sequence 1)))))
 ;;(equal-elements [1 1])
 
-(defun mequal (map-function &rest args)
+(cl-defun mequal (map-function &rest args)
   "Tests whether all ARGS are EQUAL after applying MAP-FUNCTION
 on them. TODO: somehow make test function (EQUAL) configurable"
   (apply #'all-equal (mapcar map-function args)))
@@ -590,12 +592,12 @@ on them. TODO: somehow make test function (EQUAL) configurable"
   (notany #'null args))
 ;;(all-true t t)
 
-(defun function-signature (function)
+(cl-defun function-signature (function)
   "Returns FUNCTION's signature"
   (second (symbol-function function)))
 ;;(function-signature 'test-function-special-args)
 
-(defun test-function-special-args (a &optional b &keys c &rest d))
+(cl-defun test-function-special-args (a &optional b &keys c &rest d))
 
 (cl-defun function-args (function &optional (argument-type t))
   "Returns the FUNCTION's' arguments.
@@ -627,14 +629,14 @@ returned. If t (default), then all arguments."
 ;;(function-args 'test-function-special-args t)
 ;;(function-args 'test-function-special-args '&keys)
 
-(defun re-evaluate-function (function-symbol)
+(cl-defun re-evaluate-function (function-symbol)
   (let* ((file-orig (symbol-file function-symbol 'defun))
 	 (file (if (string-match "\\.elc$" file-orig)
 		 (substring* file-orig 0 -1)
 		 file-orig)))
     (when file
       (with-file-readonly file
-	(re-search-forward (concat "^" (regexp-quote (format "(defun %s " (symbol-name function-symbol)))))
+	(re-search-forward (concat "^" (regexp-quote (format "(cl-defun %s " (symbol-name function-symbol)))))
 	(eval-defun nil)))))
 
 (cl-defun sstring (string-designator &optional (nil-string nil) (integer-is-char-p nil))
@@ -658,7 +660,7 @@ converted to optional argument NIL-STRING."
     nil-string))
 ;;(cl-loop for x in '(nil :qwe qwe "qwe" 123 -1 (:read 2 3)) collect (sstring x 0 t))
 
-(defun ssymbol (symbol-designator)
+(cl-defun ssymbol (symbol-designator)
   (acond
     ((or (symbolp symbol-designator)
 	 (numberp symbol-designator)) symbol-designator)
@@ -668,7 +670,7 @@ converted to optional argument NIL-STRING."
      (eval symbol-designator))))
 ;;(mapcar #'ssymbol (list "qwe" '(quote qwe) 'qwe))
 
-(defun iintern (symbol-name)
+(cl-defun iintern (symbol-name)
   (if (stringp symbol-name)
     (if (empty-string-p symbol-name)
       nil
@@ -678,7 +680,7 @@ converted to optional argument NIL-STRING."
     symbol-name))
 ;;(mapcar #'symbolp (mapcar #'iintern (list 1 "a" 'b "")))
 
-(defun decolonize-symbol-name (symbol-name &optional string-key)
+(cl-defun decolonize-symbol-name (symbol-name &optional string-key)
   (let ((res (if (= (char symbol-name 0) ?:)
 	       (substring symbol-name 1) symbol-name)))
     (if string-key
@@ -687,15 +689,15 @@ converted to optional argument NIL-STRING."
 ;;(decolonize-symbol-name ":a" #'upcase)
 ;;(mapcar #'decolonize-symbol-name (list ":a" "a"))
 
-(defun decolonize-symbol (symbol &optional string-key)
+(cl-defun decolonize-symbol (symbol &optional string-key)
   (ssymbol (decolonize-symbol-name (symbol-name symbol) string-key)))
 ;;(mapcar #'decolonize-symbol '(a :b))
 
-(defun llist (x)
+(cl-defun llist (x)
   (warn "llist is deprecated. Use listify instead")
   (listify x))
 
-(defun listify (x)
+(cl-defun listify (x)
   "Coerces x to become a cons. Also a lambda expression, which
 also is a cons, will be encapsulated in a list."
   (if (or (not (listp x)) (functionp x))
@@ -704,7 +706,7 @@ also is a cons, will be encapsulated in a list."
 
 
 ;;; symbols
-(defun concat-symbols (symbol &rest symbols)
+(cl-defun concat-symbols (symbol &rest symbols)
   (if symbols
     (apply #'concat-symbols 
 	   (iintern (concat (sstring symbol) (sstring (first symbols))))
@@ -712,27 +714,27 @@ also is a cons, will be encapsulated in a list."
     symbol))
 ;;(concat-symbols 'a 1)
 
-(defun symbol-left (symbol N)
+(cl-defun symbol-left (symbol N)
   "Abbrevates SYMBOL to its N leftmost characters"
   (intern (substring (symbol-name symbol) 0 N)))
 ;;(symbol-left 'testtest 2)
 
-(defun symbol< (x y)
+(cl-defun symbol< (x y)
   "Apply `string<' on the symbol names of two symbols X Y."
   (string< (sstring x) (sstring y)))
 ;;(symbol< 'a 'b)
 
-(defun keyword-name (keyword-symbol)
+(cl-defun keyword-name (keyword-symbol)
   (if (keywordp keyword-symbol)
     (upcase (substring (symbol-name keyword-symbol) 1))
     keyword-symbol))
 ;;(keyword-name :key)
 
-(defun make-keyword (name)
+(cl-defun make-keyword (name)
   (intern (format ":%s" name)))
 ;;(make-keyword "qwe")
 
-(defun numcond-transform-clauses (clauses gx gy)
+(cl-defun numcond-transform-clauses (clauses gx gy)
   "TODO: handle t and otherwise like in `cond'"
   `(cond ,@(mapcar #'(lambda (x) `((,(first x) ,gx ,gy) ,@(rest x)))
 		       clauses)))
@@ -747,7 +749,7 @@ also is a cons, will be encapsulated in a list."
 (cl-indent 'numcond 'case)
 ;;(numcond (4 3) (= 'eq) (< 'lt) (> 'geq))
 
-(defun call-if (predicate function x)
+(cl-defun call-if (predicate function x)
   "Return (FUNCTION X) if predicate is not nil.
 Otherwise return x"
   (if predicate
@@ -755,7 +757,7 @@ Otherwise return x"
     x))
 
 ;;; PLIST utils
-(defun plist-position (plist prop)
+(cl-defun plist-position (plist prop)
   "Return the property position of PROP in PLIST.
 The position includes both property symbol and value."
   (cl-loop for pos from 0
@@ -764,7 +766,7 @@ The position includes both property symbol and value."
 	while plist))
 ;;(plist-position '(:qwe qwe :ewq ewq) :ewq)
 
-(defun plist-delete (plist prop)
+(cl-defun plist-delete (plist prop)
   "Delete property PROP from PLIST. Destructive."
   (let ((pos (plist-position plist prop)))
     (and pos
@@ -775,7 +777,7 @@ The position includes both property symbol and value."
 	     plist)))))
 ;;(plist-delete '(:qwe qwe :ewq ewq) :ewq)
 
-(defun plist-remove (plist prop)
+(cl-defun plist-remove (plist prop)
   "Remove property PROP from PLIST."
   (plist-delete (copy-list plist) prop))
 ;;(plist-remove '(:qwe qwe :ewq ewq) :ewq)
@@ -787,7 +789,7 @@ Return nil if PROP does not exist."
      (setf ,plist (plist-delete ,plist ,prop))
      it))
 
-(defun modify-if (value test new-value)
+(cl-defun modify-if (value test new-value)
   "Return VALUE if (TEST VALUE) evaluates to nil, otherwise
 return NEW-VALUE"
   (if (funcall test value) new-value value))

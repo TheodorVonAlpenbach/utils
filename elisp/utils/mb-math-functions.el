@@ -1,18 +1,18 @@
 ;;;; Standard math functions not supported by Emacs
-(defun sec (x) (/ 1 (cos x)))
-(defun scs (x) (/ 1 (sin x)))
-(defun sinh (x) (/ (- (exp x) (exp (- x))) 2))
-(defun cosh (x) (/ (+ (exp x) (exp (- x))) 2))
-(defun tanh (x) (let ((y (exp (* 2 x)))) (/ (1- y) (1+ y))))
+(cl-defun sec (x) (/ 1 (cos x)))
+(cl-defun scs (x) (/ 1 (sin x)))
+(cl-defun sinh (x) (/ (- (exp x) (exp (- x))) 2))
+(cl-defun cosh (x) (/ (+ (exp x) (exp (- x))) 2))
+(cl-defun tanh (x) (let ((y (exp (* 2 x)))) (/ (1- y) (1+ y))))
 ;;(+ (sinh pi) (cosh pi) (- (exp pi)))
 ;;(- (tanh 1) (/ (sinh 1) (cosh 1)))
 
 (defmacro define-degree-trigonometry (fns)
   `(let ((c ,(/ pi 180.0)))
      ,@(cl-loop for fn in fns
-		collect `(defun ,(intern (concat (sstring fn) "d")) (d)
+		collect `(cl-defun ,(intern (concat (sstring fn) "d")) (d)
 			   (,fn (* degrees-to-radians d)))
-		collect `(defun ,(intern (concat "a" (sstring fn) "d")) (r)
+		collect `(cl-defun ,(intern (concat "a" (sstring fn) "d")) (r)
 			   (* radians-to-degrees
 			      (,(intern (concat "a" (sstring fn))) r))))))
 (define-degree-trigonometry (cos sin tan sec scs))
@@ -53,7 +53,7 @@ http://functions.wolfram.com/webMathematica/FunctionEvaluation.jsp?name=PolyLog2
    ((> x 1) (dilog-gt-1 x num-iterations))))
 ;;(dilog 7)
 
-(defun atan2 (x y)
+(cl-defun atan2 (x y)
   "Arctan with two arguments"
   ;; http://en.wikipedia.org/wiki/Atan2
   (numcond x
@@ -73,13 +73,13 @@ http://functions.wolfram.com/webMathematica/FunctionEvaluation.jsp?name=PolyLog2
     -0.18628806 0.27886807 -1.13520398 1.48851587
     -0.82215223 0.17087277))
 
-(defun erf-tau-1 (x s)
+(cl-defun erf-tau-1 (x s)
   (* s (exp (- (horner +erf-tau-polynomial+ s) (sq x)))))
 
-(defun erf-tau (x)
+(cl-defun erf-tau (x)
   (erf-tau-1 x (/ 1 (+ 1 (* 0.5 (abs x))))))
 
-(defun erf (x)
+(cl-defun erf (x)
   "Calculate the erf function for X.
 See https://en.wikipedia.org/wiki/Error_function#Numerical_approximations
 for numerical implementation basis."
@@ -89,11 +89,11 @@ for numerical implementation basis."
 ;;(cl-loop for x from -3 to 3 by 0.5 collect (erf x))
 ;;(cl-loop for x in '(0.8) collect (erf x))
 
-(defun erfc (x)
+(cl-defun erfc (x)
   "Calculate the complimentary error function for X"
   (- 1 (erf x)))
 
-(defun inverse-erf (x)
+(cl-defun inverse-erf (x)
   ""
   (let* ((a (/ (* 8 (- pi 3))
 	       (* 3 pi (- 4 pi))))
@@ -127,12 +127,12 @@ for numerical implementation basis."
        (geometric-series r :start 0 :end start))))
 ;;(geometric-series 0.5 :end 1)
 
-(defun quadratic-discriminant (a b c)
+(cl-defun quadratic-discriminant (a b c)
   "Return the discriminant of the quadratic polynomial ax2 + bx + c."
   (- (sq b) (* 4 a c)))
 ;;(quadratic-discriminant 1 1 1)
 
-(defun quadratic-root (a b c)
+(cl-defun quadratic-root (a b c)
   "Return the roots of the quadratic polynomial ax2 + bx + c."
   (let ((d (quadratic-discriminant a b c)))
     (cl-assert (not (minusp d)) t "The discriminant is negative.")
@@ -142,7 +142,7 @@ for numerical implementation basis."
       (list (- sqrt-expr b/2a) (- (+ sqrt-expr b/2a))))))
 ;;(quadratic-root 1 0 -1)
 
-(defun falsi-method (f a b e m)
+(cl-defun falsi-method (f a b e m)
   "Return the solution to the equation F(x) = 0.
 Here, A, B are the endpoints of an interval where we search. E is
 half of upper bound for relative error. M is the maximal number
@@ -179,7 +179,7 @@ of iterations."
 ;;(falsi-method #'(lambda (x) (- (cos x) (expt x 3))) 0 1 5E-15 100)
 
 (cl-defun newton-raphson (f df x0 &optional (eps 1E-12) (max-n 20))
-  (loop for n below max-n
+  (cl-loop for n below max-n
 	for xn = x0 then xn+1
 	for fn = (funcall f xn)
 	for dfn = (funcall df xn)

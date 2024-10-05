@@ -42,7 +42,7 @@
   "Maximum allowed waiting time in milliseconds between output
   batches from comint.")
 
-(defun repl-abort ()
+(cl-defun repl-abort ()
   "Repeats Abort until the prompt is top-level.
 A true hack..."
   (interactive)
@@ -50,10 +50,10 @@ A true hack..."
     (execute-kbd-macro "abort\n")
     (sleep-for 0 100)))
 
-(defun symbol-regexp (symbol)
+(cl-defun symbol-regexp (symbol)
   (format "\\_<%s\\_>" symbol))
 
-(defun search-symbol (symbol)
+(cl-defun search-symbol (symbol)
   "SEXP is an atom or a list. Currently only supports atoms, i.e. symbols."
   (re-search-forward (symbol-regexp (symbol)) nil t 1))
 
@@ -66,7 +66,7 @@ recursive function transversing through all sexps in buffer. "
       (progn (backward-up-list 1) t))))
 ;;(search-form 'defun)
 
-(defun buffer-package-name ()
+(cl-defun buffer-package-name ()
   "Returns the package name in use in the current lisp buffer.
 If no IN-PACKAGE declaration is found, NIL is returned."
   (save-excursion
@@ -75,7 +75,7 @@ If no IN-PACKAGE declaration is found, NIL is returned."
       "COMMON-LISP-USER")))
 ;;(buffer-package-name)
 
-(defun ilb-last-output (max-point)
+(cl-defun ilb-last-output (max-point)
   "Returns the last ilb output. Assumes current-buffer is the
   inferior lisp buffer."
   (with-buffer* inferior-lisp-buffer
@@ -91,7 +91,7 @@ If no IN-PACKAGE declaration is found, NIL is returned."
 	(prog1 (buffer-substring-no-properties (point) b)
 	  (goto-char (point-max))))))
 
-(defun ilb-parse (output)
+(cl-defun ilb-parse (output)
   (let ((values (split-string (string-trim output) ";\n")))
     (concat* values :in "; ")))
 
@@ -111,7 +111,7 @@ If no IN-PACKAGE declaration is found, NIL is returned."
   *repl-output*)
 ;;(repl-wait-for-ouput)
 
-(defun lisp-eval-expression-1 (expression-string &optional waiting-for-result)
+(cl-defun lisp-eval-expression-1 (expression-string &optional waiting-for-result)
   "Send EXPRESSION-STRING to the inferior Lisp process and return the result.
 This should only be used for 'small' commands requiring just one
 comint result text package to be sent. Also, the process time
@@ -126,13 +126,13 @@ should be fairly small"
 ;;(lisp-eval-expression-1 "1" t)
 ;;(comint-simple-send (inferior-lisp-proc) "1")
 
-(defun repl-current-package-name ()
+(cl-defun repl-current-package-name ()
   (let ((*repl-discard-message* t)
 	(*repl-discard-output* t))
     (first (lisp-eval-expression-1 "(package-name *package*)" nil))))
 ;;(repl-current-package-name)
 
-(defun repl-set-package (package-name)
+(cl-defun repl-set-package (package-name)
   (let* ((*repl-discard-message* t)
 	 (*repl-discard-output* nil)
 	 (arg (format "(in-package %s)" 
@@ -142,7 +142,7 @@ should be fairly small"
 	 (res (first (lisp-eval-expression-1 arg t))))))
 ;;(repl-set-package ":utils")
 
-(defun mb-lisp-change-in-package (prefix)
+(cl-defun mb-lisp-change-in-package (prefix)
   (interactive "P")
   (let ((buffer-package-name (buffer-package-name))
 	(repl-package-name (repl-current-package-name)))
@@ -165,7 +165,7 @@ should be fairly small"
 	 (repl-set-package current-package-name)))))
   (def-edebug-spec repl-with-buffer-package t)
 
-(defun lisp-eval-print-result (result)
+(cl-defun lisp-eval-print-result (result)
   (if (and (vectorp (first result))
 	   (> (mvec-size (first result)) 20))
     (mvec->table (first result))
@@ -176,7 +176,7 @@ should be fairly small"
 				    (format "\"%s\"" x)
 				    (sstring x)))))))
 
-(defun lisp-eval-expression (expression-string)
+(cl-defun lisp-eval-expression (expression-string)
     "Sends EXPRESSION-STRING to the inferior Lisp process.
 
 TODO: prefix argument means to keep package. Default behaviour is
@@ -191,7 +191,7 @@ this is different from the REPL package."
        ;;(eread (first result)) doesnt work for strings
        (first result))))
 
-(defun lisp-eval-expression-old (expression-string)
+(cl-defun lisp-eval-expression-old (expression-string)
   "Sends EXPRESSION-STRING to the inferior Lisp process.
 
 TODO: prefix argument means to keep package. Default behaviour is
@@ -210,7 +210,7 @@ this is different from the REPL package."
      ;;(eread (first result)) doesnt work for strings
      (first result))))
 
-(defun multi-substitute (map sequence &rest plist)
+(cl-defun multi-substitute (map sequence &rest plist)
   "Substitute all OLD elements in MAP with its corresponding NEW value.
 MAP is an alist with elements (NEW . OLD). The method calls
 repeatedly `cl-substitute' and all keywords in `cl-substitute'
@@ -228,7 +228,7 @@ are allowed.
     sequence))
 ;;(multi-substitute '((?a . ?b) (?n . ?c)) "abc")
 
-(defun string-to-valid-pathname (string)
+(cl-defun string-to-valid-pathname (string)
   "Note that the CARs are the resulting character"
   (multi-substitute '((?_ . ? )
 		      (?! . ?\\)
@@ -244,7 +244,7 @@ are allowed.
   (cl-remove ?' string)))
 ;;(string-to-valid-pathname "qwe '()+")
 
-(defun mb-lisp-eval-1 (expression-string prefix)
+(cl-defun mb-lisp-eval-1 (expression-string prefix)
   "EXPRESSION-STRING is a string that can be sent to repl. Note
 that strings must be quoted withing such strings."
   (if prefix
@@ -269,13 +269,13 @@ that strings must be quoted withing such strings."
       (t (insert (format "%S" (lisp-eval-expression expression-string)))))
     (lisp-eval-expression expression-string)))
 
-(defun mb-previous-sexp ()
+(cl-defun mb-previous-sexp ()
   (save-excursion 
      (backward-sexp 1) 
      (prin1-to-string (sexp-at-point))))
 ;;(mb-previous-sexp)
 
-(defun mb-previous-sexp ()
+(cl-defun mb-previous-sexp ()
   "Returns the sexp form immediately to the left of point.
 This is a more robust version than the previous one, which used
 `sexp-at-point'. Nothing is wrong with sexp-at-point in Elisp,
@@ -288,29 +288,29 @@ non-Elisp syntax in Common Lisp. E.g. #(1 2 3) fails in
       (string-trim (buffer-substring-no-properties (point) end)))))
 ;;(mb-previous-sexp)
 
-(defun mb-lisp-eval-sexp (prefix)
+(cl-defun mb-lisp-eval-sexp (prefix)
   (interactive "P")
   (mb-lisp-eval-1 (mb-previous-sexp) prefix))
 
-(defun mb-lisp-eval-defun (prefix)
+(cl-defun mb-lisp-eval-defun (prefix)
   (interactive "P")
   (mb-lisp-eval-1 (substring-no-properties (thing-at-point 'defun)) prefix))
 
-(defun mb-lisp-eval-region (beg end)
+(cl-defun mb-lisp-eval-region (beg end)
   (interactive "r")
   (mb-lisp-eval-1 (replace-regexp-in-string "(in-package :[^)]*)" ""
 						   (buffer-substring-no-properties beg end))
 		  nil))
 
-(defun mb-lisp-eval-buffer ()
+(cl-defun mb-lisp-eval-buffer ()
   (interactive "")
   (mb-lisp-eval-region (point-min) (point-max)))
 
-(defun mb-lisp-load-buffer (prefix)
+(cl-defun mb-lisp-load-buffer (prefix)
   (interactive "P")
   (mb-lisp-eval-1 (format "(load \"%s\")" (buffer-file-name)) prefix))
 
-(defun inferior-lisp-program-with-lispinit ()
+(cl-defun inferior-lisp-program-with-lispinit ()
   (format "clisp -q -norc -M %s" (file-truename "~/lispinit.mem")))
 
 (setq-local paragraph-start "\"\\|\f\\|[ \t]*$")
@@ -322,18 +322,18 @@ non-Elisp syntax in Common Lisp. E.g. #(1 2 3) fails in
 \\{mb-lisp-mode-map\\}"
   (run-hooks))
 
-(defun mblisp-show-process-buffer ()
+(cl-defun mblisp-show-process-buffer ()
   (interactive)
   (aif (lisp-process-buffer)
     (display-buffer it '(display-buffer-use-some-window))
     (inferior-lisp)))
 
-(defun lisp-process-buffer ()
+(cl-defun lisp-process-buffer ()
   (if (boundp 'inferior-lisp-buffer)
     inferior-lisp-buffer))
 ;;(lisp-process-buffer)
 
-(defun mb-inferior-lisp-set-locals ()
+(cl-defun mb-inferior-lisp-set-locals ()
   (define-key inferior-lisp-mode-map [(f12)] 'repl-abort)
   (setq-local comint-output-filter-functions
 	      '(mb-lisp-scroll-to-bottom
@@ -352,29 +352,29 @@ non-Elisp syntax in Common Lisp. E.g. #(1 2 3) fails in
 
 
 ;;(nilf comint-preoutput-filter-functions)
-;;(pushnew #'mb-lisp-on-output comint-preoutput-filter-functions)
+;;(cl-pushnew #'mb-lisp-on-output comint-preoutput-filter-functions)
 
-(defun tree->mvec (tree)
+(cl-defun tree->mvec (tree)
   (if (atom tree) tree (map 'vector #'tree->mvec tree)))
 ;;(tree->mvec '((1 2)))
 
-(defun mvec-dimensions (mvec)
+(cl-defun mvec-dimensions (mvec)
   (if (vectorp mvec)
     (if (zerop (length mvec))
       0
       (cons (length mvec) (mvec-dimensions (elt mvec 0))))))
 ;;(mvec-dimensions (tree->mvec '(((1 2) (1 2)) ((1 2) (1 2)) ((1 2) (1 2)))))
 
-(defun tree-dimensions (tree)
+(cl-defun tree-dimensions (tree)
   (when (consp tree)
     (cons (length tree) (tree-dimensions (first tree)))))
 ;;(tree-dimensions '(((1 2) (1 2)) ((1 2) (1 2)) ((1 2) (1 2))))
 
-(defun mvec->tree (x)
+(cl-defun mvec->tree (x)
   (if (vectorp x) (map 'list #'mvec->tree x) x))
 ;;(mvec->tree (tree->mvec '((1 2))))
 
-(defun mvec->string (mvec)
+(cl-defun mvec->string (mvec)
   (let ((tree (mvec->tree mvec)))
     (csv-string (if (= (length (tree-dimensions tree)) 1)
 		  (transpose (list tree)) tree)
@@ -391,12 +391,12 @@ non-Elisp syntax in Common Lisp. E.g. #(1 2 3) fails in
   (switch-to-buffer buffer))
 ;;(mvec->table (tree->mvec '((1 2) (3 4))))
 
-(defun mvec-size (mvec)
+(cl-defun mvec-size (mvec)
   (if (vectorp mvec)
     (sum (map 'list #'mvec-size mvec)) 1))
 ;;(mvec-size [[1 2 3] [1 2 3]])
 
-(defun eread (string)
+(cl-defun eread (string)
   "Reads a common lisp expression. It handles CL print syntax in the following ways:
 Arrays are converted to vectors (or vectors of vectors):
 #(1 2 3)              --> [1 2 3]
@@ -431,7 +431,7 @@ Other unprintable paths are converted to string:
 		 (read string)
 	       (error nil))))))))
 
-(defun read-cl-expression (beg end)
+(cl-defun read-cl-expression (beg end)
   "Assumes we are in buffer where the cl expression exactly
 contained in the region BEG END"
   (save-excursion
@@ -441,7 +441,7 @@ contained in the region BEG END"
       ;;handle atom
       )))
 
-(defun eread (string)
+(cl-defun eread (string)
   "Reads a common lisp expression. It handles CL print syntax in the following ways:
 Arrays are converted to vectors (or vectors of vectors):
 #(1 2 3)              --> [1 2 3]
@@ -478,7 +478,7 @@ Edit: I have scetched a reader for this, see above."
 ;;(eread qwe)
 ;;(mapcar #'eread '("asdf#<PACKAGE YAMAL-MODEL>" nil))
 
-(defun mb-lisp-process-output ()
+(cl-defun mb-lisp-process-output ()
   "Returns the output from REPL as an Elisp object. Note that
 multiple values are returned as a list, cfr cl-values"
   (let* ((string (concat* (reverse *repl-comint-output-list*))))
@@ -487,12 +487,12 @@ multiple values are returned as a list, cfr cl-values"
      (setf *repl-comint-output-list* nil)    
      (setf *repl-output* (mapcar #'eread (split-string (cl-substitute 10 13 string) " ;\n\n"))))))
 
-(defun mb-lisp-scroll-to-bottom (string)
+(cl-defun mb-lisp-scroll-to-bottom (string)
   (let ((current (current-buffer)))
     (dolist (w (get-buffer-window-list current nil t))
       (set-window-point w (point-max)))))
 
-(defun mb-lisp-on-output (string)
+(cl-defun mb-lisp-on-output (string)
   "Echoes the result part of string.
 This function is called by comint when the process has finished a
 command. The input STRING is the default output. It is untouched
@@ -525,7 +525,7 @@ of the lisp evaulation the started the command."
   the lisp process window is not present in this window, it is
   deleted when exiting mb-repl-mode.")
 
-(defun repl-error-p (string)
+(cl-defun repl-error-p (string)
   (string-match +repl-error-regexp+ string))
 
 (define-derived-mode mb-lisp-repl-mode fundamental-mode "MB-Lisp REPL mode"
@@ -538,7 +538,7 @@ of the lisp evaulation the started the command."
   (use-local-map +mb-lisp-repl-mode-map+)
   (display-buffer inferior-lisp-buffer))
 
-(defun repl-read-expression (from-minibuffer-p)
+(cl-defun repl-read-expression (from-minibuffer-p)
   (let ((expression (if from-minibuffer-p (read-from-minibuffer "Eval: ") (mb-previous-sexp)))
 	(package-name (buffer-package-name)))
     (comint-simple-send (inferior-lisp-proc)
@@ -574,7 +574,7 @@ from C to entering :C in the REPL."
 		    number-sequence)))
 ;;(macroexpand (repl-define-number-key-maps +mb-lisp-repl-mode-map+ "123"))
 
-(defun exit-mb-lisp-repl-mode (&optional send-abort-message-p)
+(cl-defun exit-mb-lisp-repl-mode (&optional send-abort-message-p)
   ;; (let ((new-windows (cl-set-difference (window-list) *repl-window-list*)))
   ;;   (cl-loop for w in new-windows
   ;; 	  do (delete-window w)))
@@ -608,7 +608,7 @@ The file name is a generated name and is put somewhere under
       (insert string)
       (write-file temp-ly-file)
       (setf compilation-finish-function
-	    (lexical-let ((temp-pdf-file (format "%s.pdf" temp-file)))
+	    (let ((temp-pdf-file (format "%s.pdf" temp-file)))
 	      #'(lambda (buffer status)
 		  (when (string-match "finished" status)
 		    (find-file temp-pdf-file)
@@ -633,7 +633,7 @@ The file name is a generated name and is put somewhere under
 	(insert string)
 	(write-file temp-ly-file)
 	(setf compilation-finish-function
-	      (lexical-let ((temp-pdf-file (format "%s.pdf" temp-file)))
+	      (let ((temp-pdf-file (format "%s.pdf" temp-file)))
 		#'(lambda (buffer status)
 		    (when (string-match "finished" status)
 		      (find-file temp-pdf-file)
@@ -647,7 +647,7 @@ The file name is a generated name and is put somewhere under
 	 (format "lilypond %s" temp-ly-file) "*LilyPond-compile*"))
       )))
 
-(defun lisp-doc-region ()
+(cl-defun lisp-doc-region ()
   "Returns the region (BEG END) of the documentation string of
 the defun at POINT. If the defun does not have a documentation
 string, it returns nil. Notqe also that this will not work in the
@@ -670,7 +670,7 @@ documentation strings of defclass, defconstant etc."
       (error nil))))
 ;;(lisp-doc-region)
 
-(defun restrict-to-lisp-doc (orig-fun &rest args)
+(cl-defun restrict-to-lisp-doc (orig-fun &rest args)
   "Dette er en setning. Dette er nok en setning. Dette er ogsaa en setning."
   (if (member major-mode '(emacs-lisp-mode mb-lisp-mode lisp-mode))
     (cl-destructuring-bind (beg end) (lisp-doc-region)
@@ -681,7 +681,7 @@ documentation strings of defclass, defconstant etc."
 (advice-add 'forward-sentence :around #'restrict-to-lisp-doc)
 
 ;;; slime/evil additions
-(defun slime-plot-last-result ()
+(cl-defun slime-plot-last-result ()
   (interactive)
   (when (slime-p)
     (with-buffer "*Messages*"

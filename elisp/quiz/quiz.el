@@ -18,18 +18,18 @@
 
 ;;;;;;;;;;;;;;;; UTILS ;;;;;;;;;;;;;;;;;;
 
-(defun buffer-replace (string1 string2)
+(cl-defun buffer-replace (string1 string2)
   (save-excursion
     (goto-char (point-min))
     (while (re-search-forward string1 nil t)
     (replace-match string2 t))))
 
-(defun buffer-replace-multi (strings1 strings2)
-  (loop for string1 in strings1
+(cl-defun buffer-replace-multi (strings1 strings2)
+  (cl-loop for string1 in strings1
 	for string2 in strings2
 	do (buffer-replace string1 string2)))
 
-(defun quiz-clean-up-mule-shit ()
+(cl-defun quiz-clean-up-mule-shit ()
   (interactive)
   (buffer-replace-multi
    '("Ã¥" "Ã¸" "Â«" "Â»" "Ã¶" "Ã¦") 
@@ -60,7 +60,7 @@
   (setq *quiz-items-short* (apply #'concat (mapcar #'second items-long))))
 
 
-(defun quiz-item-prefix (item) (second (assoc item *quiz-items-long*)))
+(cl-defun quiz-item-prefix (item) (second (assoc item *quiz-items-long*)))
 ;;(quiz-item-prefix :answer)
 
 (cl-defun quiz-item (item n &optional (string ""))
@@ -97,11 +97,11 @@ that are recognized."
 ;;;   · q-item-text (section after q-item-header)
 
 ;;; q-list
-(defun quiz-beginning-of-list ()
+(cl-defun quiz-beginning-of-list ()
   "Beginning of list is a header"
   (goto-char (point-min)))
 
-(defun quiz-end-of-list ()
+(cl-defun quiz-end-of-list ()
   "End of list is before next header or end of buffer."
   (error "Not implemented"))
 
@@ -143,12 +143,12 @@ that are recognized."
 	     (backward-char 1))))
   (point))
 
-(defun quiz-goto-question (n)
+(cl-defun quiz-goto-question (n)
   "Starts at beginning of q-list and moves cursor to the beginning of
 the first q-question labeled N"
   (error "Not implemented"))
 
-(defun quiz-question-set-numbers (n)
+(cl-defun quiz-question-set-numbers (n)
   "Returns new point or nil if last question"
   (quiz-beginning-of-question 1)
   (let* ((point (point))
@@ -200,13 +200,13 @@ the first q-question labeled N"
   (quiz-beginning-of-item items-short)
   (re-search-forward (quiz-item-beg-regexp)))
 
-(defun quiz-item-set-number (n)
+(cl-defun quiz-item-set-number (n)
   (quiz-beginning-of-item)
   (forward-char 1)
   (kill-word 1)
   (insert (number-to-string n)))
 
-(defun quiz-item-insert ()
+(cl-defun quiz-item-insert ()
   (error "Not implemented"))
 ;;;;;;;;
 
@@ -225,7 +225,7 @@ the first q-question labeled N"
   (re-search-forward (quiz-regexp-item-start *quiz-items-short* t) nil t)
   (eol :offset -1))
 
-(defun quiz-goto-question-end ()
+(cl-defun quiz-goto-question-end ()
   "Moves point to end of current question section."
   (re-search-forward "\n\\s-*$" nil t 1))
 
@@ -277,7 +277,7 @@ ITEM is not given or \"\", the item at point is used."
 
 ;;;; Quiz mode and GUI
 
-(defun quiz-mode () "Major mode for editing .qz files.
+(cl-defun quiz-mode () "Major mode for editing .qz files.
  \\{quiz-mode-map}
  \\<quiz-mode-map>"
        (interactive)
@@ -334,13 +334,13 @@ ITEM is not given or \"\", the item at point is used."
     (setq quiz-mode-map map)) "Keymap used in quiz mode.")
 
 ;;; Queries
-(defun quiz-current-item ()
+(cl-defun quiz-current-item ()
   (save-excursion
     (quiz-beginning-of-item)
     (first (find (buffer-substring* :start (point) :length 1)
 		 *quiz-items-long* :key #'second :test #'string=))))
 
-(defun quiz-current-item-p (item)
+(cl-defun quiz-current-item-p (item)
   (eql (quiz-current-item) item))
 
 (cl-defun quiz-get-buffer (&optional (buffer-name (format "mq-%s.qz" (iso-date))))
@@ -381,7 +381,7 @@ other local variables are set."
   "4 or 5"
   (+ quiz-hanging-space (quiz-paragraph-indent point)))
 
-(defun quiz-fill-item (&optional justify)
+(cl-defun quiz-fill-item (&optional justify)
   "Fills schedule paragraphs. Too macroish implemented."
   (interactive "P")
   (save-excursion
@@ -394,7 +394,7 @@ other local variables are set."
   (let ((*quiz-items-short* "QAE"))
     (save-excursion
       (goto-char (point-min))
-      (loop for beg = (quiz-beginning-of-question)
+      (cl-loop for beg = (quiz-beginning-of-question)
 	    for end = (quiz-end-of-question 1)
 	    for item-string = (string-trim (buffer-substring-no-properties beg end))
 	    collect (quiz-parse-item item-string)
@@ -403,7 +403,7 @@ other local variables are set."
 (defconst +quiz-ignore-chars-regexp+ "[^[:alnum:])»\"]")
 
 ;;; Editing
-(defun quiz-super-save ()
+(cl-defun quiz-super-save ()
   "Cleans Q, saves buffer and return to other window.
 TODO: factorize this and clean answer as well."
   (interactive)
@@ -443,7 +443,7 @@ TODO: factorize this and clean answer as well."
       (quiz-forward-item)
       (insert (string-trim* s "[^[:alnum:]()«»]")))))
 
-(defun quiz-remove-A ()
+(cl-defun quiz-remove-A ()
   "Removes next A item"
   (interactive)
   (when (re-search-forward "^A" nil t)
@@ -452,7 +452,7 @@ TODO: factorize this and clean answer as well."
     (re-search-forward "^A.*\n\\([^QAS\n].*\n\\)*")
     (kill-region (point) (mark))))
 
-(defun quiz-remove-S ()
+(cl-defun quiz-remove-S ()
   "Removes next S item"
   (interactive)
   (when (re-search-forward "^S" nil t)
@@ -462,21 +462,21 @@ TODO: factorize this and clean answer as well."
     (kill-region (point) (mark))
     t))  
 
-(defun add-iso-day (iso-date &optional n)
+(cl-defun add-iso-day (iso-date &optional n)
   "Returns a date that is ISO-DATE + N. Default value for N is 1. Both
 string ISO-DATE and the returned string are in iso date format. TODO:
 why is this method but here?"
   (iso-date (add-time iso-date :day (or n 1))))
 ;;(add-iso-day "2004-03-23")
 
-(defun quiz-remove-A-buffer ()
+(cl-defun quiz-remove-A-buffer ()
   "Obsolete?"
   (interactive)
   (save-excursion
     (goto-char (point-min))
     (while (quiz-remove-A))))
 
-(defun quiz-remove-S-buffer ()
+(cl-defun quiz-remove-S-buffer ()
   "Obsolete?"
   (interactive)
   (save-excursion
@@ -511,7 +511,7 @@ respectively are to be included for each question record."
 	 (buffer (get-buffer-create buffer-name)))
     (with-buffer buffer
       (kill-region (point-min) (point-max))
-      (loop for iso-d = iso-from then (iso-date (add-time iso-d :day 1))
+      (cl-loop for iso-d = iso-from then (iso-date (add-time iso-d :day 1))
 	    for filename = (format "mq-%s" iso-d)
 	    for path = (format "%s%s.qz" *quiz-dir* filename)
 	    until (string= iso-d iso-to)
@@ -532,16 +532,16 @@ respectively are to be included for each question record."
     (switch-to-buffer buffer)
     (set (make-local-variable 'fill-paragraph-function) #'quiz-fill-item)))
 
-(defun quiz-summary (n items)
+(cl-defun quiz-summary (n items)
   (quiz-compile :iso-from (add-iso-day (iso-date) (- 1 n))
 		:iso-to (add-iso-day (iso-date))
 		:items items))
 
-(defun quiz-summary-print (n)
+(cl-defun quiz-summary-print (n)
   (interactive "P")
   (quiz-summary (or n 14) "QA"))
 
-(defun quiz-summary-mail (n)
+(cl-defun quiz-summary-mail (n)
   (interactive "P")
   (quiz-summary (or n 7) "QS"))
 
@@ -556,9 +556,9 @@ respectively are to be included for each question record."
 		    "Truls Flatberg <trulsf@ifi.uio.no>"
 		    "Thomas Bergkirk <thomas.bergkirk@rubicontv.no>"))))
 
-(defun purify-address (address) (string-match* "<?\\([^ >]*@[^ >]*\\)>?" address 1))
+(cl-defun purify-address (address) (string-match* "<?\\([^ >]*@[^ >]*\\)>?" address 1))
 
-(defun quiz-mail-buffer (refresh)
+(cl-defun quiz-mail-buffer (refresh)
   "Sends current quiz buffer as mail to recipients"
   (interactive "P")
   (if refresh (mb-refresh-addresses))
@@ -595,7 +595,7 @@ at the beginning of the q-question."
   (quiz-save-excursion point
     (quiz-question-set-number-1 n)))
 
-(defun quiz-reset-question-numbers ()
+(cl-defun quiz-reset-question-numbers ()
   (interactive)
   (save-excursion
     (goto-char (point-min))
@@ -627,7 +627,7 @@ DATE. TODO: coordinate this with goto methods, ie. goto-Q etc."
 
 (require 'mb-utils-buffer)
 
-(defun quiz-convert-aftenposten-nyhetsquiz-question-to-qz-question (beg end n &optional s)
+(cl-defun quiz-convert-aftenposten-nyhetsquiz-question-to-qz-question (beg end n &optional s)
   "STRING is aftenposten question string. Returns a string question in
 qz format. The question is numbered N."
   (let* ((string (buffer-substring beg end))
@@ -640,7 +640,7 @@ qz format. The question is numbered N."
     (insert (quiz-item-a n a))
     (when s (insert (quiz-item-s n s)))))
 
-(defun quiz-convert-aftenposten-nyhetsquiz-to-qz-file ()
+(cl-defun quiz-convert-aftenposten-nyhetsquiz-to-qz-file ()
   (interactive)
   (let ((n 0)) 
     (buffer-do-regions beg end ("\\(.*\n.*\n\\)\\s-*\n" 1)

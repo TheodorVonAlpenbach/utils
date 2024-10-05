@@ -1,6 +1,6 @@
 (require 'mongo)
 
-(defun ada-mongo-count-ucs-tasks (component-uuid user-pseudonym collection &optional env)
+(cl-defun ada-mongo-count-ucs-tasks (component-uuid user-pseudonym collection &optional env)
   "Return number of tasks for each state in one UserComponentState object"
   (let* ((db (if (string= collection "userComponentState")
 	       "portal-state" "kafka-connect"))
@@ -24,7 +24,7 @@
 	 (docres (mongo-message-reply-documents result)))
     (cl-loop for x in docres
 	     for states = (cdr (assoc-string "userComponentStates" (car docres)))
-	     for task-answer-lengths = (loop for state across states
+	     for task-answer-lengths = (cl-loop for state across states
 					     collect (length (cdr (assoc-string "taskAnswers" state))))
 	     collect (list task-answer-lengths component-uuid user-pseudonym))))
 ;;(ada-mongo-count-ucs-tasks "c19b653d-e606-33cd-8e96-5d9cab42f06a" "d313d833-0b52-4541-8d36-1272a8333db0" "state-user-component-170")

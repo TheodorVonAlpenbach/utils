@@ -1,13 +1,13 @@
 (require 'emacsql-mysql)
 (require 'ada-user)
 
-(defun cancel-group-sync (group-id-descriptor)
+(cl-defun cancel-group-sync (group-id-descriptor)
   (emacsql db [:update company-group :set (= sync-date $r1) :where (= id $s2)]
 	   (iso-date-and-time :time (add-etime-date (now) :day -1))
 	   (id group-id-descriptor)))
 ;;(cancel-group-sync 571156)
 
-(defun company-group (id-descriptor)
+(cl-defun company-group (id-descriptor)
   (car (emacsql db [:select * :from company-group :where (= id $s1)] (id id-descriptor))))
 ;;(company-group 571156)
 ;;(ada-columns 'company-group)
@@ -23,7 +23,7 @@ By default, COMPANY-ID is 4, i.e. Skolen"
 ;;(group-from-name "Basisgruppe 1A")
 ;;(length (group-from-name "Basisgruppe 1A"))
 
-(defun user-groups (user-descriptor)
+(cl-defun user-groups (user-descriptor)
   "Return IDs for all groups that includes USER-DESCRIPTOR"
   (mapcar #'id
     (emacsql db [:select company-group-id
@@ -32,7 +32,7 @@ By default, COMPANY-ID is 4, i.e. Skolen"
 	    (id user-descriptor))))
 ;;(user-groups 321210)
 
-(defun group-member-ids (group-descriptor)
+(cl-defun group-member-ids (group-descriptor)
   "Return user IDs for all members in GROUP-DESCRIPTOR"
   (mapcar #'id
     (emacsql db [:select user-id
@@ -41,7 +41,7 @@ By default, COMPANY-ID is 4, i.e. Skolen"
 	    (id group-descriptor))))
 ;;(group-member-ids 571156)
 
-(defun remove-member-from-all-groups (user-id-descriptor)
+(cl-defun remove-member-from-all-groups (user-id-descriptor)
   (emacsql db [:delete :from user-company-group :where (= user-id $s1)]
 	   (id user-id-descriptor)))
 ;;(remove-member-from-all-groups (id (user-from-name "%laerer%499_1%")))
@@ -68,7 +68,7 @@ By default, COMPANY-ID is 4, i.e. Skolen"
 ;;(remove-members-from-group (id 571156))
 ;;(ada-columns 'user-company-group)
 
-(defun ada-group (id-or-ids)
+(cl-defun ada-group (id-or-ids)
   "Return company-group(s) for id-or-ids"
   (if (listp id-or-ids)
     (mapcar #'ada-group id-or-ids)
@@ -78,7 +78,7 @@ By default, COMPANY-ID is 4, i.e. Skolen"
 	   id-or-ids))))
 ;;(fourth (car (ada-group 571156)))
 
-(defun group-ids-from-user (user)
+(cl-defun group-ids-from-user (user)
   (mapcar #'car (emacsql db
 		  [:select company-group-id
 		    :from user-company-group
@@ -88,7 +88,7 @@ By default, COMPANY-ID is 4, i.e. Skolen"
 ;;(group-ids-from-user teacher9-1)
 ;;(mapcar #'company-group-size (group-ids-from-user teacher9-1))
 
-(defun company-group-size (id)
+(cl-defun company-group-size (id)
   (cons id (car (emacsql db
 		  [:select (funcall count id)
 		    :from user-company-group
@@ -96,7 +96,7 @@ By default, COMPANY-ID is 4, i.e. Skolen"
 		  id))))
 ;;(company-group-size 571179)
 
-(defun active-groups ()
+(cl-defun active-groups ()
   "Return active company-groups"
   (emacsql db
     [:select *
@@ -106,7 +106,7 @@ By default, COMPANY-ID is 4, i.e. Skolen"
     (iso-date-and-time)))
 ;;(active-groups)
 
-(defun active-group-ids ()
+(cl-defun active-group-ids ()
   "Return ID of active company-groups"
   (mapcar #'car
     (emacsql db
@@ -117,13 +117,13 @@ By default, COMPANY-ID is 4, i.e. Skolen"
       (iso-date-and-time))))
 ;;(active-group-ids)
 
-(defun active-singleton-company-groups ()
+(cl-defun active-singleton-company-groups ()
   "Return groups with only one member"
   (copy 1 (mapcar #'company-group-size (active-group-ids))
     :key #'second))
 ;;(active-company-group-sizes)
 
-(defun group-member-p (user-id company-group-id)
+(cl-defun group-member-p (user-id company-group-id)
   (emacsql db
     [:select *
       :from user-company-group
@@ -132,13 +132,13 @@ By default, COMPANY-ID is 4, i.e. Skolen"
     company-group-id user-id))
 ;;(group-member-p (caar (user-from-name "%laerer%9_1%")) (active-group-ids))
 
-(defun active-singleton-company-groups-user (user-id-descriptor)
+(cl-defun active-singleton-company-groups-user (user-id-descriptor)
   (cl-loop for (company-group-id length) in (active-singleton-company-groups)
 	if (group-member-p (id user-id-descriptor) company-group-id)
 	collect company-group-id))
 ;;(active-singleton-company-groups-user teacher9-1)
 
-(defun fgroup (id &rest columns)
+(cl-defun fgroup (id &rest columns)
   "Argument COLUMNS are not yet supported"
   (tab-format (butlast (cl-loop for v in (ada-group id)
 				for (k . rest ) in (ada-columns 'company-group)

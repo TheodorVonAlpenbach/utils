@@ -6,12 +6,12 @@
   (defalias 'emacsen-compiled-function-arglist 'compiled-function-arglist))
  ;; GNU Emacs
  (t
-  (defun emacsen-make-up-number-arglist (start end tail)
+  (cl-defun emacsen-make-up-number-arglist (start end tail)
     (while (< start end)
       (setq end (1- end))
       (setq tail (cons (intern (format "a%d" end)) tail)))
     tail)
-  (defun emacsen-compiled-function-arglist (func)
+  (cl-defun emacsen-compiled-function-arglist (func)
     (let ((a (aref func 0)))
       (if (integerp a)
           ;; An integer encoding the arity. Encountered in Emacs 24.3.
@@ -26,7 +26,7 @@
             (emacsen-make-up-number-arglist 0 mandatory arglist))
         ;; Otherwise: this is the arglist. The only format I've seen up to GNU 23.
         a)))))
-(defun interactive-spec (function &optional safe)
+(cl-defun interactive-spec (function &optional safe)
   "Return the interactive calling specs of FUNCTION.
 Signal an error if FUNCTION does not have interactive calling specs.
 However, in this case, if optional second argument SAFE is non-nil,
@@ -57,7 +57,7 @@ return nil."
                              nil
                            (signal 'wrong-type-argument (cdr e))))))
 
-(defun function-argspec (func)
+(cl-defun function-argspec (func)
   "Return a function's argument list.
 For byte-compiled functions in Emacs >=24, some information may be lost as the
 byte compiler sometimes erases argument names. In this case, fake argument names
@@ -90,7 +90,7 @@ are reconstructed."
    (t (signal 'wrong-type-argument
               (list 'functionp func)))))
 
-(defun function-arity (func)
+(cl-defun function-arity (func)
   "Return a function's arity as (MIN . MAX).
 Return minimum and maximum number of args allowed for SUBR.
 The returned value is a pair (MIN . MAX).  MIN is the minimum number

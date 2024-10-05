@@ -121,10 +121,10 @@
 ;;;;    (autoload 'scilab-help-function "scilab" "Scilab Help Function." t)
 ;;;;    (autoload 'scilab-apropos-function "scilab" "Scilab Apropos Function." t)
 
-;;;; (defun my-scilab-mode-hook ()
+;;;; (cl-defun my-scilab-mode-hook ()
 ;;;;   (if running-gnuemacs (show-paren-mode))
 ;;;;      (setq fill-column 76))        ; where auto-fill should wrap
-;;;; (defun my-scilab-shell-mode-hook ()
+;;;; (cl-defun my-scilab-shell-mode-hook ()
 ;;;; (if running-gnuemacs (show-paren-mode)))
 ;;;;
 ;;;; (add-hook 'scilab-mode-hook 'my-scilab-mode-hook)
@@ -225,7 +225,7 @@
      (defalias 'scilab-run-with-timer 'run-with-timer)
      (require 'cus-face)
      (defalias 'scilab-face-get-attribute  'face-custom-attributes-get)
-     (defun scilab-run-with-idle-timer (secs repeat function &rest args)
+     (cl-defun scilab-run-with-idle-timer (secs repeat function &rest args)
    (condition-case nil
        (start-itimer "scilab" function secs (if repeat secs nil) t)
      (error
@@ -250,7 +250,7 @@
 ;; has much more features and can be installed also.So:
 
 
-(defun scilab-server-start()
+(cl-defun scilab-server-start()
 "Run gnuserver if it is possible. For Xemacs this is the standard
 server. For GNU emacs server is the standard server. However, gnuserver
 can be installed for emacs too. In this case scilab-server-start runs
@@ -287,7 +287,7 @@ is updated"
 nil))
 
 
-(defun scilab-server-kill()
+(cl-defun scilab-server-kill()
 "Run gnuserver if it is possible. For Xemacs this is the standard
 server. For GNU emacs server is the standard server. However, gnuserver
 can be installed for emacs too. In this case scilab-server-start runs
@@ -310,7 +310,7 @@ is updated"
 
 
 
-(defun scilab-server-status()
+(cl-defun scilab-server-status()
 "Gives status of scilab-server. Notice that gnuserv can rub while the status
 for scilab-server will be \"not run\". To privide proper behaviour of gnuserver
 it must be run only via `scilab-server-start'. This is cheked via the variable
@@ -365,12 +365,12 @@ than for builtins. You can disable this option"
    (progn
      (defalias 'scilab-point-at-bol 'point-at-bol)
      (defalias 'scilab-point-at-eol 'point-at-eol))
- (defun scilab-point-at-bol ()
+ (cl-defun scilab-point-at-bol ()
    (interactive) (save-excursion (forward-line 0) (point)))
- (defun scilab-point-at-eol ()
+ (cl-defun scilab-point-at-eol ()
    (interactive) (save-excursion (end-of-line) (point))))
 
-(defun scilab-get-default-scilab-shell-command ()
+(cl-defun scilab-get-default-scilab-shell-command ()
  "Compute the default value for user-changeable variable scilab-shell-command"
  (let (
    (trial-list (list (getenv "SCI") "/usr/lib/scilab-2.6"))
@@ -660,7 +660,7 @@ Valid values are:
  "Regexp describing all valid variable names")
 
 
-(defun scilab-simple-send (proc string)
+(cl-defun scilab-simple-send (proc string)
  "Default function for sending in scilab session to PROC input STRING.
 Takes in account the meaning of the symbol '!'.
 See the hook `comint-input-sender'."
@@ -684,7 +684,7 @@ See the hook `comint-input-sender'."
 
 
 
-(defun scilab-string-garbage-filter (string)
+(cl-defun scilab-string-garbage-filter (string)
  "Filters STRING for the scilab-simple-send"
  (let ((garbage (concat "\\(" (regexp-quote "\C-g") "\\|"
             (regexp-quote "\033[H0") "\\|"
@@ -696,7 +696,7 @@ See the hook `comint-input-sender'."
      (setq string (replace-match "" t t string))))
 (if (null string) "" string))
 
-(defun scilab-output-garbage-filter (&optional string)
+(cl-defun scilab-output-garbage-filter (&optional string)
  "Filters output.This function could be on `comint-output-filter-functions' or bound to a key."
  (interactive)
  (let ((pmark (process-mark (get-buffer-process (current-buffer))))
@@ -714,7 +714,7 @@ See the hook `comint-input-sender'."
      (replace-match "" t t)))))
 
 
-(defun scilab-font-lock-adjustments ()
+(cl-defun scilab-font-lock-adjustments ()
  "Make adjustments for font lock.
 If font lock is not loaded, lay in wait."
  (if (and (featurep 'custom) (fboundp 'custom-declare-variable) (fboundp 'scilab-face-get-attribute))
@@ -1030,7 +1030,7 @@ when attempting to understand the current context.")
 The ' character can be used as a transpose, and can transpose transposes.
 Therefore, to end, we must check all that goop.")
 
-(defun scilab-font-lock-string-match-normal (limit)
+(cl-defun scilab-font-lock-string-match-normal (limit)
  "When font locking strings, call this function for normal strings.
 Argument LIMIT is the maximum distance to scan."
  (scilab-font-lock-string-match-here
@@ -1039,7 +1039,7 @@ Argument LIMIT is the maximum distance to scan."
       "\\([^\"]\\|$\\)")
   limit))
 
-(defun scilab-font-lock-string-match-unterminated (limit)
+(cl-defun scilab-font-lock-string-match-unterminated (limit)
  "When font locking strings, call this function for normal strings.
 Argument LIMIT is the maximum distance to scan."
  (scilab-font-lock-string-match-here
@@ -1047,7 +1047,7 @@ Argument LIMIT is the maximum distance to scan."
       "\\([\"][^\"\n]*\\([\"][\"][^\"\n]*\\)*\\)$")
   limit))
 
-(defun scilab-font-lock-string-match-here (regex limit)
+(cl-defun scilab-font-lock-string-match-here (regex limit)
  "When font-locking strings, call this function to determine a match.
 Argument REGEX is the expression to scan for.  Match 2 must be the string.
 Argument LIMIT is the maximum distance to scan."
@@ -1070,7 +1070,7 @@ Argument LIMIT is the maximum distance to scan."
      (goto-char e)
      t)))
 
-(defun scilab-font-lock-comment-match (limit)
+(cl-defun scilab-font-lock-comment-match (limit)
  "When font-locking comments, call this function to determine a match.
 Argument LIMIT is the maximum distance to scan."
  (let (e)
@@ -1221,7 +1221,7 @@ thing.  Besides my genlib  produces full correpodnence bin-file scilab-function 
 be changed for MSDOS")
 
 
-(defun scilab-make-regexp-from-builtin ()
+(cl-defun scilab-make-regexp-from-builtin ()
 "Make regexp from builtin list of strings"
 (regexp-opt scilab-builtin-list 'words)
 ;(concat "\\<\\(" (mapconcat 'regexp-quote scilab-builtin-list "\\|")
@@ -1235,7 +1235,7 @@ be changed for MSDOS")
  :type 'string)
 
 
-(defun scilab-make-regexp-from-libfunc ()
+(cl-defun scilab-make-regexp-from-libfunc ()
 "Make regexp from libfunc file"
 (if (null (file-exists-p scilab-libfunc-list-path))
   "\\<\\(genlib\\)\\>"
@@ -1462,14 +1462,14 @@ It may be .. ... .. ... etc \n.")
 
 (defvar scilab-function-end-regexp  "^\\s-*endfunction\\>")
 
-(defun scilab-get-id ()
+(cl-defun scilab-get-id ()
 (interactive)
 (prin1 (process-id (get-buffer-process "*Scilab*"))))
 
 ;;; Scilab mode entry point ==================================================
 
 ;;;###autoload
-(defun scilab-mode ()
+(cl-defun scilab-mode ()
  "Scilab-mode is a major mode for editing SCILAB dot-sci files.
 \\<scilab-mode-map>
 Convenient editing commands are:
@@ -1616,27 +1616,27 @@ All Key Bindings:
      (set-buffer buf)))))
 ;;; Utilities =================================================================
 
-(defun scilab-show-version ()
+(cl-defun scilab-show-version ()
  "Show the versions number in the minibuffer."
  (interactive)
  (if (null scilab-mode-all-versions)
      (message "scilab-mode, version %s" scilab-mode-version)
      (message "%s" scilab-mode-all-versions)))
 
-(defun scilab-find-prev-line ()
+(cl-defun scilab-find-prev-line ()
  "Recurse backwards until a code line is found."
  (if (= -1 (forward-line -1)) nil
    (if (or (scilab-ltype-empty)
        (scilab-ltype-comm-ignore))
    (scilab-find-prev-line) t)))
 
-(defun scilab-prev-line ()
+(cl-defun scilab-prev-line ()
  "Go to the previous line of code.  Return nil if not found."
  (interactive)
  (let ((old-point (point)))
    (if (scilab-find-prev-line) t (goto-char old-point) nil)))
 
-(defun scilab-uniquafy-list (lst)
+(cl-defun scilab-uniquafy-list (lst)
  "Return a list that is a subset of LST where all elements are unique."
  (let ((nlst nil))
    (while lst
@@ -1671,7 +1671,7 @@ All Key Bindings:
      (lambda ()
        (def-edebug-spec scilab-navigation-syntax def-body)))
 
-(defun scilab-up-list (count &optional restrict)
+(cl-defun scilab-up-list (count &optional restrict)
  "Move forwards or backwards up a list by COUNT.
 Optional argument RESTRICT is where to restrict the search."
  ;; Scilab syntax table has no disabling strings or comments.
@@ -1698,7 +1698,7 @@ Optional argument RESTRICT is where to restrict the search."
      (error "Not implemented"))
    ms))
 
-(defun scilab-valid-end-construct-p ()
+(cl-defun scilab-valid-end-construct-p ()
  "Return non-nil if the end after point terminates a block.
 Return nil if it is being used to dereference an array."
  (let ((p (point))
@@ -1753,7 +1753,7 @@ Excludes function.")
 
 (defconst scilab-not-variable-symbol "[():; ,.^\"\n-]")
 
-(defun scilab-block-beg-pre ()
+(cl-defun scilab-block-beg-pre ()
  "Partial regular expression to recognize Scilab block-begin keywords."
  (if scilab-indent-function
      scilab-block-beg-pre-if
@@ -1771,7 +1771,7 @@ Excludes function.")
  "end"
  "Partial regular expression to recognize Scilab block-end keywords.")
 
-(defun scilab-block-end-pre ()
+(cl-defun scilab-block-end-pre ()
  "Partial regular expression to recognize Scilab block-end keywords."
  (if scilab-indent-function
      scilab-block-end-pre-if
@@ -1790,7 +1790,7 @@ Thus, they are endless.  A new case or else will end a previous
 endless block, and and end will end this block, plus any outside normal
 blocks.")
 
-(defun scilab-block-re ()
+(cl-defun scilab-block-re ()
  "Regular expression for keywords which begin Scilab blocks."
  (concat "\\(^\\|[;,]\\)\\s-*\\("
      (scilab-block-beg-pre) "\\|"
@@ -1798,29 +1798,29 @@ blocks.")
      (scilab-block-end-pre) "\\|"
      scilab-endless-blocks "\\)\\b"))
 
-(defun scilab-block-scan-re ()
+(cl-defun scilab-block-scan-re ()
  "Expression used to scan over matching pairs of begin/ends."
  (concat "\\(^\\|[;,]\\)\\s-*\\("
      (scilab-block-beg-pre) "\\|"
      (scilab-block-end-pre) "\\)\\b"))
 
-(defun scilab-block-beg-re ()
+(cl-defun scilab-block-beg-re ()
  "Expression used to find the beginning of a block."
  (concat "\\(" (scilab-block-beg-pre) "\\)"))
 
-(defun scilab-block-mid-re ()
+(cl-defun scilab-block-mid-re ()
  "Expression used to find block center parts (like else)."
  (concat "\\(" scilab-block-mid-pre "\\)"))
 
-(defun scilab-block-end-re ()
+(cl-defun scilab-block-end-re ()
  "Expression used to end a block.  Usually just `end'."
  (concat "\\(" (scilab-block-end-pre) "\\)"))
 
-(defun scilab-block-end-no-function-re ()
+(cl-defun scilab-block-end-no-function-re ()
  "Expression representing and end if functions are excluded."
  (concat "\\<\\(" scilab-block-end-pre-no-if "\\)\\>"))
 
-(defun scilab-endless-blocks-re ()
+(cl-defun scilab-endless-blocks-re ()
  "Expression of block starters that do not have associated ends."
  (concat "\\(" scilab-endless-blocks "\\)"))
 
@@ -1877,7 +1877,7 @@ blocks.")
  "[gs]et\\|findobj\\|waitfor"
  "Expression for commands that have unknown types.")
 
-(defun scilab-all-known-properties ()
+(cl-defun scilab-all-known-properties ()
  "Return a list of all properties."
  (let ((lst scilab-core-properties)
    (tl scilab-property-lists))
@@ -1906,7 +1906,7 @@ blocks.")
 This is so the block highlighter doesn't gobble up lots of time when
 a block is not terminated.")
 
-(defun scilab-backward-sexp (&optional autoend noerror)
+(cl-defun scilab-backward-sexp (&optional autoend noerror)
  "Go backwards one balanced set of Scilab expressions.
 If optional AUTOEND, then pretend we are at an end.
 If optional NOERROR, then we return t on success, and nil on failure."
@@ -1946,7 +1946,7 @@ If optional NOERROR, then we return t on success, and nil on failure."
          (error "Unstarted END construct"))))
    returnme))))
 
-(defun scilab-forward-sexp ()
+(cl-defun scilab-forward-sexp ()
    "Go forward one balanced set of Scilab expressions."
  (interactive)
  (scilab-navigation-syntax
@@ -1979,7 +1979,7 @@ If optional NOERROR, then we return t on success, and nil on failure."
        (setq done t))))
    (if (null s) (error "Unterminated block"))))))
 
-(defun scilab-beginning-of-defun ()
+(cl-defun scilab-beginning-of-defun ()
  "Go to closest beginning of function above. If the current
 pointer is between two functions then go to the beginning of the
 above function. If beginning of function is found, then return match end,
@@ -1991,7 +1991,7 @@ above function. If beginning of function is found, then return match end,
    (goto-char (point-min))
    nil))
 
-(defun scilab-matching-beginning-of-defun (&optional no-warning)
+(cl-defun scilab-matching-beginning-of-defun (&optional no-warning)
  "Go to the beginning of the current function. Return end of
  beginning of function match point if beginning of function is
  found, nil otherwise.  
@@ -2028,7 +2028,7 @@ above function. If beginning of function is found, then return match end,
    bofun))
 
 
-(defun scilab-mark-defun ()
+(cl-defun scilab-mark-defun ()
  "Put mark at end of Scilab function, point at beginning. 
 The marks are pushed."
  (interactive)
@@ -2040,7 +2040,7 @@ The marks are pushed."
    (goto-char cur)
    (scilab-matching-beginning-of-defun)))
 
-(defun scilab-matching-end-of-defun (&optional no-warning)
+(cl-defun scilab-matching-end-of-defun (&optional no-warning)
  "Go to the end of the current function. Return beginning
  of endfunction match when end of function is found, nil otherwise.
 
@@ -2074,7 +2074,7 @@ The marks are pushed."
      ))
    eofun))
 
-(defun scilab-end-of-defun ()
+(cl-defun scilab-end-of-defun ()
  "Go to the end of the current function. If the current pointer
 is between two functions go to the end of the above function."
  (interactive)
@@ -2091,14 +2091,14 @@ is between two functions go to the end of the above function."
           (point))))
      (goto-char (point-max))))
 
-(defun scilab-beginning-of-prev-defun ()
+(cl-defun scilab-beginning-of-prev-defun ()
  "Go to the beginning of the previous function."
  (interactive)
  (scilab-beginning-of-defun)
  (forward-line -1)
  (scilab-beginning-of-defun))
 
-(defun scilab-beginning-of-next-defun ()
+(cl-defun scilab-beginning-of-next-defun ()
  "Go to the beginning of the previous function."
  (interactive)
  (scilab-end-of-defun)
@@ -2108,7 +2108,7 @@ is between two functions go to the end of the above function."
      (goto-char (point-max)))
  (forward-line 0))
 
-(defun scilab-function-goto-line (nline)
+(cl-defun scilab-function-goto-line (nline)
  "Go to the Nth line  of the current function. If the number is more
 then the number of lines into function - go to the end of the function"
  (interactive "NGoto the function's line: " )
@@ -2120,7 +2120,7 @@ then the number of lines into function - go to the end of the function"
  (if (< ep (point))
      (goto-char ep))))
 
-(defun scilab-beginning-of-command ()
+(cl-defun scilab-beginning-of-command ()
  "Go to the beginning of an sci command.
 Travels across continuations."
  (interactive)
@@ -2145,7 +2145,7 @@ Travels across continuations."
      (setq p nil))
    (back-to-indentation)))
 
-(defun scilab-end-of-command (&optional beginning)
+(cl-defun scilab-end-of-command (&optional beginning)
  "Go to the end of an sci command.
 Optional BEGINNING is where the command starts from."
  (interactive)
@@ -2167,7 +2167,7 @@ Optional BEGINNING is where the command starts from."
 
 ;;; Line types and attributes =================================================
 
-(defun scilab-ltype-empty ()        ; blank line
+(cl-defun scilab-ltype-empty ()        ; blank line
  "Return t if current line is empty."
  (save-excursion
    (forward-line 0)
@@ -2175,19 +2175,19 @@ Optional BEGINNING is where the command starts from."
        (looking-at (concat "^\\(" comint-prompt-regexp "\\)?[ \t]*$"))
    (looking-at "^[ \t]*$"))))
 
-(defun scilab-ltype-comm ()        ; comment line
+(cl-defun scilab-ltype-comm ()        ; comment line
  "Return t if current line is a SCILAB comment line."
  (save-excursion
    (forward-line 0)
    (looking-at "[ \t]*//.*$")))
 
-(defun scilab-ltype-comm-ignore ()    ; comment out a region line
+(cl-defun scilab-ltype-comm-ignore ()    ; comment out a region line
  "Return t if current line is a SCILAB comment region line."
  (save-excursion
    (forward-line 0)
    (looking-at (concat "[ \t]*" scilab-comment-region-s))))
 
-(defun scilab-ltype-help-comm ()
+(cl-defun scilab-ltype-help-comm ()
  "Return t if the current line is part of the SCILAB help comment."
  (save-excursion
    (if (null (scilab-ltype-comm))
@@ -2197,7 +2197,7 @@ Optional BEGINNING is where the command starts from."
    (forward-line 0))
      (scilab-ltype-function-definition))))
 
-(defun scilab-ltype-endfunction-comm ()
+(cl-defun scilab-ltype-endfunction-comm ()
  "Return t if the current line is an ENDFUNCTION style comment."
  (save-excursion
    (if (null (scilab-ltype-comm))
@@ -2211,7 +2211,7 @@ Optional BEGINNING is where the command starts from."
      (forward-line 1))
    (scilab-ltype-function-definition)))))
 
-(defun scilab-ltype-continued-comm ()
+(cl-defun scilab-ltype-continued-comm ()
  "Return column of previous line's comment start, or nil."
  (save-excursion
    (forward-line 0)
@@ -2227,21 +2227,21 @@ Optional BEGINNING is where the command starts from."
          (current-column))
      nil)))))
 
-(defun scilab-ltype-function-definition ()
+(cl-defun scilab-ltype-function-definition ()
  "Return t if the current line is a function definition."
  (save-excursion
    (forward-line 0)
    (looking-at scilab-defun-regex)))
 
-(defun scilab-ltype-code ()        ; line of code
+(cl-defun scilab-ltype-code ()        ; line of code
  "Return t if current line is a SCILAB code line."
  (and (null (scilab-ltype-empty)) (null (scilab-ltype-comm))))
 
-(defun scilab-lattr-comm ()        ; line has comment
+(cl-defun scilab-lattr-comm ()        ; line has comment
  "Return t if current line contain a comment."
  (save-excursion (scilab-comment-on-line)))
 
-(defun scilab-lattr-cont ()        ; line has continuation
+(cl-defun scilab-lattr-cont ()        ; line has continuation
  "Return non-nil if current line ends in ... and optional comment."
  (save-excursion
    (forward-line 0)
@@ -2250,7 +2250,7 @@ Optional BEGINNING is where the command starts from."
     (progn (goto-char (match-beginning 0))
        (null (scilab-cursor-in-comment))))))
 
-(defun scilab-lattr-array-cont (&optional restrict)
+(cl-defun scilab-lattr-array-cont (&optional restrict)
  "Return non-nil if current line is in an array.
 If the entirety of the array is on this line, return nil.
 Optional option RESTRICT is the distrance to restrict the search."
@@ -2261,14 +2261,14 @@ Optional option RESTRICT is the distrance to restrict the search."
    (and (looking-at "[[{]") (point)))
    (error nil)))
 
-(defun scilab-lattr-array-end ()
+(cl-defun scilab-lattr-array-end ()
  "Return non-nil if the current line closes an array.
 by close, the first character is the end of an array."
  (save-excursion
    (back-to-indentation)
    (and (looking-at "[]}]") (scilab-lattr-array-cont))))
 
-(defun scilab-lattr-block-cont (&optional eol)
+(cl-defun scilab-lattr-block-cont (&optional eol)
  "Return a number representing the number of unterminated block constructs.
 This is any block, such as if, or for that doesn't have an END on this line.
 Optional EOL indicates a virtual end of line."
@@ -2294,7 +2294,7 @@ Optional EOL indicates a virtual end of line."
          (error (goto-char p))))))
      (if (= v 0) nil v))))))
 
-(defun scilab-lattr-middle-block-cont ()
+(cl-defun scilab-lattr-middle-block-cont ()
  "Return the number of middle block continuations.
 This should be 1 or nil, and only true if the line starts with one of these
 special items."
@@ -2304,7 +2304,7 @@ special items."
    1
      nil)))
 
-(defun scilab-lattr-endless-block-cont ()
+(cl-defun scilab-lattr-endless-block-cont ()
  "Return the number of middle block continuations.
 This should be 1 or nil, and only true if the line starts with one of these
 special items."
@@ -2314,7 +2314,7 @@ special items."
    1
      nil)))
 
-(defun scilab-lattr-block-close ()
+(cl-defun scilab-lattr-block-close ()
  "Return the number of closing block constructs. (not used yet)."
  (let ((v 0))
    (save-excursion
@@ -2331,7 +2331,7 @@ special items."
        (error nil)))
    (if (= v 0) nil v)))))
 
-(defun scilab-lattr-local-end ()
+(cl-defun scilab-lattr-local-end ()
  "Return t if this line begins with an end construct."
  (save-excursion
    (back-to-indentation)
@@ -2339,7 +2339,7 @@ special items."
      (and (looking-at (concat "\\<" (scilab-block-end-re) "\\>"))
       (scilab-valid-end-construct-p)))))
 
-(defun scilab-lattr-semantics (&optional prefix)
+(cl-defun scilab-lattr-semantics (&optional prefix)
  "Return the semantics of the current position.
 Values are nil 'solo, 'value, and 'boolean.  Boolean is a subset of
 value.  nil means there is no semantic content (ie, string or comment.)
@@ -2406,7 +2406,7 @@ line."
 
 
 
-(defun scilab-function-called-at-point ()
+(cl-defun scilab-function-called-at-point ()
  "Return a string representing the function called nearby point."
  (save-excursion
    (forward-line 0)
@@ -2417,7 +2417,7 @@ line."
       (match-string 1))
      (t nil))))
 
-(defun scilab-cursor-in-string-or-comment ()
+(cl-defun scilab-cursor-in-string-or-comment ()
  "Return t if the cursor is in a valid Scilab comment or string."
  ;; comment and string depend on each other.  Here is one test
  ;; that does both.
@@ -2456,7 +2456,7 @@ line."
          ;; Ooops, a transpose, keep going.
      returnme)))
 
-(defun scilab-cursor-in-comment ()
+(cl-defun scilab-cursor-in-comment ()
  "Return t if the cursor is in a valid Scilab comment."
  (save-match-data
    (save-restriction
@@ -2474,7 +2474,7 @@ line."
                   (regexp-quote scilab-elipsis-string)))
           (null (scilab-cursor-in-string))))))))
 
-(defun scilab-cursor-in-string (&optional incomplete)
+(cl-defun scilab-cursor-in-string (&optional incomplete)
  "Return t if the cursor is in a valid Scilab string.
 If the optional argument INCOMPLETE is non-nil, then return t if we
 are in what could be a an incomplete string."
@@ -2528,7 +2528,7 @@ are in what could be a an incomplete string."
    returnme))
 
 
-(defun scilab-comment-on-line ()
+(cl-defun scilab-comment-on-line ()
  "Place the cursor on the beginning of a valid comment on this line.
 If there isn't one, then return nil, point otherwise."
  (interactive)
@@ -2545,7 +2545,7 @@ If there isn't one, then return nil, point otherwise."
      nil)))
 ;;; Indent functions ==========================================================
 
-(defun scilab-indent-line ()
+(cl-defun scilab-indent-line ()
  "Indent a line in `scilab-mode'."
  (interactive)
  (let ((i (scilab-calc-indent))
@@ -2561,7 +2561,7 @@ If there isn't one, then return nil, point otherwise."
      (if () (if (scilab-lattr-comm) (scilab-comment))))
    (if (<= c i) (move-to-column i))))
 
-(defun scilab-indent-defun ()
+(cl-defun scilab-indent-defun ()
  "Indent correspondently all lines in the current function body in `scilab-mode'"
  (interactive)
  (save-excursion
@@ -2570,7 +2570,7 @@ If there isn't one, then return nil, point otherwise."
      (end  (scilab-end-of-defun)))
      (indent-region start end nil))))
 
-(defun scilab-calc-indent ()
+(cl-defun scilab-calc-indent ()
  "Return the appropriate indentation for this line as an integer."
  (interactive)
  (if (save-excursion
@@ -2592,7 +2592,7 @@ If there isn't one, then return nil, point otherwise."
      ;; simplistic
      (nth 1 sem))))
 
-(defun scilab-calc-function-depth ()
+(cl-defun scilab-calc-function-depth ()
  "Returns depth of a function definition, for function at
  point. That is to say, when point is not within a function
  definition, returned depth is -1. When it is within a function
@@ -2610,7 +2610,7 @@ If there isn't one, then return nil, point otherwise."
    depth))
 
 
-(defun scilab-calculate-indentation (current-indentation)
+(cl-defun scilab-calculate-indentation (current-indentation)
  "Calculate out the indentation of the current line.
 Return a list of descriptions for this line.  Return format is:
 '(TYPE DEPTHNUMBER)
@@ -2804,7 +2804,7 @@ this line's indentation should be."
                        (cdr mi)))))
               cc)))))))))))
 
-(defun scilab-next-line-indentation ()
+(cl-defun scilab-next-line-indentation ()
  "Calculate the indentation for lines preceeding this command line."
  (let ((bc (scilab-lattr-block-cont))
    (mc (scilab-lattr-middle-block-cont))
@@ -2818,7 +2818,7 @@ this line's indentation should be."
      (or ec 0))
       (if hc scilab-indent-level 0))))
 
-(defun scilab-narrow-to-function (&optional arg)
+(cl-defun scilab-narrow-to-function (&optional arg)
  "Make text outside current defun invisible.
 The defun visible is the one that contains point or follows point."
  (interactive)
@@ -2849,30 +2849,30 @@ Must be one of:
         (function-item scilab-indent-end-before-ret)
         (function-item scilab-indent-before-ret)))
 
-(defun scilab-return ()
+(cl-defun scilab-return ()
  "Handle carriage return in `scilab-mode'."
  (interactive)
  (funcall scilab-return-function))
 
-(defun scilab-plain-ret ()
+(cl-defun scilab-plain-ret ()
  "Vanilla new line."
  (interactive)
  (newline))
 
-(defun scilab-indent-after-ret ()
+(cl-defun scilab-indent-after-ret ()
  "Indent after new line."
  (interactive)
  (newline)
  (if scilab-dynamical-indent
  (scilab-indent-line)))
 
-(defun scilab-double-plain-ret ()
+(cl-defun scilab-double-plain-ret ()
  "Indent after new line."
  (interactive)
  (newline)
  (newline))
 
-(defun scilab-indent-end-before-ret ()
+(cl-defun scilab-indent-end-before-ret ()
  "Indent line if block end, start new line, and indent again."
  (interactive)
  (if (save-excursion
@@ -2888,14 +2888,14 @@ Must be one of:
  (if scilab-dynamical-indent
  (scilab-indent-line)))
 
-(defun scilab-indent-before-ret ()
+(cl-defun scilab-indent-before-ret ()
  "Indent line, start new line, and indent again."
  (interactive)
  (if scilab-dynamical-indent (scilab-indent-line))
  (newline)
  (if scilab-dynamical-indent (scilab-indent-line)))
 
-(defun scilab-linefeed ()
+(cl-defun scilab-linefeed ()
  "Handle line feed in `scilab-mode'.
 Has effect of `scilab-return' with (not scilab-indent-before-return)."
  (interactive)
@@ -2903,7 +2903,7 @@ Has effect of `scilab-return' with (not scilab-indent-before-return)."
  (newline)
  (scilab-indent-line))
 
-(defun scilab-comment-return ()
+(cl-defun scilab-comment-return ()
  "Handle carriage return for Scilab comment line."
  (interactive)
  (cond
@@ -2916,7 +2916,7 @@ Has effect of `scilab-return' with (not scilab-indent-before-return)."
   (t
    (newline) (scilab-comment) (scilab-indent-line))))
 
-(defun scilab-comm-from-prev ()
+(cl-defun scilab-comm-from-prev ()
  "If the previous line is a comment-line then set up a comment on this line."
  (save-excursion
    ;; If the previous line is a comment-line then set the fill prefix from
@@ -2931,7 +2931,7 @@ Has effect of `scilab-return' with (not scilab-indent-before-return)."
      (insert fill-prefix)
      (scilab-reset-fill-prefix)))))
 ;;; Comment management========================================================
-(defun scilab-comment ()
+(cl-defun scilab-comment ()
  "Add a comment to the current line."
  (interactive)
  (cond ((scilab-ltype-empty)        ; empty line
@@ -2961,7 +2961,7 @@ Has effect of `scilab-return' with (not scilab-indent-before-return)."
       (insert " "))
     (insert scilab-comment-on-line-s))))
 
-(defun scilab-comment-line-break-function (&optional soft)
+(cl-defun scilab-comment-line-break-function (&optional soft)
  "Break the current line, and if in a comment, continue it.
 Optional argument SOFT indicates that the newline is soft, and not hard."
  (interactive)
@@ -2973,11 +2973,11 @@ Optional argument SOFT indicates that the newline is soft, and not hard."
    (scilab-indent-line)
    (end-of-line)))
 
-(defun scilab-comment-indent ()
+(cl-defun scilab-comment-indent ()
  "Indent a comment line in `scilab-mode'."
  (scilab-calc-indent))
 
-(defun scilab-comment-region (beg-region end-region)
+(cl-defun scilab-comment-region (beg-region end-region)
  "Comments every line in the region.
 Puts `scilab-comment-region-s' at the beginning of every line in the region.
 BEG-REGION and END-REGION are arguments which specify the region boundaries.
@@ -2995,7 +2995,7 @@ With non-nil ARG, uncomments the region."
    (set-marker end-region-mark nil)
    (set-marker save-point nil)))
 
-(defun scilab-comment-command ()
+(cl-defun scilab-comment-command ()
  "Comment the command on which point is, as if it was a region"
  (interactive)
  (let (beg end)
@@ -3006,7 +3006,7 @@ With non-nil ARG, uncomments the region."
      (setq end (point))
      (scilab-comment-region beg end))))
 
-(defun scilab-hungry-delete-forward (&optional count)
+(cl-defun scilab-hungry-delete-forward (&optional count)
  "Delete the following character or all following whitespace
 up to the next non-whitespace character."
  (interactive "P")
@@ -3019,7 +3019,7 @@ up to the next non-whitespace character."
      (delete-region here (match-end 0)))
     (t (delete-char 1)))))))
 
-(defun scilab-insert-probe ()
+(cl-defun scilab-insert-probe ()
  "Insert a line
 disp('VAR=',VAR); //$$PROBE
   just after line on which point is, where VAR is the symbol pointed by point"
@@ -3046,7 +3046,7 @@ disp('VAR=',VAR); //$$PROBE
    (end-of-line)
    (insert "\ndisp(" sci-symbol-name ",'" sci-symbol-name "='); //$$PROBE")))))
 
-(defun scilab-delete-all-probes ()
+(cl-defun scilab-delete-all-probes ()
  (interactive)
  (save-excursion
    (save-match-data
@@ -3058,7 +3058,7 @@ disp('VAR=',VAR); //$$PROBE
      (delete-region (point) p))))))
 
 
-(defun scilab-uncomment-region (beg-region end-region)
+(cl-defun scilab-uncomment-region (beg-region end-region)
  "Comments every line in the region.
 Remove  `scilab-comment-region-s' at the beginning of every line in the region.
 Do it only once. Opposite action to the `scilab-comment-region'. END-REGION are arguments which specify the region boundaries."
@@ -3081,7 +3081,7 @@ Do it only once. Opposite action to the `scilab-comment-region'. END-REGION are 
 
 ;;; Filling ===================================================================
 
-(defun scilab-set-comm-fill-prefix ()
+(cl-defun scilab-set-comm-fill-prefix ()
  "Set the `fill-prefix' for the current (comment) line."
  (interactive)
  (if (scilab-lattr-comm)
@@ -3096,16 +3096,16 @@ Do it only once. Opposite action to the `scilab-comment-region'. END-REGION are 
        (concat (make-string (- (current-column) (length pf)) ? )
            pf))))))
 
-(defun scilab-set-comm-fill-prefix-post-code ()
+(cl-defun scilab-set-comm-fill-prefix-post-code ()
  "Set the `fill-prefix' for the current post-code comment line."
  (interactive)
  (scilab-set-comm-fill-prefix))
 
-(defun scilab-reset-fill-prefix ()
+(cl-defun scilab-reset-fill-prefix ()
  "Reset the `fill-prefix'."
  (setq fill-prefix nil))
 
-(defun scilab-find-convenient-line-break ()
+(cl-defun scilab-find-convenient-line-break ()
  "For the current line, position the cursor where we want to break the line.
 Basically, spaces are best, then operators.  Always less than `fill-column'
 unless we decide we can fudge the numbers.  Return nil if this line should
@@ -3221,7 +3221,7 @@ not be broken.  This function will ONLY work on code."
     (progn (goto-char orig)
        nil))))))
 
-(defun scilab-auto-fill ()
+(cl-defun scilab-auto-fill ()
  "Do auto filling.
 Set variable `auto-fill-function' to this symbol to enable Scilab style auto
 filling which will automatically insert `...' and the end of a line."
@@ -3291,7 +3291,7 @@ filling which will automatically insert `...' and the end of a line."
              (insert " " quote-char))))
          (goto-char m))))))))
 
-(defun scilab-join-comment-lines ()
+(cl-defun scilab-join-comment-lines ()
  "Join current comment line to the next comment line."
  ;; New w/ V2.0: This used to join the previous line, but I could find
  ;; no editors that had a "join" that did that.  I modified join to have
@@ -3302,7 +3302,7 @@ filling which will automatically insert `...' and the end of a line."
      (replace-match " " t t nil)
    (error "No following comment to join with")))
 
-(defun scilab-fill-region (beg-region end-region &optional justify-flag)
+(cl-defun scilab-fill-region (beg-region end-region &optional justify-flag)
  "Fill the region between BEG-REGION and END-REGION.
 Non-nil JUSTIFY-FLAG means justify comment lines as well."
  (interactive "*r\nP")
@@ -3317,7 +3317,7 @@ Non-nil JUSTIFY-FLAG means justify comment lines as well."
      (forward-line 1)
      (forward-line 0))))
 
-(defun scilab-fill-comment-line (&optional justify)
+(cl-defun scilab-fill-comment-line (&optional justify)
  "Fill the current comment line.
 With optional argument, JUSTIFY the comment as well."
  (interactive)
@@ -3353,7 +3353,7 @@ With optional argument, JUSTIFY the comment as well."
                   (match-string 0))))
      (fill-region (point-min) (point-max) justify))))
 
-(defun scilab-justify-line ()
+(cl-defun scilab-justify-line ()
  "Delete space on end of line and justify."
  (interactive)
  (save-excursion
@@ -3361,7 +3361,7 @@ With optional argument, JUSTIFY the comment as well."
    (delete-horizontal-space)
    (justify-current-line)))
 
-(defun scilab-fill-paragraph (arg)
+(cl-defun scilab-fill-paragraph (arg)
  "When in a comment, fill the current paragraph.
 Paragraphs are always assumed to be in a comment.
 ARG is passed to `fill-paragraph' and will justify the text."
@@ -3456,7 +3456,7 @@ ARG is passed to `fill-paragraph' and will justify the text."
 ;;; Semantic text insertion and management ====================================
 
 
-(defun scilab-find-recent-variable-list (prefix)
+(cl-defun scilab-find-recent-variable-list (prefix)
  "Instead of looking through the session we just use Scilab who comand to
 get all variables"
 (interactive)
@@ -3477,7 +3477,7 @@ get all variables"
 (defvar scilab-most-recent-variable-list nil
  "Maintained by `scilab-find-recent-variable'.")
 
-(defun scilab-find-recent-variable (prefix &optional next)
+(cl-defun scilab-find-recent-variable (prefix &optional next)
  "Return the most recently used variable starting with PREFIX as a string.
 See `scilab-find-recent-variable-list' for details.
 In NEXT is non-nil, than continue through the list of elements."
@@ -3497,7 +3497,7 @@ In NEXT is non-nil, than continue through the list of elements."
 ;; We do not use the next two functions. Instead we write  new functions
 ;; scilab-find-scifunctions-list and scilab-find-scifunctions
 
-(defun scilab-find-user-functions-list (prefix)
+(cl-defun scilab-find-user-functions-list (prefix)
  "Return a list of user defined functions that match PREFIX."
  (setq prefix (regexp-quote prefix))
  (scilab-navigation-syntax
@@ -3536,7 +3536,7 @@ In NEXT is non-nil, than continue through the list of elements."
 (defvar scilab-shell-libfunc-isbuilt nil)
 
 
-(defun scilab-find-scifunctions-list (prefix &optional list)
+(cl-defun scilab-find-scifunctions-list (prefix &optional list)
  "Return a list of library  functions that match PREFIX. The goal is
 to find all sci functions. To make search over all directories everytime
 is too time consuming. Instead we suggest to define a staic file, say libfunc
@@ -3595,7 +3595,7 @@ The function first checks if the file exisits. If not it checks if $SCIHOME/libf
 (defvar scilab-scifunctions-list nil
 )
 
-(defun scilab-find-tlists-list (prefix)
+(cl-defun scilab-find-tlists-list (prefix)
  "Return a list of fields of prefix considired as tlist of scilab"
 (string-match "\\(%?\\(\\w\\|[_$]\\)*\\)\\.\\([^.]*\\)$" prefix)
 (let  (  (pref (match-string 1 prefix))
@@ -3619,7 +3619,7 @@ The function first checks if the file exisits. If not it checks if $SCIHOME/libf
 (defvar scilab-scifunction-list nil
  "Maintained by `scilab-find-scifunctions'.")
 
-(defun scilab-find-user-functions (prefix &optional next)
+(cl-defun scilab-find-user-functions (prefix &optional next)
  "Return a list of user defined functions that match PREFIX."
  (if next
      (let ((next (car scilab-user-function-list)))
@@ -3633,7 +3633,7 @@ The function first checks if the file exisits. If not it checks if $SCIHOME/libf
    (setq scilab-user-function-list (cdr syms))
    first))))
 
-(defun scilab-find-scifunctions (prefix &optional next)
+(cl-defun scilab-find-scifunctions (prefix &optional next)
 "Return a function from all available *.sci  that match PREFIX and return it.
 If optional argument NEXT is non-nil, then return the next found
 object. This "
@@ -3653,7 +3653,7 @@ object. This "
  "Maintained by `scilab-find-tlists-fields'.")
 
 
-(defun scilab-find-tlists-fields (prefix &optional next)
+(cl-defun scilab-find-tlists-fields (prefix &optional next)
  "Return PREFIX matching elements for tlist  variable of scilab
 If NEXT then the next patch from the list is used."
  (if next
@@ -3677,7 +3677,7 @@ If NEXT then the next patch from the list is used."
  "Maintained by `matalb-generic-list-expand'.
 Holds sub-lists of symbols left to be expanded.")
 
-(defun scilab-generic-list-expand (list prefix &optional next)
+(cl-defun scilab-generic-list-expand (list prefix &optional next)
  "Return an element from LIST that start with PREFIX.
 If optional NEXT argument is non nil, then the next element in the
 list is used.  nil is returned if there are not matches."
@@ -3700,22 +3700,22 @@ list is used.  nil is returned if there are not matches."
    (setq scilab-generic-list-placeholder (cdr fl))
    first))))
 
-(defun scilab-solo-completions (prefix &optional next)
+(cl-defun scilab-solo-completions (prefix &optional next)
  "Return PREFIX matching elements for solo symbols.
 If NEXT then the next patch from the list is used."
  (scilab-generic-list-expand scilab-keywords-solo prefix next))
 
-(defun scilab-builtin-completions (prefix &optional next)
+(cl-defun scilab-builtin-completions (prefix &optional next)
  "Return PREFIX matching elements for value symbols.
 If NEXT then the next patch from the list is used."
  (scilab-generic-list-expand scilab-builtin-list prefix next))
 
-(defun scilab-boolean-completions (prefix &optional next)
+(cl-defun scilab-boolean-completions (prefix &optional next)
  "Return PREFIX matching elements for boolean symbols.
 If NEXT then the next patch from the list is used."
  (scilab-generic-list-expand scilab-keywords-boolean prefix next))
 
-(defun scilab-property-completions (prefix &optional next)
+(cl-defun scilab-property-completions (prefix &optional next)
  "Return PREFIX matching elements for property names in strings.
 If NEXT then the next property from the list is used."
  (let ((f (scilab-function-called-at-point))
@@ -3751,7 +3751,7 @@ The last type of semantic used while completing things.")
 
 ;(defvar scilab-complete-1-window  nil)
 ;(defvar scilab-current-window-configuration nil)
-(defun scilab-complete-symbol (&optional arg)
+(cl-defun scilab-complete-symbol (&optional arg)
  "Complete a partially typed symbol in a Scilab mode buffer.
 If the previously entered command was also `scilab-complete-symbol'
 then undo the last completion, and find a new one.
@@ -3881,7 +3881,7 @@ to change it temporarily."
                   (goto-char cpt)))
         (scilab-dynamic-list-completions allsyms))))))))))
 
-(defun scilab-dynamic-list-completions (completions)
+(cl-defun scilab-dynamic-list-completions (completions)
  "List in help buffer sorted COMPLETIONS."
  (let ((conf (current-window-configuration)))
    (with-output-to-temp-buffer "*Completions*"
@@ -3911,7 +3911,7 @@ to change it temporarily."
           (setq unread-command-events (listify-key-sequence key)))))))))
 
 
-(defun scilab-insert-end-block (&optional reindent)
+(cl-defun scilab-insert-end-block (&optional reindent)
  "Insert and END block based on the current syntax.
 Optional argument REINDENT indicates if the specified block should be re-indented."
  (interactive "P")
@@ -3996,7 +3996,7 @@ Optional argument REINDENT indicates if the specified block should be re-indente
 "Insert a Scilab select statement with region in the otherwise clause."
 'scilab-tempo-tags)
 
-(defun scilab-insert-next-case ()
+(cl-defun scilab-insert-next-case ()
  "Insert a case statement inside this select statement."
  (interactive)
  ;; First, make sure we are where we think we are.
@@ -4041,7 +4041,7 @@ Optional argument REINDENT indicates if the specified block should be re-indente
 "Insert a Scilab function statement"
 'scilab-tempo-tags)
 
-(defun scilab-stringify-region (begin end)
+(cl-defun scilab-stringify-region (begin end)
  "Put Scilab 's around region, and quote all quotes in the string.
 Stringification allows you to type in normal Scilab code, mark it, and
 then turn it into a Scilab string that will output exactly what's in
@@ -4061,7 +4061,7 @@ the region.  BEGIN and END mark the region to be stringified."
      (goto-char m)
      (insert "'"))))
 
-(defun scilab-ispell-strings-region (begin end)
+(cl-defun scilab-ispell-strings-region (begin end)
  "Spell check valid strings in region with Ispell.
 Argument BEGIN and END mark the region boundary."
  (interactive "r")
@@ -4073,13 +4073,13 @@ Argument BEGIN and END mark the region boundary."
    (while (and (scilab-font-lock-string-match-normal end)
        (ispell-region (match-beginning 2) (match-end 2))))))
 
-(defun scilab-ispell-strings ()
+(cl-defun scilab-ispell-strings ()
  "Spell check valid strings in the current buffer with Ispell.
 Calls `scilab-ispell-strings-region'"
  (interactive)
  (scilab-ispell-strings-region (point-min) (point-max)))
 
-(defun scilab-ispell-comments (&optional arg)
+(cl-defun scilab-ispell-comments (&optional arg)
  "Spell check comments in the current buffer with Ispell.
 Optional ARG means to only check the current comment."
  (interactive "P")
@@ -4102,7 +4102,7 @@ Optional ARG means to only check the current comment."
 "The delay running scilab command  when restarting"
 )
 
-(defun scilab-enable-block-highlighting (&optional arg)
+(cl-defun scilab-enable-block-highlighting (&optional arg)
  "Start or stop the block highlighter.
 Optional ARG is 1 to force enable, and -1 to disable.
 If ARG is nil, then highlighting is toggled."
@@ -4132,7 +4132,7 @@ If ARG is nil, then highlighting is toggled."
  "Last started timer.")
 (make-variable-buffer-local 'scilab-block-highlight-timer)
 
-(defun scilab-start-block-highlight-timer ()
+(cl-defun scilab-start-block-highlight-timer ()
  "Set up a one-shot timer if we are in Scilab mode."
  (if (eq major-mode 'scilab-mode)
      (progn
@@ -4148,7 +4148,7 @@ If ARG is nil, then highlighting is toggled."
          (scilab-run-with-idle-timer
           1 nil 'scilab-highlight-block-match)))))
 
-(defun scilab-highlight-block-match ()
+(cl-defun scilab-highlight-block-match ()
  "Highlight a matching block if available."
  (setq scilab-block-highlight-timer nil)
  (let ((inhibit-quit nil)        ;turn on G-g
@@ -4200,7 +4200,7 @@ If ARG is nil, then highlighting is toggled."
          ))))))
 ;;; M Code verification & Auto-fix ============================================
 
-(defun scilab-mode-verify-fix-file-fn ()
+(cl-defun scilab-mode-verify-fix-file-fn ()
  "Verify the current buffer from `write-contents-hooks'."
  (if scilab-verify-on-save-flag
      (scilab-mode-verify-fix-file (> (point-max)
@@ -4208,7 +4208,7 @@ If ARG is nil, then highlighting is toggled."
  ;; Always return nil.
  nil)
 
-(defun scilab-mode-verify-fix-file (&optional fast)
+(cl-defun scilab-mode-verify-fix-file (&optional fast)
  "Verify the current buffer satisfies all sci things that might be useful.
 We will merely loop across a list of verifiers/fixers in
 `scilab-mode-verify-fix-functions'.
@@ -4226,7 +4226,7 @@ If optional FAST is non-nil, do not perform usually lengthy checks."
 ;;
 ;; Add more auto verify/fix functions here!
 ;;
-(defun scilab-mode-vf-functionname (&optional fast)
+(cl-defun scilab-mode-vf-functionname (&optional fast)
  "Verify/Fix the function name of this file.
 Optional argument FAST is ignored."
  (scilab-navigation-syntax
@@ -4261,7 +4261,7 @@ Optional argument FAST is ignored."
        (delete-region begin end)
        (insert bn))))))))
 
-(defun scilab-mode-vf-block-matches-forward (&optional fast)
+(cl-defun scilab-mode-vf-block-matches-forward (&optional fast)
  "Verify/Fix unterminated (or un-ended) blocks.
 This only checks block regions like if/end.
 Optional argument FAST causes this check to be skipped."
@@ -4288,7 +4288,7 @@ Optional argument FAST causes this check to be skipped."
          (error "Unterminated Block found!")))
    (message "Block-check: %d%%" (/ (/ (* 100 (point)) (point-max)) 2))))))
 
-(defun scilab-mode-vf-block-matches-backward (&optional fast)
+(cl-defun scilab-mode-vf-block-matches-backward (&optional fast)
  "Verify/fix unstarted (or dangling end) blocks.
 Optional argument FAST causes this check to be skipped."
  (goto-char (point-max))
@@ -4314,7 +4314,7 @@ Optional argument FAST causes this check to be skipped."
 
 ;;; Utility for verify/fix actions if you need to highlight
 ;;  a section of the buffer for the user's approval.
-(defun scilab-mode-highlight-ask (begin end prompt)
+(cl-defun scilab-mode-highlight-ask (begin end prompt)
  "Highlight from BEGIN to END while asking PROMPT as a yes-no question."
  (let ((mo (scilab-make-overlay begin end (current-buffer)))
    (ans nil))
@@ -4332,7 +4332,7 @@ Optional argument FAST causes this check to be skipped."
 ;;  that did not have outputs earlier.
 ;;
 ;;  You probably don't want this as a default verify function
-(defun scilab-mode-vf-quietafy-buffer (&optional fast)
+(cl-defun scilab-mode-vf-quietafy-buffer (&optional fast)
  "Find all commands that do not end in ;, and add one.
 This has the effect of removing any extraneous output that may not be
 desired.  Optional argument FAST is not used."
@@ -4374,7 +4374,7 @@ $\\|//\\)"))))
 
 ;;; V19 stuff =================================================================
 
-(defun scilab-mode-hilit ()
+(cl-defun scilab-mode-hilit ()
  "Set up hilit19 support for `scilab-mode'."
  (interactive)
  (cond (window-system
@@ -4388,7 +4388,7 @@ $\\|//\\)"))))
 (defvar scilab-mode-menu-keymap nil
  "Keymap used in Scilab mode to provide a menu.")
 
-(defun scilab-frame-init ()
+(cl-defun scilab-frame-init ()
  "Initialize Emacs 19+ menu and Xemacs system. in `scilab-mode' (editing mode)"
  (interactive)
  ;; make a menu keymap
@@ -4608,7 +4608,7 @@ $\\|//\\)"))))
 ;  :type 'string)
 
 ;;;;###autoload
-;(defun scilab-shell-get-global-key ()
+;(cl-defun scilab-shell-get-global-key ()
 ;scilab-shell-global-key
 ;)
 
@@ -4656,7 +4656,7 @@ only if scilab-shell is active."
  :type 'boolean)
 
 ;;;###autoload
-(defun scilab-mode-setup()
+(cl-defun scilab-mode-setup()
 "Setup function. When you just got the file scilab.el, it helps to
 configure your scilab with emacs"
 (interactive)
@@ -4673,7 +4673,7 @@ configure your scilab with emacs"
  "Name used to create `scilab-shell' mode buffers.
 This name will have *'s surrounding it.")
 
-(defun scilab-shell-active-p ()
+(cl-defun scilab-shell-active-p ()
  "Return t if the Scilab shell is active."
  (if (get-buffer (concat "*" scilab-shell-buffer-name "*"))
      (save-excursion
@@ -4681,7 +4681,7 @@ This name will have *'s surrounding it.")
    (if (comint-check-proc (current-buffer))
        (current-buffer)))))
 
-(defun scilab-shell-active-in-current-buffer-p ()
+(cl-defun scilab-shell-active-in-current-buffer-p ()
  "Return t if the Scilab shell is active in the current buffer."
  (if (comint-check-proc (current-buffer))
        (current-buffer)))
@@ -4705,7 +4705,7 @@ This name will have *'s surrounding it.")
 
 (eval-when-compile (require 'gud) (require 'comint) (require 'shell))
 
-(defun scilab-reset-shell-mode-map ()
+(cl-defun scilab-reset-shell-mode-map ()
  (setq 
   scilab-shell-mode-map
   (let ((km (make-sparse-keymap 'scilab-shell-mode-map)))
@@ -4769,7 +4769,7 @@ This name will have *'s surrounding it.")
     km)))
 
 ;;;###autoload
-(defun scilab-shell ()
+(cl-defun scilab-shell ()
  "Create a buffer with Scilab running as a subprocess."
 
  (interactive)
@@ -4850,7 +4850,7 @@ Try C-h f scilab-shell RET"))
        (scilab-find-scifunctions-list "" t)))
 (switch-to-buffer buffer)))
 
-(defun scilab-shell-versions ()
+(cl-defun scilab-shell-versions ()
  "Save in scilab variable %version versions of scilab, emacs, scilab-mode
 and client-mode"
  (interactive)
@@ -4879,7 +4879,7 @@ and client-mode"
         (file :tag "File" "")))
 
 
-(defun scilab-shell-hack-logo (str)
+(cl-defun scilab-shell-hack-logo (str)
  "Replace the text logo with a real logo.
 STR is passed from the commint filter."
  (when (string-match "S c i l a b" str)
@@ -4990,7 +4990,7 @@ Keymap:
    (comint-read-input-ring t)))
 
 
-(defun scilab-shell-frame-init()
+(cl-defun scilab-shell-frame-init()
  "Initialize Emacs 19+ menu and Xemacs system. in `scilab-shell-mode' (editing mode)"
 ;;I grabbed this menu from the standard comint I/O menu, but many stuffs
 ;; I removed as not useful (by my private opinion)
@@ -5136,7 +5136,7 @@ Keymap:
 (scilab-shell-dummy-action)
 (message "Menus updated"))
 
-(defun scilab-shell-dummy-action()
+(cl-defun scilab-shell-dummy-action()
 "Dummy action. Does nothing"
 
  (unless (null (scilab-on-prompt-p))
@@ -5158,7 +5158,7 @@ Keymap:
    (delete-region pos (point-max))
        (insert lastcmd)))))
 
-(defun scilab-shell-additional ()
+(cl-defun scilab-shell-additional ()
  "Create an additional buffer with additional Scilab running as a subprocess.
 If in the main scilab buffer there is no process then rerun the basic scilab"
 (interactive)
@@ -5186,7 +5186,7 @@ If in the main scilab buffer there is no process then rerun the basic scilab"
 
 
 
-(defun gud-scilab-make-debug-menu()
+(cl-defun gud-scilab-make-debug-menu()
 "Make `gud-def's and runs `gud-make-debug-menu'"
    (gud-def gud-break  (concat "setbpt('" (scilab-which-function) "'," (scilab-get-line-number-in-function) ")") "\C-b" "Set breakpoint at current line.")
 ;(gud-def gud-break  (concat "setbpt('%y',%L)" "\C-b" "Set breakpoint at current line.")
@@ -5253,13 +5253,13 @@ It is reset to nil whenever we are not prompted by the K-[1-100]?-> output.")
 (defvar scilab-one-db-request nil
  "Set to t if we requested a debugger command trace.")
 
-(defun gud-scilab-massage-args (file args)
+(cl-defun gud-scilab-massage-args (file args)
  "Argument massager for starting scilab file.
 I don't think I have to do anything, but I'm not sure.
 FILE is ignored, and ARGS is returned."
  args)
 
-(defun gud-scilab-marker-filter (string)
+(cl-defun gud-scilab-marker-filter (string)
  "Filters STRING for the Unified Debugger based on Scilab output.
 Swiped ruthlessly from GDB mode in gud.el"
  (let ((garbage (concat "\\(" (regexp-quote "\C-g") "\\|"
@@ -5353,7 +5353,7 @@ Swiped ruthlessly from GDB mode in gud.el"
    output))
 ;;We write here the new version of function gud-scilab-find-file taking in account
 ;; that scilab accepts many function in one file. The old version is commented.
-(defun gud-scilab-find-file (f)
+(cl-defun gud-scilab-find-file (f)
  "Find file F or function when debugging frames in Scilab."
  (save-excursion
      (scilab-find-file-on-path f)
@@ -5362,7 +5362,7 @@ Swiped ruthlessly from GDB mode in gud.el"
      (current-buffer)))
 
 
-;;;(defun gud-scilab-find-file (f)
+;;;(cl-defun gud-scilab-find-file (f)
 ;;;  "Find file F when debugging frames in Scilab."
 ;;;  (save-excursion
 ;;;    (let* ((realfname (if (string-match "\\.\\(p\\)$" f)
@@ -5378,7 +5378,7 @@ Swiped ruthlessly from GDB mode in gud.el"
 
 ;;Scilab version of gud-format-command, extend format to catch functions names
 ;; and lines into functions not in file
-(defun gud-scilab-format-command (str arg)
+(cl-defun gud-scilab-format-command (str arg)
 "Local version of `gud-format-command'. Add format "
 
  (let ((insource (null (eq (current-buffer) gud-comint-buffer)))
@@ -5430,7 +5430,7 @@ Swiped ruthlessly from GDB mode in gud.el"
    ;; There might be text left in STR when the loop ends.
    (concat result str)))
 
-(defun scilab-shell-delete-backwards-no-prompt (&optional arg)
+(cl-defun scilab-shell-delete-backwards-no-prompt (&optional arg)
  "Delete one char backwards without destroying the scilab prompt.
 Optional argument ARG describes the number of chars to delete."
  (interactive "P")
@@ -5446,7 +5446,7 @@ Optional argument ARG describes the number of chars to delete."
 
 ;;; Scilab Shell Commands =====================================================
 
-(defun scilab-read-word-at-point ()
+(cl-defun scilab-read-word-at-point ()
  "Get the word closest to point, but do not change position.
 Has a preference for looking backward when not directly on a symbol.
 Snatched and hacked from dired-x.el"
@@ -5469,7 +5469,7 @@ Snatched and hacked from dired-x.el"
        (setq start (point)))        ; If no found, return empty string
      (buffer-substring start (point)))))
 
-(defun scilab-read-line-at-point ()
+(cl-defun scilab-read-line-at-point ()
  "Get the line under point, if command line."
  (if (eq major-mode 'scilab-shell-mode)
      (save-excursion
@@ -5490,7 +5490,7 @@ Snatched and hacked from dired-x.el"
    (end-of-line)
    (buffer-substring start (point))))))
 
-(defun scilab-non-empty-lines-in-string (str)
+(cl-defun scilab-non-empty-lines-in-string (str)
  "Return number of non-empty lines in STR."
  (let ((count 0)
    (start 0))
@@ -5499,7 +5499,7 @@ Snatched and hacked from dired-x.el"
        start (match-end 0)))
    count))
 
-(defun scilab-output-to-temp-buffer (buffer output)
+(cl-defun scilab-output-to-temp-buffer (buffer output)
  "Print output to temp buffer, or a message if empty string.
 BUFFER is the buffer to output to, and OUTPUT is the text to insert."
  (let ((lines-found (scilab-non-empty-lines-in-string output)))
@@ -5516,7 +5516,7 @@ BUFFER is the buffer to output to, and OUTPUT is the text to insert."
           (scilab-shell-help-mode))
 )))))
 
-(defun scilab-shell-run-command (command)
+(cl-defun scilab-shell-run-command (command)
  "Run COMMAND and display result in a buffer.
 This command requires an active Scilab shell."
  (interactive (list (read-from-minibuffer
@@ -5528,7 +5528,7 @@ This command requires an active Scilab shell."
 (scilab-output-to-temp-buffer "*SciCommand*" doc))
 (scilab-shell-collect-command-output "lines(%tmp(2),%tmp(1)); clear %tmp"))
 
-(defun scilab-shell-run-graphic (command)
+(cl-defun scilab-shell-run-graphic (command)
  "Run COMMAND and display result in a buffer.
 This command requires an active Scilab shell."
  (interactive (list (read-from-minibuffer
@@ -5538,7 +5538,7 @@ This command requires an active Scilab shell."
 (scilab-shell-collect-command-output command))
 
 
-(defun scilab-shell-describe-variable (variable)
+(cl-defun scilab-shell-describe-variable (variable)
  "Get the contents of VARIABLE and display them in a buffer.
 This uses the wh (My utilita) command to find viable commands.
 This command requires an active Scilab shell."
@@ -5612,7 +5612,7 @@ with the name '*SciHelp: <functionname>*'. Otherwise general buffer *SciHelp* fo
 (defalias 'scilab-help-function  'scilab-shell-describe-command)
 ;;;###autoload
 
-(defun scilab-shell-describe-command (command)
+(cl-defun scilab-shell-describe-command (command)
  "Describe COMMAND textually by fetching it's doc from the Scilab shell.
 This uses the lookfor command to find viable commands.
 This command does not require an active Scilab shell."
@@ -5646,7 +5646,7 @@ This command does not require an active Scilab shell."
 
 (defalias 'scilab-apropos-function  'scilab-shell-apropos)
 ;;;###autoload
-(defun scilab-shell-apropos (scilabregex)
+(cl-defun scilab-shell-apropos (scilabregex)
  "Look for any active commands in SCILAB matching SCILABREGEX.
 This uses the apropos  command to find viable commands."
  (interactive (list (read-from-minibuffer
@@ -5663,7 +5663,7 @@ This uses the apropos  command to find viable commands."
 ;    (scilab-shell-topic-mode)
 ))
 
-;;;(defun scilab-on-prompt-p ()
+;;;(cl-defun scilab-on-prompt-p ()
 ;;;  "Return t if we Scilab can accept input."
 ;;;  (save-excursion
 ;;;    (end-of-line)
@@ -5673,7 +5673,7 @@ This uses the apropos  command to find viable commands."
 ;;;    (looking-at comint-prompt-regexp)
 ;;;))
 
-(defun scilab-on-prompt-p ()
+(cl-defun scilab-on-prompt-p ()
  "Return t if we Scilab can accept input."
 (save-excursion
    (set-buffer "*Scilab*")
@@ -5685,7 +5685,7 @@ This uses the apropos  command to find viable commands."
      (if (null (looking-at comint-prompt-regexp)) t nil))
      nil)))
 
-(defun scilab-make-not-busy ()
+(cl-defun scilab-make-not-busy ()
  "Sometimes prompt is perturbed by noises. It makes some procedures,
 for instance competion buggy. The function regularises the situation"
  (save-excursion
@@ -5696,24 +5696,24 @@ for instance competion buggy. The function regularises the situation"
 
 
 
-(defun scilab-on-empty-prompt-p ()
+(cl-defun scilab-on-empty-prompt-p ()
  "Return t if we Scilab is on an empty prompt."
  (save-excursion
    (goto-char (point-max))
    (forward-line 0)
    (looking-at (concat comint-prompt-regexp "\\s-*$"))))
 
-(defun scilab-shell-buffer-barf-not-running ()
+(cl-defun scilab-shell-buffer-barf-not-running ()
  "Return a running Scilab buffer iff it is currently active."
  (or (scilab-shell-active-p)
      (error "You need to run the command `scilab-shell' to do that!")))
 
-(defun scilab-shell-test ()
+(cl-defun scilab-shell-test ()
  (scilab-shell-collect-command-output "a=1")
  (scilab-shell-collect-command-output "plot(1)")
  (scilab-shell-collect-command-output "b=1"))
 
-(defun scilab-shell-lisp2scilab (lispvar scivar)
+(cl-defun scilab-shell-lisp2scilab (lispvar scivar)
 "Write lisp-variable to a suitable scilab object with name that scivar
 string provides. If there is no corresponding scilab variable, then scilab
 variable gets [] "
@@ -5732,7 +5732,7 @@ variable gets [] "
           scivar "='" lispvar "';"))))
 t)
 
-(defun scilab-shell-collect-command-output (command)
+(cl-defun scilab-shell-collect-command-output (command)
  "If there is a Scilab shell, run the Scilab COMMAND and return it's output.
 It's output is returned as a string with no face properties.  The text output
 of the command is removed from the Scilab buffer so there will be no
@@ -5784,7 +5784,7 @@ indication that it ran."
 ;;;    (goto-char currpt)
   str))
 
-(defun scilab-shell-send-invisible-string (string)
+(cl-defun scilab-shell-send-invisible-string (string)
  "Send STRING to the currently running scilab process."
  (if (null scilab-shell-echoes)
      (let ((proc (get-buffer-process (current-buffer))))
@@ -5794,7 +5794,7 @@ indication that it ran."
  (if (null (string-match "^!.*\n" string))
  (send-invisible string)))
 
-(defun scilab-shell-send-string (string)
+(cl-defun scilab-shell-send-string (string)
  "Send STRING to the currently running scilab process."
  (if (null scilab-shell-echoes)
      (let ((curbuff (current-buffer)) (proc (get-buffer-process (current-buffer))))
@@ -5819,7 +5819,7 @@ indication that it ran."
 
 (defvar scilab-shell-save-and-go-history '("()")
  "Keep track of parameters passed to the Scilab shell.")
-(defun scilab-function-file-p()
+(cl-defun scilab-function-file-p()
 "Checks if the given buffer is a scilab function or set of scilab functions."
 (interactive)
 (let ((p (point)) (p2 nil))
@@ -5828,7 +5828,7 @@ indication that it ran."
  (goto-char p)
  (if p2 t nil)))
 
-(defun scilab-which-function()
+(cl-defun scilab-which-function()
 "Gets the name of the current function"
 (interactive)
 (let ((name nil))
@@ -5839,18 +5839,18 @@ indication that it ran."
  (setq name  (match-string-no-properties 3)))
  (message name)))
 
-(defun scilab-whereami()
+(cl-defun scilab-whereami()
 "Gets the name of the current function and the number line"
 (interactive)
 (prin1 (concat (scilab-which-function) ", Line " (int-to-string (scilab-get-line-number-in-function)))))
 
-(defun scilab-shell-whereami()
+(cl-defun scilab-shell-whereami()
 "Display current instruction calling tree"
 (interactive)
 (scilab-shell-send-string "whereami();\n")
 (ring-insert comint-input-ring "whereami();"))
 
-(defun scilab-get-line-number-in-function()
+(cl-defun scilab-get-line-number-in-function()
 "Compute the line number of point relative to the function's
 beginning.  (Scilab reports the line numbers in which a error has
 occurred relative to the function head.)  Refresh variable
@@ -5870,7 +5870,7 @@ function is used interactively."
 
 
 
-(defun scilab-shell-save-and-getf-or-run ()
+(cl-defun scilab-shell-save-and-getf-or-run ()
  "Save this sci, file, and getf it in a Scilab shell. Recognize if this
 file is function or script. If script -just run it"
  (interactive)
@@ -5899,7 +5899,7 @@ param fn-name ";\n"))
 
 
 
-(defun scilab-shell-cd (dir)
+(cl-defun scilab-shell-cd (dir)
  "Change directory in emacs and in Scilab. before syncronises directories to emacs's directory "
  (interactive   (list (read-file-name "Change current directory: "
             default-directory default-directory
@@ -5914,7 +5914,7 @@ param fn-name ";\n"))
    (scilab-shell-collect-command-output (concat "chdir " absdr))
    (pwd)))
 
-(defun scilab-shell-load-getf-getd-exec (filename)
+(cl-defun scilab-shell-load-getf-getd-exec (filename)
  "Load binary scilab file or getf sci file or getd directory or exec sce script.
  Distinguishes scilab scripts and functions via extensions sci/sce"
  (interactive   (list (read-file-name "Load/getf/getd/exec : "
@@ -5941,7 +5941,7 @@ param fn-name ";\n"))
      )
     (message "Error: Wrong arguments"))))
 
-(defun scilab-shell-run-region (beg end)
+(cl-defun scilab-shell-run-region (beg end)
  "Run region from BEG to END and display result in Scilab shell.
 This command requires an active Scilab shell."
  (interactive "r")
@@ -5981,7 +5981,7 @@ This command requires an active Scilab shell."
    (display-buffer msbn)
    ))
 
-(defun scilab-shell-last-error ()
+(cl-defun scilab-shell-last-error ()
  "In     Scilab interactive buffer, find the last Scilab error, and go there.
 To reference old errors, put the cursor just after the error text."
  (interactive)
@@ -5998,7 +5998,7 @@ To reference old errors, put the cursor just after the error text."
     (scilab-function-goto-line (string-to-number el))
 ))
 
-(defun scilab-shell-after-pause ()
+(cl-defun scilab-shell-after-pause ()
  "In     Scilab interactive buffer, on the line
 \"foo called at line ### of foo2\" go to foo2 at line ###"
  (interactive)
@@ -6018,19 +6018,19 @@ To reference old errors, put the cursor just after the error text."
 
 ;re-search-backward gud-scilab-error-regexp nil t))
 
-; ; ; ; (defun scilab-shell-dbstop-error ()
+; ; ; ; (cl-defun scilab-shell-dbstop-error ()
 ; ; ; ;   "Stop on errors."
 ; ; ; ;   (interactive)
 ; ; ; ;   (comint-send-string (get-buffer-process (current-buffer))
 ; ; ; ;              "dbstop if error\n"))
 
-; ; ; ; (defun scilab-shell-dbclear-error ()
+; ; ; ; (cl-defun scilab-shell-dbclear-error ()
 ; ; ; ;   "Don't stop on errors."
 ; ; ; ;   (interactive)
 ; ; ; ;   (comint-send-string (get-buffer-process (current-buffer))
 ; ; ; ;              "dbclear if error\n"))
 
-(defun scilab-shell-demos ()
+(cl-defun scilab-shell-demos ()
  "Scilab demos."
  (interactive)
 ;  (scilab-shell-collect-command-output "demos();"))
@@ -6044,7 +6044,7 @@ To reference old errors, put the cursor just after the error text."
 (defvar scilab-shell-graphic-menu-title "Graphic 0"
 "Graphic menu title")
 
-; (defun  scilab-shell-graphic-menu-redefine ()
+; (cl-defun  scilab-shell-graphic-menu-redefine ()
 ; "Redefine title of the graphic menu in accordance with the
 ; value of `scilab-shell-number-graphic-window'"
 ; (interactive)
@@ -6079,33 +6079,33 @@ To reference old errors, put the cursor just after the error text."
 
 
 
-(defun scilab-shell-plus-graphic-window ()
+(cl-defun scilab-shell-plus-graphic-window ()
  (setq scilab-shell-number-graphic-window
        (+ scilab-shell-number-graphic-window 1))
  (scilab-shell-frame-init))
 
-(defun scilab-shell-minus-graphic-window ()
+(cl-defun scilab-shell-minus-graphic-window ()
  (setq scilab-shell-number-graphic-window
    (max (- scilab-shell-number-graphic-window 1) 0))
 
  (scilab-shell-frame-init))
 
-(defun scilab-shell-next-graphic-window ()
+(cl-defun scilab-shell-next-graphic-window ()
  (scilab-shell-plus-graphic-window)
  (scilab-shell-open-graphic-window))
 
-(defun scilab-shell-previous-graphic-window ()
+(cl-defun scilab-shell-previous-graphic-window ()
  (scilab-shell-minus-graphic-window)
  (scilab-shell-open-graphic-window))
 
 
-(defun scilab-shell-open-graphic-window ()
+(cl-defun scilab-shell-open-graphic-window ()
  "Open scilab graphic window (if it does not exists)."
  (interactive)
 ;  (comint-send-string (get-buffer-process (current-buffer)) "xget('window');\n")
  (scilab-shell-collect-command-output (concat "xset('window'," (int-to-string scilab-shell-number-graphic-window) ");")))
 
-(defun scilab-shell-close-current-figure ()
+(cl-defun scilab-shell-close-current-figure ()
  "Close current figure."
  (interactive)
 ;  (comint-send-string (get-buffer-process (current-buffer)) "xdel()\n"))
@@ -6113,7 +6113,7 @@ To reference old errors, put the cursor just after the error text."
  (setq scilab-shell-number-graphic-window 0)
  (scilab-shell-frame-init))
 
-(defun scilab-shell-close-figures ()
+(cl-defun scilab-shell-close-figures ()
  "Close any open figures."
  (interactive)
 ;;;  (comint-send-string (get-buffer-process (current-buffer)) "close all\n"))
@@ -6123,32 +6123,32 @@ To reference old errors, put the cursor just after the error text."
  (scilab-shell-frame-init))
 
 
-(defun scilab-shell-exit ()
+(cl-defun scilab-shell-exit ()
  "Exit Scilab shell."
  (interactive)
  (comint-send-string (get-buffer-process (current-buffer)) "exit\n"))
 
 
-(defun scilab-shell-remote-exit ()
+(cl-defun scilab-shell-remote-exit ()
  "Exit Scilab shell."
  (interactive)
  (switch-to-buffer (concat "*" scilab-shell-buffer-name "*"))
  (comint-send-string (get-buffer-process (current-buffer)) "exit\n"))
 
 
-(defun scilab-shell-soft-restart ()
+(cl-defun scilab-shell-soft-restart ()
  "Restart Scilab shell."
  (interactive)
  (switch-to-buffer (concat "*" scilab-shell-buffer-name "*"))
  (comint-send-string (get-buffer-process (current-buffer)) "abort;\n exec('SCI/scilab.star',-1);\n"))
 
-(defun scilab-shell-saferestart ()
+(cl-defun scilab-shell-saferestart ()
  (interactive)
  (comint-send-string (get-buffer-process (current-buffer)) "abort;\n save('/tmp/'+date()+'.scilab')\n; exit\n")
  (switch-to-buffer (concat "*" scilab-shell-buffer-name "*"))
  (scilab-shell))
 
-(defun scilab-shell-restart ()
+(cl-defun scilab-shell-restart ()
  (interactive)
  (if (scilab-shell-active-p)
    (scilab-shell-remote-exit)
@@ -6173,7 +6173,7 @@ To reference old errors, put the cursor just after the error text."
 
 (defalias  'scilab-help 'scilab-shell-topic-browser)
 ;;;###autoload
-(defun scilab-shell-topic-browser ()
+(cl-defun scilab-shell-topic-browser ()
  "Create a topic browser by querying an active Scilab shell using HELP.
 Maintain state in our topic browser buffer."
  (interactive)
@@ -6246,7 +6246,7 @@ Maintain state in our topic browser buffer."
 (if (null (fboundp 'view-major-mode)) (defalias 'view-major-mode 'view-mode))
 
 ;;;###autoload
-(defun scilab-unboldunderline-region (start end)
+(cl-defun scilab-unboldunderline-region (start end)
  "Remove all boldness  (overstruck characters) and  underlining
 (overstruck underscores) in the region.
 Called from program, takes two arguments START and END
@@ -6360,7 +6360,7 @@ scilab-shell-topic-mode-menu scilab-shell-topic-mode-map
 
 
 
-(defun scilab-shell-topic-browser-create-contents (subtopic)
+(cl-defun scilab-shell-topic-browser-create-contents (subtopic)
  "Fill in a topic browser with the output from SUBTOPIC."
  (toggle-read-only -1)
   (switch-to-buffer "*Scilab Topic*")
@@ -6410,13 +6410,13 @@ scilab-shell-topic-mode-menu scilab-shell-topic-mode-map
  (toggle-read-only 1)
  ))
 
-(defun scilab-shell-topic-click (e)
+(cl-defun scilab-shell-topic-click (e)
  "Click on an item in a Scilab topic buffer we want more information on.
 Must be bound to event E."
  (interactive "e")
  (mouse-set-point e)
  (scilab-shell-topic-choose))
-(defun scilab-shell-topic-choose ()
+(cl-defun scilab-shell-topic-choose ()
  "Choose the topic to expand on that is under the cursor.
 This can fill the topic buffer with new information.  If the topic is a
 command, use `scilab-shell-describe-command' instead of changing the topic
@@ -6442,7 +6442,7 @@ buffer."
      (scilab-shell-describe-command fun))
    ))
 
-(defun scilab-shell-topic-mouse-highlight-subtopics ()
+(cl-defun scilab-shell-topic-mouse-highlight-subtopics ()
  "Put a `mouse-face' on all clickable targets in this buffer."
  (save-excursion
    (let ((el scilab-shell-topic-mouse-face-keywords))
@@ -6459,7 +6459,7 @@ buffer."
                   'mouse-face 'highlight)))))
    (setq el (cdr el))))))
 
-(defun scilab-shell-topic-highlight-line (event)
+(cl-defun scilab-shell-topic-highlight-line (event)
  "A value of `mode-motion-hook' which will highlight topics under the mouse.
 EVENT is the user mouse event."
  (let* ((buffer (event-buffer event))
@@ -6521,7 +6521,7 @@ what a user wants."
  :type '(repeat (string :tag "Path: ")))
 
 
-(defun scilab-find-file-under-path (path filename)
+(cl-defun scilab-find-file-under-path (path filename)
  "Return the pathname or nil of FILENAME under PATH."
  (if (file-exists-p (concat path filename))
      (concat path filename)
@@ -6542,7 +6542,7 @@ what a user wants."
    (setq dirs (cdr dirs)))
      found)))
 
-(defun scilab-find-function-over-buffers(funname)
+(cl-defun scilab-find-function-over-buffers(funname)
  "Find FUNNAAME over all buffers"
  (let ((currbf (current-buffer))
    (lst (buffer-list))
@@ -6571,7 +6571,7 @@ what a user wants."
 
 
 
-(defun scilab-find-file-on-path (filename)
+(cl-defun scilab-find-file-on-path (filename)
  "Find FILENAME on the current Scilab path.
 The Scilab path is determined by `scilab-mode-install-path' and the
 current directory.  You must add user-installed paths into
@@ -6658,7 +6658,7 @@ Check `scilab-mode-install-path'" filename)
            (message "File %s is found." filenamesci)
      (scilab-find-function-in-file filename))))))
 
-(defun scilab-find-function-in-file (funname)
+(cl-defun scilab-find-function-in-file (funname)
 "Find function in the current file"
        (goto-char (point-max))
        (setq fun (re-search-backward (concat
@@ -6671,7 +6671,7 @@ Check `scilab-mode-install-path'" filename)
          (goto-char fun)
          (message "Function %s is found." funname)))
 
-(defun scilab-find-library-function (funname)
+(cl-defun scilab-find-library-function (funname)
  "Find library scilab function. Uses whereis scilab function 
 Here new approach within `scilab-lib-tag-table-name' is used"
  ;; from `scilab-lib-ta  
@@ -6722,7 +6722,7 @@ Here new approach within `scilab-lib-tag-table-name' is used"
          (find-file  pthf)
          (scilab-find-function-in-file funname))))))))))
 
-(defun scilab-find-file-click (e)
+(cl-defun scilab-find-file-click (e)
  "Find the file clicked on with event E on the current path."
  (interactive "e")
  (mouse-set-point e)
@@ -6739,7 +6739,7 @@ Here new approach within `scilab-lib-tag-table-name' is used"
    (if (null f) (error "To find an sci file, click on a word"))
    (scilab-find-file-on-path f)))
 
-(defun scilab-find-help-file (helpfilename)
+(cl-defun scilab-find-help-file (helpfilename)
  "Returns full path on input help-file. The search is done under 
 the paths given in `scilab-help-pages-path' variable"
  (interactive)
@@ -6757,7 +6757,7 @@ the paths given in `scilab-help-pages-path' variable"
 
 ;;; scilab-mode debugging =====================================================
 
-(defun scilab-show-line-info ()
+(cl-defun scilab-show-line-info ()
  "Display type and attributes of current line.  Used in debugging."
  (interactive)
  (let ((msg "line-info:")
@@ -6777,7 +6777,7 @@ the paths given in `scilab-help-pages-path' variable"
  "Non-nil if communications via pty; false if by pipe.  Buffer local.
 This is to work around a bug in Emacs process signaling.")
 
-(defun scilab-interrupt-subjob ()
+(cl-defun scilab-interrupt-subjob ()
  "Interrupt the current subjob.
 This command also kills the pending input
 between the process-mark and point."
@@ -6785,7 +6785,7 @@ between the process-mark and point."
  (comint-kill-input)
  (interrupt-process nil t))
 
-(defun scilab-kill-subjob ()
+(cl-defun scilab-kill-subjob ()
  "Send kill signal to the current subjob.
 This command also kills the pending input
 between the process-mark and point."
@@ -6793,7 +6793,7 @@ between the process-mark and point."
  (comint-kill-input)
  (kill-process nil scilab-ptyp))
 
-(defun scilab-quit-subjob ()
+(cl-defun scilab-quit-subjob ()
  "Send quit signal to the current subjob.
 This command also kills the pending input
 between the process-mark and point."
@@ -6801,7 +6801,7 @@ between the process-mark and point."
  (comint-kill-input)
  (quit-process nil scilab-ptyp))
 
-(defun scilab-abort-subjob ()
+(cl-defun scilab-abort-subjob ()
  "Stop the current subjob.
 This command also kills the pending input
 between the process-mark and point.
@@ -6822,7 +6822,7 @@ is not a problem with most shells, since they ignore this signal.)"
 )
 
 
-(defun scilab-continue-subjob ()
+(cl-defun scilab-continue-subjob ()
  "Send CONT signal to process buffer's process group.
 Useful if you accidentally suspend the top-level process."
  (interactive)

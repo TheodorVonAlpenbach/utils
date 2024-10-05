@@ -21,10 +21,10 @@
 (defvar c++-c-file-footersec-template ""
   "Template string for the header section of a cpp-file.")
 
-(defun c++-insert-default-cons (class) ""
+(cl-defun c++-insert-default-cons (class) ""
   (smart-insert class "() {}"))
 
-(defun c++-insert-class-def (class)
+(cl-defun c++-insert-class-def (class)
   "Inserts an empty class definition"
   (interactive "*sclass name: ")
   (smart-insert "class " class " {" )
@@ -33,11 +33,11 @@
   (smart-insert "\nprivate:")
   (smart-insert "};"))
 
-(defun file-name-simple (file) ""
+(cl-defun file-name-simple (file) ""
   (file-name-nondirectory (file-name-sans-extension file)))
 ; (file-name-simple "c:/a/b/c")
 
-(defun c++-insert-h-file-template (arg)
+(cl-defun c++-insert-h-file-template (arg)
   "Inserts minimal body of CLASS in h-file
 together with standard header and footer h-file sections."
   (interactive "*P")
@@ -56,7 +56,7 @@ together with standard header and footer h-file sections."
     (smart-insert (concat "#endif //" _CLASS_H_))
     (previous-line 3)))
 
-(defun c++-insert-c-file-template ()
+(cl-defun c++-insert-c-file-template ()
   "Inserts standard header and footer sections of a cpp-file.
 Also assumes that the prefix of the name of this file is the same as
 for the corresponding h-file, and #includes the latter."
@@ -69,7 +69,7 @@ for the corresponding h-file, and #includes the latter."
     (next-line 2)
     (insert c++-c-file-footersec-template)))
 
-(defun c++-insert-get-method (method type member)
+(cl-defun c++-insert-get-method (method type member)
   "Inserts standard get method at point."
   (interactive "*\
 sname of get method: (foo)
@@ -83,7 +83,7 @@ sname of member to return (without standard formatting):
   (setq type (c++-reference-non-base-type type))
   (smart-insert "const " type " " method "() const {return " member ";}"))
 
-(defun c++-insert-set-method (method type member arg)
+(cl-defun c++-insert-set-method (method type member arg)
   "Inserts standard ste method at point."
   (interactive "*\
 score name of get method (fooBar) 

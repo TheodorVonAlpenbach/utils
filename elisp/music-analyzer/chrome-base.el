@@ -3,10 +3,10 @@
 (defconst chrome-bases
   '(C D E F G A B))
 
-(defun* chb-transpose (pbc chb-transposer &optional (n 1))
+(cl-defun chb-transpose (pbc chb-transposer &optional (n 1))
   (mod (* n (+ pbc chb-transposer)) 7))
 
-(defun chb-to-spc (pbc)
+(cl-defun chb-to-spc (pbc)
   (case pbc
     (0 0)
     (1 2)
@@ -17,7 +17,7 @@
     (6 11)))
 ;(mapcar #'chb-to-spc (mapcar #'chb-from-string '("C" "D" "E" "F" "G" "A" "B")))
 
-(defun chb- (pbc1 pbc2)
+(cl-defun chb- (pbc1 pbc2)
   (- pbc1 pbc2))
 
 ;;; read/write
@@ -28,14 +28,14 @@
     (lilypond ("c" "d" "e" "f" "g" "a" "b"))
     (symbol german))) ;;derivation
 
-(defun chb-string-style (print-style)
+(cl-defun chb-string-style (print-style)
   (let ((res (tmap-0-1 print-style chb-string-styles)))
     (if (symbolp res)
       (chb-string-style res)
       res)))
 ;;(chb-string-style 'english-chord)
 
-(defun* chb-from-string (chb-string &optional (print-style mu-default-print-style))
+(cl-defun chb-from-string (chb-string &optional (print-style mu-default-print-style))
   (case print-style
     (lilypond (chb-from-string (upcase chb-string)))
     (otherwise 
@@ -46,7 +46,7 @@
 ;;(chb-from-string "g" 'lilypond)
 ;;(chb-from-string "g")
 
-(defun* chb-to-string (pbc &optional (print-style mu-default-print-style))
+(cl-defun chb-to-string (pbc &optional (print-style mu-default-print-style))
   (nth pbc (chb-string-style print-style)))
 ;;(chb-to-string 6)
 ;;(chb-to-string 6 'english-chord)

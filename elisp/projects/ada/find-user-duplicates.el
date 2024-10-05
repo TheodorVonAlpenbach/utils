@@ -1,7 +1,7 @@
 (require 'ada-user)
 (require 'ada-group)
 
-(defun user-name-normal-form (user-name)
+(cl-defun user-name-normal-form (user-name)
   (apply #'format "%s@%s"
 	 (string-match*
 	     "^\\(feide:\\)?\\([^@]+\\)@\\(\\([tesurp]+users\\)?\\.\\)?\\(.*\\)$"
@@ -15,17 +15,17 @@
       (mapcar #'id
 	(typecase seed
 	  (string (user-from-user-name seed :id))
-	  (cons (loop for u in seed collect (user u :id)))
+	  (cons (cl-loop for u in seed collect (user u :id)))
 	  (number (user-ids-from-seed (mapcan #'group-member-ids (user-groups seed))))))))
-;;(loop for x in '(321678 (321678) "c%_no456326%") collect (user-ids-from-seed x))
+;;(cl-loop for x in '(321678 (321678) "c%_no456326%") collect (user-ids-from-seed x))
 
 (cl-defun users-from-seed (seed &optional (columns '(:id :salto-id :feide-id :user-name :company-id :stamp-updated)))
   "SEED is either
   · list of user IDs: corresponds directly to the target users
   · a regexp: matches USER-NAME of target users
   · a user ID: target users will be all users in the same groups as this user."
-  (loop for u in (user-ids-from-seed seed) collect (apply #'user u columns)))
-;;(loop for x in '(321678 (321678) "c%_no456326%") collect (users-from-seed x))
+  (cl-loop for u in (user-ids-from-seed seed) collect (apply #'user u columns)))
+;;(cl-loop for x in '(321678 (321678) "c%_no456326%") collect (users-from-seed x))
 
 (cl-defun find-user-name-duplicates-1 (&optional (seed "c%_no456326%"))
   "Return a list of user fragment pairs grouped by duplicity.
@@ -53,7 +53,7 @@ For SEED, see `user-ids-from-seed."
 ;;(find-user-name-duplicates "c%_no456326499_1a_1 %")
 ;;(cadadr (car (find-user-name-duplicates)))
 
-(defun superfluous-users (k class)
+(cl-defun superfluous-users (k class)
   ;; (rest (cl-sort class #'string< :key #'sixth))
   (copy "NULL" class :test #'string= :key #'second))
 ;;(superfluous-users '("c" 123) '(("1" "NULL" "f" "un" "c" "date1") ("0" "s" "f" "un" "c" "date2")))

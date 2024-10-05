@@ -1,6 +1,6 @@
 ;;; Methods for producing nice looking text tables
 
-(defun table-clean (beg end)
+(cl-defun table-clean (beg end)
   "Assumes lines in region is a table and cleans that table."
   (interactive "r")
   (with-syntax-table emacs-lisp-mode-syntax-table
@@ -16,19 +16,19 @@
 	(cl-loop for line from beg-line to end-line
 	      do (table-clean-line line offsets))))))
 
-(defun table-clean-paragraph ()
+(cl-defun table-clean-paragraph ()
   "Assumes lines in region is a table and cleans that table."
   (interactive)
   (let ((bounds (bounds-of-thing-at-point 'paragraph)))
     (table-clean (1+ (car bounds)) (1- (cdr bounds)))))
 
-(defun* goto-begin-sexp (&optional (n 1))
+(cl-defun goto-begin-sexp (&optional (n 1))
   (interactive "p")
   (forward-sexp n)
   (forward-sexp -1)
   (princ (point)))
 
-(defun table-clean-line (line offsets)
+(cl-defun table-clean-line (line offsets)
   "Fills in or removes whitespace according to OFFSETS at LINE.
 OFFSETS is a list of integers."
   (goto-line line)
@@ -40,7 +40,7 @@ OFFSETS is a list of integers."
 	(when (/= (point-2-line) line)
 	  (error "number of sexp in line %d doesn't match offsets argument")))))
 
-(defun* point-2-line (&optional (point (point)))
+(cl-defun point-2-line (&optional (point (point)))
   (interactive "d")
   (save-excursion
     (goto-char point)
@@ -48,7 +48,7 @@ OFFSETS is a list of integers."
     (1+ (count-lines 1 (point)))))
 ;;(point-2-line)
 
-(defun table-collect-sexp-lengths (start-line end-line)
+(cl-defun table-collect-sexp-lengths (start-line end-line)
   "Assumes lines in region is a table and cleans that table. TODO:
 lines should be input instead."
   (interactive "r")
@@ -63,7 +63,7 @@ lines should be input instead."
 			collect (- (cdr bounds) (car bounds))
 			do (forward-sexp 1)))))
 
-(defun table-collect-sexp-lengths (start-line end-line)
+(cl-defun table-collect-sexp-lengths (start-line end-line)
   "Assumes lines in region is a table and cleans that table."
   (interactive "r")
   (goto-line start-line)
@@ -77,7 +77,7 @@ lines should be input instead."
 			while (= (point-2-line) line)
 			collect (princ (- end start)))))
 
-(defun table-item-lengths-line (line)
+(cl-defun table-item-lengths-line (line)
   "Returns a ordered list of lengths of all non-whitespace items in
 LINE. TODO: fix if LINE is last."
   (interactive "P")
@@ -92,7 +92,7 @@ LINE. TODO: fix if LINE is last."
 	collect (princ (- end start))
 	do (forward-whitespace 1))))
 
-(defun table-item-lengths-line (line)
+(cl-defun table-item-lengths-line (line)
   "Returns a ordered list of lengths of all non-whitespace items in
 LINE. TODO: fix if LINE is last."
   (goto-line line)
@@ -100,7 +100,7 @@ LINE. TODO: fix if LINE is last."
 		   (= (point-2-line) line))
 	collect (length (match-string 0))))
 
-(defun table-item-lengths-line* ()
+(cl-defun table-item-lengths-line* ()
   (interactive)
   (princ (table-item-lengths-line (point-2-line))))
 

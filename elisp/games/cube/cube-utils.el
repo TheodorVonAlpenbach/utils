@@ -1,31 +1,31 @@
-(defun cube-revert-string (s)
+(cl-defun cube-revert-string (s)
   (if (and (> (length s) 1)
 	   (eql (char s 1) ?w))
     (remove-nth 1 s)
     (insert-sequence s "w" :start1 1)))
 
-(defun cube-revert-symbol (symbol)
+(cl-defun cube-revert-symbol (symbol)
   (intern (cube-revert-string (sstring symbol))))
 ;;(mapcar #'cube-revert-symbol '(U Uw U2 Uw2))
 
-(defun cube-revert (sexp)
+(cl-defun cube-revert (sexp)
   (when sexp
     (if (symbolp sexp)
      (cube-revert-symbol sexp)
      (reverse (mapcar #'cube-revert sexp)))))
 ;;(cube-revert '((U R Uw Rw U2) (U R Uw Rw U2)))
 
-(defun cube-rotate-symbol-y (symbol)
+(cl-defun cube-rotate-symbol-y (symbol)
   (case symbol
     (r f) (R F) (f l) (F L) (l b) (L B) (b r) (B R) (M s) (s m) (m S) (S M)
     (otherwise symbol)))
 
-(defun cube-rotate-symbol-x (symbol)
+(cl-defun cube-rotate-symbol-x (symbol)
   (case symbol
     (u f) (U F) (f d) (F D) (d b) (D B) (b u) (B U) (E S) (S e) (e s) (s E)
     (otherwise symbol)))
 
-(defun cube-rotate-symbol-z (symbol)
+(cl-defun cube-rotate-symbol-z (symbol)
   (case symbol
     (u l) (U L) (l d) (L D) (d r) (D R) (r u) (R U) (M E) (E m) (m e) (e M)
     (otherwise symbol)))
@@ -34,14 +34,14 @@
   "Rotate SYMBOL clockwise, e.g. F -> R, R2 -> B2, Mw -> Sw.
 Only DIR :Y is currently supported"
   (if (/=  n 1)
-    (loop repeat n do (setf symbol (cube-rotate-symbol symbol 1 dir)))
+    (cl-loop repeat n do (setf symbol (cube-rotate-symbol symbol 1 dir)))
     (let ((sym1 (intern (char (sstring symbol) 0))))
       (case dir
 	(:y (cube-rotate-symbol-y sym1))
 	(:x (cube-rotate-symbol-x sym1))
 	(:z (cube-rotate-symbol-z sym1))))))
 
-(defun cube-fliplr-symbol (symbol)
+(cl-defun cube-fliplr-symbol (symbol)
   (intern
    (let ((s (sstring symbol)))
      (case (char s 0)
@@ -56,7 +56,7 @@ Only DIR :Y is currently supported"
 ;;(cl-replace "abcdef" "ABCDEF" :start2 0 :end2 2)
 ;;(insert-sequence "l" "rw" :start1 0 :end1 1)
 
-(defun cube-fliplr (sexp)
+(cl-defun cube-fliplr (sexp)
   (when sexp
     (cond ((symbolp sexp) (cube-fliplr-symbol sexp))
 	  ((integerp sexp) sexp)
@@ -65,7 +65,7 @@ Only DIR :Y is currently supported"
 ;;(cube-fliplr '((U R Uw Rw U2)2 (U R Uw Rw U2)))
 
 (cl-defun cube-parse-algorithm (s &optional (reverse-char ?'))
-  (loop while (or (null i) (< i (length s)))
+  (cl-loop while (or (null i) (< i (length s)))
 	for (o . i) = (read-from-string (cl-substitute ?w reverse-char s) i)
 	collect o))
 

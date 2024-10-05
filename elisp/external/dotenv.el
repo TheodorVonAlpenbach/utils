@@ -54,7 +54,7 @@
     table))
 
 ;; Adapted from code generously donated by Fuco1 (https://github.com/Fuco1; see: https://fuco1.github.io/2017-06-11-Font-locking-with-custom-matchers.html)
-(defun dotenv-mode--match-variables-in-double-quotes (limit)
+(cl-defun dotenv-mode--match-variables-in-double-quotes (limit)
   "Match variables in double-quotes in `dotenv-mode'."
   (with-syntax-table dotenv-mode-syntax-table
     (catch 'done
@@ -84,7 +84,7 @@
     ("\${[[:alpha:]]+[[:alnum:]_]*}" . font-lock-variable-name-face)
     ("\$([[:alpha:]]+[[:alnum:]_]*)" . font-lock-variable-name-face)))
 
-(defun dotenv-mode-variables ()
+(cl-defun dotenv-mode-variables ()
   "Initialize buffer-local variables for `dotenv-mode'"
   (setq-local comment-start "# ") ;; Added due to suggestion by jscheid (https://github.com/jscheid)
   (setq-local comment-end "")

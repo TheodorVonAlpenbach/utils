@@ -6,7 +6,7 @@
 
 ;(debug-on-entry 'forward-sentence)
 ;(cancel-debug-on-entry 'forward-sentence)
-(defun forward-sentence (&optional arg)
+(cl-defun forward-sentence (&optional arg)
   "Move forward to next `sentence-end'.  With argument, repeat.
 With negative argument, move backward repeatedly to `sentence-beginning'.
 
@@ -40,22 +40,22 @@ This version is modified by mb. See canonical behaviour definition in
       (setq arg (1- arg)))
     (setq case-fold-search old-case-fold-search)))
 
-(defun mark-whole-word () (interactive)
+(cl-defun mark-whole-word () (interactive)
   (forward-word 1)
   (push-mark nil t t)
   (backward-word 1))
 
-(defun mark-whole-sexp () (interactive)
+(cl-defun mark-whole-sexp () (interactive)
   (forward-sexp 1)
   (push-mark nil t t)
   (backward-sexp 1))
 
-(defun 2- (number)
+(cl-defun 2- (number)
   "Return NUMBER minus two.  NUMBER may be a number or a marker.
 Markers are converted to integers." (- number 2))
 ;(2- 4)
 
-(defun 3- (number)
+(cl-defun 3- (number)
   "Return NUMBER minus three. NUMBER may be a number or a marker.
 Markers are converted to integers." (- number 3))
 

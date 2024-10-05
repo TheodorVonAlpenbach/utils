@@ -1,4 +1,4 @@
-(defun mb-php-mode-hook-function ()
+(cl-defun mb-php-mode-hook-function ()
   (linum-mode)
   ;;(setq tab-width 4)
   ;; to setup tabs

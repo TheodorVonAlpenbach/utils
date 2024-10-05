@@ -27,25 +27,25 @@ For example:
 ")
 
 (require 'mb-ert)
-(defun elisp-swap ()
+(cl-defun elisp-swap ()
   "Swap an emacs lisp file with its associated test file."
   (when (eql major-mode 'emacs-lisp-mode)
     (mb-swap-ert-defun)))
 
-(defun regexp-swap (file-regexp)
+(cl-defun regexp-swap (file-regexp)
   (cl-destructuring-bind (regexp num) file-regexp
     (awhen (string-match* regexp (buffer-string-no-properties) :num 1)
       (find-file it))))
 
-(defun version-swap ()
+(cl-defun version-swap ()
   (awhen (swap (buffer-directory) *version-swaps* :test #'file-equal-p)
     (find-file (expand-file-name (buffer-file-name-nondirectory) it))))
 
-(defun substitute-extension (filename extension)
+(cl-defun substitute-extension (filename extension)
   (format "%s.%s" (file-name-sans-extension filename) (sstring extension)))
 ;;(substitute-extension (buffer-file-name) 'ly)
 
-(defun expand-swap-target (expr)
+(cl-defun expand-swap-target (expr)
   (cond	((symbolp expr)
 	 (substitute-extension (buffer-file-name) expr))
 	((stringp expr)
@@ -55,11 +55,11 @@ For example:
 ;;(swap-target 'el)
 ;;(swap-target '("filename='\\(.*\\)'" 1))
 
-(defun smart-swap-find-file (filename-ending relative-target-directory)
+(cl-defun smart-swap-find-file (filename-ending relative-target-directory)
   (directory-files relative-target-directory t filename-ending))
 ;;(smart-swap-find-file "swap.el$" "../global")
 
-(defun swap-target (expr)
+(cl-defun swap-target (expr)
   "Here I should allow for search"
   (if (consp expr)
     (awhen (expand-swap-target expr)
@@ -67,7 +67,7 @@ For example:
     (apply #'smart-swap-find-file expr)))
 ;;(length (directory-files "." t))
 
-(defun match-current-buffer-p (expr)
+(cl-defun match-current-buffer-p (expr)
   (cond ((symbolp expr)
 	 (when (string= (file-name-extension (buffer-file-name))
 			(symbol-name expr))

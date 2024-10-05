@@ -1,7 +1,7 @@
 (require 'cram-config)
 (require 'cram-common)
 
-(defun cram-format-problem (question &optional max-length)
+(cl-defun cram-format-problem (question &optional max-length)
   (format "%s%s"
     (if max-length
       (substring question 0 (min max-length (length question)))
@@ -9,7 +9,7 @@
     (if max-length "" "\n")))
 ;;(cram-format-problem "qwe" 2)
 
-(defun cram-format-match (user problem)
+(cl-defun cram-format-match (user problem)
   (concat
     (format "Your rating: %d (RD = %d)\n"
       (cram-user-rating-e user) (cram-user-rating-d user))
@@ -43,12 +43,12 @@
     (evil-emacs-state)))
 ;;(cram-draw-problem)
 
-(defun cram-read-response ()
+(cl-defun cram-read-response ()
   "Parses the submitted response"
   (string-trim (line-string)))
 
 
-(defun format-alternatives (alternatives)
+(cl-defun format-alternatives (alternatives)
   (or alternatives "None."))
 
 (cl-defun short-judgement (score response answer alternatives
@@ -89,7 +89,7 @@
 	  ;;   (cl-sort (cram-db-problems) #'string> :key #'cram-problem-updated))
 	  )))))
 
-(defun cram-submit ()
+(cl-defun cram-submit ()
   "It's a bit confusing with problem-entry in DB, problem as is, and
 the *cram-current-problem* which is yet another structure."
   (let* ((time (time-elapsed nil))
@@ -108,17 +108,17 @@ the *cram-current-problem* which is yet another structure."
     (cram-answer-mode)
     (evil-emacs-state))
 
-(defun cram-response-submitted-p ()
+(cl-defun cram-response-submitted-p ()
   (string-match "Spent" (buffer-string)))
 
 ;;; Interactive functions
-(defun cram-enter ()
+(cl-defun cram-enter ()
   (interactive)
   (if (eql major-mode 'cram-problem-mode)
     (cram-submit)
     (cram-new)))
 
-(defun cram-register-new-user ()
+(cl-defun cram-register-new-user ()
   (interactive)
   (let ((user-name (read-from-minibuffer "New user name: ")))
     (when (yes-or-no-p
@@ -131,7 +131,7 @@ the *cram-current-problem* which is yet another structure."
 	(message "Couldn't register user since user name '%s' is already registered" user-name)))))
 ;;(cram-register-new-user)
 
-(defun cram-change-user ()
+(cl-defun cram-change-user ()
   (interactive)
   (let ((others (cram-db-user-names :sans (cram-user-name (cram-current-user)))))
     (if others
@@ -140,24 +140,24 @@ the *cram-current-problem* which is yet another structure."
 	(cram-new))
       (message "There are currently no other users but you!"))))
 
-(defun cram-toggle-auto-continue ()
+(cl-defun cram-toggle-auto-continue ()
   (interactive)
   (setf *cram-auto-continue* (not *cram-auto-continue*)))
 ;;(cram-toggle-auto-continue)
 
-(defun cram-auto-continue-p ()
+(cl-defun cram-auto-continue-p ()
   *cram-auto-continue*)
 
-(defun cram-help ()
+(cl-defun cram-help ()
   (interactive)
   (message "Not implemented"))
 
-(defun cram-browse-wikipedia ()
+(cl-defun cram-browse-wikipedia ()
   (interactive)
   (browse-url (format "https://no.wikipedia.org/wiki/%s"
 		(cram-problem-answer (cram-current-problem)))))
 
-(defun cram-browse-store-norske ()
+(cl-defun cram-browse-store-norske ()
   (interactive)
   (browse-url (format "https://snl.no/%s"
 		(cram-problem-answer (cram-current-problem)))))
@@ -188,25 +188,25 @@ the *cram-current-problem* which is yet another structure."
 	    :column-separator " | "))
     (switch-to-buffer-other-window buffer-name)))
 
-(defun cram-quit ()
+(cl-defun cram-quit ()
   (interactive)
   (cram-save)
   (kill-buffer +cram-buffer+))
 
-(defun unsuppress-keymap (map keys)
+(cl-defun unsuppress-keymap (map keys)
   (cl-loop for char across keys
 	   for key = (char-to-string char)
-	   do (define-key map key (lexical-let ((char char))
+	   do (define-key map key (let ((char char))
 				    #'(lambda () 
 					(interactive)
 					(insert char))))))
 ;;(unsuppress-keymap cram-mode-map "0123456789")
 
-(defun cram-plot-user-ratings ()
+(cl-defun cram-plot-user-ratings ()
   (interactive)
   (gnuplot-ratings (cram-db-user-ratings (cram-current-user))))
 
-(defun cram-answer-mode-map ()
+(cl-defun cram-answer-mode-map ()
   (let ((map (make-keymap))
 	(list-map (make-sparse-keymap))
 	(user-map (make-sparse-keymap))
@@ -289,7 +289,7 @@ the *cram-current-problem* which is yet another structure."
   (evil-emacs-state)
   (define-key cram-problem-mode-map [return] #'cram-enter))
 
-(defun cram-init (&optional force)  
+(cl-defun cram-init (&optional force)  
   (setf *cram-last-update* (the-creation))
   (setf *cram-match-cache* nil)
   (require 'cram-db)

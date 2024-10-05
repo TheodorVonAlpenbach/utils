@@ -1,13 +1,13 @@
 (require 'chrome)
 
-(defun define-scale (name chromees &optional print-style)
+(cl-defun define-scale (name chromees &optional print-style)
   (list name (if (stringp chromees) 
 	       (pcs-from-string chromees print-style)
 	       chromees)))
 ;;(define-scale "Super Locrian" "C Db Eb Fb Gb Ab B")
 
 (defconst scale-types
-  (loop for x in '(("Major" "c d e f g a b")
+  (cl-loop for x in '(("Major" "c d e f g a b")
 		   ("Melodic Minor" "c d ees f g a b")
 		   ("Super Locrian" "c des ees fes ges aes bes")
 		   ("Neapolitan Minor" "c des ees f g aes b")
@@ -35,20 +35,20 @@
 		   ("Whole-tone" "c d e fis gis ais"))
 	collect (define-scale (first x) (second x) 'lilypond)))
 
-(defun get-scale-type (name) (tmap-0-1 name scale-types :test #'equal))
+(cl-defun get-scale-type (name) (tmap-0-1 name scale-types :test #'equal))
 
-(defun scale-skeleton (scale-type)
-  (loop for x in (pairs (append (mapcar #'spc-to-chrome scale-type) '(12)))
+(cl-defun scale-skeleton (scale-type)
+  (cl-loop for x in (pairs (append (mapcar #'spc-to-chrome scale-type) '(12)))
 	collect (- (second x) (first x))))
 ;;(scale-skeleton (get-scale-type "Melodic Minor"))
 
-(defun scale-skeleton-base (scale-skeleton)
-  (let ((modal-variants (loop for n below (length scale-skeleton)
+(cl-defun scale-skeleton-base (scale-skeleton)
+  (let ((modal-variants (cl-loop for n below (length scale-skeleton)
 			      collect (rotate-list scale-skeleton n))))
     (nminimum modal-variants #'list>)))
 ;;(scale-skeleton-base (scale-skeleton (get-scale-type "Super Locrian")))
 
-(prin1 (loop for x in scale-types
+(prin1 (cl-loop for x in scale-types
       collect (scale-skeleton-base (scale-skeleton (second x)))))
 
 

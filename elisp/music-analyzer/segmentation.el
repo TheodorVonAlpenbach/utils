@@ -6,7 +6,7 @@
 ;; See Rohrmeier (https://drive.google.com/a/contango.no/?tab=co#folders/0B0tCbZB2ykMzbDFhNE04VFBXVlU)
 ;  for a discussion of segmentation methods
 
-(defun* segmentation (x &optional (segmentation-method 'harmonic))
+(cl-defun segmentation (x &optional (segmentation-method 'harmonic))
   "Segments X according to SEGMENTATION-METHOD, and returns the
 modified X"
   (funcall (case segmentation-method
@@ -16,7 +16,7 @@ modified X"
 	     (harmonic #'harmonic-segmentation)
 	     (mb #'mb-segmentation)) x))
 
-(defun notes-mapc (x function &optional preserve-tree)
+(cl-defun notes-mapc (x function &optional preserve-tree)
   "Returns a list of all notes
 TODO: also accept a list of notes"
   (mapc function (notes x preserve-tree)))
@@ -24,30 +24,30 @@ TODO: also accept a list of notes"
 ;;(movement-to-lilypond qwe :start t)
 ;;(setq qwe (mvt-submovement (mvt-test) 5 7))
 
-(defun durations (x)
+(cl-defun durations (x)
   "Returns a list of all durations in VOICE"
   (mapcar #'n-duration (notes x)))
 ;;(durations (mvt-test))
 
-(defun lcm-duration (x)
+(cl-defun lcm-duration (x)
   "Returns the least common multiplum of the durations in VOICES
 TODO: Do better than this: 
 In this version we split each duration to a puncutation vector
 and finds the non-empty least element in those vectors.
 See `duration.el'"
-  (loop for i from 0 below 10 ;;10 is ridicously high, but we must avoid eternal loop
+  (cl-loop for i from 0 below 10 ;;10 is ridicously high, but we must avoid eternal loop
 	for ds = (mapcar #'d-value (durations x)) then (mapcar (bind #'* 2) ds)
 	for ds* = (remove-if #'zerop ds :key (bind #'mod 1.0))
 	unless ds* return (/ 1.0 (expt 2 i))))
 ;;(lcm-duration (mvt-test))
 
-(defun* notes-total-segmentation (ns &optional (unit (lcm-duration ns)))
+(cl-defun notes-total-segmentation (ns &optional (unit (lcm-duration ns)))
   "Splits NS according to `total-segmentation'"
 ;;  (mapcar (bind #'n-split (bind #'d-split-total (lcm-duration ns))) ns)
   (mapcan #'(lambda (n) (n-split n (bind #'d-split-total unit))) ns))
 ;;(notes-total-segmentation (notes (v-test)))
 
-(defun* total-segmentation (x &optional (unit (lcm-duration x)))
+(cl-defun total-segmentation (x &optional (unit (lcm-duration x)))
   "Destructive, so make a copy of X, if necessary.
 This segmentation is the most rudimentary: it identifies the
 least common duration factor in VOICE-GROUP, and then it splits
@@ -61,12 +61,12 @@ a foundation for other segmentation methods"
 ;;(movement-to-lilypond total :title "Total segmentation")
 
 ;;;; metric
-(defun metric-segmentation (x)
+(cl-defun metric-segmentation (x)
   (let* ((vs (voices x))
 	 (total-segmentation x))
-    (loop for v in (voices x)
+    (cl-loop for v in (voices x)
 	  for ns = (v-notes v)
-	  for metric-notes = (loop for n in ns
+	  for metric-notes = (cl-loop for n in ns
 				   for st = (n-start-time n)
 				   for m = (mod* st 1)
 				   if (zerop m) collect n)
@@ -82,24 +82,24 @@ a foundation for other segmentation methods"
 ;;(setq qwe (mvt-submovement (mvt-test) 6 8))
 
 ;;;; dense
-(defun nchords (x)
+(cl-defun nchords (x)
   (voices x))
 
-(defun nchord-equal (x y)
+(cl-defun nchord-equal (x y)
   (every #'n-equal x y))
 
-(defun dense-segmentation (x)
+(cl-defun dense-segmentation (x)
   (let* ((vs (voices x))
 	 (vs-total (total-segmentation vs))
 	 (nss (notes vs-total t))
 	 (nchords (transpose nss))
 	 (nchords-groups (group nchords :test #'nchord-equal))
-	 (nchords* (loop for g in nchords-groups
+	 (nchords* (cl-loop for g in nchords-groups
 			 for nchord = (first g)
 			 for ns = (first (transpose g))
 			 for d = (sum ns :key (compose #'d-value #'n-duration))
 			 if (> (length g) 1)
-			 do (loop for n in nchord 
+			 do (cl-loop for n in nchord 
 				  do (setf (d-value (n-duration n)) d)
 				  do (setf (n-tied n) nil))
 			 collect nchord)))
@@ -111,28 +111,28 @@ a foundation for other segmentation methods"
 
 
 ;;;; harmonic
-(defun sinterval-dissonance-score (sinterval)
+(cl-defun sinterval-dissonance-score (sinterval)
   (case (abs sinterval)
     ((1 11) -4) ;; minor seconds
     ((2 10 6) -1) ;; major seconds or tritones
     (t 0)))
 ;;(mapcar #'sinterval-dissonance-score (0-n 12))
 
-(defun schord-intervals (schordx)
+(cl-defun schord-intervals (schordx)
   "TODO: move this"
-  (loop for r in (relations (cons 0 (schordx-schosk schordx)))
+  (cl-loop for r in (relations (cons 0 (schordx-schosk schordx)))
 	collect (- (apply #'- r))))
 ;;(schord-intervals '(0 4 7))
 
-(defun schordx-dissonance-score (schordx)
+(cl-defun schordx-dissonance-score (schordx)
   (sum (mapcar #'sinterval-dissonance-score (schord-intervals schordx))))
 ;;(schord-dissonance-score '(0 1 4 7))
 
-(defun nchord-to-chord (nchord)
+(cl-defun nchord-to-chord (nchord)
   (mapcar #'n-chrome nchord))
 ;;(nchord-to-chord (list (n-new)))
 
-(defun nchord-new ()
+(cl-defun nchord-new ()
   (nreverse
    (list (n-new (p-new (chrome-new 4 0) 3) 0 (d-new))
 	 (n-new (p-new (chrome-new 1 0) 4) 0 (d-new))
@@ -140,17 +140,17 @@ a foundation for other segmentation methods"
 	 (n-new (p-new (chrome-new 6 -1) 4) 0 (d-new)))))
 ;;(mapcar #'n-to-string (nchord-new))
 
-(defun schordx-from-nchord (nchord)
+(cl-defun schordx-from-nchord (nchord)
   (schordx-from-chord (nchord-to-chord nchord)))
-(defun schordx-from-nchord (nchord)
+(cl-defun schordx-from-nchord (nchord)
   (schordx-from-spcs (reverse (mapcar (compose #'chrome-to-spitch #'n-chrome) nchord))))
 ;;(schordx-from-nchord (nchord-new))
 
-(defun nchord-dissonance-score (nchord)
+(cl-defun nchord-dissonance-score (nchord)
   (schordx-dissonance-score (schordx-from-nchord nchord)))
 ;;(schord-dissonance-score '(0 1 4 7))
 
-(defun harmonic-segmentation-best-nchord (nchords)
+(cl-defun harmonic-segmentation-best-nchord (nchords)
   "Returns one nchord from NCHORDS based on the following rules:
 1. if first schord in NCHORDS is consonant or dominant-seventh,
 it is returned 2. else return the least consonant schord in
@@ -161,7 +161,7 @@ https://drive.google.com/a/contango.no/?tab=co#folders/0B0tCbZB2ykMzbDFhNE04VFBX
     (first nchords)
     (minimum nchords #'> :key (compose #'schordx-dissonance-score #'schordx-from-nchord))))
 
-(defun* nchord-same-beat (nchord1 nchord2 &optional (dvalue 1))
+(cl-defun nchord-same-beat (nchord1 nchord2 &optional (dvalue 1))
   "Returns t iif two consecutive chords nchord1 and nchord2 are
 on the same metric level. Metric level length is defined by (the
 optional argument) DVALUE as this many `d-unit's.
@@ -169,7 +169,7 @@ TODO: Still a bit unclear, so perhaps rewrite"
   (plusp (mod* (n-start-time (first nchord2)) dvalue)))
 ;;(nchord-same-beat nil (list (n-new (p-new) .5)) .5)
 
-(defun hs-adjust-note (n)
+(cl-defun hs-adjust-note (n)
   "Quick and dirty method used by harmonic-segmentation. Makes
 sure that note N starts on a main beat, has one beat's length and
 is not tied to the following note"
@@ -178,9 +178,9 @@ is not tied to the following note"
 	(floor (n-start-time n)))
   (setf (n-tied n) nil))
 
-(defun hs-adjust-nchord (nchord) (mapc #'hs-adjust-note nchord))
+(cl-defun hs-adjust-nchord (nchord) (mapc #'hs-adjust-note nchord))
 
-(defun harmonic-segmentation (x)
+(cl-defun harmonic-segmentation (x)
   "Only handles fairly metric voice-groups"
   (let* ((vs (voices x))
 	 (vs-total (total-segmentation vs))
@@ -234,7 +234,7 @@ is not tied to the following note"
 ;;(schordx-group '((3 7) 0 0) nil mb-seg-chord-groups)
 
 
-(defun* nchord-more-preferred (nchord1 nchord2)
+(cl-defun nchord-more-preferred (nchord1 nchord2)
   "Returns t if nchord1 is more preferred, nil if nchord2 is more
  preferred, and 'na if incommensurable.
 incommensurable: 
@@ -265,7 +265,7 @@ incommensurable:
 	t))))
 
 
-(defun nchord-concat (&rest nchords)
+(cl-defun nchord-concat (&rest nchords)
   "Returns the first nchord in NCHORDS, but after modifying the
 start-time and duration so that these properties together
 corresponds to nchords as a whole. Assumes that NCHORDS perferct
@@ -285,16 +285,16 @@ segmentation"
     res))
 
 
-(defun nchord-p (x)
+(cl-defun nchord-p (x)
   (and (listp x)
        (every #'note-p x)))
 
-(defun nchord-group-p (x)
+(cl-defun nchord-group-p (x)
   (and (listp x)
        (every #'nchord-p x)))
 ;;(nchord-group-p nil)
 
-(defun* nchord-groups-reduce-1 (g1 g2)
+(cl-defun nchord-groups-reduce-1 (g1 g2)
   "Must return a chord group, i.e. a list of list of notes.
 Write this later.
 Note: N is ignored in this version"
@@ -310,22 +310,22 @@ Note: N is ignored in this version"
       res
       (error "Expected a nchord-group")))) 
 
-(defun* nchord-groups-reduce (nchord-groups &optional (n 2))
+(cl-defun nchord-groups-reduce (nchord-groups &optional (n 2))
   "Write this doc later.
 Note: N is ignored in this version"
-  (loop for gg in (cut nchord-groups n)
+  (cl-loop for gg in (cut nchord-groups n)
 	for x = (apply #'nchord-groups-reduce-1 gg)
 	if (nchord-group-p x) collect x
 	else do (error "Expected a nchord-group")))
 
-(defun mb-segmentation (x)
+(cl-defun mb-segmentation (x)
   "Flexible version of harmonic segmentation. Only handles fairly metric voice-groups
 TODO: remove tildes"
   (let* ((vs (voices x))
 	 (vs-total (total-segmentation vs))
 	 (nchords (transpose (notes vs-total t)))
  	 (nchord-groups (mapcar #'list nchords)))
-    (loop for dvalue = (n-dvalue (first (first (first nchord-groups))))
+    (cl-loop for dvalue = (n-dvalue (first (first (first nchord-groups))))
 	  while (< dvalue 1)
 	  do (setf nchord-groups (nchord-groups-reduce nchord-groups)))
     (mapcar* #'(lambda (v ns) (setf (v-notes v) ns)) vs (transpose (flatten nchord-groups 1)))

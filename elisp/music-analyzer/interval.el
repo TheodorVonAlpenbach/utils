@@ -37,39 +37,39 @@
   "Should employ tone structure (or perhaps a structure of its
   own) instead, since the octave part will be needed")
 
-(defun i-copy (interval)
+(cl-defun i-copy (interval)
   (chrome-copy interval))
 
-(defun i-inverted-p (interval)
+(cl-defun i-inverted-p (interval)
   (< (p-octave interval) 0))
 
-(defun i-number (interval)
+(cl-defun i-number (interval)
   (+ (if (i-inverted-p interval) -1 1)
      (chrome-base (p-chrome interval))
      (* (p-octave interval) 7)))
 ;;(i-number (i-parse 'm-2))
 
-(defun i-invert (interval)
+(cl-defun i-invert (interval)
   (p- (i-new) interval))
 ;;(i-invert (i-from-abbreviation "d-2"))
 
-(defun i-abs (interval)
+(cl-defun i-abs (interval)
   "Returns an :UP-ward copy of interval"
   (if (i-inverted-p interval)
     (i-invert interval)
     (i-copy interval)))
 
-(defun i-direction (interval)
+(cl-defun i-direction (interval)
   "Doesn't take octave into account"
   (if (< (p-octave interval) 0) :down
       (if (i-is interval 'P1o) nil :up)))
 ;;(mapcar #'i-direction (mapcar #'i-parse '(P1 m2 m-2)))
 
-(defun i-semitones (interval)
+(cl-defun i-semitones (interval)
   (p-ansi interval 0))
 ;;(i-semitones (i-parse 'M3))
 
-(defun i-new (&optional x y)
+(cl-defun i-new (&optional x y)
   "Creates a new interval from pitches.
 Method may be invoked with the following argument combinations:
 \(i-new [NOTE-OR-PITCH1 [NOTE-OR-PITCH2]], which creates the
@@ -99,48 +99,48 @@ pitch arguments.
 ;;(i-new)
 
 
-(defun is-new (pitches)
+(cl-defun is-new (pitches)
   (mapcar (bind #'apply #'i-new 1) (pairs pitches)))
 ;;(mapcar #'i-symbol (is-new (mapcar #'p-from-string '("C1" "C#1" "G1"))))
 
-(defun i-alteration (interval)
+(cl-defun i-alteration (interval)
   (chrome-accidentals (p-chrome interval)))
 ;;(i-alteration (i-new))
 
-(defun i-base (interval)
+(cl-defun i-base (interval)
   (p-copy interval :octave 0))
 ;;(i-symbol (i-base (p-new)))
 
-(defun i-type (interval)
+(cl-defun i-type (interval)
   (intern (string-match* "[^-[:digit:]]*" (i-abbrevation (i-parse interval)))))
 ;;(mapcar #'i-type '(P1 m2 A4))
 
-(defun i-step (interval)
+(cl-defun i-step (interval)
   (string-to-number (string-match* "[^-[:digit:]]*\\(-?[[:digit:]]*\\)"
 				   (i-abbrevation (i-parse interval)) 1)))
 ;;(mapcar #'i-step '(P1 m2 A-4))
 
-(defun i-nalterate (interval n)
+(cl-defun i-nalterate (interval n)
   "See `p-nalterate'"
   (p-nalterate interval n))
 
-(defun i-alterate (interval n)
+(cl-defun i-alterate (interval n)
   "See `p-alterate'"
   (p-alterate interval n))
 
-(defun i= (interval1 interval2)
+(cl-defun i= (interval1 interval2)
   (p= (i-parse interval1)
       (i-parse interval2)))
 ;;(i= (i-new) (i-new))
 
-(defun i/= (interval1 interval2)
+(cl-defun i/= (interval1 interval2)
   (not (i= interval1 interval2)))
 
-(defun i~ (interval1 interval2)
+(cl-defun i~ (interval1 interval2)
   (p= (i-base interval1) (i-base interval2)))
 ;;(i~ (i-parse 'P1) (i-parse 'P8))
 
-(defun i< (interval1 interval2)
+(cl-defun i< (interval1 interval2)
   (let* ((i1 (i-parse interval1))
 	 (i2 (i-parse interval2))
 	 (o1 (p-octave i1))
@@ -157,9 +157,9 @@ pitch arguments.
 	(< pbc1 pbc2)
 	(< a1 a2)))))
 
-(defun i> (interval1 interval2) (i< interval2 interval1))
+(cl-defun i> (interval1 interval2) (i< interval2 interval1))
 
-(defun* i-is (interval intervals &optional (test #'i=))
+(cl-defun i-is (interval intervals &optional (test #'i=))
   (and interval
        (let ((interval* (i-parse interval))
 	     (intervals* (i-parse intervals)))
@@ -168,29 +168,29 @@ pitch arguments.
 	   (funcall test interval* intervals*)))))
 ;;(i-is 'P1 'P8 #'i~)
 
-(defun i-perfect-consonance-p (interval)
+(cl-defun i-perfect-consonance-p (interval)
   (eq (elt (i-abbrevation interval) 0) ?P))
 ;;(mapcar #'i-perfect-consonance-p (mapcar #'second mu-intervals))
 
-(defun i-imperfect-consonance-p (interval)
+(cl-defun i-imperfect-consonance-p (interval)
   (find (elt (i-abbrevation interval) 0) '(?m ?M)))
 ;;(count nil (mapcar #'i-imperfect-consonance-p (i-a-b 'P1 'P8)))
 ;;(length (i-a-b 'P1 'P8))
 
-(defun i-parallel-p (interval &rest intervals)
+(cl-defun i-parallel-p (interval &rest intervals)
   (apply #'equal* (mapcar #'i-direction (cons interval intervals))))
 
-(defun i-skip-p (interval)
+(cl-defun i-skip-p (interval)
   "Returns the direction of interval iff it is a skip, else returns nil"
   (not (i-is interval '(P1 A1 d1 m2 M2 m-2 M-2))))
 
-(defun i-step-p (interval)
+(cl-defun i-step-p (interval)
   "Returns the direction of interval iff it is a step, else returns nil"
   (i-is interval '(m2 M2 m-2 M-2)))
 ;;(i-step-p 'P5)
 
 ;;; read/write
-(defun i-from-abbreviation (interval-string)
+(cl-defun i-from-abbreviation (interval-string)
   (let* ((inverse (string-match "-" interval-string))
 	 (opos (string-match "[-[:digit:]]" interval-string))
 	 (pbc* (1- (abs (string-to-number (substring* interval-string opos)))))
@@ -204,11 +204,11 @@ pitch arguments.
     (if inverse (i-invert i) i)))
 ;;(i-from-abbreviation "P-1")
 
-(defun i-from-symbol (interval-symbol)
+(cl-defun i-from-symbol (interval-symbol)
   (i-from-abbreviation (symbol-name interval-symbol)))
 ;;(i-from-symbol 'P-12)
 
-(defun i-alteration-symbol-name (interval)
+(cl-defun i-alteration-symbol-name (interval)
   (let* ((iv (if (i-inverted-p interval) (i-invert interval) interval))
 	 (alt (i-alteration iv)))
     (case (i-number iv)
@@ -223,11 +223,11 @@ pitch arguments.
 					(make-string alt ?A)
 					(make-string (1- (- alt)) ?d))))))))
 
-(defun i-alteration-symbol (interval)
+(cl-defun i-alteration-symbol (interval)
   (intern (i-alteration-symbol-name interval)))
 ;;(i-alteration-symbol (i-parse 'A3))
 
-(defun i-alteration-name (interval)
+(cl-defun i-alteration-name (interval)
   (case (i-alteration-symbol interval)
     (P "perfect") (M "major") (m "minor")
     (a "augmented")
@@ -235,17 +235,17 @@ pitch arguments.
     (dd "doubly diminished")))
 ;;(i-alteration-name (i-parse 'M3))
 
-(defun i-abbrevation (interval)
+(cl-defun i-abbrevation (interval)
   (format "%s%d" 
       (i-alteration-symbol-name interval) 
       (i-number interval)))
 ;;(i-abbrevation (i-from-abbreviation "d2"))
 
-(defun i-symbol (interval)
+(cl-defun i-symbol (interval)
   (intern (i-abbrevation interval)))
 ;;(i-symbol (i-new))
 
-(defun i-parse (interval-object)
+(cl-defun i-parse (interval-object)
   (if (listp interval-object)
     (mapcar #'i-parse interval-object)
     (case (type-of interval-object)
@@ -255,16 +255,16 @@ pitch arguments.
 ;;(i-parse (list 'P-12 "M3" (i-new)))
 
 ;;; test
-(defun* i-a-b (&optional (from 'P-12) (to 'P12))
+(cl-defun i-a-b (&optional (from 'P-12) (to 'P12))
   "Returns a sorted list of all main intervals in [FROM TO].
 Secondary augmented"
   (let* ((from* (i-parse from))
 	 (to* (i-parse to))
 	 (ofrom (p-octave from*))
 	 (oto (p-octave to*)))
-    (sort (loop for o from ofrom to oto
+    (sort (cl-loop for o from ofrom to oto
 		append 
-		(loop for mui in mu-intervals
+		(cl-loop for mui in mu-intervals
 		      for ibase = (second mui)
 		      for i = (p-new ibase o)
 		      for is = (i-symbol i)

@@ -1,6 +1,6 @@
 ;;;; Scratch for klondike
 
-(defun ho-make-hand (list)
+(cl-defun ho-make-hand (list)
   "HAND is a pair (VISIBLE HIDDEN), where VISIBLE and HIDDEN are
 lists of integers (cards) . Initially VISIBLE is empty. With
 ho-pop-hidden, you pop an integer from HIDDEN and push it on
@@ -14,11 +14,11 @@ No errors are signaled in this design."
 (defalias 'ho-visible #'first)
 (defalias 'ho-hidden #'second)
 
-(defun ho-pop-visible (hand)
+(cl-defun ho-pop-visible (hand)
   "Return the first element in VISIBLE and remove it."
   (pop (ho-visible hand)))
 
-(defun ho-pop-hidden (hand)
+(cl-defun ho-pop-hidden (hand)
   "Return the first element in HIDDEN and move it to the start of VISIBLE."
   (aif (pop (ho-hidden hand))
     (car (push it (ho-visible hand)))

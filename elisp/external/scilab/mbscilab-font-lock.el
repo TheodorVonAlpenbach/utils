@@ -10,7 +10,7 @@ when attempting to understand the current context.")
 The ' character can be used as a transpose, and can transpose transposes.
 Therefore, to end, we must check all that goop.")
 
-(defun scilab-font-lock-string-match-normal (limit)
+(cl-defun scilab-font-lock-string-match-normal (limit)
  "When font locking strings, call this function for normal strings.
 Argument LIMIT is the maximum distance to scan."
  (scilab-font-lock-string-match-here
@@ -19,7 +19,7 @@ Argument LIMIT is the maximum distance to scan."
       "\\([^'\"]\\|$\\)")
   limit))
 
-(defun scilab-font-lock-string-match-unterminated (limit)
+(cl-defun scilab-font-lock-string-match-unterminated (limit)
  "When font locking strings, call this function for normal strings.
 Argument LIMIT is the maximum distance to scan."
  (scilab-font-lock-string-match-here
@@ -27,7 +27,7 @@ Argument LIMIT is the maximum distance to scan."
       "\\(['\"][^'\"\n]*\\(['\"]['\"][^'\"\n]*\\)*\\)$")
   limit))
 
-(defun scilab-font-lock-string-match-here (regex limit)
+(cl-defun scilab-font-lock-string-match-here (regex limit)
  "When font-locking strings, call this function to determine a match.
 Argument REGEX is the expression to scan for.  Match 2 must be the string.
 Argument LIMIT is the maximum distance to scan."
@@ -50,7 +50,7 @@ Argument LIMIT is the maximum distance to scan."
      (goto-char e)
      t)))
 
-(defun scilab-font-lock-comment-match (limit)
+(cl-defun scilab-font-lock-comment-match (limit)
  "When font-locking comments, call this function to determine a match.
 Argument LIMIT is the maximum distance to scan."
  (let (e)
@@ -201,7 +201,7 @@ thing.  Besides my genlib  produces full correpodnence bin-file scilab-function 
 be changed for MSDOS")
 
 
-(defun scilab-make-regexp-from-builtin ()
+(cl-defun scilab-make-regexp-from-builtin ()
 "Make regexp from builtin list of strings"
 (regexp-opt scilab-builtin-list 'words)
 ;(concat "\\<\\(" (mapconcat 'regexp-quote scilab-builtin-list "\\|")
@@ -215,7 +215,7 @@ be changed for MSDOS")
  :type 'string)
 
 
-(defun scilab-make-regexp-from-libfunc ()
+(cl-defun scilab-make-regexp-from-libfunc ()
 "Make regexp from libfunc file"
 (if (null (file-exists-p scilab-libfunc-list-path))
   "\\<\\(genlib\\)\\>"

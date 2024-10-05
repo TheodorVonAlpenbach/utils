@@ -6,18 +6,18 @@
 (defconst dd-json (json-parse-string (file-string "~/ada-tasks/ADA-12003-optimalisere-mongodb-in-operator/new-data.json")))
 ;; (defconst dd-json (json-parse-string (file-string "~/ada-tasks/ADA-12003-optimalisere-mongodb-in-operator/data-benchmark.json")))
 
-(defun dd-data () (elt (gethash "data" dd-json) 0))
-(defun dd-attributes () (gethash "attributes" (dd-data)))
+(cl-defun dd-data () (elt (gethash "data" dd-json) 0))
+(cl-defun dd-attributes () (gethash "attributes" (dd-data)))
 (defconst dd-columns (gethash "columns" (dd-attributes)))
 (defconst dd-queries (gethash "values" (elt dd-columns 0)))
 (defconst dd-durations (gethash "values" (elt dd-columns 1)))
 (defconst dd-hits (gethash "values" (elt dd-columns 2)))
 
-(defun num-in-args-1 (expression)
+(cl-defun num-in-args-1 (expression)
   (length (cdadr (car expression))))
 ;;(num-in-args-1 (first (dd-parse-query (elt dd-queries 0))))
 
-(defun num-in-args (expression)
+(cl-defun num-in-args (expression)
   (cl-destructuring-bind (f s) expression
     (unless (eql (caar f) '_id\.userPseudonym)
       (rotatef f s))
@@ -27,7 +27,7 @@
 ;;(num-in-args '(((_id (userPseudonym . "?") (componentUuid . "?"))) ((_id (userPseudonym . "?") (componentUuid . "?"))) ((_id (userPseudonym . "?") (componentUuid . "?"))) ((_id (userPseudonym . "?") (componentUuid . "?"))) ((_id (userPseudonym . "?") (componentUuid . "?")))))
 ;;(num-in-args (dd-parse-query (elt dd-queries 0)))
 
-(defun qwe (mongo-query)
+(cl-defun qwe (mongo-query)
   (awhen (condition-case nil
 	     (json-parse-string (elt mongo-query 0) :object-type 'alist)
 	   (error nil))
@@ -42,7 +42,7 @@
 ;;(qwe (elt dd-queries 13))(((_id\.userPseudonym ($in . ["?" "?" "?" "?"]))) ((_id\.componentUuid ($in . ["?"]))))
 ;;(length dd-queries)
 
-(defun dd-parse-query (mongo-query)
+(cl-defun dd-parse-query (mongo-query)
   (awhen (condition-case nil
 	     (json-parse-string (elt mongo-query 0) :object-type 'alist)
 	   (error nil))
@@ -69,11 +69,11 @@
 ;;(length dd-table)
 ;;(first dd-table)
 
-(defun init-report-table (n m)
+(cl-defun init-report-table (n m)
   (cons (a-b 0 m)
 	(cl-loop for i from 1 to n collect (cons i (make-list m nil)))))
 
-(defun dd-reorganize-table (table)
+(cl-defun dd-reorganize-table (table)
   (let ((n (min-value table :test #'> :key #'caar))
 	(m (min-value table :test #'> :key #'cadar)))
     (let* ((d2 (init-report-table n m))
@@ -100,11 +100,11 @@
 ;;(length csv-durations)
 ;;(length csv-hits)
 
-(defun report-sum (list2)
+(cl-defun report-sum (list2)
   (cl-loop for r in (rest list2)
 	sum (cl-loop for x in (rest r) if x sum x)))
 
-(defun sums ()
+(cl-defun sums ()
   (cl-destructuring-bind (d2 h2) (dd-reorganize-table dd-table)
     (list (report-sum d2) (report-sum h2))))
 ;;(/ (first (sums)) 24 60 60)

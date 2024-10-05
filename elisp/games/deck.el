@@ -1,4 +1,4 @@
-(defun deck-shuffle ()
+(cl-defun deck-shuffle ()
   (randomize (0-n 52)))
 ;;(deck-shuffle)
 

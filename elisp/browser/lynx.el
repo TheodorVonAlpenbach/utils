@@ -41,7 +41,7 @@
 (defconst *lynx-config* (format "-cfg=%s" (expand-file-name "lynx.cfg" *lynx-config-dir*)))
 (defconst *lynx-lss* (format "-lss=%s" (expand-file-name "lynx.lss" *lynx-config-dir*)))
 
-(defstruct (lynx-job (:conc-name lj-))
+(cl-defstruct (lynx-job (:conc-name lj-))
   "Structure for storing job info on job stack. URL is where to fetch
 the file, REFRESHP is non-nil iff the data should be refreshed if it
 exist, and SHOWP is non-nil iff the data should be view."
@@ -52,7 +52,7 @@ exist, and SHOWP is non-nil iff the data should be view."
 (defvar *lynx-url-jobs* ()
   "Stack with LYNX-JOB elements refreshp showp\), where ")
 
-(defun lynx-mode () "Major mode for browsing urls with lynx. Creates a
+(cl-defun lynx-mode () "Major mode for browsing urls with lynx. Creates a
    new lynx-mode buffer for each browse. At visit, the buffer is
    parsed, the url-refs are collected in file local varible local-url-refs
    (or something) and highlighted. The refs should be easy visited by
@@ -86,13 +86,13 @@ exist, and SHOWP is non-nil iff the data should be view."
 	 (list 'lynx-match-proxy-ref 0 font-lock-keyword-face 'prepend)))
   "Additional expressions to highlight in Lynx mode.")
 
-(defun lynx-match-proxy-ref (bound)
+(cl-defun lynx-match-proxy-ref (bound)
   "Searches forward to POINT for lynx references in proxy. Used by
  `font-lock-mode'."
   (re-search-forward lynx-current-proxy-refs-regexp bound t))
 ;;(cancel-debug-on-entry 'lynx-match-proxy-ref)
 
-(defun* lynx-interactive ()
+(cl-defun lynx-interactive ()
   "Reads url from command line."
   `(,(let ((completion-ignore-case t)
 	   (default (first *lynx-favorites*)))
@@ -216,7 +216,7 @@ exist, and SHOWP is non-nil iff the data should be view."
 
 ;; When a lynx buffer is killed, make sure the associated db
 ;; is killed too.
-(defun lynx-kill-buffer ()
+(cl-defun lynx-kill-buffer ()
   (when (eql major-mode 'lynx-mode)
     (lynx-save-favorites)
     (lynx-proxy-save-db)))
@@ -225,11 +225,11 @@ exist, and SHOWP is non-nil iff the data should be view."
 
 
 ;;; print methods
-(defun lynx-browse-current-url ()
+(cl-defun lynx-browse-current-url ()
   (interactive)
   (browse-url *lynx-current-url*))
 
-(defun lynx-browse-map ()
+(cl-defun lynx-browse-map ()
   (interactive)
   (browse-url (format "https://maps.google.no/maps?hl=no&q=maps+%s" (thing-at-point 'word))))
 
@@ -240,37 +240,37 @@ exist, and SHOWP is non-nil iff the data should be view."
 			(t "http://en.wikipedia.org/wiki/%s"))
 		(or (marked-text) (thing-at-point 'word)))))
 
-(defun lynx-print (var) 
+(cl-defun lynx-print (var) 
   (interactive "vVariable: ")
   "Prints variable VAR in temporary buffer *lynx-info*."
   (with-output-to-temp-buffer "*lynx-info*" (princ var))
   (when current-prefix-arg (kill-new var)))
 
-(defun lynx-print-current-url () 
+(cl-defun lynx-print-current-url () 
   (interactive)
   "Prints current url"
   (lynx-print *lynx-current-url*))
 
-(defun lynx-print-referred-url () 
+(cl-defun lynx-print-referred-url () 
   (interactive)
   "Prints url referred to at point."
   (lynx-print (message "%s" (lynx-url-from-reference (lynx-reference-active-at-point)))))
 
-(defun lynx-print-history ()
+(cl-defun lynx-print-history ()
   (interactive)
   "Prints history of visited sites."
   (lynx-print *lynx-history*))
 
-(defun lynx-print-home ()
+(cl-defun lynx-print-home ()
   (interactive)
   "Prints home site url."
   (lynx-print *lynx-home-url*))
 
-(defun desc-var (var) ""
+(cl-defun desc-var (var) ""
        (interactive "SVariable: ")
        (message (setf var var)))
 
-(defun* lynx (&optional url other-window)
+(cl-defun lynx (&optional url other-window)
   "Invokes lynx with START-URL and enters lynx-mode. Starts in OTHER-WINDOW
  if this option is non-nil."
   (interactive)
@@ -289,19 +289,19 @@ exist, and SHOWP is non-nil iff the data should be view."
       (lynx-browse (or url *lynx-home-url*)))))
 ;;(lynx "c:/unix/doc/HyperSpec/Body/fun_zerop.html" t)
 
-(defun lynx-update-proxy-refs-regexp ()
+(cl-defun lynx-update-proxy-refs-regexp ()
   "Updates 'LYNX-CURRENT-PROXY-REFS-REGEXP."
   (setq lynx-current-proxy-refs-regexp
 	(concat* (lynx-references-in-proxy) 
 		 :pre "\\[\\(" :in "\\]\\|" :suf "\\]\\)")))
 
-(defun* lynx-before-print-html (&optional refresh (url *lynx-current-url*))
+(cl-defun lynx-before-print-html (&optional refresh (url *lynx-current-url*))
   "Make this a hook later."
   (recenter 1)
   (when (or refresh (zerop (lpe-point (lpdb-entry url))))
     (lynx-recenter url)))
 
-(defun* lynx-recenter (&optional (url *lynx-current-url*))
+(cl-defun lynx-recenter (&optional (url *lynx-current-url*))
   "TODO: handling of site modes like aftenposten and sn should be
 done transparently"
   (interactive)
@@ -312,10 +312,10 @@ done transparently"
      ((url-sn-p *lynx-current-url*)
       (lynx-sn-goto-article-begin))))
 
-(defun lynx-convert-path (path)
+(cl-defun lynx-convert-path (path)
   (mb-string-replace path "^.:/" "/cygdrive/c/"))
 
-(defun* lynx-load-file (filename &key (buffer *lynx-buffer*) (url ""))
+(cl-defun lynx-load-file (filename &key (buffer *lynx-buffer*) (url ""))
   "Processes local html file at FILENAME. Only exception is files
 downloaded from Aftenposten which are already processed in proxy and
 therefore loaded unmodified."
@@ -327,7 +327,7 @@ therefore loaded unmodified."
 ;;(call-process "lynx" nil "qwe" t  *lynx-config* "-dump" (lynx-convert-path "c:/unix/data/lynx-proxy/13-artid=464394") "-force_html")
 ;;(process-coding-system process)
 
-(defun* lynx-print-html (filename &key pos (buffer *lynx-buffer*) (url ""))
+(cl-defun lynx-print-html (filename &key pos (buffer *lynx-buffer*) (url ""))
   "Processes html in FILENAME with Lynx and flushes output to buffer."
   (with-buffer* buffer
     (blank-buffer)
@@ -341,7 +341,7 @@ therefore loaded unmodified."
   (lynx-browse-jobs))
 ;;(lynx-print-html "c:/unix/clisp/doc/clisp.html" :buffer (get-buffer-create "out"))
 
-(defun* lynx-download-to-buffer-lynx (buffer url &key (type :dump) (reload nil) (width 80) (process-name "lynx-b"))
+(cl-defun lynx-download-to-buffer-lynx (buffer url &key (type :dump) (reload nil) (width 80) (process-name "lynx-b"))
   "Downloads content at URL to BUFFER using lynx. See `lynx-download'
 for key parameters."
   (let ((lynx-arguments
@@ -357,13 +357,13 @@ for key parameters."
 	   process-name buffer *lynx-prog* lynx-arguments)))
 ;;(start-process-shell-command "lynx-b" "qwe" *lynx-prog* "-dump" "http://www.m-w.com/cgi-bin/dictionary?estuary")
 
-(defun* lynx-download-ie (url filename &key (type :source) (reload nil) 
+(cl-defun lynx-download-ie (url filename &key (type :source) (reload nil) 
 			      (width (if (lynx-aftenposten-article-p url) 50 80)))
   "Downloads content at URL to FILENAME using IE6. See `lynx-download'"
   (start-process-shell-command "ie" nil *ie-prog* url (format "\'%s\'" filename)))
 ;;(start-process-shell-command "ie" nil *ie-prog* "http://www.storenorskeleksikon.no/sa.aspx?artid=775719url" "qwe")
 
-(defun* lynx-download-lynx (url filename &key
+(cl-defun lynx-download-lynx (url filename &key
 				(type :source)
 				(reload nil)
 				(width (if (lynx-aftenposten-article-p url) 50 80))
@@ -388,7 +388,7 @@ for key parameters."
 ;;(start-process-shell-command "lynx" "qwe" "c:/cygwin/bin/lynx.exe" "-dump" "-reload" (url-encode "http://www2.nrk.no/spillelister40/sending.aspx?prog=41&tid=2003-05-27%2000:00:00Z"))
 
 
-(defun* lynx-download (url filename &key (type :source) (reload nil)
+(cl-defun lynx-download (url filename &key (type :source) (reload nil)
 			   (width (if (lynx-aftenposten-article-p url) 50 80)))
   "Downloads www page at URL and stores result in FILENAME. Asynchronous
 process. Returns the process of #'START-PROCESS-SHELL-COMMAND. TYPE
@@ -399,7 +399,7 @@ may be either the default :SOURCE or :DUMP."
 ;    )
 )
 
-(defun* lynx-show-html (filename &key pos (buffer *lynx-buffer*) (url ""))
+(cl-defun lynx-show-html (filename &key pos (buffer *lynx-buffer*) (url ""))
   "Processes html in FILENAME with Lynx and flushes output to buffer."
   (message "lynx-show-html: printing %s, width=%s" url (if (lynx-aftenposten-article-p url) 50 80))
   (with-buffer* buffer
@@ -413,12 +413,12 @@ may be either the default :SOURCE or :DUMP."
     (run-hooks 'lynx-show-html-hook)))
 ;;(lynx-show-html (concat *mb-lisp-dir* "/browser/test.txt") :buffer "ewq")
 
-(defun lynx-show-entry (entry)
+(cl-defun lynx-show-entry (entry)
   (lynx-show-html (lpe-abs-filename entry) 
 		  :pos (lpe-point entry) 
 		  :url (substring-no-properties (lpe-url entry))))
 
-(defun* lynx-update-lpdb (entry job)
+(cl-defun lynx-update-lpdb (entry job)
   "Obsolete?"
   (setf (lpe-point entry) 0) ;"reset" point
   (set-process-sentinel
@@ -426,17 +426,17 @@ may be either the default :SOURCE or :DUMP."
 		  :type (if (lynx-aftenposten-p (lpe-url entry)) :dump :source))
    (lynx-update-lpdb-sentinel entry job)))
 
-(defun lynx-print-entry (entry)
+(cl-defun lynx-print-entry (entry)
   (lynx-print-html (lpe-abs-filename entry)
 		   :pos (lpe-point entry) 
 		   :url (string-remove-props (lpe-url entry))))
 
-(defun lynx-fontify ()
+(cl-defun lynx-fontify ()
   (with-buffer *lynx-buffer*
     (lynx-update-proxy-refs-regexp)
     (font-lock-fontify-block)))
 
-(defun lynx-update-lpdb-sentinel-body (event entry job) 
+(cl-defun lynx-update-lpdb-sentinel-body (event entry job) 
   "TODO: assure that process was ok."
   (if (string= event "finished\n")
     (progn
@@ -451,15 +451,15 @@ may be either the default :SOURCE or :DUMP."
     ;; else flag an error
     (message "Loading of entry %S failed. Continuing..." entry)))
 
-(defun lynx-update-lpdb-sentinel (entry job) 
+(cl-defun lynx-update-lpdb-sentinel (entry job) 
   "TODO: assure that process was ok."
-  (lexical-let ((entry entry) (job job))
+  (let ((entry entry) (job job))
     (function
      (lambda (process event)
       (lynx-update-lpdb-sentinel-body event entry job)
       (lynx-browse-jobs)))))
 
-(defun lynx-browse-jobs ()
+(cl-defun lynx-browse-jobs ()
   "Looks at *LYNX-URL-JOBS*. Creates processes and corresponding
 sentinels for loading the urls in queue. See #'LYNX-BROWSE-SILENT."
   ;; skip already loaded urls
@@ -496,7 +496,7 @@ sentinels for loading the urls in queue. See #'LYNX-BROWSE-SILENT."
 	    job (length *lynx-url-jobs*)))
     (message "Finished. Job queue empty.")))
 
-(defun lynx-browse-no-proxy (url)
+(cl-defun lynx-browse-no-proxy (url)
   "TODO: make this an asynchronous process."
   (interactive "sURL: ")
   (with-buffer (get-buffer-create *lynx-buffer*)
@@ -506,12 +506,12 @@ sentinels for loading the urls in queue. See #'LYNX-BROWSE-SILENT."
     (blank-buffer :start (point))))
 
 ;;; navigatation methods
-(defun lynx-goto-home ()
+(cl-defun lynx-goto-home ()
   "Loads home site"
   (interactive)
   (lynx-browse *lynx-home-url*))
 
-(defun lynx-goto-last (n)
+(cl-defun lynx-goto-last (n)
   "Loads last visited page."
   (interactive "P")
   (when (<= (length *lynx-history*) 1)
@@ -520,44 +520,44 @@ sentinels for loading the urls in queue. See #'LYNX-BROWSE-SILENT."
   (lynx-browse (pop* *lynx-history* (1+ (or n 1)))))
 ;(cancel-debug-on-entry 'lynx-goto-last)
 
-(defun lynx-goto-ref (ref)
+(cl-defun lynx-goto-ref (ref)
   "Goes to cite [REF]."
   (interactive "nRef: ")
   (lynx-browse (lynx-url-from-reference ref)))
 
-(defun lynx-url-at-point ()
+(cl-defun lynx-url-at-point ()
   "Returns url referenced at point."
   (interactive)
   (lynx-url-from-reference (lynx-reference-active-at-point)))
 
-(defun lynx-urls-in-region (beg end)
+(cl-defun lynx-urls-in-region (beg end)
   "Returns list of all urls referenced in region."
   (interactive "r")
   (mapcar #'lynx-url-from-reference (lynx-references-in-region beg end)))
 
-(defun lynx-make-jobs (urls &optional refreshp showp)
+(cl-defun lynx-make-jobs (urls &optional refreshp showp)
   "Makes a new lynx job from URLS."
-  (loop for url in urls do
+  (cl-loop for url in urls do
 	(push (make-lynx-job :url url :refreshp refreshp :showp showp)
 	      *lynx-url-jobs*)))
 
-(defun lynx-make-jobs-region (beg end &optional refreshp showp)
+(cl-defun lynx-make-jobs-region (beg end &optional refreshp showp)
   "Makes a new lynx job from all references in region between BEG and END"
   (lynx-make-jobs (lynx-urls-in-region beg end) refreshp showp))
 
-(defun lynx-browse-urls-in-region (beg end)
+(cl-defun lynx-browse-urls-in-region (beg end)
   "Browses urls in region. Prefix argument forces refresh."
   (interactive "r")
   (lynx-make-jobs-region beg end current-prefix-arg t)
   (lynx-browse-jobs))
 
-(defun lynx-download-from-urls-in-region (beg end)
+(cl-defun lynx-download-from-urls-in-region (beg end)
   "Download silently pages from urls in region. Prefix argument forces refresh."
   (interactive "r")
   (lynx-make-jobs-region beg end current-prefix-arg)
   (lynx-browse-jobs))
 
-(defun lynx-download-all-urls ()
+(cl-defun lynx-download-all-urls ()
   "Download silently pages from urls in region. Prefix argument forces refresh."
   (interactive)
   (when (not-empty (string-match* "aftenposten\\.no\\/nyheter.*\\/siste100\\/" *lynx-current-url*))
@@ -567,7 +567,7 @@ sentinels for loading the urls in queue. See #'LYNX-BROWSE-SILENT."
 	       (lynx-browse-jobs))
 	(message "Reference region is undefined.")))))
 
-(defun lynx-browse (url)
+(cl-defun lynx-browse (url)
   "Loads site at URL into current buffer (and deletes old site
 content) using proxy-db. Later: Prefix argument forces refresh."
   (interactive "sURL: ")
@@ -577,59 +577,59 @@ content) using proxy-db. Later: Prefix argument forces refresh."
     (lynx-make-jobs (list url) current-prefix-arg t)
     (lynx-browse-jobs)))
 
-(defun lynx-skip-job (n)
+(cl-defun lynx-skip-job (n)
   "Skips next job from QUEUE. If prefix argument N is given, skips
 next N jobs."
   (interactive "P")
   (pop* *lynx-url-jobs* n)
   (lynx-browse-jobs))
 
-(defun lynx-delete-jobs ()
+(cl-defun lynx-delete-jobs ()
   "Skips next job from QUEUE. If prefix argument N is given, skips
 next N jobs."
   (interactive)
   (setq *lynx-url-jobs* ()))
 
-(defun lynx-browse-url-at-point ()
+(cl-defun lynx-browse-url-at-point ()
   "Goes to cite referenced at point. Prefix argument forces refresh."
   (interactive)
   (lynx-browse (lynx-url-at-point)))
 
-(defun lynx-download-from-url-at-point ()
+(cl-defun lynx-download-from-url-at-point ()
   "Goes to cite referenced at point. Prefix argument forces refresh."
   (interactive)
   (lynx-make-jobs (list (lynx-url-at-point)) current-prefix-arg)
   (lynx-browse-jobs))
 
-(defun* lynx-refresh ()
+(cl-defun lynx-refresh ()
   "Refreshes current page."
   (interactive)
   (lynx-make-jobs (list *lynx-current-url*) t t)
   (lynx-browse-jobs))
 
 ;;; print methods
-(defun lpe-print (url)
+(cl-defun lpe-print (url)
   "Prints lpdb entry corresponding to URL to help buffer."
   (with-output-to-temp-buffer "*lynx-entry*" 
     (princ (or (lpdb-entry url) "Not in proxy db."))))
 
-(defun lynx-print-entry-at-point ()
+(cl-defun lynx-print-entry-at-point ()
   "Prints lpdb entry corresponding to url at point."
   (interactive)
   (lpe-print (lynx-url-at-point)))
 
-(defun lynx-print-current-entry ()
+(cl-defun lynx-print-current-entry ()
   "Prints lpdb entry corresponding to current url."
   (interactive)
   (lpe-print *lynx-current-url*))
 
 ;; print
-(defun lynx-print-db ()
+(cl-defun lynx-print-db ()
   (interactive)
   (with-output-to-temp-buffer "*lynx-entry*"
     (princ (hash-table-print (lpdb-entries *lynx-proxy-db*)))))
 
-(defun lynx-print-jobs ()
+(cl-defun lynx-print-jobs ()
   (interactive)
   (lynx-print 
    (if *lynx-url-jobs* 
@@ -637,7 +637,7 @@ next N jobs."
 		"No jobs in queue.")))
   
 ;;; post methods
-(defun* lynx-request-post (url &key string args (name "lynx-post")
+(cl-defun lynx-request-post (url &key string args (name "lynx-post")
 			       (buffer "*lynx-buffer*"))
   "Call lynx with form post arguments"
   (when (not string) 
@@ -650,19 +650,19 @@ next N jobs."
    "echo -e " (concat "\"" string "\n---\n\"")  " | " 
    *lynx-prog* "-dump" *lynx-config* url "-post_data"))
 
-(defun lynx-delete-processes (regexp)
+(cl-defun lynx-delete-processes (regexp)
   "Deletes all running processes whose name matches REGEXP"
-  (loop for process in (process-list)
+  (cl-loop for process in (process-list)
 	if (or current-prefix-arg
 	    (string-match regexp (process-name process)))
 	do (delete-process process)))
 
-(defun lynx-delete-all-processes ()
+(cl-defun lynx-delete-all-processes ()
   "Deletes all running processes"
   (interactive)
   (lynx-delete-processes ""))
 
-(defun lynx-delete-lynx-processes ()
+(cl-defun lynx-delete-lynx-processes ()
   "Deletes all running lynx processes"
   (interactive)
   (lynx-delete-processes "lynx"))

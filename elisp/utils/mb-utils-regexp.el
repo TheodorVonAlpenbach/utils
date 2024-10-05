@@ -5,17 +5,17 @@
 (defconst *empty-regexp* "\\`\\`"
   "Matches absolutely nothing.")
 
-(defun regexp-or (&rest strings)
+(cl-defun regexp-or (&rest strings)
   "Returns a regexp matching any integer in INTS"
   (concat* strings :in "\\|"))
 ;;(regexp-or "abc" "def")
 
-(defun regexp-or-integers (&rest ints)
+(cl-defun regexp-or-integers (&rest ints)
   "Returns a regexp matching any integer in INTS"
   (apply #'regexp-or (mapcar 'number-to-string ints)))
 ;;(apply #'regexp-or-integers (a-b 1 3))
 
-(defun factor-list (list test &rest args)
+(cl-defun factor-list (list test &rest args)
   "{aa ab b ba} -> {a{a b} b{nil a}}"
   (apply #'group-adjacent (apply #'sort* list test args) :test test args))
 ;;(factor-list '("ab" "b" "ac") #'= :key #'first-elt)
@@ -36,7 +36,7 @@
 ;;(group-adjacent '("ab" "ac" "b") :key #'first-elt :test #'=)
 ;;(group-adjacent '("") :key #'first-elt :test #'=)
 
-(defun factor-strings (strings)
+(cl-defun factor-strings (strings)
   "{aa ab b ba} -> {a{a b} b{nil a}}"
   (mapcar #'(lambda (x) (list (first-elt (first x))
 			      (remove-empty-strings
@@ -45,10 +45,10 @@
 ;;(factor-strings '("ab" "b" "ac"))
 ;;(factor-strings '("ee" "d1" "d3" "4d" "ef" "ag5"))
 
-(defun remove-empty-strings (strings)
+(cl-defun remove-empty-strings (strings)
   (remove* "" strings :test #'string=))
 
-(defun mb-regexp-not-strings (strings)
+(cl-defun mb-regexp-not-strings (strings)
   "Generate a regular expression that do _not_ match any string in
 STRINGS."
   (let ((factored-strings (factor-strings (remove* "" strings :test #'string=))))

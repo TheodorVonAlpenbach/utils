@@ -1,4 +1,4 @@
-(require 'etags)
+\(require 'etags)
 (require 'lynx)
 (require 'mb-utils-regexp)
 (require 'mb-utils-time)
@@ -15,12 +15,12 @@
 (defconst *dict-db-path* (expand-file-name "dic/" *local-data-dir*))
 (defconst *dic-db-file* (expand-file-name "dic.el" *dict-db-path*))
 
-(defun dic-backup (tim))
+(cl-defun dic-backup (tim))
 
-(defun dic-read-db ()
+(cl-defun dic-read-db ()
   (setq *dic-db* (read* *dic-db-file*)))
 
-(defun dic-write-db ()
+(cl-defun dic-write-db ()
   (with-temp-file *dic-db-file*
     (overwrite-safe (prin1-to-string *dic-db*))))
 ;;(dic-write-db)
@@ -56,7 +56,7 @@
     ("proxy" "Proxy DB" "")))
 ;;(setf debug-on-error t)
 
-(defun dic-url (word &optional dictionary)
+(cl-defun dic-url (word &optional dictionary)
   "Returns correct url to lookup WORD in DICTIONARY (default
 \"mw\"). Updated bo-ny 2002-09-12"
   (string-case dictionary
@@ -106,7 +106,7 @@
 ;;(dic-url "pmi" "mw")
 ;;(dic-url "auspicabile" "it-eng")
 
-(defun lynx-output-filter-dic (string dictionary)
+(cl-defun lynx-output-filter-dic (string dictionary)
   "Filter STRING according to DICTIONARY."
   (string-case dictionary
     ("mw" (or (not-empty
@@ -194,18 +194,18 @@
     ("dwds" string)
     (otherwise string)))
 
-(defun dic-buffer-name (dic-name) (concat "*" dic-name "*"))
+(cl-defun dic-buffer-name (dic-name) (concat "*" dic-name "*"))
 
 ;;; General dictionary functions
-(defun dic-output (dictionary string)
+(cl-defun dic-output (dictionary string)
   "Prints STRING to dic's output buffer."
   (with-output-to-temp-buffer (dic-buffer-name (second dictionary))
     (princ string)))
 ;(require 'cl-indent)
 ;(cl-indent 'dic-output 'aif)
 
-(defun dic-sentinel (dictionary)
-  (lexical-let ((dictionary dictionary))
+(cl-defun dic-sentinel (dictionary)
+  (let ((dictionary dictionary))
     #'(lambda (process event)
 	(let* ((dic-object (assoc dictionary *dic-list*))
 	       (string (region-to-string :buffer (get-buffer *dic-buf*)))
@@ -218,7 +218,7 @@
 	  (kill-buffer *dic-buf*)
 	  (dic-output dic-object (third res))))))
 
-(defun dic-start-lynx-process (word dic)
+(cl-defun dic-start-lynx-process (word dic)
   (set-process-sentinel
    (if (string= dic "saob")
      (lynx-request-post (dic-url nil dic) :args (list (list "string" word)) :name dic :buffer *dic-buf*)
@@ -226,7 +226,7 @@
    (dic-sentinel dic)))
 ;(cancel-debug-on-entry 'dic-start-lynx-process)
 
-(defun* dic-lookup (word &optional (dictionary *dic-current*))
+(cl-defun dic-lookup (word &optional (dictionary *dic-current*))
   "Look up WORD in DICTIONARY using proxy. This is the mother of all
 lookup functions."
   (interactive (dic-lookup-interactive))
@@ -249,11 +249,11 @@ lookup functions."
     (dic-lookup word ,dictionary)))
 ;;(funcall (dic-lookup-word "de-eng2") "test")
 
-(defun dic-lookup-at-point () (interactive)
+(cl-defun dic-lookup-at-point () (interactive)
   "Look up word at point in current dictionary."
   (dic-lookup (thing-at-point 'word)))
 
-(defun dic-set-current (dictionary)
+(cl-defun dic-set-current (dictionary)
   "Set current DICTIONARY. DICTIONARY must be a symbol equal to some
 FIRST of *DIC-LIST*. The variable *DIC-CURRENT* always contains the
 current dictionary."
@@ -264,10 +264,10 @@ current dictionary."
 	    *dic-list* nil t (cons *dic-current* 0)))))
   (setq *dic-current* dictionary))
 
-(defun dic-sub (dictionary)
+(cl-defun dic-sub (dictionary)
   (if (eql dictionary ':all)
       *dic-db*
-      (remove-if-not #'(lambda (x) (string= dictionary (second x)))
+      (cl-remove-if-not #'(lambda (x) (string= dictionary (second x)))
 		 *dic-db*)))
 ;(mapcar #'first (dic-sub 'lsmorph))
 
@@ -277,24 +277,24 @@ current dictionary."
 	   (setf (second x) (symbol-name (second x)))))
 	*dic-db*)
 
-(defun* dic-lookup-interactive (&optional (dictionary *dic-current*))
+(cl-defun dic-lookup-interactive (&optional (dictionary *dic-current*))
   `(,(read-string
       (concat "Look up: ")
       (or (word-at-point) "") 'dic-lookup-history)))
 
-(defun* dic-proxy-completion (string &optional (dictionary ':all))
+(cl-defun dic-proxy-completion (string &optional (dictionary ':all))
   `(,(let ((completion-ignore-case t)
 	   (w (or (word-at-point) "")))
        (completing-read	string (dic-sub dictionary) nil nil (cons w (length w))))))
 ;;(dic-proxy-completion "Look up proxy: " ':all)
 
-(defun dic-lookup-proxy (word)
+(cl-defun dic-lookup-proxy (word)
   "Look up WORD entry in proxy only. The interactive part seems soon
 ripe for macro."
   (interactive (dic-proxy-completion "Look up proxy: "))
   (dic-output (assoc "proxy" *dic-list*) (third (assoc word *dic-db*))))
 
-(defun* dic-delete-word (word)
+(cl-defun dic-delete-word (word)
   "Delete WORD in current dictionary."
   (interactive (dic-proxy-completion
 		(concat "Delete from " *dic-current* ": ") *dic-current*))
@@ -307,13 +307,13 @@ ripe for macro."
 (defconst *dic-sep* "
 -------------------------------------------------------------------------------")
 
-(defun dic-make-sep (word)
+(cl-defun dic-make-sep (word)
   "Returns the separator string with WORD centered on it."
   (replace (copy-sequence *dic-sep*) word 
 	   :start1 (/ (- (length *dic-sep*) (length word)) 2)))
 ;;(dic-make-sep "qwe")
 
-(defun* dic-show-lookups
+(cl-defun dic-show-lookups
     (&key (dic :all) (time (period :from (now :week -1) :to (now))))
   (with-output-to-temp-buffer "*dictionary-lookups*"
     (mapc #'(lambda (x)
@@ -330,7 +330,7 @@ lastest lookup: %s\n%s\n"
 	   (reverse *dic-db*)))))
 ;;(dic-show-lookups :dic :all :time (period :from (now :hour -2) :to (now)))
 
-(defun* dic-info (&optional (dictionary 'all) &key time-extension)
+(cl-defun dic-info (&optional (dictionary 'all) &key time-extension)
   "Prints the following information about the entries in DICTIONARY
 \(as a proxy\) with dates within TIME-EXTENSION:
 * The number of such entries
@@ -346,7 +346,7 @@ lastest lookup: %s\n%s\n"
 	     (sort (mapcar #'first *dic-db*) #'string<)))))
 ;;(current-time (last *dic-db*))
 
-(defun dic-replace-forward-definition (from to)
+(cl-defun dic-replace-forward-definition (from to)
   "Forwards the definition of FROM to the definition of TO."
   (interactive (nconc
 		(dic-proxy-completion
@@ -357,7 +357,7 @@ lastest lookup: %s\n%s\n"
     (setf (third it) (concat to " <=="))))
 ;;(nth 4 (third *dic-db*))
 
-(defun dic-parse-output (dic)
+(cl-defun dic-parse-output (dic)
   "Parses result from it-eng2. Returns a list of English words."
   (set-difference 
    (nthcdr 2 (split-string		;nthcdr removes 'Results:', '<lookup>'
@@ -367,19 +367,19 @@ lastest lookup: %s\n%s\n"
    '("N" "V")			  ; remove tokens
    :test #'string=))
 
-(defun dic-last-entry ()
+(cl-defun dic-last-entry ()
   (let* ((dic-buffer-names (mapcar #'dic-buffer-name (mapcar #'second *dic-list*)))
 	 (buffer-names (mapcar #'buffer-name (buffer-list)))
 	 (res (find-if #'(lambda (x) (find x dic-buffer-names :test #'string=)) buffer-names)))
     (find res *dic-list* :test #'(lambda (x y) (string= x (dic-buffer-name (second y)))))))
 
-(defun dic-browse-last-entry ()
+(cl-defun dic-browse-last-entry ()
   "Redirects last shown lookup entry to original url in a Windows browser."
   (interactive)
   (let ((entry (dic-last-entry)))
     (browse-url (dic-url (third entry) (first entry)))))
 
-(defun dic-url-last-entry ()
+(cl-defun dic-url-last-entry ()
   "Redirects last shown lookup entry to original url in a Windows browser."
   (interactive)
   (let ((entry (dic-last-entry)))

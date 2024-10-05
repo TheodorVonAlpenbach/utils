@@ -2,7 +2,7 @@
 (require 'gnus-art)
 (require 'mb-utils-file)
 
-(defun gnus-win32-attachment-press-button ()
+(cl-defun gnus-win32-attachment-press-button ()
   "Invoke this method when point is on HANDLE's region, then win32's
 `open' is invoked on the HANDLE file. Typically, HANDLE points to a
 mail attachment. If prefix is given, the method just prompts to save
@@ -33,11 +33,11 @@ attachment as file."
 			      (copy-file filename (read-file-name "Save attachment as: "))
 			    (error "Couldn't open file %s!" filename)))))))))) 
 
-(defun qwe ()
+(cl-defun qwe ()
   (read-file-name "Save attachment as: ")
   (message* "Saved file as %s" fn))
 
-(defun gnus-mb-get-part-filename (handle)
+(cl-defun gnus-mb-get-part-filename (handle)
   "Used by gnus-win32-attachment-press-button."
   (let* ((filename (mail-content-type-get (mm-handle-disposition handle) 'filename)))
     (string-replace-map
@@ -48,7 +48,7 @@ attachment as file."
 	 "c:/WINNT/Temp/")
       (assoc-project *iso-latin1-encoding* 0 1))))
 
-(defun message-tab (refresh)
+(cl-defun message-tab (refresh)
   "Expand group names in Newsgroups and Followup-To headers.
 Do a `tab-to-tab-stop' if not in those headers."
   (interactive "P")

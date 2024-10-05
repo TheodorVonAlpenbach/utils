@@ -63,7 +63,7 @@
   (when digits
     (if (cdr digits)
       (let ((g1 (glob-up-digit (1+ (car digits)) (car ranges)))
-	    (grest (loop for s in (glob-up-digits-1 (cdr digits) (cdr ranges))
+	    (grest (cl-loop for s in (glob-up-digits-1 (cdr digits) (cdr ranges))
 			 if s collect (format "%d%s" (car digits) s))))
 	(if g1
 	  (cons (format "%s%s" g1 (glob-ranges (cdr ranges))) grest)

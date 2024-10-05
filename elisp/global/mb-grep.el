@@ -1,6 +1,6 @@
 (require 'c++-include)
 
-(defun mb-grep-filter-dirs (dirs match match-not)
+(cl-defun mb-grep-filter-dirs (dirs match match-not)
   (let ((case-fold-search nil))
     (cl-remove-if (disjoin (if match
 			     (complement (bind #'string-match match 1))
@@ -40,7 +40,7 @@
 	 'grep-mode nil t)))))
 ;;(mb-grep-basic :target "mb-grep-basic" :types '("el"))
 
-(defun finddirs (rootdir &optional depth)
+(cl-defun finddirs (rootdir &optional depth)
   "Return a list of all subdirectories under ROOTDIR.
 If optional arguement depth is a non-negative integer, the result
 is restricted to depth levels, just like unix utility find's

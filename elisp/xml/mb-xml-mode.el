@@ -10,18 +10,18 @@
 ;;; then the stanard lisp functions for moving around in sexps should
 ;;; do the rest
 
-(defun mbxml-tag-regexp (&optional end-tag)
+(cl-defun mbxml-tag-regexp (&optional end-tag)
    (format "[[:space:]]*<%s[A-z0-9]+>[[:space:]]*" (if end-tag "/" "")))
 ;;(mbxml-tag-regexp t)
 
-(defun mbxml-looking-at-tag (&optional end-tag backward)
+(cl-defun mbxml-looking-at-tag (&optional end-tag backward)
   "If point is looking at an sgml tag, it returns the name
 of that tag. Else it return nil. If BACKWARDS is not nil then it
 looks backward from point."
   (funcall (if backward #'looking-back #'looking-at)
 	   (mbxml-tag-regexp end-tag)))
 
-(defun mbxml-tag-region (&optional backward)
+(cl-defun mbxml-tag-region (&optional backward)
   "Returns a list (START END) defining the buffer region of the
 XML tag point is looking at."
   (let ((forward-sexp-function nil)
@@ -32,7 +32,7 @@ XML tag point is looking at."
 	(list (point) start)
 	(list start (point))))))
 
-(defun mbxml-skip-tag (n)
+(cl-defun mbxml-skip-tag (n)
   "Skips N tags, backwards if N is negative."
   (if (plusp n)
     (sgml-skip-tag-forward n)

@@ -1,14 +1,14 @@
 (require 'mb-utils-div)
 (require 'mb-sequences)
 
-(defstruct (lynx-proxy-db (:conc-name lpdb-))
+(cl-defstruct (lynx-proxy-db (:conc-name lpdb-))
   "ENTRIES is a hash table of LPEs (se below). Max-index should be
 autoincremented each time new entry is added to db."
   (entries (make-hash-table :test #'equal))
   (path *lynx-proxy-dir*)
   (max-index 0))
 
-(defstruct (lynx-proxy-entry (:conc-name lpe-))
+(cl-defstruct (lynx-proxy-entry (:conc-name lpe-))
   "Entrys 'key' is the URL. INDEX is a unique integer within a LPDB.
 POINT is the emacs buffer's point value when the entry site was last
 visited."
@@ -25,28 +25,28 @@ pushed on the list."
       (lpdb-max-index db)
     (incf (lpdb-max-index db))))
 
-(defun external-url-p (url)
+(cl-defun external-url-p (url)
   "Returns URL if it does not refers within local network."
   (if (not (local-url-p url)) url nil))
 ;(external-url-p "file://localhost/language.html")
 
-(defun local-url-p (url)
+(cl-defun local-url-p (url)
   "Returns true if URL refers within local network."
   (awhen (string-match "\\(file://localhost\\)\\|\\([a-zA-z]:\\)" url)
     (zerop it)))
 ;(local-url-p "file://localhost/language.html")
 
-(defun lpe-local-p (entry)
+(cl-defun lpe-local-p (entry)
   "Returns T if entrys html file is stored locally."
   (< (lpe-index entry) 0))
 ;;(lpe-local-p [cl-struct-lynx-proxy-entry "c:/unix/doc/HyperSpec/Body/typspe_and.html" -1 0])
 
-(defun lpe-file-exists-p (entry)
+(cl-defun lpe-file-exists-p (entry)
   "Returns T iff file in entry exists. If no this suggests download."
   (file-exists-p (lpe-abs-filename entry)))
 ;;(lpe-file-exists-p *lynx-proxy-db*)
 
-(defun urlp (url)
+(cl-defun urlp (url)
   "Returns nil iff URL does not take a recognizable url value"
   (not (null url)))
 ;;(urlp nil)
@@ -68,7 +68,7 @@ then set pos to some other value than 0."
 	  (make-lynx-proxy-entry :url url :index -1)
 	  (make-lynx-proxy-entry :url url))))
 
-(defun url-name (url)
+(cl-defun url-name (url)
   "Returns the biggest suffix of url that can be used as a win32
 filename. Some specialcases. New! Using url-file-encode!"
   (cond
@@ -84,7 +84,7 @@ filename. Some specialcases. New! Using url-file-encode!"
   "Returns ENTRY's filename"
   (format "%s-%s" (lpe-index entry) (url-name (lpe-url entry))))
 
-(defun lpe-abs-filename (entry)
+(cl-defun lpe-abs-filename (entry)
   "Where to store html."
   (if (local-url-p (lpe-url entry))
     (lpe-url entry)
@@ -92,11 +92,11 @@ filename. Some specialcases. New! Using url-file-encode!"
 ;;(gethash "http://www.aftenposten.no" (lpdb-entries *lynx-proxy-db*))
 ;;(lpe-abs-filename [cl-struct-lynx-proxy-entry "http://www.aftenposten.no" 0 427])
 
-(defun hash-table-print (hash-table)
+(cl-defun hash-table-print (hash-table)
   "Converts HASH-TABLE to a printing format, ie a list with format
 \(ht-test ht-weakness ht-size ht-rehash-threshold ht-rehash-size ((k1
 v1) (k2 v2)...)\).See #'MAKE-HASH-TABLE and #'HASH-TABLE-READ."
-  (lexical-let ((list ())) ; hash-table is implemented as a cons
+  (let ((list ())) ; hash-table is implemented as a cons
     (maphash #'(lambda (k v) (push (cons k v) list))
 	     hash-table)
     (list (hash-table-test hash-table)
@@ -116,7 +116,7 @@ hash table less the size of the LIST."
 				     :size (third list)
 				     :rehash-threshold (fourth list)
 				     :rehash-size (fifth list))))
-    (loop for x in (sixth list)
+    (cl-loop for x in (sixth list)
 	  do (setf (gethash (first x) hash-table) (rest x)))
     hash-table))
 ;;(hash-table-read (hash-table-print (lpdb-entries *lynx-proxy-db*)))
@@ -149,12 +149,12 @@ hash table less the size of the LIST."
 			:entries (hash-table-read (third list)))))
 ;(lynx-proxy-read-db)
 
-(defun delete-file* (file)
+(cl-defun delete-file* (file)
   "No warning if FILE does not exist."
   (when (file-exists-p file)
     (delete-file file)))
 
-(defun lynx-proxy-clear-all ()
+(cl-defun lynx-proxy-clear-all ()
   (setq *lynx-proxy-db* (make-lynx-proxy-db)))
 ;;(lynx-proxy-clear-all)
 
@@ -167,7 +167,7 @@ before TIME. TODO: delete backup files."
 	 (delete-urls
 	  ;; loop through entries and delete old files and collect
 	  ;; corresponding indices
-	  (loop for url being the hash-keys of entries
+	  (cl-loop for url being the hash-keys of entries
 		using (hash-values entry)
 		for file = (lpe-abs-filename entry)
 		for time-created = (nth 5 (file-attributes file))
@@ -176,7 +176,7 @@ before TIME. TODO: delete backup files."
 				       (time< (decode-time time-created) time)))
 		when match-p collect url)))
     ;; now delete entries
-    (loop for url in delete-urls
+    (cl-loop for url in delete-urls
 	  do (remhash url entries))
     ;; now delete appropriate files in lynx-proxy directory
     (lynx-proxy-delete-files :time time)
@@ -192,7 +192,7 @@ before TIME. TODO: delete backup files."
   (let ((files (directory-files dir t))
 	(tabus (list (concat *lynx-proxy-dir* ".proxy-db") 
 		     (concat *lynx-proxy-dir* "lynx-favorites"))))
-    (loop for file in files
+    (cl-loop for file in files
 	  for time-created = (nth 5 (file-attributes file))
 	  for decoded-time-created = (decode-time time-created)
  	  when (and 
@@ -207,7 +207,7 @@ before TIME. TODO: delete backup files."
 
 ;;(decode-time (nth 5 (file-attributes "c:/unix/data/lynx-proxy/102-articleID=198257")))
 
-(defun lynx-proxy-clear-all ()
+(cl-defun lynx-proxy-clear-all ()
   (interactive)
   (lynx-proxy-clear-db :time (now))
   (lynx-update-proxy-refs-regexp)

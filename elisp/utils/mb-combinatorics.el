@@ -15,7 +15,7 @@ For the definition of !N, see https://en.wikipedia.org/wiki/Derangement"
     (0 !0) 
     (1 !1) 
     (otherwise 
-     (loop for i from 2 to n
+     (cl-loop for i from 2 to n
 	   for Ln-2 = !0 then Ln-1
 	   for Ln-1 = !1 then Ln
 	   for Ln = (* (1- i) (+ Ln-1 Ln-2))
@@ -28,7 +28,7 @@ For the definition of !N, see https://en.wikipedia.org/wiki/Derangement"
 (cl-defun factorials (n &optional (m 1))
   "Returns M!, (M + 1)!, ... N!.
 By default, M is 1."
-  (loop for i from m to n
+  (cl-loop for i from m to n
 	for p = (n! m) then (* p i)
 	collect p))
 ;;(factorials 5 3)
@@ -40,7 +40,7 @@ resulting sequence."
   (if (< n 2)
     (head n start-values)
     (let ((res (reverse start-values)))
-     (loop for i below (- n 2)
+     (cl-loop for i below (- n 2)
 	   do (push (+ (first res) (second res)) res))
      (nreverse res))))
 ;;(fibonacci-numbers 0)
@@ -54,12 +54,12 @@ resulting sequence."
        (- phi psi))))
 ;;(time (fibonacci-nth 50))
 
-(defun binomial-coefficient-simple (n m)
+(cl-defun binomial-coefficient-simple (n m)
   "Weak version, cannot deal with Ns and Ms greater than ~ 11"
   (/ (factorial n (1+ m)) (factorial (- n m))))
 ;;(binomial-coefficient-simple 10 4)
 
-(defun simplify-ratio (ratio)
+(cl-defun simplify-ratio (ratio)
   (mapcar (bind #'/ (apply #'gcd ratio)) ratio))
 ;;(simplify-ratio '(6 10))
 
@@ -68,21 +68,21 @@ resulting sequence."
 ;;(divisor-function 220)
 ;;(divisor-function 284)
 
-(defun aliquot-sum (n)
+(cl-defun aliquot-sum (n)
   (- (divisor-function n 1) n))
 ;;(mapcar #'aliquot-sum (1-n 10))
 
-(defun amicable-numbers-p (x y)
+(cl-defun amicable-numbers-p (x y)
   (= (divisor-function x) (divisor-function y)))
 ;;(amicable-numbers-p 220 284)
 
-(defun abundancy-index (n)
+(cl-defun abundancy-index (n)
   (simplify-ratio (list (sum (all-factors n)) n)))
 ;;(mapcar #'abundancy-index '(220 284 30))
 
-(defun remove-factors (factors divisor)
+(cl-defun remove-factors (factors divisor)
   "Removes all factors in FACTORS that are also factors in DIVISOR"
-  (loop for factor in factors
+  (cl-loop for factor in factors
 	for d = divisor then (/ d gcd)
 	for gcd = (gcd factor d)
         collect (/ factor gcd)))
@@ -93,7 +93,7 @@ resulting sequence."
   (if (minusp m)
     0
     (let* ((m* (max m (- n m)))
-	   (factors (loop for denominator-factor in (a-b 1 (- n m*))
+	   (factors (cl-loop for denominator-factor in (a-b 1 (- n m*))
 			  for numerator-factors = (a-b (1+ m*) n)
 			  then (remove-factors numerator-factors denominator-factor)
 			  finally return numerator-factors)))
@@ -102,14 +102,14 @@ resulting sequence."
 
 (cl-defun binomial-coefficients-n (n1 n2 m &optional (method :auto))
   "Returns (n1 / m), ((n1 + 1) / m) ... (n2 / m)"
-  (loop for n from n1 to n2
+  (cl-loop for n from n1 to n2
 	for bc = (binomial-coefficient n m method) then (/ (* bc n) (- n m))
 	collect bc))
 ;;(binomial-coefficients-n 4 6 3)
 
 (cl-defun binomial-coefficients-m (n m1 m2 &optional (method :auto))
   "Returns (n / m1), (n / (m1 + 1)) ... (n2 / m2)"
-  (loop for m from m1 to m2
+  (cl-loop for m from m1 to m2
 	for bc = (binomial-coefficient n m method) then (/ (* bc (- n m -1)) m)
 	collect bc))
 ;;(binomial-coefficients-m 6 0 5)
@@ -204,7 +204,7 @@ See also `uefa-possible-opponents-gen"
   "Recursive function that on each recursion stage returns list of elements on the form (MATCH DRAWS-GIVEN-MATCH),
 where MATCH is formed fro"
   (if winners-left
-    (loop with winner = (first winners-left)
+    (cl-loop with winner = (first winners-left)
 	  for runner-up in runner-ups-left
 	  for match = (list winner runner-up)
 	  for draws-given-match = (and (uefa-possible-opponents-p winner runner-up groups)
@@ -230,18 +230,18 @@ PLAYERS is 2 and CARDS is 10.
 This assertion seems wrong given the Wikipedia definition of
 standard rummy."
   (assert (<= (* players cards) deck) t "Too many players or cards!")
-  (/ (product (loop for n below players
+  (/ (product (cl-loop for n below players
 		    collect (binomial-coefficient deck cards)
 		    do (decf deck cards)))
      (n! players)))
 ;;(rummy-hands 2)
 
-(defun stirling-numbers-2 (n k)
+(cl-defun stirling-numbers-2 (n k)
   "Return coefficients s(n, k), i.e. a Stirling number of the first kind.
 This is the number of permutations of n elements with k disjoint
 cycles."
   (round
-   (loop with k-i!s = (nreverse (factorials k 0))
+   (cl-loop with k-i!s = (nreverse (factorials k 0))
 	 for i from 0 to k
 	 for sign = (expt -1 (- k i))
 	 for i! = 1 then (* i! i)
@@ -250,13 +250,13 @@ cycles."
 	 ;; do (print (list i sign i! k-i! addend))
 	 sum addend)))
 ;;(stirling-numbers-2 0 0)
-;;(loop for k to 10 collect (stirling-numbers-2 10 k))
+;;(cl-loop for k to 10 collect (stirling-numbers-2 10 k))
 
-(defun stirling-numbers-1 (n k)
+(cl-defun stirling-numbers-1 (n k)
   "Return coefficients s(n, k), i.e. a Stirling number of the first kind.
 This is the number of permutations of n elements with k disjoint
 cycles."
-  (loop with 2n-k = (- (2* n) k)
+  (cl-loop with 2n-k = (- (2* n) k)
 	for j from n to 2n-k
 	for signum = (expt -1 (- j k))
 	for addend = (* signum
@@ -264,6 +264,6 @@ cycles."
 			(binomial-coefficient 2n-k j)
 			(stirling-numbers-2 (- j k) (- j n)))
 	sum addend))
-;;(loop for k to 4 collect (stirling-numbers-1 4 k))
+;;(cl-loop for k to 4 collect (stirling-numbers-1 4 k))
 
 (provide 'mb-combinatorics)

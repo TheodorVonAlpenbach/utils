@@ -59,7 +59,7 @@ Note that this is a PLIST format of coldefs. Hence PLIST-P must be set to t in `
 ;;(ld-table-column-definitions (ld-table :users))
 ;; match-rating
 
-(defun cram-update-schema (keyword)
+(cl-defun cram-update-schema (keyword)
   "Not used. Need to rename (table column) and add (table column)"
   (setf (ld-table-schema
 	 (ld-find-table (list +cram-db-keyword+ keyword) *cram-db*))
@@ -70,7 +70,7 @@ Note that this is a PLIST format of coldefs. Hence PLIST-P must be set to t in `
 (defconst +cram-db-keyword+ :cram)
 
 ;;(require 'ld-repository)
-(defun cram-init-database (&optional force)
+(cl-defun cram-init-database (&optional force)
   "TODO: this is a constant, but should eventually become a variable"
   (ld-set-database
    (or (ld-load-database +cram-db-keyword+)
@@ -85,6 +85,6 @@ Note that this is a PLIST format of coldefs. Hence PLIST-P must be set to t in `
 ;;(ld-replace-table '(:cram :match) (ld-table-add-column :match '(:score :type number) :colpos 4) :value .5)
 ;;(ld-table-add-column :match '(:score :type number) :colpos 4)
 ;;(ld-table :match)
-;;(loop for task in (cram-db-tasks) do (setf (cram-task-level task) (cram-estimate-level task)))(provide 'cram-db)
+;;(cl-loop for task in (cram-db-tasks) do (setf (cram-task-level task) (cram-estimate-level task)))(provide 'cram-db)
 
 (provide 'cram-db)

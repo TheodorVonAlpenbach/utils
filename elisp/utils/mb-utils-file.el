@@ -1,27 +1,27 @@
-(defun in-directory-p (filename directory)
+(cl-defun in-directory-p (filename directory)
   "Return not nil if FILENAME is in DIRECTORY."
   (prefix-p (expand-file-name directory)
 	    (expand-file-name filename)))
 ;;(in-directory-p "~/bin/mbtags.sh" "~/")
 
-(defun expand-directory-name (directory-name &optional parent-directory-name)
+(cl-defun expand-directory-name (directory-name &optional parent-directory-name)
   "Return the expansion of parent-directory-name with directory-name.
 This is similiar to expand-file-name, except that the result is a
 true directory name."
   (file-name-as-directory
    (expand-file-name directory-name parent-directory-name)))
 
-(defun concat-directories (directory1 directory2)
+(cl-defun concat-directories (directory1 directory2)
   (concat (file-name-as-directory directory1)
 	  directory2))
 ;;(concat-directories "c:/emacs-22.1/site-lisp/mb-lisp/utils/" "qwe")
 
-(defun filename-base (path)
+(cl-defun filename-base (path)
   "Non-extension part of Common Lisp filename component of PATH."
   (file-name-nondirectory (file-name-sans-extension path)))
 ;(filename-base "d/d/a.b")
 
-(defun directory-truename (directory)
+(cl-defun directory-truename (directory)
   "Return a canonical form of DIRECTORY.
 In this implementation the canonical form is the same as the
 result of FILE-TRUENAME without any trailing slash. Example:
@@ -80,7 +80,7 @@ see `file-name-alter'"
   (format "%s%s%s" filename extension-separator extension))
 ;;(file-name-add-extension "qwe/qwe" "txt")
 
-(defun file-name-change-extension (filename new-extension)
+(cl-defun file-name-change-extension (filename new-extension)
   "Return FILENAME with NEW-EXTENSION.
 
 \(file-name-change-extension \"qwe.txt\" \"pdf\"\) ==> \"qwe.pdf\""
@@ -88,7 +88,7 @@ see `file-name-alter'"
    (file-name-sans-extension filename) new-extension))
 ;;(file-name-change-extension "qwe/qwe.txt" "cpp")
 
-(defun copy-libs (path1 path2)
+(cl-defun copy-libs (path1 path2)
   (let* ((apath1 (file-truename path1))
 	 (paths1 (mapcar #'file-truename (unix-find path1 :name "*sc[ie]"))))
     (cl-loop for p1 in paths1
@@ -98,7 +98,7 @@ see `file-name-alter'"
 	       (copy-file p1 p2)))))
 ;;(copy-libs "~/tmp/SciLab" "~/sources/SciLab")
 
-(defun rename-files (directory pattern replacement)
+(cl-defun rename-files (directory pattern replacement)
   "Renames all files containing PATTERN in DIRECTORY."
   (let* ((paths (file-expand-wildcards  (expand-file-name (format "*%s*" pattern) directory))))
     (cl-loop for path in paths
@@ -108,7 +108,7 @@ see `file-name-alter'"
 	  do (rename-file path new-path))))
 ;;(rename-files "~/data/FFIAOG/MCMV/M341_Karmoy/MomPks/" "351" "341")
 
-(defun parent-directory-1 (file n)
+(cl-defun parent-directory-1 (file n)
   "Helper for `parent-directory'."
   (if (plusp n)
     (parent-directory-1

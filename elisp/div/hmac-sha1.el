@@ -31,7 +31,7 @@
 
 (require 'sha1)
 
-(defun hmac-sha1 (key message)
+(cl-defun hmac-sha1 (key message)
   "Return an HMAC-SHA1 authentication code for KEY and MESSAGE.
 
 KEY and MESSAGE must be unibyte strings.  The result is a unibyte

@@ -15,18 +15,18 @@
       (format "https://%s.blob.core.windows.net/%s/%s"
 	*storage-account* *container-name* *blob-name*))
 
-(defun azure-signature-string (verb)
+(cl-defun azure-signature-string (verb)
   (format "%s\n\n\n\n\n\n\n\n\n\n\n\nx-ms-date:Fri, 26 Jun 2015 23:39:12 GMT\nx-ms-version:2015-02-21\n/myaccount/mycontainer\nrestype:container\ntimeout:30"
    (sstring verb)))
 ;;(azure-signature-string :PUT)
 
-(defun azure-encode-signature-string (string key)
+(cl-defun azure-encode-signature-string (string key)
   (base64-encode-string
    (hmac (encode-coding-string string 'utf-8 t) key)))
 ;;(azure-encode-signature-string (azure-signature-string :PUT) "")
 (length "ctzMq410TV3wS7upTBcunJTDLEJwMAZuFPfr0mrrA08=")
 
-(defun upload-blob (target storage-account container-name blob-name destination access-key)
+(cl-defun upload-blob (target storage-account container-name blob-name destination access-key)
   (let* ((current-date (format-time-string "%a, %e %b %Y %H:%M:%S %Z"))
 	(file-length (eighth (file-attributes target)))
 	(header-resource
@@ -88,8 +88,8 @@
 ;; print_r(curl_error($ch));
 
 ;; curl_close($ch);
-(defun sha256 (string) (secure-hash 'sha256 string))
+(cl-defun sha256 (string) (secure-hash 'sha256 string))
 ;;(sha256 "")
-(defun sha1 (string) (secure-hash 'sha1 string))
+(cl-defun sha1 (string) (secure-hash 'sha1 string))
 ;;(sha1 "")
 

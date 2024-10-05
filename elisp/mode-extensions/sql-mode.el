@@ -2,7 +2,7 @@
 ;; TODO: move this somewhere else
 (setq split-width-threshold nil)
 
-(defun sql-send-expression ()
+(cl-defun sql-send-expression ()
   "Sends one-line expressions to the SQL output buffer. 
 It handles also lines commented with --.
 Examples:

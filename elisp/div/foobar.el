@@ -4,7 +4,7 @@
     (list "\\([cdefgab]\\)[- ]+\\(sharp\\|flat\\)? *\\(major\\|minor\\)?"
 	  #'foobar-translate-key)))
 
-(defun foobar-translate-key (string)
+(cl-defun foobar-translate-key (string)
   "Translates typical English keys to German"
   (let* ((ms1 (match-string 1 string))
 	 (ms2 (match-string 2 string))
@@ -32,10 +32,10 @@
 	(downcase res))
       res)))
 
-(defun foobar-clean-text (beg end)
+(cl-defun foobar-clean-text (beg end)
   (interactive "r")
   (let ((newstring (buffer-substring beg end)))
-    (loop for foobar-substitution in foobar-substitutions
+    (cl-loop for foobar-substitution in foobar-substitutions
 	  do (setq newstring 
 		   (apply #'string-replace-f
 			  newstring

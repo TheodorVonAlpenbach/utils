@@ -22,7 +22,7 @@
     (switch-to-buffer-other-window buffer-name)))
 ;;(maths-list-user-ratings)
 
-(defun maths-db-task-ratings ()
+(cl-defun maths-db-task-ratings ()
   "Returns a tree of task ratings"
   (eval-when (load eval)
     (ld-select :tasks
@@ -35,7 +35,7 @@
 	       :order :desc)))
 
 
-(defun maths-default-task-rating (operation level)
+(cl-defun maths-default-task-rating (operation level)
   "Eventually this method should take into account the task nature (level and operation)"
   +maths-default-rating+)
 
@@ -45,17 +45,17 @@
 (cl-defun maths-add-user (name age &optional (rating +maths-default-rating+) (RD +maths-default-RD+))
   (maths-db-insert-user name age rating RD))
 
-(defun maths-set-current-user (user)
+(cl-defun maths-set-current-user (user)
   (setf *maths-current-user* (if (stringp user) (maths-db-get-user user) user)))
 
-(defun maths-current-user-old (&optional update) 
+(cl-defun maths-current-user-old (&optional update) 
   (when (or update (null *maths-current-user*))
     (maths-set-current-user (maths-db-get-user +maths-default-user-name+)))
   (unless *maths-current-user*
     (maths-set-current-user (maths-db-last-user)))
   *maths-current-user*)
 
-(defun maths-current-user (&optional update) 
+(cl-defun maths-current-user (&optional update) 
   (when (or update (null *maths-current-user*))
     (maths-set-current-user (or (maths-db-last-user)
 				(maths-db-get-user +maths-default-user-name+))))
@@ -70,7 +70,7 @@
 (defvar *maths-current-task* nil ;;(nilf *maths-current-task*)
   "This should be a tuple on the form (TASK RATING LAST-TIMESTAMP)")
 
-(defun maths-set-current-task (task)
+(cl-defun maths-set-current-task (task)
   (setf *maths-current-task* task))
 
 (cl-defun maths-get-task-method (&optional (new/old-ratio 0.5))
@@ -78,7 +78,7 @@
   ;; only new tasks at this stage
   (if (< (random-float) new/old-ratio)
     :new :random))
-;;(let ((n 1000000)) (/ (loop for i below n if (eql (maths-get-task-method) :new) count 1) (float n)))
+;;(let ((n 1000000)) (/ (cl-loop for i below n if (eql (maths-get-task-method) :new) count 1) (float n)))
 
 (cl-defun maths-current-task ()
   "Use this method to retrive a copy of current task"
@@ -118,19 +118,19 @@
   (list (maths-user-ratings user) (maths-task-ratings task)))
 ;;(maths-get-task :method :current)
 
-(defun maths-operators ()
+(cl-defun maths-operators ()
   '(:addition :substraction :multiplication :division))
 ;;(maths-operators)
 
-(defun maths-random-operation ()
+(cl-defun maths-random-operation ()
   (first (elt-random *maths-task-range*)))
 ;;(maths-random-operation)
 
-(defun maths-random-level (operation)
+(cl-defun maths-random-level (operation)
   (elt-random (apply #'a-b (second (assoc operation *maths-task-range*)))))
 ;;(maths-random-level :substraction)
 
-(defun maths-arguments-1 (level)
+(cl-defun maths-arguments-1 (level)
   "Returns "
   (case level
     (1 ;positive integers that adds to 10 or lower
@@ -143,16 +143,16 @@
     (4 ;integers less than 1000
      (list (random 1000) (random 1000)))))
 
-(defun maths-arguments (level operation)
+(cl-defun maths-arguments (level operation)
   "Returns "
   (if (eql operation :division)
-    (loop for args = (maths-arguments-1 level)
+    (cl-loop for args = (maths-arguments-1 level)
 	  while (zerop (first args))
 	  finally (return (list (apply #'* args) (first args))))
     (maths-arguments-1 level)))
-;;(loop for i below 10000 never (= (second (maths-arguments 1 :division)) 0))
+;;(cl-loop for i below 10000 never (= (second (maths-arguments 1 :division)) 0))
 
-(defun maths-estimate-level (task)
+(cl-defun maths-estimate-level (task)
   (destructuring-bind (x y) (maths-task-arguments task)
     (cond
       ;; both < 10
@@ -163,49 +163,49 @@
       ((and (< x 1000) (< y 1000)) 4))))
 ;;(mapcar #'maths-estimate-level (maths-db-tasks))
 
-(defun combine< (&rest predicates)
-  (lexical-let ((preds predicates))
+(cl-defun combine< (&rest predicates)
+  (let ((preds predicates))
     #'(lambda (x y)
-	(loop for (pred key) in preds
+	(cl-loop for (pred key) in preds
 	      for x* = (funcall key x)
 	      for y* = (funcall key y)
 	      if (funcall pred x* y*) return t
 	      if (funcall pred y* x*) return nil))))
 ;;(funcall (combine< (list #'< #'first) (list #'string< #'second)) '(1 "a") '(1 "b"))
 
-(defun lt->equal (lt)
-  (lexical-let ((lt lt))
+(cl-defun lt->equal (lt)
+  (let ((lt lt))
     #'(lambda (x y) (nor (funcall lt x y) (funcall lt y x)))))
 ;;(funcall (lt->equal #'<) 1 1)
 
-(defun maths-sort-task-predicate ()
+(cl-defun maths-sort-task-predicate ()
   "Not in use. However an example on use of `combine<'"
   (combine< (list #'(lambda (x y) (l-explicit< x y (maths-operators))) #'maths-task-operation)
 	    (list #'< #'maths-task-level)))
 ;;(sort (maths-db-tasks) (maths-sort-task-predicate))
 ;;(ld-select :tasks :columns (:operation :level))
 
-(defun maths-group-tasks-by-type (task)
+(cl-defun maths-group-tasks-by-type (task)
   "Not in use, but a good example on advanced use of
   #'maths-sort-task-predicate"
   (let ((tasks (maths-db-tasks))
 	(pred (maths-sort-task-predicate)))
     (group (sort tasks pred) :test (lt->equal pred))))
 
-(defun maths-estimate-task-rating (operation level)
+(cl-defun maths-estimate-task-rating (operation level)
   "Direct select, violates policy on "
   (aif (maths-db-ratings-by-type operation level)
     (average it)
     +maths-default-rating+))
 ;;(maths-estimate-task-rating :substraction 2)
 
-(defun maths-init-rating (&optional operation level)
+(cl-defun maths-init-rating (&optional operation level)
   +maths-default-rating+)
 
-(defun maths-calculate (operation args)
+(cl-defun maths-calculate (operation args)
   (apply (maths-operator operation) args))
 
-(defun maths-operator (operation)
+(cl-defun maths-operator (operation)
   (case operation
     (:addition #'+)
     (:substraction #'-)
@@ -213,7 +213,7 @@
     (:division #'/)))
 ;;(mapcar #'maths-operator '(:addition :substraction :multiplication :division))
 
-(defun task-exists (operation args)
+(cl-defun task-exists (operation args)
   (ld-select :tasks
     :where (and (eql :operation operation)
 		(equal :arguments args))))
@@ -230,7 +230,7 @@ of tries is quite limited"
 	      (or (fifth task*)
 		  (error "qwe")))
 	    (gentask (level &optional (RD +maths-default-RD+))
-	      (loop for i below 1000
+	      (cl-loop for i below 1000
 		    for args = (maths-arguments level operation)
 		    unless (task-exists operation args)
 		    return (list operation level args
@@ -243,21 +243,21 @@ of tries is quite limited"
 	  (level-range (second (assoc operation *maths-task-range*))))
       (when task* ;; else, probably all possible problems is already in db
 	(if (< (task*-rating task*) min-rating)
-	  (loop for l from level to (max level (last-elt level-range))
+	  (cl-loop for l from level to (max level (last-elt level-range))
 		for task* = (gentask l)
 		if (and task*
 			(>= (task*-rating task*) min-rating))
 		return task*
 		finally return task*)
-	  (loop for l from level downto (min level (first level-range))
+	  (cl-loop for l from level downto (min level (first level-range))
 		for task* = (gentask l)
 		if (and task*
 			(<= (fifth task*) max-rating))
 		return task*
 		finally return task*))))))
-;;(loop repeat 1 collect (maths-create-task :rating 1771.5996682195228 :operation :addition))
-;;(loop repeat 1 collect (maths-create-task :rating 1500))
-;;(count nil (loop repeat 100 collect (maths-create-task :rating 1653.5199667679983)))
+;;(cl-loop repeat 1 collect (maths-create-task :rating 1771.5996682195228 :operation :addition))
+;;(cl-loop repeat 1 collect (maths-create-task :rating 1500))
+;;(count nil (cl-loop repeat 100 collect (maths-create-task :rating 1653.5199667679983)))
 
 (cl-defun maths-score (task answer time-elapsed &optional (free-time 2000) (max-time 20000))
   "All TIMEs are in milliseconds."
@@ -271,7 +271,7 @@ of tries is quite limited"
 (defsubst maths-invert-score (score) (- 1 score))
 
 ;;; Ratings
-(defun glicko-new-ratings (user task score &optional time)
+(cl-defun glicko-new-ratings (user task score &optional time)
   (let* ((uratings (maths-user-ratings user))
 	 (tratings (maths-task-ratings task))
 	 (res (list (glicko-rating uratings (list tratings score) time)
@@ -280,13 +280,13 @@ of tries is quite limited"
     res))
 ;;(glicko-rating '(1372 350) '((1677 35) 0.04) nil)
 
-(defun extract-ratings (user task)
+(cl-defun extract-ratings (user task)
   (list (list (maths-user-rating user)
 	      (maths-user-RD user))
 	(list (maths-task-rating task)
 	      (maths-task-RD task))))
 
-(defun maths-report-answer-strange-error (answer time-elapsed)
+(cl-defun maths-report-answer-strange-error (answer time-elapsed)
   (let* ((user (maths-current-user))
 	 (task (maths-current-task))
 	 (score (maths-score task answer time-elapsed))
@@ -304,7 +304,7 @@ of tries is quite limited"
       (maths-set-current-task updated-task))
     score))
 
-(defun maths-report-answer (answer time-elapsed)
+(cl-defun maths-report-answer (answer time-elapsed)
   "Return result score based on ANSWER and the TIME-ELAPSED.
 Also, calculate new ratings for current user and task,
 and update the current database concordingly.
@@ -329,13 +329,13 @@ ratings, and hand the onus of DB update to the caller"
       (list updated-user updated-task))
     score))
 
-(defun maths-reset-all ()
+(cl-defun maths-reset-all ()
   (when (yes-or-no-p "Are you sure you want to reset everything? ")
     (maths-init-database)
     (nilf *maths-current-user* *maths-current-task*)))
 ;;(maths-reset-all)
 
-(defun maths-save ()
+(cl-defun maths-save ()
   (ld-save-database *current-database*))
 
 

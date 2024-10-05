@@ -16,36 +16,36 @@
   )
 
 ;;(mapcar #'schord-from-string test-chords)
-(defun gchords-from-strings (strings)
+(cl-defun gchords-from-strings (strings)
   (mapcar (bind #'gch-from-string 'schordx) strings))
 ;;(gchords-from-strings test-chords)
 
-(defun gch-from-nchord (nchord)
+(cl-defun gch-from-nchord (nchord)
   (let ((n (first nchord)))
     (gch-new (schordx-from-nchord nchord) (n-start-time n) (d-copy (n-duration n)))))
 ;;(gch-from-nchord (first (nchords (mvt-test))))
 
-(defun* gchords-from-mvt (&optional (mvt (mvt-test)))
+(cl-defun gchords-from-mvt (&optional (mvt (mvt-test)))
   "mvt -> segmented mvt -> nchords -> gchords"
   (mapcar #'gch-from-nchord (nchords (mb-segmentation (mvt-copy mvt)))))
 ;;(length (gchords-from-mvt))
 
 ;;; this should be moved to modulation
-(defun gnode-dominantic-p (n &optional recursively)
+(cl-defun gnode-dominantic-p (n &optional recursively)
   (and n (or (eq (second n) 'dominantic)
 	     (and recursively 
 		  (eq (second n) 'equal)
 		  (or (gnode-dominantic-p (first (third n)) t)
 		      (gnode-dominantic-p (second (third n)) t))))))
 
-(defun gnode-subdominantic-p (n &optional recursively)
+(cl-defun gnode-subdominantic-p (n &optional recursively)
   (and n (or (find (second n) '(neapolitan subdominantic))
 	     (and recursively
 		  (eq (second n) 'equal)
 		  (or (gnode-subdominantic-p (first (third n)) t)
 		      (gnode-subdominantic-p (second (third n)) t))))))
 
-(defun gnode-relation (n1 n2)
+(cl-defun gnode-relation (n1 n2)
   "If a valid relation exists between N1 and N2 this is returned.
 Otherwise nil is returned"
   (let ((relation (gch-relation (first n1) (first n2))))
@@ -56,12 +56,12 @@ Otherwise nil is returned"
        (when (gnode-dominantic-p n2)
 	 relation)))))
 
-(defun gtree-stack-state (stack)
+(cl-defun gtree-stack-state (stack)
   (if (< (length stack) 2)
     'stack-too-short
     (gnode-relation (second stack) (first stack))))
 
-(defun gtree-reduce-stack (stack)
+(cl-defun gtree-reduce-stack (stack)
   "Reduces stack as much as possible applying unary and binary
 rules"
   (let ((state (gtree-stack-state stack)))
@@ -83,7 +83,7 @@ rules"
 	(setq stack (gtree-reduce-stack stack))))
     stack))
 
-(defun gtree-build (stack set-chords)
+(cl-defun gtree-build (stack set-chords)
   "Starts with an empty STACK and a list of SET-CHORDS.
 Successively feeds stack with new chords until SET-CHORDS is
 empty and STACK can't be reduced anymore"
@@ -92,17 +92,17 @@ empty and STACK can't be reduced anymore"
     (setq stack (gtree-reduce-stack stack)))
   (nreverse stack))
 
-(defun gtree (gchords)
+(cl-defun gtree (gchords)
   ""
   (gtree-build '() (mapcar (bind #'list 'leaf) gchords)))
 ;;(gtree (gchords-from-mvt (mvt-test)))
 
-(defun gtree-from-chord-strings (chord-strings)
+(cl-defun gtree-from-chord-strings (chord-strings)
   (gtree (gchords-from-strings chord-strings)))
 ;;(gtree-from-chord-strings test-chords)
 
-(lexical-let ((tree nil))
-  (defun* gtree-test (&key source start end)
+(let ((tree nil))
+  (cl-defun gtree-test (&key source start end)
     (when (or source start end (not tree))
       (let ((gchords (if (eq source :strings)
 		       (gchords-from-strings test-chords)
@@ -112,7 +112,7 @@ empty and STACK can't be reduced anymore"
 ;;(prin1 (gtree-test :start 8 :end 10))
 
 ;; the next two methods should be simplified
-(defun gnode-to-dot (gnode identifier)
+(cl-defun gnode-to-dot (gnode identifier)
   (let ((name (gch-to-string (first gnode) 'english-chord))
 	(color (cond ((gnode-dominantic-p gnode) 'yellow)
 		     ((gnode-subdominantic-p gnode) 'green)
@@ -121,10 +121,10 @@ empty and STACK can't be reduced anymore"
 		     (t (message "%S" (second gnode)) ""))))
     (dot-node identifier name color)))
 
-(defun gtree-to-dot-1 (gnode node-identifier)
+(cl-defun gtree-to-dot-1 (gnode node-identifier)
   "Converts sub tree starting at GNODE to a list of .dot
 statements"
-  (loop with children = (third gnode)
+  (cl-loop with children = (third gnode)
 	for child in children
 	for char from ?A
 	for child-identifier = (format "%s%c" node-identifier char)
@@ -135,9 +135,9 @@ statements"
 	collect node-to-child-statement
 	append (gtree-to-dot-1 child child-identifier)))
 
-(defun gtree-to-dot-0 (gtree)
+(cl-defun gtree-to-dot-0 (gtree)
   "Converts GTREE to a list of .dot statements"
-  (loop for child in gtree
+  (cl-loop for child in gtree
 	for char from ?A
 	for child-identifier = (format "n%d" char)
 	for child-name = (gch-to-string (first child) 'english-chord)
@@ -145,7 +145,7 @@ statements"
 	collect (gnode-to-dot child child-identifier)
 	append (gtree-to-dot-1 child child-identifier)))
 
-(defun gtree-to-dot (gtree)
+(cl-defun gtree-to-dot (gtree)
   "Converts GTREE to a list of .dot statements"
   (concat* (gtree-to-dot-0 gtree) :pre "digraph g {\n" :in "\n" :suf "\n}"))
 ;;(gtree-to-dot (gtree-test))
@@ -153,13 +153,13 @@ statements"
 ;;(string-to-file (gtree-tree-to-dot-string '(((7 10 2) dominant (((2 6 9 0) leaf) ((7 10 2) leaf))))) "c:/Documents and Settings/matsb/My Documents/data/dot/graph3.gv")
 
 (require 'dot)
-(defun* gtree-view (tree &optional filename)
+(cl-defun gtree-view (tree &optional filename)
   (dot-view (gtree-to-dot tree) filename))
 ;;(gtree-view (gtree-test :start 8 :end 11))
 ;;(gtree-view '(((7 10 2) dominant (((2 6 9 0) leaf) ((7 10 2) leaf)))))
 
 ;;;; Conversion to chromes (pitch classes)
-(defun gtree-schordx-to-chordx-1 (gnode parent-chordx)
+(cl-defun gtree-schordx-to-chordx-1 (gnode parent-chordx)
   "Primitive first version. Only root of parent chord is used.
 Maybe it is enough, but to deduce a reference key, not only a
 reference chrome, would be more general."
@@ -169,8 +169,8 @@ reference chrome, would be more general."
 	  (second gnode) ;;keep the functional relation
 	  (mapcar (bind #'gtree-schordx-to-chordx-1 chordx) (third gnode)))))
 
-(defun* gtree-schordx-to-chordx (gtree &optional (reference-chrome-chordx (chordx-from-string "C")))
-  (loop with parent-chord = reference-chrome-chordx
+(cl-defun gtree-schordx-to-chordx (gtree &optional (reference-chrome-chordx (chordx-from-string "C")))
+  (cl-loop with parent-chord = reference-chrome-chordx
 	for n in gtree
 	for chrome-n = (gtree-schordx-to-chordx-1 n reference-chrome-chordx)
 	for parent-chord = (first chrome-n)
@@ -178,22 +178,22 @@ reference chrome, would be more general."
 ;;(gtree-schordx-to-chordx (gtree-test))
 ;;(gtree-view (gtree-schordx-to-chordx (gtree-test)))
 
-(defun gtree-is-leaf-p (gtree-node)
+(cl-defun gtree-is-leaf-p (gtree-node)
   (eq (second gtree-node) 'leaf))
 
-(defun gtree-leaves-1 (tree)
+(cl-defun gtree-leaves-1 (tree)
   (if (gtree-is-leaf-p tree)
     (list (first tree))
     (append (gtree-leaves-1 (first (third tree)))
 	    (gtree-leaves-1 (second (third tree))))))
 
-(defun gtree-leaves (tree)
-  (loop for n in tree
+(cl-defun gtree-leaves (tree)
+  (cl-loop for n in tree
 	append (gtree-leaves-1 n)))
 ;;(gtree-leaves (gtree-test))
 
 
-(defun schordx-adjust-dim7 (x y)
+(cl-defun schordx-adjust-dim7 (x y)
   "X and Y are schordxs"
   (let* ((target-root (spc-transpose (schordx-root y) -1))
 	(d (/ (mod (- (schordx-root x) target-root) 12) 3))
@@ -204,7 +204,7 @@ reference chrome, would be more general."
     res))
 ;;(schordx-adjust-dim7 '((3 6 9) 1 0) `((3 6 9) 0 ,(1+ 6)))
 
-(defun schordx-adjust-aug (x y)
+(cl-defun schordx-adjust-aug (x y)
   "X and Y are schordxs"
   (let* ((target-root (spc-transpose (schordx-root y) -5))
 	(d (/ (mod (- (schordx-root x) target-root) 12) 4))
@@ -215,9 +215,9 @@ reference chrome, would be more general."
     res))
 ;;(schordx-adjust-aug '((4 8) 1 0) `((4 8) 0 ,(1+ 4)))
 
-(defun gchords-adjust-dim7-aug (gchords)
+(cl-defun gchords-adjust-dim7-aug (gchords)
   "Assumes gchords are schordx based"
- (loop for gg in (pairs gchords)
+ (cl-loop for gg in (pairs gchords)
        for gch1 = (first gg)
        for gch2 = (second gg)
        for schordx1 = (gch-chord gch1)
@@ -230,13 +230,13 @@ reference chrome, would be more general."
  gchords)
 ;;(gchords-adjust-dim7-aug gchords-spc)
 
-(defun* gchord-at (start-time gchords)
+(cl-defun gchord-at (start-time gchords)
   (aif (find start-time gchords :key #'gch-start-time :from-end t :test #'>=)
     (when (> (gch-end-time it) start-time)
       it)))
 ;;(gchord-at .9 (gtree-leaves (gtree-test)))
 
-(defun key-deduce (gchords)
+(cl-defun key-deduce (gchords)
   (let* ((chordxs (mapcar #'gch-chord gchords))
 	(groups (distribute chordxs #'(lambda (x y)
 					(and (equal (chordx-chosk x) (chordx-chosk y))
@@ -248,7 +248,7 @@ reference chrome, would be more general."
     (k-new root mode)))
 ;;(key-deduce gchords)
 
-(defun n-modify (n gchords)
+(cl-defun n-modify (n gchords)
   "Assume gchords are of type 'chordx"
   (let* ((gchord (gchord-at (n-start-time n) gchords))
 	 (chordx (gch-chord gchord))
@@ -259,7 +259,7 @@ reference chrome, would be more general."
     n))
 ;;(n-modify (new))
 
-(defun mvt-modify (mvt gchords)
+(cl-defun mvt-modify (mvt gchords)
   "Assume gchords are of type 'chordx"
   (let ((mvt* (mvt-copy mvt))
 	(key (key-deduce gchords)))

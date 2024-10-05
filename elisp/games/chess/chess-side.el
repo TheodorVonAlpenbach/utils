@@ -1,4 +1,4 @@
-(defstruct 
+(cl-defstruct 
   (chess-side
    (:conc-name cs-)
    (:constructor 
@@ -20,7 +20,7 @@
   (may-castle t))
 ;;(setf (chess-piece-snumber (first (cs-pieces (cs-white)))) 'qwe)
 
-(defun cs-remove-piece (cs piece)
+(cl-defun cs-remove-piece (cs piece)
   (setf (cs-pieces cs) (delete piece (cs-pieces cs))))
 ;;(let ((cs (cs-white))) (cs-remove-piece cs (first (cs-pieces cs))) cs)
 

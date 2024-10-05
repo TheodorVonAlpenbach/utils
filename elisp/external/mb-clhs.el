@@ -17,7 +17,7 @@ something like \"file:/usr/local/doc/HyperSpec/\"."
 
 (defvar clhs-symbols nil)
 
-(defun hs-local-root (root)
+(cl-defun hs-local-root (root)
   "Returns the OS path of ROOT or nil if the path cannot be resolved.
 If ROOT is on form \"file:/somepath\", then \"/somepath\" is returned.
 Else it returns ROOT as is if it is recognized by then current OS as a valid path.
@@ -28,7 +28,7 @@ Otherwise nil is returned"
       root)))
 ;;(hs-local-root common-lisp-hyperspec-root)
 
-(defun mb-clhs-table-buffer (&optional root)
+(cl-defun mb-clhs-table-buffer (&optional root)
   (unless root (setq root common-lisp-hyperspec-root))
   ;; change 1
   (aif (hs-local-root root)
@@ -62,7 +62,7 @@ Otherwise nil is returned"
       (current-buffer))))
 ;;(mb-clhs-table-buffer)
 
-(defun clhs-read-symbols ()
+(cl-defun clhs-read-symbols ()
   "read `clhs-symbols' from the current position in the current buffer"
   (while (not (eobp))
     (puthash (buffer-substring-no-properties ; symbol
@@ -73,7 +73,7 @@ Otherwise nil is returned"
              clhs-symbols)
     (forward-line 1)))
 
-(defun mb-clhs-symbols ()
+(cl-defun mb-clhs-symbols ()
   "Get `clhs-symbols' from `common-lisp-hyperspec-root'."
   (if (and clhs-symbols (not (= 0 (hash-table-count clhs-symbols))))
       clhs-symbols
@@ -84,7 +84,7 @@ Otherwise nil is returned"
       (kill-buffer (current-buffer))
       clhs-symbols)))
 
-(defun hash-table-complete (string table how)
+(cl-defun hash-table-complete (string table how)
   "This makes it possible to use hash-tables with `completing-read'.
 Actually, `completing-read' in Emacs 22 accepts hash-tables natively."
   (let ((res nil) (st (upcase string)) (len (length string)))
@@ -102,7 +102,7 @@ Actually, `completing-read' in Emacs 22 accepts hash-tables natively."
                 (car res))))))
 
 ;;;###autoload
-(defun mb-common-lisp-hyperspec (symbol-name)
+(cl-defun mb-common-lisp-hyperspec (symbol-name)
   "Browse the Common Lisp HyperSpec documentation for SYMBOL-NAME.
 Finds the HyperSpec at `common-lisp-hyperspec-root'."
   (interactive (list (let ((sym (thing-at-point 'symbol))

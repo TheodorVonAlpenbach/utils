@@ -27,7 +27,7 @@ only, or left only depending on the surrounding characters. If
 	 (insert " "))))
 ;;(insert-parentheses* 1 :ensure-space :around)
 
-(defun insert-date (prefix)
+(cl-defun insert-date (prefix)
   "Inserts today's date string at point."
   (interactive "P")
   (insert
@@ -38,101 +38,101 @@ only, or left only depending on the surrounding characters. If
      (iso-date))))
 ;;(insert-date 3)
 
-(defun insert-time (prefix)
+(cl-defun insert-time (prefix)
   "Inserts today's date string at point."
   (interactive "P")
   (insert (iso-time :with-seconds (and (numberp prefix) 
 				       (= prefix 3)))))
 
-(defun insert-date-and-time (prefix)
+(cl-defun insert-date-and-time (prefix)
   "Inserts today's date string at point."
   (interactive)
   (insert (iso-date-and-time :with-seconds (and (numberp prefix) 
 						(= prefix 3)))))
 
-(defun insert-full-date ()
+(cl-defun insert-full-date ()
   "Inserts today's date string at point."
   (interactive)
   (insert (full-date)))
 
-(defun insert-todo-item ()
+(cl-defun insert-todo-item ()
   "Inserts a new item for a todo list."
   (interactive)
   (beginning-of-line 1)
   (insertf "* %s \n" (short-date))
   (end-of-line 0))
 
-(defun iso-to-short-date-at-point ()
+(cl-defun iso-to-short-date-at-point ()
   "Converts iso-date at point to short date."
   (interactive)
   (apply #'overwrite-region
     (short-date (date-at-point t)) (thing-at-point-bounds-of-date t)))
 
 ;; manipulation
-(defun kill-sexp* (n)
+(cl-defun kill-sexp* (n)
   "Kills sexp at point and returns it as a string. Probably better to
 use kill-ring directly, but not now."
   (backward-kill-sexp n)
   (first kill-ring))
 ;;(get-text-property 0 1)
 
-(defun insert-quotes (n)
+(cl-defun insert-quotes (n)
   "Inserts quotes \(`'\) at point. See `insert-parentheses' for N."
   (interactive "P")
   (insert-parentheses* n :left ?\` :right ?\'))
 
-(defun insert-single-quotes (n)
+(cl-defun insert-single-quotes (n)
   "Inserts pair of single quotes at point. See `insert-parentheses' for N."
   (interactive "P")
   (insert-parentheses* n :left ?' :right ?'))
 
-(defun insert-double-quotes (n)
+(cl-defun insert-double-quotes (n)
   "Inserts pair of double quotes at point. See `insert-parentheses' for N."
   (interactive "P")
   (insert-parentheses* n :left ?\" :right ?\"))
 
-(defun insert-asterisks (n)
+(cl-defun insert-asterisks (n)
   "Inserts pair of asterisks at point. See `insert-parentheses' for N."
   (interactive "P")
   (insert-parentheses* n :left ?* :right ?*))
 
-(defun insert-guillemets (n)
+(cl-defun insert-guillemets (n)
   "Inserts «» at point. See `insert-parentheses' for N."
   (interactive "P")
   (insert-parentheses* n :left ?\« :right ?\»))
 
-(defun insert-square-brackets (n)
+(cl-defun insert-square-brackets (n)
   "Inserts \[\] at point. See `insert-parentheses' for N."
   (interactive "P")
   (insert-parentheses* n :left ?\[ :right ?\] :ensure-space :after))
 
-(defun insert-curly-brackets (n)
+(cl-defun insert-curly-brackets (n)
   "Inserts \{\} at point. See `insert-parentheses' for N."
   (interactive "P")
   (insert-parentheses* n :left ?{ :right ?}))
 
-(defun insert-angle-brackets (n)
+(cl-defun insert-angle-brackets (n)
   "Inserts \<\> at point. See `insert-parentheses' for N."
   (interactive "P")
   (insert-parentheses* n :left ?< :right ?>))
 
-(defun insert-dollar-brackets (n)
+(cl-defun insert-dollar-brackets (n)
   "Inserts $$ at point. See `insert-parentheses' for N."
   (interactive "P")
   (insert-parentheses* n :left ?$ :right ?$))
 
-(defun insert-xml-tag (n tag)
+(cl-defun insert-xml-tag (n tag)
   "Inserts <TAG></TAG> around point."
   (interactive "P\nsTag: ")
   (insert-parentheses* n :left (format "<%s>" tag) :right (format "</%s>" tag)))
 
-(defun insert-skip-quote (n)
+(cl-defun insert-skip-quote (n)
   "Inserts \[...\] at point. Used to show that a part of quoted text
 is skipped. See `insert-parentheses' for N."
   (interactive "P")
   (insert "[...]"))
 
-(defun insert-post-scriptum ()
+(cl-defun insert-post-scriptum ()
   "Inserts post scriptum delimiters at point."
   (interactive)
   (insert "\nP.S. \nD.S.")
@@ -142,7 +142,7 @@ is skipped. See `insert-parentheses' for N."
   "Should provide doc, but it is more difficult than you would think!
 X should evaluate to a string designator."
   (with-gensyms (string-designator)
-    `(lexical-let ((,string-designator ,x))
+    `(let ((,string-designator ,x))
        (lambda (&optional n)
 	 (interactive "P")
 	 (dotimes (i (or n 1))
@@ -150,59 +150,59 @@ X should evaluate to a string designator."
 ;;(funcall (insert-n '¹) 2)
 ;;(funcall (insert-n "qwe") 2)
 
-(defun insert-symbol-sup1 (n)
+(cl-defun insert-symbol-sup1 (n)
   "Inserts N superscript 1s (¹) at point."
   (interactive "P")
   (dotimes (i (or n 1)) (insert ?¹)))
 
-(defun insert-symbol-sup2 (n)
+(cl-defun insert-symbol-sup2 (n)
   "Inserts N superscript 2s (²) at point."
   (interactive "P")
   (dotimes (i (or n 1)) (insert ?²)))
 
-(defun insert-symbol-sup3 (n)
+(cl-defun insert-symbol-sup3 (n)
   "Inserts N superscript 3s (³) at point."
   (interactive "P")
   (dotimes (i (or n 1)) (insert ?³)))
 
-(defun insert-symbol-deg (n)
+(cl-defun insert-symbol-deg (n)
   "Inserts N degree signs (°) at point."
   (interactive "P")
   (dotimes (i (or n 1)) (insert ?°)))
 
-(defun insert-symbol-ordm (n)
+(cl-defun insert-symbol-ordm (n)
   "Inserts N masculine ordinals (º) at point.
 This function is obsolete. Use C-x 8 _ o instead."
   (interactive "P")
   (dotimes (i (or n 1)) (insert ?º)))
 
-(defun insert-symbol-ordf (n)
+(cl-defun insert-symbol-ordf (n)
   "Inserts N feminine ordinals (ª) at point.
 This function is obsolete. Use C-x 8 _ a instead."
   (interactive "P")
   (dotimes (i (or n 1)) (insert ?ª)))
 
-(defun insert-symbol-macr (n)
+(cl-defun insert-symbol-macr (n)
   "Inserts N spacing macrons at point."
   (interactive "P")
   (dotimes (i (or n 1)) (insert ?¯)))
 
-(defun insert-symbol-bullet (n)
+(cl-defun insert-symbol-bullet (n)
   "Inserts N round filled bullets at point."
   (interactive "P")
   (dotimes (i (or n 1)) (insert ?·)))
 
-(defun insert-german-double-s (n)
+(cl-defun insert-german-double-s (n)
   "Inserts German double s at point."
   (interactive "P")
   (dotimes (i (or n 1)) (insert ?ß)))
 
-(defun insert-c-cedilla (n)
+(cl-defun insert-c-cedilla (n)
   "Inserts c with cedilla (ç) at point."
   (interactive "P")
   (dotimes (i (or n 1)) (insert ?ç)))
 
-(defun insert-1/2 (n)
+(cl-defun insert-1/2 (n)
   "Inserts c with cedilla (ç) at point."
   (interactive "P")
   (dotimes (i (or n 1)) (insert ?½)))
@@ -210,7 +210,7 @@ This function is obsolete. Use C-x 8 _ a instead."
 
 (defvar mb-default-underline-pattern "=")
 
-(defun insert-underline (pattern)
+(cl-defun insert-underline (pattern)
   "Underlines the current line with a string of multiple concatenated
 PATTERNs. The underline is inserted imediately after current line and
 has the same length as current line."
@@ -224,7 +224,7 @@ has the same length as current line."
     (insert (substring line 0 len))))
 ;;(insert-underline "hallo paa do")
 
-(defun insert-prefix-region (beg end &optional prefix)
+(cl-defun insert-prefix-region (beg end &optional prefix)
   "Inserts PREFIX at beginning of each line in region. Default is
 \"> \"."
   (interactive "*r")
@@ -233,15 +233,15 @@ has the same length as current line."
 (defmacro insert-object (obj)
   `(insert (format "%s" ,obj)))
 
-(defun ins (&rest objs)
+(cl-defun ins (&rest objs)
   (dolist (o objs) (insert-object o)))
 
-(defun insert-expression (expression)
+(cl-defun insert-expression (expression)
   "Inserts the evaluation of EXPRESSION at point."
   (interactive (list (eval-minibuffer "Insert expression: ")))
   (ins expression))
 
-(defun insert-provide ()
+(cl-defun insert-provide ()
   (interactive)
   (save-excursion
     (eob)
@@ -250,7 +250,7 @@ has the same length as current line."
 	      (file-name-sans-extension (buffer-name))))))
 ;;(insert-provide)
 
-(defun insert-alphabet (n)
+(cl-defun insert-alphabet (n)
   "Insert the alphabet.
 With a prefix you can select another language than English.
 Absolut value of prefix defines the language. The sign defines

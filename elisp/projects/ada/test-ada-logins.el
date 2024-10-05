@@ -5,7 +5,7 @@
   "Test of `ada-login-teacher-1'"
   (should
    (equal
-    (loop for prefix in (cartesian-product
+    (cl-loop for prefix in (cartesian-product
 			 '((9 0 4) (1 3))
 			 #'(lambda (x y)
 			     (string-to-number

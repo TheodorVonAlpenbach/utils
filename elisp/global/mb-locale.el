@@ -1,4 +1,4 @@
-(defun map-string-region (from to beg end)
+(cl-defun map-string-region (from to beg end)
   (interactive "*r")
   (save-excursion
     (save-restriction
@@ -19,10 +19,10 @@
 ;;(map-strings-region 1 100 *iso-latin1-encoding* 4 0)
 ;;(map-strings-region (point-min) (point-max) *iso-latin1-encoding* 4 0)
 
-(defun replace-iso-latin1-with-7bit-region (beg end) (interactive "*r")
+(cl-defun replace-iso-latin1-with-7bit-region (beg end) (interactive "*r")
   (map-strings-region beg end map-string-iso-latin1-to-7bit))
 
-(defun replace-iso-latin1-with-7bit-region (beg end)
+(cl-defun replace-iso-latin1-with-7bit-region (beg end)
   (interactive "*r")
   (save-excursion
     (save-restriction
@@ -35,7 +35,7 @@
               (replace-match (car (cdr current)) t nil)))
           (setq table (cdr table)))))))
 
-(defun iso-latin1-2-7bit-char (iso-latin-char &optional check-error-p encoding)
+(cl-defun iso-latin1-2-7bit-char (iso-latin-char &optional check-error-p encoding)
   (let ((string (char-to-string iso-latin-char)))
     (aif (assoc string (or encoding *iso-latin1-encoding*))
       (second it)
@@ -44,7 +44,7 @@
 	string))))
 ;;(mapcar #'iso-latin1-2-7bit-char (list ?æ ?a))
 
-(defun iso-latin1-2-7bit (iso-latin-string &optional encoding)
+(cl-defun iso-latin1-2-7bit (iso-latin-string &optional encoding)
   (cl-loop for c across iso-latin-string
 	   concat (iso-latin1-2-7bit-char c)))
 ;;(iso-latin1-2-7bit "ææ")

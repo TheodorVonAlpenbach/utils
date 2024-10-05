@@ -15,7 +15,7 @@
 (defconst c++-base-type-list '("int" "bool" "double" "char")
   "List of base C++ types")
 
-(defun c++-reference-non-base-type (type)
+(cl-defun c++-reference-non-base-type (type)
   "Returns TYPE + '& if TYPE is not in c++-base-type-list, else TYPE" 
   (if (not (member type c++-base-type-list))
       (setq type (concat type "&"))
@@ -26,14 +26,14 @@
 
 ;;;lbs endringer
 
-(defun open-insert-and-indent-line (&rest line)
+(cl-defun open-insert-and-indent-line (&rest line)
 "Opens a new line, inserts any number of strings or characters, and
 indents it."
   (newline)
   (apply #'insert line)
   (indent-according-to-mode))
 
-(defun c++-insert-unary-function-6 (class argt argn rett memt memn)
+(cl-defun c++-insert-unary-function-6 (class argt argn rett memt memn)
 "Inserts the class definition of unary_function object at point. CLASS
 denotes the class name, ARGT the function argument template type, ARGN
 the function argument template name, RETT the function return type,
@@ -89,7 +89,7 @@ smember name (first letter of type): ")
 (define-key c++-mode-map "\C-cf" 'c++-insert-unary-function-6)
 
 ;; mb original
-(defun c++-insert-unary-function-5 (class argt argn rett memt memn)
+(cl-defun c++-insert-unary-function-5 (class argt argn rett memt memn)
   "Inserts the class definition of unary_function object at point.
 CLASS denotes the class name, ARGT the function argument template
 type, ARGN the function argument template name, MEMT the optional
@@ -136,5 +136,5 @@ struct " class " : unary_function<" arg-template ", " ret-template ">
 ;(c++-insert-unary-function-0 "C" "T" "x" "R" "M" "m")
 ;(concat "a" "b")
 
-(defun mb_test (arg) "foobar"
+(cl-defun mb_test (arg) "foobar"
   (c++-insert-unary-function-0 arg arg arg arg arg arg ))

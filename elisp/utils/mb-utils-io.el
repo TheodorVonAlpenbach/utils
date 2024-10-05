@@ -7,7 +7,7 @@ file."
   (insert-file f)
   (goto-char (or pos (point-min))))
 
-(defun read* (file)
+(cl-defun read* (file)
   "`read's first elisp object in FILE and returns it."
   (with-temp-buffer
     (insert-file-contents file)
@@ -32,7 +32,7 @@ file."
     (buffer-substring-no-properties (point-min) (point-max))))
 ;;(substring (buffer-string-no-properties) 1 30)
 
-(defun file-string (filename &optional coding-system)
+(cl-defun file-string (filename &optional coding-system)
   "Returns content of FILENAME as a string.
 Note that the function discards the EOF character.
 
@@ -46,7 +46,7 @@ expand it to the directory of this module."
       (buffer-string))))
 ;;(file-string "~/tmp/qwe.txt")
 
-(defun file-lines (filename &optional coding-system)
+(cl-defun file-lines (filename &optional coding-system)
   "Returns content of file as a string.
 Note that the function discards the EOF character."
   (string-lines (file-string filename coding-system)))
@@ -122,7 +122,7 @@ default value of optional parameter BUFFER is the current buffer."
 	 ,@body))))
 (def-edebug-spec with-file-readonly t)
 
-(defun get-temp-file-name ()
+(cl-defun get-temp-file-name ()
   "Returns a list of two items: a unique file name and a path to a tmp
 dir."
   (list (iso-date-and-time :with-seconds t) "C:/WINNT/Temp/"))
@@ -234,21 +234,21 @@ See `parse-csv-string' for more details"
     (set-buffer-multibyte nil)
     (insert (subseq vector from to))))
 
-(defun test-io-byte-vector ()
+(cl-defun test-io-byte-vector ()
   (let ((f1 "/cygdrive/c/Users/eier/Documents/MATLAB/miningsuite/ragtime.wav")
 	(f2 "/cygdrive/c/Users/eier/Documents/MATLAB/miningsuite/ragtime2.wav"))
     (write-byte-vector (coerce (read-byte-vector f1) 'string) f2)))
 ;;(test-io-byte-vector)
 
 (require 'hexl)
-(defun file-to-bytes (file)
+(cl-defun file-to-bytes (file)
   (with-temp-buffer
     (insert-file file)
     (hexl-mode)
     (buffer-to-bytes (current-buffer))))
 ;;(file-to-bytes "c:/emacs-22.1/site-lisp/mb-lisp/midi/test-new2.midi")
   
-(defun buffer-to-bytes (buffer)
+(cl-defun buffer-to-bytes (buffer)
   "this has been checked and ok! next step is to make a read file thing."
   (with-buffer buffer
     (hexl-beginning-of-buffer 1)
@@ -259,10 +259,10 @@ See `parse-csv-string' for more details"
 	  finally return (nreverse bytes))))
 ;;(read-bytes-from-buffer "test.midi")
 
-(defun read-position ()
+(cl-defun read-position ()
   (hexl-current-address))
 
-(defun read-bytes (n)
+(cl-defun read-bytes (n)
   "Returns the folloing N bytes in the buffer stream as a list.
 Also, stream marker is moved to the point after the NTh byte.
 Must be called in a hexl mode buffer context."
@@ -271,7 +271,7 @@ Must be called in a hexl mode buffer context."
 	do (when (< (hexl-current-address) hexl-max-address)
 	     (hexl-forward-char 1))))
 
-(defun bs-read-string (n)
+(cl-defun bs-read-string (n)
   "Reads N bytes from the buffer stream and converts them to a string of length N"
   (apply #'concat (mapcar #'byte-to-char (read-bytes n))))
 ;;(bs-read-string (read-bytes-from-file "c:/emacs-22.1/site-lisp/mb-lisp/music-analyzer/test.midi") 4)
@@ -287,18 +287,18 @@ stream marker to the point after this byte. The bytes 1...N-1 are
 discareded. Must be called in a hexl mode buffer context."
   (first (last (read-bytes n))))
 
-(defun insert-bytes-in-buffer (bytes buffer)
+(cl-defun insert-bytes-in-buffer (bytes buffer)
   "Inserts the BYTES list into BUFFER at curent point"
   (with-buffer buffer
     (mapc #'insert bytes)))
 
-(defun bytes-to-buffer (bytes buffer)
+(cl-defun bytes-to-buffer (bytes buffer)
   "Removes exising content in BUFFER and inserts the BYTES list into it."
   (with-buffer buffer
     (delete-region (point-min) (point-max))
     (mapc #'insert bytes)))
 
-(defun bytes-to-file (bytes file)
+(cl-defun bytes-to-file (bytes file)
   "Creates a new file FILE consisting of BYTES.
 If FILE already exists, it will be overwritten."
   (with-temp-buffer
@@ -308,7 +308,7 @@ If FILE already exists, it will be overwritten."
     (save-buffer)))
 ;(bytes-to-file '(1 2 3 4) "c:/emacs-22.1/site-lisp/mb-lisp/utils/test1.bin")
 
-(defun read-variable-length-integer ()
+(cl-defun read-variable-length-integer ()
   (let ((bytes (nreverse 
 		(cl-loop for byte = (read-byte) then (read-byte)
 		      collect (mod byte 128)

@@ -2,7 +2,7 @@
 (require 'time)
 
 ;;; LS formatter
-(defun LS-fontify ()
+(cl-defun LS-fontify ()
   (interactive)
   (font-lock-add-keywords
    nil ;;i.e. only for the current buffer
@@ -10,16 +10,16 @@
 	 '(0 org-level-6))))
 
 ;;; LS parser
-(defun LS-buffer ()
+(cl-defun LS-buffer ()
   (or (get-buffer "LS-notes.org")
       (error "LS buffer is not loaded")))
 
-(defun LS-log-day-separator ()
+(cl-defun LS-log-day-separator ()
   (format "^\\*\\* %s"(iso-date-regexp)))
-(defun LS-log-item-separator ()
+(cl-defun LS-log-item-separator ()
   (format "^%s" (iso-time-regexp)))
 
-(defun time-within (x interval)
+(cl-defun time-within (x interval)
   (and (time<= (first interval) x) (time< x (second interval))))
 ;;(mapcar #'first (LS-log-days (LS-log-string)))
 
@@ -40,7 +40,7 @@
 	   :key #'first))
 ;;(mapcar #'first (LS-log-days (LS-log-string)))
 
-(defun LS-extract-hours-buffer ()
+(cl-defun LS-extract-hours-buffer ()
   (LS-extract-hours (LS-log-string)))
 ;;(LS-extract-hours-buffer)
 
@@ -109,7 +109,7 @@ compared to the relative directory names in PARENT-DIR"
   (with-buffer it
     (setf fill-paragraph-function #'fill-time-paragraph)))
 
-(defun ls-insert-arrival-time ()
+(cl-defun ls-insert-arrival-time ()
   (interactive)
   (if (string/= (buffer-name) "LS-notes.org")
     (warn "Function ls-insert-arrival-time is only valid in buffer LS-notes.org.")
@@ -124,7 +124,7 @@ compared to the relative directory names in PARENT-DIR"
     (insert-time nil)
     (insert " Ankomst\n")))
 
-(defun ls-insert-depature-time ()
+(cl-defun ls-insert-depature-time ()
   (interactive)
   (if (string/= (buffer-name) "LS-notes.org")
     (warn "Function ls-insert-arrival-time is only valid in buffer LS-notes.org.")
@@ -134,12 +134,12 @@ compared to the relative directory names in PARENT-DIR"
     (insert-time nil)
     (insert " Hjem\n")))
 
-(defun ls-project-number->tag (project-number)
+(cl-defun ls-project-number->tag (project-number)
   "Convert integer PROJECT-NUMBER to corresponding project tag."
   (insert-sequence (format "%05d" project-number) "_" :start1 2 :end1 2))
 ;;(ls-project-number->tag 15010)
 
-(defun ls-project-name (project-number)
+(cl-defun ls-project-name (project-number)
   "Return the directory name under ~/systems containing PROJECT-NUMBER."
   (find (ls-project-number->tag project-number)
 	(directory-files "~/systems")

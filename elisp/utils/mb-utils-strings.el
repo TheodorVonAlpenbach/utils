@@ -3,15 +3,15 @@
 (require 'mb-sequences)
 (require 'mb-utils-math)
 
-(defun string> (string1 string2)
+(cl-defun string> (string1 string2)
   "Returns non-nil iif string1 > string2. See `string<'"
   (string< string2 string1))
 
-(defun string<= (string1 string2)
+(cl-defun string<= (string1 string2)
   "Returns non-nil iif string1 > string2. See `string<'"
   (not (string> string1 string2)))
 
-(defun string>= (string1 string2)
+(cl-defun string>= (string1 string2)
   "Returns non-nil iif string1 > string2. See `string<'"
   (not (string< string1 string2)))
 
@@ -29,31 +29,31 @@
 ;;(string/= "qwe" "qwe")
 
 ;;; Ignore case versions
-(defun istring< (string1 string2)
+(cl-defun istring< (string1 string2)
   (string-collate-lessp string1 string2 nil t))
 ;;(list (string< "qwe" "Rty") (istring< "qwe" "rty"))
 
-(defun istring= (string1 string2)
+(cl-defun istring= (string1 string2)
   (string-collate-equalp string1 string2 nil t))
 ;;(list (string= "qwe" "QWE") (istring= "qwe" "QWE"))
 
-(defun lower-case-p (character)
+(cl-defun lower-case-p (character)
   "Common Lisp function. Checks if CHARACTER is invariant under
 case-table."
   (= (aref (current-case-table) character) character))
 ;;(lower-case-p ?Æ) => nil
 
-(defun upper-case-p (character)
+(cl-defun upper-case-p (character)
   "Inverse of `lower-case-p'."
   (not (lower-case-p character)))
 
-(defun integer-string-p (string &optional only-non-negative-p)
+(cl-defun integer-string-p (string &optional only-non-negative-p)
   (and (stringp string)
        (string-match-exact
 	(if only-non-negative-p "[0-9]+" "-?[0-9]+") string)))
 ;;(mapcar #'integer-string-p '("123" "-123" 123 "a"))
 
-(defun string-to-integer (string)
+(cl-defun string-to-integer (string)
   "Similar to `string-to-number', but returns nil (not 0) if the
 STRING is not an integer, otherwise returns the resulting integer."
   (and (integer-string-p string)
@@ -64,10 +64,10 @@ STRING is not an integer, otherwise returns the resulting integer."
   "Common Lisp CHAR"
   `(aref ,string ,index))
 
-(defun string-to-character-list (string) (coerce string 'list))
+(cl-defun string-to-character-list (string) (coerce string 'list))
 ;;(string-to-character-list "abc")
 
-(defun copy-case (string pattern)
+(cl-defun copy-case (string pattern)
   "Returns copy of STRING that has similar case as PATTERN: If PATTERN
 starts with two upper case characters, the entire result is upcased. If
 PATTERN starts with an upcase character followed by a downcase, the
@@ -78,7 +78,7 @@ result is capitalized. Else the entire result is downcased."
       (capitalize string))
     (downcase string)))
 
-(defun pure-string (string)
+(cl-defun pure-string (string)
   "Removes formatting from STRING and returns result."
   (cl-typecase string
     (sequence (elt string 0))
@@ -90,29 +90,29 @@ result is capitalized. Else the entire result is downcased."
 This is a shortcut for \(make-string N 32\))"
   (make-string n 32))
 
-(defun empty-string-p (string)
+(cl-defun empty-string-p (string)
   (and (stringp string)
        (zerop (length string))))
 ;;(empty-string-p "")
 
-(defun not-empty (string)
+(cl-defun not-empty (string)
   "Returns 'nil if STRING is empty. Otherwise returns STRING. Useful
 in connection with e.g. `or'"
   (and (not (empty-string-p string))
        string))
 ;(not-empty "")
 
-(defun blank-p (string)
+(cl-defun blank-p (string)
   "Return not nil if string has no non-whitespace characters."
   (empty-string-p (string-trim string)))
 
-(defun string-match-end (regexp string &optional start)
+(cl-defun string-match-end (regexp string &optional start)
   "Same as `string-match', except that it returns the position after
 match."
   (let ((pos (string-match regexp string)))
     (if pos (match-end 0) nil)))
 
-(defun split-string-at-pos (string &rest positions)
+(cl-defun split-string-at-pos (string &rest positions)
   (warn "split-string-at-pos is deprecated.
 Use `split-at-position' instead. Called from %s"
 	(second (backtrace-frame 6)))
@@ -128,7 +128,7 @@ from-end is t) is less than (or equal to) N."
     (remove "" (apply #'split-at-position string split-positions))))
 ;;(split-string-by-length "0123456789012345" 3 :from-end t)
 
-(defun regexp-consecutive-matches (regexp string)
+(cl-defun regexp-consecutive-matches (regexp string)
   "Returns the position boundaries of the consecutive substrings of
 STRING that matches REGEXP"
   (cl-loop with position = 0
@@ -137,7 +137,7 @@ STRING that matches REGEXP"
 	collect (list (match-beginning 0) (match-end 0))))
 ;;(regexp-consecutive-matches "a" "aasdfaa")
 
-(defun split-string-modify-positions (positions with-separator)
+(cl-defun split-string-modify-positions (positions with-separator)
   (cl-case with-separator
     ((:none nil) (cut (cons 0 (flatten positions)) 2 t))
     (:left (cut (cons 0 (repeat-elements (mapcar #'first positions))) 2 t))
@@ -199,7 +199,7 @@ the result is undefined."
        (split-at-position string (match-beginning 0) (match-end 0))))
 ;;(split-string-once "gabcdg" "\\`g")
 
-(defun split-string-regexp-1 (string regexp)
+(cl-defun split-string-regexp-1 (string regexp)
   (cl-loop for s = string then (third split)
 	for split = (split-string-once s regexp)
 	while split
@@ -308,7 +308,7 @@ NEWSTRING."
     (buffer-string)))
 ;;(mb-string-replace (setq string-replace-test-string "") "b" "c")
 
-(defun substitute-string (string subst-string from to)
+(cl-defun substitute-string (string subst-string from to)
   "Removes substring [FROM TO) from STRING and inserts
   SUBST-STRING at position FROM in STRING"
   (let ((substrings (split-at-position string from to)))
@@ -348,7 +348,7 @@ result of FUNCTION."
 :;(string-replace-map "Àøå"
 :;  (mapcar #'(lambda (x) (cons (first x) (third x))) *iso-latin1-encoding*))
 
-(defun string-indent-lines (string indent-string)
+(cl-defun string-indent-lines (string indent-string)
   "Prepend all lines in STRING with INDENT-STRING."
   (if (empty-string-p indent-string)
     string
@@ -371,7 +371,7 @@ insertion, KEY modifies the elements. Note that KEY manipulation does
 not affect TEST.
 IN may also be a function (fn i), taking an index argument, see `infix-list'."
   (let* ((list* (mapcar key
-		  (remove-if-not test
+		  (cl-remove-if-not test
 		    (if discard-nil (remove nil list) list)))))
     (string-indent-lines
      (concat pre
@@ -412,11 +412,11 @@ arguments DELIMITER, LAST-DELIMITER, and PAIR-DELIMITER.
 	 :suf (concat last-delimiter (last-elt list))))))
 ;;(andcat '("Peter" "Paul" "Mary"))
 
-(defun lines-to-string (lines)
+(cl-defun lines-to-string (lines)
   (concat* lines :in "\n"))
 ;;(lines-to-string '("first" "next" "last"))
 
-(defun string-to-lines (string &optional remove-empty-p)
+(cl-defun string-to-lines (string &optional remove-empty-p)
   "Returns a list of strings, each string being line substring in
 STRING."
   (if remove-empty-p
@@ -427,12 +427,12 @@ STRING."
 (defalias 'string-lines 'string-to-lines)
 ;;(string-lines "a\nb\n\nc\n")
 
-(defun quote-word () "Quotes closest word before point"
+(cl-defun quote-word () "Quotes closest word before point"
   (interactive "*")
   (backward-word 1) (insert "\"") 
   (forward-word 1) (insert "\""))
 
-(defun quote-region (beg end) "Quotes region"
+(cl-defun quote-region (beg end) "Quotes region"
   (interactive "*r")
   (goto-char beg) (insert "\"") 
   (goto-char (1+ end)) (insert "\""))
@@ -472,7 +472,7 @@ current buffer) as a lines of string lines. The region can be
 overruled by keywords :START and :END."
   (string-to-lines (region-to-string :buffer buffer :start start :end end)))
 
-(defun match-string* (num string &optional no-properties)
+(cl-defun match-string* (num string &optional no-properties)
   "Same as `match-string', but if NO-PROPERTIES is non-nil,
 `match-string-no-properties' is called instead."
   (funcall (if no-properties #'match-string-no-properties #'match-string)
@@ -527,13 +527,13 @@ tree. Then a tree of corresponding matches is returned."
 
 ;; Note! The following three functions can be in conflict with modules
 ;; that Slime loads. Should consider renaming them to mb-string-*
-(defun string-trim-left* (string &optional regexp)
+(cl-defun string-trim-left* (string &optional regexp)
   "Returns a copy of STRING trimmed at left with REGEXP."
   (or (third (split-string-once string (mb-trim-regexp regexp :left)))
       string))
 ;;(string-trim-left* "***qwe" "\\*")
 
-(defun string-trim-right* (string &optional regexp)
+(cl-defun string-trim-right* (string &optional regexp)
   "Returns a copy of STRING trimmed at right with REGEXP."
   (or (first (split-string-once string (mb-trim-regexp regexp :right)))
       string))
@@ -549,13 +549,13 @@ right side respectively."
     ((:both t) (string-trim-right* (string-trim-left* string regexp) regexp))))
 ;;(string-trim* " **qwe**" t)
 
-(defun string-remove-props (string)
+(cl-defun string-remove-props (string)
   "Returns STRING without any emacs text props. For an entire buffer,
 consider `buffer-substring-no-properties'"
   (message "This method is obsolete. Use `substring-no-properties' instead")
   (set-text-properties 0 (length string) nil string) string)
 
-(defun string-fill-paragraph (string)
+(cl-defun string-fill-paragraph (string)
   "Modyfies STRING as if it were a substring in a text buffer and
 one applied `fill-paragraph' to it"
   (string-trim (with-temp-buffer
@@ -579,13 +579,13 @@ one applied `fill-paragraph' to it"
 ;;(let (lines) (with-lines (l "qwe\nqwe\nqwe") (push l lines)) lines)
 (def-edebug-spec with-lines ((gate symbolp form) body))
 
-(defun multiply-string (s n)
+(cl-defun multiply-string (s n)
   "TODO: Not too efficient"
   (if (< n 1)
     "" (apply #'concat (make-list n s))))
 ;;(mapcar (bind #'multiply-string "qwe" 1) (a-b -1 3))
 
-(defun integer-to-ordinal (n)
+(cl-defun integer-to-ordinal (n)
   (if (<= n 0)
     (error "Integer must be positive")
     (if (< 3 (mod n 100) 21)
@@ -593,7 +593,7 @@ one applied `fill-paragraph' to it"
       (format "%d%s" n (cl-case (mod n 10) 
 			 (1 "st") (2 "nd") (3 "rd") (t "th"))))))
 
-(defun integer-to-ordinal-string (n)
+(cl-defun integer-to-ordinal-string (n)
   (if (<= n 0)
     (error "Integer must be positive")
     (cl-case n 
@@ -696,12 +696,12 @@ parameter SEED, see `random-integers'."
 ;;; either one of the end digits. The sides alternate making a single
 ;;; move. Eventually there must be one digit left. The side making
 ;;; this last, forced move wins iff the last digit is 1.
-(defun bsg-legal-p (string)
+(cl-defun bsg-legal-p (string)
   (and (stringp string)
        (string-match "^[01]+$" string)))
 ;;(mapcar #'bsg-legal-p '(nil 1 "" "1" "0" "01" "10101" "101013"))
 
-(defun bsg-lost-p (string)
+(cl-defun bsg-lost-p (string)
   "Return nil iff STRING is a theoretically won position.
 A position is lost iff its perfect center substring is either 0,
 11, or 010."
@@ -713,7 +713,7 @@ A position is lost iff its perfect center substring is either 0,
       (string= (center string 2) "11"))))
 ;;(mapcar #'bsg-lost-p '("0" "010" "11"))
 
-(defun bsg-move (string)
+(cl-defun bsg-move (string)
   "Make a move in the BSG game.
 The result is a pair \(MOVE NEW-STRING\), where MOVE is
 either :left or :right, and indicates from which end of STRING a
@@ -732,7 +732,7 @@ you (the other player) win or lose."
     (error "%s is not a legal BSG string!")))
 ;;(bsg-move "101")
 
-(defun format-integer-ranges (integers &optional sorted-p)
+(cl-defun format-integer-ranges (integers &optional sorted-p)
   "Return a string that expresses the list INTEGERS in a condensed form.
 E.g. '(1 2 3 6 7 8 11) ==> \"1--3, 6--8, 11\".
 
@@ -750,7 +750,7 @@ See also `group-consequtive-integers'."
 		 :key #'number-to-string)))))
 ;;(format-integer-ranges '(1 2 3 6 7 8 11))
 
-(defun read-whole-string (string)
+(cl-defun read-whole-string (string)
   "Read the whole STRING as with `read' into a sexp list."
   (cl-loop with n = (length string)
 	for (x . pos) = (read-from-string string pos)
@@ -764,7 +764,7 @@ See also `group-consequtive-integers'."
   (lines-to-string (last (string-lines string) n)))
 ;;(string-tail "qwe\nqwe2\nqwe3")
 
-(defun alliterate-word (word)
+(cl-defun alliterate-word (word)
   "Randomly scramble the letters in WORD, except the first and last."
   (if (> (length word) 3)
     (concat (substring word 0 1)
@@ -772,7 +772,7 @@ See also `group-consequtive-integers'."
 	    (substring word -1))
     word))
 
-(defun alliterate (string)
+(cl-defun alliterate (string)
   "Randomly scramble the letter"
   (apply #'concat
     (mapcar #'alliterate-word
@@ -798,7 +798,7 @@ length."
 	      'string))))
 ;;(alphanumerate (a-b 0 26))
 
-(defun split-name (name)
+(cl-defun split-name (name)
   (cl-destructuring-bind (firsts last)
       (split-at-position (split-string name) -1)
     (list (concat* firsts :in " ") (car last))))
@@ -821,7 +821,7 @@ length."
     (apply #'max (mapcar #'length it))))
 ;;(tab-column-width '(1 123))
 
-(defun tab-flag (width &optional type)
+(cl-defun tab-flag (width &optional type)
   (format "%%%s%ds" (if (eql type 'integer) "" "-") width))
 
 (cl-defun tab-control-string (widths &key (type 'string) (separator " "))
@@ -878,20 +878,20 @@ SEPARATOR"
 ;;(uuid-regexp '(8 4 4 4 12) "-")
 ;;(string-to-integer "1091864")
 
-(defun uuid-p (string)
+(cl-defun uuid-p (string)
   (or (string-match (uuid-regexp 24) string)
       (string-match (uuid-regexp '(8 4 4 4 12) "-") string)))
 ;;(uuid-p "53bf7368-f985-4061-9283-b3065a578a7f")
 ;;(length "b3065a578a7f")
 ;;(uuid-p "594d3459cb99b500132bc742")
 
-(defun commented-string-p (string comment-start &optional empty-is-comment-p)
+(cl-defun commented-string-p (string comment-start &optional empty-is-comment-p)
   (or (and empty-is-comment-p (empty-string-p string))
       (string-match (format "^%s" comment-start) string)))
 ;;(commented-string-p "#!/bin/bash" "#")
 ;;(commented-string-p "" "#" t)
 
-(defun sort-strings-with-comments (strings comment-start)
+(cl-defun sort-strings-with-comments (strings comment-start)
   (let ((comments ()))
     (cl-loop for string in strings
 	     if (commented-string-p string comment-start t)

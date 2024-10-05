@@ -1,4 +1,4 @@
-(defun scratches ()
+(cl-defun scratches ()
   (setf a 'a)
   (setf b 'b)
   (setf rels nil)

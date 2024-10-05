@@ -1,9 +1,9 @@
 (require 'gui)
 
-(defun gui-extract-scilab-positions (gui)
+(cl-defun gui-extract-scilab-positions (gui)
   "Calculate the envelopes of the rectangles in GUI."
   (if (eql (car gui) :frame)
-    (loop for x in (third gui)
+    (cl-loop for x in (third gui)
 	  append (gui-extract-scilab-positions x))
     (if (stringp (car gui))
       (destructuring-bind (name (left top) (width height)) gui

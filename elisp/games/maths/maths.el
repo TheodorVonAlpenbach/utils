@@ -1,11 +1,11 @@
 (require 'maths-config)
 (require 'maths-common)
 
-(defun maths-operator-string (operator)
+(cl-defun maths-operator-string (operator)
   (symbol-name operator))
 ;;(mapcar #'maths-operator-string '(:addition :substraction :multiplication :division))
 
-(defun maths-format-task (operation arguments &optional solution)
+(cl-defun maths-format-task (operation arguments &optional solution)
   (format "%d %s %d = %s" 
     (first arguments)
     (maths-operator-string (maths-operator operation))
@@ -13,7 +13,7 @@
     (or solution "")))
 ;;(maths-format-task :addition '(1 1) 2)
 
-(defun maths-format-match (user task)
+(cl-defun maths-format-match (user task)
   (concat
    (format "Your rating: %d (RD = %d)\n" (maths-user-rating user) (maths-user-RD user))
    (format "Task rating: %d (RD = %d)\n" (maths-task-rating task) (maths-task-RD task))
@@ -29,7 +29,7 @@
     (insert (maths-format-match user (maths-draw-task :rating (maths-user-rating user))))
     (time-set-reference)))
 
-(defun maths-read-answer ()
+(cl-defun maths-read-answer ()
   "Parses the submitted answer"
   (save-excursion
     (backward-char 1)
@@ -55,7 +55,7 @@
 		(format "Task's new rating is %d (%d)\n" task-rating task-rating-diff)
 		(format "Task' new RD is %d (%d)\n" task-RD task-RD-diff))))))
 
-(defun maths-submit ()
+(cl-defun maths-submit ()
   "It's a bit confusing with task-entry in DB, task as is, and
 the *maths-current-task* which is yet another structure."
   (let* ((time (time-elapsed nil))
@@ -69,17 +69,17 @@ the *maths-current-task* which is yet another structure."
 	     (maths-new))
       (insert (long-judgement answer time solution score old-ratings new-ratings)))))
 
-(defun maths-answer-submitted-p ()
+(cl-defun maths-answer-submitted-p ()
   (string-match "Spent" (buffer-string)))
 
 ;;; Interactive functions
-(defun maths-enter ()
+(cl-defun maths-enter ()
   (interactive)
   (if (maths-answer-submitted-p)
     (maths-new)
     (maths-submit)))
 
-(defun maths-register-new-user ()
+(cl-defun maths-register-new-user ()
   (interactive)
   (let ((user-name (read-from-minibuffer "New user name: "))
 	(age (string-to-number (read-from-minibuffer "Age: "))))
@@ -92,7 +92,7 @@ the *maths-current-task* which is yet another structure."
 	(message "Couldn't register user since user name '%s' is already registered" user-name)))))
 ;;(maths-register-new-user)
 
-(defun maths-change-user ()
+(cl-defun maths-change-user ()
   (interactive)
   (let ((others (maths-db-user-names :sans (maths-user-name (maths-current-user)))))
     (if others
@@ -101,12 +101,12 @@ the *maths-current-task* which is yet another structure."
 	(maths-new))
       (message "There are currently no other users but you!"))))
 
-(defun maths-toggle-auto-continue ()
+(cl-defun maths-toggle-auto-continue ()
   (interactive)
   (setf *maths-auto-continue* (not *maths-auto-continue*)))
 ;;(maths-toggle-auto-continue)
 
-(defun maths-auto-continue-p ()
+(cl-defun maths-auto-continue-p ()
   *maths-auto-continue*)
 
 ;;; tab format. TODO move this somewhere else
@@ -125,7 +125,7 @@ the *maths-current-task* which is yet another structure."
     (apply #'max (mapcar #'length c))))
 ;;(tab-column-width '(1 123))
 
-(defun tab-flag (width &optional type)
+(cl-defun tab-flag (width &optional type)
   (format "%%%s%ds" (if (eql type 'integer) "" "-") width))
 
 (cl-defun tab-control-string (widths &key (type 'string) (separator " "))
@@ -162,25 +162,25 @@ the *maths-current-task* which is yet another structure."
 	    :column-separator " | "))
     (switch-to-buffer-other-window buffer-name)))
 
-(defun maths-quit ()
+(cl-defun maths-quit ()
   (interactive)
   (maths-save)
   (kill-buffer +maths-buffer+))
 
-(defun unsuppress-keymap (map keys)
+(cl-defun unsuppress-keymap (map keys)
   (cl-loop for char across keys
 	   for key = (char-to-string char)
-	   do (define-key map key (lexical-let ((char char))
+	   do (define-key map key (let ((char char))
 				    #'(lambda () 
 					(interactive)
 					(insert char))))))
 ;;(unsuppress-keymap maths-mode-map "0123456789")
 
-(defun maths-plot-user-ratings ()
+(cl-defun maths-plot-user-ratings ()
   (interactive)
   (gnuplot-ratings (maths-db-user-ratings (maths-current-user))))
 
-(defun maths-mode-map ()
+(cl-defun maths-mode-map ()
   (let ((map (make-keymap))
 	(list-map (make-sparse-keymap))
 	(user-map (make-sparse-keymap)))
@@ -248,7 +248,7 @@ the *maths-current-task* which is yet another structure."
    (setf buffer-read-only nil)
    (maths-set-mode-line))
 
-(defun maths-init ()
+(cl-defun maths-init ()
   (maths-init-database)
   (require 'maths-backend))
 

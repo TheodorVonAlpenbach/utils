@@ -24,17 +24,17 @@
 ;;; For simplicity we put the octave before the pitch class
 ;;; 4A is «A4», i.e. frequency 400
 
-(defun y2b-frequency (soctave spc)
+(cl-defun y2b-frequency (soctave spc)
   "Convert pitch symbol to frequency"
   (awhen (cl-assoc (upcase spc) +base-frequencies+ :test #'string=)
     (round (* (second it)
 	      (expt 2 (- (string-to-integer soctave) 4))))))
 ;;(y2b-frequency "5" "C")
-;;(loop for o from 3 to 6 collect (y2b-frequency (number-to-string o) "A"))
-;;(loop for o from 3 to 6 collect (y2b-frequency (number-to-string o) "R"))
+;;(cl-loop for o from 3 to 6 collect (y2b-frequency (number-to-string o) "A"))
+;;(cl-loop for o from 3 to 6 collect (y2b-frequency (number-to-string o) "R"))
 
-(defun y2b-geometric-series (base end)
-  (loop for i from 0 to end sum (expt base i)))
+(cl-defun y2b-geometric-series (base end)
+  (cl-loop for i from 0 to end sum (expt base i)))
 ;;(y2b-geometric-series 1 1)
 
 (cl-defun y2b-parse-sduration (sduration)
@@ -51,13 +51,13 @@
 ;;(mapcar (bind #'y2b-milliseconds 480) '("1" "1.5" "2" "4" "8" "16"))
 ;;(y2b-milliseconds "1.")
 
-(defun y2b-parse-spitch (spitch)
+(cl-defun y2b-parse-spitch (spitch)
   (if (string-match "[0-9]" (substring spitch 0 1))
     (split-at-position spitch 1)
     (list nil spitch)))
 ;;(mapcar #'y2b-parse-spitch '("5C" "4C#" "C" "C#"))
 
-(defun y2b-parse-snote (snote)
+(cl-defun y2b-parse-snote (snote)
   (aif (string-match "[0-9]\\.*$" snote)
     (destructuring-bind (soctave spc)
 	(y2b-parse-spitch (substring snote 0 it))
@@ -67,7 +67,7 @@
 ;;(string-match "[0-9]\\.*$" "5C4.")
 
 (cl-defun y2b-1 (svoice tempo transpose)
-  (loop for snote in (split-string svoice)
+  (cl-loop for snote in (split-string svoice)
 	for (soctave spc sduration) = (y2b-parse-snote snote)
 	for last-sduration = (or sduration "4") then (or sduration last-sduration)
 	for last-soctave = (or soctave "4") then (or soctave last-soctave)
@@ -79,7 +79,7 @@
 ;;(y2b-1 "5C8 R4  4G8 F#" 240 1)
 
 (cl-defun y2b (svoice &key (tempo 60) transpose tag)
-  (concat* (loop for (a b) in (pairs (append (y2b-1 svoice tempo transpose) '("dummy")))
+  (concat* (cl-loop for (a b) in (pairs (append (y2b-1 svoice tempo transpose) '("dummy")))
 		 if (not (string= (substring a 0 2) "-D"))
 		 collect (if (string= (substring b 0 2) "-D")
 			   (format "%s %s" a b)
@@ -87,14 +87,14 @@
     :pre "beep "
     :in " -n "))
 
-(defun y2b-join-delay (ds)
+(cl-defun y2b-join-delay (ds)
   (format "-D %d"
-    (loop for d in ds
+    (cl-loop for d in ds
 	  sum (string-to-number (second (split-string d))))))
 ;;(y2b-join-delay '("-D 10" "-D 5"))
 
 (cl-defun y2b (svoice &key (tempo 60) transpose tag)
-  (concat* (loop for (n . ds) in (group (y2b-1 svoice tempo transpose)
+  (concat* (cl-loop for (n . ds) in (group (y2b-1 svoice tempo transpose)
 				   :test #'(lambda (x y)
 					     (string= (substring y 0 2) "-D")))
 		 collect (if ds (concat n " " (y2b-join-delay ds)) n))
@@ -105,7 +105,7 @@
 ;;(insert (y2b "5c8 4b 5c r 4c r c r g f e g 5c 4b 5c e d c d r 4d r d r" :tempo 120 "Sea song"))
 ;;(insert (y2b "4g4 r8 g8 a2 g 5c 4b2 r4 4g4 r8 g8 a2 g 5d c2 r4 4g4 r8 g8 5g2 e c 4b a 5f4 r8 f8 e2 c2 d c1" :tempo 240 :tag "Happy Birthday"))
 
-(defun ly2b (m env)
+(cl-defun ly2b (m env)
   "ENV is tempo, relative pitch, duration. Defaults are 60 bpm, c4, 4, respectively.
 Note is (FREQUENCY DURATION). A rest is (nil DURATION)."
   (case :t

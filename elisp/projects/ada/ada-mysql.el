@@ -4,7 +4,7 @@
 ;;; To debug an expression, use emacsql-compile, e.g:
 ;;; (emacsql-compile db [:select * :from component :where (= source-id $r1)] "617bac2c4075f937656d9d36")
 
-(defun column-selection (columns)
+(cl-defun column-selection (columns)
   (if columns
     (coerce (mapcar #'decolonize-symbol columns) 'vector)
     '*))
@@ -26,12 +26,12 @@
       (setf db it))))
 ;;(ada-mysql-connect)
 
-(defun ada-sstring (x)
+(cl-defun ada-sstring (x)
   (unless (eql x 'NULL)
     (sstring x)))
 ;;(ada-sstring 'NULL)
 
-(defun ada-prefix-to-environment (prefix)
+(cl-defun ada-prefix-to-environment (prefix)
   (cl-case current-prefix-arg
     (2 :ada_test)
     (3 :ada_preprod)
@@ -49,7 +49,7 @@
     (message "Password for %s was copied to clipboard" (sstring prefix))))
 
 ;; prefix gh q
-(defun mb-mysql-map ()
+(cl-defun mb-mysql-map ()
   "Return a sub map for functions related to MYSQL."
   (let ((mysql-map (make-sparse-keymap)))
     (define-key mysql-map "p" #'ada-copy-to-clipboard)
@@ -60,7 +60,7 @@
 (defvar db nil)
 ;;(setf db nil)
 
-(defun ada-set-environment (&optional prefix)
+(cl-defun ada-set-environment (&optional prefix)
   (interactive)
   (let ((env (ada-prefix-to-environment current-prefix-arg)))
     ;; if no exception
@@ -87,7 +87,7 @@
 ;;(emacsql db [:select id :from user])
 ;;(string-to-integer "qwe")
 
-(defun id (id-descriptor)
+(cl-defun id (id-descriptor)
   (when id-descriptor
     (if (and (integerp id-descriptor)
 	     (plusp id-descriptor))
@@ -96,7 +96,7 @@
 	(id (car id-descriptor))
 	(error "Argument is not an ID descriptor!")))))
 
-(defun id (id-descriptor)
+(cl-defun id (id-descriptor)
   (when id-descriptor
     (cond
       ((and (integerp id-descriptor)
@@ -111,7 +111,7 @@
 ;;(id (user 322181))
 ;;(id (list "1"))
 
-(defun json-from-id (id)
+(cl-defun json-from-id (id)
   (car (emacsql db [:select json :from json :where (= id $s1)] id)))
 ;;(json-from-id 194581)
 
@@ -158,14 +158,14 @@
        5))))
 ;;(user-from-name "%elev_no456326499_1a_1 %" :id)
 
-(defun ada-tables (&optional regexp)
+(cl-defun ada-tables (&optional regexp)
   (let ((table-names (mapcar #'first (emacsql db [:show :tables]))))
     (if regexp
       (copy-if #'(lambda (x) (string-match regexp x)) table-names)
       table-names)))
 ;;(ada-tables "element")
 
-(defun ada-columns (table &rest columns)
+(cl-defun ada-columns (table &rest columns)
   (if columns
     (emacsql db [:show columns :from $i1 :where field :in $v2]
 	     table

@@ -42,17 +42,17 @@
   '(published solr_created))
 
 (require 'lab-api-period-to-solr)
-(defun lab-field-date-p (field)
+(cl-defun lab-field-date-p (field)
   (find (intern field) lab-api-date-fields))
 ;;(mapcar #'lab-api-field-date-p (mapcar #'sstring '(published solr_created qwe)))
 
 (require 'lab-api-period-to-solr)
 (require 'solr)
-(defun lab-api-date-filter-regexp ()
+(cl-defun lab-api-date-filter-regexp ()
   (format "%s\\(%s\\)" solr-field-regexp (lab-api-period-regexp)))
 ;;(string-match* (lab-api-date-filter-regexp) "id:[a b)/day" :num 1)
 
-(defun lab-api-field-to-solr-1 (name &optional type)
+(cl-defun lab-api-field-to-solr-1 (name &optional type)
   "Helper function for `lab-api-field-to-solr'. Uses a syntax
   that is more convenient for calculation."
   (if (or (null type) (empty-string-p type))
@@ -73,7 +73,7 @@
        name)
       (t (format "%s__%s" type name)))))
 
-(defun lab-api-field-to-solr (field)
+(cl-defun lab-api-field-to-solr (field)
   "Converts an API field to the corresponding Solr field. Examples:
 \"title\" -> \"field_text__title\"
 \"attribute.id\" -> \"id\"
@@ -92,7 +92,7 @@
   "A list of legal API fields useful for testing purposes")
 ;;(mapcar #'lab-api-field-to-solr lab-api-test-fields)
 
-(defun lab-api-query-to-solr (query-string)
+(cl-defun lab-api-query-to-solr (query-string)
   "Converts a lab-api query to an equivalent Solr expression."
   (let* ((regexp (lab-api-date-filter-regexp))
 	 (rep-field #'(lambda (s) (lab-api-field-to-solr (match-string 1 s))))

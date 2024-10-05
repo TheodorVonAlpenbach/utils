@@ -6,9 +6,9 @@
 		  :where (= company-group-id $s1)]
 	     (first (company-group group-from-descriptor))))
 
-(defun company-id-in-user-company-group-superfluous-p ()
+(cl-defun company-id-in-user-company-group-superfluous-p ()
   "The result is NIL. The company-id is indeed superfluous!"
-  (loop for (group-id company-id . rest) in (active-groups)
+  (cl-loop for (group-id company-id . rest) in (active-groups)
 	if (emacsql db [:select * :from user-company-group
 			      :where (and (= company-group-id $s1)
 					  (not (= company-id $s2)))]
@@ -16,14 +16,14 @@
 	collect it))
 ;;(company-id-in-user-company-group-superfluous-p)
 
-(defun find-merge-users (group-from-descriptor)
+(cl-defun find-merge-users (group-from-descriptor)
   (emacsql db [:select * :from user :where (= company-group-id $s1)]
 	   (first (company-group group-from-descriptor))))
 ;;(mapcar #'fourth (find-merge-users 571184))
 ;;(group-members 571184)
 ;;(group-members 571156)
 
-(defun merge-groups (group-from-descriptor group-to-descriptor)
+(cl-defun merge-groups (group-from-descriptor group-to-descriptor)
   "Merge GROUP-FROM-DESCRIPTOR to GROUP-TO-DESCRIPTOR.
 This operation does the following:
 1. identify all users with company-group-id matching GROUP-FROM-DESCRIPTOR

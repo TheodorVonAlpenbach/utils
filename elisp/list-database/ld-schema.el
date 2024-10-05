@@ -8,7 +8,7 @@
 (defalias 'ld-schema-name #'third)
 (defalias 'ld-schema-column-definitions #'fourth)
 
-(defun ld-make-empty-schema (keyword name parent-keyword &optional raw-column-definitions)
+(cl-defun ld-make-empty-schema (keyword name parent-keyword &optional raw-column-definitions)
   (let ((id (list parent-keyword keyword)))
     (cl-assert (ld-identifier-p id))
     (list :schema id name raw-column-definitions)))
@@ -39,7 +39,7 @@ some subset of the properties :name :type :primary-key."
     (ld-make-empty-schema keyword name parent-keyword column-definitions)))
 ;;(ld-make-schema :company :name "MB_COMPANY" :parent-keyword :mydb)
 
-(defun ld-schemadef->schema (schemadef parent-keyword)
+(cl-defun ld-schemadef->schema (schemadef parent-keyword)
   "Short cut definition of a schema. See `*maths-db*' for an example.
 The schema is set up like a skeleton of lists which resembles the
 schema structure. This skeleton is here straightforward converted
@@ -62,11 +62,11 @@ to a legal scheme structure."
 	:plist-p nil)))
 ;;(ld-join-schemas (ld-schema emps)(ld-schema comps))
 
-(defun ld-schema-p (obj)
+(cl-defun ld-schema-p (obj)
   (and (consp obj) (eql (first obj) :schema)))
 ;;(ld-schema-p (ld-table-schema (first (ld-database-tables *current-database*))))
 
-(defun ld-find-column-definition (column-designator schema-designator)
+(cl-defun ld-find-column-definition (column-designator schema-designator)
   (cl-assert (not (null schema-designator)) t "schema-designator was nil!")
   (cond ((ld-column-p column-designator)
 	 column-designator)
@@ -83,7 +83,7 @@ to a legal scheme structure."
 	  schema-designator))))
 ;;(ld-find-column-definition :name (ld-table :users))
 
-(defun ld-column-designators->coldefs (column-designators schema-designator)
+(cl-defun ld-column-designators->coldefs (column-designators schema-designator)
   (mapcar (bind #'ld-find-column-definition schema-designator) column-designators))
 ;;(ld-column-designators->coldefs '(:name :rating) (ld-table :users))
 

@@ -6,7 +6,7 @@
 `lynx-aftenposten-skip-articles'. Andre filterkandidater er:
 oslopuls")
 
-(defun remove-aftenposten-site ()
+(cl-defun remove-aftenposten-site ()
   (setq lynx-tree-sites
 	(remove-if #'(lambda (site)
 		     (equal #'lynx-aftenposten-p (first site)))
@@ -19,7 +19,7 @@ oslopuls")
 
 (cl-defun lynx-tree-forward-child-aftenposten (&optional (n 1))
   "Uncommented"
-;;  (loop with step = (* 2 (signum n)) ;why did I multiply with 2?!
+;;  (cl-loop with step = (* 2 (signum n)) ;why did I multiply with 2?!
   (cl-loop with step = (signum n)
 	   for i below (abs n)
 	   do (forward-lynx-reference step)
@@ -49,24 +49,24 @@ denne konstanten vil bli ignorert av funksjonen
   (while (not-empty (string-match* skip (lynx-url-at-point)))
     (forward-lynx-reference (signum n))))
 
-(defun lynx-aftenposten-p (url)
+(cl-defun lynx-aftenposten-p (url)
   (string-match-exact ".*\\.\\(aftenposten\\|osloby\\)\\.no.*" url))
 ;;(lynx-aftenposten-p "http://fotball.aftenposten.no/landslaget/article148659.ece")
 
-(defun lynx-aftenposten-article-p (url)
+(cl-defun lynx-aftenposten-article-p (url)
   (string-match-exact ".*www\\.aftenposten\\.no.*articleID=.*" url))
 ;;(lynx-aftenposten-article-p "http://www.aftenposten.no/nyheter/siste100/")
 
-(defun lynx-aftenposten-format-paragraphs ()
+(cl-defun lynx-aftenposten-format-paragraphs ()
   "Assume point is at beginning of article."
   (let ((article-beginning (point)))
     (lynx-aftenposten-goto-article-end)
-    (loop for p = (progn (backward-paragraph 1) (point))
+    (cl-loop for p = (progn (backward-paragraph 1) (point))
 	  while (> p article-beginning)
 	  do (fill-paragraph nil))
     (recenter 1)))
 
-(defun lynx-aftenposten-goto-article-begin ()
+(cl-defun lynx-aftenposten-goto-article-begin ()
   "Recenters buffer window according to content. Typically, it skips
 header links and commercial links at top of page and goes directly to
 the start of article, article listing or whatever part of page that is
@@ -104,7 +104,7 @@ considered to be most interesting."
   (point))
 ;(lynx-aftenposten-goto-article-begin)
 
-(defun lynx-aftenposten-goto-article-end ()
+(cl-defun lynx-aftenposten-goto-article-end ()
   (when (or (re-search-forward "^Kommentarer$" nil t)
 	    (re-search-forward "^Siste fra seksjon$" nil t)
 	    (re-search-forward "^Relaterte bilder" nil t)
@@ -117,7 +117,7 @@ considered to be most interesting."
 
 (add-hook 'lynx-show-html-hook #'lynx-aftenposten-goto-article-begin)
 
-(defun lynx-proxy-clear-aftenposten (n)
+(cl-defun lynx-proxy-clear-aftenposten (n)
   "If prefix is given, the whole aftenposten is cleared."
   (interactive "P")
   (lynx-proxy-clear-db

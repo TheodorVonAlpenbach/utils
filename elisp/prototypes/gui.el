@@ -86,7 +86,7 @@
 ;;;;
 ;;;; So the second rectangle gets the envelope ((0 1.5) (1 3.5)).
       
-(defun gui-stack-rectangles (orientation rectangles)
+(cl-defun gui-stack-rectangles (orientation rectangles)
   "Calculate the size of the minimum rectangle that contains RECTANGLES.
 The RECTANGLES are stacked one after another along a line with
 ORIENTATION, which is either :horizontal or :vertical. For
@@ -129,7 +129,7 @@ and ((max 2 1) (3 + 1)) = (2 4) along the :vertical dimension."
 	       (horizontal-p (eql orientation :horizontal)))
 	  (cons :gui-stack
 		(cons (second gui)
-		      (loop for sub-gui in (rest (rest gui))
+		      (cl-loop for sub-gui in (rest (rest gui))
 			    if (eql (first sub-gui) :stretch)
 			    collect (list :space
 					  (if horizontal-p
@@ -160,7 +160,7 @@ See `gui-geometry' for a description of the result's format."
 				 (list 0 (second gui)))))
     (:rectangle (list (third gui) position (second gui)))
     (:gui-stack (list :frame position
-		      (loop with horizontal-p = (eql (second gui) :horizontal)
+		      (cl-loop with horizontal-p = (eql (second gui) :horizontal)
 			    for sub-gui in (rest (rest gui))
 			    for p = (if horizontal-p (first position) (second position))
 			    then (+ p (if horizontal-p (first rect) (second rect)))

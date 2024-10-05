@@ -36,46 +36,46 @@
 (defalias 'schosk-info-chord-type 'second)
 (defalias 'schosk-info-chord-abbrev 'third)
 
-(defun skeleton-chord (skeleton)
+(cl-defun skeleton-chord (skeleton)
   (first skeleton))
 ;;(mapcar #'skeleton-chord set-chord-skeletons)
 
-(defun skeleton-name (skeleton)
+(cl-defun skeleton-name (skeleton)
   (second skeleton))
 ;;(mapcar #'skeleton-name set-chord-skeletons)
 
-(defun skeleton-chord-symbol (skeleton)
+(cl-defun skeleton-chord-symbol (skeleton)
   (third skeleton))
 ;;(mapcar #'skeleton-chord-symbol set-chord-skeletons)
 
-(defun skeleton-from-schord (scs)
+(cl-defun skeleton-from-schord (scs)
   (find scs schord-skeleton-info-list :key #'first :test #'equal))
 ;;(mapcar #'skeleton scs-test)
 
-(defun skeleton-from-chord-symbol (chord-type)
+(cl-defun skeleton-from-chord-symbol (chord-type)
   (find chord-type schord-skeleton-info-list :key #'third :test #'string=))
 ;;(skeleton-from-chord-symbol "7")
 
 
 ;;; SCS
-(defun scs-chord (scs)
+(cl-defun scs-chord (scs)
   (first (skeleton scs)))
 ;;(mapcar #'scs-chord scs-test)
 
-(defun scs-name (scs)
+(cl-defun scs-name (scs)
   (second (skeleton scs)))
 ;;(mapcar #'scs-name scs-test)
 
-(defun* scs-chord-symbol (scs &optional (print-style mu-default-print-style))
+(cl-defun scs-chord-symbol (scs &optional (print-style mu-default-print-style))
   (third (skeleton scs)))
 ;;(mapcar #'scs-chord-symbol scs-test)
 
-(defun scs-from-chord-symbol (chord-type)
+(cl-defun scs-from-chord-symbol (chord-type)
   (first (skeleton-from-chord-symbol chord-type)))
 ;;(scs-from-chord-symbol "7")
 ;;(mapcar #'scs-from-chord-symbol '("m7" "" "a" "d"))
 
-(defun* scs-from-sc (sc &optional (ordered t) (trivial nil))
+(cl-defun scs-from-sc (sc &optional (ordered t) (trivial nil))
   "Returns the skeleton of set chord SC. 
 Iff ORDERED is non nil, the result is sorted. 
 Iff TRIVIAL is nil a trivial skeleton is returned."
@@ -87,44 +87,44 @@ Iff TRIVIAL is nil a trivial skeleton is returned."
 ;;(scs-from-sc '(7 2 7 10) nil t)
 ;;(mapcar #'scs-from-sc '((7 2 7 10) (7 2 10) (2 2 6 9)))
 
-(defun scs-to-sc (scs sc-root)
+(cl-defun scs-to-sc (scs sc-root)
   (sc-transpose (cons 0 scs) sc-root))
 ;;(scs-to-sc (first (nth 17 schord-skeleton-info-list)) 1)
 ;;(mapcar (compose (bind #'scs-to-sc 1) #'scs-from-chord-symbol) '("m7" nil "a" "d"))
 
-(defun skeleton-to-sc (skeleton sc-root)
+(cl-defun skeleton-to-sc (skeleton sc-root)
   (scs-to-sc (first skeleton) sc-root))
 ;;(scs-to-sc (nth 17 set-chord-skeletons) 1)
 ;;(mapcar (compose (bind #'scs-to-sc 1) #'scs-from-chord-symbol) '("m7" nil "a" "d"))
 
-(defun* scs-ninvert (scs &optional (n 1))
+(cl-defun scs-ninvert (scs &optional (n 1))
   "Returns the Nth inversion of set chord skeleton SCS. Destructive."
   (let ((trivialp (= (first scs) 0)))
     (unless trivialp scs (push 0 scs))
     (scs-from-sc (nrotate-list scs n) t trivialp)))
 ;;(scs-ninvert '(4 7) 2)
 
-(defun* scs-invert (scs &optional (n 1))
+(cl-defun scs-invert (scs &optional (n 1))
   "Returns the Nth inversion of set chord skeleton SCS. Not destructive."
   (scs-ninvert (copy-list scs) n))
 ;;(scs-invert (first (find 'major-triad set-chord-skeletons :key #'second)) 3)
 
-(defun scs-type (scs)
+(cl-defun scs-type (scs)
   "Returns the classification of set chord skeleton SCS.
 Classification is a pair of two elements (SKELETON
 INVERSION-DEGREE)"
-  (loop for i to (length scs) 
+  (cl-loop for i to (length scs) 
 	for chordtype = (find (scs-invert scs (- i)) set-chord-skeletons
 			      :key #'first :test #'equal)
 	if chordtype return (list chordtype i)))
 ;;(mapcar #'scs-type '((5 9)))
 
 ;; (defconst scs-types
-;;   (loop for x in schord-skeleton-info-list
+;;   (cl-loop for x in schord-skeleton-info-list
 ;; 	collect (list (first x)
 ;; 		      (mapcar (bind #'tmap-1-0 schord-skeleton-info-list) (second x)))))
 
-(defun scs-type-p (scs type)
+(cl-defun scs-type-p (scs type)
   (find scs (second (assoc type scs-types)) :test #'equal))
 ;;(mapcar (bind #'scs-type-p 'major) '((4) (3) (4 7))) 
 
