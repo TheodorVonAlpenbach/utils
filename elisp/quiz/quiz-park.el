@@ -292,7 +292,7 @@ calling for a greater number of columns than max-column."
   "Converts STRING, i.e. the results entered by a customer, to a
   list of customer-result-entry's."
   (mapcar #'qp-customer-entry-from-string
-	  (remove-if #'empty-string-p
+	  (cl-remove-if #'empty-string-p
 	    (string-to-lines (qp-string-filter string)))))
 
 (cl-defun qp-customer-entries-from-region (beg end)
@@ -460,7 +460,7 @@ Quizserien
 and copies it to clipboard"
   (interactive)
   (let* ((skip-regexp (format "^%s$" (regexp-opt '("man" "tir" "ons" "tor" "fre" ""))))
-	 (lines (remove-if #'(lambda (x) (string-match* skip-regexp x))
+	 (lines (cl-remove-if #'(lambda (x) (string-match* skip-regexp x))
 		  (split-string (thing-at-point 'paragraph) "\n")))
 	 (news (cl-loop for x in (butlast lines 2) collect (let ((entries (split-string x "\t")))
 							     (if (= (length entries) 2)

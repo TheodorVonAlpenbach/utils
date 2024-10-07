@@ -101,7 +101,7 @@
 ;;(vec-mat-mult '(1 2) '((1 2) (1 2)))
 
 ;;; mat unary operators
-(cl-defun transpose (m) (apply #'mapcar* #'list m))
+(cl-defun transpose (m) (apply #'cl-mapcar #'list m))
 ;;(transpose '((1 2) (1 2)))
 
 (cl-defun frobenius-norm (m)

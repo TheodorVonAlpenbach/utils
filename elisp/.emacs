@@ -31,6 +31,7 @@
 (defalias 'rest 'cl-rest)
 (defalias 'find-if 'cl-find-if)
 (defalias 'getf 'cl-getf)
+(defalias 'some 'cl-some)
 
 ;;; MB setups
 (defun emacs-os ()
