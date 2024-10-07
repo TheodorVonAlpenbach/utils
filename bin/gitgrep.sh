@@ -2,7 +2,6 @@
 
 defaultContextBeforeArgument=4
 defaultContextAfterArgument=1
-adaTagTemplate="ADA-13500"
 
 function printUsage {
     echo "Usage: gitgrep ADA-NUMBER [CONTEXT1] [CONTEXT2]"
@@ -11,7 +10,7 @@ function printUsage {
     echo "-B and -A option arguments in grep, respectively."
     echo ""
     echo "ADA-NUMBER might be truncated. Then the remaining digits will be filled out"
-    echo "according to the template 12500."
+    echo "according to the template $(adatagtemplate). See util adatagtemplate for more information."
     echo ""
     echo "Options:"
     echo "  -v          Verbose mode"
@@ -35,23 +34,15 @@ done
 
 shift $(( OPTIND-1 ))
 
-adaNumber=$1
-
-if [ -z "$adaNumber" ]; then
-    printUsage
-    exit 0
-fi
+adaTag=`adatagtemplate $1`
 
 contextBeforeArgument=${2:-$defaultContextBeforeArgument}
 contextAfterArgument=${3:-$defaultContextAfterArgument}
 
-adaTag="${adaTagTemplate:0:$((${#adaTagTemplate} - ${#adaNumber}))}$adaNumber"
-
 if [ -n "$verbose" ]; then
     echo Verbose mode is on
+    echo Script argument is \'$1\'
     echo adaTag is \'$adaTag\'
-    echo adaNumber \(script argument\) is \'$adaNumber\'
-    echo adaTagTemplate is \'$adaTagTemplate\'
     echo contextBeforeArgument is \'$contextBeforeArgument\'
     echo contextAfterArgument is \'$contextAfterArgument\'
 fi

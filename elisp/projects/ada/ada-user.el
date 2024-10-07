@@ -32,7 +32,7 @@
    (caar (emacsql db
 	   [:select user-id :from user-pseudonym :where (= user-pseudonym $r1)]
 	   user-pseudonym))))
-;;(user-id-from-pseudonym "b1e464dc-b092-46ee-950a-0f9d4ef82d82")
+;;(user-id-from-pseudonym "eac62d04-2488-4435-b121-87d90c4db9dc")
 
 (cl-defun user-from-pseudonym (user-pseudonym &rest columns)
   (car (emacsql db
