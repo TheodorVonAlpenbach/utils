@@ -293,7 +293,7 @@ calling for a greater number of columns than max-column."
   list of customer-result-entry's."
   (mapcar #'qp-customer-entry-from-string
 	  (cl-remove-if #'empty-string-p
-	    (string-to-lines (qp-string-filter string)))))
+	    (string-lines (qp-string-filter string)))))
 
 (cl-defun qp-customer-entries-from-region (beg end)
   "Converts region to a list of customer-result-entry's and kills the region.

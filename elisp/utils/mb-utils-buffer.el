@@ -274,7 +274,7 @@ For optional argument point, see `region-replace-raw'."
 (cl-defun region-lines (beg end)
   "Returns a list of strings, each string being line in region"
   (interactive "r")
-  (string-to-lines (region-string beg end)))
+  (string-lines (region-string beg end)))
 
 (cl-defun region-as-line-strings (beg end)
   (interactive "r")
@@ -755,6 +755,7 @@ copied is displayed."
   (gui-set-selection 'CLIPBOARD string)
   (unless hide-message
     (message "Copied string '%s' to clipboard" string)))
+;;(string-to-clipboard "qwe")
 
 (cl-defun buffer-file-name-to-clipboard ()
   (interactive)

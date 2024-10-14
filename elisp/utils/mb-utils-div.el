@@ -460,7 +460,7 @@ This is useful for such constructs as
 string. Evaluate BODY with LINE bound to each consecutive substring in
 STRING ending with a newline character, in turn. Then evaluate RESULT
 to get return value, default nil."
- `(dolist (,line (string-to-lines ,string) ,result) ,@body))
+ `(dolist (,line (string-lines ,string) ,result) ,@body))
 ;;(dolines (l (buffer-string)) )
 
 (cl-defun group-list (source &optional (n 2))

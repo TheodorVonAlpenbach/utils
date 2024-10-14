@@ -56,7 +56,7 @@ definitions. Also, it checks rudimentary syntax."
 (cl-defun lac-definitions-from-string (string)
   "Converts STRING to a list of macro definitions. See
 `lac-definitions-from-file' for more details."
-  (lac-definitions-from-lines (lac-remove-comments (string-to-lines string))))
+  (lac-definitions-from-lines (lac-remove-comments (string-lines string))))
 
 (cl-defun lac-definitions-from-file (&optional (config-file lac-default-config-path))
   "Converts CONFIG-FILE to a list of macro definitions. The file

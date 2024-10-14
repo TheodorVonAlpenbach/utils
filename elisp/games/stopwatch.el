@@ -49,7 +49,7 @@
 
 (cl-defun gloser-parse (source)
   (if (listp source)
-    (cut (remove-if (bind #'string-match "^#\\|^[[:space:]]*$" 1) (string-to-lines (file-string (first source)))))
+    (cut (remove-if (bind #'string-match "^#\\|^[[:space:]]*$" 1) (string-lines (file-string (first source)))))
     (read* source)))
 ;;(gloser-parse '("/cygdrive/c/Users/eier/Google Drive/mb-data/quiz/koldens-quiz.txt"))
 ;;(gloser-parse *gloselistefil*)

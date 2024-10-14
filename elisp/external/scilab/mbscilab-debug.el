@@ -284,7 +284,7 @@ The line numbers are local to the current function."
   "Returns the current stack at debug stop point"
   (let ((re "[A-Za-z0-9]+  ="))
     (let ((groups (rest (cut-list-if #'(lambda (x) (string-match* re x))
-			  (string-to-lines string) t))))
+			  (string-lines string) t))))
       (mapcar #'scilab-parse-answer-group groups))))
 ;;(transpose (mapcar #'second (scilab-parse-answer qwe)))
 

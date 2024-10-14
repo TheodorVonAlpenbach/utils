@@ -252,7 +252,7 @@ article in ENVIRONMENT."
 		  (:vbox (shell-command-to-string (format "find %s -type f" dir)))
 		  (:dev (tv2-get-ids :vbox)) ;; same
 		  (t (error "Environment %S is not supported" environment))))
-	 (ids (mapcar #'(lambda (x) (nth* -2 (split-string x "[/.]"))) (string-to-lines files))))
+	 (ids (mapcar #'(lambda (x) (nth* -2 (split-string x "[/.]"))) (string-lines files))))
     ids))
 ;;(tv2-get-ids :vbox)
 

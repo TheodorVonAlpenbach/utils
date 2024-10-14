@@ -736,7 +736,7 @@ EXPRESSION and VALUE is the corresponding evaluation value."
 
 (cl-defun parse-american-date-lines (beg end)
   (interactive "r")
-  (let* ((old-lines (string-to-lines (buffer-substring beg end)))
+  (let* ((old-lines (string-lines (buffer-substring beg end)))
 	 (new-lines (mapcar #'parse-american-date old-lines))
 	 (new-region (concat* new-lines :in "\n")))
     (kill-region beg end)

@@ -1,4 +1,5 @@
-(require 'emacsql-mysql)
+;; -*- lexical-binding: t; -*-
+(require 'emacsql)
 (require 'rot47)
 
 ;;; To debug an expression, use emacsql-compile, e.g:
@@ -115,47 +116,47 @@
   (car (emacsql db [:select json :from json :where (= id $s1)] id)))
 ;;(json-from-id 194581)
 
-(cl-defun emacsql-mysql (database &key user password host port debug)
-  "Connect to a MySQL server using the mysql command line program."
-  (let* ((mysql (or (executable-find emacsql-mysql-executable)
-                    (error "No mysql binary available, aborting")))
-         (command (list database "--skip-pager" "-rfBNL" mysql)))
-    (when user     (push (format "--user=%s" user) command))
-    (when password (push (format "--password='%s'" password) command))
-    (when host     (push (format "--host=%s" host) command))
-    (when port     (push (format "--port=%s" port) command))
-    (message "%s" (reverse command))
-    (let* ((process-connection-type t)
-           (buffer (generate-new-buffer " *emacsql-mysql*"))
-           (command (concat* (nreverse command) :in " "))
-           ;; (command "/usr/bin/mysql -rfBNL --skip-pager ada --user=root --password=docker77 --host=127.0.0.1 --port=30100")
-           (process (start-process-shell-command
-                     "emacsql-mysql" buffer (concat "stty raw &&" command)))
-           (connection (make-instance 'emacsql-mysql-connection
-                                      :process process
-                                      :dbname database)))
-      ;; (print command)
-      (setf (process-sentinel process)
-            (lambda (proc _) (kill-buffer (process-buffer proc))))
-      (when debug (emacsql-enable-debugging connection))
-      (emacsql connection
-               [:set-session (= sql-mode 'NO_BACKSLASH_ESCAPES\,ANSI_QUOTES)])
-      (emacsql connection
-               [:set-transaction-isolation-level :serializable])
-      (emacsql-register connection))))
+;; (cl-defun emacsql-mysql (database &key user password host port debug)
+;;   "Connect to a MySQL server using the mysql command line program."
+;;   (let* ((mysql (or (executable-find emacsql-mysql-executable)
+;;                     (error "No mysql binary available, aborting")))
+;;          (command (list database "--skip-pager" "-rfBNL" mysql)))
+;;     (when user     (push (format "--user=%s" user) command))
+;;     (when password (push (format "--password='%s'" password) command))
+;;     (when host     (push (format "--host=%s" host) command))
+;;     (when port     (push (format "--port=%s" port) command))
+;;     (message "%s" (reverse command))
+;;     (let* ((process-connection-type t)
+;;            (buffer (generate-new-buffer " *emacsql-mysql*"))
+;;            (command (concat* (nreverse command) :in " "))
+;;            ;; (command "/usr/bin/mysql -rfBNL --skip-pager ada --user=root --password=docker77 --host=127.0.0.1 --port=30100")
+;;            (process (start-process-shell-command
+;;                      "emacsql-mysql" buffer (concat "stty raw &&" command)))
+;;            (connection (make-instance 'emacsql-mysql-connection
+;;                                       :process process
+;;                                       :dbname database)))
+;;       ;; (print command)
+;;       (setf (process-sentinel process)
+;;             (lambda (proc _) (kill-buffer (process-buffer proc))))
+;;       (when debug (emacsql-enable-debugging connection))
+;;       (emacsql connection
+;;                [:set-session (= sql-mode 'NO_BACKSLASH_ESCAPES\,ANSI_QUOTES)])
+;;       (emacsql connection
+;;                [:set-transaction-isolation-level :serializable])
+;;       (emacsql-register connection))))
 
-(cl-defmethod emacsql-parse ((connection emacsql-mysql-connection))
-  (with-current-buffer (emacsql-buffer connection)
-    (let ((standard-input (current-buffer)))
-      (bob)
-      (when (looking-at "ERROR")
-        (search-forward ": ")
-        (signal 'emacsql-error
-                (list (buffer-substring (point) (line-end-position)))))
-      (butlast
-       (cl-loop for l in (string-lines (buffer-string))
-	     collect (split-string l "\t"))
-       5))))
+;; (cl-defmethod emacsql-parse ((connection emacsql-mysql-connection))
+;;   (with-current-buffer (emacsql-buffer connection)
+;;     (let ((standard-input (current-buffer)))
+;;       (bob)
+;;       (when (looking-at "ERROR")
+;;         (search-forward ": ")
+;;         (signal 'emacsql-error
+;;                 (list (buffer-substring (point) (line-end-position)))))
+;;       (butlast
+;;        (cl-loop for l in (string-lines (buffer-string))
+;; 	     collect (split-string l "\t"))
+;;        5))))
 ;;(user-from-name "%elev_no456326499_1a_1 %" :id)
 
 (cl-defun ada-tables (&optional regexp)

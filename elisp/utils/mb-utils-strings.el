@@ -354,7 +354,7 @@ result of FUNCTION."
     string
     (apply #'concat
      (cons indent-string 
-	   (infix-list (string-to-lines string)
+	   (infix-list (string-lines string)
 		       (concat "\n" indent-string))))))
 ;;(string-indent-lines "a\nb\nc" "<<")
 
@@ -416,17 +416,6 @@ arguments DELIMITER, LAST-DELIMITER, and PAIR-DELIMITER.
   (concat* lines :in "\n"))
 ;;(lines-to-string '("first" "next" "last"))
 
-(cl-defun string-to-lines (string &optional remove-empty-p)
-  "Returns a list of strings, each string being line substring in
-STRING."
-  (if remove-empty-p
-    (cl-remove "" (split-string string "\n") :test #'string=)
-    (split-string string "\n")))
-;;(string-to-lines "a\nb\n\nc\n")
-
-(defalias 'string-lines 'string-to-lines)
-;;(string-lines "a\nb\n\nc\n")
-
 (cl-defun quote-word () "Quotes closest word before point"
   (interactive "*")
   (backward-word 1) (insert "\"") 
@@ -470,7 +459,7 @@ and :END."
   "Returns the current region content in BUFFER (default is
 current buffer) as a lines of string lines. The region can be
 overruled by keywords :START and :END."
-  (string-to-lines (region-to-string :buffer buffer :start start :end end)))
+  (string-lines (region-to-string :buffer buffer :start start :end end)))
 
 (cl-defun match-string* (num string &optional no-properties)
   "Same as `match-string', but if NO-PROPERTIES is non-nil,
@@ -574,7 +563,7 @@ one applied `fill-paragraph' to it"
 ;;(substring* "012345" 0 -1)
 
 (cl-defmacro with-lines ((line string) &rest body)
-  `(cl-loop for ,line in (string-to-lines ,string)
+  `(cl-loop for ,line in (string-lines ,string)
 	 do (progn ,@body)))
 ;;(let (lines) (with-lines (l "qwe\nqwe\nqwe") (push l lines)) lines)
 (def-edebug-spec with-lines ((gate symbolp form) body))

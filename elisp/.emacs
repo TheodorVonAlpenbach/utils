@@ -16,7 +16,12 @@
 (global-font-lock-mode t)
 (show-paren-mode 1) ;shows matching parenthesis
 (transient-mark-mode 1)
-;;find . -type f -name "*.el" -exec sed -i 's/(pushnew /(cl-pushnew /g' {} +
+;;find . -type f -name "*.el" -exec sed -i 's/(string-to-lines /(string-lines /g' {} +
+(setf x-select-enable-clipboard t)
+;; Enable clipboard support using xclip
+(when (getenv "DISPLAY")
+  (require 'xclip)
+  (xclip-mode 1))
 
 (require 'cl-lib)
 (defalias 'subseq 'cl-subseq)
@@ -32,6 +37,8 @@
 (defalias 'find-if 'cl-find-if)
 (defalias 'getf 'cl-getf)
 (defalias 'some 'cl-some)
+(defalias 'minusp 'cl-minusp)
+(defalias 'plusp 'cl-plusp)
 
 ;;; MB setups
 (defun emacs-os ()
@@ -277,7 +284,7 @@ and running Git.")
 (add-hook 'text-mode-hook #'(lambda () (abbrev-mode 1)))
 (add-hook 'text-mode-hook 'turn-on-auto-fill)
 
-(add-hook 'sh-mode-hook 'linum-mode)
+(add-hook 'sh-mode-hook 'global-display-line-numbers-mode)
 
 ;;; What's this?! (2015-04-30, but now I have a Clue...)
 ;; for some reason the following must be done in addition to the above

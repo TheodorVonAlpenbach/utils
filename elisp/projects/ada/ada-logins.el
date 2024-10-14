@@ -30,6 +30,7 @@ INFIX.
   (string-to-clipboard
    (format "claerer_no456326%s" (ada-login-infix current-prefix-arg))))
 ;;(ada-login-teacher)
+;;(string-to-clipboard "qwe")
 
 (cl-defun ada-login-pupil ()
   "Return user name for a PU pupil.

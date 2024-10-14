@@ -76,7 +76,7 @@ custom `scilab-builtin-list'. So it can work slowly. You can disable this option
 
 (cl-defun scilab-defun-lines ()
   "Return the region of current function"
-  (string-to-lines (apply #'buffer-substring-no-properties (scilab-defun-region))))
+  (string-lines (apply #'buffer-substring-no-properties (scilab-defun-region))))
 
 (cl-defun scilab-statement-p (line)
   "Return true iff line is neither blank or a comment"

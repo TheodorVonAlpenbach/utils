@@ -605,7 +605,7 @@ before starting the new timer."
   "Returns the lines between point START and END as a list of
 strings"
   (interactive "r")
-  (string-to-lines (buffer-substring-no-properties start end)))
+  (string-lines (buffer-substring-no-properties start end)))
 
 (cl-defun point-beginning-of-line (point &optional (forward-line 0))
   "Returns the point at the beginning of the line that includes POINT"
@@ -635,7 +635,7 @@ strings"
 
 (cl-defun bn-definition-start-lines (star)
   (copy-if #'bn-definition-start-line-p
-	   (string-to-lines (buffer-string-no-properties))))
+	   (string-lines (buffer-string-no-properties))))
 
 (cl-defun bn-alignment-column (lines)
   "Returns the first column that aligns all BNF definitions.
