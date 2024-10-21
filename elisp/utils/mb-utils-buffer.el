@@ -752,7 +752,7 @@ Afterwards delete the file."
   "Copy STRING to clipboard.
 If HIDE-MESSAGE is NIL, the default, a message informing what was
 copied is displayed."
-  (gui-set-selection 'CLIPBOARD string)
+  (kill-new string)
   (unless hide-message
     (message "Copied string '%s' to clipboard" string)))
 ;;(string-to-clipboard "qwe")
