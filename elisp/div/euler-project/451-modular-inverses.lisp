@@ -51,6 +51,7 @@
 			    and do (incf inverses-sum (- p i)))))
     ;; return the solution to 451
     (+ (reduce #'+ (subseq inverses start (1+ n))) inverses-sum)))
+;;(451-solution)
 
 ;;; Results
 ;; n             Sum I(n)

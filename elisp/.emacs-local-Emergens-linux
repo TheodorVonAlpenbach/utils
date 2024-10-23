@@ -57,6 +57,7 @@ sudo mount -a.")
 	(,+mb-lisp-dir+ "projects/ada/ada-logins.el")
 	(,+mb-lisp-dir+ "data/historie.org")
 
+	(,+home-dir+ "projects/quiz/ferskvare.org" :point :end :keyboard :no)
 	(,+home-dir+ "doc/log.org" :point :end :keyboard :no)
 	(,+home-dir+ "doc/manifest" :keyboard :no)
 	))
