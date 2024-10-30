@@ -34,13 +34,14 @@
 
 (cl-defun ada-prefix-to-environment (prefix)
   (cl-case current-prefix-arg
+    (1 :ada)
     (2 :ada_test)
     (3 :ada_preprod)
     (4 :ada_prod)
     (5 :ada_dummy)
     (6 :ada_bummy)
     (7 :ada_key)
-    (t :ada)))
+    (t :ada_dummy)))
 ;;(ada-prefix-to-environment t)
 
 (cl-defun ada-copy-to-clipboard (&optional prefix)
