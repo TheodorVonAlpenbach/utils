@@ -64,7 +64,7 @@ sudo mount -a.")
 	(,+home-dir+ "doc/log.org" :point :end :keyboard :no)
 	(,+home-dir+ "doc/manifest" :keyboard :no)
 
-	;; (,+home-dir+ "ada-tasks/ADA-7705-Feide2/ADA-7705-Feide2_0.org")
+	(,+home-dir+ ".bashrc" :point :end)
 	))
 ;;/ssh:ssh:~/doc/arbeidslog-new
 

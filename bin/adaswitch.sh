@@ -35,19 +35,33 @@ done
 
 shift $(( OPTIND-1 ))
 
+function removeOrigin {
+    echo $1 | cut -d '/' -f 2
+}
+
 adaTag=`adatagtemplate $1`
 adaBranchOrigin=`git branch -r --list "*$adaTag*"`
-adaBranch=`echo $adaBranchOrigin | cut -d '/' -f 2`
 
 if [ -n "$verbose" ]; then
     echo Verbose mode is on
     echo Script argument is \'$1\'
     echo adaTag is \'$adaTag\'
     echo adaBranchOrigin is \'$adaBranchOrigin\'
-    echo adaBranch is \'$adaBranch\'
 fi
 
+# count space delimited strings in adaBranch
+set -- $adaBranchOrigin
+if [ $# -gt 1 ]; then
+    echo "Cannot switch, since multiple branches matches input tag:"
+    branchList=($adaBranchOrigin)
+    for x in "${branchList[@]}"; do removeOrigin $x; done
+    exit 0
+fi
+
+adaBranch=`removeOrigin $adaBranchOrigin`
+
 if [ -n "$verbose" ]; then
+    echo adaBranch is \'$adaBranch\'
     echo ""
     echo "git switch $adaBranch"
 fi

@@ -14,7 +14,6 @@
 ;;(nodejs-repl-buffer)
 
 (cl-defun mb-js-mode-hook-function ()
-  (linum-mode)
   (electric-pair-local-mode)
   ;;(setq tab-width 4)
   ;; to setup tabs

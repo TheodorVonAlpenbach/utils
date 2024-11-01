@@ -170,6 +170,10 @@
 				  (mb-undo-surround (or n 1))))
   (define-key insert-map "1" #'(lambda (n) (interactive "P")
 				 (insert-symbol-sup1 (or n 1))))
+  (define-key insert-map "2" #'(lambda (n) (interactive "P")
+				 (insert-symbol-sup2 (or n 1))))
+  (define-key insert-map "3" #'(lambda (n) (interactive "P")
+				 (insert-symbol-sup3 (or n 1))))
   (define-key insert-map "@" #'texinfo-insert-@var))
 
 (let ((big-insert-map (make-sparse-keymap)))
