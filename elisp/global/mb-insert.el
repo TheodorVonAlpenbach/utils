@@ -13,7 +13,7 @@ only, or left only depending on the surrounding characters. If
   (unless arg (setq arg 0))
   (cond ((> arg 0) (skip-chars-forward " \t"))
 	((< arg 0) (forward-sexp arg) (setq arg (- arg))))
-  (and (member* ensure-space '(:before :around) :test #'equal)
+  (and (cl-member ensure-space '(:before :around) :test #'equal)
        (not (bobp))
        (memq (char-syntax (preceding-char)) '(?w ?_ ?\) ))
        (insert " "))
@@ -21,7 +21,7 @@ only, or left only depending on the surrounding characters. If
   (save-excursion
     (or (eq arg 0) (forward-sexp arg))
     (insert right)
-    (and (member* ensure-space '(:after :around))
+    (and (cl-member ensure-space '(:after :around))
 	 (not (eobp))
 	 (memq (char-syntax (following-char)) '(?w ?_ ?\( ))
 	 (insert " "))))
