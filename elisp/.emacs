@@ -33,6 +33,7 @@
 (defalias 'sixth 'cl-sixth)
 (defalias 'seventh 'cl-seventh)
 (defalias 'eighth 'cl-eighth)
+(defalias 'ninth 'cl-ninth)
 (defalias 'rest 'cl-rest)
 (defalias 'find-if 'cl-find-if)
 (defalias 'getf 'cl-getf)
@@ -284,7 +285,7 @@ and running Git.")
 (add-hook 'text-mode-hook #'(lambda () (abbrev-mode 1)))
 (add-hook 'text-mode-hook 'turn-on-auto-fill)
 
-(add-hook 'sh-mode-hook 'global-display-line-numbers-mode)
+(add-hook 'sh-mode-hook 'display-line-numbers-mode)
 
 ;;; What's this?! (2015-04-30, but now I have a Clue...)
 ;; for some reason the following must be done in addition to the above

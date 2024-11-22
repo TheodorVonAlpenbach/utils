@@ -258,18 +258,17 @@ Gardist Pål Magnus i vaktbua ser seg selv henge hjepeløst fra
 flaggstangen, og ringer desperat med den lille gardistbjellen sin for
 å tilkalle hjelp.
 *** Konge :drill:
-SCHEDULED: <2024-09-25 on.>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
 :ID:       cc0ac5bb-d8f1-4017-b64c-e4a15618ac2a
-:DRILL_LAST_INTERVAL: 3.995
-:DRILL_REPEATS_SINCE_FAIL: 2
-:DRILL_TOTAL_REPEATS: 5
-:DRILL_FAILURE_COUNT: 3
-:DRILL_AVERAGE_QUALITY: 2.8
+:DRILL_LAST_INTERVAL: 0.0
+:DRILL_REPEATS_SINCE_FAIL: 1
+:DRILL_TOTAL_REPEATS: 6
+:DRILL_FAILURE_COUNT: 4
+:DRILL_AVERAGE_QUALITY: 2.667
 :DRILL_EASE: 2.46
-:DRILL_LAST_QUALITY: 5
-:DRILL_LAST_REVIEWED: [2024-09-21 lø. 01:10]
+:DRILL_LAST_QUALITY: 2
+:DRILL_LAST_REVIEWED: [Y-11-19 Tue 12:%]
 :END:
 Kong [Harald 4 Magnusson Gille||22] regjerte fra [1130] til [1136]
 
