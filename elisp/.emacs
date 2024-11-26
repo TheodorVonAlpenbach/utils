@@ -347,7 +347,7 @@ and running Git.")
 		(cl-case it 
 		  (:no (activate-input-method 'norwegian-keyboard))))
 	 (awhen (getf (rest (rest x)) :read-only)
-		(toggle-read-only 1))
+		(read-only-mode 1))
 	 (awhen (getf (rest (rest x)) :read-only :none)
 		(when (eql it :none)
 		  (auto-fill-mode -1)))
