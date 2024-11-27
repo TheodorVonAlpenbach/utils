@@ -640,9 +640,18 @@ Rotten Tomatoes: 91% based on 383 reviews.
 **** Memo
 En fotballbane. Alene spiller Damon fotball med seg selv, på Mars. First! Best!
 *** Ridley Scott :drill:
+SCHEDULED: <2024-12-02 Mon>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
 :ID:       215bbafb-c9c4-425a-a2ce-832a3d965c85
+:DRILL_LAST_INTERVAL: 4.0
+:DRILL_REPEATS_SINCE_FAIL: 2
+:DRILL_TOTAL_REPEATS: 1
+:DRILL_FAILURE_COUNT: 0
+:DRILL_AVERAGE_QUALITY: 4.0
+:DRILL_EASE: 2.5
+:DRILL_LAST_QUALITY: 4
+:DRILL_LAST_REVIEWED: [Y-11-28 Thu 00:%]
 :END:
 [24|Alien: Covenant] is a [2017] science fiction horror film directed
 and produced by Ridley Scott, and written by John Logan and Dante
@@ -654,7 +663,7 @@ and Demián Bichir in supporting roles. It follows the crew of a colony
 ship that lands on an uncharted planet and makes a terrifying
 discovery.
 
-Music by [Jed Kurzel]
+Music by [Jed|Kurzel]
 
 Rotten Tomatoes: 65% based on 408 reviews.
 **** Memo
@@ -822,12 +831,14 @@ SCHEDULED: <2024-12-01 Sun>
 :DRILL_LAST_REVIEWED: [Y-11-27 Wed 02:%]
 :END:
 Hvilke filmer har Harry Gregson-Williams satt musikk til?
+
+[16-20|
 15: Kingdom of Heaven
 23: The Martian
 26: The Last Duel
 27: House of Gucci
-29: Gladiator II
-
+29: Gladiator II]
+**** Memo
 Utvalg andre filmer:
 Smilla's Sense of Snow (med Zimmer) (August)
 Spy Game (Scott)
@@ -851,29 +862,45 @@ The Equalizer 1 + 2
 The Meg 1 + 2 (Turteltaub)
 Penguins
 *** Ridley Scott :drill:
+SCHEDULED: <2024-12-02 Mon>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
+:ID:       4a7e3f04-d947-4309-8b59-5d4cb04f02f0
+:DRILL_LAST_INTERVAL: 4.0
+:DRILL_REPEATS_SINCE_FAIL: 2
+:DRILL_TOTAL_REPEATS: 1
+:DRILL_FAILURE_COUNT: 0
+:DRILL_AVERAGE_QUALITY: 4.0
+:DRILL_EASE: 2.5
+:DRILL_LAST_QUALITY: 4
+:DRILL_LAST_REVIEWED: [Y-11-28 Thu 00:%]
 :END:
 Hvilke filmer har Marc Streitenfeld satt musikk til?
-Alle på rad! 16-20.
+[16-20|
 16: A Good Year
 17: American Gangster
 18: Body of Lies
 19: Robin Hood
-20: Prometheus
-
-Utvalg andre filmer:
+20: Prometheus]
 *** Ridley Scott :drill:
+SCHEDULED: <2024-12-02 Mon>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
+:ID:       13640829-297e-42fc-83c7-d553d2edb1d6
+:DRILL_LAST_INTERVAL: 4.0
+:DRILL_REPEATS_SINCE_FAIL: 2
+:DRILL_TOTAL_REPEATS: 1
+:DRILL_FAILURE_COUNT: 0
+:DRILL_AVERAGE_QUALITY: 4.0
+:DRILL_EASE: 2.5
+:DRILL_LAST_QUALITY: 4
+:DRILL_LAST_REVIEWED: [Y-11-28 Thu 00:%]
 :END:
 Hvilke filmer har Hans Zimmer satt musikk til?
-6-7 og 11-14
+[6-7, 11-14|
  6: Black Rain
  7: Thelma og Louise
 11: Gladiator
 12: Hannibal
 13: Black Hawk Down
-14: Matchstick Men
-
-Utvalg andre filmer:
+14: Matchstick Men]
