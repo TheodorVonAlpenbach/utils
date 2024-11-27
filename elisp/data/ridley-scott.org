@@ -3,8 +3,18 @@
 ** Ridley Scott
 
 *** Ridley Scott :drill:
+SCHEDULED: <2024-12-01 Sun>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
+:ID:       3f3a6883-cbbf-498b-8c55-e0f7d7f3f8af
+:DRILL_LAST_INTERVAL: 3.86
+:DRILL_REPEATS_SINCE_FAIL: 2
+:DRILL_TOTAL_REPEATS: 1
+:DRILL_FAILURE_COUNT: 0
+:DRILL_AVERAGE_QUALITY: 3.0
+:DRILL_EASE: 2.36
+:DRILL_LAST_QUALITY: 3
+:DRILL_LAST_REVIEWED: [Y-11-27 Wed 02:%]
 :END:
 Sir Ridley Scott fra [South Shields], [Tyne and Wear], ble født i [1937]. Fra 2015 er han gift med [Giannina Facio].
 
@@ -14,10 +24,20 @@ Hans regissørbror, Tony, er født i [1944].
 **** Memo
 Han steg opp av Tyne som baby med en glorie.
 *** Ridley Scott :drill:
+SCHEDULED: <2024-11-30 Sat>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
+:ID:       55f17845-1f91-41aa-9379-70d78b952398
+:DRILL_LAST_INTERVAL: 3.86
+:DRILL_REPEATS_SINCE_FAIL: 2
+:DRILL_TOTAL_REPEATS: 2
+:DRILL_FAILURE_COUNT: 1
+:DRILL_AVERAGE_QUALITY: 2.5
+:DRILL_EASE: 2.36
+:DRILL_LAST_QUALITY: 3
+:DRILL_LAST_REVIEWED: [Y-11-26 Tue 18:%]
 :END:
-The [Duellists] er Ridley Scotts debutfilm fra [1977] med [Harvey Keitel],
+The [1|Duellists] er Ridley Scotts debutfilm fra [1977] med [Harvey Keitel],
 [Keith Carradine] og [Albert Finney] i hovedrollene.
 
 Handlingen er lagt til [Napoleonskrigene].
@@ -25,32 +45,68 @@ Handlingen er lagt til [Napoleonskrigene].
 Filmen is based on [Joseph Conrad]'s short story ["The Duel"] (titled
 "Point of Honor" in the United States), first published in A Set of
 Six.
+**** Memo
+I et rom med stearinlys: inn kommer Keitel og Carradine for å duellere. Finney er dommer.
 *** Ridley Scott :drill:
+SCHEDULED: <2024-12-01 Sun>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
+:ID:       823eaf16-ce06-4b9f-a91f-fee1cccfb074
+:DRILL_LAST_INTERVAL: 4.14
+:DRILL_REPEATS_SINCE_FAIL: 2
+:DRILL_TOTAL_REPEATS: 1
+:DRILL_FAILURE_COUNT: 0
+:DRILL_AVERAGE_QUALITY: 5.0
+:DRILL_EASE: 2.6
+:DRILL_LAST_QUALITY: 5
+:DRILL_LAST_REVIEWED: [Y-11-27 Wed 02:%]
 :END:
-[Alien] er fra [1979].
+[2|Alien] er fra [1979].
 
 The film stars [Tom Skerritt], Sigourney Weaver, [Veronica Cartwright],
 [Harry Dean Stanton], [John Hurt], Ian Holm, and [Yaphet Kotto].
 
 Screenplay by [Dan O'Bannon].
 **** Memo
+En svane sprekker, ut kommer Alien
+
 Steve Bannon skrev Alien for Breitbart.
 *** Ridley Scott :drill:
+SCHEDULED: <2024-12-01 Sun>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
+:ID:       137735dd-2e56-4abb-81c3-4e7d78b18ae4
+:DRILL_LAST_INTERVAL: 4.0
+:DRILL_REPEATS_SINCE_FAIL: 2
+:DRILL_TOTAL_REPEATS: 1
+:DRILL_FAILURE_COUNT: 0
+:DRILL_AVERAGE_QUALITY: 4.0
+:DRILL_EASE: 2.5
+:DRILL_LAST_QUALITY: 4
+:DRILL_LAST_REVIEWED: [Y-11-27 Wed 02:%]
 :END:
-[Blade Runner] fra [1982]. Starring [Harrison Ford], [Rutger Hauer],
+[3|Blade Runner] fra [1982]. Starring [Harrison Ford], [Rutger Hauer],
 [Sean Young], and [Edward James Olmos], it is an adaptation of [Philip
 K. Dick]'s [1968] novel [Do Androids Dream of Electric Sheep]?
 
 Music by Vangelis
+**** Memo
+Et hjerte som slår. Hauer kommer og knuser det med hendene sine
 *** Ridley Scott :drill:
+SCHEDULED: <2024-12-01 Sun>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
+:ID:       ef3bd786-0652-40f3-a33f-62ca489f6ef6
+:DRILL_LAST_INTERVAL: 4.0
+:DRILL_REPEATS_SINCE_FAIL: 2
+:DRILL_TOTAL_REPEATS: 1
+:DRILL_FAILURE_COUNT: 0
+:DRILL_AVERAGE_QUALITY: 4.0
+:DRILL_EASE: 2.5
+:DRILL_LAST_QUALITY: 4
+:DRILL_LAST_REVIEWED: [Y-11-27 Wed 02:%]
 :END:
-[Legend] is a [1985] American film directed by Ridley Scott, written
+[4|Legend] is a [1985] American film directed by Ridley Scott, written
 by [William Hjortsberg], and starring [Tom Cruise], [Mia Sara], [Tim
 Curry].
 
@@ -61,11 +117,23 @@ Hjortsberg var halvt svensk, og skrev også Fallen Angel, som ble til
 Angel Heart (Alan Parker, 1987) samt en opera.
 
 Tangerine Dream er en tysk elektronikaduo
+
+En kirkeklokke kimer. Ut av klokken kryper Tim Curry
 *** Ridley Scott :drill:
+SCHEDULED: <2024-11-30 Sat>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
+:ID:       fc04ab03-a826-4f3e-9db4-c05ea88c1b46
+:DRILL_LAST_INTERVAL: 4.0
+:DRILL_REPEATS_SINCE_FAIL: 2
+:DRILL_TOTAL_REPEATS: 2
+:DRILL_FAILURE_COUNT: 1
+:DRILL_AVERAGE_QUALITY: 2.5
+:DRILL_EASE: 2.5
+:DRILL_LAST_QUALITY: 4
+:DRILL_LAST_REVIEWED: [Y-11-26 Tue 18:%]
 :END:
-[Someone to Watch Over Me] is a [1987] American neo-noir romantic thriller
+[5|Someone to Watch Over Me] is a [1987] American neo-noir romantic thriller
 film directed by Ridley Scott and written by [Howard Franklin]. It stars
 [Tom Berenger] as a police detective who has to protect a wealthy woman
 ([Mimi Rogers]), who is a key witness in a murder trial. The film's
@@ -74,11 +142,24 @@ film takes its title, recorded by [Sting], and [Vangelis]' "[Memories of
 Green]", originally from Scott's [Blade Runner].
 
 Rotten Tomatoes 65% rating based on 31 reviews
+**** Memo
+Et par hvite hansker: Berenger tar dem på og kveler Mimi Rogers, da
+han allerede er sjalu på Cruise. Didn't watch over her!
 *** Ridley Scott :drill:
+SCHEDULED: <2024-11-30 Sat>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
+:ID:       c1ba0148-171c-4c56-aa0e-2360b7b8b915
+:DRILL_LAST_INTERVAL: 3.86
+:DRILL_REPEATS_SINCE_FAIL: 2
+:DRILL_TOTAL_REPEATS: 2
+:DRILL_FAILURE_COUNT: 1
+:DRILL_AVERAGE_QUALITY: 2.5
+:DRILL_EASE: 2.36
+:DRILL_LAST_QUALITY: 3
+:DRILL_LAST_REVIEWED: [Y-11-26 Tue 18:%]
 :END:
-[Black Rain] is a [1989] American neo-noir crime thriller film
+[6|Black Rain] is a [1989] American neo-noir crime thriller film
 directed by Ridley Scott and starring [Michael Douglas], [Andy
 García], Ken Takakura, [Kate Capshaw]. The film focuses on two NYPD
 detectives who arrest a member of the yakuza and must escort him back
@@ -88,11 +169,24 @@ dragged deeper and deeper into the Japanese underworld.
 Music by [Hans Zimmer] (!)
 
 Rotten Tomatoes 86% rating based on 147 reviews
+**** Memo
+En sirkuselefant. På ryggen sitter Douglas og Garcia og rir inn i
+Japans indre. På veien skremmer de livet av Capshaw!
 *** Ridley Scott :drill:
+SCHEDULED: <2024-11-30 Sat>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
+:ID:       22289748-6c8e-499f-acee-f293439bdd22
+:DRILL_LAST_INTERVAL: 4.14
+:DRILL_REPEATS_SINCE_FAIL: 2
+:DRILL_TOTAL_REPEATS: 2
+:DRILL_FAILURE_COUNT: 1
+:DRILL_AVERAGE_QUALITY: 3.5
+:DRILL_EASE: 2.6
+:DRILL_LAST_QUALITY: 5
+:DRILL_LAST_REVIEWED: [Y-11-26 Tue 18:%]
 :END:
-[Thelma & Louise] is a [1991] American crime drama film directed by Ridley
+[7|Thelma & Louise] is a [1991] American crime drama film directed by Ridley
 Scott and written by [Callie Khouri]. The film stars Susan Sarandon and
 Geena Davis as Louise and Thelma, two friends who embark on a road
 trip that ends up in unforeseen circumstances. The supporting cast
@@ -102,11 +196,24 @@ Pitt (in one of his first major roles).
 Music by [Hans Zimmer]
 
 Rotten Tomatoes 86% rating based on 147 reviews
+**** Memo
+En flaggstang med Stars and Stripes: Thelma og Louise skyter det ned
+med maskingevær
 *** Ridley Scott :drill:
+SCHEDULED: <2024-12-01 Sun>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
+:ID:       5b445aa8-b299-43b0-b68b-f4fb7dbbf0fa
+:DRILL_LAST_INTERVAL: 3.86
+:DRILL_REPEATS_SINCE_FAIL: 2
+:DRILL_TOTAL_REPEATS: 2
+:DRILL_FAILURE_COUNT: 1
+:DRILL_AVERAGE_QUALITY: 2.5
+:DRILL_EASE: 2.36
+:DRILL_LAST_QUALITY: 3
+:DRILL_LAST_REVIEWED: [Y-11-27 Wed 02:%]
 :END:
-[1492: Conquest of Paradise] is a [1992] epic historical drama film
+[8|1492: Conquest of Paradise] is a [1992] epic historical drama film
 directed and produced by Ridley Scott, written by [Roselyne Bosch] and
 starring [Gérard Depardieu], [Fernando Rey] (Charnier!), [Michael
 Wincott], and [Sigourney Weaver].
@@ -114,11 +221,24 @@ Wincott], and [Sigourney Weaver].
 Music by [Vangelis]
 
 Rotten Tomatoes 32% rating based on 22 reviews
+**** Memo
+En snømann på uvisst sted. Plutselig begynner den å smelte. Bak står
+Wincott og pisser den i hjel.
 *** Ridley Scott :drill:
+SCHEDULED: <2024-11-30 Sat>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
+:ID:       e17481e1-c427-491a-877e-08d8a27d9ed0
+:DRILL_LAST_INTERVAL: 3.86
+:DRILL_REPEATS_SINCE_FAIL: 2
+:DRILL_TOTAL_REPEATS: 3
+:DRILL_FAILURE_COUNT: 2
+:DRILL_AVERAGE_QUALITY: 2.0
+:DRILL_EASE: 2.36
+:DRILL_LAST_QUALITY: 3
+:DRILL_LAST_REVIEWED: [Y-11-26 Tue 18:%]
 :END:
-[White Squall] is a [1996] American disaster survival film directed by
+[9|White Squall] is a [1996] American disaster survival film directed by
 Ridley Scott. It is a coming of age film in which a group of high
 school and college-aged teenagers sign up for several months of
 training aboard a sailing ship, a brigantine, and travel around half
@@ -130,55 +250,103 @@ The film was based on the 1962 book [The Last Voyage of the Albatross]
 by Charles Gieg Jr. and Felix Sutton.
 
 Rotten Tomatoes: 57% based on 37 reviews.
+**** Memo
+En flott blomsterbukett. Viser seg å være i en begravelse over de falne ungdommene.
 *** Ridley Scott :drill:
+SCHEDULED: <2024=12-01 Sun>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
+:ID:       ea75d01a-fe8f-4a51-bf2b-9e94c392b229
+:DRILL_LAST_INTERVAL: 4.14
+:DRILL_REPEATS_SINCE_FAIL: 2
+:DRILL_TOTAL_REPEATS: 1
+:DRILL_FAILURE_COUNT: 0
+:DRILL_AVERAGE_QUALITY: 5.0
+:DRILL_EASE: 2.6
+:DRILL_LAST_QUALITY: 5
+:DRILL_LAST_REVIEWED: [Y-11-27 Wed 02:%]
 :END:
-[G.I. Jane] is a [1997] American action drama film directed by Ridley
-Scott and starring [Demi Moore], [Viggo Mortensen], and [Anne
-Bancroft]. The film tells the fictional story of the first woman to
-undergo special operations training similar to the U.S. Navy SEALs.
-
-Music by [Trevor Jones]
+[10|G.I. Jane] is a [1997] American action drama film directed by Ridley
+Scott and starring [Demi Moore], [Viggo Mortensen], and Anne Bancroft. The
+film tells the fictional story of the first woman to undergo special
+operations training similar to the U.S. Navy SEALs.
 
 Rotten Tomatoes: 53% based on 38 reviews.
+**** Memo
+En tallerken med biff!. En ultramuskuløs Moore setter seg ned å
+begynner å jafse i seg biffen.
 *** Ridley Scott :drill:
+SCHEDULED: <2024-11-30 Sat>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
+:ID:       67fd4495-d524-4449-b266-57797d3c517c
+:DRILL_LAST_INTERVAL: 4.0
+:DRILL_REPEATS_SINCE_FAIL: 2
+:DRILL_TOTAL_REPEATS: 2
+:DRILL_FAILURE_COUNT: 1
+:DRILL_AVERAGE_QUALITY: 3.0
+:DRILL_EASE: 2.5
+:DRILL_LAST_QUALITY: 4
+:DRILL_LAST_REVIEWED: [Y-11-26 Tue 18:%]
 :END:
-Gladiator is a 2000 historical epic film directed by Ridley Scott
-based on a story by [David Franzoni]. It stars Russell Crowe, Joaquin
+[11|Gladiator] is a [2000] historical epic film directed by Ridley Scott
+based on a story by David Franzoni. It stars Russell Crowe, Joaquin
 Phoenix, Connie Nielsen, Oliver Reed, Derek Jacobi, Djimon Hounsou,
 and Richard Harris.
 
-Music by [Hans Zimmer] and [Lisa Gerrard]
+Music by [Hans Zimmer] and Lisa [Gerrard]
 
 Rotten Tomatoes: 80% based on 257 reviews.
+**** Memo
+Et par blyanter ut av nesen. Til Russel Crowe. Phoenix har stukket dem
+inn for å vinne kampen.
 *** Ridley Scott :drill:
+SCHEDULED: <2024-11-30 Sat>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
+:ID:       a75efc0b-73a8-4705-a7b8-9c2505b0bf72
+:DRILL_LAST_INTERVAL: 4.0
+:DRILL_REPEATS_SINCE_FAIL: 2
+:DRILL_TOTAL_REPEATS: 1
+:DRILL_FAILURE_COUNT: 0
+:DRILL_AVERAGE_QUALITY: 4.0
+:DRILL_EASE: 2.5
+:DRILL_LAST_QUALITY: 4
+:DRILL_LAST_REVIEWED: [Y-11-26 Tue 18:%]
 :END:
-[Hannibal] is a [2001] American horror film directed by Ridley Scott
-and based on the 1999 novel by [Thomas Harris]. A sequel to the 1991
+[12|Hannibal] is a [2001] American horror film directed by Ridley Scott
+and based on the 1999 novel by Thomas Harris. A sequel to the 1991
 film The Silence of the Lambs, the plot follows disgraced FBI special
 agent Clarice Starling as she attempts to apprehend cannibalistic
 serial killer Hannibal Lecter before his surviving victim, Mason
 Verger, captures him. Anthony Hopkins reprises his role as Lecter,
-while Julianne Moore replaces Jodie Foster as Starling and [Gary
-Oldman] plays Verger. Ray Liotta, [Giancarlo Giannini], and [Francesca
-Neri] also star. It’s an international co-production film between the
-United States and the United Kingdom.
+while Julianne Moore replaces Jodie Foster as Starling and Gary Oldman
+plays Verger. Ray Liotta, Giancarlo [Giannini], and Francesca [Neri]
+also star. It’s an international co-production film between the United
+States and the United Kingdom.
 
 Music by [Hans Zimmer]
 
 Rotten Tomatoes: 39% based on 172 reviews.
+**** Memo
+Et armbåndsur. På armen til monsteret Oldman.
 *** Ridley Scott :drill:
+SCHEDULED: <2024-11-30 Sat>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
+:ID:       b2685239-1f77-4ad8-ada7-a32a045a7f42
+:DRILL_LAST_INTERVAL: 4.0
+:DRILL_REPEATS_SINCE_FAIL: 2
+:DRILL_TOTAL_REPEATS: 2
+:DRILL_FAILURE_COUNT: 1
+:DRILL_AVERAGE_QUALITY: 3.0
+:DRILL_EASE: 2.5
+:DRILL_LAST_QUALITY: 4
+:DRILL_LAST_REVIEWED: [Y-11-26 Tue 18:%]
 :END:
-[Black Hawk Down] is a [2001] war film directed and produced by Ridley
+[13|Black Hawk Down] is a [2001] war film directed and produced by Ridley
 Scott, and co-produced by [Jerry Bruckheimer]. It is based on the 1999
-eponymous non-fiction book by journalist [Mark Bowden], about the crew
+eponymous non-fiction book by journalist Mark [Bowden], about the crew
 of a Black Hawk helicopter that was shot down during the Battle of
 Mogadishu. The film features a large ensemble cast, including Josh
 Hartnett, Ewan McGregor, Eric Bana, Tom Sizemore, William Fichtner,
@@ -189,14 +357,26 @@ Burrell, and Nikolaj Coster-Waldau also have minor roles.
 Music by [Hans Zimmer]
 
 Rotten Tomatoes: 77% based on 175 reviews.
+**** Memo
+En trappestige: Overfylles av alle kjendisene fra filmen omtrent som et sirkusnummer.
 *** Ridley Scott :drill:
+SCHEDULED: <2024-11-30 Sat>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
+:ID:       9c70c9ce-b5c4-4ecc-9262-ca3d02361f77
+:DRILL_LAST_INTERVAL: 3.86
+:DRILL_REPEATS_SINCE_FAIL: 2
+:DRILL_TOTAL_REPEATS: 1
+:DRILL_FAILURE_COUNT: 0
+:DRILL_AVERAGE_QUALITY: 3.0
+:DRILL_EASE: 2.36
+:DRILL_LAST_QUALITY: 3
+:DRILL_LAST_REVIEWED: [Y-11-26 Tue 18:%]
 :END:
-[Matchstick Men] is a [2003] black comedy crime film directed by
-Ridley Scott and based on [Eric Garcia]'s 2002 novel of the same name.
-The film stars Nicolas Cage, [Sam Rockwell], Bruce McGill, and [Alison
-Lohman].
+[14|Matchstick Men] is a [2003] black comedy crime film directed by
+Ridley Scott and based on Eric Garcia's 2002 novel of the same name.
+The film stars [Nicolas Cage], Sam [Rockwell], Bruce [McGill], and Alison
+Lohman.
 
 Roy Waller is a con artist from Los Angeles with severe Tourette
 syndrome and obsessive-compulsive disorder.
@@ -204,29 +384,45 @@ syndrome and obsessive-compulsive disorder.
 Music by [Hans Zimmer]
 
 Rotten Tomatoes: 82% based on 186 reviews.
+**** Memo
+Et skip seiler. Inn i Afrika! Inn i Sahara, der Cage har etterlatt det (ja, jeg tror kanskje
+jeg blander sammen confilmer)
 *** Ridley Scott :drill:
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
+:ID:       4a115749-d067-46b4-a98f-df411bd2952b
 :END:
-[Kingdom of Heaven] is a [2005] epic historical drama film directed
-and produced by Ridley Scott and written by William Monahan. It
-features an ensemble cast including [Orlando Bloom], [Eva Green],
-[Jeremy Irons], David Thewlis, Brendan Gleeson, Marton Csokas, and
-Liam Neeson.
+[15|Kingdom of Heaven] is a [2005] epic historical drama film directed and
+produced by Ridley Scott and written by William Monahan. It features
+an ensemble cast including [Orlando Bloom], [Eva Green], Jeremy Irons,
+David Thewlis, Brendan Gleeson, Marton Csokas, and Liam Neeson.
 
 The film is a heavily fictionalised portrayal of the events leading to
 the Third Crusade, focusing mainly on Balian of Ibelin who fights to
 defend the Crusader Kingdom of Jerusalem from the Ayyubid Sultan
-Saladin.
+[Saladin].
 
 Music by [Harry Gregson-Williams]
 
 Rotten Tomatoes: 40% based on 189 reviews.
+**** Memo
+En tavle i et skolerom: Her undervises Bloom og Green i strategier for
+å innta Jerusalem.
 *** Ridley Scott :drill:
+SCHEDULED: <2024-12-01 Sun>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
+:ID:       e021d632-375a-4a38-8e71-f292f18105b5
+:DRILL_LAST_INTERVAL: 3.86
+:DRILL_REPEATS_SINCE_FAIL: 2
+:DRILL_TOTAL_REPEATS: 1
+:DRILL_FAILURE_COUNT: 0
+:DRILL_AVERAGE_QUALITY: 3.0
+:DRILL_EASE: 2.36
+:DRILL_LAST_QUALITY: 3
+:DRILL_LAST_REVIEWED: [Y-11-27 Wed 02:%]
 :END:
-[A Good Year] is a 2006 romantic comedy-drama film directed and
+[16|A Good Year] is a [2006] romantic comedy-drama film directed and
 produced by Ridley Scott. The film stars [Russell Crowe], [Marion
 Cotillard], Didier Bourdon, Abbie Cornish, Tom Hollander, Freddie
 Highmore and Albert Finney. The film is based on the 2004 novel of the
@@ -241,11 +437,23 @@ trader in London with a cheeky-chappy persona.
 Music by [Marc Streitenfeld]
 
 Rotten Tomatoes: 26% based on 134 reviews.
+**** Memo
+3D-symbolet. Her ligger Crowe og Cotillard og puler inne i et Goodyear-dekk.
 *** Ridley Scott :drill:
+SCHEDULED: <2024-12-01 Sun>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
+:ID:       c2bdfabd-8e35-4ee7-8041-f7312cb24954
+:DRILL_LAST_INTERVAL: 4.14
+:DRILL_REPEATS_SINCE_FAIL: 2
+:DRILL_TOTAL_REPEATS: 1
+:DRILL_FAILURE_COUNT: 0
+:DRILL_AVERAGE_QUALITY: 5.0
+:DRILL_EASE: 2.6
+:DRILL_LAST_QUALITY: 5
+:DRILL_LAST_REVIEWED: [Y-11-27 Wed 02:%]
 :END:
-[American Gangster] is a [2007] American biographical crime film
+[17|American Gangster] is a [2007] American biographical crime film
 directed and produced by Ridley Scott and written by Steven Zaillian.
 The film is loosely based on the criminal career of Frank Lucas, a
 gangster from La Grange, North Carolina who smuggled heroin into the
@@ -258,11 +466,23 @@ Ejiofor, Ruby Dee, Lymari Nadal and Cuba Gooding Jr.
 Music by [Marc Streitenfeld]
 
 Rotten Tomatoes: 81% based on 218 reviews.
+**** Memo
+Trompet. Tas opp av Crowe, som spiller en fanfare før han og New Jersey-gjengen inntar NY
 *** Ridley Scott :drill:
+SCHEDULED: <2024-12-01 Sun>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
+:ID:       fcd27c26-0807-4d90-a702-eaf777f60ea9
+:DRILL_LAST_INTERVAL: 4.14
+:DRILL_REPEATS_SINCE_FAIL: 2
+:DRILL_TOTAL_REPEATS: 1
+:DRILL_FAILURE_COUNT: 0
+:DRILL_AVERAGE_QUALITY: 5.0
+:DRILL_EASE: 2.6
+:DRILL_LAST_QUALITY: 5
+:DRILL_LAST_REVIEWED: [Y-11-27 Wed 02:%]
 :END:
-[Body of Lies] is a [2008] American spy action thriller film directed
+[18|Body of Lies] is a [2008] American spy action thriller film directed
 and produced by Ridley Scott, written by William Monahan, and starring
 [Leonardo DiCaprio], [Russell Crowe], [Mark Strong] and Golshifteh
 Farahani in the lead roles. Set in the Middle East, it follows the
@@ -270,48 +490,84 @@ attempts of the CIA and the GID of Jordan to catch "al-Saleem", a
 terrorist. Frustrated by their target's elusiveness, differences in
 their approaches strain relations between a CIA operative, his
 superior, and the head of Jordanian Intelligence. The supporting cast
-features Mark Strong and Oscar Isaac.
+features Oscar Isaac.
 
 Music by [Marc Streitenfeld]
 
 Rotten Tomatoes: 55% based on 216 reviews.
+**** Memo
+Tog. Strong torturerer Di Caprio fordi han tar privatjet
 *** Ridley Scott :drill:
+SCHEDULED: <2024-11-30 Sat>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
+:ID:       3fac7470-aad1-4946-9fdc-1bb673ec50de
+:DRILL_LAST_INTERVAL: 4.0
+:DRILL_REPEATS_SINCE_FAIL: 2
+:DRILL_TOTAL_REPEATS: 1
+:DRILL_FAILURE_COUNT: 0
+:DRILL_AVERAGE_QUALITY: 4.0
+:DRILL_EASE: 2.5
+:DRILL_LAST_QUALITY: 4
+:DRILL_LAST_REVIEWED: [Y-11-26 Tue 18:%]
 :END:
-[Robin Hood] is a [2010] historical action-adventure film based on the
+[19|Robin Hood] is a [2010] historical action-adventure film based on the
 Robin Hood legend, directed by Ridley Scott and starring [Russell
-Crowe], [Cate Blanchett], [William Hurt], Mark Strong, Mark Addy,
-Oscar Isaac, Danny Huston, Eileen Atkins, and Max von Sydow.
+Crowe], [Cate Blanchett], William Hurt, Mark Strong, Mark Addy, Oscar
+Isaac, Danny Huston, Eileen Atkins, and Max von Sydow.
 
 Screenplay by [Brian Helgeland]
 
 Music by [Marc Streitenfeld]
 
 Rotten Tomatoes: 43% based on 251 reviews.
+**** Memo
+Mobiltelefon. Tas opp av Crowe, den moderne Robin Hood, som bruker intercom til sine raids
 *** Ridley Scott :drill:
+SCHEDULED: <2024-11-30 Sat>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
+:ID:       c5519972-fe7f-4f4b-8995-91ab033843e1
+:DRILL_LAST_INTERVAL: 3.86
+:DRILL_REPEATS_SINCE_FAIL: 2
+:DRILL_TOTAL_REPEATS: 1
+:DRILL_FAILURE_COUNT: 0
+:DRILL_AVERAGE_QUALITY: 3.0
+:DRILL_EASE: 2.36
+:DRILL_LAST_QUALITY: 3
+:DRILL_LAST_REVIEWED: [Y-11-26 Tue 18:%]
 :END:
-[Prometheus] is a [2012] science fiction horror film directed by
-Ridley Scott and written by Jon Spaihts and [Damon Lindelof]. It is
+[20|Prometheus] is a [2012] science fiction horror film directed by
+Ridley Scott and written by Jon Spaihts and Damon [Lindelof]. It is
 the fifth installment of the Alien film series and features an
-ensemble cast including [Noomi Rapace], Michael Fassbender, [Guy
-Pearce], Idris Elba, Logan Marshall-Green, and Charlize Theron. Set in
-the late 21st century, the film centers on the crew of the spaceship
-Prometheus as it follows a star map discovered among the artifacts of
-several ancient Earth cultures. Seeking the origins of humanity, the
-crew arrives on a distant world and discovers a threat that could
-cause the extinction of the human species.
+ensemble cast including Noomi Rapace, Michael Fassbender, Guy Pearce,
+Idris Elba, Logan Marshall-Green, and Charlize Theron. Set in the late
+21st century, the film centers on the crew of the spaceship Prometheus
+as it follows a star map discovered among the artifacts of several
+ancient Earth cultures. Seeking the origins of humanity, the crew
+arrives on a distant world and discovers a threat that could cause the
+extinction of the human species.
 
 Music by [Marc Streitenfeld]
 
 Rotten Tomatoes: 73% based on 312 reviews.
+**** Memo
+På tennisbanen. Inn kommer den hvite kjempen og moser Jannik Sinner 6-0 x 3
 *** Ridley Scott :drill:
+SCHEDULED: <2024-12-01 Sun>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
+:ID:       d0c285fe-853f-4cdd-92a5-0633de8259ad
+:DRILL_LAST_INTERVAL: 4.0
+:DRILL_REPEATS_SINCE_FAIL: 2
+:DRILL_TOTAL_REPEATS: 1
+:DRILL_FAILURE_COUNT: 0
+:DRILL_AVERAGE_QUALITY: 4.0
+:DRILL_EASE: 2.5
+:DRILL_LAST_QUALITY: 4
+:DRILL_LAST_REVIEWED: [Y-11-27 Wed 02:%]
 :END:
-[The Counselor] (known as The Counsellor in countries that use British
+[21|The Counselor] (known as The Counsellor in countries that use British
 English) is a [2013] crime thriller film directed by Ridley Scott and
 written by [Cormac McCarthy]. It stars [Michael Fassbender] as the
 eponymous Counselor as well as [Penélope Cruz], Cameron Diaz, Javier
@@ -324,32 +580,56 @@ drug deal around the troubled Ciudad Juarez, Mexico/Texas border area.
 Music by [Daniel Pemberton]
 
 Rotten Tomatoes: 34% based on 221 reviews.
+**** Memo
+Et eple. Fassbender tar det opp og stikker en sprøyte med gift inn i
+det og gir det til de meksikanske jentene Cruz og Diaz. Han er tross
+alt mafia-Counsellor!
 *** Ridley Scott :drill:
+SCHEDULED: <2024-11-30 Sat>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
+:ID:       8aae99a0-4ccb-4866-9fcb-49788c9b9f05
+:DRILL_LAST_INTERVAL: 3.86
+:DRILL_REPEATS_SINCE_FAIL: 2
+:DRILL_TOTAL_REPEATS: 1
+:DRILL_FAILURE_COUNT: 0
+:DRILL_AVERAGE_QUALITY: 3.0
+:DRILL_EASE: 2.36
+:DRILL_LAST_QUALITY: 3
+:DRILL_LAST_REVIEWED: [Y-11-26 Tue 18:%]
 :END:
-[Exodus: Gods and Kings] is a [2014] biblical epic film directed and
-produced by Ridley Scott, and written by Adam Cooper, Bill Collage,
-Jeffrey Caine, and Steven Zaillian. The film stars [Christian Bale],
-[Joel Edgerton], John Turturro, Aaron Paul, Ben Mendelsohn, Sigourney
-Weaver, and Ben Kingsley. It is inspired by the biblical episode of
-the Exodus of the Hebrews from Egypt led by Moses and related in the
-Book of Exodus. Development on the film was first announced by Scott
-in June 2012. Filming occurred primarily in Spain beginning in October
-2013, with additional filming at Pinewood Studios in England.
+[22|Exodus: Gods and Kings] is a [2014] biblical epic film directed
+and produced by Ridley Scott, and written by Adam Cooper, Bill
+Collage, Jeffrey Caine, and Steven Zaillian. The film stars [Christian
+Bale], Joel [Edgerton], John Turturro, Aaron Paul, Ben Mendelsohn,
+Sigourney Weaver, and Ben Kingsley. It is inspired by the biblical
+episode of the Exodus of the Hebrews from Egypt led by Moses and
+related in the Book of Exodus.
 
-Music by [Alberto Iglesias]
+Music by Alberto [Iglesias]
 
 Rotten Tomatoes: 30% based on 210 reviews.
+**** Memo
+Et gevær. Moses Bale tar det opp, og skyter alle som har danset rundt gullkalven!
 *** Ridley Scott :drill:
+SCHEDULED: <2024-11-30 Sat>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
+:ID:       f4ba15bf-f404-4382-832d-b2d63e4ce6ec
+:DRILL_LAST_INTERVAL: 4.0
+:DRILL_REPEATS_SINCE_FAIL: 2
+:DRILL_TOTAL_REPEATS: 3
+:DRILL_FAILURE_COUNT: 2
+:DRILL_AVERAGE_QUALITY: 2.333
+:DRILL_EASE: 2.5
+:DRILL_LAST_QUALITY: 4
+:DRILL_LAST_REVIEWED: [Y-11-26 Tue 19:%]
 :END:
-[The Martian] is a [2015] science fiction film directed by Ridley
-Scott and starring Matt Damon. Drew Goddard adapted the screenplay
+[23|The Martian] is a [2015] science fiction film directed by Ridley
+Scott and starring [Matt Damon]. Drew Goddard adapted the screenplay
 from the 2011 novel by [Andy Weir]. It also stars Jessica Chastain,
-Jeff [Daniels], Kristen [Wiig], Chiwetel Ejiofor, Sean Bean, Michael
-Peña, Kate Mara, Sebastian Stan, Aksel Hennie, Mackenzie Davis, Donald
+Jeff Daniels, Kristen Wiig, Chiwetel Ejiofor, Sean Bean, Michael Peña,
+Kate Mara, Sebastian Stan, Aksel Hennie, Mackenzie Davis, Donald
 Glover, and Benedict Wong. The film depicts an astronaut's struggle to
 survive on Mars after being left behind and NASA's efforts to return
 him to Earth.
@@ -357,65 +637,106 @@ him to Earth.
 Music by [Harry Gregson-Williams]
 
 Rotten Tomatoes: 91% based on 383 reviews.
+**** Memo
+En fotballbane. Alene spiller Damon fotball med seg selv, på Mars. First! Best!
 *** Ridley Scott :drill:
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
+:ID:       215bbafb-c9c4-425a-a2ce-832a3d965c85
 :END:
-[Alien: Covenant] is a [2017] science fiction horror film directed and
-produced by Ridley Scott, and written by John Logan and Dante Harper
-from a story by Michael Green and Jack Paglen. A joint American and
-British production, it is part of the Alien franchise, serving as a
-sequel to Prometheus (2012). It features returning star Michael
-Fassbender, with Katherine [Waterston], Billy [Crudup], Danny McBride, and
-Demián Bichir in supporting roles. It follows the crew of a colony
+[24|Alien: Covenant] is a [2017] science fiction horror film directed
+and produced by Ridley Scott, and written by John Logan and Dante
+Harper from a story by Michael Green and Jack Paglen. A joint American
+and British production, it is part of the Alien franchise, serving as
+a sequel to Prometheus (2012). It features returning star Michael
+Fassbender, with Katherine [Waterston], Billy [Crudup], Danny McBride,
+and Demián Bichir in supporting roles. It follows the crew of a colony
 ship that lands on an uncharted planet and makes a terrifying
 discovery.
 
 Music by [Jed Kurzel]
 
 Rotten Tomatoes: 65% based on 408 reviews.
+**** Memo
+Speil. Fassbaender står og speiler seg, mens han klipper av seg håret.
 *** Ridley Scott :drill:
+SCHEDULED: <2024-11-30 Sat>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
+:ID:       78e3cddf-0ed2-4bc9-ae7a-47be59751099
+:DRILL_LAST_INTERVAL: 3.86
+:DRILL_REPEATS_SINCE_FAIL: 2
+:DRILL_TOTAL_REPEATS: 4
+:DRILL_FAILURE_COUNT: 3
+:DRILL_AVERAGE_QUALITY: 1.75
+:DRILL_EASE: 2.36
+:DRILL_LAST_QUALITY: 3
+:DRILL_LAST_REVIEWED: [Y-11-26 Tue 19:%]
 :END:
-[All the Money in the World] is a 2017 biographical crime thriller
-film directed by Ridley Scott and written by David Scarpa. Based on
-John Pearson's 1995 book Painfully Rich: The Outrageous Fortunes and
-Misfortunes of the Heirs of [J. Paul Getty], it depicts the events
-surrounding the 1973 kidnapping of John Paul Getty III and the refusal
-of his grandfather, the multi-billionaire oil tycoon J. Paul Getty, to
-cooperate with the kidnappers' extortion demands. The film stars
-[Michelle Williams] as Gail Harris Getty, John Paul Getty III's
-mother, [Christopher Plummer] as Getty, and [Mark Wahlberg] as
+[25|All the Money in the World] is a [2017] biographical crime
+thriller film directed by Ridley Scott and written by David Scarpa.
+Based on John Pearson's 1995 book Painfully Rich: The Outrageous
+Fortunes and Misfortunes of the Heirs of [J. Paul Getty], it depicts
+the events surrounding the 1973 kidnapping of John Paul Getty III and
+the refusal of his grandfather, the multi-billionaire oil tycoon J.
+Paul Getty, to cooperate with the kidnappers' extortion demands. The
+film stars Michelle [Williams] as Gail Harris Getty, John Paul Getty
+III's mother, [Christopher Plummer] as Getty, and [Mark Wahlberg] as
 Fletcher Chace, an adviser of the Getty family.
 
 Music by [Daniel Pemberton]
 
 Rotten Tomatoes: 79% based on 262 reviews.
+**** Memo
+Spåkule eller Palantir: Plummer står som Saruman. Han (Getty) har
+puttet ALLE PENGENE I VERDEN inn i stenen.
 *** Ridley Scott :drill:
+SCHEDULED: <2024-12-01 Sun>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
+:ID:       ef5c1eba-ecba-417a-b226-77ecfb7ca609
+:DRILL_LAST_INTERVAL: 4.14
+:DRILL_REPEATS_SINCE_FAIL: 2
+:DRILL_TOTAL_REPEATS: 1
+:DRILL_FAILURE_COUNT: 0
+:DRILL_AVERAGE_QUALITY: 5.0
+:DRILL_EASE: 2.6
+:DRILL_LAST_QUALITY: 5
+:DRILL_LAST_REVIEWED: [Y-11-27 Wed 02:%]
 :END:
-The Last Duel is a [2021] historical drama film directed by Ridley Scott
-from a screenplay by Nicole Holofcener, [Ben Affleck], and [Matt
-Damon], based on the 2004 book The Last Duel: A True Story of Crime,
-Scandal, and Trial by Combat in Medieval France by Eric Jager. Set in
-medieval France, the film stars [Damon] as Jean de Carrouges, a knight
-who challenges his former friend, squire Jacques le Gris ([Adam
-Driver]), to a judicial duel after Jean's wife, Marguerite (Jodie
-Comer), accuses Jacques of raping her. The events leading up to the
-duel are divided into three distinct chapters, reflecting the
-contradictory perspectives of the three main characters. Affleck also
-stars in a supporting role as Count Pierre d'Alençon.
+[26|The Last Duel] is a [2021] historical drama film[6] directed by
+Ridley Scott from a screenplay by Nicole Holofcener, [Ben Affleck],
+and [Matt Damon], based on the 2004 book The Last Duel: A True Story
+of Crime, Scandal, and Trial by Combat in Medieval France by Eric
+Jager. Set in medieval France, the film stars Damon as Jean de
+Carrouges, a knight who challenges his former friend, squire Jacques
+le Gris ([Adam Driver]), to a judicial duel after Jean's wife,
+Marguerite (Jodie Comer), accuses Jacques of raping her. The events
+leading up to the duel are divided into three distinct chapters,
+reflecting the contradictory perspectives of the three main
+characters. Affleck also stars in a supporting role as Count Pierre
+d'Alençon.
 
 Music by [Harry Gregson-Williams]
 
 Rotten Tomatoes: 85% based on 287 reviews.
+**** Memo
+Et gammelt kassaapparat. Betjenes av Damon, som ikke får betaling av Driver. Utfordrer til duell.
 *** Ridley Scott :drill:
+SCHEDULED: <2024-11-30 Sat>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
+:ID:       27388e32-50d8-49af-b529-ba5680059680
+:DRILL_LAST_INTERVAL: 4.0
+:DRILL_REPEATS_SINCE_FAIL: 2
+:DRILL_TOTAL_REPEATS: 4
+:DRILL_FAILURE_COUNT: 3
+:DRILL_AVERAGE_QUALITY: 1.75
+:DRILL_EASE: 2.5
+:DRILL_LAST_QUALITY: 4
+:DRILL_LAST_REVIEWED: [Y-11-26 Tue 18:%]
 :END:
-[House of Gucci] is a [2021] American biographical crime drama film
+[27|House of Gucci] is a [2021] American biographical crime drama film
 directed by Ridley Scott, based on the 2001 book The House of Gucci: A
 Sensational Story of Murder, Madness, Glamour, and Greed by Sara Gay
 Forden. The film follows Patrizia Reggiani ([Lady Gaga]) and Maurizio
@@ -426,30 +747,55 @@ Jack Huston, Salma Hayek, and Al Pacino also star.
 Music by [Harry Gregson-Williams]
 
 Rotten Tomatoes: 62% based on 373 reviews.
+**** Memo
+Sverd, med latterlig mange juveler (Gucci). Driver tror han er tilbake
+i Star Wars, trekker det, og stikker det inn i Lady Gaga, fordi hun er
+born that way.
 *** Ridley Scott :drill:
+SCHEDULED: <2024-11-30 Sat>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
+:ID:       3e5e531c-6ab2-4026-a36b-564a9159c172
+:DRILL_LAST_INTERVAL: 4.14
+:DRILL_REPEATS_SINCE_FAIL: 2
+:DRILL_TOTAL_REPEATS: 2
+:DRILL_FAILURE_COUNT: 1
+:DRILL_AVERAGE_QUALITY: 3.0
+:DRILL_EASE: 2.6
+:DRILL_LAST_QUALITY: 5
+:DRILL_LAST_REVIEWED: [Y-11-26 Tue 18:%]
 :END:
-[Napoleon] is a [2023] epic biographical war film directed and
+[28|Napoleon] is a [2023] epic biographical war film directed and
 produced by Ridley Scott, and written by David Scarpa. Based on the
 life of Napoleon and primarily depicting his rise to power as well as
 his relationship with his wife, Joséphine, it stars [Joaquin Phoenix]
-as Napoleon and [Vanessa Kirby] as Joséphine.
-
-Music by [Martin Phipps]
+as Napoleon and Vanessa [Kirby] as Joséphine.
 
 Rotten Tomatoes: 62% based on 373 reviews.
+**** Memo
+Briller. Phoenix tar på seg brillene, og ødelegger scenen, da Napoleon
+ikke brukte briller.
 *** Ridley Scott :drill:
+SCHEDULED: <2024-11-30 Sat>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
+:ID:       7d461939-6301-4751-a519-607075466abe
+:DRILL_LAST_INTERVAL: 3.86
+:DRILL_REPEATS_SINCE_FAIL: 2
+:DRILL_TOTAL_REPEATS: 1
+:DRILL_FAILURE_COUNT: 0
+:DRILL_AVERAGE_QUALITY: 3.0
+:DRILL_EASE: 2.36
+:DRILL_LAST_QUALITY: 3
+:DRILL_LAST_REVIEWED: [Y-11-26 Tue 18:%]
 :END:
-[Gladiator II] is a [2024] epic historical action film directed and
+[29|Gladiator II] is a [2024] epic historical action film directed and
 produced by Ridley Scott that serves as a sequel to Gladiator (2000).
 Written by David Scarpa, from a story he wrote with Peter Craig, the
 film was produced by Scott Free Productions and distributed by
-Paramount Pictures. It stars Paul [Mescal], Pedro [Pascal], Joseph
+Paramount Pictures. It stars Paul [Mescal], [Pedro Pascal], Joseph
 Quinn, Fred Hechinger, Lior Raz, Derek Jacobi, Connie Nielsen, and
-Denzel Washington. Jacobi and Nielsen reprise their roles from the
+Denzel Washington.[6] Jacobi and Nielsen reprise their roles from the
 first film, with Mescal replacing Spencer Treat Clark. Mescal portrays
 Lucius, whose home is invaded by the Roman army led by General
 Acacius. He seeks revenge against Acacius and fights as a gladiator
@@ -459,5 +805,75 @@ and Caracalla.
 Music by [Harry Gregson-Williams]
 
 Rotten Tomatoes: 72% based on 292 reviews.
+**** Memo
+Gearstang. Connie Nilsen tilbake i pornobransjen.
+*** Ridley Scott :drill:
+SCHEDULED: <2024-12-01 Sun>
+:PROPERTIES:
+:DRILL_CARD_TYPE: hide2cloze
+:ID:       a47d358e-d880-4f62-8767-f37d42567bae
+:DRILL_LAST_INTERVAL: 4.14
+:DRILL_REPEATS_SINCE_FAIL: 2
+:DRILL_TOTAL_REPEATS: 1
+:DRILL_FAILURE_COUNT: 0
+:DRILL_AVERAGE_QUALITY: 5.0
+:DRILL_EASE: 2.6
+:DRILL_LAST_QUALITY: 5
+:DRILL_LAST_REVIEWED: [Y-11-27 Wed 02:%]
+:END:
+Hvilke filmer har Harry Gregson-Williams satt musikk til?
+15: Kingdom of Heaven
+23: The Martian
+26: The Last Duel
+27: House of Gucci
+29: Gladiator II
 
+Utvalg andre filmer:
+Smilla's Sense of Snow (med Zimmer) (August)
+Spy Game (Scott)
+Phone Booth (Schumacher)
+Sinbad: Legend of the Seven Seas
+Veronica Guerin (Schumacher)
+Man on Fire (Scott)
+Shrek 2
+The Chronicles of Narnia: The Lion, the Witch and the Wardrobe
+Déjà Vu (Scott)
+The Number 23 (Schumacher)
+Shrek the Third
+Gone Baby Gone (Affleck)
+The Chronicles of Narnia: Prince Caspian
+X-Men Origins: Wolverine (Hood)
+The Taking of Pelham 123 (Scott)
+The Town (Affleck)
+Cowboys & Aliens (Favreau)
+Total Recall (Wiseman)
+The Equalizer 1 + 2
+The Meg 1 + 2 (Turteltaub)
+Penguins
+*** Ridley Scott :drill:
+:PROPERTIES:
+:DRILL_CARD_TYPE: hide2cloze
+:END:
+Hvilke filmer har Marc Streitenfeld satt musikk til?
+Alle på rad! 16-20.
+16: A Good Year
+17: American Gangster
+18: Body of Lies
+19: Robin Hood
+20: Prometheus
 
+Utvalg andre filmer:
+*** Ridley Scott :drill:
+:PROPERTIES:
+:DRILL_CARD_TYPE: hide2cloze
+:END:
+Hvilke filmer har Hans Zimmer satt musikk til?
+6-7 og 11-14
+ 6: Black Rain
+ 7: Thelma og Louise
+11: Gladiator
+12: Hannibal
+13: Black Hawk Down
+14: Matchstick Men
+
+Utvalg andre filmer:
