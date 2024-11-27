@@ -357,6 +357,8 @@ and running Git.")
 		(setf fill-paragraph-function #'fill-time-paragraph)))))
   *my-favorites*)
 
+(require 'org-drill)
+
 (custom-set-variables
  '(temp-buffer-resize-mode t)
  '(visible-bell t))
