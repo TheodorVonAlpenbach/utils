@@ -3,18 +3,18 @@
 ** Ridley Scott
 
 *** Ridley Scott :drill:
-SCHEDULED: <2024-12-01 Sun>
+SCHEDULED: <2024-12-05 Thu>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
 :ID:       3f3a6883-cbbf-498b-8c55-e0f7d7f3f8af
-:DRILL_LAST_INTERVAL: 3.86
+:DRILL_LAST_INTERVAL: 3.725
 :DRILL_REPEATS_SINCE_FAIL: 2
-:DRILL_TOTAL_REPEATS: 1
-:DRILL_FAILURE_COUNT: 0
-:DRILL_AVERAGE_QUALITY: 3.0
-:DRILL_EASE: 2.36
+:DRILL_TOTAL_REPEATS: 5
+:DRILL_FAILURE_COUNT: 3
+:DRILL_AVERAGE_QUALITY: 2.4
+:DRILL_EASE: 2.22
 :DRILL_LAST_QUALITY: 3
-:DRILL_LAST_REVIEWED: [Y-11-27 Wed 02:%]
+:DRILL_LAST_REVIEWED: [Y-12-01 Sun 23:%]
 :END:
 Sir Ridley Scott fra [South Shields], [Tyne and Wear], ble født i [1937]. Fra 2015 er han gift med [Giannina Facio].
 
@@ -24,18 +24,18 @@ Hans regissørbror, Tony, er født i [1944].
 **** Memo
 Han steg opp av Tyne som baby med en glorie.
 *** Ridley Scott :drill:
-SCHEDULED: <2024-11-30 Sat>
+SCHEDULED: <2024-12-09 Mon>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
 :ID:       55f17845-1f91-41aa-9379-70d78b952398
-:DRILL_LAST_INTERVAL: 3.86
-:DRILL_REPEATS_SINCE_FAIL: 2
-:DRILL_TOTAL_REPEATS: 2
+:DRILL_LAST_INTERVAL: 9.1096
+:DRILL_REPEATS_SINCE_FAIL: 3
+:DRILL_TOTAL_REPEATS: 3
 :DRILL_FAILURE_COUNT: 1
-:DRILL_AVERAGE_QUALITY: 2.5
+:DRILL_AVERAGE_QUALITY: 3.0
 :DRILL_EASE: 2.36
-:DRILL_LAST_QUALITY: 3
-:DRILL_LAST_REVIEWED: [Y-11-26 Tue 18:%]
+:DRILL_LAST_QUALITY: 4
+:DRILL_LAST_REVIEWED: [Y-11-30 Sat 17:%]
 :END:
 The [1|Duellists] er Ridley Scotts debutfilm fra [1977] med [Harvey Keitel],
 [Keith Carradine] og [Albert Finney] i hovedrollene.
@@ -48,18 +48,18 @@ Six.
 **** Memo
 I et rom med stearinlys: inn kommer Keitel og Carradine for å duellere. Finney er dommer.
 *** Ridley Scott :drill:
-SCHEDULED: <2024-12-01 Sun>
+SCHEDULED: <2024-12-12 Thu>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
 :ID:       823eaf16-ce06-4b9f-a91f-fee1cccfb074
-:DRILL_LAST_INTERVAL: 4.14
-:DRILL_REPEATS_SINCE_FAIL: 2
-:DRILL_TOTAL_REPEATS: 1
+:DRILL_LAST_INTERVAL: 11.0911
+:DRILL_REPEATS_SINCE_FAIL: 3
+:DRILL_TOTAL_REPEATS: 2
 :DRILL_FAILURE_COUNT: 0
 :DRILL_AVERAGE_QUALITY: 5.0
-:DRILL_EASE: 2.6
+:DRILL_EASE: 2.7
 :DRILL_LAST_QUALITY: 5
-:DRILL_LAST_REVIEWED: [Y-11-27 Wed 02:%]
+:DRILL_LAST_REVIEWED: [Y-12-01 Sun 22:%]
 :END:
 [2|Alien] er fra [1979].
 
@@ -72,18 +72,18 @@ En svane sprekker, ut kommer Alien
 
 Steve Bannon skrev Alien for Breitbart.
 *** Ridley Scott :drill:
-SCHEDULED: <2024-12-01 Sun>
+SCHEDULED: <2024-12-11 Wed>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
 :ID:       137735dd-2e56-4abb-81c3-4e7d78b18ae4
-:DRILL_LAST_INTERVAL: 4.0
-:DRILL_REPEATS_SINCE_FAIL: 2
-:DRILL_TOTAL_REPEATS: 1
+:DRILL_LAST_INTERVAL: 10.0
+:DRILL_REPEATS_SINCE_FAIL: 3
+:DRILL_TOTAL_REPEATS: 2
 :DRILL_FAILURE_COUNT: 0
 :DRILL_AVERAGE_QUALITY: 4.0
 :DRILL_EASE: 2.5
 :DRILL_LAST_QUALITY: 4
-:DRILL_LAST_REVIEWED: [Y-11-27 Wed 02:%]
+:DRILL_LAST_REVIEWED: [Y-12-01 Sun 22:%]
 :END:
 [3|Blade Runner] fra [1982]. Starring [Harrison Ford], [Rutger Hauer],
 [Sean Young], and [Edward James Olmos], it is an adaptation of [Philip
@@ -93,18 +93,18 @@ Music by Vangelis
 **** Memo
 Et hjerte som slår. Hauer kommer og knuser det med hendene sine
 *** Ridley Scott :drill:
-SCHEDULED: <2024-12-01 Sun>
+SCHEDULED: <2024-12-05 Thu>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
 :ID:       ef3bd786-0652-40f3-a33f-62ca489f6ef6
-:DRILL_LAST_INTERVAL: 4.0
+:DRILL_LAST_INTERVAL: 4.14
 :DRILL_REPEATS_SINCE_FAIL: 2
-:DRILL_TOTAL_REPEATS: 1
-:DRILL_FAILURE_COUNT: 0
-:DRILL_AVERAGE_QUALITY: 4.0
-:DRILL_EASE: 2.5
-:DRILL_LAST_QUALITY: 4
-:DRILL_LAST_REVIEWED: [Y-11-27 Wed 02:%]
+:DRILL_TOTAL_REPEATS: 4
+:DRILL_FAILURE_COUNT: 2
+:DRILL_AVERAGE_QUALITY: 3.25
+:DRILL_EASE: 2.6
+:DRILL_LAST_QUALITY: 5
+:DRILL_LAST_REVIEWED: [Y-12-01 Sun 23:%]
 :END:
 [4|Legend] is a [1985] American film directed by Ridley Scott, written
 by [William Hjortsberg], and starring [Tom Cruise], [Mia Sara], [Tim
@@ -120,18 +120,18 @@ Tangerine Dream er en tysk elektronikaduo
 
 En kirkeklokke kimer. Ut av klokken kryper Tim Curry
 *** Ridley Scott :drill:
-SCHEDULED: <2024-11-30 Sat>
+SCHEDULED: <2024-12-04 Wed>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
 :ID:       fc04ab03-a826-4f3e-9db4-c05ea88c1b46
-:DRILL_LAST_INTERVAL: 4.0
+:DRILL_LAST_INTERVAL: 3.86
 :DRILL_REPEATS_SINCE_FAIL: 2
-:DRILL_TOTAL_REPEATS: 2
-:DRILL_FAILURE_COUNT: 1
+:DRILL_TOTAL_REPEATS: 4
+:DRILL_FAILURE_COUNT: 2
 :DRILL_AVERAGE_QUALITY: 2.5
-:DRILL_EASE: 2.5
-:DRILL_LAST_QUALITY: 4
-:DRILL_LAST_REVIEWED: [Y-11-26 Tue 18:%]
+:DRILL_EASE: 2.36
+:DRILL_LAST_QUALITY: 3
+:DRILL_LAST_REVIEWED: [Y-11-30 Sat 17:%]
 :END:
 [5|Someone to Watch Over Me] is a [1987] American neo-noir romantic thriller
 film directed by Ridley Scott and written by [Howard Franklin]. It stars
@@ -146,18 +146,18 @@ Rotten Tomatoes 65% rating based on 31 reviews
 Et par hvite hansker: Berenger tar dem på og kveler Mimi Rogers, da
 han allerede er sjalu på Cruise. Didn't watch over her!
 *** Ridley Scott :drill:
-SCHEDULED: <2024-11-30 Sat>
+SCHEDULED: <2024-12-09 Mon>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
 :ID:       c1ba0148-171c-4c56-aa0e-2360b7b8b915
-:DRILL_LAST_INTERVAL: 3.86
-:DRILL_REPEATS_SINCE_FAIL: 2
-:DRILL_TOTAL_REPEATS: 2
+:DRILL_LAST_INTERVAL: 8.9861
+:DRILL_REPEATS_SINCE_FAIL: 3
+:DRILL_TOTAL_REPEATS: 3
 :DRILL_FAILURE_COUNT: 1
-:DRILL_AVERAGE_QUALITY: 2.5
-:DRILL_EASE: 2.36
+:DRILL_AVERAGE_QUALITY: 2.667
+:DRILL_EASE: 2.22
 :DRILL_LAST_QUALITY: 3
-:DRILL_LAST_REVIEWED: [Y-11-26 Tue 18:%]
+:DRILL_LAST_REVIEWED: [Y-11-30 Sat 17:%]
 :END:
 [6|Black Rain] is a [1989] American neo-noir crime thriller film
 directed by Ridley Scott and starring [Michael Douglas], [Andy
@@ -173,18 +173,18 @@ Rotten Tomatoes 86% rating based on 147 reviews
 En sirkuselefant. På ryggen sitter Douglas og Garcia og rir inn i
 Japans indre. På veien skremmer de livet av Capshaw!
 *** Ridley Scott :drill:
-SCHEDULED: <2024-11-30 Sat>
+SCHEDULED: <2024-12-11 Wed>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
 :ID:       22289748-6c8e-499f-acee-f293439bdd22
-:DRILL_LAST_INTERVAL: 4.14
-:DRILL_REPEATS_SINCE_FAIL: 2
-:DRILL_TOTAL_REPEATS: 2
+:DRILL_LAST_INTERVAL: 11.0911
+:DRILL_REPEATS_SINCE_FAIL: 3
+:DRILL_TOTAL_REPEATS: 3
 :DRILL_FAILURE_COUNT: 1
-:DRILL_AVERAGE_QUALITY: 3.5
-:DRILL_EASE: 2.6
+:DRILL_AVERAGE_QUALITY: 4.0
+:DRILL_EASE: 2.7
 :DRILL_LAST_QUALITY: 5
-:DRILL_LAST_REVIEWED: [Y-11-26 Tue 18:%]
+:DRILL_LAST_REVIEWED: [Y-11-30 Sat 17:%]
 :END:
 [7|Thelma & Louise] is a [1991] American crime drama film directed by Ridley
 Scott and written by [Callie Khouri]. The film stars Susan Sarandon and
@@ -200,21 +200,21 @@ Rotten Tomatoes 86% rating based on 147 reviews
 En flaggstang med Stars and Stripes: Thelma og Louise skyter det ned
 med maskingevær
 *** Ridley Scott :drill:
-SCHEDULED: <2024-12-01 Sun>
+SCHEDULED: <2024-12-05 Thu>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
 :ID:       5b445aa8-b299-43b0-b68b-f4fb7dbbf0fa
 :DRILL_LAST_INTERVAL: 3.86
 :DRILL_REPEATS_SINCE_FAIL: 2
-:DRILL_TOTAL_REPEATS: 2
-:DRILL_FAILURE_COUNT: 1
-:DRILL_AVERAGE_QUALITY: 2.5
+:DRILL_TOTAL_REPEATS: 4
+:DRILL_FAILURE_COUNT: 2
+:DRILL_AVERAGE_QUALITY: 2.75
 :DRILL_EASE: 2.36
-:DRILL_LAST_QUALITY: 3
-:DRILL_LAST_REVIEWED: [Y-11-27 Wed 02:%]
+:DRILL_LAST_QUALITY: 4
+:DRILL_LAST_REVIEWED: [Y-12-01 Sun 23:%]
 :END:
 [8|1492: Conquest of Paradise] is a [1992] epic historical drama film
-directed and produced by Ridley Scott, written by [Roselyne Bosch] and
+directed and produced by Ridley Scott, written by Roselyne Bosch and
 starring [Gérard Depardieu], [Fernando Rey] (Charnier!), [Michael
 Wincott], and [Sigourney Weaver].
 
@@ -225,18 +225,18 @@ Rotten Tomatoes 32% rating based on 22 reviews
 En snømann på uvisst sted. Plutselig begynner den å smelte. Bak står
 Wincott og pisser den i hjel.
 *** Ridley Scott :drill:
-SCHEDULED: <2024-11-30 Sat>
+SCHEDULED: <2024-12-09 Mon>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
 :ID:       e17481e1-c427-491a-877e-08d8a27d9ed0
-:DRILL_LAST_INTERVAL: 3.86
-:DRILL_REPEATS_SINCE_FAIL: 2
-:DRILL_TOTAL_REPEATS: 3
+:DRILL_LAST_INTERVAL: 9.3103
+:DRILL_REPEATS_SINCE_FAIL: 3
+:DRILL_TOTAL_REPEATS: 4
 :DRILL_FAILURE_COUNT: 2
-:DRILL_AVERAGE_QUALITY: 2.0
+:DRILL_AVERAGE_QUALITY: 2.5
 :DRILL_EASE: 2.36
-:DRILL_LAST_QUALITY: 3
-:DRILL_LAST_REVIEWED: [Y-11-26 Tue 18:%]
+:DRILL_LAST_QUALITY: 4
+:DRILL_LAST_REVIEWED: [Y-11-30 Sat 17:%]
 :END:
 [9|White Squall] is a [1996] American disaster survival film directed by
 Ridley Scott. It is a coming of age film in which a group of high
@@ -253,18 +253,18 @@ Rotten Tomatoes: 57% based on 37 reviews.
 **** Memo
 En flott blomsterbukett. Viser seg å være i en begravelse over de falne ungdommene.
 *** Ridley Scott :drill:
-SCHEDULED: <2024=12-01 Sun>
+SCHEDULED: <2024-12-05 Thu>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
 :ID:       ea75d01a-fe8f-4a51-bf2b-9e94c392b229
-:DRILL_LAST_INTERVAL: 4.14
+:DRILL_LAST_INTERVAL: 3.995
 :DRILL_REPEATS_SINCE_FAIL: 2
-:DRILL_TOTAL_REPEATS: 1
-:DRILL_FAILURE_COUNT: 0
-:DRILL_AVERAGE_QUALITY: 5.0
-:DRILL_EASE: 2.6
-:DRILL_LAST_QUALITY: 5
-:DRILL_LAST_REVIEWED: [Y-11-27 Wed 02:%]
+:DRILL_TOTAL_REPEATS: 3
+:DRILL_FAILURE_COUNT: 1
+:DRILL_AVERAGE_QUALITY: 3.0
+:DRILL_EASE: 2.46
+:DRILL_LAST_QUALITY: 3
+:DRILL_LAST_REVIEWED: [Y-12-01 Sun 23:%]
 :END:
 [10|G.I. Jane] is a [1997] American action drama film directed by Ridley
 Scott and starring [Demi Moore], [Viggo Mortensen], and Anne Bancroft. The
@@ -276,18 +276,18 @@ Rotten Tomatoes: 53% based on 38 reviews.
 En tallerken med biff!. En ultramuskuløs Moore setter seg ned å
 begynner å jafse i seg biffen.
 *** Ridley Scott :drill:
-SCHEDULED: <2024-11-30 Sat>
+SCHEDULED: <2024-12-10 Tue>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
 :ID:       67fd4495-d524-4449-b266-57797d3c517c
-:DRILL_LAST_INTERVAL: 4.0
-:DRILL_REPEATS_SINCE_FAIL: 2
-:DRILL_TOTAL_REPEATS: 2
+:DRILL_LAST_INTERVAL: 9.648
+:DRILL_REPEATS_SINCE_FAIL: 3
+:DRILL_TOTAL_REPEATS: 3
 :DRILL_FAILURE_COUNT: 1
 :DRILL_AVERAGE_QUALITY: 3.0
-:DRILL_EASE: 2.5
-:DRILL_LAST_QUALITY: 4
-:DRILL_LAST_REVIEWED: [Y-11-26 Tue 18:%]
+:DRILL_EASE: 2.36
+:DRILL_LAST_QUALITY: 3
+:DRILL_LAST_REVIEWED: [Y-11-30 Sat 17:%]
 :END:
 [11|Gladiator] is a [2000] historical epic film directed by Ridley Scott
 based on a story by David Franzoni. It stars Russell Crowe, Joaquin
@@ -301,18 +301,18 @@ Rotten Tomatoes: 80% based on 257 reviews.
 Et par blyanter ut av nesen. Til Russel Crowe. Phoenix har stukket dem
 inn for å vinne kampen.
 *** Ridley Scott :drill:
-SCHEDULED: <2024-11-30 Sat>
+SCHEDULED: <2024-12-10 Tue>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
 :ID:       a75efc0b-73a8-4705-a7b8-9c2505b0bf72
-:DRILL_LAST_INTERVAL: 4.0
-:DRILL_REPEATS_SINCE_FAIL: 2
-:DRILL_TOTAL_REPEATS: 1
+:DRILL_LAST_INTERVAL: 9.648
+:DRILL_REPEATS_SINCE_FAIL: 3
+:DRILL_TOTAL_REPEATS: 2
 :DRILL_FAILURE_COUNT: 0
-:DRILL_AVERAGE_QUALITY: 4.0
-:DRILL_EASE: 2.5
-:DRILL_LAST_QUALITY: 4
-:DRILL_LAST_REVIEWED: [Y-11-26 Tue 18:%]
+:DRILL_AVERAGE_QUALITY: 3.5
+:DRILL_EASE: 2.36
+:DRILL_LAST_QUALITY: 3
+:DRILL_LAST_REVIEWED: [Y-11-30 Sat 17:%]
 :END:
 [12|Hannibal] is a [2001] American horror film directed by Ridley Scott
 and based on the 1999 novel by Thomas Harris. A sequel to the 1991
@@ -331,18 +331,18 @@ Rotten Tomatoes: 39% based on 172 reviews.
 **** Memo
 Et armbåndsur. På armen til monsteret Oldman.
 *** Ridley Scott :drill:
-SCHEDULED: <2024-11-30 Sat>
+SCHEDULED: <2024-12-04 Wed>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
 :ID:       b2685239-1f77-4ad8-ada7-a32a045a7f42
 :DRILL_LAST_INTERVAL: 4.0
 :DRILL_REPEATS_SINCE_FAIL: 2
-:DRILL_TOTAL_REPEATS: 2
-:DRILL_FAILURE_COUNT: 1
+:DRILL_TOTAL_REPEATS: 4
+:DRILL_FAILURE_COUNT: 2
 :DRILL_AVERAGE_QUALITY: 3.0
 :DRILL_EASE: 2.5
 :DRILL_LAST_QUALITY: 4
-:DRILL_LAST_REVIEWED: [Y-11-26 Tue 18:%]
+:DRILL_LAST_REVIEWED: [Y-11-30 Sat 17:%]
 :END:
 [13|Black Hawk Down] is a [2001] war film directed and produced by Ridley
 Scott, and co-produced by [Jerry Bruckheimer]. It is based on the 1999
@@ -360,18 +360,18 @@ Rotten Tomatoes: 77% based on 175 reviews.
 **** Memo
 En trappestige: Overfylles av alle kjendisene fra filmen omtrent som et sirkusnummer.
 *** Ridley Scott :drill:
-SCHEDULED: <2024-11-30 Sat>
+SCHEDULED: <2024-12-09 Mon>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
 :ID:       9c70c9ce-b5c4-4ecc-9262-ca3d02361f77
-:DRILL_LAST_INTERVAL: 3.86
-:DRILL_REPEATS_SINCE_FAIL: 2
-:DRILL_TOTAL_REPEATS: 1
+:DRILL_LAST_INTERVAL: 9.3103
+:DRILL_REPEATS_SINCE_FAIL: 3
+:DRILL_TOTAL_REPEATS: 2
 :DRILL_FAILURE_COUNT: 0
-:DRILL_AVERAGE_QUALITY: 3.0
+:DRILL_AVERAGE_QUALITY: 3.5
 :DRILL_EASE: 2.36
-:DRILL_LAST_QUALITY: 3
-:DRILL_LAST_REVIEWED: [Y-11-26 Tue 18:%]
+:DRILL_LAST_QUALITY: 4
+:DRILL_LAST_REVIEWED: [Y-11-30 Sat 17:%]
 :END:
 [14|Matchstick Men] is a [2003] black comedy crime film directed by
 Ridley Scott and based on Eric Garcia's 2002 novel of the same name.
@@ -388,9 +388,18 @@ Rotten Tomatoes: 82% based on 186 reviews.
 Et skip seiler. Inn i Afrika! Inn i Sahara, der Cage har etterlatt det (ja, jeg tror kanskje
 jeg blander sammen confilmer)
 *** Ridley Scott :drill:
+SCHEDULED: <2024-12-05 Thu>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
 :ID:       4a115749-d067-46b4-a98f-df411bd2952b
+:DRILL_LAST_INTERVAL: 4.14
+:DRILL_REPEATS_SINCE_FAIL: 2
+:DRILL_TOTAL_REPEATS: 2
+:DRILL_FAILURE_COUNT: 1
+:DRILL_AVERAGE_QUALITY: 3.5
+:DRILL_EASE: 2.6
+:DRILL_LAST_QUALITY: 5
+:DRILL_LAST_REVIEWED: [Y-12-01 Sun 23:%]
 :END:
 [15|Kingdom of Heaven] is a [2005] epic historical drama film directed and
 produced by Ridley Scott and written by William Monahan. It features
@@ -409,18 +418,18 @@ Rotten Tomatoes: 40% based on 189 reviews.
 En tavle i et skolerom: Her undervises Bloom og Green i strategier for
 å innta Jerusalem.
 *** Ridley Scott :drill:
-SCHEDULED: <2024-12-01 Sun>
+SCHEDULED: <2024-12-05 Thu>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
 :ID:       e021d632-375a-4a38-8e71-f292f18105b5
-:DRILL_LAST_INTERVAL: 3.86
+:DRILL_LAST_INTERVAL: 3.725
 :DRILL_REPEATS_SINCE_FAIL: 2
-:DRILL_TOTAL_REPEATS: 1
-:DRILL_FAILURE_COUNT: 0
-:DRILL_AVERAGE_QUALITY: 3.0
-:DRILL_EASE: 2.36
+:DRILL_TOTAL_REPEATS: 3
+:DRILL_FAILURE_COUNT: 1
+:DRILL_AVERAGE_QUALITY: 2.667
+:DRILL_EASE: 2.22
 :DRILL_LAST_QUALITY: 3
-:DRILL_LAST_REVIEWED: [Y-11-27 Wed 02:%]
+:DRILL_LAST_REVIEWED: [Y-12-01 Sun 23:%]
 :END:
 [16|A Good Year] is a [2006] romantic comedy-drama film directed and
 produced by Ridley Scott. The film stars [Russell Crowe], [Marion
@@ -440,18 +449,18 @@ Rotten Tomatoes: 26% based on 134 reviews.
 **** Memo
 3D-symbolet. Her ligger Crowe og Cotillard og puler inne i et Goodyear-dekk.
 *** Ridley Scott :drill:
-SCHEDULED: <2024-12-01 Sun>
+SCHEDULED: <2024-12-11 Wed>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
 :ID:       c2bdfabd-8e35-4ee7-8041-f7312cb24954
-:DRILL_LAST_INTERVAL: 4.14
-:DRILL_REPEATS_SINCE_FAIL: 2
-:DRILL_TOTAL_REPEATS: 1
+:DRILL_LAST_INTERVAL: 10.3376
+:DRILL_REPEATS_SINCE_FAIL: 3
+:DRILL_TOTAL_REPEATS: 2
 :DRILL_FAILURE_COUNT: 0
-:DRILL_AVERAGE_QUALITY: 5.0
-:DRILL_EASE: 2.6
-:DRILL_LAST_QUALITY: 5
-:DRILL_LAST_REVIEWED: [Y-11-27 Wed 02:%]
+:DRILL_AVERAGE_QUALITY: 4.0
+:DRILL_EASE: 2.46
+:DRILL_LAST_QUALITY: 3
+:DRILL_LAST_REVIEWED: [Y-12-01 Sun 22:%]
 :END:
 [17|American Gangster] is a [2007] American biographical crime film
 directed and produced by Ridley Scott and written by Steven Zaillian.
@@ -467,20 +476,21 @@ Music by [Marc Streitenfeld]
 
 Rotten Tomatoes: 81% based on 218 reviews.
 **** Memo
-Trompet. Tas opp av Crowe, som spiller en fanfare før han og New Jersey-gjengen inntar NY
+Trompet. Tas opp av Crowe, som spiller en fanfare før han og New
+Jersey-gjengen inntar NY
 *** Ridley Scott :drill:
-SCHEDULED: <2024-12-01 Sun>
+SCHEDULED: <2024-12-12 Thu>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
 :ID:       fcd27c26-0807-4d90-a702-eaf777f60ea9
-:DRILL_LAST_INTERVAL: 4.14
-:DRILL_REPEATS_SINCE_FAIL: 2
-:DRILL_TOTAL_REPEATS: 1
+:DRILL_LAST_INTERVAL: 11.0911
+:DRILL_REPEATS_SINCE_FAIL: 3
+:DRILL_TOTAL_REPEATS: 2
 :DRILL_FAILURE_COUNT: 0
 :DRILL_AVERAGE_QUALITY: 5.0
-:DRILL_EASE: 2.6
+:DRILL_EASE: 2.7
 :DRILL_LAST_QUALITY: 5
-:DRILL_LAST_REVIEWED: [Y-11-27 Wed 02:%]
+:DRILL_LAST_REVIEWED: [Y-12-01 Sun 23:%]
 :END:
 [18|Body of Lies] is a [2008] American spy action thriller film directed
 and produced by Ridley Scott, written by William Monahan, and starring
@@ -498,18 +508,18 @@ Rotten Tomatoes: 55% based on 216 reviews.
 **** Memo
 Tog. Strong torturerer Di Caprio fordi han tar privatjet
 *** Ridley Scott :drill:
-SCHEDULED: <2024-11-30 Sat>
+SCHEDULED: <2024-12-10 Tue>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
 :ID:       3fac7470-aad1-4946-9fdc-1bb673ec50de
-:DRILL_LAST_INTERVAL: 4.0
-:DRILL_REPEATS_SINCE_FAIL: 2
-:DRILL_TOTAL_REPEATS: 1
+:DRILL_LAST_INTERVAL: 10.352
+:DRILL_REPEATS_SINCE_FAIL: 3
+:DRILL_TOTAL_REPEATS: 2
 :DRILL_FAILURE_COUNT: 0
-:DRILL_AVERAGE_QUALITY: 4.0
-:DRILL_EASE: 2.5
-:DRILL_LAST_QUALITY: 4
-:DRILL_LAST_REVIEWED: [Y-11-26 Tue 18:%]
+:DRILL_AVERAGE_QUALITY: 4.5
+:DRILL_EASE: 2.6
+:DRILL_LAST_QUALITY: 5
+:DRILL_LAST_REVIEWED: [Y-11-30 Sat 17:%]
 :END:
 [19|Robin Hood] is a [2010] historical action-adventure film based on the
 Robin Hood legend, directed by Ridley Scott and starring [Russell
@@ -524,18 +534,18 @@ Rotten Tomatoes: 43% based on 251 reviews.
 **** Memo
 Mobiltelefon. Tas opp av Crowe, den moderne Robin Hood, som bruker intercom til sine raids
 *** Ridley Scott :drill:
-SCHEDULED: <2024-11-30 Sat>
+SCHEDULED: <2024-12-09 Mon>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
 :ID:       c5519972-fe7f-4f4b-8995-91ab033843e1
-:DRILL_LAST_INTERVAL: 3.86
-:DRILL_REPEATS_SINCE_FAIL: 2
-:DRILL_TOTAL_REPEATS: 1
+:DRILL_LAST_INTERVAL: 9.1096
+:DRILL_REPEATS_SINCE_FAIL: 3
+:DRILL_TOTAL_REPEATS: 2
 :DRILL_FAILURE_COUNT: 0
-:DRILL_AVERAGE_QUALITY: 3.0
+:DRILL_AVERAGE_QUALITY: 3.5
 :DRILL_EASE: 2.36
-:DRILL_LAST_QUALITY: 3
-:DRILL_LAST_REVIEWED: [Y-11-26 Tue 18:%]
+:DRILL_LAST_QUALITY: 4
+:DRILL_LAST_REVIEWED: [Y-11-30 Sat 17:%]
 :END:
 [20|Prometheus] is a [2012] science fiction horror film directed by
 Ridley Scott and written by Jon Spaihts and Damon [Lindelof]. It is
@@ -554,18 +564,18 @@ Rotten Tomatoes: 73% based on 312 reviews.
 **** Memo
 På tennisbanen. Inn kommer den hvite kjempen og moser Jannik Sinner 6-0 x 3
 *** Ridley Scott :drill:
-SCHEDULED: <2024-12-01 Sun>
+SCHEDULED: <2024-12-05 Thu>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
 :ID:       d0c285fe-853f-4cdd-92a5-0633de8259ad
 :DRILL_LAST_INTERVAL: 4.0
 :DRILL_REPEATS_SINCE_FAIL: 2
-:DRILL_TOTAL_REPEATS: 1
-:DRILL_FAILURE_COUNT: 0
-:DRILL_AVERAGE_QUALITY: 4.0
+:DRILL_TOTAL_REPEATS: 3
+:DRILL_FAILURE_COUNT: 1
+:DRILL_AVERAGE_QUALITY: 3.333
 :DRILL_EASE: 2.5
 :DRILL_LAST_QUALITY: 4
-:DRILL_LAST_REVIEWED: [Y-11-27 Wed 02:%]
+:DRILL_LAST_REVIEWED: [Y-12-01 Sun 23:%]
 :END:
 [21|The Counselor] (known as The Counsellor in countries that use British
 English) is a [2013] crime thriller film directed by Ridley Scott and
@@ -585,18 +595,18 @@ Et eple. Fassbender tar det opp og stikker en sprøyte med gift inn i
 det og gir det til de meksikanske jentene Cruz og Diaz. Han er tross
 alt mafia-Counsellor!
 *** Ridley Scott :drill:
-SCHEDULED: <2024-11-30 Sat>
+SCHEDULED: <2024-12-04 Wed>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
 :ID:       8aae99a0-4ccb-4866-9fcb-49788c9b9f05
 :DRILL_LAST_INTERVAL: 3.86
 :DRILL_REPEATS_SINCE_FAIL: 2
-:DRILL_TOTAL_REPEATS: 1
-:DRILL_FAILURE_COUNT: 0
+:DRILL_TOTAL_REPEATS: 3
+:DRILL_FAILURE_COUNT: 1
 :DRILL_AVERAGE_QUALITY: 3.0
 :DRILL_EASE: 2.36
-:DRILL_LAST_QUALITY: 3
-:DRILL_LAST_REVIEWED: [Y-11-26 Tue 18:%]
+:DRILL_LAST_QUALITY: 4
+:DRILL_LAST_REVIEWED: [Y-11-30 Sat 17:%]
 :END:
 [22|Exodus: Gods and Kings] is a [2014] biblical epic film directed
 and produced by Ridley Scott, and written by Adam Cooper, Bill
@@ -611,19 +621,29 @@ Music by Alberto [Iglesias]
 Rotten Tomatoes: 30% based on 210 reviews.
 **** Memo
 Et gevær. Moses Bale tar det opp, og skyter alle som har danset rundt gullkalven!
+
+Joel Edgerton har spilt i flere filmer jeg har sett. Men jeg kan ikke
+huske ham for det:
+
+*Owen Lars* i Star Wars E 2 og 3 (2002, 2005)
+*King Arthur* (Fuqua:2004, mulig jeg ikke har sett, men burde se)
+The *Square* (Nash Edgerton! 2008, 86%)
+The *Thing* (2011)
+*Zero Dark Thirty* (2012)
+*The Great Gatsby* (2013)
 *** Ridley Scott :drill:
-SCHEDULED: <2024-11-30 Sat>
+SCHEDULED: <2024-12-10 Tue>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
 :ID:       f4ba15bf-f404-4382-832d-b2d63e4ce6ec
-:DRILL_LAST_INTERVAL: 4.0
-:DRILL_REPEATS_SINCE_FAIL: 2
-:DRILL_TOTAL_REPEATS: 3
+:DRILL_LAST_INTERVAL: 10.352
+:DRILL_REPEATS_SINCE_FAIL: 3
+:DRILL_TOTAL_REPEATS: 4
 :DRILL_FAILURE_COUNT: 2
-:DRILL_AVERAGE_QUALITY: 2.333
-:DRILL_EASE: 2.5
-:DRILL_LAST_QUALITY: 4
-:DRILL_LAST_REVIEWED: [Y-11-26 Tue 19:%]
+:DRILL_AVERAGE_QUALITY: 3.0
+:DRILL_EASE: 2.6
+:DRILL_LAST_QUALITY: 5
+:DRILL_LAST_REVIEWED: [Y-11-30 Sat 17:%]
 :END:
 [23|The Martian] is a [2015] science fiction film directed by Ridley
 Scott and starring [Matt Damon]. Drew Goddard adapted the screenplay
@@ -640,18 +660,18 @@ Rotten Tomatoes: 91% based on 383 reviews.
 **** Memo
 En fotballbane. Alene spiller Damon fotball med seg selv, på Mars. First! Best!
 *** Ridley Scott :drill:
-SCHEDULED: <2024-12-02 Mon>
+SCHEDULED: <2024-12-12 Thu>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
 :ID:       215bbafb-c9c4-425a-a2ce-832a3d965c85
-:DRILL_LAST_INTERVAL: 4.0
-:DRILL_REPEATS_SINCE_FAIL: 2
-:DRILL_TOTAL_REPEATS: 1
+:DRILL_LAST_INTERVAL: 10.0
+:DRILL_REPEATS_SINCE_FAIL: 3
+:DRILL_TOTAL_REPEATS: 2
 :DRILL_FAILURE_COUNT: 0
 :DRILL_AVERAGE_QUALITY: 4.0
 :DRILL_EASE: 2.5
 :DRILL_LAST_QUALITY: 4
-:DRILL_LAST_REVIEWED: [Y-11-28 Thu 00:%]
+:DRILL_LAST_REVIEWED: [Y-12-02 Mon 21:%]
 :END:
 [24|Alien: Covenant] is a [2017] science fiction horror film directed
 and produced by Ridley Scott, and written by John Logan and Dante
@@ -668,19 +688,26 @@ Music by [Jed|Kurzel]
 Rotten Tomatoes: 65% based on 408 reviews.
 **** Memo
 Speil. Fassbaender står og speiler seg, mens han klipper av seg håret.
+
+Covenant betyr pakt eller avtale
+
+Kurzel har også skrevet musikken til
+The Babadook (2014)
+Macbeth (2015, også regi)
+Assassin's Creed (2016, også regi)
 *** Ridley Scott :drill:
-SCHEDULED: <2024-11-30 Sat>
+SCHEDULED: <2024-12-04 Wed>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
 :ID:       78e3cddf-0ed2-4bc9-ae7a-47be59751099
 :DRILL_LAST_INTERVAL: 3.86
 :DRILL_REPEATS_SINCE_FAIL: 2
-:DRILL_TOTAL_REPEATS: 4
-:DRILL_FAILURE_COUNT: 3
-:DRILL_AVERAGE_QUALITY: 1.75
-:DRILL_EASE: 2.36
+:DRILL_TOTAL_REPEATS: 6
+:DRILL_FAILURE_COUNT: 4
+:DRILL_AVERAGE_QUALITY: 2.0
+:DRILL_EASE: 2.22
 :DRILL_LAST_QUALITY: 3
-:DRILL_LAST_REVIEWED: [Y-11-26 Tue 19:%]
+:DRILL_LAST_REVIEWED: [Y-11-30 Sat 17:%]
 :END:
 [25|All the Money in the World] is a [2017] biographical crime
 thriller film directed by Ridley Scott and written by David Scarpa.
@@ -700,24 +727,24 @@ Rotten Tomatoes: 79% based on 262 reviews.
 Spåkule eller Palantir: Plummer står som Saruman. Han (Getty) har
 puttet ALLE PENGENE I VERDEN inn i stenen.
 *** Ridley Scott :drill:
-SCHEDULED: <2024-12-01 Sun>
+SCHEDULED: <2024-12-12 Thu>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
 :ID:       ef5c1eba-ecba-417a-b226-77ecfb7ca609
-:DRILL_LAST_INTERVAL: 4.14
-:DRILL_REPEATS_SINCE_FAIL: 2
-:DRILL_TOTAL_REPEATS: 1
+:DRILL_LAST_INTERVAL: 11.0911
+:DRILL_REPEATS_SINCE_FAIL: 3
+:DRILL_TOTAL_REPEATS: 2
 :DRILL_FAILURE_COUNT: 0
 :DRILL_AVERAGE_QUALITY: 5.0
-:DRILL_EASE: 2.6
+:DRILL_EASE: 2.7
 :DRILL_LAST_QUALITY: 5
-:DRILL_LAST_REVIEWED: [Y-11-27 Wed 02:%]
+:DRILL_LAST_REVIEWED: [Y-12-01 Sun 22:%]
 :END:
-[26|The Last Duel] is a [2021] historical drama film[6] directed by
+[26|The Last Duel] is a [2021] historical drama film directed by
 Ridley Scott from a screenplay by Nicole Holofcener, [Ben Affleck],
-and [Matt Damon], based on the 2004 book The Last Duel: A True Story
-of Crime, Scandal, and Trial by Combat in Medieval France by Eric
-Jager. Set in medieval France, the film stars Damon as Jean de
+and [Matt Damon], based on the 2004 book <same name as the film>: A
+True Story of Crime, Scandal, and Trial by Combat in Medieval France
+by Eric Jager. Set in medieval France, the film stars Damon as Jean de
 Carrouges, a knight who challenges his former friend, squire Jacques
 le Gris ([Adam Driver]), to a judicial duel after Jean's wife,
 Marguerite (Jodie Comer), accuses Jacques of raping her. The events
@@ -730,20 +757,21 @@ Music by [Harry Gregson-Williams]
 
 Rotten Tomatoes: 85% based on 287 reviews.
 **** Memo
-Et gammelt kassaapparat. Betjenes av Damon, som ikke får betaling av Driver. Utfordrer til duell.
+Et gammelt kassaapparat. Betjenes av Damon, som ikke får betaling av
+Driver. Utfordrer til duell.
 *** Ridley Scott :drill:
-SCHEDULED: <2024-11-30 Sat>
+SCHEDULED: <2024-12-10 Tue>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
 :ID:       27388e32-50d8-49af-b529-ba5680059680
-:DRILL_LAST_INTERVAL: 4.0
-:DRILL_REPEATS_SINCE_FAIL: 2
-:DRILL_TOTAL_REPEATS: 4
+:DRILL_LAST_INTERVAL: 10.0
+:DRILL_REPEATS_SINCE_FAIL: 3
+:DRILL_TOTAL_REPEATS: 5
 :DRILL_FAILURE_COUNT: 3
-:DRILL_AVERAGE_QUALITY: 1.75
+:DRILL_AVERAGE_QUALITY: 2.2
 :DRILL_EASE: 2.5
 :DRILL_LAST_QUALITY: 4
-:DRILL_LAST_REVIEWED: [Y-11-26 Tue 18:%]
+:DRILL_LAST_REVIEWED: [Y-11-30 Sat 17:%]
 :END:
 [27|House of Gucci] is a [2021] American biographical crime drama film
 directed by Ridley Scott, based on the 2001 book The House of Gucci: A
@@ -758,21 +786,21 @@ Music by [Harry Gregson-Williams]
 Rotten Tomatoes: 62% based on 373 reviews.
 **** Memo
 Sverd, med latterlig mange juveler (Gucci). Driver tror han er tilbake
-i Star Wars, trekker det, og stikker det inn i Lady Gaga, fordi hun er
+i Star Wars, trekker det, og driver det inn i Lady Gaga, fordi hun er
 born that way.
 *** Ridley Scott :drill:
-SCHEDULED: <2024-11-30 Sat>
+SCHEDULED: <2024-12-10 Tue>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
 :ID:       3e5e531c-6ab2-4026-a36b-564a9159c172
-:DRILL_LAST_INTERVAL: 4.14
-:DRILL_REPEATS_SINCE_FAIL: 2
-:DRILL_TOTAL_REPEATS: 2
+:DRILL_LAST_INTERVAL: 10.3873
+:DRILL_REPEATS_SINCE_FAIL: 3
+:DRILL_TOTAL_REPEATS: 3
 :DRILL_FAILURE_COUNT: 1
 :DRILL_AVERAGE_QUALITY: 3.0
-:DRILL_EASE: 2.6
-:DRILL_LAST_QUALITY: 5
-:DRILL_LAST_REVIEWED: [Y-11-26 Tue 18:%]
+:DRILL_EASE: 2.46
+:DRILL_LAST_QUALITY: 3
+:DRILL_LAST_REVIEWED: [Y-11-30 Sat 17:%]
 :END:
 [28|Napoleon] is a [2023] epic biographical war film directed and
 produced by Ridley Scott, and written by David Scarpa. Based on the
@@ -785,18 +813,18 @@ Rotten Tomatoes: 62% based on 373 reviews.
 Briller. Phoenix tar på seg brillene, og ødelegger scenen, da Napoleon
 ikke brukte briller.
 *** Ridley Scott :drill:
-SCHEDULED: <2024-11-30 Sat>
+SCHEDULED: <2024-12-10 Tue>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
 :ID:       7d461939-6301-4751-a519-607075466abe
-:DRILL_LAST_INTERVAL: 3.86
-:DRILL_REPEATS_SINCE_FAIL: 2
-:DRILL_TOTAL_REPEATS: 1
+:DRILL_LAST_INTERVAL: 9.6346
+:DRILL_REPEATS_SINCE_FAIL: 3
+:DRILL_TOTAL_REPEATS: 2
 :DRILL_FAILURE_COUNT: 0
-:DRILL_AVERAGE_QUALITY: 3.0
-:DRILL_EASE: 2.36
-:DRILL_LAST_QUALITY: 3
-:DRILL_LAST_REVIEWED: [Y-11-26 Tue 18:%]
+:DRILL_AVERAGE_QUALITY: 4.0
+:DRILL_EASE: 2.46
+:DRILL_LAST_QUALITY: 5
+:DRILL_LAST_REVIEWED: [Y-11-30 Sat 17:%]
 :END:
 [29|Gladiator II] is a [2024] epic historical action film directed and
 produced by Ridley Scott that serves as a sequel to Gladiator (2000).
@@ -804,7 +832,7 @@ Written by David Scarpa, from a story he wrote with Peter Craig, the
 film was produced by Scott Free Productions and distributed by
 Paramount Pictures. It stars Paul [Mescal], [Pedro Pascal], Joseph
 Quinn, Fred Hechinger, Lior Raz, Derek Jacobi, Connie Nielsen, and
-Denzel Washington.[6] Jacobi and Nielsen reprise their roles from the
+Denzel Washington. Jacobi and Nielsen reprise their roles from the
 first film, with Mescal replacing Spencer Treat Clark. Mescal portrays
 Lucius, whose home is invaded by the Roman army led by General
 Acacius. He seeks revenge against Acacius and fights as a gladiator
@@ -817,18 +845,18 @@ Rotten Tomatoes: 72% based on 292 reviews.
 **** Memo
 Gearstang. Connie Nilsen tilbake i pornobransjen.
 *** Ridley Scott :drill:
-SCHEDULED: <2024-12-01 Sun>
+SCHEDULED: <2024-12-05 Thu>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
 :ID:       a47d358e-d880-4f62-8767-f37d42567bae
 :DRILL_LAST_INTERVAL: 4.14
 :DRILL_REPEATS_SINCE_FAIL: 2
-:DRILL_TOTAL_REPEATS: 1
-:DRILL_FAILURE_COUNT: 0
-:DRILL_AVERAGE_QUALITY: 5.0
+:DRILL_TOTAL_REPEATS: 3
+:DRILL_FAILURE_COUNT: 1
+:DRILL_AVERAGE_QUALITY: 3.667
 :DRILL_EASE: 2.6
-:DRILL_LAST_QUALITY: 5
-:DRILL_LAST_REVIEWED: [Y-11-27 Wed 02:%]
+:DRILL_LAST_QUALITY: 4
+:DRILL_LAST_REVIEWED: [Y-12-01 Sun 23:%]
 :END:
 Hvilke filmer har Harry Gregson-Williams satt musikk til?
 
@@ -862,18 +890,18 @@ The Equalizer 1 + 2
 The Meg 1 + 2 (Turteltaub)
 Penguins
 *** Ridley Scott :drill:
-SCHEDULED: <2024-12-02 Mon>
+SCHEDULED: <2024-12-12 Thu>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
 :ID:       4a7e3f04-d947-4309-8b59-5d4cb04f02f0
-:DRILL_LAST_INTERVAL: 4.0
-:DRILL_REPEATS_SINCE_FAIL: 2
-:DRILL_TOTAL_REPEATS: 1
+:DRILL_LAST_INTERVAL: 10.0
+:DRILL_REPEATS_SINCE_FAIL: 3
+:DRILL_TOTAL_REPEATS: 2
 :DRILL_FAILURE_COUNT: 0
 :DRILL_AVERAGE_QUALITY: 4.0
 :DRILL_EASE: 2.5
 :DRILL_LAST_QUALITY: 4
-:DRILL_LAST_REVIEWED: [Y-11-28 Thu 00:%]
+:DRILL_LAST_REVIEWED: [Y-12-02 Mon 21:%]
 :END:
 Hvilke filmer har Marc Streitenfeld satt musikk til?
 [16-20|
@@ -883,18 +911,18 @@ Hvilke filmer har Marc Streitenfeld satt musikk til?
 19: Robin Hood
 20: Prometheus]
 *** Ridley Scott :drill:
-SCHEDULED: <2024-12-02 Mon>
+SCHEDULED: <2024-12-12 Thu>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
 :ID:       13640829-297e-42fc-83c7-d553d2edb1d6
-:DRILL_LAST_INTERVAL: 4.0
-:DRILL_REPEATS_SINCE_FAIL: 2
-:DRILL_TOTAL_REPEATS: 1
+:DRILL_LAST_INTERVAL: 9.648
+:DRILL_REPEATS_SINCE_FAIL: 3
+:DRILL_TOTAL_REPEATS: 2
 :DRILL_FAILURE_COUNT: 0
-:DRILL_AVERAGE_QUALITY: 4.0
-:DRILL_EASE: 2.5
-:DRILL_LAST_QUALITY: 4
-:DRILL_LAST_REVIEWED: [Y-11-28 Thu 00:%]
+:DRILL_AVERAGE_QUALITY: 3.5
+:DRILL_EASE: 2.36
+:DRILL_LAST_QUALITY: 3
+:DRILL_LAST_REVIEWED: [Y-12-02 Mon 21:%]
 :END:
 Hvilke filmer har Hans Zimmer satt musikk til?
 [6-7, 11-14|

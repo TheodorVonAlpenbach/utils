@@ -146,18 +146,18 @@ for å komme inn.
 :END:
 Kong [Harald 3 Sigurdsson Hardråde||13] regjerte fra [1045] til [1066]
 *** Konge :drill:
-SCHEDULED: <2024-09-29 sø.>
+SCHEDULED: <2024-12-06 Fri>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
 :ID:       8f62817b-119f-4f98-9505-10bac5642394
-:DRILL_LAST_INTERVAL: 9.648
-:DRILL_REPEATS_SINCE_FAIL: 3
-:DRILL_TOTAL_REPEATS: 3
-:DRILL_FAILURE_COUNT: 1
+:DRILL_LAST_INTERVAL: 3.995
+:DRILL_REPEATS_SINCE_FAIL: 2
+:DRILL_TOTAL_REPEATS: 6
+:DRILL_FAILURE_COUNT: 3
 :DRILL_AVERAGE_QUALITY: 2.667
-:DRILL_EASE: 2.36
-:DRILL_LAST_QUALITY: 3
-:DRILL_LAST_REVIEWED: [2024-09-19 to. 23:20]
+:DRILL_EASE: 2.46
+:DRILL_LAST_QUALITY: 5
+:DRILL_LAST_REVIEWED: [Y-12-02 Mon 00:%]
 :END:
 Kong [Magnus 2 Haraldsson||14] regjerte fra [1066] til [1069]
 **** Memo
@@ -173,26 +173,26 @@ Kong [Olav 3 Haraldsson Kyrre||15] regjerte fra [1067] til [1093]
 I salongen har Olav fått en haug med papirHJERTER. Han lager et slags
 paternosterverk av dem men noen TANNHJUL han tilfeldigvis finner.
 *** Konge :drill:
-SCHEDULED: <2024-10-02 on.>
+SCHEDULED: <2024-12-23 Mon>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
 :ID:       99622433-54d7-488a-a0e8-d025e096103e
-:DRILL_LAST_INTERVAL: 9.1096
-:DRILL_REPEATS_SINCE_FAIL: 3
-:DRILL_TOTAL_REPEATS: 5
+:DRILL_LAST_INTERVAL: 21.2071
+:DRILL_REPEATS_SINCE_FAIL: 4
+:DRILL_TOTAL_REPEATS: 6
 :DRILL_FAILURE_COUNT: 2
-:DRILL_AVERAGE_QUALITY: 2.8
-:DRILL_EASE: 2.36
-:DRILL_LAST_QUALITY: 4
-:DRILL_LAST_REVIEWED: [2024-09-23 ma. 20:39]
+:DRILL_AVERAGE_QUALITY: 2.833
+:DRILL_EASE: 2.22
+:DRILL_LAST_QUALITY: 3
+:DRILL_LAST_REVIEWED: [Y-12-02 Mon 00:%]
 :END:
 Kong [Håkon Magnusson Toresfostre. Han fikk ikke nummer etter
 navn||16] regjerte fra [1093] til [1095].
 
 Sønn av [Magnus 2]
 **** Memo
-SEVERDIGHET på Slottets WC: Haakon viser frem det utskårne FOSTERET av
-Tore Dahl, spiddet på en miniutgave av MONOLOTTEN.
+*Severdighet* på Slottets WC: Haakon viser frem det utskårne *fosteret* av
+Tore Dahl, spiddet på en miniutgave av *monolotten*.
 **** Info
 Håkon var fostersønn av Steigar-Tore, en mektig mann fra Steig i
 Sør-Fron, Oppland.
@@ -203,18 +203,18 @@ Sør-Fron, Oppland.
 :END:
 Kong [Magnus 3 Olavsson Berrføtt||17] regjerte fra [1093] til [1103]
 *** Konge :drill:
-SCHEDULED: <2024-11-04 Mon>
+SCHEDULED: <2024-12-06 Fri>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
 :ID:       e5ed843d-1246-48ab-927f-7da4a925dcac
-:DRILL_LAST_INTERVAL: 9.648
-:DRILL_REPEATS_SINCE_FAIL: 3
-:DRILL_TOTAL_REPEATS: 5
-:DRILL_FAILURE_COUNT: 2
+:DRILL_LAST_INTERVAL: 3.86
+:DRILL_REPEATS_SINCE_FAIL: 2
+:DRILL_TOTAL_REPEATS: 7
+:DRILL_FAILURE_COUNT: 3
 :DRILL_AVERAGE_QUALITY: 3.0
 :DRILL_EASE: 2.36
-:DRILL_LAST_QUALITY: 3
-:DRILL_LAST_REVIEWED: [Y-10-25 Fri 13:%]
+:DRILL_LAST_QUALITY: 4
+:DRILL_LAST_REVIEWED: [Y-12-02 Mon 22:%]
 :END:
 Kong [Olav Magnusson||18] regjerte fra [1103] til [1115], før han døde,
 bare 16 år gammel.
@@ -258,17 +258,18 @@ Gardist Pål Magnus i vaktbua ser seg selv henge hjepeløst fra
 flaggstangen, og ringer desperat med den lille gardistbjellen sin for
 å tilkalle hjelp.
 *** Konge :drill:
+SCHEDULED: <2024-12-05 Thu>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
 :ID:       cc0ac5bb-d8f1-4017-b64c-e4a15618ac2a
-:DRILL_LAST_INTERVAL: 0.0
-:DRILL_REPEATS_SINCE_FAIL: 1
-:DRILL_TOTAL_REPEATS: 6
+:DRILL_LAST_INTERVAL: 3.995
+:DRILL_REPEATS_SINCE_FAIL: 2
+:DRILL_TOTAL_REPEATS: 7
 :DRILL_FAILURE_COUNT: 4
-:DRILL_AVERAGE_QUALITY: 2.667
+:DRILL_AVERAGE_QUALITY: 2.857
 :DRILL_EASE: 2.46
-:DRILL_LAST_QUALITY: 2
-:DRILL_LAST_REVIEWED: [Y-11-19 Tue 12:%]
+:DRILL_LAST_QUALITY: 4
+:DRILL_LAST_REVIEWED: [Y-12-01 Sun 23:%]
 :END:
 Kong [Harald 4 Magnusson Gille||22] regjerte fra [1130] til [1136]
 
@@ -314,18 +315,18 @@ han forsåvidt, men svanen forvandler seg da til en sverm SOMMERFUGLER,
 som med letthet slipper ut av sekken. Men Håkon mener likevel han har
 gjort jobben, og regner ut fakturabeløpet på et KASSAAPPARAT.
 *** Konge :drill:
-SCHEDULED: <2024-10-05 lø.>
+SCHEDULED: <2025-01-01 Wed>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
 :ID:       ef399dfb-ed0c-4852-9d05-c57edeca16d0
-:DRILL_LAST_INTERVAL: 11.5695
-:DRILL_REPEATS_SINCE_FAIL: 3
-:DRILL_TOTAL_REPEATS: 4
+:DRILL_LAST_INTERVAL: 30.1501
+:DRILL_REPEATS_SINCE_FAIL: 4
+:DRILL_TOTAL_REPEATS: 5
 :DRILL_FAILURE_COUNT: 1
-:DRILL_AVERAGE_QUALITY: 3.75
-:DRILL_EASE: 2.7
-:DRILL_LAST_QUALITY: 4
-:DRILL_LAST_REVIEWED: [2024-09-23 ma. 21:29]
+:DRILL_AVERAGE_QUALITY: 3.6
+:DRILL_EASE: 2.56
+:DRILL_LAST_QUALITY: 3
+:DRILL_LAST_REVIEWED: [Y-12-02 Mon 21:%]
 :END:
 Kong [Magnus 5 Erlingsson||27] regjerte fra [1161] til [1184].
 
@@ -363,18 +364,18 @@ Datter av [Cecilia||Sigurdsdatter], [Sverre]s søster. Halvbror til [Hertug Skul
 :END:
 Kong [Håkon 4 Håkonsson||31] regjerte fra [1217] til [1263]
 *** Konge :drill:
-SCHEDULED: <2024-10-01 ti.>
+SCHEDULED: <2024-12-28 Sat>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
 :ID:       e009c870-15e9-4d7e-83eb-0a8f62fdbe74
-:DRILL_LAST_INTERVAL: 10.375
-:DRILL_REPEATS_SINCE_FAIL: 3
-:DRILL_TOTAL_REPEATS: 6
+:DRILL_LAST_INTERVAL: 25.6263
+:DRILL_REPEATS_SINCE_FAIL: 4
+:DRILL_TOTAL_REPEATS: 7
 :DRILL_FAILURE_COUNT: 3
 :DRILL_AVERAGE_QUALITY: 3.0
-:DRILL_EASE: 2.56
-:DRILL_LAST_QUALITY: 5
-:DRILL_LAST_REVIEWED: [2024-09-21 lø. 01:13]
+:DRILL_EASE: 2.42
+:DRILL_LAST_QUALITY: 3
+:DRILL_LAST_REVIEWED: [Y-12-02 Mon 00:%]
 :END:
 Kong [Magnus 6 Håkonsson Lagabøte||32] regjerte fra [1263] til [1280]
 **** Memo
@@ -382,36 +383,36 @@ Gardist Pål Magnus har satt seg på en ELEFANT:
 Han bærer kongens FLOSSHATT (som han har stjålet),
 og med BALLONG i hånden (i stedet for gevær over skulderen)
 *** Konge :drill:
-SCHEDULED: <2024-09-28 lø.>
+SCHEDULED: <2024-12-21 Sat>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
 :ID:       a851610e-013c-41e1-925f-678caba4dd25
-:DRILL_LAST_INTERVAL: 8.7892
-:DRILL_REPEATS_SINCE_FAIL: 3
-:DRILL_TOTAL_REPEATS: 2
+:DRILL_LAST_INTERVAL: 18.8265
+:DRILL_REPEATS_SINCE_FAIL: 4
+:DRILL_TOTAL_REPEATS: 3
 :DRILL_FAILURE_COUNT: 0
 :DRILL_AVERAGE_QUALITY: 3.0
-:DRILL_EASE: 2.22
+:DRILL_EASE: 2.08
 :DRILL_LAST_QUALITY: 3
-:DRILL_LAST_REVIEWED: [2024-09-19 to. 22:54]
+:DRILL_LAST_REVIEWED: [Y-12-02 Mon 00:%]
 :END:
 Kong [Eirik 2 Magnusson||33] regjerte fra [1280] til [1299]
 **** Memo
 Erik i rosa kjole bak slottet spiller naturligvis basketball, men
 bommer stygt, og ballen havner i en stor hekk.
 *** Konge :drill:
-SCHEDULED: <2024-10-02 on.>
+SCHEDULED: <2024-12-23 Mon>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
 :ID:       664c29de-be44-4c80-88d0-f4e323ddf322
-:DRILL_LAST_INTERVAL: 9.1096
-:DRILL_REPEATS_SINCE_FAIL: 3
-:DRILL_TOTAL_REPEATS: 4
+:DRILL_LAST_INTERVAL: 21.2071
+:DRILL_REPEATS_SINCE_FAIL: 4
+:DRILL_TOTAL_REPEATS: 5
 :DRILL_FAILURE_COUNT: 1
-:DRILL_AVERAGE_QUALITY: 3.25
-:DRILL_EASE: 2.36
-:DRILL_LAST_QUALITY: 4
-:DRILL_LAST_REVIEWED: [2024-09-23 ma. 20:44]
+:DRILL_AVERAGE_QUALITY: 3.2
+:DRILL_EASE: 2.22
+:DRILL_LAST_QUALITY: 3
+:DRILL_LAST_REVIEWED: [Y-12-02 Mon 21:%]
 :END:
 Kong [Håkon 5 Magnusson||34] regjerte fra [1299] til [1319]
 **** Memo
@@ -419,40 +420,43 @@ På WC står Haakon på kne med hageHANSKER, PIL OG BUE, klar til å skyte den f
 vannrotten som dukker opp. Som agn har han lagt en MOBILTELEFON ned i
 klosettet.
 *** Konge :drill:
-SCHEDULED: <2024-11-03 Sun>
+SCHEDULED: <2024-12-25 Wed>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
 :ID:       77d3f4c2-5de1-48ab-8b70-42c523494728
-:DRILL_LAST_INTERVAL: 9.1096
-:DRILL_REPEATS_SINCE_FAIL: 3
-:DRILL_TOTAL_REPEATS: 5
+:DRILL_LAST_INTERVAL: 22.7376
+:DRILL_REPEATS_SINCE_FAIL: 4
+:DRILL_TOTAL_REPEATS: 6
 :DRILL_FAILURE_COUNT: 2
-:DRILL_AVERAGE_QUALITY: 3.0
-:DRILL_EASE: 2.36
-:DRILL_LAST_QUALITY: 4
-:DRILL_LAST_REVIEWED: [Y-10-25 Fri 12:%]
+:DRILL_AVERAGE_QUALITY: 3.333
+:DRILL_EASE: 2.46
+:DRILL_LAST_QUALITY: 5
+:DRILL_LAST_REVIEWED: [Y-12-02 Mon 21:%]
 :END:
 Kong [Magnus 7 Eriksson||35] regjerte fra [1319] til [1355]
 **** Memo
-Gardist Pål-Magnus sover i en sovepose som er heist opp i
-flaggstangen. Soveposen er ubehagelig, da den er stappfull av skålvekter.
+Gardist Pål-Magnus sover i en *sovepose* som er heist opp i
+*flaggstangen*. Soveposen er ubehagelig, da den er stappfull av
+*skålvekter*.
 *** Konge :drill:
-SCHEDULED: <2024-10-02 on.>
+SCHEDULED: <2024-12-22 Sun>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
 :ID:       3ebd5d41-a984-4f15-a5e5-5c597a9f38ef
-:DRILL_LAST_INTERVAL: 8.7892
-:DRILL_REPEATS_SINCE_FAIL: 3
-:DRILL_TOTAL_REPEATS: 4
+:DRILL_LAST_INTERVAL: 19.512
+:DRILL_REPEATS_SINCE_FAIL: 4
+:DRILL_TOTAL_REPEATS: 5
 :DRILL_FAILURE_COUNT: 1
-:DRILL_AVERAGE_QUALITY: 3.0
+:DRILL_AVERAGE_QUALITY: 3.2
 :DRILL_EASE: 2.22
-:DRILL_LAST_QUALITY: 3
-:DRILL_LAST_REVIEWED: [2024-09-23 ma. 20:42]
+:DRILL_LAST_QUALITY: 4
+:DRILL_LAST_REVIEWED: [Y-12-02 Mon 00:%]
 :END:
 Kong [Håkon 6 Magnusson||36] regjerte fra [1355] til [1380]
 **** Memo
-Haakon på wc har pyntet lekeelefanten sin med en ballong festet til snabelen.
+Haakon på wc rir på leke-*elefanten* sin og skal overlevere
+kongs-*nøkkelen* til Olav 4. Men han er så anemisk at han må ha en
+heliums-*ballong* festet til nøkkelen for å orke å holde den.
 *** Konge :drill:
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
@@ -488,18 +492,18 @@ deilig ØSTERS i kjelleren.
 
 Bilde: Kristoffer i kjeller og gumler ØSTERS.
 *** Konge :drill:
-SCHEDULED: <2024-10-29 Tue>
+SCHEDULED: <2024-12-11 Wed>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
 :ID:       3beef949-671c-4574-9fc9-76eace273729
-:DRILL_LAST_INTERVAL: 3.86
-:DRILL_REPEATS_SINCE_FAIL: 2
-:DRILL_TOTAL_REPEATS: 7
+:DRILL_LAST_INTERVAL: 9.3026
+:DRILL_REPEATS_SINCE_FAIL: 3
+:DRILL_TOTAL_REPEATS: 8
 :DRILL_FAILURE_COUNT: 4
-:DRILL_AVERAGE_QUALITY: 2.857
-:DRILL_EASE: 2.46
+:DRILL_AVERAGE_QUALITY: 2.875
+:DRILL_EASE: 2.32
 :DRILL_LAST_QUALITY: 3
-:DRILL_LAST_REVIEWED: [Y-10-25 Fri 12:%]
+:DRILL_LAST_REVIEWED: [Y-12-02 Mon 21:%]
 :END:
 Kong [Karl 1 Knutsson Bonde||41] regjerte fra [1449] til [1450]
 **** Memo
@@ -533,98 +537,98 @@ ble tvangsreformert og mistet siste rest av nasjonal selvstendighet.
 Kalles også [Grevefeiden], oppkalt etter grev [Christoffer] av
 Oldenburg, som gjorde krav på tronen.
 *** Konge :drill:
-SCHEDULED: <2024-10-02 on.>
+SCHEDULED: <2024-12-21 Sat>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
 :ID:       5cf814f1-3a43-4671-8da3-9bdd28816426
-:DRILL_LAST_INTERVAL: 8.7892
-:DRILL_REPEATS_SINCE_FAIL: 3
-:DRILL_TOTAL_REPEATS: 4
+:DRILL_LAST_INTERVAL: 18.8265
+:DRILL_REPEATS_SINCE_FAIL: 4
+:DRILL_TOTAL_REPEATS: 5
 :DRILL_FAILURE_COUNT: 1
-:DRILL_AVERAGE_QUALITY: 2.75
-:DRILL_EASE: 2.22
+:DRILL_AVERAGE_QUALITY: 2.8
+:DRILL_EASE: 2.08
 :DRILL_LAST_QUALITY: 3
-:DRILL_LAST_REVIEWED: [2024-09-23 ma. 20:46]
+:DRILL_LAST_REVIEWED: [Y-12-02 Mon 00:%]
 :END:
 Kong [Hans||43] regjerte fra [1483] til [1513]
 **** Memo
 Borchgrevink er ikke invitert til ballet, men prøver å snike seg inn
 via en stige
 *** Konge :drill:
-SCHEDULED: <2024-09-29 sø.>
+SCHEDULED: <2024-12-26 Thu>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
 :ID:       2cfb3f0f-5976-4fe1-b576-bf61c366c87e
-:DRILL_LAST_INTERVAL: 10.0
-:DRILL_REPEATS_SINCE_FAIL: 3
-:DRILL_TOTAL_REPEATS: 2
+:DRILL_LAST_INTERVAL: 24.12
+:DRILL_REPEATS_SINCE_FAIL: 4
+:DRILL_TOTAL_REPEATS: 3
 :DRILL_FAILURE_COUNT: 0
-:DRILL_AVERAGE_QUALITY: 4.0
-:DRILL_EASE: 2.5
-:DRILL_LAST_QUALITY: 4
-:DRILL_LAST_REVIEWED: [2024-09-19 to. 22:49]
+:DRILL_AVERAGE_QUALITY: 3.667
+:DRILL_EASE: 2.36
+:DRILL_LAST_QUALITY: 3
+:DRILL_LAST_REVIEWED: [Y-12-02 Mon 00:%]
 :END:
 Kong [Christian 2||44] regjerte fra [1513] til [1523]
 **** Memo
 I ballsalen er det en lek der Thorn prøver å score mot en SVANE som FOTBALL-målvakt
 *** Konge :drill:
-SCHEDULED: <2024-09-30 ma.>
+SCHEDULED: <2024-12-30 Mon>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
 :ID:       7dd329bb-da95-4d59-a02a-504feb043644
-:DRILL_LAST_INTERVAL: 10.764
-:DRILL_REPEATS_SINCE_FAIL: 3
-:DRILL_TOTAL_REPEATS: 3
+:DRILL_LAST_INTERVAL: 27.9864
+:DRILL_REPEATS_SINCE_FAIL: 4
+:DRILL_TOTAL_REPEATS: 4
 :DRILL_FAILURE_COUNT: 1
-:DRILL_AVERAGE_QUALITY: 3.667
+:DRILL_AVERAGE_QUALITY: 3.75
 :DRILL_EASE: 2.6
 :DRILL_LAST_QUALITY: 4
-:DRILL_LAST_REVIEWED: [2024-09-19 to. 22:52]
+:DRILL_LAST_REVIEWED: [Y-12-02 Mon 00:%]
 :END:
 Kong [Frederik 1||45] regjerte fra [1523] til [1533]
 **** Memo
 På datalabben har lyset gått så rommet er lyst opp av et STEARINLYS. I
 tusmørket kan man skimte IT-sjef Frederik i drag (med KJOLE)
 *** Konge :drill:
-SCHEDULED: <2024-09-29 sø.>
+SCHEDULED: <2024-12-06 Fri>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
 :ID:       e81f5de5-8b22-4c1a-84e7-edbd57a75bb1
-:DRILL_LAST_INTERVAL: 9.3103
-:DRILL_REPEATS_SINCE_FAIL: 3
-:DRILL_TOTAL_REPEATS: 3
-:DRILL_FAILURE_COUNT: 1
-:DRILL_AVERAGE_QUALITY: 2.667
-:DRILL_EASE: 2.36
-:DRILL_LAST_QUALITY: 4
-:DRILL_LAST_REVIEWED: [2024-09-20 fr. 16:10]
+:DRILL_LAST_INTERVAL: 3.995
+:DRILL_REPEATS_SINCE_FAIL: 2
+:DRILL_TOTAL_REPEATS: 5
+:DRILL_FAILURE_COUNT: 2
+:DRILL_AVERAGE_QUALITY: 3.0
+:DRILL_EASE: 2.46
+:DRILL_LAST_QUALITY: 5
+:DRILL_LAST_REVIEWED: [Y-12-02 Mon 00:%]
 :END:
-Det andre norskdanske [interregnum] varte fra [1533] til [1537]
+Det andre norskdanske interregnum varte fra [1533] til [1537]
 
 Man klarte ikke å bestemme seg for hvem som skulle bli konge av
-[Christian 3] og halvbroren [Hans].
+lutheraneren [Christian 3] og den katolske halvbroren hans, [Hans].
 
 Lutheraneren vant. Dette fikk meget store konsekvenser for Norge som
 ble tvangsreformert og mistet siste rest av nasjonal selvstendighet.
 
 Perioden kalles også for [Grevefeiden], oppkalt etter grev
-[Christoffer] av Oldenburg.
+[Christoffer] av [Oldenburg].
 **** Memo
 Christian 3 i kjelleren (interregum) med halo (han skulle jo vise seg
 å bli konge)
 *** Konge :drill:
-SCHEDULED: <2024-10-03 to.>
+SCHEDULED: <2024-12-26 Thu>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
 :ID:       08438bae-9ae4-499d-96fb-15f2e72b1077
-:DRILL_LAST_INTERVAL: 10.0
-:DRILL_REPEATS_SINCE_FAIL: 3
-:DRILL_TOTAL_REPEATS: 5
+:DRILL_LAST_INTERVAL: 24.12
+:DRILL_REPEATS_SINCE_FAIL: 4
+:DRILL_TOTAL_REPEATS: 6
 :DRILL_FAILURE_COUNT: 2
-:DRILL_AVERAGE_QUALITY: 3.2
-:DRILL_EASE: 2.5
-:DRILL_LAST_QUALITY: 4
-:DRILL_LAST_REVIEWED: [2024-09-23 ma. 20:41]
+:DRILL_AVERAGE_QUALITY: 3.167
+:DRILL_EASE: 2.36
+:DRILL_LAST_QUALITY: 3
+:DRILL_LAST_REVIEWED: [Y-12-02 Mon 21:%]
 :END:
 Kong [Christian 3||46] regjerte fra [1537] til [1559]
 **** Memo
@@ -636,18 +640,18 @@ Christian Thorn i ballsalen: med glanspapirhjerte og maske og klar for slottsbal
 :END:
 Kong [Frederik 2||47] regjerte fra [1559] til [1588]
 *** Konge :drill:
-SCHEDULED: <2024-10-03 to.>
+SCHEDULED: <2024-12-06 Fri>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
 :ID:       9af7ac14-2f5d-4e6b-9836-c30040da6f1a
-:DRILL_LAST_INTERVAL: 11.5309
-:DRILL_REPEATS_SINCE_FAIL: 3
-:DRILL_TOTAL_REPEATS: 5
-:DRILL_FAILURE_COUNT: 2
-:DRILL_AVERAGE_QUALITY: 3.6
-:DRILL_EASE: 2.7
-:DRILL_LAST_QUALITY: 4
-:DRILL_LAST_REVIEWED: [2024-09-21 lø. 01:12]
+:DRILL_LAST_INTERVAL: 4.14
+:DRILL_REPEATS_SINCE_FAIL: 2
+:DRILL_TOTAL_REPEATS: 7
+:DRILL_FAILURE_COUNT: 3
+:DRILL_AVERAGE_QUALITY: 3.571
+:DRILL_EASE: 2.8
+:DRILL_LAST_QUALITY: 5
+:DRILL_LAST_REVIEWED: [Y-12-02 Mon 22:%]
 :END:
 Kong [Christian 4||48] regjerte fra [1588] til [1648].
 
@@ -664,19 +668,23 @@ den nyopprettede norske hæren.
 **** Memo
 Thorn i ballsalen ringer med klokken: Dansen må ta pause. Det er klart
 for østersgilde!
+
+Torstensonska kriget: etter den svenske feltherren *Lennart
+Torstenson*; i Danmark kalles krigen Torstenssonfejden. På engelsk
+brukes betegnelsen «the Torstensson War».
 *** Konge :drill:
-SCHEDULED: <2024-09-28 lø.>
+SCHEDULED: <2024-12-06 Fri>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
 :ID:       efde6a14-c848-457b-9f1d-e68abddb2a9a
-:DRILL_LAST_INTERVAL: 9.1096
-:DRILL_REPEATS_SINCE_FAIL: 3
-:DRILL_TOTAL_REPEATS: 2
-:DRILL_FAILURE_COUNT: 0
-:DRILL_AVERAGE_QUALITY: 3.5
-:DRILL_EASE: 2.36
-:DRILL_LAST_QUALITY: 4
-:DRILL_LAST_REVIEWED: [2024-09-19 to. 23:04]
+:DRILL_LAST_INTERVAL: 3.725
+:DRILL_REPEATS_SINCE_FAIL: 2
+:DRILL_TOTAL_REPEATS: 4
+:DRILL_FAILURE_COUNT: 1
+:DRILL_AVERAGE_QUALITY: 3.0
+:DRILL_EASE: 2.22
+:DRILL_LAST_QUALITY: 3
+:DRILL_LAST_REVIEWED: [Y-12-02 Mon 00:%]
 :END:
 Kong [Frederik 3||49] regjerte fra [1648] til [1670].
 
@@ -694,36 +702,36 @@ Frederik har hjertesorg, og har derfor tatt på seg et stort
 papirhjerte. Han er så sjalu at han planlegger å sprenge seg selv og
 hele datalabben med en bombe.
 *** Konge :drill:
-SCHEDULED: <2024-09-30 ma.>
+SCHEDULED: <2024-12-29 Sun>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
 :ID:       2b7a16f2-6ed5-49a7-bd8f-95b06060df92
-:DRILL_LAST_INTERVAL: 10.764
-:DRILL_REPEATS_SINCE_FAIL: 3
-:DRILL_TOTAL_REPEATS: 3
+:DRILL_LAST_INTERVAL: 27.0069
+:DRILL_REPEATS_SINCE_FAIL: 4
+:DRILL_TOTAL_REPEATS: 4
 :DRILL_FAILURE_COUNT: 1
-:DRILL_AVERAGE_QUALITY: 3.667
-:DRILL_EASE: 2.6
-:DRILL_LAST_QUALITY: 4
-:DRILL_LAST_REVIEWED: [2024-09-19 to. 22:45]
+:DRILL_AVERAGE_QUALITY: 3.5
+:DRILL_EASE: 2.46
+:DRILL_LAST_QUALITY: 3
+:DRILL_LAST_REVIEWED: [Y-12-02 Mon 00:%]
 :END:
 Kong [Christian 5||50] regjerte fra [1670] til [1699]
 **** Memo
 Thorn i ballsalen kaster de hvite hanskene (pga slåsskamp) ut av
 vinduet. De lander i en hekk.
 *** Konge :drill:
-SCHEDULED: <2024-11-03 Sun>
+SCHEDULED: <2024-12-06 Fri>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
 :ID:       b8a51616-35e0-4f4a-a8b1-e745c3231927
-:DRILL_LAST_INTERVAL: 8.7892
-:DRILL_REPEATS_SINCE_FAIL: 3
-:DRILL_TOTAL_REPEATS: 4
-:DRILL_FAILURE_COUNT: 1
-:DRILL_AVERAGE_QUALITY: 2.75
+:DRILL_LAST_INTERVAL: 4.0
+:DRILL_REPEATS_SINCE_FAIL: 2
+:DRILL_TOTAL_REPEATS: 6
+:DRILL_FAILURE_COUNT: 2
+:DRILL_AVERAGE_QUALITY: 2.833
 :DRILL_EASE: 2.22
-:DRILL_LAST_QUALITY: 3
-:DRILL_LAST_REVIEWED: [Y-10-25 Fri 12:%]
+:DRILL_LAST_QUALITY: 4
+:DRILL_LAST_REVIEWED: [Y-12-02 Mon 22:%]
 :END:
 Kong [Frederik 4||51] regjerte fra [1699] til [1730]
 **** Memo
@@ -745,18 +753,18 @@ Christian Thorn på slottstrappen: sitter på en elefant og prøver hjelpeløst 
 :END:
 Kong [Frederik 5||53] regjerte fra [1746] til [1766]
 *** Konge :drill:
-SCHEDULED: <2024-09-28 lø.>
+SCHEDULED: <2024-12-06 Fri>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
 :ID:       e1b37074-4fbc-4f5a-b143-b6c8c6aa10d8
-:DRILL_LAST_INTERVAL: 8.7892
-:DRILL_REPEATS_SINCE_FAIL: 3
-:DRILL_TOTAL_REPEATS: 2
-:DRILL_FAILURE_COUNT: 0
-:DRILL_AVERAGE_QUALITY: 3.0
-:DRILL_EASE: 2.22
+:DRILL_LAST_INTERVAL: 3.86
+:DRILL_REPEATS_SINCE_FAIL: 2
+:DRILL_TOTAL_REPEATS: 5
+:DRILL_FAILURE_COUNT: 2
+:DRILL_AVERAGE_QUALITY: 2.4
+:DRILL_EASE: 2.08
 :DRILL_LAST_QUALITY: 3
-:DRILL_LAST_REVIEWED: [2024-09-19 to. 23:17]
+:DRILL_LAST_REVIEWED: [Y-12-02 Mon 00:%]
 :END:
 Kong [Christian 7||54] regjerte fra [1766] til [1808].
 
@@ -783,24 +791,33 @@ selve krigføringen.
 :END:
 Kong [Frederik 6||55] regjerte fra [1808] til [1814]
 *** Konge :drill:
+SCHEDULED: <2024-12-06 Fri>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
 :ID:       b446d41f-ae83-4b09-ae9b-c84b0e7ce173
+:DRILL_LAST_INTERVAL: 3.86
+:DRILL_REPEATS_SINCE_FAIL: 2
+:DRILL_TOTAL_REPEATS: 1
+:DRILL_FAILURE_COUNT: 0
+:DRILL_AVERAGE_QUALITY: 3.0
+:DRILL_EASE: 2.36
+:DRILL_LAST_QUALITY: 3
+:DRILL_LAST_REVIEWED: [Y-12-02 Mon 22:%]
 :END:
 Kong [Christian Frederik||56] regjerte fra [1814] til [1814]
 *** Konge :drill:
-SCHEDULED: <2024-09-28 lø.>
+SCHEDULED: <2024-12-24 Tue>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
 :ID:       d0e07451-0be4-401a-89f8-199a59220ee2
-:DRILL_LAST_INTERVAL: 9.1096
-:DRILL_REPEATS_SINCE_FAIL: 3
-:DRILL_TOTAL_REPEATS: 2
+:DRILL_LAST_INTERVAL: 22.2548
+:DRILL_REPEATS_SINCE_FAIL: 4
+:DRILL_TOTAL_REPEATS: 3
 :DRILL_FAILURE_COUNT: 0
-:DRILL_AVERAGE_QUALITY: 3.5
-:DRILL_EASE: 2.36
-:DRILL_LAST_QUALITY: 4
-:DRILL_LAST_REVIEWED: [2024-09-19 to. 23:10]
+:DRILL_AVERAGE_QUALITY: 4.0
+:DRILL_EASE: 2.46
+:DRILL_LAST_QUALITY: 5
+:DRILL_LAST_REVIEWED: [Y-12-02 Mon 00:%]
 :END:
 Kong [Karl 2||57] regjerte fra [1814] til [1818]
 **** Memo
@@ -815,18 +832,18 @@ døren.
 :END:
 Kong [Karl 3 Johan||58] regjerte fra [1818] til [1844]
 *** Konge :drill:
-SCHEDULED: <2024-09-30 ma.>
+SCHEDULED: <2024-12-06 Fri>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
 :ID:       87dd1911-9617-4f0e-ba33-9d4ab505b202
-:DRILL_LAST_INTERVAL: 11.1407
-:DRILL_REPEATS_SINCE_FAIL: 3
-:DRILL_TOTAL_REPEATS: 2
-:DRILL_FAILURE_COUNT: 0
-:DRILL_AVERAGE_QUALITY: 5.0
-:DRILL_EASE: 2.7
-:DRILL_LAST_QUALITY: 5
-:DRILL_LAST_REVIEWED: [2024-09-19 to. 23:05]
+:DRILL_LAST_INTERVAL: 3.86
+:DRILL_REPEATS_SINCE_FAIL: 2
+:DRILL_TOTAL_REPEATS: 4
+:DRILL_FAILURE_COUNT: 1
+:DRILL_AVERAGE_QUALITY: 3.5
+:DRILL_EASE: 2.56
+:DRILL_LAST_QUALITY: 3
+:DRILL_LAST_REVIEWED: [Y-12-02 Mon 00:%]
 :END:
 Kong [Oscar 1||59] regjerte fra [1844] til [1859]
 *** Konge :drill:
@@ -839,18 +856,18 @@ Kong [Karl 4||60] regjerte fra [1859] til [1872]
 Fiolinspiller Karl underviser (med TAVLE) i en spesiell type salsa der
 hver danser må ha et stoppskilt i hånden.
 *** Konge :drill:
-SCHEDULED: <2024-09-29 sø.>
+SCHEDULED: <2024-12-06 Fri>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
 :ID:       c6e9bade-f265-44c0-99ab-2d03b7f96780
-:DRILL_LAST_INTERVAL: 10.3873
-:DRILL_REPEATS_SINCE_FAIL: 3
-:DRILL_TOTAL_REPEATS: 3
-:DRILL_FAILURE_COUNT: 1
-:DRILL_AVERAGE_QUALITY: 3.333
-:DRILL_EASE: 2.46
-:DRILL_LAST_QUALITY: 3
-:DRILL_LAST_REVIEWED: [2024-09-19 to. 22:51]
+:DRILL_LAST_INTERVAL: 4.135
+:DRILL_REPEATS_SINCE_FAIL: 2
+:DRILL_TOTAL_REPEATS: 5
+:DRILL_FAILURE_COUNT: 2
+:DRILL_AVERAGE_QUALITY: 3.4
+:DRILL_EASE: 2.56
+:DRILL_LAST_QUALITY: 5
+:DRILL_LAST_REVIEWED: [Y-12-02 Mon 00:%]
 :END:
 Kong [Oscar 2||61] regjerte fra [1872] til [1905]
 *** Konge :drill:

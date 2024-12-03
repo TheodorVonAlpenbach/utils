@@ -770,7 +770,7 @@ copied is displayed."
 
 (cl-defun transpose-string (string)
   "Insert a newline between each character in STRING"
-  (coerce (nbutlast (zip (coerce string 'list) 10)) 'string))
+  (cl-coerce (nbutlast (zip (cl-coerce string 'list) 10)) 'string))
 
 (cl-defun insert-alphabet (n)
   "Insert alphabet at point"
