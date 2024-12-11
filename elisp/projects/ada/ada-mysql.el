@@ -11,8 +11,8 @@
     '*))
 ;;(mapcar #'column-selection '(nil (a :b)))
 
-(cl-defun ada-read-pwd (&optional (db :ada))
-  (cl-find db (read* "~/git/utils/elisp/projects/ada/.pwd") :key #'first))
+(cl-defun ada-read-pwd (&optional (env :ada))
+  (cl-find env (read* "~/git/utils/elisp/projects/ada/.pwd") :key #'first))
 
 (cl-defun ada-mysql-connect (&optional (db-tag :ada))
   (cl-destructuring-bind (db-tag user password host port)
@@ -32,8 +32,8 @@
     (sstring x)))
 ;;(ada-sstring 'NULL)
 
-(cl-defun ada-prefix-to-environment (prefix)
-  (cl-case current-prefix-arg
+(cl-defun ada-prefix-to-environment (prefix-number)
+  (cl-case prefix-number
     (1 :ada)
     (2 :ada_test)
     (3 :ada_preprod)
@@ -44,11 +44,17 @@
     (t :ada_dummy)))
 ;;(ada-prefix-to-environment t)
 
+(cl-defun ada-copy-to-clipboard-1 (n retrieve-fun token-type)
+  (let ((env (ada-prefix-to-environment n)))
+    (string-to-clipboard (funcall retrieve-fun (ada-read-pwd env)) t)
+    (message "%s for %S was copied to clipboard" token-type env)))
+
 (cl-defun ada-copy-to-clipboard (&optional prefix)
   (interactive)
-  (let ((prefix (ada-prefix-to-environment current-prefix-arg)))
-    (string-to-clipboard (rot47 (third (ada-read-pwd prefix))) t)
-    (message "Password for %s was copied to clipboard" (sstring prefix))))
+  (let ((n (or current-prefix-arg 5)))
+    (if (< n 10)
+      (ada-copy-to-clipboard-1 n (compose #'rot47 #'third) "Password")
+      (ada-copy-to-clipboard-1 (- 5 10) #'sixth "Username"))))
 
 ;; prefix gh q
 (cl-defun mb-mysql-map ()

@@ -251,7 +251,7 @@ TODO: implement this. Probably involves some macro magic"
       (let ((fn1 (car (last fns)))
 		    (fns (butlast fns)))
 	(function (lambda (&rest args)
-	  (reduce #'funcall fns 
+	  (cl-reduce #'funcall fns 
 		  :from-end t
 		  :initial-value (apply fn1 args)))))
       (function identity))))

@@ -197,9 +197,18 @@ Tore Dahl, spiddet på en miniutgave av *monolotten*.
 Håkon var fostersønn av Steigar-Tore, en mektig mann fra Steig i
 Sør-Fron, Oppland.
 *** Konge :drill:
+SCHEDULED: <2024-12-07 Sat>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
 :ID:       5d52fd66-2ad3-4b62-b6d1-bebbfd242456
+:DRILL_LAST_INTERVAL: 4.0
+:DRILL_REPEATS_SINCE_FAIL: 2
+:DRILL_TOTAL_REPEATS: 1
+:DRILL_FAILURE_COUNT: 0
+:DRILL_AVERAGE_QUALITY: 4.0
+:DRILL_EASE: 2.5
+:DRILL_LAST_QUALITY: 4
+:DRILL_LAST_REVIEWED: [Y-12-03 Tue 19:%]
 :END:
 Kong [Magnus 3 Olavsson Berrføtt||17] regjerte fra [1093] til [1103]
 *** Konge :drill:
