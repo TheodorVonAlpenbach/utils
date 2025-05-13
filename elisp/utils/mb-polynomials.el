@@ -34,7 +34,7 @@
 ;;(polynom-align '(1 2 3) '(1))
 
 (cl-defun polynom-addition (&rest polynomials)
-  (apply #'mapcar* #'+ (pad-lists polynomials)))
+  (apply #'cl-mapcar #'+ (pad-lists polynomials)))
 ;;(polynom-addition '(1 2 1) '(1))
 
 (cl-defun polynom-scalar-multiplication (polynomial scalar)
@@ -58,7 +58,7 @@
 				(polynom-scalar-multiplication q a)))))))
 
 (cl-defun polynom-multiplication (&rest polynomials)
-  (reduce #'polynom-multiplication-1 polynomials :initial-value '(1)))
+  (cl-reduce #'polynom-multiplication-1 polynomials :initial-value '(1)))
 ;;(polynom-multiplication)
 
 (cl-defun polynom-expt (p exponent)
@@ -91,7 +91,7 @@
 
 (cl-defun test-polynom-division (&optional (num '(0 0 1)) (den '(1 1)))
   (cl-destructuring-bind (q rem den) (polynom-division num den)
-    (mapcar* #'= num (polynom-addition 
+    (cl-mapcar #'= num (polynom-addition 
 		     (polynom-multiplication q den)
 		     rem))))
 ;;(test-polynom-division)
@@ -99,7 +99,7 @@
 (cl-defun pole-polynom (poles)
   "Returns the polynomial defined by the POLES a1, a2, ... aN as
 \(x - a1)(x - a2)...(x - aN)"
-  (reduce #' polynom-multiplication 
+  (cl-reduce #' polynom-multiplication 
 	     (mapcar #'(lambda (pole) (list (- pole) 1)) poles)))
 ;;(pole-polynom '(-1 1))
 
@@ -133,7 +133,7 @@ and floats are formatted with PRECISION"
 (cl-defun fpolynom (numerator denomintator)
   (list numerator denomintator))
 
-(defsubst fp* (qp1 qp2) (mapcar* #'p* qp1 qp2))
+(defsubst fp* (qp1 qp2) (cl-mapcar #'p* qp1 qp2))
 ;(fp* (qpolynom '(1 1) '(1 1)) (fpolynom '(1 1) '(1 1)))
 
 (cl-defun polynom-expand (p order)

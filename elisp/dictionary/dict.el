@@ -370,8 +370,8 @@ lastest lookup: %s\n%s\n"
 (cl-defun dic-last-entry ()
   (let* ((dic-buffer-names (mapcar #'dic-buffer-name (mapcar #'second *dic-list*)))
 	 (buffer-names (mapcar #'buffer-name (buffer-list)))
-	 (res (find-if #'(lambda (x) (find x dic-buffer-names :test #'string=)) buffer-names)))
-    (find res *dic-list* :test #'(lambda (x y) (string= x (dic-buffer-name (second y)))))))
+	 (res (find-if #'(lambda (x) (cl-find x dic-buffer-names :test #'string=)) buffer-names)))
+    (cl-find res *dic-list* :test #'(lambda (x y) (string= x (dic-buffer-name (second y)))))))
 
 (cl-defun dic-browse-last-entry ()
   "Redirects last shown lookup entry to original url in a Windows browser."

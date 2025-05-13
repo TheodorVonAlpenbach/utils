@@ -49,7 +49,7 @@
 ;;(time (progn (setf +fvec+ (cl-make-factor-vector (round 2E7) 10000-first-primes)) (array-dimensions +fvec+)))
 
 (cl-defun make-factor-vector (n primes)
-  (let ((res (coerce (cl-loop for i below n collect (list i 1)) 'vector)))
+  (let ((res (cl-coerce (cl-loop for i below n collect (list i 1)) 'vector)))
     (cl-loop for p in primes do
 	  (cl-loop for i from 1
 		for ip = (* i p)
@@ -70,7 +70,7 @@
 ;;(time (cl-loop for n from 2 below 10 do (cl-factorize-rec n +fvec+)))
 (cl-defun factorize-rec (n fvec)
   (when (> n 1)
-    (destructuring-bind (p rest) (aref fvec n)
+    (cl-destructuring-bind (p rest) (aref fvec n)
       (cons p (factorize-rec rest fvec)))))
 ;;(factorize-rec 2345 +fvec+)
 ;;(time (cl-loop for n from 2 below 1000000 do (cl-factorize-rec n +fvec+)))
@@ -135,7 +135,7 @@
   (cl-loop for f in (aref +factors+ n)
 	for subfactors = (all-factors-2 f)
 	append (cons f subfactors)))
-;;(sort (remove-duplicates (all-factors-2 100111)) #'<)
+;;(sort (cl-remove-duplicates (all-factors-2 100111)) #'<)
 ;; (2 (2 1)) spawns (4 (2 2)), (8 (2 4)), (2^k2 ...), where 2^k2 < N
 ;; (3 (3 1)) spawns (9 (3 3)), (27 (3 9)),..., (6 (3 2))
 ;; (4 (2 2)) spawns (8 (2 4)) and (12 (3 4))
@@ -176,7 +176,7 @@
 
 (cl-defun all-divisors-1 (pvecs)
   (when pvecs
-    (destructuring-bind (divisors . pvecs) pvecs
+    (cl-destructuring-bind (divisors . pvecs) pvecs
       (cl-loop for pvec in pvecs
 	    do (setf divisors (append divisors (pvecs-combine divisors pvec))))
       divisors)))

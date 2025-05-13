@@ -90,7 +90,7 @@
 	(r1 (i-make-interval 0 1)))
     (let ((dranges (list r9 r9 r9 r9 r1 r9 r3 r9))
 	  (tranges (list r2 r9 r5 r9 r5 r9)))
-      (destructuring-bind (lsd lst) (split-string lsdate "_")
+      (cl-destructuring-bind (lsd lst) (split-string lsdate "_")
 	(list (glob-up-lsdate-date lsd dranges)
 	      (glob-up-lsdate-time lst tranges))))))
 ;;(glob-up-lsdate "20181117_000000")

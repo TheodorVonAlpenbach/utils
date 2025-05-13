@@ -23,7 +23,7 @@ entry list. This will always be so when the entries (like now) are
 pushed on the list."
   (prog1 
       (lpdb-max-index db)
-    (incf (lpdb-max-index db))))
+    (cl-incf (lpdb-max-index db))))
 
 (cl-defun external-url-p (url)
   "Returns URL if it does not refers within local network."
@@ -198,11 +198,11 @@ before TIME. TODO: delete backup files."
  	  when (and 
  		(not (file-directory-p file))
 		(time< (decode-time time-created) time)
-		(find file tabus :test-not #'string=)
+		(cl-find file tabus :test-not #'string=)
 		)
 	  do (delete-file file))))
 ;;(lynx-proxy-delete-files :time (now))
-;;(find ".proxy-db" '(".proxy-db" "lynx-favorites") :test #'string=)
+;;(cl-find ".proxy-db" '(".proxy-db" "lynx-favorites") :test #'string=)
 ;;(time< (now :week -1) '(18 41 19 6 11 2002 3 nil 3600))
 
 ;;(decode-time (nth 5 (file-attributes "c:/unix/data/lynx-proxy/102-articleID=198257")))

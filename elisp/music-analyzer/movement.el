@@ -10,7 +10,7 @@
 
 (cl-defun vgs-p (x)
   "Returns t iif X is a list of `voice-group' elements"
-  (and (listp x) (every #'voice-group-p x)))
+  (and (listp x) (cl-every #'voice-group-p x)))
 
 (cl-defun mvt-time-signature (mvt)
   (vg-time-signature (mvt-voice-group mvt)))

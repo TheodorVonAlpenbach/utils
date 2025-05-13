@@ -146,7 +146,7 @@
 (cl-defun cram-modify-scores (scores &optional (success-factor 2))
   "Set zero scores to -1, and double succesively scores after
 last zero score."
-  (destructuring-bind (head tail) (split2 0 scores)
+  (cl-destructuring-bind (head tail) (split2 0 scores)
     (append
      (cl-mapcar #'* head (mapcar (bind #'expt success-factor 1)
 			   (n-0 (length head))))
@@ -272,7 +272,7 @@ If METHOD is
 
 Many of these methods take additional parameters that can modify
 the selection strategy somewhat. For instance, :RANDOM avoids the last problems presented to the user, see "
-  (case method
+  (cl-case method
     (:last (cram-db-last-problem))
     (:new (let ((problem (cram-create-problem :rating rating)))
 	    (if (cl-notany #'null problem)
@@ -360,7 +360,7 @@ Why was cram-current-user called with t (update arg)?."
   (apply (cram-operator operation) args))
 
 (cl-defun cram-operator (operation)
-  (case operation
+  (cl-case operation
     (:addition #'+)
     (:substraction #'-)
     (:multiplication #'*)
@@ -411,7 +411,7 @@ of tries is quite limited"
 		finally return problem*))))))
 ;;(cl-loop repeat 1 collect (cram-create-problem :rating 1771.5996682195228 :operation :addition))
 ;;(cl-loop repeat 1 collect (cram-create-problem :rating 1500))
-;;(count nil (cl-loop repeat 100 collect (cram-create-problem :rating 1653.5199667679983)))
+;;(cl-count nil (cl-loop repeat 100 collect (cram-create-problem :rating 1653.5199667679983)))
 
 (require 'mb-utils-strings)
 (cl-defun expand-alternatives (pattern)
@@ -478,7 +478,7 @@ See also cram-extract-alternatives."
   (let ((answer (cram-problem-answer problem)))
     (if (cram-correct-response-p problem response)
       (- 1 (min 1 (/ (max 0 (- time-elapsed free-time))
-		     (coerce (- max-time free-time) 'float))))
+		     (cl-coerce (- max-time free-time) 'float))))
       0)))
 ;;(mapcar #'(lambda (x) (cram-score (first *cram-current-problem*) (problem-result (first *cram-current-problem*)) x)) (a-b 0 22000 2000))
 
@@ -512,8 +512,8 @@ was SOLVED."
 	 (score (cram-score problem response time-elapsed))
 	 (old-ratings (extract-ratings user problem))
 	 (new-ratings (glicko-new-ratings user problem score)))
-    (assert (not (equal old-ratings new-ratings)))
-    (destructuring-bind (updated-user updated-problem)
+    (cl-assert (not (equal old-ratings new-ratings)))
+    (cl-destructuring-bind (updated-user updated-problem)
 	(apply #'cram-db-report-match
 	       user problem
 	       (iso-date-and-time) response time-elapsed
@@ -539,8 +539,8 @@ ratings, and hand the onus of DB update to the caller"
 	 (old-ratings (extract-ratings user problem))
 	 (new-ratings (glicko-new-ratings user problem score)))
     ;; this assert seems a bit spurious to me now
-    (assert (not (equal old-ratings new-ratings)))
-    (destructuring-bind (updated-user updated-problem)
+    (cl-assert (not (equal old-ratings new-ratings)))
+    (cl-destructuring-bind (updated-user updated-problem)
 	(apply #'cram-db-report-match
 	       user problem
 	       (iso-date-and-time :with-seconds t)

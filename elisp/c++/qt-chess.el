@@ -148,7 +148,7 @@
 
 (cl-defun chess-goto-error ()
   (interactive)
-  (destructuring-bind (fn linum)
+  (cl-destructuring-bind (fn linum)
       (string-match* "\\(/.*\\.\\(?:h\\|cpp\\)\\):\\([0-9]*\\): "
 	(line-string) :num '(1 2))
     (find-file-other-window fn)
@@ -203,7 +203,7 @@
 (cl-defun chess-replace-symbols (old new query-p)
   "Replace all symbols OLD with NEW in current buffer"
   (let ((case-fold-search nil))
-    (case query-p
+    (cl-case query-p
       ((nil :never :replacement) (replace-symbols old new))
       (t (save-excursion
 	   (goto-char (point-min))
@@ -226,12 +226,12 @@ before carrying out its actions."
 
 (cl-defun chess-memberize (&optional query-p (prefix "m_"))
   "Prepend 'm_' on all identifiers in buffer equal to identifier at point."
-  (destructuring-bind (old new) (chess-memberize-init query-p prefix)
+  (cl-destructuring-bind (old new) (chess-memberize-init query-p prefix)
     (chess-replace-symbols old new query-p)))
 
 (cl-defun chess-memberize-class (&optional query-p (prefix "m_"))
   (save-excursion
-    (destructuring-bind (old new) (chess-memberize-init query-p prefix)
+    (cl-destructuring-bind (old new) (chess-memberize-init query-p prefix)
       (chess-replace-symbols old new query-p)
       (smart-swap)
       (chess-replace-symbols old new query-p)
@@ -330,7 +330,7 @@ Consider move this functionality to a makefile-mode extension module"
   "Convert old-fashion while construct with iterators to a for loop."
   (interactive)
   (let ((var (symbol-at-point)))
-    (destructuring-bind (beg . end)
+    (cl-destructuring-bind (beg . end)
 	(bounds-of-thing-at-point 'list)
       (delete-region (1+ beg) (1- end))
       (insert (format "auto it = %S.begin(); it != %S.end(); ++it" var var))

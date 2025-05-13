@@ -40,7 +40,7 @@
   :type 'string
   :group 'evil-textobj-line)
 
-(cl-defun evil-line-range (count beg end type &optional inclusive)
+(cl-defun evil-line-range (cl-count beg end type &optional inclusive)
   (if inclusive
       (evil-range (line-beginning-position) (line-end-position) 'line :expand t)
     (let ((start (save-excursion
@@ -52,10 +52,10 @@
                  (point))))
       (evil-range start end))))
 
-(evil-define-text-object evil-a-line (count &optional beg end type)
+(evil-define-text-object evil-a-line (cl-count &optional beg end type)
   "Select range between a character by which the command is followed."
   (evil-line-range count beg end type t))
-(evil-define-text-object evil-inner-line (count &optional beg end type)
+(evil-define-text-object evil-inner-line (cl-count &optional beg end type)
   "Select inner range between a character by which the command is followed."
   (evil-line-range count beg end type))
 

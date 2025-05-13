@@ -100,7 +100,7 @@ for numerical implementation basis."
 	 (ln1-x2 (log (- 1 (sq x))))
 	 (subexp (+ (/ 2 (* pi a))
 		    (/ ln1-x2 2))))
-    (* (signum x)
+    (* (cl-signum x)
        (sqrt (- (sqrt (- (sq subexp) (/ ln1-x2 a)))
 		subexp)))))
 ;;(cl-loop for x in '(0 .1 .2 .5 1 1.2 1.5 1.82 2 3) collect (- x (inverse-erf (erf x))))
@@ -174,7 +174,7 @@ of iterations."
                 (/2 fb))
               (setf side 1))
             (setf n m))))
-      (incf n))
+      (cl-incf n))
     c))
 ;;(falsi-method #'(lambda (x) (- (cos x) (expt x 3))) 0 1 5E-15 100)
 

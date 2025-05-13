@@ -23,13 +23,13 @@
 (defalias 'schosk-info-chord-abbrev 'third) ;;TODO: rename to chord-abbrev or chord-symbol
 
 (cl-defun schosk-info-from-schosk (schosk)
-  (find schosk schord-skeleton-info-list :key #'first :test #'equal))
+  (cl-find schosk schord-skeleton-info-list :key #'first :test #'equal))
 ;;(schosk-info-from-schosk '(3 7))
 
 (cl-defun schosk-exists-p (schosk &optional legal-chord-types)
   (awhen (schosk-info-from-schosk schosk)
     (if legal-chord-types
-      (find (schosk-info-chord-type it) legal-chord-types)
+      (cl-find (schosk-info-chord-type it) legal-chord-types)
       it)))
 ;;(schosk-exists-p '(4 7) '(major-triad))
 

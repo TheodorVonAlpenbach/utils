@@ -10,7 +10,7 @@
 ;;;; 2. MATLAB does not automatically convert into logicals, like Octave. E.g.
 ;;;;   ifelse (diff (t), 2, 1)
 ;;;; works in Octave, not in MATLAB. But this works in both:
-;;;;   ifelse (find (diff (t)), 2, 1)
+;;;;   ifelse (cl-find (diff (t)), 2, 1)
 
 (defconst +octave-root+ "~/git/utils/octave")
 (defconst +matlab-root+ "~/git/utils/matlab")
@@ -66,7 +66,7 @@
 
 (cl-defun o2m-convert-ends ()
   "Substitue Octave ending keywords with 'end'"
-  (assert (o2m-validate-buffer))
+  (cl-assert (o2m-validate-buffer))
   (save-excursion
     (bob)
     (while (re-search-forward +o2m-ends-regexp+ nil t)
@@ -75,7 +75,7 @@
 
 (cl-defun o2m-convert-defun-names ()
   "Convert _defun_name to defun_name_."
-  (assert (o2m-validate-buffer))
+  (cl-assert (o2m-validate-buffer))
   (save-excursion
     (bob)
     (while (re-search-forward "\\_<_\\([_[:word:]]+\\)\\_>" nil t)
@@ -85,7 +85,7 @@
 
 (cl-defun o2m-convert-NA ()
   "Convert defun_name_ to defun_name_."
-  (assert (o2m-validate-buffer))
+  (cl-assert (o2m-validate-buffer))
   (save-excursion
     (bob)
     (while (re-search-forward "\\_<\\(NA\\)\\_>" nil t)
@@ -98,7 +98,7 @@
 (cl-defun o2m-convert-empty-curls ()
   "Substitute dubious Octave empty curls, {} with the more explicit {:}.
 The function avoids commented lines."
-  (assert (o2m-validate-buffer))
+  (cl-assert (o2m-validate-buffer))
   (save-excursion
     (bob)
     (while (re-search-forward "{}" nil t)
@@ -108,7 +108,7 @@ The function avoids commented lines."
 
 (cl-defun o2m-comments-buffer ()
   "Convert octave style comments (## / #) to MATLAB style (% / %)"
-  (assert (o2m-validate-buffer))
+  (cl-assert (o2m-validate-buffer))
   (save-excursion
     (bob)
     (while (re-search-forward "##" nil t)
@@ -121,7 +121,7 @@ The function avoids commented lines."
 
 (cl-defun o2m-not-ify-buffer ()
   "Convert octave style not (!) to MATLAB style (~)."
-  (assert (o2m-validate-buffer))
+  (cl-assert (o2m-validate-buffer))
   (save-excursion
     (bob)
     (while (re-search-forward "\!" nil t)
@@ -130,11 +130,11 @@ The function avoids commented lines."
 	(replace-match "~")))))
 
 (cl-defun o2m-convert-colon-string (s prefix)
-  (destructuring-bind (l r)
+  (cl-destructuring-bind (l r)
       (split-string s "=" t " +")
     (let ((pos (1+ (string-match ")(:)" r)))
 	  (ltmp (format "tmp_%s_" l)))
-      (destructuring-bind (rl rr) (split-at-position r pos)
+      (cl-destructuring-bind (rl rr) (split-at-position r pos)
 	(format "%s%s = %s;\n%s%s = %s(:);"
 	  prefix ltmp rl
 	  prefix l ltmp)))))
@@ -147,7 +147,7 @@ v = foo (x)(:)
 with
 v_tmp_ = foo (x);
 v = v_tmp_(:);"
-  (assert (o2m-validate-buffer))
+  (cl-assert (o2m-validate-buffer))
   (save-excursion
     (bob)
     (while (re-search-forward ")(:)" nil t)
@@ -173,7 +173,7 @@ buffer."
 
 (cl-defun o2m-sign-inner-region ()
   "As `o2m-sign-outer-region' but without the parenthesis characters."
-  (destructuring-bind (a b) (o2m-sign-outer-region)
+  (cl-destructuring-bind (a b) (o2m-sign-outer-region)
     (list (1+ a) (1- b))))
 
 (cl-defun o2m-inner-sign-string (&optional (region (o2m-sign-inner-region)))
@@ -217,7 +217,7 @@ function foo (a)
     b = initval2;
   end
   ..."
-  (destructuring-bind (new-sign new-defaults)
+  (cl-destructuring-bind (new-sign new-defaults)
       (o2m-convert-arguments (o2m-arguments (o2m-inner-sign-string)))
     (region-replace-raw new-sign (o2m-sign-inner-region))
     (save-excursion
@@ -234,7 +234,7 @@ function foo (a)
 
 (cl-defun o2m-convert-defaults ()
   "Apply `o2m-convert-defaults' to all defuns in buffer."
-  (assert (o2m-validate-buffer))
+  (cl-assert (o2m-validate-buffer))
   (save-excursion
     (bob)
     (while (o2m-forward-defun)
@@ -243,7 +243,7 @@ function foo (a)
 ;;(o2m-convert-defaults)
 
 (cl-defun o2m-convert-strings ()
-  (assert (o2m-validate-buffer))
+  (cl-assert (o2m-validate-buffer))
   (save-excursion
     (bob)
     (while (re-search-forward "'" nil t)
@@ -309,8 +309,8 @@ I was wrong."
 
 (cl-defun o2m-convert-test-line (s)
   "Assume %! is stripped."
-  (case (read s)
-    (assert (o2m-convert-assert s))
+  (cl-case (read s)
+    (cl-assert (o2m-convert-assert s))
     (test nil)
     (t (concat "  " (string-trim-left s)))))
 ;;(o2m-convert-test-line "assert (a, b);")

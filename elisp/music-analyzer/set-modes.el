@@ -7,7 +7,7 @@
 
 (cl-defun set-scale (mode)
   (if (symbolp mode)
-    (find mode set-scales :key #'first)
-    (find mode set-scales :test #'string-equal :key (compose #'symbol-name #'first))))
+    (cl-find mode set-scales :key #'first)
+    (cl-find mode set-scales :test #'string-equal :key (compose #'symbol-name #'first))))
 ;;(set-scale 'minor)
 

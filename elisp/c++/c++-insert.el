@@ -17,7 +17,7 @@
 (cl-defun c++-insert-parentheses (arg)
   (interactive "*P")
   (let* ((space-symbols '(if for while))
-	 (space (if (find (symbol-at-point* (1- (point))) space-symbols)
+	 (space (if (cl-find (symbol-at-point* (1- (point))) space-symbols)
 		  :before :none)))
     (insert-parentheses* arg :ensure-space space)))
 ;(insert-parentheses* 0 :ensure-space :before)

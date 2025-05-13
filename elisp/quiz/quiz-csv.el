@@ -38,7 +38,7 @@
 
 (cl-defun quiz-parse-list (buffer)
   "Converts q-list in BUFFER to a list of list of q-item-strings."
-  (mapcar* #'quiz-parse-q (quiz-collect-qs buffer)))
+  (cl-mapcar #'quiz-parse-q (quiz-collect-qs buffer)))
 ;;(length (quiz-parse-list "mq-2006-08-16.qz"))
 ;;(print (quiz-parse-list "mq-2006-08-16.qz"))
 
@@ -56,7 +56,7 @@ abundant internal whitespace."
   (mb-string-replace (string-trim q-item-string) "\\s-+" " "))
 
 (cl-defun quiz-parse-q (q-string)
-  (mapcar* #'quiz-trim-q-item-string (split-string q-string "[QACS][0-9]+: ")))
+  (cl-mapcar #'quiz-trim-q-item-string (split-string q-string "[QACS][0-9]+: ")))
 ;;(quiz-parse-q (fourth (quiz-collect-qs "mq-2006-08-15.qz")))
 ;;(fourth (quiz-collect-qs "mq-2006-08-16.qz"))
 

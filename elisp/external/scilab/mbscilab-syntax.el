@@ -31,7 +31,7 @@ and returns the list (LHS NAME ARGS), where
 LHS is the left hand side of an assignment (or nil if the statement is not an assigment)
 NAME is the name of a function if called
 ARGS is a list of the arguments to NAME"
-  (destructuring-bind (garbage1 lhs name garbage2 args-string)
+  (cl-destructuring-bind (garbage1 lhs name garbage2 args-string)
       (string-match* (scilab-function-call-regexp) string :num '(1 2 3 4 5))
     (list lhs name (split-string args-string "[ \t\n,]") )))
 ;;(scilab-parse-statement "[a, b] = qwe(c, [], %T, d);")
@@ -163,7 +163,7 @@ BUFFER is nil then path to FUNCTION-NAME is not in any buffer. If
 open-buffer-file-p is true, then the file containing
 function-name is opened (if it is not yet opened) and BUFFER is
 set to the file's buffer. See also `scilab-function-path'"
-  (destructuring-bind (path start-line)
+  (cl-destructuring-bind (path start-line)
       (scilab-function-path function-name)
     (if path
       (list (find-file-noselect path) start-line)
@@ -185,7 +185,7 @@ Note! This only applies to current buffer."
   "FUNCTION-LINUM is relative to function [1 num-lines-function]"
   (interactive)
   (awhen (scilab-function-path name)
-    (destructuring-bind (path line*) it
+    (cl-destructuring-bind (path line*) it
       (when path
 	(switch-to-buffer it)
 	(goto-line (scilab-function-start-line name))

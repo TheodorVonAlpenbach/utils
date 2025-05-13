@@ -67,7 +67,7 @@ TODO include instrument."
   (create-key-from-accidentals (key-signature-accidentals ks) (key-signature-mode ks)))
 
 (cl-defun n-modify-to-orignal-pitch (n key)
-  (let ((key-pitch (find (n-set-chrome n) 
+  (let ((key-pitch (cl-find (n-set-chrome n) 
 			 (flatten (k-scale key))
 			 :key #'spc-to-chrome)))
     (when key-pitch

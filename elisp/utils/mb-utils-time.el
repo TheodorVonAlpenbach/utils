@@ -278,7 +278,7 @@ Argument may be a time objects itself or a string."
 
 (cl-defun parse-ms (ms)
   "Converts an integer representing unix milliseconds to new time object."
-  (parse-time (/ (coerce ms 'float) 1000)))
+  (parse-time (/ (cl-coerce ms 'float) 1000)))
 ;;(iso-dttm (parse-ms 1643018173697))
 
 ;;; Notion of time extension: time extension atoms are time points

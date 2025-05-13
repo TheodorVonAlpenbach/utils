@@ -164,7 +164,7 @@ pitch arguments.
        (let ((interval* (i-parse interval))
 	     (intervals* (i-parse intervals)))
 	 (if (listp intervals*)
-	   (find interval* intervals* :test test)
+	   (cl-find interval* intervals* :test test)
 	   (funcall test interval* intervals*)))))
 ;;(i-is 'P1 'P8 #'i~)
 
@@ -173,8 +173,8 @@ pitch arguments.
 ;;(mapcar #'i-perfect-consonance-p (mapcar #'second mu-intervals))
 
 (cl-defun i-imperfect-consonance-p (interval)
-  (find (elt (i-abbrevation interval) 0) '(?m ?M)))
-;;(count nil (mapcar #'i-imperfect-consonance-p (i-a-b 'P1 'P8)))
+  (cl-find (elt (i-abbrevation interval) 0) '(?m ?M)))
+;;(cl-count nil (mapcar #'i-imperfect-consonance-p (i-a-b 'P1 'P8)))
 ;;(length (i-a-b 'P1 'P8))
 
 (cl-defun i-parallel-p (interval &rest intervals)
@@ -198,7 +198,7 @@ pitch arguments.
 	 (o (floor pbc* 7))
 	 (alteration (string-case (substring* interval-string 0 opos)
 		       ("P" 0) ("M" 0) ("m" -1) ("A" 1) 
-		       ("d" (if (find pbc '(0 3 4))
+		       ("d" (if (cl-find pbc '(0 3 4))
 				-1 -2))))
 	 (i (p-new (chrome-new pbc alteration) o)))
     (if inverse (i-invert i) i)))
@@ -211,14 +211,14 @@ pitch arguments.
 (cl-defun i-alteration-symbol-name (interval)
   (let* ((iv (if (i-inverted-p interval) (i-invert interval) interval))
 	 (alt (i-alteration iv)))
-    (case (i-number iv)
+    (cl-case (i-number iv)
       ((1 4 5) 
        (if (zerop alt) "P"
 	   (if (> alt 0)
 	     (make-string alt ?A)
 	     (make-string (- alt) ?d))))
       (otherwise 
-       (case (i-alteration iv)
+       (cl-case (i-alteration iv)
 	 (0 "M")  (-1 "m") (otherwise (if (> alt 0)
 					(make-string alt ?A)
 					(make-string (1- (- alt)) ?d))))))))
@@ -228,7 +228,7 @@ pitch arguments.
 ;;(i-alteration-symbol (i-parse 'A3))
 
 (cl-defun i-alteration-name (interval)
-  (case (i-alteration-symbol interval)
+  (cl-case (i-alteration-symbol interval)
     (P "perfect") (M "major") (m "minor")
     (a "augmented")
     (aa "doubly augmented")
@@ -248,7 +248,7 @@ pitch arguments.
 (cl-defun i-parse (interval-object)
   (if (listp interval-object)
     (mapcar #'i-parse interval-object)
-    (case (type-of interval-object)
+    (cl-case (type-of interval-object)
       (symbol (i-from-symbol interval-object))
       (string (i-from-abbreviation interval-object))
       (vector interval-object))))

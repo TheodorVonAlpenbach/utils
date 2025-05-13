@@ -126,7 +126,7 @@ that are recognized."
 (cl-defun quiz-list-set-numbers (&optional (base 1))
   (quiz-beginning-of-list)
   (while (quiz-question-set-numbers base)
-    (incf base)))
+    (cl-incf base)))
 
 ;;; q-question
 (cl-defun quiz-forward-question (&optional (n 1))
@@ -378,7 +378,7 @@ ITEM is not given or \"\", the item at point is used."
 (cl-defun quiz-current-item ()
   (save-excursion
     (quiz-beginning-of-item)
-    (first (find (buffer-substring* :start (point) :length 1)
+    (first (cl-find (buffer-substring* :start (point) :length 1)
 		 *quiz-items-long* :key #'second :test #'string=))))
 
 (cl-defun quiz-current-item-p (item)
@@ -478,7 +478,7 @@ TODO: factorize this and clean answer as well."
 
 (cl-defun quiz-move-active-region-to-a (beg end)
   (interactive "r")
-  (assert (quiz-current-item-p :question))
+  (cl-assert (quiz-current-item-p :question))
   (let ((s (string-trim (delete-and-extract-region beg end))))
     (just-one-space)
     (save-excursion
@@ -567,9 +567,9 @@ respectively are to be included for each question record."
 	    (newline 2))
       (delete-blank-lines)
       (goto-char (point-min))
-      (and (not (find ?Q items)) (quiz-remove-Q-buffer))
-      (and (not (find ?A items)) (quiz-remove-A-buffer))
-      (and (not (find ?S items)) (quiz-remove-S-buffer))
+      (and (not (cl-find ?Q items)) (quiz-remove-Q-buffer))
+      (and (not (cl-find ?A items)) (quiz-remove-A-buffer))
+      (and (not (cl-find ?S items)) (quiz-remove-S-buffer))
       (quiz-mode))
     (switch-to-buffer buffer)
     (set (make-local-variable 'fill-paragraph-function) #'quiz-fill-item)))
@@ -647,7 +647,7 @@ at the beginning of the q-question."
     (let ((n 1))
       (while (re-search-forward (quiz-regexp-item-start "Q" t) nil t)
 	(quiz-question-set-number-1 n)
-	(incf n)))))
+	(cl-incf n)))))
 
 (cl-defun quiz-summary-edit-question-1
     (number &optional (date (midnight)) (path *quiz-dir*))
@@ -693,7 +693,7 @@ qz format. The question is numbered N."
     (buffer-do-regions beg end ("\\(.*\n.*\n\\)\\s-*\n" 1)
       ;;(message (buffer-substring beg (+ beg 20)))
       (quiz-convert-aftenposten-nyhetsquiz-question-to-qz-question
-       beg end (incf n)))))
+       beg end (cl-incf n)))))
 
 (provide 'quiz)
 

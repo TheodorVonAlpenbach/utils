@@ -60,7 +60,7 @@ direction."
 (cl-defun copy-subtree-1 (x trees copy-p filter test key from-end tree-from-end)
   "Helper for `copy-subtree' and `find-subtree'."
   (cl-loop for ft in (if from-end (reverse trees) trees)
-	for res = (case filter
+	for res = (cl-case filter
 		    (:down (tree-member
 			    x ft :test test :key key :from-end tree-from-end))
 		    (:up (prune-tree-to-target

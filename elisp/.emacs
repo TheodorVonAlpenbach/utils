@@ -16,7 +16,7 @@
 (global-font-lock-mode t)
 (show-paren-mode 1) ;shows matching parenthesis
 (transient-mark-mode 1)
-;;find . -type f -name "*.el" -exec sed -i 's/(string-to-lines /(string-lines /g' {} +
+;;find . -type f -name "*.el" -exec sed -i 's/(reduce /(cl-reduce /g' {} +
 (setf x-select-enable-clipboard t)
 ;; Enable clipboard support using xclip
 (when (getenv "DISPLAY")

@@ -4,7 +4,7 @@
 (cl-defun flags-test-ord (q-f)
   (cl-destructuring-bind (q &rest fasits) q-f
     (let* ((answer (read-string (format "%s: " q) nil nil nil t))
-	   (res (find answer fasits :test #'string=)))
+	   (res (cl-find answer fasits :test #'string=)))
       (read-string (format "%s Trykk Enter for å fortsette..."
 		       (if res
 		       "Riktig!"
@@ -31,7 +31,7 @@
 
 (cl-defun flags-show-result (list)
   (erase-buffer)
-  (destructuring-bind (table num-correct num-wrong)
+  (cl-destructuring-bind (table num-correct num-wrong)
       (flags-result-stats list)
     (insert (if (zerop num-wrong)
 	      "Gratulerer, du svarte riktig på alt!\n\n"

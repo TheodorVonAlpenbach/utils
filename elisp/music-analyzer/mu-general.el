@@ -57,7 +57,7 @@ PRESERVE-TREE, see `voices'"
 ;;(note (p-new))
 
 (cl-defun durations-p (x)
-  (and (listp x) (every #'duration-p x)))
+  (and (listp x) (cl-every #'duration-p x)))
 
 (cl-defun durations (x &optional preserve-tree)
   "Returns a list of all durations in X, For meaning of

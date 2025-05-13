@@ -116,7 +116,7 @@
 	   (cm (nth n moves))
 	   (cmp (cm-print cm)))
       (cp-move cp* cm)
-      (incf n)
+      (cl-incf n)
       (when (>= n (length moves))
 	(setf n 0))
       (let ((s (cp-print cp*)))

@@ -132,7 +132,7 @@ Regel 1.4a hos Grinde."
 (cl-defun 2p-not-dim-nor-aug (pitch1 pitch2 context args)
   "Checks that the interval between PITCH1 and PITCH2 does not exceed an octave.
 Regel 1.4b hos Grinde."
-  (case (find (i-alteration (i-new pitch1 pitch2)) '(aug dim))
+  (cl-case (cl-find (i-alteration (i-new pitch1 pitch2)) '(aug dim))
     (aug "Melodic interval is augmented")
     (dim "Melodic interval is diminished")))
 ;;(2p-not-dim-nor-aug (p-new) (p-new (chrome-new 3 1)) nil)
@@ -152,7 +152,7 @@ Regel 1.5 hos Grinde."
   "Checks that when both voices leaps in parallel, not both leaps must be bigger than a third.
 Regel 1.6 hos Grinde."
   (let ((leaps (mapcar #'i-step hipair)))
-    (when (and (apply #'eq* (mapcar #'signum leaps)) ;same direction
+    (when (and (apply #'eq* (mapcar #'cl-signum leaps)) ;same direction
 	       (> (apply #'min* (mapcar #'abs leaps)) (first maxmin-leap)))
       "Too big simultaneous leaps")))
 

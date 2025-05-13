@@ -14,7 +14,7 @@
   (if (= (length vecs) 1)
     (first vecs)
     (if (> (length vecs) 1)
-      (mapcar* #'+ (first vecs) (apply #'vec-sum (rest vecs))))))
+      (cl-mapcar #'+ (first vecs) (apply #'vec-sum (rest vecs))))))
 ;;(vec-sum '(1 2 3) '(1 1 1))
 
 (cl-defun vec-distance (u v)
@@ -75,7 +75,7 @@
   (with-buffer gravity-buffer-name
     (goto-char (g-buffer-position (go-center x)))
     (delete-char 1)
-    (insert (case (go-type x)
+    (insert (cl-case (go-type x)
 	      ('satelite "x")
 	      ('planet "P")
 	      ('sun "*")))
@@ -92,8 +92,8 @@
 (cl-defun g-move (o x y)
   "Moves object x columns to the right and y lines down. Negative
 values means opposite directions."
-  (incf (first (go-center o)) x)
-  (incf (second (go-center o)) y))
+  (cl-incf (first (go-center o)) x)
+  (cl-incf (second (go-center o)) y))
 
 (cl-defun g-move-target (x y)
   (g-move (g-target) x y)

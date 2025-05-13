@@ -11,7 +11,7 @@
     (if (minusp n)
       (concat (propertize " " 'font-lock-face '(:height 3.0))
 	      (nth (- -1 n) +card-colors+))
-      (destructuring-bind (v c) (cl-floor n 13)
+      (cl-destructuring-bind (v c) (cl-floor n 13)
 	(concat (propertize (format "%S" (nth c +card-values+))
 			    'font-lock-face '(:height 3.0))
 		(nth v +card-colors+))))
@@ -27,9 +27,9 @@
 (cl-defun card-king-p (n) (= (card-value n) 12))
 
 (cl-defun card-parse-value (char)
-  (case (upcase char)
+  (cl-case (upcase char)
     ((?B ?C ?D ?E ?F ?G ?H ?I) (- (upcase char) 65))
-    (t (position (ssymbol (upcase (coerce (list char) 'string)))
+    (t (position (ssymbol (upcase (cl-coerce (list char) 'string)))
 		 +card-values+))))
 ;;(mapcar #'card-parse-value '(?a ?b ?c ?i ?2 ?3 ?8 ?9 ?t ?j ?q ?k))
 

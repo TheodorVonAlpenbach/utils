@@ -93,7 +93,7 @@
 (cl-defun p-to-string (pitch &optional (print-style mu-default-print-style))
   (if (listp pitch)
     (concat* (mapcar (bind #'p-to-string print-style) pitch) :pre "[" :in " " :suf "]")
-    (case print-style
+    (cl-case print-style
       (norwegian (error "Not implemented"))
       (otherwise (concat (chrome-to-string (p-chrome pitch) print-style)
 			 (octave-to-string (p-octave pitch) print-style))))))
@@ -113,7 +113,7 @@
   "Reads a pitch string on the ANSI (?) format.
 TODO: what is this format actually called?
 TODO: MIDI format should not store pitch as a string, but as an integer"
-  (case print-style
+  (cl-case print-style
     ('lilypond (p-from-string-lilypond p-string))
     (otherwise (let ((pc (chrome-from-string (substring* p-string 0 -1)))
 		     (o (octave-from-string (substring* p-string -1))))

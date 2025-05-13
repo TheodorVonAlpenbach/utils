@@ -51,7 +51,7 @@
 ;;; object queries
 (cl-defun me-subsubtype (e)
   "Probably obsolete"
-  (case (me-subtype e)
+  (cl-case (me-subtype e)
     ((midi-channel-event) (mce-subtype (me-subevent e)))
     ((midi-meta-event) (mme-subtype (me-subevent e)))
     ((midi-system-exclusive-event) (mse-subtype (me-subevent e)))))
@@ -59,7 +59,7 @@
 
 (cl-defun me-subsubevent (e)
   "Returns the subevent of E's subevent"
-  (case (me-subtype e)
+  (cl-case (me-subtype e)
     ((midi-channel-event) (mce-subevent (me-subevent e)))
     ((midi-meta-event) (mme-subevent (me-subevent e)))
     ((midi-system-exclusive-event) (mse-subevent (me-subevent e)))))

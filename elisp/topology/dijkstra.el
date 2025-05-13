@@ -18,7 +18,7 @@
 ;;(read-segments "c:/cygwin/usr/libs/emacs-21.3/site-lisp/mb-lisp/topology/afrika.csv")
 
 (cl-defun extract-nodes (segments)
-  (remove-duplicates 
+  (cl-remove-duplicates 
    (cl-loop for segment in segments
 	 collect (first segment)
 	 collect (second segment))))
@@ -33,7 +33,7 @@
 ;;(symbolp (node-symbol (first *network*)))
 
 (cl-defun get-node (node-symbol network)
-  (find node-symbol network :key #'first))
+  (cl-find node-symbol network :key #'first))
 
 (cl-defun set-neighbor-nodes (node segments network)
   (cl-loop with node-symbol = (first node)

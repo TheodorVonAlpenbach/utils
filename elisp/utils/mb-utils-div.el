@@ -9,7 +9,7 @@
 ;;(let ((qwe nil)) (eval-defun nil) (eval 2))
 
 (cl-defun tmap-n (item n table &key (test #'eq))
-  (find item table :key #'(lambda (row) (nth n row)) :test test))
+  (cl-find item table :key #'(lambda (row) (nth n row)) :test test))
 (cl-defun tmap-0 (item table &key (test #'eq)) (tmap-n item 0 table :test test))
 (cl-defun tmap-1 (item table &key (test #'eq)) (tmap-n item 1 table :test test))
 (cl-defun tmap-0-1 (item table &key (test #'eq)) (tmap-n-m item 0 1 table :test test))
@@ -91,12 +91,12 @@ If no arguments is given, t is returned."
 
 (cl-defun xor (&rest conditions)
   "Return nil iff there are an even number of conditions that evaluates to nil."
-  (oddp (count nil conditions)))
+  (cl-oddp (cl-count nil conditions)))
 ;;(xor t nil t)
 
 (cl-defun xnor (&rest conditions)
   "Return nil iff there are an even number of conditions that evaluates to non nil."
-  (oddp (count-if (complement #'null) conditions)))
+  (cl-oddp (count-if (complement #'null) conditions)))
 ;;(xnor t t nil)
 
 ;; push/pop
@@ -380,7 +380,7 @@ TODO: font-lock face as `defun'."
 ;;(vxw (0-n 2) (1-n 3) #'*)
 
 (cl-defun cartesian-product (lists &optional (map #'list))
-  (mapply map (reduce #'(lambda (v w) (vxw v w #'append))
+  (mapply map (cl-reduce #'(lambda (v w) (vxw v w #'append))
 		(mapcar #'(lambda (x) (mapcar #'list x)) lists))))
 ;;(cartesian-product '(("a" "b") ("c" "d") ("e" "f" "g") ("h")) #'concat)
 
@@ -546,7 +546,7 @@ etc. NB! Check if obsolete!"
 
 (cl-defmacro push-unique (x place &optional test)
   "Like `push', but pushes X on PLACE only if PLACE does not contain X."
-  `(if (member* ,x ,place :test ,(or test `#'eql))
+  `(if (cl-member ,x ,place :test ,(or test `#'eql))
      ,place
      ,(if (symbolp place)
       `(setq ,place (cons ,x ,place))
@@ -589,7 +589,7 @@ on them. TODO: somehow make test function (EQUAL) configurable"
 ;;(mequal #'oddp 1 3)
 
 (cl-defun all-true (&rest args)
-  (notany #'null args))
+  (cl-notany #'null args))
 ;;(all-true t t)
 
 (cl-defun function-signature (function)
@@ -744,7 +744,7 @@ also is a cons, will be encapsulated in a list."
   (when (atom arg)
     (setf arg (list arg 0)))
   (with-gensyms (gx gy) 
-    `(destructuring-bind (,gx ,gy) (list ,@arg)
+    `(cl-destructuring-bind (,gx ,gy) (list ,@arg)
         ,(numcond-transform-clauses clauses gx gy))))
 (cl-indent 'numcond 'case)
 ;;(numcond (4 3) (= 'eq) (< 'lt) (> 'geq))

@@ -1671,7 +1671,7 @@ All Key Bindings:
      (lambda ()
        (def-edebug-spec scilab-navigation-syntax def-body)))
 
-(cl-defun scilab-up-list (count &optional restrict)
+(cl-defun scilab-up-list (cl-count &optional restrict)
  "Move forwards or backwards up a list by COUNT.
 Optional argument RESTRICT is where to restrict the search."
  ;; Scilab syntax table has no disabling strings or comments.
@@ -5492,7 +5492,7 @@ Snatched and hacked from dired-x.el"
 
 (cl-defun scilab-non-empty-lines-in-string (str)
  "Return number of non-empty lines in STR."
- (let ((count 0)
+ (let ((cl-count 0)
    (start 0))
    (while (string-match "^.+$" str start)
      (setq count (1+ count)
@@ -7070,7 +7070,7 @@ Useful if you accidentally suspend the top-level process."
 ;;
 
 ;;;date: 2001/10/10; author Alexander Vigodner
-;;   1) Completion for C-c . (find file or functions). Works pretty nice
+;;   1) Completion for C-c . (cl-find file or functions). Works pretty nice
 ;;   2) Completion for help
 ;;;  3)Version 2.1.12
 ;;

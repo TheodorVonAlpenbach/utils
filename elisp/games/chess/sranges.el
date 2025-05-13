@@ -15,7 +15,7 @@
 
 
 (cl-defun range-from-square (square template)
-  (remove nil (remove-duplicates (mapcar (bind #'square-translate square) template))))
+  (remove nil (cl-remove-duplicates (mapcar (bind #'square-translate square) template))))
 ;;(range-from-square '(1 1) ne-template)
 ;;(print-board-squares (let ((x '(1 1))) x (range-from-square x ne-template)))
 
@@ -114,7 +114,7 @@
   (let* ((side (chess-piece-side piece))
 	 (sfrom (chess-piece-snumber piece)))
     (sb-set cb sfrom piece)
-    (case (chess-piece-type piece)
+    (cl-case (chess-piece-type piece)
       (queen (actual-rbq-range sfrom queen-ranges side cb))
       (rook (actual-rbq-range sfrom rook-ranges side cb))
       (bishop (actual-rbq-range sfrom bishop-ranges side cb))

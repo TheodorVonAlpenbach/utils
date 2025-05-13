@@ -13,7 +13,7 @@
   (setf *current-status* nil))
 
 (cl-defun sn-draw-canvas (canvas)
-  (destructuring-bind (w . h) canvas
+  (cl-destructuring-bind (w . h) canvas
     (let ((horizontal-frame-bar (make-string (+ 2 w) ?#)))
       (with-buffer (get-sn-buffer)
 	(insert horizontal-frame-bar)
@@ -31,7 +31,7 @@
     (delete-char 1)
     (insert ? )
     (let ((new-head (+ start-point
-		       (case direction
+		       (cl-case direction
 			 (:east 1) (:west -1)
 			 (:south (+ 3 (car *sn-canvas*)))
 			 (:north (- (+ 2 (car *sn-canvas*))))))))

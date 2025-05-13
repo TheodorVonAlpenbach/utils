@@ -203,7 +203,7 @@ A simple split consists of two windows only."
   (condition-case nil
       (and (symbolp mode)
 	   (symbol-value mode)
-	   (find mode minor-mode-list))
+	   (cl-find mode minor-mode-list))
     (error nil)))
 ;;(mapcar #'minor-mode-p '(slime-mode undo-tree-mode))
 
@@ -443,17 +443,17 @@ does not work for me."
       (global-unset-key (vector 'key-chord key2 key1)))))
 ;;(alf/key-chord-undefine "df")
 
-(evil-define-text-object mb-evil-buffer (count &optional beg end type)
+(evil-define-text-object mb-evil-buffer (cl-count &optional beg end type)
   "Smartparens sexp object."
   (evil-range (point-min) (point-max) 'inclusive :expanded t))
 
-(evil-define-text-object mb-evil-inner-defun (count &optional beg end type)
+(evil-define-text-object mb-evil-inner-defun (cl-count &optional beg end type)
   "Object for inner defun of c++ like languages"
   (evil-range (bol* :point (bod*) :offset 1)
 	      (eol* :point (eod*) :offset -2)
 	      'inclusive :expanded t))
 
-(evil-define-text-object mb-evil-inner-variable-name (count &optional beg end type)
+(evil-define-text-object mb-evil-inner-variable-name (cl-count &optional beg end type)
   "Smartparens sexp object. E.g. +foobar+ --> foobar"
   (cl-destructuring-bind (beg end) (last-sexp-region)
     (evil-range (1+ beg) (1- end) 'inclusive :expanded t)))

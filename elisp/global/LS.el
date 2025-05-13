@@ -141,7 +141,7 @@ compared to the relative directory names in PARENT-DIR"
 
 (cl-defun ls-project-name (project-number)
   "Return the directory name under ~/systems containing PROJECT-NUMBER."
-  (find (ls-project-number->tag project-number)
+  (cl-find (ls-project-number->tag project-number)
 	(directory-files "~/systems")
 	:test #'string-match*))
 ;;(ls-project-name 14029)

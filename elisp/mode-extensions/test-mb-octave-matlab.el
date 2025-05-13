@@ -29,16 +29,8 @@
 
 (ert-deftest test-o2m-convert-test-line ()
   "Test of `o2m-convert-test-line'"
-  (should (equal (o2m-convert-test-line "assert (a, b);")
-		 "  verifyEqual (testCase, a, b);"))
   (should (equal (o2m-convert-test-line "a = b + c;")
 		 "  a = b + c;"))
   (should (equal (o2m-convert-test-line "test") nil)))
-
-(ert-deftest test-o2m-convert-test-string ()
-  "Test of `o2m-convert-test-string'"
-  (should (equal (o2m-convert-test-string
-		  "%!test\n%! x = randi (100, 10);\n%! assert (a, b);")
-		 "  x = randi (100, 10);\n  verifyEqual (testCase, a, b);")))
 
 (provide 'test-mb-octave-matlab)

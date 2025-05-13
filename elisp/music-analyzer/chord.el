@@ -7,7 +7,7 @@
 (cl-defun chord-p (x)
   "Partly because of the necessity of this function, consider
 chord to be a struct."
-  (and (listp x) (every #'chrome-p x)))
+  (and (listp x) (cl-every #'chrome-p x)))
 
 (cl-defun chord-transpose (chord chrome-interval &optional (n 1))
   "N is unused until the general `bind*' is finished"

@@ -80,7 +80,7 @@ A(T(pc)) = (A(pc) + N * A(T)) + (Q(pc) + N * Q(T) + 1) \ 7
 ;;(chrome-generate-all)
 
 (cl-defun chrome-nalterate (pc n)
-  (incf (chrome-accidentals pc) n)
+  (cl-incf (chrome-accidentals pc) n)
   pc)
 ;;(let ((pc (chrome-new))) (list (chrome-alterate pc -1) pc))
 
@@ -109,7 +109,7 @@ respectively) as matching alteration values."
 
 ;;; read/write
 (cl-defun n-tuple-to-string (n)
-  (case n
+  (cl-case n
     ((1) "single")
     ((2) "double")
     ((3) "triple")
@@ -144,7 +144,7 @@ respectively) as matching alteration values."
 (require 'print-style)
 (cl-defun chrome-to-string (pc &optional (print-style mu-default-print-style))
   ;;for now
-  (case print-style
+  (cl-case print-style
     (lilypond (chrome-to-string-lilypond pc))
     (otherwise (chrome-to-string-symbol pc))))
 ;;(prin1 (mapcar #'chrome-to-string (chrome-generate-all)))
@@ -152,8 +152,8 @@ respectively) as matching alteration values."
 (cl-defun chrome-from-string-lilypond (pitch-string)
   (let* ((pbc (chb-from-string (substring pitch-string 0 1) 'lilypond))
 	 (accidentals-strings (split-string-by-length (substring pitch-string 1) 2))
-	 (num-is (count "is" accidentals-strings :test #'equal))
-	 (num-es (count "es" accidentals-strings :test #'equal))
+	 (num-is (cl-count "is" accidentals-strings :test #'equal))
+	 (num-es (cl-count "es" accidentals-strings :test #'equal))
 	 (accidentals-count (- num-is num-es)))
     (when (or (/= (+ 1 (* num-is 2) (* num-es 2)) (length pitch-string))
 	      (nor (zerop num-is) (zerop num-es)))
@@ -171,7 +171,7 @@ respectively) as matching alteration values."
 
 (cl-defun chrome-from-string (pitch-string &optional (style mu-default-print-style))
   "Symbol style only"
-  (case style
+  (cl-case style
     (lilypond (chrome-from-string-lilypond pitch-string))
     (otherwise (let* ((number-of-accidentals (1- (length pitch-string)))
 		      (pbc (chb-from-string (substring pitch-string 0 1))))

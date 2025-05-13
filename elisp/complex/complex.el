@@ -21,7 +21,7 @@
 
 (cl-defun admin-non-complex-operators (action &optional (operators complex-operators))
   "ACTION is one of :init :redefine :reset"
-  (case action
+  (cl-case action
     (:redefine (cl-loop for op in operators
 		     do (fset op (symbol-function (complex-symbol op)))))
     (:reset (cl-loop for op in operators
@@ -82,7 +82,7 @@
 (cl-defun complex (x &optional (y 0)) (list x y))
 
 (cl-defun complex-p (c)
-  (and (listp c) (= (length c) 2) (every #'numberp c)))
+  (and (listp c) (= (length c) 2) (cl-every #'numberp c)))
 ;;(mapcar #'complex-p '((1 2) 1 (1) (0 2)))
 
 (cl-defun complex-ify (x &optional signal-on-error)
@@ -97,11 +97,11 @@
 ;;(mapcar #'complex-clean '((1 2)(1 0)(0 2)))
 
 (cl-defun complex-add (c1 c2)
-  (complex-clean (mapcar* #'non-complex-+ (complex-ify c1) (complex-ify c2))))
-;;(mapcar* #'complex-add '((1 2)(1 0)(0 2)) '((1 2)(1 0)(0 2)))
+  (complex-clean (cl-mapcar #'non-complex-+ (complex-ify c1) (complex-ify c2))))
+;;(cl-mapcar #'complex-add '((1 2)(1 0)(0 2)) '((1 2)(1 0)(0 2)))
 
 (cl-defun complex-sum (complex-numbers)
-  (reduce #'complex-add complex-numbers :initial-value '(0 0)))
+  (cl-reduce #'complex-add complex-numbers :initial-value '(0 0)))
 
 (cl-defun complex-+ (&rest complex-numbers)
   (complex-sum complex-numbers))
@@ -119,23 +119,23 @@
 ;;(complex-- '(1 2) '(1 0) '(0 2) '(123 123))
 
 (cl-defun complex-multiply (c1 c2)
-  (destructuring-bind ((a b) (c d)) 
+  (cl-destructuring-bind ((a b) (c d)) 
       (list (complex-ify c1) (complex-ify c2))
     (complex (non-complex-- (non-complex-* a c) 
 			    (non-complex-* b d))
 	     (non-complex-+ (non-complex-* b c) 
 			    (non-complex-* a d)))))
-;;(mapcar* #'complex-multiply '((1 2)(1 0)(0 2)) '((1 2)(1 0)(0 2)))
+;;(cl-mapcar #'complex-multiply '((1 2)(1 0)(0 2)) '((1 2)(1 0)(0 2)))
 
 (cl-defun complex-product (complex-numbers)
-  (reduce #'complex-multiply complex-numbers :initial-value 1))
+  (cl-reduce #'complex-multiply complex-numbers :initial-value 1))
 
 (cl-defun complex-* (&rest complex-numbers)
   (complex-product complex-numbers))
 ;;(complex-* '(1 2) '(1 0) '(0 2))
 
 (cl-defun complex-inverse (c) 
-  (destructuring-bind (c d) (complex-ify c)
+  (cl-destructuring-bind (c d) (complex-ify c)
     (with-non-complex
 	(let ((denominator (float (+ (sq c) (sq d)))))
 	  (complex (/ c denominator)(/ (- d) denominator))))))
@@ -183,7 +183,7 @@ cf. `complex-expt'"
 
 ;;; derived functions
 (cl-defun complex-expt (arg1 arg2)
-  (destructuring-bind (r arg) (complex-polar arg1)
+  (cl-destructuring-bind (r arg) (complex-polar arg1)
     (complex-polar (with-non-complex 
 		     (list (expt r arg2) (* arg arg2)))
 		   t)))

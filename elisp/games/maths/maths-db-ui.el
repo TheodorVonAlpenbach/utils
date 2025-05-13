@@ -33,7 +33,7 @@
 ;;(maths-db-last-user)
 
 (cl-defun maths-db-user-names (&key sans)
-  (ld-select :users :where (not (member* :name (listify sans) :test #'string=))
+  (ld-select :users :where (not (cl-member :name (listify sans) :test #'string=))
 	     :column :name))
 ;;(maths-db-user-names)
 
@@ -90,8 +90,8 @@ Two solutions "
 (cl-defun maths-db-report-match (user task iso-time answer time new-user-rating-RD new-task-rating-RD)
   "The core of all updates. It adds a new match into DB, and updates the ratings for both user and task.
 It returns the updates of user and task as a pair"
-  (destructuring-bind (user-id name age old-user-rating old-user-RD &rest uargs) user
-    (destructuring-bind (task-id operation level arguments solution old-task-rating old-task-RD &rest targs) task
+  (cl-destructuring-bind (user-id name age old-user-rating old-user-RD &rest uargs) user
+    (cl-destructuring-bind (task-id operation level arguments solution old-task-rating old-task-RD &rest targs) task
       (ld-insert :matches (list iso-time answer time task-id user-id old-user-rating old-user-RD old-task-rating old-task-RD))
       (list (ld-update :users (= (:id) user-id) new-user-rating-RD (:rating :RD))
 	    (ld-update :tasks (= (:id) task-id) new-task-rating-RD (:rating :RD))))))
@@ -99,7 +99,7 @@ It returns the updates of user and task as a pair"
 ;; Ratings
 (cl-defun maths-db-rating-history (user-or-task &key from-time to-time n)
   "Returns a list of user or task ratings in period FROM-TIME TO-TIME"
-  (destructuring-bind (iso-times ratings RDs)
+  (cl-destructuring-bind (iso-times ratings RDs)
       (transpose (maths-get-matches (if (user-p user-or-task) :user :task) user-or-task
 				    :columns '(:iso-time :user-rating :user-RD)))
     (transpose (list (push (ld-metadata user-or-task :columns :created) iso-times) 

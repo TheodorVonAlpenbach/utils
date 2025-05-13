@@ -395,8 +395,8 @@ Note: if you are not using any of the keyword arguments, see
 If LINUMS is specified it returns the region covering those
 lines."
   (with-buffer buffer
-    (list (bol :linum (and linums (reduce #'min (listify linums))))
-	  (eol :linum (and linums (reduce #'max (listify linums)))))))
+    (list (bol :linum (and linums (cl-reduce #'min (listify linums))))
+	  (eol :linum (and linums (cl-reduce #'max (listify linums)))))))
 ;;(line-region)
 
 (cl-defun line-string (&key to-point from-point
@@ -523,7 +523,7 @@ The return value is a pair of points \(START END\)."
 
 (cl-defun flatten-paragraph ()
   "Remove all newline characters from current paragraph"
-  (let ((fill-column (- (reduce #'- (paragraph-region))))
+  (let ((fill-column (- (cl-reduce #'- (paragraph-region))))
 	(fill-paragraph-function nil))
     (fill-paragraph)))
 

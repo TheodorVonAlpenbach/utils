@@ -9,7 +9,7 @@
 (cl-defun segmentation (x &optional (segmentation-method 'harmonic))
   "Segments X according to SEGMENTATION-METHOD, and returns the
 modified X"
-  (funcall (case segmentation-method
+  (funcall (cl-case segmentation-method
 	     (total #'total-segmentation)
 	     (dense #'dense-segmentation)
 	     (metric #'metric-segmentation)
@@ -86,7 +86,7 @@ a foundation for other segmentation methods"
   (voices x))
 
 (cl-defun nchord-equal (x y)
-  (every #'n-equal x y))
+  (cl-every #'n-equal x y))
 
 (cl-defun dense-segmentation (x)
   (let* ((vs (voices x))
@@ -103,7 +103,7 @@ a foundation for other segmentation methods"
 				  do (setf (d-value (n-duration n)) d)
 				  do (setf (n-tied n) nil))
 			 collect nchord)))
-    (mapcar* #'(lambda (v ns) (setf (v-notes v) ns)) vs (transpose nchords*))
+    (cl-mapcar #'(lambda (v ns) (setf (v-notes v) ns)) vs (transpose nchords*))
     x))
 ;;(setf sm (mvt-submovement (mvt-test) 1 2))
 ;;(setf dense (dense-segmentation (mvt-copy sm)))
@@ -112,7 +112,7 @@ a foundation for other segmentation methods"
 
 ;;;; harmonic
 (cl-defun sinterval-dissonance-score (sinterval)
-  (case (abs sinterval)
+  (cl-case (abs sinterval)
     ((1 11) -4) ;; minor seconds
     ((2 10 6) -1) ;; major seconds or tritones
     (t 0)))
@@ -189,7 +189,7 @@ is not tied to the following note"
 	 (nchords* (mapcar #'harmonic-segmentation-best-nchord nchord-groups)))
     (mapc #'hs-adjust-nchord nchords*)
     ;; adjustments done: now the result is transfered to X
-    (mapcar* #'(lambda (v ns) (setf (v-notes v) ns)) vs (transpose nchords*))
+    (cl-mapcar #'(lambda (v ns) (setf (v-notes v) ns)) vs (transpose nchords*))
     x))
 ;;(setf harmonic (harmonic-segmentation (mvt-copy qwe)))
 
@@ -287,11 +287,11 @@ segmentation"
 
 (cl-defun nchord-p (x)
   (and (listp x)
-       (every #'note-p x)))
+       (cl-every #'note-p x)))
 
 (cl-defun nchord-group-p (x)
   (and (listp x)
-       (every #'nchord-p x)))
+       (cl-every #'nchord-p x)))
 ;;(nchord-group-p nil)
 
 (cl-defun nchord-groups-reduce-1 (g1 g2)
@@ -328,7 +328,7 @@ TODO: remove tildes"
     (cl-loop for dvalue = (n-dvalue (first (first (first nchord-groups))))
 	  while (< dvalue 1)
 	  do (setf nchord-groups (nchord-groups-reduce nchord-groups)))
-    (mapcar* #'(lambda (v ns) (setf (v-notes v) ns)) vs (transpose (flatten nchord-groups 1)))
+    (cl-mapcar #'(lambda (v ns) (setf (v-notes v) ns)) vs (transpose (flatten nchord-groups 1)))
     x))
 
 (require 'lilypond-conversion)

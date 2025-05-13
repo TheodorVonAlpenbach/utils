@@ -6,7 +6,7 @@
   "Add an url to favorites. Default is current url."
   (interactive)
   (when (y-or-n-p (format "Add %s to favorites? " *lynx-current-url*))
-    (when (not (member* url *lynx-favorites* :test #'string=))
+    (when (not (cl-member url *lynx-favorites* :test #'string=))
       (setq *lynx-favorites* (nconc *lynx-favorites* (list url))))
     (lynx-print-favorites)))
 

@@ -59,7 +59,7 @@
     (emacsql db
       [:select * :from user-pseudonym :where user-id :in $v1]
       user-ids)))
-;;(user-pseudonyms (coerce (mapcar #'string-to-integer (flatten (user-from-name "%celev%99_1a%" :id))) 'vector))
+;;(user-pseudonyms (cl-coerce (mapcar #'string-to-integer (flatten (user-from-name "%celev%99_1a%" :id))) 'vector))
 
 (cl-defun user-from-id (user-id-descriptor &rest columns)
   (car (emacsql db

@@ -41,7 +41,7 @@ XML tag point is looking at."
 (cl-defun mbxml-down-sexp (&optional (n 1))
   (if (/= n 0)
     (let ((backward (minusp n))
-	  (inc (signum n)))
+	  (inc (cl-signum n)))
       (while (not (mbxml-looking-at-tag backward backward))
 	(forward-sexp inc))
       (let ((forward-sexp-function nil))

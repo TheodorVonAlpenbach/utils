@@ -8,9 +8,9 @@
 ;;(mapcar #'anchor-day (a-b 16 24))
 
 (cl-defun doomsday (y)
-  (destructuring-bind (cc yy) (cl-floor y 100)
+  (cl-destructuring-bind (cc yy) (cl-floor y 100)
     (+ (anchor-day cc)
-       (destructuring-bind (a b) (cl-floor yy 12)
+       (cl-destructuring-bind (a b) (cl-floor yy 12)
 	 (mod (+ a b (/ b 4)) 7)))))
 ;;(doomsday 2023)
 

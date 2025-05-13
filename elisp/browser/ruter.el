@@ -27,7 +27,7 @@
 ;;(qcurl "Trip/GetTrip/10/time=100220161526")
 
 (cl-defun format-location (location)
-  (destructuring-bind (x y)
+  (cl-destructuring-bind (x y)
       (if (symbolp location) (ru-location location) location)
     (format "\\(x=%d,y=%d\\)" x y)))
 ;;(mapcar #'format-location '(home (1 2)))
@@ -60,7 +60,7 @@
 
 (cl-defun ru-time (dttm)
   (if dttm
-    (destructuring-bind (s mi h d mo y z w x) dttm
+    (cl-destructuring-bind (s mi h d mo y z w x) dttm
       (format "%02d%02d%04d%02d%02d%02d" d mo y h mi s))
     ""))
 ;;(mapcar #'ru-time (list (now) nil (weekstart)))

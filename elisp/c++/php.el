@@ -125,18 +125,18 @@ first character"
 	      (error t))
       (backward-sexp 1)
       (let ((string (thing-at-point 'sexp)))
-	(if (member* string '("try") :test #'string=)
+	(if (cl-member string '("try") :test #'string=)
 	  (intern string)
 	  (if (eq ?\( (char string 0)) ;;left parenthesis: function, if foreach etc
 	    (progn 
 	      (backward-sexp 1)
 	      (let ((token (substring-no-properties (thing-at-point 'sexp))))
-		(if (member* token '("foreach" "if" "else") :test #'string=)
+		(if (cl-member token '("foreach" "if" "else") :test #'string=)
 		  (list (intern token))
 		  (progn
 		    (backward-sexp 1)
 		    (let ((token2 (thing-at-point 'sexp)))
-		      (if (member* token2 '("function") :test #'string=)
+		      (if (cl-member token2 '("function") :test #'string=)
 			(list (intern token2) token)
 			(progn
 			  (re-search-backward "class")
@@ -195,7 +195,7 @@ first character"
 (cl-defun lab-base-url-archived-article (environment)
   "Returns the front article base url for an archived (escenic)
 article in ENVIRONMENT."
-  (case environment
+  (cl-case environment
     (:vbox "http://localhost/labrador2.git/front/2013/11/15/kristenliv/maria/jesus")
     (:dev "http://www.tv2.no.dev.lbrdr.com/2013/11/21/nyheter")
     (:stage (error))
@@ -205,7 +205,7 @@ article in ENVIRONMENT."
 (cl-defun lab-base-path-archived-article (environment)
   "Returns the front article base url for an archived (escenic)
 article in ENVIRONMENT."
-  (case environment
+  (cl-case environment
     (:vbox "/cygdrive/c/Users/mat_ber/Documents/WinShare/labrador2.git/escenic_storage/published")
     (:dev "ssh pbl tidy -xml -indent -quiet /www/publish/customers/tv2/stage/escenic_storage/published")
     (:stage (error))
@@ -220,7 +220,7 @@ article in ENVIRONMENT."
     (browse-url url)))
 
 (cl-defun tv2-escenic-directory (&optional (environment :vbox))
-  (case environment
+  (cl-case environment
     (:vbox "/cygdrive/c/Users/mat_ber/Documents/WinShare/labrador2.git/escenic_storage/published")
     (:dev "/www/publish/customers/tv2/stage/escenic_storage/published")
     (t (error "Environment %S is not supported!" environment))) )
@@ -231,11 +231,11 @@ article in ENVIRONMENT."
 	 (sub-dir-number (/ id 10000))
 	 (base-path (tv2-escenic-directory environment))
 	 (path (format "%s/%d/%d.xml" base-path sub-dir-number id))
-	 (script (case environment
+	 (script (cl-case environment
 		      (:vbox "tidy")
 		      (:dev "ssh")))
 	 (tidy-args (list "-xml" "-indent" "-quiet" path))
-	 (args (case environment
+	 (args (cl-case environment
 		 (:vbox tidy-args)
 		 (:dev (append '("pbl" "tidy") tidy-args)))))
     (unless (get-buffer buffer-name)
@@ -248,7 +248,7 @@ article in ENVIRONMENT."
 
 (cl-defun tv2-get-ids (&optional (environment :vbox))
   (let* ((dir (tv2-escenic-directory environment))
-	 (files (case environment
+	 (files (cl-case environment
 		  (:vbox (shell-command-to-string (format "find %s -type f" dir)))
 		  (:dev (tv2-get-ids :vbox)) ;; same
 		  (t (error "Environment %S is not supported" environment))))

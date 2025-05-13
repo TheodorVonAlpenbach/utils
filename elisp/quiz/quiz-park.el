@@ -246,14 +246,14 @@ calling for a greater number of columns than max-column."
      (cl-remove-if #'(lambda (x)
 		       (and (listp x)
 			    (second x) (neql (second x) :last)
-			    (> (reduce #'max x) max-column)))
+			    (> (cl-reduce #'max x) max-column)))
 		   +qp-customers+ :key #'qp-customer-columns)
      +qp-customers+)
    :key #'first :from-end t))
 ;;(qp-customers 3)
 
 (cl-defun qp-customer (tag &optional max-column)
-  (find tag (qp-customers max-column) :key #'first))
+  (cl-find tag (qp-customers max-column) :key #'first))
 ;;(qp-customer 'burums 2)
 
 (defalias 'qp-customer-pub 'first)
@@ -352,7 +352,7 @@ Otherwise it is column based."
 	       (qp-season-name)
 	       (qp-customer-pub-name customer)
 	       (capitalize team-name) team-score)))))
-;;(qp-customer-entry-to-table-entry (find 'onkel-oskar-namsos +qp-customers+ :key #'first) (qp-customer-entry-from-string "1	Onsdag	Allmennquiz	Onkel Oskar (Namsos)	Cranium	45") 1)
+;;(qp-customer-entry-to-table-entry (cl-find 'onkel-oskar-namsos +qp-customers+ :key #'first) (qp-customer-entry-from-string "1	Onsdag	Allmennquiz	Onkel Oskar (Namsos)	Cranium	45") 1)
 ;;(capitalize "Bryr M'ække")
 
 (cl-defun qp-customer-entries-to-table-entries (customer-tag customer-entries round)
@@ -377,7 +377,7 @@ list. Do this for all data lines, and select the most frequently
 detected pub name."
   (let* ((lines (remove-if #'empty-string-p (string-lines data)))
 	 (numlines (length lines))
-	 (numcols (count 9 (first lines))))
+	 (numcols (cl-count 9 (first lines))))
     (cl-loop for (tag x y z regexp) in (qp-customers numcols)
 	     if (> (count-matches-in-string regexp data)
 		   (min limit (/ numlines 2)))
@@ -416,7 +416,7 @@ For LIMIT, see qp-guess-customer-tag."
 
 (cl-defun qp-legal-table-entries-p (tes)
   (and tes (consp tes)
-       (every #'consp tes) (every #'(lambda (x) (= (length x) 7)) tes)
+       (cl-every #'consp tes) (cl-every #'(lambda (x) (= (length x) 7)) tes)
        (cl-loop for x in (flatten (project-sequence tes '(0 1 6)))
 		always (integerp (read x)))))
 ;;(qp-legal-table-entries-p '(("0" "1" "2a" "3a" "4a" "5a" "6") ("0" "1" "2a" "3a" "4a" "5a" "6")))

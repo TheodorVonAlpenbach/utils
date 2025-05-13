@@ -226,7 +226,7 @@ See `parse-csv-string' for more details"
   (with-temp-buffer
     (set-buffer-multibyte nil)
     (insert-file-contents-literally file nil from to)
-    (coerce (buffer-string) 'vector)))
+    (cl-coerce (buffer-string) 'vector)))
 ;;(pp (read-byte-vector "/cygdrive/c/Users/eier/Documents/MATLAB/miningsuite/ragtime.wav" :to 10000))
 
 (cl-defun write-byte-vector (vector file &key (from 0) to)
@@ -237,7 +237,7 @@ See `parse-csv-string' for more details"
 (cl-defun test-io-byte-vector ()
   (let ((f1 "/cygdrive/c/Users/eier/Documents/MATLAB/miningsuite/ragtime.wav")
 	(f2 "/cygdrive/c/Users/eier/Documents/MATLAB/miningsuite/ragtime2.wav"))
-    (write-byte-vector (coerce (read-byte-vector f1) 'string) f2)))
+    (write-byte-vector (cl-coerce (read-byte-vector f1) 'string) f2)))
 ;;(test-io-byte-vector)
 
 (require 'hexl)

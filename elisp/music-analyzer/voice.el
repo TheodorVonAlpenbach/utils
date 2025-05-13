@@ -16,7 +16,7 @@
 
 (cl-defun notes-p (x)
   "Returns t iif X is a list of `note' elements"
-  (and (listp x) (every #'note-p x)))
+  (and (listp x) (cl-every #'note-p x)))
 ;;(notes-p (list (n-new)))
 
 (cl-defun v-new (&optional notes (time-signature (ts-new)) (key (k-new)) instrument)
@@ -51,7 +51,7 @@ copy-voice only copies the head of the notes list."
 
 (cl-defun voice= (v1 v2)
   (and (equal (v-instrument v1) (v-instrument v2))
-       (apply #'all-true (mapcar* #'note= (v-notes v1) (v-notes v2)))))
+       (apply #'all-true (cl-mapcar #'note= (v-notes v1) (v-notes v2)))))
 
 (cl-defun v-bar-position (voice bar &optional (with-upbeat t))
   "Assumes all voices has the same time-signature."

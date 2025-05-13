@@ -171,18 +171,18 @@
 ;;(points (first (results player)))
 
 (cl-defun get-player (seeding)
-  (find seeding table :key #'first))
+  (cl-find seeding table :key #'first))
 ;;(get-player 6)
 
 (cl-defun wp (player) (apply #'+ (mapcar #'score (oppenents player))))
 ;;(wp player)
 
-(cl-defun sb (player) (apply #'+ (mapcar* #'* 
+(cl-defun sb (player) (apply #'+ (cl-mapcar #'* 
 			  (mapcar #'score (oppenents player))
 			  (mapcar #'points (results player)))))
 ;;(mapcar #'sb table)
 
-(cl-defun ps (player) (apply #'+ (mapcar* #'* 
+(cl-defun ps (player) (apply #'+ (cl-mapcar #'* 
 			  (mapcar #'score (oppenents player))
 			  (mapcar #'(lambda (result) (if (= (third result) 1) 1 0)) (results player)))))
 ;;(ps player)

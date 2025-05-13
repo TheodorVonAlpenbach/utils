@@ -121,7 +121,7 @@ This action requires that no card is pushed on it. Else move card
 and all cards pushed on it to visible's COLUMNth deck."
   (let ((visible (klondike-visible state)))
     (aif (klondike-find-visible n visible)
-      (destructuring-bind (i j) it
+      (cl-destructuring-bind (i j) it
 	(if (if column
 	      (klondike-push-card-visible
 	       (subseq (nth i visible) 0 (1+ j)) column visible)
@@ -196,7 +196,7 @@ and all cards pushed on it to visible's COLUMNth deck."
   (klondike-ui-refresh))
 
 (cl-defun klondike-finished (&optional (out (klondike-out *klondike-state*)))
-  (when (every #'card-king-p out)
+  (when (cl-every #'card-king-p out)
     (message "Klondike accomplished, congratulations!")))
 ;;(klondike-finished '(22 25 38 51))
 

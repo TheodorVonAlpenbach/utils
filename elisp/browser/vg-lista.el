@@ -31,7 +31,7 @@ Note that we are using that fact that January 4 is _always_ in week 1."
 
 (cl-defun vg-url (year week)
   "Returns the URL to VG-lista for WEEK in YEAR."
-  (assert (vg-week-exists-p year week) t "VG-lista wasn't even started in this week!")
+  (cl-assert (vg-week-exists-p year week) t "VG-lista wasn't even started in this week!")
   (format "%s/%d/uke/%02d" +vg-url-prefix+ year week))
 ;;(vg-url 2011 1)
 
@@ -114,7 +114,7 @@ TODO! See above."
 	 (progress-reporter (make-progress-reporter "Collecting VG-lista..." i (+ 1 i n))))
     (with-temp-file pathname
       (do-vg-weeks (year week from to)
-	(progress-reporter-update progress-reporter (incf i))
+	(progress-reporter-update progress-reporter (cl-incf i))
 	(vg-add-db-entry (vg-download-list year week) (current-buffer)))
       (progress-reporter-done progress-reporter))))
 ;;(vg-update-db (now :month -1) (now) "~/data/vg-listen/test.eldata")
@@ -132,7 +132,7 @@ TODO! See above."
   "Obsolete. See new version below."
   (cl-loop for (place artist song place-prev) in (seventh curr)
 	never (and (typep place-prev '(integer 1 10))
-		   (destructuring-bind (prev-place prev-artist prev-song &rest args)
+		   (cl-destructuring-bind (prev-place prev-artist prev-song &rest args)
 		       (elt (seventh prev) (1- place-prev))
 		     (when (or (string/= artist prev-artist)
 			       (string/= song prev-song))
@@ -188,7 +188,7 @@ of the song in the previous week entry."
 (cl-defun vg-manually-validated-p (entry)
   (let ((year (getf (rest entry) :year))
 	(week (getf (rest entry) :week)))
-    (find (list year week) +vg-ok-weeks+ :test #'equal)))
+    (cl-find (list year week) +vg-ok-weeks+ :test #'equal)))
 ;;(mapcar #'vg-manually-validated-p qwe)
 
 (cl-defun vg-read-file-to-hashtable-1 (pathname ht)
@@ -218,23 +218,25 @@ of the song in the previous week entry."
 ;;(vg-read-all-files-to-hashtable)
 
 (cl-defun vg-place-score (appearances &optional max-place-score)
-  (let ((absolute-score (reduce #'+ (mapcar (compose (bind #'- 21 1) #'first) appearances))))
+  (let ((absolute-score
+	 (cl-reduce #'+
+	   (mapcar (compose (bind #'- 21 1) #'first) appearances))))
     (if max-place-score 
-      (/ (coerce absolute-score 'float) max-place-score)
+      (/ (cl-coerce absolute-score 'float) max-place-score)
       absolute-score)))
 ;;(vg-place-score '((10 1958 49) (10 1958 48) (7 1958 47) (3 1958 46) (2 1958 45) (1 1958 44) (1 1958 43) (1 1958 42)) 1007)
-;;(vg-place-score (second (find '("Nazareth" "Love Hurts") *vg-vector* :key #'car :test #'equal)))
+;;(vg-place-score (second (cl-find '("Nazareth" "Love Hurts") *vg-vector* :key #'car :test #'equal)))
 
 (cl-defun vg-duration-score (appearances &optional max-duration-score)
   (let ((absolute-score (length appearances)))
     (if max-duration-score
-      (/ (coerce absolute-score 'float) max-duration-score)
+      (/ (cl-coerce absolute-score 'float) max-duration-score)
       absolute-score)))
 ;;(vg-duration-score '((10 1958 49) (10 1958 48)) 1007)
-;;(vg-duration-score (second (find '("Nazareth" "Love Hurts") *vg-vector* :key #'car :test #'equal)))
+;;(vg-duration-score (second (cl-find '("Nazareth" "Love Hurts") *vg-vector* :key #'car :test #'equal)))
 
 (cl-defun max-value (sequence &rest key-args)
-  (third (apply #'minimum (coerce sequence 'list) :test #'> key-args)))
+  (third (apply #'minimum (cl-coerce sequence 'list) :test #'> key-args)))
 ;;(max-value (vector '(0 a) '(1 a) '(2 a) '(3 a) '(4 a) '(10 a) '(-30 a)) :key #'first)
 
 (cl-defun vg-max-place-score (&optional (vec *vg-vector*))
@@ -248,7 +250,7 @@ of the song in the previous week entry."
 (cl-defun vg-score (appearances max-place-score max-duration-score &optional (wlambda 0.8))
   (+ (* wlambda (vg-place-score appearances max-place-score))
      (* (- 1 wlambda) (vg-duration-score appearances max-duration-score))))
-;;(vg-score (second (find '("Nazareth" "Love Hurts") *vg-vector* :key #'car :test #'equal)) (vg-max-place-score) (vg-max-duration-score))
+;;(vg-score (second (cl-find '("Nazareth" "Love Hurts") *vg-vector* :key #'car :test #'equal)) (vg-max-place-score) (vg-max-duration-score))
 
 (cl-defun vg-list-sorted ()
   (let* ((vec (copy-sequence *vg-vector*))

@@ -186,9 +186,9 @@
 (cl-defun vg-apply-rules (voice-group rules)
   "voices must be a list of voices as follows (super-cp cf sub-cp)"
   (let* ((voices (vg-voices voice-group))
-	 (super (find "super" voices :key #'v-instrument :test #'equal))
-	 (cantus-firmus (find "c.f." voices :key #'v-instrument :test #'equal))
-	 (sub (find "sub" voices :key #'v-instrument :test #'equal))
+	 (super (cl-find "super" voices :key #'v-instrument :test #'equal))
+	 (cantus-firmus (cl-find "c.f." voices :key #'v-instrument :test #'equal))
+	 (sub (cl-find "sub" voices :key #'v-instrument :test #'equal))
 	 (cp-super (and super (list cantus-firmus super)))
 	 (cp-sub (and sub (list sub cantus-firmus)))
 	 (key (v-key cantus-firmus))

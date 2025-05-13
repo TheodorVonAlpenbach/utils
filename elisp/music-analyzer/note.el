@@ -52,7 +52,8 @@ start-time (ignored) and ties"
 
 (cl-defun n-chrome (note)
   (p-chrome (n-pitch note)))
-(defsetf n-chrome (note) (chrome)
+
+(gv-define-setter n-chrome (note) (chrome)
   `(setf (p-chrome (n-pitch ,note)) ,chrome))
 ;;(n-chrome (n-new))
 
@@ -124,7 +125,7 @@ start-time (ignored) and ties"
 
 ;;; read and write
 (cl-defun n-to-string (note &optional (print-style mu-default-print-style))
-  (case print-style
+  (cl-case print-style
     (lilypond (concat (p-to-string (n-pitch note) print-style) 
 		      (d-to-string (n-duration note) print-style)
 		      (if (n-tied note) " ~" "")))
@@ -151,7 +152,7 @@ start-time (ignored) and ties"
 ;;(n-from-string-lilypond "c''4")
 
 (cl-defun n-from-string (note-string &optional (print-style mu-default-print-style))
-  (case print-style
+  (cl-case print-style
     (lilypond (n-from-string-lilypond note-string))
     (otherwise (error "note-from-string doesn't support print-style '%S'" print-style))))
 ;;(note-from-string "sfe" 'lilypond)

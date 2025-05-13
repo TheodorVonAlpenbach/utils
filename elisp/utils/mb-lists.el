@@ -23,7 +23,7 @@
   "Same as NTH but accepts negative indexes: -1 means last
 element, -2 second last and so on."
   (nth (mod n (length list)) list))
-;;(mapcar* (bind #'nth* (0-n 4)) (a-b -5 5))
+;;(cl-mapcar (bind #'nth* (0-n 4)) (a-b -5 5))
 
 (cl-defun head (n list)
   (butlast list (- (length list) n)))
@@ -475,7 +475,7 @@ in the same position."
 	unless (funcall test elt1 elt2)
 	collect elt1 into list1* and collect elt2 into list2*
 	finally return (list list1* list2*)))
-;;(filter-duplicates '(1 2 3 4) '(1 4 2 3) :test #'(lambda (x y) (eql (oddp x) (oddp y)))) ;;filters equal parity
+;;(filter-duplicates '(1 2 3 4) '(1 4 2 3) :test #'(lambda (x y) (eql (cl-oddp x) (cl-oddp y)))) ;;filters equal parity
 
 (cl-defun list< (list1 list2 &key (test #'<) (key #'identity))
   "Lexical like comparison of LIST1 and LIST2.
@@ -652,8 +652,8 @@ consisting of each floats neighbouring mid-points."
 ;;(randomize-intervals (pairs (0-n 5)))
 
 (cl-defun randomize-elements (sequence)
-  (let ((ivs (pairs (boundaries (coerce sequence 'list) t))))
-    (values (coerce (randomize-intervals ivs) (type-of sequence))
+  (let ((ivs (pairs (boundaries (cl-coerce sequence 'list) t))))
+    (values (cl-coerce (randomize-intervals ivs) (type-of sequence))
 	    ivs)))
 ;;(randomize-elements (vector -4.0 -3.0 -1.0))
 
@@ -710,7 +710,7 @@ cannot be used for later matches. For example
 \(position-unique '(1 1) '(1 2 3 1)) => (0 3)
 \(position-unique '(1 1) '(1 2 3)) => (0 nil)
 "
-  (cl-loop with maps = (cl-loop for x in (remove-duplicates targets)
+  (cl-loop with maps = (cl-loop for x in (cl-remove-duplicates targets)
 			 collect (list x (positions x list)))
 	for x in targets
 	for map = (cl-find x maps :key #'first)

@@ -9,16 +9,16 @@ For instance, if emps is a variable holding a table with
 keyword :employees, the following two select operations are
 equivalent 
 
-\(ld-select emps :where (oddp :id)\) ;returns every record with odd column id
+\(ld-select emps :where (cl-oddp :id)\) ;returns every record with odd column id
  <==>
-\(ld-select :employee :where (oddp :id)\) ;returns every record with odd column id
+\(ld-select :employee :where (cl-oddp :id)\) ;returns every record with odd column id
 
 given that emps is a table with keyword :employee in
 *current-database*.
 
 \(The stuff in the next paragraph is not yet implemented)
 You could refer to other databases as well
-\(ld-select (:sweden :employee) :where (oddp :id)\) ;returns every record with odd column id
+\(ld-select (:sweden :employee) :where (cl-oddp :id)\) ;returns every record with odd column id
 ")
 
 (defvar *ld-check-data-p* t

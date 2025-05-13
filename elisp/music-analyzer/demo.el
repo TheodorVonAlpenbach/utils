@@ -66,7 +66,7 @@
     (cl-loop for n in notes
 	  for chrome = (n-chrome n)
 	  for spc = (chrome-to-spitch chrome)
-	  for x = (find spc scale-pcs :key #'chrome-to-spitch)
+	  for x = (cl-find spc scale-pcs :key #'chrome-to-spitch)
 	  if x do (setf (n-chrome n) x))
 
     ;; chromatic pairs
@@ -77,8 +77,8 @@
 	  for pc2 = (n-chrome n2)
 	  for spc1 = (chrome-to-spitch pc1)
 	  for spc2 = (chrome-to-spitch pc2)
-	  for x1 = (find spc1 scale-pcs :key #'chrome-to-spitch)
-	  for x2 = (find spc2 scale-pcs :key #'chrome-to-spitch)
+	  for x1 = (cl-find spc1 scale-pcs :key #'chrome-to-spitch)
+	  for x2 = (cl-find spc2 scale-pcs :key #'chrome-to-spitch)
 	  for pcb1 = (chrome-base pc1)
 	  for pcb2 = (chrome-base pc2)
 

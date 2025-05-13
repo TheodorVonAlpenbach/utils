@@ -16,7 +16,7 @@
 
 (cl-defun perm-rot3 (x rot3)
   "Rotate the Ith, Jth, Kth elements in X, where rot3 = (I J K)" 
-  (destructuring-bind (i j k) rot3
+  (cl-destructuring-bind (i j k) rot3
     (rotatef (nth i x) (nth j x) (nth k x))
     x))
 ;;(perm-rot3 (0-n 12) '(4 7 10))

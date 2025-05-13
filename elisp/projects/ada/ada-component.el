@@ -101,7 +101,7 @@
   (ada-parse-id-list
    (emacsql db [:select sub-competence-aim-id :from element-sub-competence-aim
 		 :where element-id :in $v1]
-	    (coerce element-ids 'vector))))
+	    (cl-coerce element-ids 'vector))))
 ;;(sub-competence-aim-ids-from-element-ids (component-element-ids 15955))
 
 (cl-defun sub-competence-aim (id &rest columns)
@@ -120,7 +120,7 @@
   (ada-parse-id-list
    (emacsql db [:select curriculum-id :from sub-competence-aim-curriculum
 		 :where sub-competence-aim-id :in $v1]
-	    (coerce sub-competence-aim-ids 'vector))))
+	    (cl-coerce sub-competence-aim-ids 'vector))))
 ;;(curriculum-ids-from-sub-competence-aim-ids '(7034))
 
 (cl-defun component-sub-competence-aims-from-elements (component-descriptor)

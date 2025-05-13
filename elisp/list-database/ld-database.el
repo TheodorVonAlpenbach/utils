@@ -56,7 +56,7 @@ application" (ld-database-name *current-database*))))
 
 (cl-defun ld-find-table (id &optional (db *current-database*))
   "Finds table in DB by ID (NB! not keyword only)"
-  (find id (ld-database-tables db) :key #'ld-table-identifier :test #'equal))
+  (cl-find id (ld-database-tables db) :key #'ld-table-identifier :test #'equal))
 ;;(ld-find-table '(:maths :users))
 
 (cl-defun ld-replace-table (id new-table &optional (db *current-database*))

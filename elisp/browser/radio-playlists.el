@@ -94,7 +94,7 @@
   (ak-format-entry-long (first (ak-entries html-string 1))))
 
 (cl-defun ak-at-converter (html-string time)
-  (ak-format-entry-long (find time (ak-entries html-string)
+  (ak-format-entry-long (cl-find time (ak-entries html-string)
 			       :key #'first :test #'string>=)))
 
 
@@ -202,7 +202,7 @@
 
 (cl-defun sr-at-converter (html-string time)
   ""
-  (sr-format-entry (find time (sr-entries html-string)
+  (sr-format-entry (cl-find time (sr-entries html-string)
 			 :key #'(lambda (x) (first (first x)))
 			 :test #'string>= :from-end nil)))
 

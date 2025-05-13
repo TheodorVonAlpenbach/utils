@@ -12,7 +12,7 @@
   "Each color is defined as a pair (COLOR-KEYWORD COLOR-CHARACTER)")
 
 (cl-defun peg-char->color (char-or-string &optional (colors +colors+))
-  (find (if (stringp char-or-string) (char char-or-string 0) char-or-string)
+  (cl-find (if (stringp char-or-string) (char char-or-string 0) char-or-string)
 	colors :key #'second))
 ;;(mapcar #'peg-char->color "rygcbw")
 
@@ -38,7 +38,7 @@
   "Returns the number of black pegs and white pegs for a ROW in
 comparison with the current mastermind FASIT"
   (let ((n (length row)))
-    (destructuring-bind (row* fasit*)
+    (cl-destructuring-bind (row* fasit*)
 	(filter-duplicates row fasit :test #'equal)
       (list (- n (length row*))
 	    (count-whites row* fasit*)))))
@@ -111,7 +111,7 @@ comparison with the current mastermind FASIT"
   (kill-buffer (mastermind-buffer)))
 
 (cl-defun char->color (color-char)
-  (first (find color-char +colors+ :key #'second)))
+  (first (cl-find color-char +colors+ :key #'second)))
 ;;(char->color ?b)
 
 (cl-defun insert-peg (color-char &optional (color (char->color color-char)))

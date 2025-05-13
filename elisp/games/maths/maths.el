@@ -112,10 +112,10 @@ the *maths-current-task* which is yet another structure."
 ;;; tab format. TODO move this somewhere else
 (cl-defun tab-column-type (column)
   (cond
-    ((every #'integerp column) 'integer)
-    ((and (every #'numberp column)
+    ((cl-every #'integerp column) 'integer)
+    ((and (cl-every #'numberp column)
 	  (some #'floatp column)) 'float)
-    ((every #'stringp column) 'string)))
+    ((cl-every #'stringp column) 'string)))
 ;;(tab-column-type '("qe" "qe"))
 
 (cl-defun tab-column-width (column &optional (type (tab-column-type column)))
@@ -130,7 +130,7 @@ the *maths-current-task* which is yet another structure."
 
 (cl-defun tab-control-string (widths &key (type 'string) (separator " "))
   (let ((types (if (atom type) (make-list (length widths) type) type)))
-    (concat* (mapcar* #'tab-flag widths types) :in separator)))
+    (concat* (cl-mapcar #'tab-flag widths types) :in separator)))
 ;;(tab-control-string '(4 5 1) :type '(integer integer string))
 
 (cl-defun tab-format (string-table &key header (column-separator " ") (underline-char ?=))
@@ -140,9 +140,9 @@ the *maths-current-task* which is yet another structure."
 		   (eql (tab-column-type header) 'string))))
     (let* ((columns (transpose string-table))
 	   (types (mapcar #'tab-column-type columns))
-	   (cwidths (mapcar* #'tab-column-width columns types))
+	   (cwidths (cl-mapcar #'tab-column-width columns types))
 	   (hwidths (and header (mapcar #'length header)))
-	   (widths (if header (mapcar* #'max cwidths hwidths) cwidths))
+	   (widths (if header (cl-mapcar #'max cwidths hwidths) cwidths))
 	   (header (if header (concat (apply #'format (tab-control-string widths :separator column-separator) header) "\n") "")))
       (concat* string-table
 	:pre (if underline-char (format "%s%s\n" header (make-string (length header) underline-char)) header)

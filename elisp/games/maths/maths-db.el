@@ -41,7 +41,7 @@ Note that this is a PLIST format of coldefs. Hence PLIST-P must be set to t in `
 
 (cl-defun maths-update-schema (keyword)
   (setf (ld-table-schema (ld-find-table (list +maths-db-keyword+ keyword) *maths-db*))
-	(ld-schemadef->schema (find keyword *maths-db-schema-definitions*
+	(ld-schemadef->schema (cl-find keyword *maths-db-schema-definitions*
 				    :key #'first))))
 ;;(maths-update-schema :users)
 

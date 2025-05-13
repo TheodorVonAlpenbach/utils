@@ -156,8 +156,8 @@ should be fairly small"
 (defmacro repl-with-buffer-package (&rest body)
   `(let ((current-package-name (repl-current-package-name))
 	 (buffer-package-name (buffer-package-name)))
-     ;; (assert current-package-name)
-     (if (equalp current-package-name buffer-package-name)
+     ;; (cl-assert current-package-name)
+     (if (cl-equalp current-package-name buffer-package-name)
        (progn ,@body)
        (prog2 
 	   (repl-set-package buffer-package-name)
@@ -409,7 +409,7 @@ Other unprintable paths are converted to string:
       (acond
 	;;vector
 	((string-match* "`#(" s)
-	 (coerce (read (substring string 1)) 'vector))
+	 (cl-coerce (read (substring string 1)) 'vector))
 	;;array
 	((string-match* "#.A(" string)
 	 (tree->mvec (eread (substring string (1- (length it))))))
@@ -457,7 +457,7 @@ Edit: I have scetched a reader for this, see above."
     (acond
       ;;vector
       ((string-match* "^#(" string)
-       (coerce (read (substring string 1)) 'vector))
+       (cl-coerce (read (substring string 1)) 'vector))
       ;;array
       ((string-match* "#.A(" string)
        (tree->mvec (read (substring string (1- (length it))))))

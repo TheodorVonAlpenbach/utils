@@ -20,7 +20,7 @@
 ;;(gchord-type (gch-new (chordx-new)))
 
 (cl-defun gch-copy (gchord &key 
-			 (chord (case (gchord-type gchord)
+			 (chord (cl-case (gchord-type gchord)
 				  (schordx (schordx-copy (gch-chord gchord)))
 				  (chordx (chordx-copy (gch-chord gchord)))))
 			 (start-time (gch-start-time gchord))
@@ -39,7 +39,7 @@
 (cl-defun gch-chord-relation (type x y)
   "Returns the relation between chords X and Y (of TYPE). Helper
 function for `gch-relation'"
-  (case type
+  (cl-case type
    (schordx (schordx-relation x y))
    (chordx (chordx-relation x y))))
 
@@ -49,7 +49,7 @@ function for `gch-relation'"
 
 (cl-defun gch-remove-seventh (gchord)
   "Removes the seventh part of GCHORD. Non destructive"
-  (gch-copy gchord :chord (case (gchord-type gchord)
+  (gch-copy gchord :chord (cl-case (gchord-type gchord)
 			    (schordx (schordx-remove-seventh (gch-chord gchord))))))
 ;;(gchord-remove-seventh (gch-new (schordx-new '(1 4 7 10))))
 
@@ -57,14 +57,14 @@ function for `gch-relation'"
   "NB! This version doesn't parse START-TIME and DURATION.
 GCHORDS is typically used with segmentations, so reading from
 string is currently used in tests only"
-  (gch-new (case type
+  (gch-new (cl-case type
 	     (chordx (chordx-from-string s style))
 	     (schordx (schordx-from-string s style)))))
 ;;(gch-from-string "Am" 'schordx)
 
 (cl-defun gch-to-string (gchord &optional (print-style mu-default-print-style))
   "Prints gchord. See comment in `gch-from-string'"
-  (case (gchord-type gchord)
+  (cl-case (gchord-type gchord)
     (chord (chord-to-string (gch-chord gchord) print-style))
     (chordx (chordx-to-string (gch-chord gchord) print-style))
     (schord (schord-to-string (gch-chord gchord) print-style))

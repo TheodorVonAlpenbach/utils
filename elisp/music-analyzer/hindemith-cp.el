@@ -35,10 +35,10 @@
 (cl-defun hcp-model (cp)
   (if (= 1 (length (cp-voices cp)))
     (first (cp-voices cp))
-    (find "model" (cp-voices cp) :test #'equal :key #'v-instrument)))
+    (cl-find "model" (cp-voices cp) :test #'equal :key #'v-instrument)))
 
 (cl-defun hcp-2nd (cp)
-  (find "2nd" (cp-voices cp) :test #'equal :key #'v-instrument))
+  (cl-find "2nd" (cp-voices cp) :test #'equal :key #'v-instrument))
 
 (cl-defun hcp-rules (cp)
   (if (= 1 (length (cp-voices cp)))
@@ -115,7 +115,7 @@ I.e. only three consecutive melodic intervals in the same direction is accepted.
   inversions, augmented triads and every chord containing a
   tritone is considered illegal."
   (or (and model-p
-	   (aif (find (sc-typename (chord-to-sc triad)) '(major-triad minor-triad augmented-triad))
+	   (aif (cl-find (sc-typename (chord-to-sc triad)) '(major-triad minor-triad augmented-triad))
 	     (format "%S" it)))
       (let* ((intervals (mapcar #'(lambda (x) (apply #'i-new x)) (relations triad)))
 	     (res (or (i-is 'A4 intervals #'i~) (i-is 'd5 intervals #'i~))))
@@ -194,7 +194,7 @@ I.e. only three consecutive melodic intervals in the same direction is accepted.
   "No augmented or dimished progressions."
   (cl-loop for 2n in (pairs (v-notes voice))
 	for hi = (i-new 2n)
-	if (find (i-alteration-symbol hi) '(A d))
+	if (cl-find (i-alteration-symbol hi) '(A d))
 	collect (format "Rule 12 violation: Notes %s and %s creates an illegal %s interval (%s)" 
 		  (n-to-string (first 2n)) (n-to-string (second 2n)) (i-alteration-name hi) (i-abbrevation hi))))
 
@@ -318,7 +318,7 @@ are issued from this rule."
 
 (cl-defun hcp-rule-21-chord-p (sc &optional include-secondary-sevenths-p)
   "2-4 notes formations classified as chords by Hindemith"
-  (find (sc-typename sc) 
+  (cl-find (sc-typename sc) 
 	(if include-secondary-sevenths-p
 	  (conc hcp-bad-chords hcp-secondary-sevenths)
 	  hcp-bad-chords)))
@@ -396,7 +396,7 @@ any cross relation in chord1 and chord2. The FORMAT-STRING must
 have have following slots: (note1 voice-index1 note2
 voice-index2)"
   (cl-loop for indexes in (voices-relations-to-other-voices-indexes chord1)
-	for 2n = (mapcar* #'nth indexes (list chord1 chord2))
+	for 2n = (cl-mapcar #'nth indexes (list chord1 chord2))
 	for 2pc = (mapcar (compose #'p-chrome #'n-pitch) 2n)
 	if (apply #'n-alteration-p 2n)
 	collect (format format-string 

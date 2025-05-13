@@ -11,7 +11,7 @@
 (cl-defun derangement (n &optional (!0 1) (!1 0))
   "Returns !N. See also `factorial'.
 For the definition of !N, see https://en.wikipedia.org/wiki/Derangement"
-  (case n
+  (cl-case n
     (0 !0) 
     (1 !1) 
     (otherwise 
@@ -153,11 +153,11 @@ The Catalan numbers form the sequence A000108 in the OEIS."
 ;;(uefa-teams)
 
 (cl-defun uefa-group-member-p (team group)
-  (member* team (mapcar #'first group) :test #'equal))
+  (cl-member team (mapcar #'first group) :test #'equal))
 ;;(uefa-group-member-p 'PSG (first uefa-groups))
 
 (cl-defun uefa-group (team &optional (groups uefa-groups))
-  (find team groups :test #'uefa-group-member-p))
+  (cl-find team groups :test #'uefa-group-member-p))
 ;;(uefa-group (first (uefa-winners)))
 
 (cl-defun uefa-same-group-p (team1 team2 &optional (groups uefa-groups))
@@ -165,7 +165,7 @@ The Catalan numbers form the sequence A000108 in the OEIS."
 ;;(uefa-same-group-p 'Schalke 'Arsenal)
 
 (cl-defun uefa-team-country (team &optional (groups uefa-groups))
-  (second (find team (uefa-group team groups) :key #'first)))
+  (second (cl-find team (uefa-group team groups) :key #'first)))
 ;;(uefa-team-country 'PSG)
 
 (cl-defun uefa-same-country-p (team1 team2 &optional (groups uefa-groups))
@@ -220,7 +220,7 @@ where MATCH is formed fro"
 		       (copy-list (uefa-runner-ups groups))
 		       groups))
 ;;(setf res (uefa-possible-draws-main))
-;;(count t (flatten res))
+;;(cl-count t (flatten res))
 
 (cl-defun rummy-hands (&optional (players 2) (cards (if (< players 5) 10 6)) (deck 52))
   "Return the number of possible initial rummy hands,
@@ -232,7 +232,7 @@ PLAYERS is 2 and CARDS is 10.
 
 This assertion seems wrong given the Wikipedia definition of
 standard rummy."
-  (assert (<= (* players cards) deck) t "Too many players or cards!")
+  (cl-assert (<= (* players cards) deck) t "Too many players or cards!")
   (/ (product (cl-loop for n below players
 		    collect (binomial-coefficient deck cards)
 		    do (decf deck cards)))

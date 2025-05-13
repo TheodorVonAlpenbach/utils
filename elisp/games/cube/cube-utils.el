@@ -16,17 +16,17 @@
 ;;(cube-revert '((U R Uw Rw U2) (U R Uw Rw U2)))
 
 (cl-defun cube-rotate-symbol-y (symbol)
-  (case symbol
+  (cl-case symbol
     (r f) (R F) (f l) (F L) (l b) (L B) (b r) (B R) (M s) (s m) (m S) (S M)
     (otherwise symbol)))
 
 (cl-defun cube-rotate-symbol-x (symbol)
-  (case symbol
+  (cl-case symbol
     (u f) (U F) (f d) (F D) (d b) (D B) (b u) (B U) (E S) (S e) (e s) (s E)
     (otherwise symbol)))
 
 (cl-defun cube-rotate-symbol-z (symbol)
-  (case symbol
+  (cl-case symbol
     (u l) (U L) (l d) (L D) (d r) (D R) (r u) (R U) (M E) (E m) (m e) (e M)
     (otherwise symbol)))
 
@@ -36,7 +36,7 @@ Only DIR :Y is currently supported"
   (if (/=  n 1)
     (cl-loop repeat n do (setf symbol (cube-rotate-symbol symbol 1 dir)))
     (let ((sym1 (intern (char (sstring symbol) 0))))
-      (case dir
+      (cl-case dir
 	(:y (cube-rotate-symbol-y sym1))
 	(:x (cube-rotate-symbol-x sym1))
 	(:z (cube-rotate-symbol-z sym1))))))
@@ -44,7 +44,7 @@ Only DIR :Y is currently supported"
 (cl-defun cube-fliplr-symbol (symbol)
   (intern
    (let ((s (sstring symbol)))
-     (case (char s 0)
+     (cl-case (char s 0)
        (?l (cube-revert-string (cl-replace s "r" :end1 1)))
        (?r (cube-revert-string (cl-replace s "l" :end1 1)))
        (?L (cube-revert-string (cl-replace s "R" :end1 1)))

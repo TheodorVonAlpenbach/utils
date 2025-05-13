@@ -121,8 +121,8 @@ must be a member of a cycle preceding the cycle of the latter.")
 
 (cl-defun cycle-type (string)
   "If STRING is 'CYCLIC it returns the cycle type."
-  (first (find string *cyclic-things* 
-	       :test #'(lambda (o e) (find o e :test #'string-equal*))
+  (first (cl-find string *cyclic-things* 
+	       :test #'(lambda (o e) (cl-find o e :test #'string-equal*))
 	       :key #'second)))
 
 (cl-defun replace-thing-at-point (new thing)

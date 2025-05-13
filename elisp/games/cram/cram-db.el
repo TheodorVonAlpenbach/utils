@@ -63,7 +63,7 @@ Note that this is a PLIST format of coldefs. Hence PLIST-P must be set to t in `
   "Not used. Need to rename (table column) and add (table column)"
   (setf (ld-table-schema
 	 (ld-find-table (list +cram-db-keyword+ keyword) *cram-db*))
-	(ld-schemadef->schema (find keyword +cram-db-schema-definitions+
+	(ld-schemadef->schema (cl-find keyword +cram-db-schema-definitions+
 				    :key #'first))))
 ;;(cram-update-schema :user)
 

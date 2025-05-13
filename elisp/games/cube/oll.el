@@ -45,7 +45,7 @@
 
 (cl-defun oll-expand-corners (uf roc)
   "Return OC"
-  (assert (= (length (cl-set-difference '(1 3 9 7) uf))
+  (cl-assert (= (length (cl-set-difference '(1 3 9 7) uf))
 	     (length roc))
 	  nil "Malformed oll. UF: %S, ROC: %S" uf roc)
   (cl-loop for x in '(1 3 9 7)
@@ -116,7 +116,7 @@
 ;;(oll-parse "13579")
 
 (cl-defun oll-tex (oll &optional (cm 1) (ratio 0.3))
-  (destructuring-bind (uf roc) (oll-parse oll)
+  (cl-destructuring-bind (uf roc) (oll-parse oll)
     (format "\\ShowCube{%gcm}{%g}{\n%s\n%s\n  \\DrawRubikFaceUpSide\n}"
       cm ratio (oll-face-tex uf) (oll-sides-tex uf roc))))
 ;;(oll-tex "59 rrr")
@@ -127,7 +127,7 @@
     anti))
 
 (cl-defun oll-table-row (x tree)
-  (destructuring-bind (name oll alg anti rev) x
+  (cl-destructuring-bind (name oll alg anti rev) x
     (concat* (list (oll-tex oll)
 		   name
 		   (oll-fliplr-if-G anti alg)

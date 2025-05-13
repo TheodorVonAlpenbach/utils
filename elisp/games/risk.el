@@ -16,7 +16,7 @@ T means a black win, NIL means a red win."
   (let* ((bd (roll-dices blacks))
 	 (rd (roll-dices reds))
 	 (bres (cl-mapcar #'> bd rd)))
-    (list (count nil bres) (count t bres) bd rd)))
+    (list (cl-count nil bres) (cl-count t bres) bd rd)))
 ;;(risk-roll-loss 3 2)
 
 (cl-defun risk-roll-loss-prediction (blacks reds &optional (n 100000))

@@ -10,12 +10,12 @@
 
 (cl-defun ts-to-string (ts &optional (print-style mu-default-print-style))
   (when ts 
-    (case print-style
+    (cl-case print-style
       (otherwise (format "%d/%d" (ts-length ts) (ts-unit ts))))))
 ;;(ts-to-string (make-time-signature))
 
 (cl-defun ts-from-string (ts-string &optional (print-style mu-default-print-style))
-  (case print-style
+  (cl-case print-style
     (otherwise (apply #'ts-new (mapcar #'string-to-int (split-string ts-string "/"))))))
 ;;(ts-from-string "4/4")
 

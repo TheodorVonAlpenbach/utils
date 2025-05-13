@@ -39,7 +39,7 @@
 		      (gnode-dominantic-p (second (third n)) t))))))
 
 (cl-defun gnode-subdominantic-p (n &optional recursively)
-  (and n (or (find (second n) '(neapolitan subdominantic))
+  (and n (or (cl-find (second n) '(neapolitan subdominantic))
 	     (and recursively
 		  (eq (second n) 'equal)
 		  (or (gnode-subdominantic-p (first (third n)) t)
@@ -49,7 +49,7 @@
   "If a valid relation exists between N1 and N2 this is returned.
 Otherwise nil is returned"
   (let ((relation (gch-relation (first n1) (first n2))))
-    (case relation ;;implement acase?
+    (cl-case relation ;;implement acase?
       ((equal dominantic) 
        relation)
       ((neapolitan subdominantic)
@@ -66,7 +66,7 @@ Otherwise nil is returned"
 rules"
   (let ((state (gtree-stack-state stack)))
     ;; unary
-    (when (find state '(seventh))
+    (when (cl-find state '(seventh))
       (let ((new-stack-element (list (gtree-remove-seventh (first (first stack)))
 				     state
 				     (list (second stack)))))
@@ -74,7 +74,7 @@ rules"
 	(push new-stack-element stack)
 	(setq stack (gtree-reduce-stack stack))))
     ;; binary
-    (when (find state '(equal dominantic neapolitan subdominantic))
+    (when (cl-find state '(equal dominantic neapolitan subdominantic))
       (let ((new-stack-element (list (first (first stack))
 				     state
 				     (list (second stack) (first stack)))))
@@ -231,7 +231,7 @@ reference chrome, would be more general."
 ;;(gchords-adjust-dim7-aug gchords-spc)
 
 (cl-defun gchord-at (start-time gchords)
-  (aif (find start-time gchords :key #'gch-start-time :from-end t :test #'>=)
+  (aif (cl-find start-time gchords :key #'gch-start-time :from-end t :test #'>=)
     (when (> (gch-end-time it) start-time)
       it)))
 ;;(gchord-at .9 (gtree-leaves (gtree-test)))
@@ -253,7 +253,7 @@ reference chrome, would be more general."
   (let* ((gchord (gchord-at (n-start-time n) gchords))
 	 (chordx (gch-chord gchord))
 	 (chord (chord-from-chordx chordx))
-	 (chrome (find (chrome-to-spitch (n-chrome n)) chord :key #'chrome-to-spitch)))
+	 (chrome (cl-find (chrome-to-spitch (n-chrome n)) chord :key #'chrome-to-spitch)))
     (when chrome 
       (setf (n-chrome n) chrome))
     n))

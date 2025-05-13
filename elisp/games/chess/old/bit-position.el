@@ -17,7 +17,7 @@
 
 (cl-defun bp-add (&rest bit-positions)
   (if bit-positions
-    (apply #'mapcar* #'logior bit-positions)
+    (apply #'cl-mapcar #'logior bit-positions)
     bp-empty))
 ;;(bp-add (bp-from-snumbers (fibonacci-numbers 10)) (bp-from-snumbers (fibonacci-numbers 10)))
 

@@ -22,7 +22,7 @@
 ;;; read/write
 (cl-defun k-to-string (k &optional (print-style mu-default-print-style))
   (when k
-    (case print-style
+    (cl-case print-style
       (otherwise (format "%s %S" (chrome-to-string (k-root k) print-style) (k-mode k))))))
 ;;(k-to-string nil)
 

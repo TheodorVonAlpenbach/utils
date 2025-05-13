@@ -46,7 +46,7 @@
 
 (cl-defun square-rotate90 (square &optional (n 1))
   "Rotates 90 degrees counter-clockwise around A1 (0 0)"
-  (case (mod n 4)
+  (cl-case (mod n 4)
     (0 (copy-list square))
     (1 (list (- (second square)) (first square)))
     (2 (list (- (first square)) (- (second square))))
@@ -60,7 +60,7 @@
 
 (cl-defun square-translate (square translation &optional (nil-if-outside-board t))
   "Reflects by 0 column"
-  (let ((virtual-square (mapcar* #'+ square translation)))
+  (let ((virtual-square (cl-mapcar #'+ square translation)))
    (if (and nil-if-outside-board (square-outside-board-p virtual-square))
      nil
      virtual-square)))
@@ -109,7 +109,7 @@
 square (A1) is dark, as in chess. The latter assumption can
 however be reversed by setting optional argument
 FIRST-SQUARE-IS-DARK-P to nil"
-  (eq (oddp (apply #'+ square))
+  (eq (cl-oddp (apply #'+ square))
       first-square-is-dark-p))
 ;;(mapcar (bind #'square-light-p nil) (squares))
 

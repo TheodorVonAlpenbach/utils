@@ -16,7 +16,7 @@
 (cl-defun get-buffer-regexp (regexp)
   "Similar to `get-buffer', but finds buffer by matching regular
   expressin REGEXP with buffer name"
-  (find regexp (buffer-list) :key #'buffer-name :test #'string-match))
+  (cl-find regexp (buffer-list) :key #'buffer-name :test #'string-match))
 ;;(get-buffer-regexp "GEBEN.+process")
 
 (cl-defun mb-geben-get-process-buffer ()

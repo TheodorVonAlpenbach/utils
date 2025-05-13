@@ -26,7 +26,7 @@
 (cl-defun wi-langlinks-info (target &optional (target-type "pageids"))
   "Return (NUM-LANGUAGES TITLE PAGEID) for wpage with ARTICLE-TITLE
 See https://www.mediawiki.org/wiki/API:Langlinks for API doc."
-  (destructuring-bind ((langlinkstag . langlinks)
+  (cl-destructuring-bind ((langlinkstag . langlinks)
 		       (titletag . title)
 		       (nstag . ns)
 		       (pageidtag . pageid))

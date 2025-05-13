@@ -13,7 +13,7 @@
   (format "%s%s%s"
     (if backup "." "")
     (ld-database-directory-name-1 db)
-    (case backup
+    (cl-case backup
       ((nil) "")
       (:iso-date (format "-%s" (iso-date-and-time :simple-p t)))
       (otherwise

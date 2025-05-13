@@ -66,7 +66,7 @@ NUMBER is zero."
 (cl-defun ecl-column (column-line) (first column-line))
 
 (cl-defun ecl-add (column-line1 column-line2) 
-  (mapcar* #'+ column-line1 column-line2))
+  (cl-mapcar #'+ column-line1 column-line2))
 ;;(ecl-add '(2 3) '(10 7))
 
 (cl-defun goto-char* (column-line &optional (fill-line ""))

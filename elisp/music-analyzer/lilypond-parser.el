@@ -127,7 +127,7 @@ interval is as short as possible
 2. an additional N number of '-s or ,-s increases the octave
 value by N or -N respectively."
   (let ((absolute-pitch (copy-pitch pitch)))
-    (incf (p-octave absolute-pitch)
+    (cl-incf (p-octave absolute-pitch)
 	  (+ (p-octave reference-pitch)
 	     (chb-octave-difference (chrome-base (p-chrome reference-pitch))
 				    (chrome-base (p-chrome pitch)))
@@ -191,14 +191,14 @@ See `ly-convert-relative-pitches-to-absolute' for more information"
     (while (> delimiter-count 0)
       (setq token (ts-read token-stream))
       (when (equal token (first list-delimiters))
-	(incf delimiter-count))
+	(cl-incf delimiter-count))
       (when (equal token (second list-delimiters))
 	(decf delimiter-count))
       (push token token-list))
     (reverse token-list)))
 
 (cl-defun ly-read-element (token-stream variables)
-  (case (ly-token-type (ts-peak token-stream))
+  (cl-case (ly-token-type (ts-peak token-stream))
     (:list-begin (ly-read-list token-stream '("{" "}")))
     (:simultaneous-music-begin (ly-read-list token-stream '("<<" ">>")))
     (t (list (ts-read token-stream)))))
@@ -269,7 +269,7 @@ the method returns the (list '{ 'list-element-1 'list-element-2 '}"
   (n-from-string note-token 'lilypond))
 
 (cl-defun ly-eval-music (token-stream variables contexts)
-  (case (ly-token-type (ts-peak token-stream))
+  (cl-case (ly-token-type (ts-peak token-stream))
     (:list-begin (ly-eval-sequential-music token-stream variables contexts))
 ;    (:list-begin (ly-eval-list token-stream variables contexts))
     (:list-end (prog1 :list-end (ts-read token-stream)))
@@ -298,13 +298,13 @@ the method returns the (list '{ 'list-element-1 'list-element-2 '}"
     ("assignment" (ly-read-variable-definition token-stream variables))))
 
 (cl-defun ly-eval-element (token-stream variables contexts)
-  (case (ly-token-type (ts-peak token-stream))
+  (cl-case (ly-token-type (ts-peak token-stream))
     (:list (ly-eval-list token-stream variables contexts))
     (:function (ly-eval-function token-stream variables contexts))
     (t (ts-read token-stream))))
 
 (cl-defun ly-find-variable (name variables)
-  (find (substring (ts-peak token-stream) 1) variables :key #'first :test #'equal))
+  (cl-find (substring (ts-peak token-stream) 1) variables :key #'first :test #'equal))
 
 (cl-defun ly-insert-variable-and-eval (variable token-stream variables contexts)
   "Prepends the definition (ie. a list of tokens) of VARIABLE on
@@ -327,7 +327,7 @@ TOKEN-STREAM and continues evaluations of the modified stream."
 	(contexts)
 	(result))
     (while (not (ts-eof token-stream))
-      (case (ly-top-level-token-type (ts-peak token-stream))
+      (cl-case (ly-top-level-token-type (ts-peak token-stream))
 	(:list (push (ly-eval-sequential-music token-stream variables contexts) result))
 	(:<< (push (ly-eval-simultaneous-music token-stream variables contexts) result))
 	(:function (push (ly-eval-function token-stream variables contexts) result))
@@ -392,7 +392,7 @@ TOKEN-STREAM and continues evaluations of the modified stream."
 	collect (ly-make-voice-group (second o) (substring* last-markup 1 -1))))
 
 (cl-defun ly-x-to-string (x)
-  (case (struct-type x)
+  (cl-case (struct-type x)
     (note (n-to-string x))
     (key (k-to-string x))
     (time-signature (ts-to-string x))))

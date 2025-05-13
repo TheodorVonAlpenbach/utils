@@ -67,11 +67,11 @@
 ;;(chess-board-start-position)
 
 (cl-defun chess-board-square-start-position (square)
-  (mapcar* #'edge-start-position (chess-board-start-position) square chess-board-square-size))
+  (cl-mapcar #'edge-start-position (chess-board-start-position) square chess-board-square-size))
 ;;(chess-board-square-start-position (esquare '(0 0)))
 
 (cl-defun chess-board-square-center (square)
-  (mapcar* #'+ (chess-board-square-start-position square) (square-mid)))
+  (cl-mapcar #'+ (chess-board-square-start-position square) (square-mid)))
 ;;(chess-board-square-center (esquare '(0 0)))
 
 

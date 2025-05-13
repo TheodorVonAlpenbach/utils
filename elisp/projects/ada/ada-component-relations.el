@@ -44,7 +44,7 @@
   (ids (emacsql db
 	 [:select json-id :from content-list
 	   :where id :in $v1]
-	 (coerce (gateway-content-list-ids gateway-id) 'vector))))
+	 (cl-coerce (gateway-content-list-ids gateway-id) 'vector))))
 ;;(gateway-content-list-json-ids 4)
 ;;(json-available-p)
 
@@ -52,7 +52,7 @@
   (emacsql db
     [:select json :from json
       :where id :in $v1]
-    (coerce (gateway-content-list-json-ids gateway-id) 'vector)))
+    (cl-coerce (gateway-content-list-json-ids gateway-id) 'vector)))
 ;;(json-parse-string (caar (gateway-content-list-jsons 4)))
 
 (cl-defun ada-get-symbolic-folder-items (content-list-json)
@@ -105,7 +105,7 @@ objects (hash tables)"
 	 [:select :distinct folder-id
 	   :from gateway-condition
 	   :where id :in $v1]
-	 (coerce gateway-condition-ids 'vector))))
+	 (cl-coerce gateway-condition-ids 'vector))))
 ;;(gateway-condition-folder-ids (ids (gateway-conditions 4 :id)))
 
 (cl-defun licensed-module-condition-folder-ids (gateway-condition-ids)
@@ -113,7 +113,7 @@ objects (hash tables)"
 	 [:select :distinct folder-id
 	   :from gateway-licensed-module-condition
 	   :where gateway-condition-id :in $v1]
-	 (coerce gateway-condition-ids 'vector))))
+	 (cl-coerce gateway-condition-ids 'vector))))
 ;;(licensed-module-condition-folder-ids (ids (gateway-conditions 4 :id)))
 ;;(seq-intersection asd (licensed-module-condition-folder-ids (ids (gateway-conditions 4 :id))))
 
@@ -122,7 +122,7 @@ objects (hash tables)"
 	 [:select :distinct application-id
 	   :from gateway-condition-application
 	   :where gateway-condition-id :in $v1]
-	 (coerce gateway-condition-ids 'vector))))
+	 (cl-coerce gateway-condition-ids 'vector))))
 ;;(gateway-application-ids (ids (gateway-conditions 4 :id)))
 
 (cl-defun gateway-root-ids (gateway-id)
@@ -144,7 +144,7 @@ objects (hash tables)"
 	[:select :distinct target-component-id
 	  :from component-relations
 	  :where source-component-id :in $v1]
-	(coerce source-ids 'vector)))))
+	(cl-coerce source-ids 'vector)))))
 ;;(length (target-components-1 (gateway-conditions 4)))
 ;;(ada-columns 'component-relations)
 
@@ -162,7 +162,7 @@ objects (hash tables)"
 ;;(length (calculate-gateway-components 4))
 ;;(setf qwe (calculate-gateway-components 4))
 ;;(length qwe)
-;;(find 65169 qwe)
+;;(cl-find 65169 qwe)
 
 (cl-defun all-component-ids ()
   (emacsql db [:select id :from component]))
@@ -175,7 +175,7 @@ objects (hash tables)"
 	[:select :distinct source-component-id
 	  :from component-relations
 	  :where target-component-id :in $v1]
-	(coerce target-ids 'vector)))))
+	(cl-coerce target-ids 'vector)))))
 ;;(source-components-1 '(65169))
 
 (cl-defun component-relation (source-id target-id)
@@ -204,7 +204,7 @@ return the pair (target-id source-id)."
 	[:select :distinct [source-component-id target-component-id]
 	  :from component-relations
 	  :where target-component-id :in $v1]
-	(coerce target-ids 'vector)))))
+	(cl-coerce target-ids 'vector)))))
 ;;(parent-relations (list 65169))
 
 (cl-defun find-component-ancestors (component-id)
@@ -217,8 +217,8 @@ return the pair (target-id source-id)."
 	   do (push-list new-ids all-ids)
 	   do (push-list rels all-rels)
 	   finally return (list all-rels all-ids)))
-;;(remove-duplicates (flatten (setf ancestors-46751 (find-component-ancestors 46751))))
-;;(remove-duplicates (flatten (setf ancestors-46751 (find-component-ancestors 46751))))
+;;(cl-remove-duplicates (flatten (setf ancestors-46751 (find-component-ancestors 46751))))
+;;(cl-remove-duplicates (flatten (setf ancestors-46751 (find-component-ancestors 46751))))
 ;;(setf ewq-65169 (find-component-ancestors 65169))
 ;;(setf ewq-43043 (find-component-ancestors 43043))
 ;;(setf ewq-20192 (find-component-ancestors 20192))

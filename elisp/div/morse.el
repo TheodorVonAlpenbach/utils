@@ -14,7 +14,7 @@
     (?5 ".....") (?6 "-....") (?7 "--...") (?8 "---..") (?9 "----.")))
 
 (cl-defun sign-to-morse (sign)
-  (case (ssymbol sign)
+  (cl-case (ssymbol sign)
     (?. dit-length)
     (?- dash-length)
     (otherwise (error "Unknown morse sign %c" sign))))

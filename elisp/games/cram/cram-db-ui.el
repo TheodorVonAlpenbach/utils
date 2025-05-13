@@ -45,7 +45,7 @@ from the more primitive function `cram-user-id'"
 ;;(cram-db-last-user)
 
 (cl-defun cram-db-user-names (&key sans)
-  (ld-select :user :where (not (member* :name (listify sans) :test #'string=))
+  (ld-select :user :where (not (cl-member :name (listify sans) :test #'string=))
 	     :column :name))
 ;;(cram-db-user-names :sans "Ludvik")
 
@@ -155,7 +155,7 @@ Optional QUARANTINE is not implemented."
 			     new-user-rating new-problem-rating)
   "Add new match to DB, and update user and problem ratings.
 It returns the updates of user and problem as a pair"
-  (destructuring-bind (user-id name old-user-rating &rest uargs)
+  (cl-destructuring-bind (user-id name old-user-rating &rest uargs)
       user
     (let ((problem-id (cram-problem-id problem))
 	  (old-problem-rating (cram-problem-rating problem)))
@@ -170,7 +170,7 @@ It returns the updates of user and problem as a pair"
 ;; Ratings
 (cl-defun cram-db-rating-history (user-or-problem &key from-time to-time n)
   "Returns a list of user or problem ratings in period FROM-TIME TO-TIME"
-  (destructuring-bind (iso-times ratings RDs)
+  (cl-destructuring-bind (iso-times ratings RDs)
       (transpose (cram-get-matches
 		  (if (user-p user-or-problem) :user :match)
 		  user-or-problem

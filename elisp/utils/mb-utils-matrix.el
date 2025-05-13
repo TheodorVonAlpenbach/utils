@@ -31,15 +31,15 @@
 
 ;;; vec operators
 (cl-defun vec-add (&rest vecs)
-  (apply #'mapcar* #'+ vecs))
+  (apply #'cl-mapcar #'+ vecs))
 ;;(vec-add '(1 2) '(1 2)'(1 2))
 
 (cl-defun vec-subtract (&rest vecs)
-  (apply #'mapcar* #'- vecs))
+  (apply #'cl-mapcar #'- vecs))
 ;;(vec-subtract '(1 2) '(1 2)'(1 2))
 
 (cl-defun vec-elt-mult (&rest vecs)
-  (apply #'mapcar* #'* vecs))
+  (apply #'cl-mapcar #'* vecs))
 ;;(vec-elt-mult '(1 2 3) '(1 2 3))
 
 (cl-defun vec-scalar-mult (v c)
@@ -47,7 +47,7 @@
 ;;(vec-scalar-mult '(1 2 3) 2)
 
 (cl-defun vec-sum (v) 
-  (reduce #'+ v))
+  (cl-reduce #'+ v))
 ;;(vec-sum '(1 2 3))
 
 (cl-defun scalar-product (&rest vecs)
@@ -162,7 +162,7 @@ v+ = v'/(v'v)"
 
 ;;; mat extended binary operators
 (cl-defun mat-add  (mat1 mat2)
-  (mapcar* #'vec-add mat1 mat2))
+  (cl-mapcar #'vec-add mat1 mat2))
 ;;(mat-add (mat-constant 2 2 1) (mat-constant 2 2 1))
 
 (cl-defun mat-subtract  (mat1 mat2)
@@ -170,7 +170,7 @@ v+ = v'/(v'v)"
 ;;(mat-subtract (mat-constant 2 2 1) (mat-constant 2 2 1))
 
 (cl-defun hadamard-product (&rest mats)
-  (apply #'mapcar* #'vec-elt-mult mats))
+  (apply #'cl-mapcar #'vec-elt-mult mats))
 ;;(hadamard-product '((1 2) (1 2)) '((1 2) (1 2)))
 
 

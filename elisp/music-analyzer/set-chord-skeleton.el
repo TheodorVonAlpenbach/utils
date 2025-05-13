@@ -49,11 +49,11 @@
 ;;(mapcar #'skeleton-chord-symbol set-chord-skeletons)
 
 (cl-defun skeleton-from-schord (scs)
-  (find scs schord-skeleton-info-list :key #'first :test #'equal))
+  (cl-find scs schord-skeleton-info-list :key #'first :test #'equal))
 ;;(mapcar #'skeleton scs-test)
 
 (cl-defun skeleton-from-chord-symbol (chord-type)
-  (find chord-type schord-skeleton-info-list :key #'third :test #'string=))
+  (cl-find chord-type schord-skeleton-info-list :key #'third :test #'string=))
 ;;(skeleton-from-chord-symbol "7")
 
 
@@ -80,7 +80,7 @@
 Iff ORDERED is non nil, the result is sorted. 
 Iff TRIVIAL is nil a trivial skeleton is returned."
   (let ((res (mapcar (bind #'spc-transpose (- (first sc)))
-		     (remove-duplicates sc :from-end t))))
+		     (cl-remove-duplicates sc :from-end t))))
     (when ordered (setq res (sort res #'<)))
     (unless trivial (setq res (rest res)))
     res))
@@ -107,14 +107,14 @@ Iff TRIVIAL is nil a trivial skeleton is returned."
 (cl-defun scs-invert (scs &optional (n 1))
   "Returns the Nth inversion of set chord skeleton SCS. Not destructive."
   (scs-ninvert (copy-list scs) n))
-;;(scs-invert (first (find 'major-triad set-chord-skeletons :key #'second)) 3)
+;;(scs-invert (first (cl-find 'major-triad set-chord-skeletons :key #'second)) 3)
 
 (cl-defun scs-type (scs)
   "Returns the classification of set chord skeleton SCS.
 Classification is a pair of two elements (SKELETON
 INVERSION-DEGREE)"
   (cl-loop for i to (length scs) 
-	for chordtype = (find (scs-invert scs (- i)) set-chord-skeletons
+	for chordtype = (cl-find (scs-invert scs (- i)) set-chord-skeletons
 			      :key #'first :test #'equal)
 	if chordtype return (list chordtype i)))
 ;;(mapcar #'scs-type '((5 9)))
@@ -125,7 +125,7 @@ INVERSION-DEGREE)"
 ;; 		      (mapcar (bind #'tmap-1-0 schord-skeleton-info-list) (second x)))))
 
 (cl-defun scs-type-p (scs type)
-  (find scs (second (assoc type scs-types)) :test #'equal))
+  (cl-find scs (second (assoc type scs-types)) :test #'equal))
 ;;(mapcar (bind #'scs-type-p 'major) '((4) (3) (4 7))) 
 
 (provide 'set-chord-skeleton)

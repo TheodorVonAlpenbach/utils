@@ -51,8 +51,8 @@
 ;;(cp-test t 'hindemith 2 1)
 
 (cl-defun cp-rules (cp)
-  (aif (find (cp-style cp) cp-rules :key #'first)
-    (aif (find (cp-species cp) (second it) :key #'first)
+  (aif (cl-find (cp-style cp) cp-rules :key #'first)
+    (aif (cl-find (cp-species cp) (second it) :key #'first)
       (second it)
       (error "Couldn't find species %S in style %S" (cp-species cp) (cp-style cp)))
     (error "Couldn't find style %S in the rules collection." (cp-style cp))))
@@ -64,7 +64,7 @@
 ;;(cp-check (cp-test))
 
 (cl-defun cp-vertical-intervals (cp &key (filter nil))
-  (case filter
+  (cl-case filter
     (accented)))
 
 (cl-defun cp-check-print (cp &optional (indent 0))

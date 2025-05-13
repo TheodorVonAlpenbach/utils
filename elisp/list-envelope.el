@@ -22,7 +22,7 @@
   (e-contain-p envelope x strictly-p))
 
 (cl-defun e-touch-p (envelope1 envelope2)
-  (destructuring-bind ((ix1 iy1) (ix2 iy2)) (list envelope1 envelope2)
+  (cl-destructuring-bind ((ix1 iy1) (ix2 iy2)) (list envelope1 envelope2)
     (or (and (i-touch-p ix1 ix2)
 	     (i-overlap-p iy1 iy2))
 	(and (i-touch-p iy1 iy2)

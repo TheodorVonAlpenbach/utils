@@ -41,7 +41,7 @@ the two last tag lists an so on. If P=nil then tags are specified with
 read-minibuffer.") ;(setq *c++-std-tags* nil)
 (unless *c++-std-tags*
   (setq *c++-std-tags* '((numeric_limits)
-			 (count for_each transform) 
+			 (cl-count for_each transform) 
 			 (unary_function binary_function identity not1 ptr_fun back_inserter)
 			 (vector list map pair valarray slice)
 			 (string)

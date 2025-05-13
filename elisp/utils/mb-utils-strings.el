@@ -64,7 +64,7 @@ STRING is not an integer, otherwise returns the resulting integer."
   "Common Lisp CHAR"
   `(aref ,string ,index))
 
-(cl-defun string-to-character-list (string) (coerce string 'list))
+(cl-defun string-to-character-list (string) (cl-coerce string 'list))
 ;;(string-to-character-list "abc")
 
 (cl-defun copy-case (string pattern)
@@ -253,7 +253,7 @@ For the use of TRIM and SEPARATOR, see `split-string-regexp-list'."
     (if omit-nulls (cl-delete "" res :test #'string=) res)))
 ;;(split-string-regexp "bab cd bqwerb" "b" t nil)
 
-(cl-defun substring-intv (string regexp-interval &optional (count 1))
+(cl-defun substring-intv (string regexp-interval &optional (cl-count 1))
   "Returns substring of STRING matching REGEXP-INTERVAL."
   (cl-assert (>= count 0))
   (multiple-value-call #'(lambda (beg mid end match) (if match mid ""))
@@ -266,7 +266,7 @@ is :ONCE, the method returns either the first match or an empty
 string. If N is :ALL it returns all matches in a list of strings.
 If N is a non-negative it returns the the first N matches in a
 list of strings."
-  (let ((count (cl-case n 
+  (let ((cl-count (cl-case n 
 		 (:once 1)
 		 (:all most-positive-fixnum)
 		 (t n)))
@@ -482,7 +482,7 @@ tree. Then a tree of corresponding matches is returned."
 ;;(string-match* "[[:alpha:]][[:alnum:]]*" "daystart")
 
 (cl-defun string-matches-exact (regexp string &key
-						(count most-positive-fixnum)
+						(cl-count most-positive-fixnum)
 						start (num 0) from-end)
   (with-temp-buffer
     (insert string)
@@ -499,7 +499,7 @@ tree. Then a tree of corresponding matches is returned."
 ;;(string-matches-exact "\\(a.\\)b" "axbayb" :num 1 :count 123 :from-end t)
 
 (cl-defun string-match-exact (regexp string &optional
-					      (num 0) (start 0) (count :once))
+					      (num 0) (start 0) (cl-count :once))
   "Returns the part of STRING that matches REGEXP."
   (and (string-match regexp string start)
        (string= (match-string num string) string)
@@ -695,7 +695,7 @@ parameter SEED, see `random-integers'."
 A position is lost iff its perfect center substring is either 0,
 11, or 010."
   (let ((n (length string)))
-    (if (oddp n)
+    (if (cl-oddp n)
       (or (string= (center string 1) "0")
 	  (and (> n 1)
 	       (string= (center string 3) "010")))
@@ -783,7 +783,7 @@ length."
 			    (cl-loop for i in n maximize (uint-length i b)))
 	       for i in n
 	       collect (alphanumerate i l chars))
-      (coerce (mapcar (bind #'nth chars)
+      (cl-coerce (mapcar (bind #'nth chars)
 		(uint-to-n-base n b (or min-length 1)))
 	      'string))))
 ;;(alphanumerate (a-b 0 26))

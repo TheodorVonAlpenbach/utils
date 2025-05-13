@@ -31,7 +31,7 @@ Util for Regel 1.1 hos Grinde"
 (cl-defun vppair2-same-direction (vppair1 vppair2)
   "Returns non nil iff vertical pitch pairs VPPAIR1 and VPPAIR2 does not move in the same direction.
 The return value is :up or :down if the motion is upwards or downwards respectively."
-  (apply #'eq* (mapcar #'i-direction (mapcar* #'i-new vppair1 vppair2))))
+  (apply #'eq* (mapcar #'i-direction (cl-mapcar #'i-new vppair1 vppair2))))
 ;;(vppair2-parallel-motion (list (p-new) (p-new (chrome-new 1))) (list (p-new (chrome-new 1)) (p-new (chrome-new 2)))) => :up
 ;;(vppair2-parallel-motion (list (p-new (chrome-new 1)) (p-new (chrome-new 2))) (list (p-new) (p-new (chrome-new 1)))) => :down
 ;;(vppair2-parallel-motion (list (p-new (chrome-new 1)) (p-new (chrome-new 2))) (list (p-new (chrome-new 1)) (p-new (chrome-new 2)))) => nil

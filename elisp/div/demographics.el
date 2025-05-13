@@ -4,9 +4,9 @@
 			       &optional (premature-death-rate '(0.01 0.1)))
   "Calculates the next generation of POPULATION.
 POPULATION is a triple (CHILDREN ADULTS ELDER)."
-  (destructuring-bind (children adults elder)
+  (cl-destructuring-bind (children adults elder)
       population
-    (destructuring-bind (pdr-children pdr-adults)
+    (cl-destructuring-bind (pdr-children pdr-adults)
 	premature-death-rate
       (list (* average-number-of-children
 	       (/ adults 2.0))

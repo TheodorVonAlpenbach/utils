@@ -56,7 +56,7 @@
       (0 nil)
       (1 (and (first id) (ld-database id)))
       (2 (ld-table id))
-      (3 (find id (ld-table-column-definitions (ld-object (ld-parent-id id)))
+      (3 (cl-find id (ld-table-column-definitions (ld-object (ld-parent-id id)))
 	       :key #'ld-column-identifier)))))
 
 (provide 'ld-general)

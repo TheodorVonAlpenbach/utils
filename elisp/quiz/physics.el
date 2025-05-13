@@ -43,11 +43,11 @@
 ;;(time-to-touchdown 4.9)
 
 (cl-defun celcius (temperature &optional (unit :kelvin))
-  (case unit
+  (cl-case unit
     (:kelvin (- temperature +kelvin+))))
 
 (cl-defun kelvin (temperature &optional (unit :celcius))
-  (case unit
+  (cl-case unit
     (:kelvin temperature)
     (:celcius (+ temperature +kelvin+))))
 ;;(kelvin 0)
@@ -67,7 +67,7 @@
 ;;(coulomb-distance (* 2 +proton-charge+) +electron-charge+ (- (* +electron-mass+ +gravity+)))
 
 (cl-defun quantify-prefix (prefix)
-  (case prefix
+  (cl-case prefix
     (:kilo 3) (:milli -3)
     (:mega 6) (:micro -6)
     (:giga 9) (:nano -9)
@@ -76,7 +76,7 @@
 (cl-defun unit-prefix (unit)
   (if (atom unit)
     0
-    (case (length unit)
+    (cl-case (length unit)
       (1 0)
       (2 (first unit))
       (t (error "Doesn't yet support multiprefix")))))
@@ -101,8 +101,8 @@
 (cl-defun get-time-unit (x) (get-unit x :second))
 
 (cl-defun velocity (distance time &optional (velocity-unit '(:meter :second)))
-  (destructuring-bind (distance distance-unit) (get-length-unit distance)
-    (destructuring-bind (time time-unit) (get-time-unit time)
+  (cl-destructuring-bind (distance distance-unit) (get-length-unit distance)
+    (cl-destructuring-bind (time time-unit) (get-time-unit time)
       (/ (change-unit (float distance) :from distance-unit :to (first velocity-unit))
        (change-time-unit time :from-unit time-unit :to-unit (second velocity-unit))))))
 ;;(velocity '(44 (:kilo :meter)) '(31 :minute) '((:kilo :meter) :hour))
@@ -117,9 +117,9 @@
 ;;(velocity-from-kinetic-energy (* 1 +gravity+ 10) 1)
 
 (cl-defun distance-vat (time &key (velocity 0) (acceleration 0))
-  (destructuring-bind (time time-unit) (get-unit time :second)
-    (destructuring-bind (velocity velocity-unit) (get-unit velocity '(:meter :second))
-      (destructuring-bind (acceleration acceleration-unit) (get-unit acceleration '(:meter (:second :second)))
+  (cl-destructuring-bind (time time-unit) (get-unit time :second)
+    (cl-destructuring-bind (velocity velocity-unit) (get-unit velocity '(:meter :second))
+      (cl-destructuring-bind (acceleration acceleration-unit) (get-unit acceleration '(:meter (:second :second)))
 	(+ (* velocity time)
 	   (* .5 acceleration (sq time)))))))
 ;;(distance-vat (* 0.5 5) :acceleration +gravity+)
@@ -201,13 +201,13 @@
 
 (cl-defun number-of-anagrams (string)
   "Grimaldi 17"
-  (let ((accumulation (mapcar #'second (accumulate-list (coerce string 'list)))))
-    (reduce #'* (remove-factors (a-b 1 (sum accumulation)) (reduce #'* (mapcar #'faculty accumulation))))))
+  (let ((accumulation (mapcar #'second (accumulate-list (cl-coerce string 'list)))))
+    (cl-reduce #'* (remove-factors (a-b 1 (sum accumulation)) (cl-reduce #'* (mapcar #'faculty accumulation))))))
 ;;(number-of-anagrams "TALLAHASSEE")
 
 (cl-defun number-of-anagrams-without-adjacent-character (string char)
   "Grimaldi 17"
-  (let ((number-of-chars (count char string))
+  (let ((number-of-chars (cl-count char string))
 	(string-without-char (delete char string)))
      (* (number-of-anagrams string-without-char)
 	(binomial-coefficient (1+ (length string-without-char)) number-of-chars))))

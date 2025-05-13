@@ -94,7 +94,7 @@
 
 (cl-defun d-to-string (duration &optional (print-style mu-default-print-style))
   (and duration 
-       (case print-style
+       (cl-case print-style
 	 (lilypond (d-to-string-lilypond duration))
 	 (otherwise (string-to-int (or (d-to-string-lilypond duration)
 				       "0"))))))
@@ -111,7 +111,7 @@
 ;;(d-from-string-lilypond "4.")
 
 (cl-defun d-from-string (duration-string &optional (print-style mu-default-print-style))
-  (case print-style
+  (cl-case print-style
     (lilypond (d-from-string-lilypond duration-string))
     (otherwise (error "Not implemented for style '%S'" print-style))))
 ;;(d-from-string "8." 'lilypond)

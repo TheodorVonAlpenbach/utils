@@ -25,14 +25,14 @@
 (cl-defun ld-example-0 ()
   ;; This works today
   (ld-select (ld-join `(,emps :company-id) `(,comps :id))
-	     :where (oddp (:employee :id))
+	     :where (cl-oddp (:employee :id))
 	     :columns ((:employee :name) (:company :name) (sq (:company :president-id)))
 	     :format "%s works for %s (squared id is %d)\n"))
 ;;(ld-example-0)
 
 (cl-defun ld-example-1 ()
   ;; This works today
-  (ld-select comps :where (oddp (:company :id))))
+  (ld-select comps :where (cl-oddp (:company :id))))
 ;;(ld-example-1)
 
 (cl-defun ld-example-2 ()
@@ -41,8 +41,8 @@
 * column extraction becomes a macro
 * possibilti of creating new columns"
   (ld-select (ld-join (list emps :company-id) (list comps :id))
-	     :where (and (oddp (:employee :id)) ;;id is ambigous needs two-element list
-			 (oddp (:president-id))) ;;president-id is not ambigous
+	     :where (and (cl-oddp (:employee :id)) ;;id is ambigous needs two-element list
+			 (cl-oddp (:president-id))) ;;president-id is not ambigous
 	     :columns ((:employee :name) ;;column extraction must be a macro)
 		       (:company :name)
 		       ("Squared president ID!" (sq (:president-id)))) ;; TBA: column creation on the fly!

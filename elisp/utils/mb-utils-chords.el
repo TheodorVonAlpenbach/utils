@@ -32,7 +32,7 @@
 (cl-defun cs-chordtype (cs)
   "CS is chord-skeleton"
   (cl-loop for i to (length cs) 
-	for chordtype = (find (invert-chord-skeleton cs (- i)) chordtypes :key #'second :test #'equal)
+	for chordtype = (cl-find (invert-chord-skeleton cs (- i)) chordtypes :key #'second :test #'equal)
 	if chordtype return (list chordtype i)))
 ;;(cs-chordtype '(6 9))
 

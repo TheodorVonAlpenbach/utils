@@ -195,7 +195,6 @@ Keywords supported: :test :key"
 	  if (cl-member y list :test test)
 	  collect i)))
 ;;(positions 'a '(a b c a))
-;;(positions 'a '(a b c a))
 
 ;;; min/max function
 ;;; This is a mess.

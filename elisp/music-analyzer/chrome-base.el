@@ -7,7 +7,7 @@
   (mod (* n (+ pbc chb-transposer)) 7))
 
 (cl-defun chb-to-spc (pbc)
-  (case pbc
+  (cl-case pbc
     (0 0)
     (1 2)
     (2 4)
@@ -36,7 +36,7 @@
 ;;(chb-string-style 'english-chord)
 
 (cl-defun chb-from-string (chb-string &optional (print-style mu-default-print-style))
-  (case print-style
+  (cl-case print-style
     (lilypond (chb-from-string (upcase chb-string)))
     (otherwise 
      (let ((res (position chb-string (chb-string-style print-style) :test #'string-equal)))

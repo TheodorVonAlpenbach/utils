@@ -45,7 +45,7 @@ o create a temporary .dat file for the points
     (call-process "gnuplot" nil nil nil gp-script-path)
     (find-file (format "%s.pdf" prefix))))
 ;;(gnuplot)
-;;(gnuplot :polynomial (reduce #'fp* (elliptic-fractions)))
+;;(gnuplot :polynomial (cl-reduce #'fp* (elliptic-fractions)))
 
 (cl-defun gnuplot-ratings (ratings &optional (time-unit :hour) (prefix "gnuplot"))
   "RATINGS is a list of points. Each point is pair (DTTM RATING)"

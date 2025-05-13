@@ -35,7 +35,7 @@ RELATIVE-LINUMS could be either a list of integer or a single integer."
   (condition-case var
       (mbscilab-eval-raw
        (format "%s('%s', %s)"
-	 (case toggle
+	 (cl-case toggle
 	   (:on "setbpt")
 	   (:off "delbpt")
 	   (t (error "In scilab-toggle-fn-bpts: Illegal toggle value")))
@@ -63,8 +63,8 @@ RELATIVE-LINUMS could be either a list of integer or a single integer."
    ;; 			   (print (format "toggle color line: %S" (list toggle linum color)))
    ;; 			   (list 'testing (backtrace))))))))
   (with-buffer buffer
-    (destructuring-bind (start end) (line-as-region linum)
-      (funcall (case toggle
+    (cl-destructuring-bind (start end) (line-as-region linum)
+      (funcall (cl-case toggle
 		 (:on #'add-text-properties)
 		 (:off #'remove-text-properties)
 		 (t (error "In toggle-line-color: Illegal toggle value")))
@@ -81,7 +81,7 @@ RELATIVE-LINUMS could be either a list of integer or a single integer."
   "Formats, or unformats, a breakpoint at current line.
 If BUFFER is specified the operation is restricted to this buffer."
   (condition-case var
-      (destructuring-bind (function-name relative-line) breakpoint
+      (cl-destructuring-bind (function-name relative-line) breakpoint
 	(with-buffer (or buffer (first (scilab-function-buffer function-name)))
 	  (toggle-line-color
 	   toggle
@@ -124,7 +124,7 @@ See `*scilab-breakpoints*' for breakpoint format."
   (mapprop (scilab-fn-info) '(:name :current-line)))
 
 (cl-defun scilab-breakpoint-exists-p (breakpoint)
-  (find breakpoint *scilab-breakpoints* :test #'equal))
+  (cl-find breakpoint *scilab-breakpoints* :test #'equal))
 ;;(scilab-breakpoint-exists-p "mbfct" 2)
 
 (cl-defun scilab-add-breakpoint (breakpoint)
@@ -157,7 +157,7 @@ See `*scilab-breakpoints*' for breakpoint format."
 
 ;;; env
 (cl-defun scilab-num-lines-fn (&optional (fn-info (scilab-fn-info)))
-  (destructuring-bind (first last) (getf fn-info :lines)
+  (cl-destructuring-bind (first last) (getf fn-info :lines)
     (1+ (- last first))))
 
 (cl-defun relative-linums (global-linums &optional (base 1))
@@ -166,7 +166,7 @@ See `*scilab-breakpoints*' for breakpoint format."
 ;;(relative-linums (a-b 7 10))
 
 (cl-defun scilab-fn-linums (relative-to &optional (fn-info (scilab-fn-info)))
-  (case relative-to
+  (cl-case relative-to
     ((:buffer :file :global) (apply #'a-b (getf fn-info :lines)))
     ((:function t) (relative-linums (scilab-fn-linums :file fn-info)))))
 
@@ -178,7 +178,7 @@ See `*scilab-breakpoints*' for breakpoint format."
 
 (cl-defun scilab-bpt-linums (relative-to &optional (fn-info (scilab-fn-info)))
   "Returns relative linums corresponding to all relevant bpts in current function"
-  (case relative-to
+  (cl-case relative-to
     ((:buffer :file) (copy-if (bind #'scilab-code-line-p (getf fn-info :buffer))
 		       (scilab-fn-linums :file fn-info)))
     ((:function t) (relative-linums (scilab-bpt-linums :file fn-info)))))
@@ -231,14 +231,14 @@ For example, the following code defines a diagonal line.
   "Toggles the soft breakpoint marks in the left fringe of code buffer.
 Note: Important to specify BUFFER, since at this point, current buffer could be *scilab*."
   (with-buffer buffer
-    (case toggle
+    (cl-case toggle
       (:on
        (cl-loop for l in linums
 	     do (goto-line l)
 	     do (let ((overlay (make-overlay (point) (point))))
 		  (overlay-put overlay 'before-string +scilab-soft-breakpoint-glyph+))))
       ((:off t)
-       (destructuring-bind (beg end) (line-as-region linums buffer)
+       (cl-destructuring-bind (beg end) (line-as-region linums buffer)
 	 (remove-overlays beg end 'before-string +scilab-soft-breakpoint-glyph+))))))
 
 (cl-defun scilab-toggle-soft-breakpoints (toggle fn-info)
@@ -276,7 +276,7 @@ The line numbers are local to the current function."
 	 (symbol (first (read-from-string (first lines))))
 	 (values (mapcar #'scilab-parse-value (rest lines))))
     (list symbol (if (stringp (first values))
-		   (cl-loop for x in values for i from 1 if (oddp i) collect x)
+		   (cl-loop for x in values for i from 1 if (cl-oddp i) collect x)
 		   values))))
 ;;(scilab-parse-answer-group "   ")
 
@@ -405,7 +405,7 @@ it will mark line 6 in GenerateFFIAOG as a step line."
 	      (string-match* 
 	       "Stop after row[[:space:]]+\\([[:digit:]]+\\) in function \\([^.]+\\)\\."
 	       string :num '(1 2)))
-    (destructuring-bind (srlinum fn) it
+    (cl-destructuring-bind (srlinum fn) it
       (message "Got string, parsing to %S" it)
       (scilab-instrument-function :on fn) ;;TODO: skip this if the function already has been instrumented
       (scilab-mark-step-line fn (1+ (string-to-number srlinum))))))

@@ -57,7 +57,7 @@ this trick by adding 100 years.")
 
 (cl-defun DATE-weekend-p (DATE)
   "Non-nil iff DATE is a Sunday or a Monday."
-  (case (DATE-weekday DATE)
+  (cl-case (DATE-weekday DATE)
     ((0 6) t)
     (otherwise nil)))
 ;;(cl-loop for day from 0 to 7 collect (DATE-weekend-p (DATE (now :day day))))

@@ -42,11 +42,11 @@
    directory 
    (if (equal (elt directory (1- (length directory))) ?/)
        "" "/")
-   (or (find "Makefile" (directory-files directory) :test 'string=)
-       (find "makefile" (directory-files directory) :test 'string=))))
+   (or (cl-find "Makefile" (directory-files directory) :test 'string=)
+       (cl-find "makefile" (directory-files directory) :test 'string=))))
 ;;(makefile-in-dir "e:/projects/rp/sverige/rp_lib/rp_data")
 
-;(find "a" '("a" "b") :test 'string=)
+;(cl-find "a" '("a" "b") :test 'string=)
 ;(makefile-in-dir mb-current-makefile-dir)
 
 (setq compilation-directory-regexp 

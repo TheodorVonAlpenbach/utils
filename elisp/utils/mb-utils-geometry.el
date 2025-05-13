@@ -32,14 +32,14 @@
 (cl-defun 1d-move (x offset)
   "Moves 1D object X OFFSET units"
   (let ((res (copy-list x)))
-    (incf (1d-start res) offset)
+    (cl-incf (1d-start res) offset)
     res))
 ;;(1d-move (first (1d-interspaces 3 10)) 1)
 
 
 (cl-defun minmax (numbers)
-  (list (reduce #'min numbers)
-	(reduce #'max numbers)))
+  (list (cl-reduce #'min numbers)
+	(cl-reduce #'max numbers)))
 (cl-defun minmax (numbers)
   (list (butlast (minimum numbers))
 	(butlast (minimum numbers :test #'>))))

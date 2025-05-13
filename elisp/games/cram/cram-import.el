@@ -52,7 +52,7 @@ See header of imports.cvs for correct format"
 ;;(cram-format-question "Parnassia palustris")
 
 (cl-defun cram-format-picture (s)
-  (destructuring-bind (f . r) (split-string s " ")
+  (cl-destructuring-bind (f . r) (split-string s " ")
     (concat* (cons (capitalize f) r) :in "_" :suf ".jpg")))
 ;;(cram-format-picture "Parnassia palustris")
 

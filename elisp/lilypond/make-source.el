@@ -266,7 +266,7 @@
     (ly-expand-instrument-symbols (list instrument-symbols))
     (let ((all-symbols (ly-instrument-symbols)))
       (sort  
-       (remove-duplicates 
+       (cl-remove-duplicates 
 	(cl-loop for x in instrument-symbols
 	      if (eq x 'tutti) return (mapcan #'ly-expand-instrument-symbols '(winds brass strings))
 	      else if (member x ly-instrument-groups) append (mapcar #'ly-instrument-symbol (ly-get-instruments x))

@@ -37,11 +37,11 @@
 	  for name = (first definition)
 	  for values = (second definition)
 	  for values-extended = (cl-loop for value in values
-				      for referenced-definition = (find value res :key #'first)
+				      for referenced-definition = (cl-find value res :key #'first)
 				      collect (if referenced-definition 
 						(second referenced-definition)
 						value))
-	  collect (list name (remove-duplicates (flatten values-extended))) into res
+	  collect (list name (cl-remove-duplicates (flatten values-extended))) into res
 	  finally return res)))
 ;;(chord-type-group-flatten chord-type-group-list)
 
@@ -67,7 +67,7 @@
 
 (cl-defun chord-type-group-p (chord-type chord-type-group)
   "Returns nil iff CHORD-TYPE belongs to CHORD-TYPE-GROUP"
-  (find chord-type (second (find chord-type-group chord-type-group-list :key #'first))))
+  (cl-find chord-type (second (cl-find chord-type-group chord-type-group-list :key #'first))))
 ;;(chord-type-group-p 'major-triad 'dominantic)
 
 (defalias 'chosk-info-chosk 'first)
@@ -79,15 +79,15 @@
 ;;(chosk-new)
 
 (cl-defun chosk-info-from-chosk (chord-skeleton)
-  (find chord-skeleton chord-skeleton-info-list :key #'chosk-info-chosk :test #'equal))
+  (cl-find chord-skeleton chord-skeleton-info-list :key #'chosk-info-chosk :test #'equal))
 ;;(mapcar #'chosk-info-from-chosk (mapcar #'chosk-info-to-chosk chord-skeleton-info-list))
 
 (cl-defun chosk-info-from-chord-type (chord-type)
-  (find chord-type chord-skeleton-info-list :key #'chosk-info-chord-type :test #'equal))
+  (cl-find chord-type chord-skeleton-info-list :key #'chosk-info-chord-type :test #'equal))
 ;;(mapcar #'chosk-info-from-chord-type (mapcar #'chosk-info-chord-type chord-skeleton-info-list))
 
 (cl-defun chosk-info-from-chord-abbrev (chord-type)
-  (find chord-type chord-skeleton-info-list :key #'chosk-info-chord-abbrev :test #'equal))
+  (cl-find chord-type chord-skeleton-info-list :key #'chosk-info-chord-abbrev :test #'equal))
 ;;(mapcar #'chosk-info-from-chord-abbrev (mapcar #'chosk-info-chord-abbrev chord-skeleton-info-list))
 
 

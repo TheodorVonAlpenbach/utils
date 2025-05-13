@@ -54,7 +54,7 @@
 
 (cl-defun cbs-position (cbs)
   "Returns the relative position of SQUARE to CBS."
-  (mapcar* #'* (cbs-size cbs) (cbs-address cbs)))
+  (cl-mapcar #'* (cbs-size cbs) (cbs-address cbs)))
 ;;(cbs-position (make-chess-board-square :address '(1 2)))
 
 (cl-defun cbs-insert-at (cbs column-line &optional overwrite-p)

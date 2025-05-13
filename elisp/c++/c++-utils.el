@@ -20,9 +20,9 @@
 Example: (mb-insert-between '(a b c) d) -> (a d b d c)" 
   (rest (mapcan 'list (mb-fill-list elt (length lst)) lst)))
 
-;(mapcar* 'list '(a b c) '(_ _ _))
+;(cl-mapcar 'list '(a b c) '(_ _ _))
 ;(mapcan 'list '(a b c) '(_ _ _))
-;(apply 'list (mapcar* 'list '(a b c) '(_ _ _)))
+;(apply 'list (cl-mapcar 'list '(a b c) '(_ _ _)))
 ;(mb-insert-between '("a" "b" "c") "_")
 
 (cl-defun c++-compose-variable-string (words)

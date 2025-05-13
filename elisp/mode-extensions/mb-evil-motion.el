@@ -88,7 +88,7 @@ TODO: ensure that normal state is kept even if there are errors within function.
   (forward-sexp (1+ (or count 1)))
   (backward-sexp 1))
 
-(defmacro with-char-offset (count body)
+(defmacro with-char-offset (cl-count body)
   `(prog1
        (progn
 	(forward-char ,count)
@@ -96,7 +96,7 @@ TODO: ensure that normal state is kept even if there are errors within function.
      (backward-char ,count)))
 (cl-indent 'with-char-offset 'while)
 
-(defmacro with-char-offset-if (count test body)
+(defmacro with-char-offset-if (cl-count test body)
   `(if ,test 
      (with-char-offset ,count ,body)
      ,body))
@@ -178,7 +178,7 @@ TODO: ensure that normal state is kept even if there are errors within function.
   (up-list (- (or count 1))))
 
 ;; Note that evil-a-sexp is set to evil-a-paren
-(evil-define-text-object evil-inner-sexp (count &optional beg end type)
+(evil-define-text-object evil-inner-sexp (cl-count &optional beg end type)
   ""
   :extend-selection t
   (evil-inner-object-range count beg end type #'forward-sexp #'backward-sexp))

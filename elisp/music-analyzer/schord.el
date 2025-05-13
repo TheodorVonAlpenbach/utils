@@ -18,7 +18,7 @@
 + iff ORDERED is non nil, the result is sorted. 
 + Iff TRIVIAL is nil the bass spitch (which otherwise is always 0) is removed "
   (let ((res (mapcar (bind #'spc-transpose (- (first schord)))
-		     (remove-duplicates schord :from-end t))))
+		     (cl-remove-duplicates schord :from-end t))))
     (when ordered (setq res (sort res #'<)))
     (unless trivial (setq res (rest res)))
     res))
@@ -108,7 +108,7 @@ For instance a D in the d minor key has scale position 0 (tonic).
 An F in the c minor key has scale position 3 (subdominant)."
   (position (spc-transpose spc (- (first key))) ;spc transposed to C
 	    (second (set-scale (second key)))   ;C minor/major set scale
-	    :test #'(lambda (x y) (if (listp y) (find x y) (= x y)))))
+	    :test #'(lambda (x y) (if (listp y) (cl-find x y) (= x y)))))
 ;;(mapcar (bind #'spc-scale-position '(2 major)) '(2 4 6 7 9 11 1 2))
 
 (cl-defun schord-scale-position (sc key)
@@ -157,20 +157,20 @@ probably be included later."
 
 (cl-defun schord-triad-p (sc)
   "Returns nil iff SC is not a major or minor triad chord."
-  (find (schord-typename sc) '(minor-triad major-triad)))
+  (cl-find (schord-typename sc) '(minor-triad major-triad)))
 
 (cl-defun schord-dominant-p (sc)
   "Must be dominant, ie. a major triad does not qualify"
-  (find (schord-typename sc) '(dominant-seventh-without-fifth dominant-seventh-without-third dominant-seventh)))
+  (cl-find (schord-typename sc) '(dominant-seventh-without-fifth dominant-seventh-without-third dominant-seventh)))
 
 (cl-defun schord-dominantic-p (sc)
   "Returns nil iff SC is not a set chord that could functions as a dominant."
-  (find (schord-typename sc) '(major-triad dominant-seventh dominant-seventh-without-fifth dominant-seventh-without-third)))
+  (cl-find (schord-typename sc) '(major-triad dominant-seventh dominant-seventh-without-fifth dominant-seventh-without-third)))
 ;;(schord-dominantic-p '(0 4 7 10))
 
 (cl-defun schord-diminished-p (sc)
   "Returns nil iff SC is not a set chord that is diminished"
-  (find (schord-typename sc) '(diminished-triad diminished-seventh)))
+  (cl-find (schord-typename sc) '(diminished-triad diminished-seventh)))
 ;;(schord-diminished-p '(0 3 6))
 
 

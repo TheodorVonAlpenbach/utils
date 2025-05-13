@@ -19,8 +19,8 @@ oslopuls")
 
 (cl-defun lynx-tree-forward-child-aftenposten (&optional (n 1))
   "Uncommented"
-;;  (cl-loop with step = (* 2 (signum n)) ;why did I multiply with 2?!
-  (cl-loop with step = (signum n)
+;;  (cl-loop with step = (* 2 (cl-signum n)) ;why did I multiply with 2?!
+  (cl-loop with step = (cl-signum n)
 	   for i below (abs n)
 	   do (forward-lynx-reference step)
 	   do (while (not-empty (string-match* 
@@ -47,7 +47,7 @@ denne konstanten vil bli ignorert av funksjonen
   (when (> n 0) (backward-char 1))
   (forward-lynx-reference n)
   (while (not-empty (string-match* skip (lynx-url-at-point)))
-    (forward-lynx-reference (signum n))))
+    (forward-lynx-reference (cl-signum n))))
 
 (cl-defun lynx-aftenposten-p (url)
   (string-match-exact ".*\\.\\(aftenposten\\|osloby\\)\\.no.*" url))

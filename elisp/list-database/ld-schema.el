@@ -72,7 +72,7 @@ to a legal scheme structure."
 	 column-designator)
 
 	((ld-identifier-p column-designator :column)
-	 (find column-designator (ld-schema-column-definitions (ld-schema schema-designator))
+	 (cl-find column-designator (ld-schema-column-definitions (ld-schema schema-designator))
 	       :key #'ld-column-identifier
 	       :test #'equal))
 

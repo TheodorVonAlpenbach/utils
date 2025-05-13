@@ -44,7 +44,7 @@ The MIDI header always starts with the string 'MTrk'."
 ;;(midi-track-to-string (midi-track-with-absolute-times (test-track)) 1)
 
 (cl-defun mt-find-first-event (mt subsubtype)
-  (find subsubtype (mt-events mt) :key #'me-subsubtype))
+  (cl-find subsubtype (mt-events mt) :key #'me-subsubtype))
 ;;(mt-find-first-event (test-track 0) 'set-tempo)
 
 (provide 'midi-track)

@@ -23,7 +23,7 @@
 (defconst s-template (mapcar (bind #'square-rotate90 3) e-template))
 
 (cl-defun range-from-square (square template)
-  (remove nil (remove-duplicates (mapcar (bind #'square-translate square) template))))
+  (remove nil (cl-remove-duplicates (mapcar (bind #'square-translate square) template))))
 ;;(range-from-square '(7 0) ne-template)
 ;;(print-board-squares (let ((x '(1 1))) x (range-from-square x ne-template)))
 

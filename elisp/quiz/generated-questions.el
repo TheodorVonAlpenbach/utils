@@ -1,6 +1,6 @@
 ;;; Generation
 (cl-defun sparsity-function (sparsity)
-  (case sparsity
+  (cl-case sparsity
     (:normal (sparsity-function 1.1))
     (:dense (sparsity-function 1.05))
     (:very-dense (sparsity-function 1.03))
@@ -23,7 +23,7 @@
 ;;(required-decimals 1.106 1.11)
 
 (cl-defun integer-alternatives (answer sparsity n)
-  (assert (integerp answer) t)
+  (cl-assert (integerp answer) t)
   (let ((pos (min answer (random n))))
     (a-b (- answer pos) (- (+ answer n) 1 pos))))
 ;;(length (integer-alternatives 11 nil 10))
@@ -54,7 +54,7 @@
   (format "%s %s" answer-string unit))
 
 (cl-defun format-question (q)
-  (destructuring-bind (text alternatives answer unit) q
+  (cl-destructuring-bind (text alternatives answer unit) q
     (flatten (list text 
 		   (mapcar (bind #'add-unit unit) alternatives)
 		   (add-unit answer unit)))))

@@ -102,14 +102,14 @@ and ((max 2 1) (3 + 1)) = (2 4) along the :vertical dimension."
 
 (cl-defun gui-rectangle (gui &optional (orientation :horizontal))
   "Calculate the minimum rectangle that contains GUI."
-  (case (car gui)
+  (cl-case (car gui)
     (:rectangle (second gui))
     (:space
      (if (eql orientation :horizontal)
        (list (second gui) 0) (list 0 (second gui))))
     (:stretch (list 0 0))
     (:gui-stack
-	(destructuring-bind (tag orientation . sub-guis) gui
+	(cl-destructuring-bind (tag orientation . sub-guis) gui
 	  (gui-stack-rectangles orientation
 	    (mapcar (bind #'gui-rectangle orientation) sub-guis))))))
 ;;(gui-rectangle (os-gui))
@@ -118,7 +118,7 @@ and ((max 2 1) (3 + 1)) = (2 4) along the :vertical dimension."
 
 (cl-defun gui-fill-stretch (gui env)
   "Expand :stretch objects to :space objects."
-  (case (car gui)
+  (cl-case (car gui)
     ;; Should be handled with :gui-stack
     (:stretch (error "Unexpected :stretch object encountered."))
     (:gui-stack
@@ -154,7 +154,7 @@ and ((max 2 1) (3 + 1)) = (2 4) along the :vertical dimension."
 (cl-defun gui-absolute (gui &optional (position '(0 0)) orientation)
   "Calculate the absolute positions of the objects in GUI.
 See `gui-geometry' for a description of the result's format."
-  (case (car gui)
+  (cl-case (car gui)
     (:space (list nil position (if (eql orientation :horizontal)
 				 (list (second gui) 0)
 				 (list 0 (second gui)))))

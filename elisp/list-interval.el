@@ -32,14 +32,14 @@
   (i-contain-p interval x strictly-p))
 
 (cl-defun i-touch-p (interval1 interval2)
-  (destructuring-bind ((a b) (c d)) (list interval1 interval2)
+  (cl-destructuring-bind ((a b) (c d)) (list interval1 interval2)
     (if (<= a c) (= b c) (= a d))))
 ;;(i-touch-p '(0 2) '(-1 0))
 
 (cl-defun i-overlap-p (interval1 interval2 &optional strictly-p)
   (and (i-interval-p interval1)
        (i-interval-p interval2)
-       (destructuring-bind ((a b) (c d)) (list interval1 interval2)
+       (cl-destructuring-bind ((a b) (c d)) (list interval1 interval2)
 	 (if strictly-p
 	   (or (< a c b) (< c a d))
 	   (or (<= a c b) (<= c a d))))))
@@ -53,7 +53,7 @@
 (cl-defun i-intersection (interval1 interval2)
   (and (i-interval-p interval1)
        (i-interval-p interval2)
-       (destructuring-bind ((a b) (c d)) (list interval1 interval2)
+       (cl-destructuring-bind ((a b) (c d)) (list interval1 interval2)
 	 (cond ((<= a c b) (i-make-interval c (min b d)))
 	       ((<= c a d) (i-make-interval a (min b d)))))))
 

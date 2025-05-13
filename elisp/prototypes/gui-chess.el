@@ -34,7 +34,7 @@
     (cl-loop for x in (third gui)
 	  append (gui-extract-scilab-positions x))
     (if (stringp (car gui))
-      (destructuring-bind (name (left top) (width height)) gui
+      (cl-destructuring-bind (name (left top) (width height)) gui
 	(list (format "%s = [%d, %d, %d, %d];"
 		(concat "pos" (upcase-initials name))
 		(round left) (round top)

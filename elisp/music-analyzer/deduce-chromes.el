@@ -60,7 +60,7 @@ c:/Documents and Settings/matsb/My Documents/data/dot/graph1.gv
 
 (cl-defun dch-valid-schord (schord)
   (awhen (schosk-info-chord-type (schordx-to-schosk-info (schord-to-schordx schord)))
-    (case it
+    (cl-case it
       ((major-ninth-suspension minor-ninth-suspension suspended-triad) nil)
       (t t))))
 ;;(qwe '(0 1 7))
@@ -94,7 +94,7 @@ minium: only SD should be marked")
 		      (dch-node-dominantic-p (second (third n)) t))))))
 
 (cl-defun dch-node-subdominantic-p (n &optional recursively)
-  (and n (or (find (second n) '(neapolitan subdominantic))
+  (and n (or (cl-find (second n) '(neapolitan subdominantic))
 	     (and recursively
 		  (eq (second n) 'equal)
 		  (or (dch-node-subdominantic-p (first (third n)) t)
@@ -109,7 +109,7 @@ minium: only SD should be marked")
 
 (cl-defun node-relation (n1 n2)
   (let ((relation (schord-relation (first n1) (first n2))))
-    (case relation ;;implement acase?
+    (cl-case relation ;;implement acase?
       ((equal dominantic) relation)
       ((neapolitan subdominantic) (and (dch-node-dominantic-p n2) relation)))))
 
@@ -138,7 +138,7 @@ minium: only SD should be marked")
 rules"
   (let ((state (dch-stack-state stack)))
     ;; unary
-    (when (find state '(seventh))
+    (when (cl-find state '(seventh))
       (let ((new-stack-element (list (dch-remove-seventh (first (first stack)))
 				     state
 				     (list (second stack)))))
@@ -146,7 +146,7 @@ rules"
 	(push new-stack-element stack)
 	(setq stack (dch-reduce-stack stack))))
     ;; binary
-    (when (find state '(equal dominantic neapolitan subdominantic))
+    (when (cl-find state '(equal dominantic neapolitan subdominantic))
       (let ((new-stack-element (list (first (first stack))
 				     state
 				     (list (second stack) (first stack)))))

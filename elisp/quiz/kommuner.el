@@ -25,7 +25,7 @@
 (defalias 'nk-name #'first)
 
 (cl-defun nk-kommune (name)
-  (find name (kommuner) :test #'string= :key #'nk-name))
+  (cl-find name (kommuner) :test #'string= :key #'nk-name))
 ;;(nk-kommune "Oslo")
 
 (cl-defun iv-less-than-p (iv1 iv2)
@@ -73,7 +73,7 @@ First naive version. BB criterion"
 ;;(ring< 1 2 3 4 5 0 .1)
 
 (cl-defun nk-path-clockwise-p (kommune)
-  (destructuring-bind (((xmin p1) (xmax p3))
+  (cl-destructuring-bind (((xmin p1) (xmax p3))
 			((ymin p4) (ymax p2)))
       (nk-bb kommune)
     (ring< p1 p2 p3 p4)))

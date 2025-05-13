@@ -8,7 +8,7 @@
 
 (cl-defun sc-mode (sc)
   "TODO: This function is bad! Name and posistion and all"
-  (case (second (skeleton (scs-from-sc sc)))
+  (cl-case (second (skeleton (scs-from-sc sc)))
     ((major-triad-without-fifth
       major-triad
       major-triad major-seventh-without-fifth

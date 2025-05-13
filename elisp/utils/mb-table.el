@@ -7,7 +7,7 @@
     (save-excursion
       (let* ((beg-line (point-2-line beg))
 	     (end-line (point-2-line end))
-	     (maxlengths (apply #'mapcar* #'max 
+	     (maxlengths (apply #'cl-mapcar #'max 
 				(table-collect-sexp-lengths
 				 beg-line end-line)))
 	     (offsets (cl-loop for y = 0 then (+ x y 2)

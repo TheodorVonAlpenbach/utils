@@ -17,11 +17,11 @@
 	  (vg-name vg)))
 
 (cl-defun voice-group= (vg1 vg2)
-  (apply #'all-true (mapcar* #'voice= (vg-voices vg1) (vg-voices vg2))))
+  (apply #'all-true (cl-mapcar #'voice= (vg-voices vg1) (vg-voices vg2))))
 
 (cl-defun voices-p (x)
   "Returns t iif X is a list of `voice' elements"
-  (and (listp x) (every #'voice-p x)))
+  (and (listp x) (cl-every #'voice-p x)))
 
  (cl-defun vg-time-signature (vg)
   "TODO: return a warning if not all voices in VG has same ts"
@@ -61,7 +61,7 @@
 ;;(vg-deduce-upbeat (test-vg))
 
 (cl-defun vgs-find-named-vg (voice-groups name)
-  (find name voice-groups :key #'vg-name :test #'equal))
+  (cl-find name voice-groups :key #'vg-name :test #'equal))
 
 (cl-defun vg-start-time (voice-group)
   "Returns the start-time of the first note in VOICE-GROUP"
@@ -143,7 +143,7 @@ such the sum of the durations of the resulting notes equals the duration of the 
 
 ;;; read/write
 (cl-defun voices-to-string (voices &optional (print-style mu-default-print-style))
-  (case print-style
+  (cl-case print-style
     (otherwise (concat* (mapcar (bind #'v-to-string print-style) voices)
 			:in "\n"))))
 

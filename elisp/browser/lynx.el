@@ -235,7 +235,7 @@ exist, and SHOWP is non-nil iff the data should be view."
 
 (cl-defun lynx-browse-wiki (&optional lang-number)
   (interactive "P")
-  (browse-url (format (case current-prefix-arg
+  (browse-url (format (cl-case current-prefix-arg
 			(1 "https://no.wikipedia.org/wiki/%s")
 			(t "http://en.wikipedia.org/wiki/%s"))
 		(or (marked-text) (thing-at-point 'word)))))
@@ -346,7 +346,7 @@ therefore loaded unmodified."
 for key parameters."
   (let ((lynx-arguments
 	 (list *lynx-config*
-	       (case type (:source "-source") (:dump "-dump"))
+	       (cl-case type (:source "-source") (:dump "-dump"))
 	       (if reload "-reload" "")
 	       (format "-width=%d" width)
 	       *lynx-config*
@@ -375,7 +375,7 @@ for key parameters."
   (let* ((lynx-arguments
 	  (list *lynx-config*
 		*lynx-lss*
-		(case type (:source "-source") (:dump "-dump"))
+		(cl-case type (:source "-source") (:dump "-dump"))
 		"-reload"
 		(format "-width=%d" width)
 		(format "-display_charset=%s" display-charset)
@@ -562,7 +562,7 @@ sentinels for loading the urls in queue. See #'LYNX-BROWSE-SILENT."
   (interactive)
   (when (not-empty (string-match* "aftenposten\\.no\\/nyheter.*\\/siste100\\/" *lynx-current-url*))
     (let ((region (lynx-aftenposten-siste-100-region)))
-      (if (notany #'null region)
+      (if (cl-notany #'null region)
 	(progn (lynx-make-jobs-region (first region) (second region) current-prefix-arg)
 	       (lynx-browse-jobs))
 	(message "Reference region is undefined.")))))

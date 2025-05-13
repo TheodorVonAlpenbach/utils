@@ -1,5 +1,5 @@
 (cl-defun split-sequence (delimiter sequence &key (start 0) (end (length sequence)) (from-end nil)
-				    (count nil) (remove-empty-subseqs nil)
+				    (cl-count nil) (remove-empty-subseqs nil)
 				    (test #'eql) (test-not nil) (key #'identity))
   "Return a list of subsequences in seq delimited by delimiter.
 If :remove-empty-subseqs is NIL, empty subsequences will be included
@@ -30,7 +30,7 @@ stopped."
 ;;(split-sequence ?  "The quick brown fox jumps over the lazy dog")
 
 (cl-defun split-sequence-if (predicate sequence &key (start 0) (end (length sequence)) (from-end nil)
-                            (count nil) (remove-empty-subseqs nil) (key #'identity))
+                            (cl-count nil) (remove-empty-subseqs nil) (key #'identity))
     "Return a list of subsequences in seq delimited by items satisfying
 predicate.
 If :remove-empty-subseqs is NIL, empty subsequences will be included
@@ -50,7 +50,7 @@ stopped."
                           sequence start end count remove-empty-subseqs)))
 ;;(split-sequence-if #'oddp (0-n 10) :remove-empty-subseqs t)
 
-(cl-defun split-sequence-if-not (predicate sequence &key (count nil) (remove-empty-subseqs nil)
+(cl-defun split-sequence-if-not (predicate sequence &key (cl-count nil) (remove-empty-subseqs nil)
 					   (from-end nil) (start 0) (end (length sequence)) (key #'identity))
     "Return a list of subsequences in seq delimited by items satisfying
 \(CL:COMPLEMENT predicate).

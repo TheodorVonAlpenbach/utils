@@ -3,21 +3,21 @@
 ;;(mapcar #'octave-to-string-lilypond (a-b 0 8))
 
 (cl-defun octave-to-string (o &optional (print-style mu-default-print-style))
-  (case print-style
+  (cl-case print-style
     (lilypond (octave-to-string-lilypond o))
     (t (int-to-string o))))
 ;;(mapcar #'octave-to-string (a-b 0 8))
 
 (cl-defun octave-from-string-lilypond (o-string)
-  (let ((o-ups (count ?' o-string))
-	(o-downs (count ?, o-string)))
+  (let ((o-ups (cl-count ?' o-string))
+	(o-downs (cl-count ?, o-string)))
     (if (nor (zerop o-ups) (zerop o-downs))
       (error "Octave string '%s' is not in Lilypond format" o-stringa)
       (+ 3 (- o-ups o-downs)))))
 ;;(octave-from-string-lilypond "")
 
 (cl-defun octave-from-string (o-string &optional (print-style mu-default-print-style))
-  (case print-style
+  (cl-case print-style
     (lilypond (octave-from-string-lilypond o-string))
     (t (if (string-match "[[:digit:]]" o-string)
 	 (string-to-number o-string)

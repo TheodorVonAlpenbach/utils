@@ -43,7 +43,7 @@
 
 (require 'lab-api-period-to-solr)
 (cl-defun lab-field-date-p (field)
-  (find (intern field) lab-api-date-fields))
+  (cl-find (intern field) lab-api-date-fields))
 ;;(mapcar #'lab-api-field-date-p (mapcar #'sstring '(published solr_created qwe)))
 
 (require 'lab-api-period-to-solr)

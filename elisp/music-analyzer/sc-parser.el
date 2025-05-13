@@ -15,7 +15,7 @@
 (cl-defun scr-reduce-stack (stack)
   (let ((sc2 (pop stack))
 	(sc1 (pop stack)))
-    (case (sc-relation sc1 sc2)
+    (cl-case (sc-relation sc1 sc2)
       (SDT (push (list SDT (sc-base-pc sc2 sc1) sc2) stack))
       (DT (push (list DT (sc-base-pc sc2 sc1) sc2) stack))
       (TD (push (list DT (sc-base-pc sc2 sc1) sc2) stack))

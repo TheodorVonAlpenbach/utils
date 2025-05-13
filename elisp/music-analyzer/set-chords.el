@@ -45,7 +45,7 @@ For instance a D in the d minor key has scale position 0 (tonic).
 An F in the c minor key has scale position 3 (subdominant)."
   (position (spc-transpose spc (- (first key))) ;spc transposed to C
 	    (second (set-scale (second key)))   ;C minor/major set scale
-	    :test #'(lambda (x y) (if (listp y) (find x y) (= x y)))))
+	    :test #'(lambda (x y) (if (listp y) (cl-find x y) (= x y)))))
 ;;(mapcar (bind #'spc-scale-position '(2 major)) '(2 4 6 7 9 11 1 2))
 
 (cl-defun sc-scale-position (sc key)
@@ -94,20 +94,20 @@ probably be included later."
 
 (cl-defun sc-triad-p (sc)
   "Returns nil iff SC is not a major or minor triad chord."
-  (find (sc-typename sc) '(minor-triad major-triad)))
+  (cl-find (sc-typename sc) '(minor-triad major-triad)))
 
 (cl-defun sc-dominant-p (sc)
   "Must be dominant, ie. a major triad does not qualify"
-  (find (sc-typename sc) '(dominant-seventh-without-fifth dominant-seventh-without-third dominant-seventh)))
+  (cl-find (sc-typename sc) '(dominant-seventh-without-fifth dominant-seventh-without-third dominant-seventh)))
 
 (cl-defun sc-dominantic-p (sc)
   "Returns nil iff SC is not a set chord that could functions as a dominant."
-  (find (sc-typename sc) '(major-triad dominant-seventh dominant-seventh-without-fifth dominant-seventh-without-third)))
+  (cl-find (sc-typename sc) '(major-triad dominant-seventh dominant-seventh-without-fifth dominant-seventh-without-third)))
 ;;(sc-dominantic-p '(0 4 7 10))
 
 (cl-defun sc-diminished-p (sc)
   "Returns nil iff SC is not a set chord that is diminished"
-  (find (sc-typename sc) '(diminished-triad diminished-seventh)))
+  (cl-find (sc-typename sc) '(diminished-triad diminished-seventh)))
 ;;(sc-diminished-p '(0 3 6))
 
 

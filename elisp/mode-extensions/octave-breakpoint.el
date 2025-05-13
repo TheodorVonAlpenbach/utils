@@ -129,8 +129,8 @@ The result is organized as the list described in
   "Return not `nil' if the current buffer line is a dbstop in Octave."
   (let ((bl (octave-dbstop-list)))
     (cl-destructuring-bind (fn line) (mb-octave-location pos)
-      (awhen (find fn bl :test #'string= :key #'first)
-	(find line (second it))))))
+      (awhen (cl-find fn bl :test #'string= :key #'first)
+	(cl-find line (second it))))))
 
 (cl-defun octave-dbstop-list-1 (oline)
   "Extract function name and dbstop lines in string OLINE.

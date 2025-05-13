@@ -37,7 +37,7 @@
 (cl-defun c++-standard-header-files (dirs)
   "Returns absolute path of all c++ standard headers."
   (remove-if #'(lambda (x) (or (not (string-match-exact "[a-z]+" x))
-			       (find x '("CVS" "TAGS") :test #'string=)))
+			       (cl-find x '("CVS" "TAGS") :test #'string=)))
 	      (directory-files* dirs t)
 	      :key #'file-name-nondirectory))
 ;(c++-standard-header-files *c++-standard-include-directories*)
@@ -88,7 +88,7 @@ TODO: handle case where there are no #includes. "
 	 (names (c++-header-names paths))
 	 (names-alist (mapcar #'list (apply #'append names)))
 	 (name (completing-read "Include header: " names-alist))
-	 (local-p (find name (third names) :test #'string=))
+	 (local-p (cl-find name (third names) :test #'string=))
 	 (include-string (c++-include-string name local-p)))
     (save-excursion
       (if (exists-match-p (regexp-quote include-string))

@@ -28,10 +28,10 @@
 
 ;; Evil smartparens text objects
 
-(evil-define-text-object evil-a-sexp (count &optional beg end type)
+(evil-define-text-object evil-a-sexp (cl-count &optional beg end type)
   (evil-an-object-range count beg end #'sp-forward-sexp #'sp-backward-sexp))
 
-(evil-define-text-object evil-inner-sexp (count &optional beg end type)
+(evil-define-text-object evil-inner-sexp (cl-count &optional beg end type)
   (evil-inner-object-range count beg end #'sp-forward-sexp #'sp-backward-sexp))
 
 (define-key evil-outer-text-objects-map "e" 'evil-a-sexp)

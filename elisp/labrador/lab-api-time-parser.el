@@ -160,7 +160,7 @@ strings. See `decode-time' for the return value format"
   (let ((res (cl-loop for m = (lab-time-point-modifier q) 
 		   while m collect m)))
     (when res
-      (apply #'mapcar* #'+ res))))
+      (apply #'cl-mapcar #'+ res))))
 
 (cl-defun lab-time-point-modifier (q)
   (q-try q
@@ -232,7 +232,7 @@ strings. See `decode-time' for the return value format"
 	(list left-parenthesis from to right-parenthesis))))))
 
 (cl-defun lab-convert-delimiters (delimiter)
-  (case delimiter
+  (cl-case delimiter
     (open-left "<") 
     (closed-left "<=")
     (open-right ">")
@@ -248,7 +248,7 @@ strings. See `decode-time' for the return value format"
 
 (cl-defun solr-time (time &optional open)
   "Assumes the time resolution is in seconds"
-  (if (find time (list (the-creation)(the-apocalypse)) :test #'equal)
+  (if (cl-find time (list (the-creation)(the-apocalypse)) :test #'equal)
     "*"
     (if open 
       (format "%s.999" (lab-dttm (add-time time :second -1) t))
@@ -264,7 +264,7 @@ strings. See `decode-time' for the return value format"
   (multiple-value-bind (lp lv rv rp)
       (lab-interval-parse (q-test string))
     (if (empty-string-p (q-stream (q-test)))
-      (case format
+      (cl-case format
 	(solr (lab-time-string-to-solr lp lv rv rp))
 	(t (lab-time-string-to-sql lp lv rv rp)))
       (message "Couldn't parse rest of stream: %s" (first (q-test))))))

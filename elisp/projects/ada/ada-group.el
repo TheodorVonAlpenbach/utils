@@ -56,18 +56,18 @@ By default, COMPANY-ID is 4, i.e. Skolen"
 		     [:select id :from user
 		       :where id :in $v1
 		       :and (= user_role $r2)]
-		     (coerce (group-member-ids group-descriptor) 'vector)
+		     (cl-coerce (group-member-ids group-descriptor) 'vector)
 		     (sstring user-role))
 		   (emacsql db
 		     [:select id :from user
 		       :where id :in $v1]
-		     (coerce (group-member-ids group-descriptor) 'vector))))))
+		     (cl-coerce (group-member-ids group-descriptor) 'vector))))))
     (when uids
       (emacsql db [:delete :from user-company-group
 			   :where (= company_group_id $s1)
 			   :and user_id :in $v2]
 	       (id group-descriptor)
-	       (coerce uids 'vector)))
+	       (cl-coerce uids 'vector)))
     (group-member-ids group-descriptor)))
 ;;(remove-members-from-group (id 571156))
 ;;(ada-columns 'user-company-group)

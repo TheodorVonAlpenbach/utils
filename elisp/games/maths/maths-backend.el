@@ -89,7 +89,7 @@
 
 (cl-defun maths-get-task (&key (method :next) (rating +maths-default-rating+))
   "Method is one of :new (default), :random, :current and :last"
-  (case method
+  (cl-case method
     (:last (maths-db-last-task))
     (:new (let ((task (maths-create-task :rating rating)))
 	    (if (cl-notany #'null task)
@@ -132,7 +132,7 @@
 
 (cl-defun maths-arguments-1 (level)
   "Returns "
-  (case level
+  (cl-case level
     (1 ;positive integers that adds to 10 or lower
      (let ((x (random 10)))
        (list x (random (- 11 x)))))
@@ -153,7 +153,7 @@
 ;;(cl-loop for i below 10000 never (= (second (maths-arguments 1 :division)) 0))
 
 (cl-defun maths-estimate-level (task)
-  (destructuring-bind (x y) (maths-task-arguments task)
+  (cl-destructuring-bind (x y) (maths-task-arguments task)
     (cond
       ;; both < 10
       ((and (< x 10) (< y 10))
@@ -206,7 +206,7 @@
   (apply (maths-operator operation) args))
 
 (cl-defun maths-operator (operation)
-  (case operation
+  (cl-case operation
     (:addition #'+)
     (:substraction #'-)
     (:multiplication #'*)
@@ -257,7 +257,7 @@ of tries is quite limited"
 		finally return task*))))))
 ;;(cl-loop repeat 1 collect (maths-create-task :rating 1771.5996682195228 :operation :addition))
 ;;(cl-loop repeat 1 collect (maths-create-task :rating 1500))
-;;(count nil (cl-loop repeat 100 collect (maths-create-task :rating 1653.5199667679983)))
+;;(cl-count nil (cl-loop repeat 100 collect (maths-create-task :rating 1653.5199667679983)))
 
 (cl-defun maths-score (task answer time-elapsed &optional (free-time 2000) (max-time 20000))
   "All TIMEs are in milliseconds."
@@ -265,7 +265,7 @@ of tries is quite limited"
     (if (nequal answer solution)
       0
       (- 1 (min 1 (/ (max 0 (- time-elapsed free-time))
-		     (coerce (- max-time free-time) 'float)))))))
+		     (cl-coerce (- max-time free-time) 'float)))))))
 ;;(mapcar #'(lambda (x) (maths-score (first *maths-current-task*) (task-result (first *maths-current-task*)) x)) (a-b 0 22000 2000))
 
 (defsubst maths-invert-score (score) (- 1 score))
@@ -292,8 +292,8 @@ of tries is quite limited"
 	 (score (maths-score task answer time-elapsed))
 	 (old-ratings (extract-ratings user task ))
 	 (new-ratings (glicko-new-ratings user task score)))
-    (assert (not (equal old-ratings new-ratings)))
-    (destructuring-bind (updated-user updated-task)
+    (cl-assert (not (equal old-ratings new-ratings)))
+    (cl-destructuring-bind (updated-user updated-task)
 	(apply #'maths-db-report-match
 	       user task
 	       (iso-date-and-time) answer time-elapsed
@@ -318,8 +318,8 @@ ratings, and hand the onus of DB update to the caller"
 	 (old-ratings (extract-ratings user task))
 	 (new-ratings (glicko-new-ratings user task score)))
     ;; this assert seems a bit spurious to me now
-    (assert (not (equal old-ratings new-ratings)))
-    (destructuring-bind (updated-user updated-task)
+    (cl-assert (not (equal old-ratings new-ratings)))
+    (cl-destructuring-bind (updated-user updated-task)
 	(apply #'maths-db-report-match
 	       user task
 	       (iso-date-and-time) answer time-elapsed

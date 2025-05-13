@@ -64,7 +64,7 @@ hfsymbols for clarity)
   (nth 2 (m-intervals mode)))
 
 (cl-defun mode-from-string (mode-string &optional (print-style mu-default-print-style))
-  (find (intern mode-string) (mapcar #'first mu-modes)))
+  (cl-find (intern mode-string) (mapcar #'first mu-modes)))
 ;;(mapcar #'mode-from-string '("major" "minor" "dorian"))
 
 (provide 'mu-mode)

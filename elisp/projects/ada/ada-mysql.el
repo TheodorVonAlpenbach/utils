@@ -188,7 +188,7 @@
     (emacsql db [:show columns :from $i1] table)))
 ;;(ada-columns 'task)
 ;;(ada-columns 'user-ntp-module-codes )
-;;(coerce (mapcar #'decolonize-symbol '(user-id)) 'vector)
+;;(cl-coerce (mapcar #'decolonize-symbol '(user-id)) 'vector)
 ;;(cl-substitute ?_ ?- "a-ha")
 
 (provide 'ada-mysql)

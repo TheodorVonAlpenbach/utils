@@ -45,7 +45,7 @@
 ;;(mapcar #'y2b-parse-sduration '("4" "4.."))
 
 (cl-defun y2b-milliseconds (sduration &optional (tempo 60))
-  (destructuring-bind (bd dots) (y2b-parse-sduration sduration)
+  (cl-destructuring-bind (bd dots) (y2b-parse-sduration sduration)
       (round (/ (* 4 +base-tempo+ 60 (y2b-geometric-series 0.5 dots))
 		bd tempo))))
 ;;(mapcar (bind #'y2b-milliseconds 480) '("1" "1.5" "2" "4" "8" "16"))
@@ -59,7 +59,7 @@
 
 (cl-defun y2b-parse-snote (snote)
   (aif (string-match "[0-9]\\.*$" snote)
-    (destructuring-bind (soctave spc)
+    (cl-destructuring-bind (soctave spc)
 	(y2b-parse-spitch (substring snote 0 it))
       (list soctave spc (substring snote it)))
     (append (y2b-parse-spitch snote) (list nil))))
@@ -108,7 +108,7 @@
 (cl-defun ly2b (m env)
   "ENV is tempo, relative pitch, duration. Defaults are 60 bpm, c4, 4, respectively.
 Note is (FREQUENCY DURATION). A rest is (nil DURATION)."
-  (case :t
+  (cl-case :t
     ()))
 
 ;;(ly2b '(:t (60 120) (:r c5 (c8 b c r c- r c r g+ f e g c b c e d c d r d- r d))))

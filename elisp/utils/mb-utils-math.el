@@ -52,9 +52,9 @@ The return value is the incremented value of PLACE."
   "Sum all elements in SEQUENCE.
 Keywords supported: :operator :start :end :from-end
 :initial-value :key. Default value for :operator is #'+. See
-`reduce' for a description of the other keywords"
+`cl-reduce' for a description of the other keywords"
   (let ((op (or (plist-pop cl-keys :operator) #'+)))
-    (apply #'reduce op sequence cl-keys)))
+    (apply #'cl-reduce op sequence cl-keys)))
 ;;(sum '(1 2 3 4) :operator #'* :start 1 :initial-value 1)
 ;;(sum '(1 2 3))
 
@@ -85,7 +85,7 @@ For the key arguments, see `cumsum-list'."
 ;;(cumsum (cl-coerce (0-n 3) 'vector))
 
 (cl-defun product (sequence &key (key #'identity) (initial-value 1))
-  (reduce #'* sequence :key key :initial-value initial-value))
+  (cl-reduce #'* sequence :key key :initial-value initial-value))
 ;;(product '(1 2 3) :initial-value 2)
 
 (cl-defun product-safe-list (list &key (initial-value 1))
@@ -141,15 +141,15 @@ converting to float if the product is large for an integer."
   `(setf ,n (abs ,n)))
 
 (cl-defun plusp* (&rest factors)
-  (oddp (count-if #'plusp factors)))
+  (cl-oddp (count-if #'plusp factors)))
 ;;(plusp* 1 -1)
 
 (cl-defun minusp* (&rest factors)
-  (oddp (count-if #'minusp factors)))
+  (cl-oddp (count-if #'minusp factors)))
 ;;(minusp* -1 -2 -3 4)
 
 (cl-defun signum* (&rest factors)
-  (apply #'* (mapcar #'signum factors)))
+  (apply #'* (mapcar #'cl-signum factors)))
 ;;(signum* -1 -2)
 
 (cl-defun unsignum (&rest factors)
@@ -170,7 +170,7 @@ converting to float if the product is large for an integer."
 ;;(mapcar #'(lambda (x) (list x (fixnum-ceiling x 8))) (0-n 10))
 
 (cl-defun eq-parity (x y)
-  (eq (oddp x) (oddp y)))
+  (eq (cl-oddp x) (cl-oddp y)))
 ;;(eq-parity 2 'a)
 
 ;;chess math
@@ -331,8 +331,8 @@ The equivalence relation is given by keyword :test.
 ;;(partition (vector 'a 1 'b 'b "string" 'a))
 ;;(partition "abcdeafe")
 
-;;(partition (0-n 10) #'(lambda (x y) (eq (oddp x) (oddp y))))
-;;(partition (vector 1 2 3 4) #'(lambda (x y) (eq (oddp x) (oddp y))))
+;;(partition (0-n 10) #'(lambda (x y) (eq (cl-oddp x) (cl-oddp y))))
+;;(partition (vector 1 2 3 4) #'(lambda (x y) (eq (cl-oddp x) (cl-oddp y))))
 
 (cl-defun distribute (list &optional (test #'eq))
   (merge-n-lists (partition list test)))
@@ -341,7 +341,7 @@ The equivalence relation is given by keyword :test.
 (cl-defun distribute-categories (distribution-list &optional categories-list)
   "Special application for Munkholmserien"
   (merge-n-lists 
-   (mapcar* #'(lambda (n sym) (make-list n sym))
+   (cl-mapcar #'(lambda (n sym) (make-list n sym))
 	    distribution-list
 	    (or categories-list '(g h k n s d)))))
 ;;(prin1 (distribute-categories '(10 10 8 10 5 7)))
@@ -393,14 +393,14 @@ the rotation degree."
 ;;(2cycle-lform '(a b a a b b b a))
 
 (cl-defun 2cycle-to-optimal-lform (cycle &optional (test #'eq))
-  (let* ((n (count (first cycle) cycle :test test)))
+  (let* ((n (cl-count (first cycle) cycle :test test)))
     (2cycle-lform (cycle-normal-form (make-distributed-list n (length cycle))))))
 ;;(2cycle-to-optimal-lform '(a a a b b a))
 
 (cl-defun 2cycle-badness (cycle &optional (test #'eq))
   "Calculates how good the elements of CYCLE is distributed, assuming the number of non-EQ elements is 2"
   (let* ((n (length cycle))
-	 (nfirst (count (first cycle) cycle :test test))
+	 (nfirst (cl-count (first cycle) cycle :test test))
 	 (pos (positions (first cycle) cycle :test (if (> (+ nfirst nfirst) n) 
 						     (compose #'not test) test)))
 	 (distances (cons (- (+ n (first pos)) (last-elt pos)) 
@@ -416,7 +416,7 @@ the rotation degree."
   "Calculate how well the elements of CYCLE is distributed,
 assuming the number of non-EQ elements is 2"
   (let ((test test))
-    (cl-loop for elt in (remove-duplicates cycle)
+    (cl-loop for elt in (cl-remove-duplicates cycle)
 	     for badness = (2cycle-badness cycle #'(lambda (x y) 
 						     (xnor (funcall test elt x) 
 							   (funcall test elt y))))
@@ -502,7 +502,7 @@ See `cycle-badness' for the measure of a good cycle."
 ;;(/ 288 36)
 
 (cl-defun all-factors (n)
-  (cl-sort (remove-duplicates (mapcar #'product (power-set (factorize n)))) #'<))
+  (cl-sort (cl-remove-duplicates (mapcar #'product (power-set (factorize n)))) #'<))
 ;;(all-factors 120)
 ;;(all-factors 284)
 

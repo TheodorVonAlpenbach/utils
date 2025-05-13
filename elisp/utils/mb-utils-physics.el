@@ -59,7 +59,7 @@
 (cl-defun alcohol-unit (percentage &optional (milliliter 1000) (n 1))
   (if (symbolp percentage)
     (alcohol-unit
-     (case percentage
+     (cl-case percentage
        (:pils .047)
        (:stout7 .07)
        (:imperial-stout .09)

@@ -273,16 +273,16 @@ Note: Either this or mb-ert-test-file is obsolete."
 Currently it only tests the test functions that have been
 evaluated or compiled.
 
-Also, there seems to be a problem with how
-ERT handles environments. My let forms seem to be kept in a
-separate environment, which causes side effects to be kept until
-the time the test is run again. Because of this, you really need
-to evaluate the test function before each test in order to reset
-the bindings. I believe this is a bug.
+Also, there seems to be a problem with how ERT handles
+environments. My `let' forms seem to be kept in a separate
+environment, which causes side effects to be kept until the time
+the test is run again. Because of this, you really need to
+evaluate the test function before each test in order to reset the
+bindings. I believe this is a bug.
 
 I guess the best implementation of this function is to actually
-locate every test fuction that there is and re-evaluate each of
-them before calling (ert t)."
+locate every test fuction there is and re-evaluate each of them
+before calling (ert t)."
   (interactive)
   ;; TODO load all test buffers here
   (ert t))

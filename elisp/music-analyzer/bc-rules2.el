@@ -1,6 +1,6 @@
 ;;; cp methods
 (cl-defun cp-voice (cp voice-symbol)
-  (case voice-symbol
+  (cl-case voice-symbol
     (cf (first cp-voices))
     (cp (second cp-voices))
     (otherwise (error "Unknown voice tag %S" voice-symbol))))
@@ -33,7 +33,7 @@
   "Checks that when both voices leaps in parallel, not both leaps must be bigger than a third.
 Regel 1.6 hos Grinde."
   (let ((leaps (mapcar #'i-step hipair)))
-    (when (and (apply #'eq* (mapcar #'signum leaps)) ;same direction
+    (when (and (apply #'eq* (mapcar #'cl-signum leaps)) ;same direction
 	       (> (apply #'min* (mapcar #'abs leaps)) (first maxmin-leap))))
     "Too big simultaneous leaps"))
 
