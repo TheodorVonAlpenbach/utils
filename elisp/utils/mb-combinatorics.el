@@ -60,7 +60,7 @@ resulting sequence."
 ;;(binomial-coefficient-simple 10 4)
 
 (cl-defun simplify-ratio (ratio)
-  (mapcar (bind #'/ (apply #'gcd ratio)) ratio))
+  (mapcar (bind #'/ (apply #'cl-gcd ratio)) ratio))
 ;;(simplify-ratio '(6 10))
 
 (cl-defun divisor-function (n &optional (order 1))
@@ -83,9 +83,9 @@ resulting sequence."
 (cl-defun remove-factors (factors divisor)
   "Removes all factors in FACTORS that are also factors in DIVISOR"
   (cl-loop for factor in factors
-	for d = divisor then (/ d gcd)
-	for gcd = (gcd factor d)
-        collect (/ factor gcd)))
+	for d = divisor then (/ d cl-gcd)
+	for cl-gcd = (cl-gcd factor d)
+        collect (/ factor cl-gcd)))
 ;;(remove-factors '(2 3 4 5) 12)
 
 (cl-defun binomial-coefficient (n m &optional (method :auto))
@@ -93,10 +93,11 @@ resulting sequence."
   (if (minusp m)
     0
     (let* ((m* (max m (- n m)))
-	   (factors (cl-loop for denominator-factor in (a-b 1 (- n m*))
-			  for numerator-factors = (a-b (1+ m*) n)
-			  then (remove-factors numerator-factors denominator-factor)
-			  finally return numerator-factors)))
+	   (factors
+	    (cl-loop for denominator-factor in (a-b 1 (- n m*))
+		     for numerator-factors = (a-b (1+ m*) n)
+		     then (remove-factors numerator-factors denominator-factor)
+		     finally return numerator-factors)))
       (product* factors :method method))))
 ;;(time (binomial-coefficient 112 100 :auto))
 
@@ -207,8 +208,10 @@ where MATCH is formed fro"
     (cl-loop with winner = (first winners-left)
 	  for runner-up in runner-ups-left
 	  for match = (list winner runner-up)
-	  for draws-given-match = (and (uefa-possible-opponents-p winner runner-up groups)
-				       (uefa-possible-draws (rest winners-left) (remove runner-up runner-ups-left) groups))
+	  for draws-given-match =
+	  (and (uefa-possible-opponents-p winner runner-up groups)
+	       (uefa-possible-draws (rest winners-left)
+				    (remove runner-up runner-ups-left) groups))
 	  if res collect (cons match draws-given-match))
     (list t)))
 

@@ -12,7 +12,7 @@
 ;;(random-elt (a-b -10 10))
 
 (cl-defun remove-nth (n sequence)
-  (concatenate (type-of-super sequence)
+  (cl-concatenate (type-of-super sequence)
     (subseq sequence 0 n)
     (subseq sequence (cl-incf n))))
 ;;(progn (setq qwe "abc") (remove-nth 1 qwe))
@@ -189,11 +189,12 @@ X might be an atom or a sequence.
 Keywords supported: :test :key"
   (let ((list (listify x)))
     (cl-loop for y in (if key
-			(map 'list key sequence)
+			(cl-map 'list key sequence)
 			(cl-coerce sequence 'list)) 
 	  for i from 0
 	  if (cl-member y list :test test)
 	  collect i)))
+;;(positions 'a '(a b c a))
 ;;(positions 'a '(a b c a))
 
 ;;; min/max function
@@ -392,7 +393,9 @@ returns SEQUENCE unaltered."
 			   &key (start1 0) (end1 start1) (start2 0) end2)
   "Insert the elements in SEQ2 into SEQ1."
   (cl-flet ((is (x y z)
-	      (if (listp seq1) (append x y z) (concatenate (type-of x) x y z))))
+	      (if (listp seq1)
+		(append x y z)
+		(cl-concatenate (type-of x) x y z))))
     (is (subseq seq1 0 start1) (subseq seq2 start2 end2) (subseq seq1 end1))))
 ;;(insert-sequence "15010" "_" :start1 2)
 ;;(insert-sequence '(1 2 5) '(3 4) :start1 2 :end1 2)

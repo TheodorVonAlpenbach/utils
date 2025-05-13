@@ -43,9 +43,9 @@
     (should (equal (mapcar (bind #'copy-if #'always 1) seqs) seqs)))
 
   ;; :from-end
-  (should (equal (copy-if #'oddp '(1 2 3 4) :count 1) '(1)))
-  (should (equal (copy-if #'oddp '(1 2 3 4) :count 1 :from-end nil) '(1)))
-  (should (equal (copy-if #'oddp '(1 2 3 4) :count 1 :from-end t) '(3)))
+  (should (equal (copy-if #'cl-oddp '(1 2 3 4) :count 1) '(1)))
+  (should (equal (copy-if #'cl-oddp '(1 2 3 4) :count 1 :from-end nil) '(1)))
+  (should (equal (copy-if #'cl-oddp '(1 2 3 4) :count 1 :from-end t) '(3)))
 
   ;; :count
   (should (equal (length (copy-if #'always "12345" :count 0)) 0))
@@ -131,7 +131,7 @@
 
 (ert-deftest test-split-if ()
   "Test of `split-if'"
- (should (equal (split-if #'oddp '(1 2 3 4 5)) '(nil (1 2) (3 4) (5))))
+ (should (equal (split-if #'cl-oddp '(1 2 3 4 5)) '(nil (1 2) (3 4) (5))))
  (should (equal (split-if (bind #'equal ?a) "babab") '("b" "ab" "ab"))))
 
 (ert-deftest test-type-of-super ()

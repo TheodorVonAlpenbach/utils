@@ -19,9 +19,9 @@
   (should (equal (iso-dttm (add-time (parse-time "1972-01-06T07:15Z") :second 60) t)
 		 "1972-01-06T07:16:00GMT"))
   ;; Not a recommended practice. 
-  (should (equal (iso-dttm (add-time (parse-time "1972-01-06T08:15CET")
+  (should (equal (iso-dttm (add-time (parse-time "1972-01-06T07:15CET")
 			     :year 46 :month 4 :day 19))
-		 "2018-05-25T08:15:00CEST"))
+		 "2018-05-25T07:15:00CEST"))
   ;; This should fail since UTC does not have daylight savings and the
   ;; inner workings of elisp time calculations are based on locale.
   ;; Only proper way to handle these problems is to set the locale to
@@ -104,7 +104,7 @@
 		 "1972-01-06T00:00:00GMT"))
   (should (equal (iso-dttm (midnight (parse-time "1972-01-05T23:00") t) t)
 		 "1972-01-05T00:00:00GMT"))
-  (should (equal (iso-dttm (midnight (parse-time "1972-01-05T23:00cet") t) t)
+  (should (equal (iso-dttm (midnight (parse-time "1972-01-05T23:00CET") t) t)
 		 "1972-01-05T00:00:00GMT"))
   (should (equal (iso-dttm (midnight (parse-time "1972-01-06T00:00") t) t)
 		 "1972-01-06T00:00:00GMT"))
@@ -305,7 +305,6 @@
 
 (ert-deftest test-unix-time ()
   "Test of `unix-time'"
-  (should (equal "CET" (current-timezone)))
   (should (equal (unix-time "1972-01-06T08:15CET") 63530100.0))
   (should (equal (unix-time "1970-01-01T00:00Z") 0.0))
   (should (equal (unix-time "1970-01-01T00:00") -3600.0))

@@ -82,7 +82,7 @@ the start value for the cumulation."
   "Return the cumulative sum of SEQUENCE.
 For the key arguments, see `cumsum-list'."
   (as-list (l sequence) (cumsum-list l key initial-value)))
-;;(cumsum (coerce (0-n 3) 'vector))
+;;(cumsum (cl-coerce (0-n 3) 'vector))
 
 (cl-defun product (sequence &key (key #'identity) (initial-value 1))
   (reduce #'* sequence :key key :initial-value initial-value))
@@ -103,7 +103,7 @@ converting to float if the product is large for an integer."
 (cl-defun product-safe (sequence &rest args)
   "Return the product of SEQUENCE's elements,
 converting to float if the product is large for an integer."
-  (apply #'product-safe-list (coerce sequence 'list) args))
+  (apply #'product-safe-list (cl-coerce sequence 'list) args))
 ;;(product-safe (make-list 19 10))
 
 (cl-defun product* (sequence &key (method :auto) (initial-value 1))
@@ -325,9 +325,9 @@ Each equivalence class is a sequence of the same type as SEQUENCE.
 The equivalence relation is given by keyword :test.
 \nKeywords supported:  :test :key
 \n(fn SEQUENCE [KEYWORD VALUE]...)"
-  (mapcar (bind #'coerce (type-of sequence))
-    (apply #'npartition (coerce sequence 'list) args)))
-;;(partition (coerce '(a 1 b b "string" a) 'vector))
+  (mapcar (bind #'cl-coerce (type-of sequence))
+    (apply #'npartition (cl-coerce sequence 'list) args)))
+;;(partition (cl-coerce '(a 1 b b "string" a) 'vector))
 ;;(partition (vector 'a 1 'b 'b "string" 'a))
 ;;(partition "abcdeafe")
 
@@ -477,8 +477,8 @@ See `cycle-badness' for the measure of a good cycle."
 
 (require 'mb-utils-10000-first-primes)
 (cl-defun primep (n)
-  (not-null (find n 10000-first-primes)))
-;;(remove-if nil (mapcar #'primep (1-n 20)))
+  (not-null (cl-find n 10000-first-primes)))
+;;(cl-remove-if nil (mapcar #'primep (1-n 20)))
 
 (cl-defun factorize (n &optional (primes 10000-first-primes))
   (let* ((max-prime (first (last primes)))
@@ -715,9 +715,9 @@ behavior when the argument is not an integer"
 (cl-defun random-float-base (&optional seed)
   "Return a random number in [0 1]."
   (when seed (random t))
-  (/ (- (coerce (random) 'float) most-negative-fixnum)
-     (- (coerce most-positive-fixnum 'float)
-	(coerce most-negative-fixnum 'float))))
+  (/ (- (cl-coerce (random) 'float) most-negative-fixnum)
+     (- (cl-coerce most-positive-fixnum 'float)
+	(cl-coerce most-negative-fixnum 'float))))
 ;;(cl-loop for i below 100000 count (< (random-float-base) .1)) should -> .1
 
 (cl-defun random-float (&optional (a 0.0) (b 1.0) seed)
@@ -896,7 +896,7 @@ either 0 or 1)"
 	 (max (first (quadratic-solver 1 0 (- y))))
 	 (range (mapcar 'float (a-b (ceiling min) (ceiling max))))
 	 (solution-candidates (mapcar (bind #'/ y 1) range)))
-    (find y solution-candidates :test #'= :key #'(lambda (x) (* (ceiling x) x)))))
+    (cl-find y solution-candidates :test #'= :key #'(lambda (x) (* (ceiling x) x)))))
 ;;(ceilx*x-solver 3.1)
 
 ;; financial
@@ -922,7 +922,7 @@ either 0 or 1)"
     (58.46 breaststroke)))
 
 (cl-defun swimming-relative-distances (&optional (style-symbol 'crawl) (distance 100))
-  (let ((style (find style-symbol swimming-records :key #'second))
+  (let ((style (cl-find style-symbol swimming-records :key #'second))
 	(other-styles (remove* style-symbol swimming-records :key #'second)))
     (mapcar #'(lambda (x)
 		(list (* distance
@@ -1159,7 +1159,7 @@ quotients by the gcd: (%d, %d)"
 
 (cl-defun integer-ceiling (p q)
   "Return the ceiling of P/Q, where P and Q are positive integers.
-This is an effective implementation of (coerce (ceiling (/ (float
+This is an effective implementation of (cl-coerce (ceiling (/ (float
 p) q)))"
   (/ (+ p q -1) q))
 ;;(integer-ceiling 10 3)
@@ -1168,7 +1168,7 @@ p) q)))"
   "Test `integer-ceiling'"
   (cl-loop repeat n
 	   for (p q) = (random-integers 2 1 max-integer)
-	   if (/= (coerce (ceiling (/ (float p) q)) 'integer)
+	   if (/= (cl-coerce (ceiling (/ (float p) q)) 'integer)
 		  (integer-ceiling p q))
 	   collect (list p q)))
 ;;(test-integer-ceiling 100000)
@@ -1176,7 +1176,7 @@ p) q)))"
 (cl-defun test-another-integer-operation (n &optional (max-integer 1000000))
   (cl-loop repeat n
 	   for (p q r) = (random-integers 3 1 max-integer)
-	   for res1 = (coerce (floor (- (float r) (/ (float p) q))) 'integer)
+	   for res1 = (cl-coerce (floor (- (float r) (/ (float p) q))) 'integer)
 	   for res2 = (- r (integer-ceiling p q))
 	   if (/= res1 res2) collect (list r p q res1 res2)))
 ;;(test-another-integer-operation 1000000)
@@ -1187,7 +1187,7 @@ p) q)))"
   (/ (cl-loop with primes = (subseq 10000-first-primes 0 15)
 	      repeat n
 	      for s = (+ (random-integer 1 50) (random-integer 1 50))
-	      count (and (find s primes) (< s 50)))
+	      count (and (cl-find s primes) (< s 50)))
      (float n)))
 ;;(* (problem 1000000) (/ 2500 313.0))
 

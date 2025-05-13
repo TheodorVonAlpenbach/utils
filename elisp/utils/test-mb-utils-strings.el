@@ -42,7 +42,7 @@
 		   :key (compose #'number-to-string #'length))
 		 "(1)"))
   (should (equal (concat* '(1 2 nil 3)
-		   :test #'oddp
+		   :test #'cl-oddp
 		   :key #'number-to-string
 		   :discard-nil t)
 		 "13"))
@@ -188,7 +188,7 @@
   "Test of `integer-to-literary-string'"
   (should
    (equal
-    (mapcar #'integer-to-literary-string (list 21 99 100 123456789012))
+    (mapcar #'integer-to-literary-string (list 21 99 100 100003))
     '("twenty-one" "ninety-nine" "one hundred" "one hundred thousand three"))))
 
 (ert-deftest test-andcat ()

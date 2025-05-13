@@ -471,7 +471,7 @@ to get return value, default nil."
   "A recursive generalization of `mapcar*'"
   (if (some #'atom args)
       (apply fn args)
-      (apply #'mapcar* 
+      (apply #'cl-mapcar
              #'(lambda (&rest args) 
                  (apply #'rmapcar fn args))
              args)))

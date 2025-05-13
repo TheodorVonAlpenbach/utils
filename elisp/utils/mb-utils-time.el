@@ -1,3 +1,5 @@
+;; -*- lexical-binding: t; -*-
+
 ;;;; Time utils library --- A new approach 
 
 ;;;; The time utils in Emacs are more powerful than I thought. This
@@ -237,6 +239,10 @@ ZONE is a pair (ZONE-CODE . UTC-OFFSET). The result is on the form
 	    sign h (or m "00"))))
       ;; Code suffix not found
       string))
+;;(clean-time-zone-suffix "1972-01-05")
+;;(date-to-time "1972-01-06T00:00+0000")
+;;(date-to-time "1972-01-06T00:00+0100")
+;;(date-to-time "1972-01-06")
 ;;(clean-time-zone-suffix "1972-01-05T23:00Z")
 ;;(clean-time-zone-suffix "1972-01-05T23:00+01:00")
 
@@ -254,12 +260,8 @@ ZONE is a pair (ZONE-CODE . UTC-OFFSET). The result is on the form
   ;; This function therefore replaces 'T' with a space before calling
   ;; `date-to-time'.
   (if (< (length string) 11)
-    (mb-parse-date-string (concat string " 00:00"))
-    (when (eql (char string 10) ?T)
-      (setf (char string 10) ? ))
+    (date-to-time string)
     (date-to-time (clean-time-zone-suffix string))))
-;;(decode-time (mb-parse-date-string "2018-05-24T00:00+0000"))
-;;(decode-time (mb-parse-date-string "2018-05-24T00:00Z"))
 
 (cl-defun parse-time (time-designator)
   "Returns a new time object equal to TIME-DESIGNATOR.
@@ -273,8 +275,6 @@ Argument may be a time objects itself or a string."
     (number (seconds-to-time time-designator))
     (otherwise (error "%s is not a legar time designator"))))
 ;;(mapcar #'parse-time (list 1527598870.823139 "2005-01-18 09:15" '2014-04-02))
-;;(parse-time "2000-01-18T22:31:00CET")
-;;(parse-time "2000-01-18T22:31:00Z")
 
 (cl-defun parse-ms (ms)
   "Converts an integer representing unix milliseconds to new time object."
@@ -333,6 +333,9 @@ regardless of this changes the status of daylight saving time
 status. If UNIVERSAL-P is not nil, return result in UTC."
   (--time-encode (--dtime-set-time (decode-time etime) second minute hour)
 		 universal-p))
+;;(midnight (parse-time "1972-01-05T23:00CET"))
+;;(decode-time (parse-time "1972-01-05T23:00CET"))
+;;(decode-time (parse-time "1972-01-05T23:00Z"))
 
 ;; Reference times
 (defmacro encode-now ()
@@ -343,6 +346,7 @@ status. If UNIVERSAL-P is not nil, return result in UTC."
   "Convert ETIME to an ISO 8601 time string.
 If UNIVERSAL-P is not nil, return result in UTC."
   (format-time-string "%Y-%m-%dT%H:%M:%S%Z" etime universal-p))
+;;(iso-dttm (list 968 61552))
 ;;(mapcar #'iso-dttm (list (parse-time (seconds-to-time (float-time))) (encode-now)))
 
 (cl-defun etime-part (etime part &optional universal-p)
@@ -482,11 +486,11 @@ of the week."
 
 (cl-defun weekday-number (weekday-designator)
   "Return the weekday number corresponding to WEEKDAY-DESIGNATOR.
-Possible values of WEEKDAY-DESIGNATOR
+Possible cl-values of WEEKDAY-DESIGNATOR
 are :SUNDAY, :MONDAY, :TUESDAY, :WEDNESDAY,:THURSDAY, :FRIDAY,
 and :SATURDAY."
-  (position weekday-designator '(:sunday :monday :tuesday :wednesday
-				 :thursday :friday :saturday)))
+  (cl-position weekday-designator
+    '(:sunday :monday :tuesday :wednesday :thursday :friday :saturday)))
 
 (cl-defun weekstart (&optional (etime (now)) (start-weekday :monday))
   "Return encoded time of the start of the week ETIME is in.
@@ -538,13 +542,12 @@ day of the week."
 
 ;;;; Time units
 (let* ((2^16 (expt 2 16))
-	       (s 1.0) (m (* 60 s)) (h (* 60 m)) (d (* 24 h)) 
-	       (w (* 7 d)) (mo (* 30 d)) (y (* 365.24 d)))
-
-  (cl-defun unit-factor (unit)
+       (s 1.0) (m (* 60 s)) (h (* 60 m)) (d (* 24 h))
+       (w (* 7 d)) (mo (* 30 d)) (y (* 365.24 d)))
+  (defun unit-factor (unit)
     (cl-case unit
       (:second s) (:minute m) (:hour h) (:day d) (:week w)
-      (:month mo) (:year y) (:olympiad (* 4 y)) 
+      (:month mo) (:year y) (:olympiad (* 4 y))
       (:decennium (* 10 y)) (:century (* 100 y))
       (:millenium (* 1000 y))
       (otherwise (error "Unknown unit `%S'." unit))))
@@ -701,7 +704,7 @@ EXPRESSION and VALUE is the corresponding evaluation value."
 	(result (gensym)))
     `(let ((,current-time-start (current-time))
 	   (,result ,expression)) ;unwind-?
-       (values (diff-current-time-msec ,current-time-start
+       (cl-values (diff-current-time-msec ,current-time-start
 				       (current-time))
 	       ,result))))
 ;;(fourth (first *dic-db*))

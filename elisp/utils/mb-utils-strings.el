@@ -372,7 +372,7 @@ not affect TEST.
 IN may also be a function (fn i), taking an index argument, see `infix-list'."
   (let* ((list* (mapcar key
 		  (cl-remove-if-not test
-		    (if discard-nil (remove nil list) list)))))
+		    (if discard-nil (cl-remove nil list) list)))))
     (string-indent-lines
      (concat pre
 	     (apply #'concat
@@ -760,6 +760,7 @@ See also `group-consequtive-integers'."
 	    (randomize (substring word 1 -1))
 	    (substring word -1))
     word))
+;;(alliterate-word "qweriuiuie")
 
 (cl-defun alliterate (string)
   "Randomly scramble the letter"
