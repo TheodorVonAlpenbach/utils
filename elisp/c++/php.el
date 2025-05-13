@@ -12,7 +12,7 @@
 (add-hook 'php-mode-hook 'mb-php-mode-hook)
 (cl-defun mb-php-mode-hook ()
   "My PHP mode configuration."
-  (linum-mode)
+  (display-line-numbers-mode)
   (setq indent-tabs-mode nil
         c-default-style "pear"
         tab-width 4

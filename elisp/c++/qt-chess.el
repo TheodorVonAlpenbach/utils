@@ -36,7 +36,7 @@
     (setf evil-symbol-word-search t)
     (setf indent-tabs-mode nil)
     (setq-local parens-require-spaces nil)
-    (linum-mode 1)
+    (display-line-numbers-mode)
     (chess-kbd-maps)))
 
 (cl-defun chess-pro-hook ()

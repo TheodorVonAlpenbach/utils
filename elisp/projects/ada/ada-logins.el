@@ -45,14 +45,17 @@ INFIX.
    (if current-prefix-arg
      (if (< current-prefix-arg 100)
        (format "celev_no456326%sa_1" (ada-login-infix current-prefix-arg))
-       (cl-destructuring-bind (pupil-prefix-arg pupil-number) (cl-floor current-prefix-arg 10)
-	 (format "celev_no456326%sa_%d" (ada-login-infix pupil-prefix-arg) pupil-number)))
+       (cl-destructuring-bind (pupil-prefix-arg pupil-number)
+	   (cl-floor current-prefix-arg 10)
+	 (format "celev_no456326%sa_%d"
+	   (ada-login-infix pupil-prefix-arg) pupil-number)))
      "celev_no456326499_1a_1")))
 
 ;; prefix for *clipboard-map* is "cv"
 (defvar *ada-login-map* (make-sparse-keymap))
 
-(define-key *ada-login-map* "p" #'ada-copy-to-clipboard)
+(define-key *ada-login-map* "p" #'ada-copy-password-to-clipboard)
+(define-key *ada-login-map* "u" #'ada-copy-username-to-clipboard)
 (define-key *ada-login-map* "e" #'ada-login-pupil)
 (define-key *ada-login-map* "l" #'ada-login-teacher)
 

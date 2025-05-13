@@ -13,26 +13,27 @@
 		 :from 'user
 		 :where '(like name $r1))
     name))
-;;(user-from-name "%celev%99_1a_1 %")
+;;(caar (user-from-name "%celev%99_1a_1 %" :name))
+;;(caar (user-from-name "%celev%99_1a_1 %" :feide-id))
 ;;(user-from-name "%laerer_no456326499_1%")
 
 (cl-defun user-from-user-name (user-name &rest columns)
   "Return a list of users matching USER-NAME"
   (emacsql db
     (vector :select (column-selection columns)
-		 :from 'user
-		 :where '(like user-name $r1))
+	    :from 'user
+	    :where '(like user-name $r1))
     user-name))
 ;;(car (user-from-name "%celev%99_1a_1 %"))
 ;;(car (user-from-name "%Haakon%"))
 ;;(car (user-from-name "%celev%502%"))
 
 (cl-defun user-id-from-pseudonym (user-pseudonym)
-  (string-to-integer
-   (caar (emacsql db
-	   [:select user-id :from user-pseudonym :where (= user-pseudonym $r1)]
-	   user-pseudonym))))
-;;(user-id-from-pseudonym "eac62d04-2488-4435-b121-87d90c4db9dc")
+  (caar
+   (emacsql db
+     [:select user-id :from user-pseudonym :where (like user-pseudonym $r1)]
+     user-pseudonym)))
+;;(user-id-from-pseudonym "fb0def31-9f25-4cd6-9b0d-defcbe02e815")
 
 (cl-defun user-from-pseudonym (user-pseudonym &rest columns)
   (car (emacsql db

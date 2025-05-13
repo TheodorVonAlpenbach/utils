@@ -207,7 +207,6 @@ and running Git.")
 	 collect x into res
 	 finally do (setf load-path (append res load-path)))
 
-(length (directory-files (expand-file-name ".emacs.d/elpa" +home-dir+) t))
 ;; smartparens
 (add-to-list 'load-path "~/.emacs.d/smartparens-master")
 
@@ -286,6 +285,7 @@ and running Git.")
 (add-hook 'text-mode-hook 'turn-on-auto-fill)
 
 (add-hook 'sh-mode-hook 'display-line-numbers-mode)
+;; DD_API_KEY
 
 ;;; What's this?! (2015-04-30, but now I have a Clue...)
 ;; for some reason the following must be done in addition to the above
@@ -316,6 +316,7 @@ and running Git.")
 			    mb-indent
 			    quiz-park
 			    mb-js-mode
+			    quiz
 			    mb-ert
 			    mb-org)
 			  *local-requires*)

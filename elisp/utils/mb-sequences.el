@@ -43,8 +43,8 @@
 SEQUENCE is coerced to a list bound to the symbol LIST. The
 evaluation of the last form in BODY is expected to be a list,
 which is finally coerced to the same type as SEQUENCE."
-  `(let ((,list (coerce ,sequence 'list)))
-     (coerce (progn ,@body) (sequence-type ,sequence))))
+  `(let ((,list (cl-coerce ,sequence 'list)))
+     (cl-coerce (progn ,@body) (sequence-type ,sequence))))
 (cl-indent 'as-list 1)
 
 (cl-defun copy-if (cl-pred cl-seq &key key count from-end)
@@ -59,16 +59,16 @@ Keywords supported:  :key :count :from-end
     (cl-loop with max-count = (or count most-positive-fixnum)
 	  with current-count = 0
 	  with seq = (if from-end (reverse cl-seq) cl-seq)
-	  with values = (if key (mapcar key seq) seq)
+	  with cl-values = (if key (mapcar key seq) seq)
 	  for x in seq
-	  for v in values
+	  for v in cl-values
 	  if (= current-count max-count) return res
 	  if (funcall cl-pred v)
 	    do (cl-incf current-count) and
 	    collect x into res
 	  finally (return res))
     ;; else we convert cl-seq to a list, call ourselves, and convert back
-    (coerce (copy-if cl-pred (coerce cl-seq 'list)
+    (cl-coerce (copy-if cl-pred (cl-coerce cl-seq 'list)
 	      :key key :count count :from-end from-end)
 	    (type-of cl-seq))))
 ;;(copy-if #'oddp '(1 2 3 4) :key #'1+ :count 1 :from-end nil)
@@ -188,7 +188,9 @@ X might be an atom or a sequence.
 
 Keywords supported: :test :key"
   (let ((list (listify x)))
-    (cl-loop for y in (if key (map 'list key sequence) (coerce sequence 'list)) 
+    (cl-loop for y in (if key
+			(map 'list key sequence)
+			(cl-coerce sequence 'list)) 
 	  for i from 0
 	  if (cl-member y list :test test)
 	  collect i)))
@@ -240,7 +242,7 @@ This function is not intended for use outside of this module."
 	for x across vec
 	when (funcall test x min)
 	do (setf min x pos i)
-	finally (return (values min pos))))
+	finally (return (cl-values min pos))))
 ;;(nminimum-nokey (vector 17 17) #'>=)
 
 (cl-defun minimum (cl-seq &key (test #'<) key (start 0) end from-end)
@@ -260,11 +262,11 @@ respectively.
       (cl-destructuring-bind (min pos)
 	  (nminimum-nokey
 	   (if key
-	     (map 'vector key (subseq cl-seq start end))
-	     (coerce (subseq cl-seq start end) 'vector))
+	     (cl-map 'vector key (subseq cl-seq start end))
+	     (cl-coerce (subseq cl-seq start end) 'vector))
 	   test)
 	(let ((pos* (+ pos start)))
-	  (values (elt cl-seq pos*) pos* min))))))
+	  (cl-values (elt cl-seq pos*) pos* min))))))
 ;;(minimum '(1 2 3 5 5) :start 3)
 
 (cl-defun min-position (&rest args)
@@ -309,7 +311,7 @@ Note! This function is now obsolete. Use `subseq' instead."
 (cl-defun deltas (sequence)
   "Returns the canonical deltas around numbers in sequence.
 If A, B, C are consecutive numbers, the delta for B is (- (/ (+ A C) 2) B)."
-  (coerce (deltas-list (coerce sequence 'list)) (type-of sequence)))
+  (cl-coerce (deltas-list (cl-coerce sequence 'list)) (type-of sequence)))
 ;;(deltas (vector 0 5 10 14 17 20 22))
 
 (cl-defun center (sequence k &optional right)
@@ -369,7 +371,7 @@ returns SEQUENCE unaltered."
     sequence
     (if (or (integerp projection) (functionp projection))
       (project-1 sequence projection)
-      (coerce (cl-loop for x in (coerce projection 'list)
+      (cl-coerce (cl-loop for x in (cl-coerce projection 'list)
 		    collect (project-1 sequence x))
 	      (type-of-super sequence)))))
 ;;(project '(a b c) '(1 0 2 1))
@@ -380,13 +382,14 @@ returns SEQUENCE unaltered."
 
 (cl-defun project-sequence (sequence projection)
   "Project multi-dimensional SEQUENCE according to PROJECTION-ARGS."
-  (coerce (mapcar #'(lambda (x) (project x projection)) sequence)
-	  (type-of-super sequence)))
+  (cl-coerce (mapcar #'(lambda (x) (project x projection)) sequence)
+	     (type-of-super sequence)))
 ;;(project-sequence '("012" "098") '(0 2))
 ;;(mapcar #'first (project-sequence '((1 2 3) (4 5 6)) '(1 2)))
 ;;(project-sequence '((1 "Mats" 'qwe) (2 "Ludvik" 'ewq)) 1)
 
-(cl-defun insert-sequence (seq1 seq2 &key (start1 0) (end1 start1) (start2 0) end2)
+(cl-defun insert-sequence (seq1 seq2
+			   &key (start1 0) (end1 start1) (start2 0) end2)
   "Insert the elements in SEQ2 into SEQ1."
   (cl-flet ((is (x y z)
 	      (if (listp seq1) (append x y z) (concatenate (type-of x) x y z))))
@@ -397,7 +400,8 @@ returns SEQUENCE unaltered."
 
 (cl-defun replace-sequence (seq1 seq2 &optional (start 0) end)
   "Replace the elements in SEQ2 into SEQ1."
-  (insert-sequence seq1 seq2 :start1 start :end1 (or end (+ start (length seq2)))))
+  (insert-sequence seq1 seq2
+		   :start1 start :end1 (or end (+ start (length seq2)))))
 ;;(replace-sequence "01234" "ab" 1)
 ;;(replace-sequence '(0 1 2 3 4) '(a b) 1 -2)
 

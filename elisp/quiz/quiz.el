@@ -1,21 +1,25 @@
 ;;; TODO
-;;; * this file should only contain settings and mappings, maybe also other methods that do not belong to other files
-;;; * this file should control including the other quiz lisp files (with 'require etc)
+;;; * this file should only contain settings and mappings, maybe also other
+;;;   methods that do not belong to other files
+;;; * this file should control including the other quiz lisp files (with
+;;;   'require etc)
 
 ;;; o mail function (with mail list)
 ;;; o fix fill prefix thing (maybe the best thing is to provide a quiz mode)
 ;;; o coloring (set appropriate faces)
 
-;;; * make a re-number-items method (sometimes a q-question must be deleted, and then...)
+;;; * make a re-number-items method (sometimes a q-question must be deleted, and
+;;;   then...)
 ;;; * base methods on "objects": 
 ;;;   · q-file/q-buffer (quiz buffer or summary quiz buffer)
 ;;;   · q-list (entire quiz-buffer or region of summary buffer)
 ;;;   · q-question (entity containing at least a q-item)
-;;;   · q-item (either Q, A, S by now; later I might add C for comment, T: for the durations of the validity)
+;;;   · q-item (either Q, A, S by now; later I might add C for comment, T: for
+;;;     the durations of the validity)
 
 ;; see legenda.txt for categories
 
-
+(require 'quiz-csv)
 ;;;;;;;;;;;;;;;; UTILS ;;;;;;;;;;;;;;;;;;
 
 (cl-defun buffer-replace (string1 string2)
@@ -37,9 +41,8 @@
 
 ;;;;;;;;;;;;;;; BASIC ;;;;;;;;;;;;;;
 
-
 (defconst *quiz-buffer* "*quiz*" "")
-(defconst *quiz-dir* (concat *shared-data-dir* "quiz/") "")
+(defconst *quiz-dir* (concat +home-dir+ "projects/quiz/") "")
 (defconst *quiz-without-source-dir* (concat *quiz-dir* "without-source/") "")
 (defconst *quiz-scratch-buffername* "scratch.qz")
 (defconst quiz-popup-buffer-size 12)
@@ -49,8 +52,10 @@
     (:answer "A")
     (:source "S")
     (:comment "C") 
+    (:extra "E") 
+    (:theme "T") 
     (:difficulty "D")
-    (:alternatives "E")))
+    (:alternatives "X")))
 
 (defconst *quiz-items-short*
   (apply #'concat (mapcar #'second *quiz-items-long*))) ; ==> "QASCDE"
@@ -58,7 +63,6 @@
 (cl-defun quiz-set-vars (&optional (items-long *quiz-items-long*))
   "TODO: Disallow Q0000 etc as label format. Currently, this method is obsolete"
   (setq *quiz-items-short* (apply #'concat (mapcar #'second items-long))))
-
 
 (cl-defun quiz-item-prefix (item) (second (assoc item *quiz-items-long*)))
 ;;(quiz-item-prefix :answer)
@@ -68,13 +72,26 @@
 ;;(quiz-item :question 1 "What's the capital of Transylvania?")
 
 ;;short-cuts
-(cl-defun quiz-item-q (n &optional (string "")) (quiz-item :question n string))
-(cl-defun quiz-item-a (n &optional (string "")) (quiz-item :answer n string))
-(cl-defun quiz-item-s (n &optional (string "")) (quiz-item :source n string))
-(cl-defun quiz-item-e (n &optional (string "")) (quiz-item :alternatives n string))
-;;(quiz-item-e 10 "qwe\n")
+(cl-defun quiz-item-q (n &optional (string ""))
+  (quiz-item :question n string))
+(cl-defun quiz-item-a (n &optional (string ""))
+  (quiz-item :answer n string))
+(cl-defun quiz-item-s (n &optional (string ""))
+  (quiz-item :source n string))
+(cl-defun quiz-item-c (n &optional (string ""))
+  (quiz-item :comment n string))
+(cl-defun quiz-item-t (n &optional (string ""))
+  (quiz-item :theme n string))
+(cl-defun quiz-item-d (n &optional (string ""))
+  (quiz-item :difficulty n string))
+(cl-defun quiz-item-e (n &optional (string ""))
+  (quiz-item :extra n string))
+(cl-defun quiz-item-x (n &optional (string ""))
+  (quiz-item :alternatives n string))
+;;(quiz-item-x 10 "qwe\n")
 
-(cl-defun quiz-regexp-item-start (&optional (items-short *quiz-items-short*) (forward t))
+(cl-defun quiz-regexp-item-start
+    (&optional (items-short *quiz-items-short*) (forward t))
   "Returns a regular expression that matches the beginning of a
 q-item. If FORWARD is nil it returns instead an expression that
 matches the end of a q-item. ITEMS specifies which types of q-items
@@ -90,7 +107,8 @@ that are recognized."
 
 ;;;   · q-file/q-buffer (quiz buffer or summary quiz buffer)
 ;;;   · q-list (entire quiz-buffer or region of summary buffer)
-;;;   · q-question (entity containing at least a q-item, separated by at least one blank line)
+;;;   · q-question (entity containing at least a q-item, separated by at least
+;;;     one blank line)
 ;;;   · q-item (either Q (mandatory), A, S by now; later I might add C
 ;;;     for comment, T: for the durations of the validity)
 ;;;     q-item <-- q-item-header q-item-header-space q-item-text
@@ -196,7 +214,8 @@ the first q-question labeled N"
   ""
   (quiz-current-item-region-end items-short))
 
-(cl-defun quiz-beginning-of-item-text (&optional (items-short *quiz-items-short*))
+(cl-defun quiz-beginning-of-item-text
+    (&optional (items-short *quiz-items-short*))
   (quiz-beginning-of-item items-short)
   (re-search-forward (quiz-item-beg-regexp)))
 
@@ -210,18 +229,21 @@ the first q-question labeled N"
   (error "Not implemented"))
 ;;;;;;;;
 
-(cl-defun quiz-current-item-region-start (&optional (items-short *quiz-items-short*))
+(cl-defun quiz-current-item-region-start
+    (&optional (items-short *quiz-items-short*))
   (save-excursion
     (end-of-line)
     (re-search-backward (quiz-regexp-item-start items-short t) nil t)))
 
-(cl-defun quiz-current-item-region-end-old (&optional (items-short *quiz-items-short*))
+(cl-defun quiz-current-item-region-end-old
+    (&optional (items-short *quiz-items-short*))
   (save-excursion
     (if (re-search-backward (quiz-regexp-item-start items-short nil) nil t)
       (re-search-forward (quiz-regexp-item-start *quiz-items-short* t) nil t)
       (point-max))))
 
-(cl-defun quiz-current-item-region-end (&optional (items-short *quiz-items-short*))
+(cl-defun quiz-current-item-region-end
+    (&optional (items-short *quiz-items-short*))
   (re-search-forward (quiz-regexp-item-start *quiz-items-short* t) nil t)
   (eol :offset -1))
 
@@ -253,10 +275,27 @@ ITEM is not given or \"\", the item at point is used."
 ;;; Insert
 (cl-defun quiz-insert-empty-question ()
   (interactive)
-  (quiz-insert-question "" "" "" (current-buffer))
+  ;; (quiz-insert-question "" "" "" (current-buffer))
+  (quiz-insert-question-pugg)
   (quiz-forward-item))
 
-(cl-defun quiz-insert-question-base (question answer source &optional (point (point)))
+(cl-defun quiz-insert-question-pugg (&optional (point (point)))
+  "TODO: get behaviour from #'LYNX-INSERT-REGION-IN-QUIZ-OUTLINE"
+  (goto-char point)
+    (let ((n (quiz-read-n-prev-question)))
+      (delete-blank-lines)
+      (unless (<= n 1) (newline))
+      (insert (quiz-item-q n ""))
+      (insert (quiz-item-a n ""))
+      (insert (quiz-item-c n ""))
+      (insert (quiz-item-e n ""))
+      (insert (quiz-item-t n ""))
+      (insert (quiz-item-d n "")))
+    (newline)
+    (point))
+
+(cl-defun quiz-insert-question-base (question answer source
+				     &optional (point (point)))
   "TODO: get behaviour from #'LYNX-INSERT-REGION-IN-QUIZ-OUTLINE"
   (goto-char point)
     (let ((n (quiz-read-n-prev-question)))
@@ -268,7 +307,9 @@ ITEM is not given or \"\", the item at point is used."
     (newline)
     (point))
 
-(cl-defun quiz-insert-question (question answer source &optional (buffer (quiz-get-buffer)) (point (point-max)))
+(cl-defun quiz-insert-question
+    (question answer source
+     &optional (buffer (quiz-get-buffer)) (point (point-max)))
   "TODO: get behaviour from #'LYNX-INSERT-REGION-IN-QUIZ-OUTLINE"
   (with-buffer buffer
     (quiz-insert-question-base question answer source point)))
@@ -343,7 +384,8 @@ ITEM is not given or \"\", the item at point is used."
 (cl-defun quiz-current-item-p (item)
   (eql (quiz-current-item) item))
 
-(cl-defun quiz-get-buffer (&optional (buffer-name (format "mq-%s.qz" (iso-date))))
+(cl-defun quiz-get-buffer
+    (&optional (buffer-name (format "mq-%s.qz" (iso-date))))
   "Returns the standard quiz buffer. If the underlying file does not
 exist, it is created, and the buffers mode is set to TEXT-MODE and
 other local variables are set."
@@ -355,24 +397,24 @@ other local variables are set."
 
 (cl-defun quiz-read-n-prev-question (&optional (point (point)))
   (interactive)
-  (if (quiz-current-item-number)
-    (1+ (string-to-int (match-string 1))) 
-    1))
+  (aif (quiz-current-item-number) (1+ it) 1))
 
 (defconst quiz-hanging-space 1)
 
-(cl-defun quiz-current-item-number (&optional (point (point)) (items *quiz-items-short*))
+(cl-defun quiz-current-item-number
+    (&optional (point (point)) (items *quiz-items-short*))
   (save-excursion
     (goto-char point)
     (end-of-line)
     (if (re-search-backward (format "^[%s]\\([0-9]+\\):" items) nil t)
-      (string-to-int (match-string 1))
+      (string-to-integer (match-string 1))
       ;; point is in front of first item if there is any
       (if (re-search-forward (format "^[%s]\\([0-9]+\\):" items) nil t)
-	(string-to-int (match-string 1))))))
+	(string-to-integer (match-string 1))))))
 ;;(quiz-current-item-number)
 
-(cl-defun quiz-paragraph-indent (&optional (point (point)) (items *quiz-items-short*))
+(cl-defun quiz-paragraph-indent
+    (&optional (point (point)) (items *quiz-items-short*))
   "3 or 4"
   (+ 2 (if (< (quiz-current-item-number point) 10)
 	 1 2)))
@@ -556,14 +598,17 @@ respectively are to be included for each question record."
 		    "Truls Flatberg <trulsf@ifi.uio.no>"
 		    "Thomas Bergkirk <thomas.bergkirk@rubicontv.no>"))))
 
-(cl-defun purify-address (address) (string-match* "<?\\([^ >]*@[^ >]*\\)>?" address 1))
+(cl-defun purify-address (address)
+  (string-match* "<?\\([^ >]*@[^ >]*\\)>?" address 1))
 
 (cl-defun quiz-mail-buffer (refresh)
   "Sends current quiz buffer as mail to recipients"
   (interactive "P")
   (if refresh (mb-refresh-addresses))
   (let* ((group quiz-default-mail-group)
-	 (to (concat* (second (assoc group quiz-mail-groups)) :in ", " :key #'purify-address))
+	 (to (concat* (second (assoc group quiz-mail-groups))
+	       :in ", "
+	       :key #'purify-address))
 	 (subject (buffer-name))
 	 (body (buffer-string)))
     (gnus-msg-mail "" subject)
@@ -604,7 +649,8 @@ at the beginning of the q-question."
 	(quiz-question-set-number-1 n)
 	(incf n)))))
 
-(cl-defun quiz-summary-edit-question-1 (number &optional (date (midnight)) (path *quiz-dir*))
+(cl-defun quiz-summary-edit-question-1
+    (number &optional (date (midnight)) (path *quiz-dir*))
   "Opens the file with the requested question defined by NUMBER and
 DATE. TODO: coordinate this with goto methods, ie. goto-Q etc."
   (interactive "P")
@@ -620,14 +666,15 @@ DATE. TODO: coordinate this with goto methods, ie. goto-Q etc."
     (save-excursion
       (end-of-line)
       (re-search-backward (format "[%s]\\([0-9]+\\)" *quiz-items-short*))
-      (setq n (string-to-int (match-string 1)))
+      (setq n (string-to-integer (match-string 1)))
       (re-search-backward (format "mq-\\(%s\\)" *iso-date*))
       (setq iso-date (match-string 1))
       (quiz-summary-edit-question-1 n iso-date path))))
 
 (require 'mb-utils-buffer)
 
-(cl-defun quiz-convert-aftenposten-nyhetsquiz-question-to-qz-question (beg end n &optional s)
+(cl-defun quiz-convert-aftenposten-nyhetsquiz-question-to-qz-question
+    (beg end n &optional s)
   "STRING is aftenposten question string. Returns a string question in
 qz format. The question is numbered N."
   (let* ((string (buffer-substring beg end))
@@ -645,11 +692,15 @@ qz format. The question is numbered N."
   (let ((n 0)) 
     (buffer-do-regions beg end ("\\(.*\n.*\n\\)\\s-*\n" 1)
       ;;(message (buffer-substring beg (+ beg 20)))
-      (quiz-convert-aftenposten-nyhetsquiz-question-to-qz-question beg end (incf n)))))
+      (quiz-convert-aftenposten-nyhetsquiz-question-to-qz-question
+       beg end (incf n)))))
 
-(require 'quiz-csv)
 (provide 'quiz)
 
-;;For referering til IDLs hjemmesider: http://www.mylder.no/idl/views/640&ref0=291
-;;Kirkeinndelinger og rettslige inndelinger: http://www.ssb.no/aarbok/tab/t-000010-001.html
-;;http://www.kongehuset.no/ 
+;; For referering til IDLs hjemmesider:
+;; http://www.mylder.no/idl/views/640&ref0=291
+
+;; Kirkeinndelinger og rettslige inndelinger:
+;; http://www.ssb.no/aarbok/tab/t-000010-001.html
+
+;; http://www.kongehuset.no/ 

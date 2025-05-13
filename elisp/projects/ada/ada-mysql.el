@@ -1,5 +1,5 @@
 ;; -*- lexical-binding: t; -*-
-(require 'emacsql)
+(require 'emacsql-mysql)
 (require 'rot47)
 
 ;;; To debug an expression, use emacsql-compile, e.g:
@@ -7,7 +7,7 @@
 
 (cl-defun column-selection (columns)
   (if columns
-    (coerce (mapcar #'decolonize-symbol columns) 'vector)
+    (cl-coerce (mapcar #'decolonize-symbol columns) 'vector)
     '*))
 ;;(mapcar #'column-selection '(nil (a :b)))
 
@@ -49,12 +49,15 @@
     (string-to-clipboard (funcall retrieve-fun (ada-read-pwd env)) t)
     (message "%s for %S was copied to clipboard" token-type env)))
 
-(cl-defun ada-copy-to-clipboard (&optional prefix)
+(cl-defun ada-copy-password-to-clipboard ()
   (interactive)
   (let ((n (or current-prefix-arg 5)))
-    (if (< n 10)
-      (ada-copy-to-clipboard-1 n (compose #'rot47 #'third) "Password")
-      (ada-copy-to-clipboard-1 (- 5 10) #'sixth "Username"))))
+    (ada-copy-to-clipboard-1 n (compose #'rot47 #'third) "Password")))
+
+(cl-defun ada-copy-username-to-clipboard ()
+  (interactive)
+  (let ((n (or current-prefix-arg 5)))
+    (ada-copy-to-clipboard-1 n #'sixth "Username")))
 
 ;; prefix gh q
 (cl-defun mb-mysql-map ()
@@ -70,7 +73,7 @@
 
 (cl-defun ada-set-environment (&optional prefix)
   (interactive)
-  (let ((env (ada-prefix-to-environment current-prefix-arg)))
+  (let ((env (ada-prefix-to-environment (or current-prefix-arg 1))))
     ;; if no exception
     (setf db (ada-mysql-connect env))))
 ;;(ada-set-environment)

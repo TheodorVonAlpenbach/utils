@@ -257,7 +257,7 @@ debug mode no longer triggers the buffer's modified mark."
 	  ((?_ . "w")) 	  ; puts _ as a word constituent, simplifying our keywords significantly
 	  ))
   (scilab-show-all-breakpoints)
-  (linum-mode t)
+  (display-line-numbers-mode)
 
   ;; finally launch scilab
   (when +with-scilab-process-p+

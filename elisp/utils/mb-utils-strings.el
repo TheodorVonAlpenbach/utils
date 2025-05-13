@@ -796,10 +796,10 @@ length."
 ;;; tab format. TODO move this somewhere else
 (cl-defun tab-column-type (column)
   (cond
-    ((every #'integerp column) 'integer)
-    ((and (every #'numberp column)
-	  (some #'floatp column)) 'float)
-    ((every #'stringp column) 'string)))
+    ((cl-every #'integerp column) 'integer)
+    ((and (cl-every #'numberp column)
+	  (cl-some #'floatp column)) 'float)
+    ((cl-every #'stringp column) 'string)))
 ;;(tab-column-type '((1 2)))
 ;;(tab-column-type '("qe" "qe"))
 
@@ -815,7 +815,7 @@ length."
 
 (cl-defun tab-control-string (widths &key (type 'string) (separator " "))
   (let ((types (if (atom type) (make-list (length widths) type) type)))
-    (concat* (mapcar* #'tab-flag widths types) :in separator)))
+    (concat* (cl-mapcar #'tab-flag widths types) :in separator)))
 ;;(tab-control-string '(4 5 1) :type '(integer integer string))
 
 (cl-defun tab-format (string-table
@@ -826,9 +826,9 @@ length."
 		      (eql (tab-column-type header) 'string))))
     (let* ((columns (transpose string-table))
 	   (types (mapcar #'tab-column-type columns))
-	   (cwidths (mapcar* #'tab-column-width columns types))
+	   (cwidths (cl-mapcar #'tab-column-width columns types))
 	   (hwidths (and header (mapcar #'length header)))
-	   (widths (if header (mapcar* #'max cwidths hwidths) cwidths))
+	   (widths (if header (cl-mapcar #'max cwidths hwidths) cwidths))
 	   (header (if header
 		     (concat (apply #'format
 			       (tab-control-string widths

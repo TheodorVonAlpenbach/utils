@@ -8,7 +8,9 @@
 ;;(cancel-group-sync 571156)
 
 (cl-defun company-group (id-descriptor)
-  (car (emacsql db [:select * :from company-group :where (= id $s1)] (id id-descriptor))))
+  (car (emacsql db [:select * :from company-group
+		     :where (= id $s1)]
+		(id id-descriptor))))
 ;;(company-group 571156)
 ;;(ada-columns 'company-group)
 
@@ -46,14 +48,16 @@ By default, COMPANY-ID is 4, i.e. Skolen"
 	   (id user-id-descriptor)))
 ;;(remove-member-from-all-groups (id (user-from-name "%laerer%499_1%")))
 
-(cl-defun remove-members-from-group (group-descriptor &optional (user-role :pupil))
+(cl-defun remove-members-from-group (group-descriptor
+				     &optional (user-role :pupil))
   (let* ((uids (mapcar #'id
 		 (if user-role
 		   (emacsql db
 		     [:select id :from user
 		       :where id :in $v1
 		       :and (= user_role $r2)]
-		     (coerce (group-member-ids group-descriptor) 'vector) (sstring user-role))
+		     (coerce (group-member-ids group-descriptor) 'vector)
+		     (sstring user-role))
 		   (emacsql db
 		     [:select id :from user
 		       :where id :in $v1]

@@ -2,22 +2,29 @@
 
 defaultContextBeforeArgument=4
 defaultContextAfterArgument=1
+numberOfShownEntries=5
 
 function printUsage {
     echo "Usage: gitgrep ADA-NUMBER [CONTEXT1] [CONTEXT2]"
     echo "Finds occurrences of ADA-NUMBER in git log. CONTEXT1 is the -C option argument in grep."
-    echo "By default it is set to 5. If CONTEXT2 is provided, CONTEXT1 and CONTEXT2 are the"
+    echo "By default it is set to $numberOfShownEntries."
+    echo "If CONTEXT2 is provided, CONTEXT1 and CONTEXT2 are the"
     echo "-B and -A option arguments in grep, respectively."
     echo ""
     echo "ADA-NUMBER might be truncated. Then the remaining digits will be filled out"
     echo "according to the template $(adatagtemplate). See util adatagtemplate for more information."
     echo ""
     echo "Options:"
+    echo "  -n          Number of shown log entries. Default is $numberOfShownEntries"
     echo "  -v          Verbose mode"
+    echo "  -h          Help"
 }
 
 while getopts "hv" arg; do
     case $arg in
+	n)
+	    numberOfShownEntries=$arg
+	    ;;
 	h)
 	    printUsage
 	    exit 0

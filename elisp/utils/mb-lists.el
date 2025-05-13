@@ -142,7 +142,7 @@ ELEMENTS are exactly the elements in LIST that evaluates to K."
   "Destructive version of `ZIP'
 TODO: something is wrong, see test below."
   (cl-loop with heads = (cl-loop for i below n collect (nthcdr i list))
-	with pointers = (copy-list heads)
+	with pointers = (cl-copy-list heads)
 	while (first pointers)
 	do (cl-loop for p in-ref pointers 
 		 while p
@@ -151,7 +151,7 @@ TODO: something is wrong, see test below."
 	finally return heads))
 ;;(nunzip (0-n 10) 2)
 
-(cl-defun unzip (list &optional (n 2)) (nunzip (copy-list list) n))
+(cl-defun unzip (list &optional (n 2)) (nunzip (cl-copy-list list) n))
 ;;(unzip (0-n 10) 3)
 
 (cl-defun repeat-elements (x &optional n)
@@ -187,7 +187,7 @@ INFIX as a constant sexp."
 
 (cl-defun flank (a list &optional (b a))
   "Inserts A before and B after LIST."
-  (nflank a (copy-list list) b))
+  (nflank a (cl-copy-list list) b))
 ;;(flank 1 '(a))
 
 (defmacro twins (x) `(make-list 2 ,x))
@@ -331,7 +331,7 @@ where a comes before b in LIST."
   "Returns a list of pairs (X count-X), where X is an element in
 list and count-X is the number of occurrences of X. Note that the
 resulting list is sorted on the value of COUNT-X"
-  (accumulate-sorted-list (cl-sort (copy-list list) test :key key)
+  (accumulate-sorted-list (cl-sort (cl-copy-list list) test :key key)
     :test (lt-equal test) :key key
     :min-occurrences min-occurrences :accumulator accumulator))
 ;;(accumulate-list '((a 1) (a 2) (b 4) (c 100) (b 5)) :test #'symbol< :key #'first :accumulator #'(lambda (x) (sum x :key #'second)))
@@ -418,14 +418,14 @@ matches PREDICATE"
 
 (cl-defun rotate-list (list &optional (n 1))
   "Returns a list that is LIST rotated N times."
-  (nrotate-list (copy-list list) n))
+  (nrotate-list (cl-copy-list list) n))
 
 (cl-defmacro rotatef-list (list &optional (n 1))
   `(setf ,list (rotate-list ,list ,n)))
 
 (cl-defun rotate (sequence &optional (n 1))
   "Returns a list that is LIST rotated N times."
-  (nrotate-list (copy-list list) n))
+  (nrotate-list (cl-copy-list list) n))
 
 (defmacro list-insert (x n list)
   "Inserts element X at position N in LIST. Returns the tail of
@@ -463,7 +463,7 @@ TODO: this looks like draw. Check out and clean up if necessary"
 (cl-defun test-nsplit-nth (&optional (n 3))
   (let ((list (0-n n)))
     (cl-loop for i below n
-	  collect (let ((list* (copy-list list)))
+	  collect (let ((list* (cl-copy-list list)))
 		    (values (nsplit-nth i list*) list*)))))
 ;;(test-split-nth) => (((0 (1 2)) (0 1 2)) ((1 (0 2)) (0 2)) ((2 (0 1)) (0 1)))
 
@@ -603,7 +603,7 @@ different, see test cases below."
   "Returns a copy of table, but where the column at COLPOS (only) is mapped by FUNCTION.
 The TABLE must be a tree, i.e. a list of lists."
   (mapcar #'(lambda (x) 
-	      (let ((x* (copy-list x)))
+	      (let ((x* (cl-copy-list x)))
 		(asetf (nth colpos x*) (funcall function it))
 		x*))
 	  table))

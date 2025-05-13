@@ -2,7 +2,7 @@
 ;;java-mode
 
 (cl-defun mb-java-mode-hook-function ()
-  (linum-mode)
+  (display-line-numbers-mode)
   (electric-pair-local-mode)
   (setq java-indent-level 4)
   (setq tab-width 4)

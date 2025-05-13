@@ -30,7 +30,7 @@
 (cl-defun mb-octave-init ()
   (mb-octave-kbd-maps)
   (turn-on-eldoc-mode)
-  (linum-mode)
+  (display-line-numbers-mode)
   (setf evil-symbol-word-search t)
   (modify-syntax-entry ?_  "_")
   (add-hook 'vc-before-checkin-hook 'mb-octave-breakpoints-hook))

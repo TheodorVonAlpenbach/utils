@@ -168,6 +168,8 @@
 				 (mb-surround "/" (or n 1))))
   (define-key insert-map "\\" #'(lambda (n) (interactive "P")
 				  (mb-undo-surround (or n 1))))
+  (define-key insert-map "0" #'(lambda (n) (interactive "P")
+				 (insert-symbol-deg (or n 1))))
   (define-key insert-map "1" #'(lambda (n) (interactive "P")
 				 (insert-symbol-sup1 (or n 1))))
   (define-key insert-map "2" #'(lambda (n) (interactive "P")

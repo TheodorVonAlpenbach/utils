@@ -1,5 +1,5 @@
 (cl-defun mb-php-mode-hook-function ()
-  (linum-mode)
+  (display-line-numbers-mode)
   ;;(setq tab-width 4)
   ;; to setup tabs
   (setq c-basic-offset 4)

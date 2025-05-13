@@ -7,6 +7,8 @@ function printUsage {
     echo "If two branches correspond to this Jira number, i.e. it is the prefix of both have names,"
     echo "the script lists these two branches."
     echo ""
+    echo "See also adatagtemplate"
+    echo ""
     echo "Options:"
     echo "  -v          Verbose mode"
 }

@@ -3,7 +3,7 @@
   ;; Disable intraspace for INSERT-PARENTHESES
   (setq-local parens-require-spaces nil)
   (setq-local evil-symbol-word-search t)
-  (linum-mode))
+  (display-line-numbers-mode))
    
 (cl-defun mb-python-last-sexp-region ()
   (let ((end (point)))
