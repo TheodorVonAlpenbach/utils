@@ -75,7 +75,8 @@ See `sum' for a descriptions of the keywords."
   "Return the cumulative sum of LIST.
 Optional argument KEY specifies the operator and INITIAL-VALUE
 the start value for the cumulation."
-  (cl-loop for x in list collect (setf initial-value (funcall key initial-value x))))
+  (cl-loop for x in list
+	   collect (setf initial-value (funcall key initial-value x))))
 ;;(cumsum-list (0-n 3))
 
 (cl-defun cumsum (sequence &key (key #'+) (initial-value 0))
@@ -195,7 +196,8 @@ converting to float if the product is large for an integer."
     25
     (if (< elo 2400) 15 10)))
 
-(cl-defun elo-new (elo-old score num-games elo-average &optional has-played-less-than-30-games)
+(cl-defun elo-new (elo-old score num-games elo-average
+		   &optional has-played-less-than-30-games)
   (+ elo-old (* (elo-coefficient-fide elo-old has-played-less-than-30-games)
 		(- score (elo-expected-score elo-old elo-average num-games)))))
 ;;(elo-new 2713 5.5 9 2713)
@@ -353,7 +355,8 @@ the rotation degree."
   (rotate-list cycle n))
 ;;(cycle-rotate '(1 2 3))
 
-(cl-defun cycle-rotate-until (cycle test &optional (max-number-of-rotations (length cycle)))
+(cl-defun cycle-rotate-until
+    (cycle test &optional (max-number-of-rotations (length cycle)))
   "Returns a rotated copy of CYCLE. Optional argument N specifies
 the rotation degree."
   (cl-loop for i below max-number-of-rotations
@@ -401,12 +404,15 @@ the rotation degree."
   "Calculates how good the elements of CYCLE is distributed, assuming the number of non-EQ elements is 2"
   (let* ((n (length cycle))
 	 (nfirst (cl-count (first cycle) cycle :test test))
-	 (pos (positions (first cycle) cycle :test (if (> (+ nfirst nfirst) n) 
-						     (compose #'not test) test)))
+	 (pos (positions (first cycle) cycle
+			 :test (if (> (+ nfirst nfirst) n) 
+				 (compose #'not test) test)))
 	 (distances (cons (- (+ n (first pos)) (last-elt pos)) 
-			  (mapcar (compose #'- (bind #'apply #'- 1)) (pairs pos))))
+			  (mapcar (compose #'- (bind #'apply #'- 1))
+			    (pairs pos))))
 	 (optimal-distance (/ (float n) (length pos)))
-	 (penalties (mapcar (compose #'sq (bind #'distance optimal-distance)) distances)))
+	 (penalties (mapcar (compose #'sq (bind #'distance optimal-distance))
+		      distances)))
     (if (> (length pos) 1) 
       (sum penalties)
       0)))
@@ -417,92 +423,98 @@ the rotation degree."
 assuming the number of non-EQ elements is 2"
   (let ((test test))
     (cl-loop for elt in (cl-remove-duplicates cycle)
-	     for badness = (2cycle-badness cycle #'(lambda (x y) 
-						     (xnor (funcall test elt x) 
-							   (funcall test elt y))))
-	     sum badness)))
-;;(cycle-badness '(a b c a b c b a c a b c))
+	     for badness = (2cycle-badness
+			    cycle #'(lambda (x y) 
+				      (xnor (funcall test elt x) 
+					    (funcall test elt y))))))
+  ;;(cycle-badness '(a b c a b c b a c a b c))
 
-(cl-defun cycle-best (cycles &optional (test #'eq))
-  "Calculate the best distribution of the elements in CYCLE.
+  (cl-defun cycle-best (cycles &optional (test #'eq))
+    "Calculate the best distribution of the elements in CYCLE.
 See `cycle-badness' for the measure of a good cycle."
-  (cl-loop with min-cycle = (first cycles)
-	   with min = (cycle-badness min-cycle test)
-	   for c in cycles
-	   for badness = min then (cycle-badness c test)
-	   if (zerop badness) return c
-	   if (< badness min) do (setf min badness min-cycle c)
-	   finally return min-cycle))
-;;(cycle-best '((a a b b) (a b a b)))
+    (cl-loop with min-cycle = (first cycles)
+	     with min = (cycle-badness min-cycle test)
+	     for c in cycles
+	     for badness = min then (cycle-badness c test)
+	     if (zerop badness) return c
+	     if (< badness min) do (setf min badness min-cycle c)
+	     finally return min-cycle))
+  ;;(cycle-best '((a a b b) (a b a b)))
 
-(cl-defun distribute-rest (list prefix-cycle &optional (test #'eq))
-  (let* ((rots )
-		 (test test))
-    (cycle-best (mapcar (bind #'append prefix-cycle) (cycle-rotations (distribute list test))))))
-;;(cycle-badness (distribute-rest '(a c a b e b) '(a a b)))
+  (cl-defun distribute-rest (list prefix-cycle &optional (test #'eq))
+    (let* ((test test))
+      (cycle-best (mapcar (bind #'append prefix-cycle)
+		    (cycle-rotations (distribute list test))))))
+  ;;(cycle-badness (distribute-rest '(a c a b e b) '(a a b)))
 
-;; energy
-(cl-defun p/th-to-NOK/MWh (p/th &optional (NOK/pound 11.5))
-  (* p/th 0.01 NOK/pound 34.1))
-;;(p/th-to-NOK/MWh 90)352.935
+  ;; energy
+  (cl-defun p/th-to-NOK/MWh (p/th &optional (NOK/pound 11.5))
+    (* p/th 0.01 NOK/pound 34.1))
+  ;;(p/th-to-NOK/MWh 90)352.935
 
-;; trondheim
-(cl-defun trondheim-percentage (n-games game-price n-qs-delivered received-price/q wanted-price/q)
-  (/ (* n-qs-delivered (- wanted-price/q received-price/q))
-     (* 1.0 n-games game-price)))
-;;(trondheim-percentage 5000 500 1000 10 35)
+  ;; trondheim
+  (cl-defun trondheim-percentage
+      (n-games game-price n-qs-delivered received-price/q wanted-price/q)
+    (/ (* n-qs-delivered (- wanted-price/q received-price/q))
+       (* 1.0 n-games game-price)))
+  ;;(trondheim-percentage 5000 500 1000 10 35)
 
 
-(defconst bilkollektivet-price-table 
-  '((B 26 180 280 2.70 1.30)
-    (C 28.50 200 300 2.90 1.50)
-    (D 31.50 220 320 3.10 1.70))
-  "Format: (type NOK/hour NOK/days¹ NOK/days² NOK/km³ NOK/km°). where
+  (defconst bilkollektivet-price-table 
+    '((B 26 180 280 2.70 1.30)
+      (C 28.50 200 300 2.90 1.50)
+      (D 31.50 220 320 3.10 1.70))
+    "Format: (type NOK/hour NOK/days¹ NOK/days² NOK/km³ NOK/km°). where
 ¹: 1-5 days, ²: >6 days, ³: 1-300 km, and °: >301 km")
 
-(cl-defun bilkollektivet-price-calculator (type num-km &optional (days 0) (hours 0))
-  ""
-  (let* ((price-type (assoc type bilkollektivet-price-table))
-	 (price-km (* num-km (if (< num-km 301) (fifth price-type) (sixth price-type))))
-	 (price-days (* days (if (< days 6) (third price-type) (fourth price-type))))
-	 (price-hours (* hours (second price-type))))
-    (+ price-km price-days price-hours)))
-;;(bilkollektivet-price-calculator 'C 2000 5)
+  (cl-defun bilkollektivet-price-calculator (type num-km
+					     &optional (days 0) (hours 0))
+    ""
+    (let* ((price-type (assoc type bilkollektivet-price-table))
+	   (price-km (* num-km (if (< num-km 301)
+				 (fifth price-type) (sixth price-type))))
+	   (price-days (* days (if (< days 6)
+				 (third price-type) (fourth price-type))))
+	   (price-hours (* hours (second price-type))))
+      (+ price-km price-days price-hours)))
+  ;;(bilkollektivet-price-calculator 'C 2000 5)
 
 
 ;;; div
-(cl-defun is-divisible (n m)
-  (zerop (mod n m)))
-;(mapcar #'(lambda (n) (is-divisible n 5)) (cl-loop for i below 11 collect i))
+  (cl-defun is-divisible (n m)
+    (zerop (mod n m)))
+					;(mapcar #'(lambda (n) (is-divisible n 5)) (cl-loop for i below 11 collect i))
 
-(require 'mb-utils-10000-first-primes)
-(cl-defun primep (n)
-  (not-null (cl-find n 10000-first-primes)))
-;;(cl-remove-if nil (mapcar #'primep (1-n 20)))
+  (require 'mb-utils-10000-first-primes)
+  (cl-defun primep (n)
+    (not-null (cl-find n 10000-first-primes)))
+  ;;(cl-remove-if nil (mapcar #'primep (1-n 20)))
 
-(cl-defun factorize (n &optional (primes 10000-first-primes))
-  (let* ((max-prime (first (last primes)))
-	 (max-argument (sq max-prime))
-	 (factors '()))
-    (when (> n max-argument)
-      (error "Argument must be lower than %d" max-argument))
-    (while (and primes 
-		(> n 1))
-      (let ((p (pop primes)))
-	(while (is-divisible n p)
-	  (push p factors)
-	  (setq n (/ n p)))))
-    (when (> n 1)
-      (push n factors))
-    factors))
-;;(mapcar #'factorize (cl-loop for i from 2 to 100 collect i))
-;;(mapcar #'factorize '(324 180))
-;;(/ 180 36)
-;;(apply #'* (factorize 1047300))
-;;(/ 288 36)
+  (cl-defun factorize (n &optional (primes 10000-first-primes))
+    (let* ((max-prime (first (last primes)))
+	   (max-argument (sq max-prime))
+	   (factors '()))
+      (when (> n max-argument)
+	(error "Argument must be lower than %d" max-argument))
+      (while (and primes 
+		  (> n 1))
+	(let ((p (pop primes)))
+	  (while (is-divisible n p)
+	    (push p factors)
+	    (setq n (/ n p)))))
+      (when (> n 1)
+	(push n factors))
+      factors))
+  ;;(mapcar #'factorize (cl-loop for i from 2 to 100 collect i))
+  ;;(mapcar #'factorize '(324 180))
+  ;;(/ 180 36)
+  ;;(apply #'* (factorize 1047300))
+  ;;(/ 288 36)
 
-(cl-defun all-factors (n)
-  (cl-sort (cl-remove-duplicates (mapcar #'product (power-set (factorize n)))) #'<))
+  (cl-defun all-factors (n)
+    (cl-sort (cl-remove-duplicates
+		 (mapcar #'product (power-set (factorize n))))
+      #'<)))
 ;;(all-factors 120)
 ;;(all-factors 284)
 
@@ -569,7 +581,8 @@ function returns the greatest digit length of elements in N."
     (uint-length-1 n base)))
 ;;(uint-length (0-n 111))
 
-(cl-defun uint-to-n-base (n &optional (base 10) (min-length (uint-length n base)))
+(cl-defun uint-to-n-base
+    (n &optional (base 10) (min-length (uint-length n base)))
   "Divide non-negative integer N into its digits.
 By default the decimal system is used. But you can use an
 arbitrary number base with optional argument BASE. The function
@@ -607,7 +620,8 @@ TODO: handle multibyte strings."
   (logand 1 (lsh integer (- n))))
 ;;(mapcar (bind #'nth-bit 16 1) (b-a 7 0))
 
-(cl-defun int-to-n-bit-bytes (integer &optional (number-of-bits 8) (number-of-bytes nil))
+(cl-defun int-to-n-bit-bytes
+    (integer &optional (number-of-bits 8) (number-of-bytes nil))
   "Converts INTEGER to a list of NUMBER-OF-BITS-bit bytes.
 If NUMBER-OF-BYTES is nil, the result contains only the needed
 bytes. If non-nil the result is either truncated to
@@ -616,12 +630,14 @@ NUMBER-OF-BYTES is reached."
   (if (zerop integer)
     (make-list (or number-of-bytes 1) 0)
     (let* ((number-of-total-bits (log (+ 1.0 integer) 2))
-	   (number-of-total-bytes (ceiling (/ number-of-total-bits number-of-bits)))
+	   (number-of-total-bytes
+	    (ceiling (/ number-of-total-bits number-of-bits)))
 	   (mask (1- (expt 2 number-of-bits)))
-	   (bytes (reverse
-		   (cl-loop for i below number-of-total-bytes
-			    for integer-i = (lsh integer (- (* i number-of-bits)))
-			    collect (logand integer-i mask)))))
+	   (bytes
+	    (reverse
+	     (cl-loop for i below number-of-total-bytes
+		      for integer-i = (lsh integer (- (* i number-of-bits)))
+		      collect (logand integer-i mask)))))
       
       (if number-of-bytes
 	(if (> (length bytes) number-of-bytes)
@@ -639,10 +655,11 @@ NUMBER-OF-BYTES is reached."
 
 (cl-defun bytes-to-int (bytes &key (byte-size 8) (endianness :big))
   "Calculates the integer represented by BYTES of bit length BYTE-SIZE."
-  (calculate-n-ary (expt 2 8) (cl-case endianness
-				((:big) (nreverse bytes))
-				((:little) bytes)
-				(t (error "%s is not a correct :ENDIANNESS value" :endianness)))))
+  (calculate-n-ary
+   (expt 2 8) (cl-case endianness
+     ((:big) (nreverse bytes))
+     ((:little) bytes)
+     (t (error "%s is not a correct :ENDIANNESS value" :endianness)))))
 ;;(bytes-to-int (list 1 0) :endianness :little)
 ;;(bytes-to-int (list 1 0) :endianness :big)
 
@@ -680,14 +697,16 @@ definition."
     integer))
 ;;(time (mapcar #'2s-complement (0-n (expt 2 8))))
 
-(cl-defun 2s-complement-function (number-of-bits &key (with-non-integer :error) inverse)
-  "Returns a function that converts a number to its 2's complement of bit length NUMBER-OF-BITS.
+(cl-defun 2s-complement-function (number-of-bits
+				  &key (with-non-integer :error) inverse)
+  "Returns a function that converts a number to its 2's complement
+of bit length NUMBER-OF-BITS.
 Optional argument WITH-NON-INTEGER controls the functions
 behavior when the argument is not an integer"
   (let ((2^n (expt 2 number-of-bits))
-		(2^n-1 (expt 2 (1- number-of-bits)))
-		(with-non-integer with-non-integer)
-		(inverse inverse))
+	(2^n-1 (expt 2 (1- number-of-bits)))
+	(with-non-integer with-non-integer)
+	(inverse inverse))
     (lambda (x)
       (if (integerp x)
 	(if inverse
@@ -809,7 +828,8 @@ value in the specified interval. Else, it will be an integer."
 ;;(interval-floor 30 10)
 
 ;;pool utils
-(cl-defun fractional-ball-angle (fraction &optional with-object-ball-throw-correction)
+(cl-defun fractional-ball-angle (fraction
+				 &optional with-object-ball-throw-correction)
   "Optional argument WITH-OBJECT-BALL-THROW-CORRECTION is not implemented"
   (cl-assert (between= fraction 0 1))
   (radians-to-degrees (asin (- 1 fraction))))
@@ -921,15 +941,9 @@ either 0 or 1)"
     (51.94 backstroke)
     (58.46 breaststroke)))
 
-(cl-defun swimming-relative-distances (&optional (style-symbol 'crawl) (distance 100))
-  (let ((style (cl-find style-symbol swimming-records :key #'second))
-	(other-styles (remove* style-symbol swimming-records :key #'second)))
-    (mapcar #'(lambda (x)
-		(list (* distance
-			 (/ (first style)
-			    (first x)))
-		      (second x)))
-      other-styles)))
+(cl-defun swimming-relative-distances
+    (&optional (style-symbol 'crawl) (distance 100))
+  (let ((style (cl-find style-symbol swimming-records :key #'second)))))
 ;;(swimming-relative-distances 'crawl 50)
 
 ;;; div js dates (TODO move this later)
@@ -1179,7 +1193,7 @@ p) q)))"
 	   for res1 = (cl-coerce (floor (- (float r) (/ (float p) q))) 'integer)
 	   for res2 = (- r (integer-ceiling p q))
 	   if (/= res1 res2) collect (list r p q res1 res2)))
-;;(test-another-integer-operation 1000000)
+;;(test-another-integer-operation 100000)
 
 (provide 'mb-utils-math)
 
@@ -1206,7 +1220,8 @@ TODO: move this to some yamal elisp module."
 	     unless (< n-max n-min) return (list n-min n-max m (fz n-min m))
 	     for nn-min = (ceiling (fn f (- eps) (- m)))
 	     for nn-max = (floor (fn f eps (- m)))
-	     unless (< nn-max nn-min) return (list nn-min (- m) (fz nn-min (- m))))))
+	     unless (< nn-max nn-min)
+	     return (list nn-min (- m) (fz nn-min (- m))))))
 ;;(approximate-frequency (* 100 pi) 1)
 
 (cl-defun volume-ellipsoid (r1 &optional (r2 r1) (r3 r2))

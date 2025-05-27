@@ -693,10 +693,6 @@ converted to optional argument NIL-STRING."
   (ssymbol (decolonize-symbol-name (symbol-name symbol) string-key)))
 ;;(mapcar #'decolonize-symbol '(a :b))
 
-(cl-defun llist (x)
-  (warn "llist is deprecated. Use listify instead")
-  (listify x))
-
 (cl-defun listify (x)
   "Coerces x to become a cons. Also a lambda expression, which
 also is a cons, will be encapsulated in a list."
