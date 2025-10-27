@@ -304,7 +304,7 @@ end of buffer if not already present."
 ;;(buffer-lines)
 
 (cl-defun buffer-string* (&optional (buffer (current-buffer)))
-  (with-buffer buffer (buffer-string)))
+  (with-buffer buffer (buffer-string-no-properties)))
 ;;(buffer-lines)
 
 ;;; Paragraph stuff

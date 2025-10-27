@@ -108,7 +108,7 @@ Return the hash table"
 ;; perhaps EQUIVALENCE-CLASS-LIST. Or: generalize with ELT, and rename
 ;; to GROUP or EQUIVALENCE-CLASS.
 (cl-defun equivalence-class (list &key (key #'identity) (test #'eql) (size 65))
-  "Group LIST into sublist equivalence classes defined by KEY."
+  "Grup LIST into sublist equivalence classes defined by KEY."
   (cl-loop for v the hash-values of (equivalence-class-ht
 				  list :key key :test test :size size)
 	collect v))
@@ -717,5 +717,8 @@ cannot be used for later matches. For example
 	collect (pop (second map))))
 ;;(position-unique '(1 1 3 2 3) '(1 2 3))
 ;;(position-unique '(1 1) '(1 2 3 1))
+
+(defun cars (lists) (mapcar #'car lists))
+;;(cars '((1 2) (3 4 5)))
 
 (provide 'mb-lists)

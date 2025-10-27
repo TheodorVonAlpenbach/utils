@@ -1,0 +1,35 @@
+* Personer
+** Familie
+Alle memoreringsbilder her er i eller rett utenfor slottet på Bellevue
+(Germannløkken) i Oslo.
+
+Siden det på sikt kan være aktuelt å memorere svenske konger også, tar
+memoene for Karl-kongene utgangspunkt i det svenske konge-nummeret.
+Det norske er trivielt å regne seg til utfra dette.
+*** Morsiden                                                          :drill:
+:PROPERTIES:
+:DRILL_CARD_TYPE: hide2cloze
+:END:
+Ungene til Ida og ? heter Mikkel og ?
+**** Memo
+*** Farsiden                                                          :drill:
+:PROPERTIES:
+:DRILL_CARD_TYPE: hide2cloze
+:END:
+Ungene til Lars og Karin heter Lisa, Vilmer, Vidar og Malva.
+**** Memo
+*** Farsiden                                                          :drill:
+:PROPERTIES:
+:DRILL_CARD_TYPE: hide2cloze
+:END:
+Kjæresten til Johan heter Anna Wagnell.
+**** Memo
+** Privat
+*** CVO
+:PROPERTIES:
+:DRILL_CARD_TYPE: hide2cloze
+:END:
+Viktor Strand og Pelin har en datter, Nora. Venninnen til Pelin heter Merve.
+**** Memo
+
+

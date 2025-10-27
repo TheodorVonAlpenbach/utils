@@ -60,6 +60,7 @@ sudo mount -a.")
 	(,+home-dir+ ".bashrc" :point :end)
 	(,+home-dir+ ".bash_aliases" :point :end)
 	(,+home-dir+ ".bash_profile" :point :end)
+	(,+home-dir+ "git/utils/bin/adatagtemplate.sh")
 	
 	(,+home-dir+ "doc/personer.org" :point :end :keyboard :no)
 	(,+home-dir+ "doc/technologies.org" :point :end)

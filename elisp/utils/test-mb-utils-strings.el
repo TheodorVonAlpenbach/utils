@@ -191,6 +191,12 @@
     (mapcar #'integer-to-literary-string (list 21 99 100 100003))
     '("twenty-one" "ninety-nine" "one hundred" "one hundred thousand three"))))
 
+(ert-deftest test-string-case ()
+  "Test of `string-case'"
+  (should (equal (string-case "C" (("a" "b") 'ewq) (("a" "b" "C") 'qwe)) 'qwe))
+  (should (equal (string-case "a" (("a" "b") 'ewq) (("a" "b" "C") 'qwe)) 'ewq))
+  (should (equal (string-case "a" ("a" 'ewq) ("b" 'qwe)) 'ewq)))
+
 (ert-deftest test-andcat ()
   "Test of `andcat'"
   (should (equal (andcat '()) ""))

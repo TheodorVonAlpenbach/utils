@@ -24,9 +24,11 @@
 (cl-defun dot-node-base (identifier properties)
   "Creates a dot node definition string. PROPERTIES is an alist
 where each element defines a dot node property \(name . value)"
-  (format "%s [%s];" identifier
-	  (concat* properties :in "," :key #'(lambda (p) 
-					       (format "%s=\"%s\"" (car p) (cdr p))))))
+  (format "%s [%s];"
+    identifier
+    (concat* properties
+      :in ","
+      :key #'(lambda (p) (format "%s=\"%s\"" (car p) (cdr p))))))
 ;;(dot-node-base 'n '((label . "nodeName") (fillcolor . yellow) (style . filled)))
 
 (cl-defun dot-node (identifier &optional name (color "white") (style "filled"))
@@ -71,6 +73,11 @@ where each element defines a dot node property \(name . value)"
   (dot-to-png (buffer-string)
 	      :path (file-name-change-extension (buffer-file-name) "png")))
 
+(cl-defun dot-to-svg-buffer ()
+  (interactive)
+  (dot-to-png (buffer-string)
+	      :path (file-name-change-extension (buffer-file-name) "svg")))
+
 (cl-defun dot-to-png (dot-string &key (path (dot-tmp-path dot-string)))
   "Returns path to generated PNG file.
 The function uses `dot-program' to convert the DOT-STRING to a PNG image."
@@ -81,7 +88,17 @@ The function uses `dot-program' to convert the DOT-STRING to a PNG image."
 		    (concat (file-name-sans-extension path) ".png"))
       (error "Couldn't compile .dot file %s. See *qwe* for reason." path))))
 ;;(dot-to-png (dot-string (dot-statements-from-tree '((c f) g c))))
-(concat (substring "abc.def" 0 -3) "png")
+
+(cl-defun dot-to-svg (dot-string &key (path (dot-tmp-path dot-string)))
+  "Returns path to generated PNG file.
+The function uses `dot-program' to convert the DOT-STRING to a PNG image."
+  (string-to-file dot-string path)
+  (let ((res (call-process dot-program nil "*qwe*" nil path "-Tsvg" "-O")))
+    (if (zerop res)
+      (rename-file* (concat path ".svg")
+		    (concat (file-name-sans-extension path) ".svg"))
+      (error "Couldn't compile .dot file %s. See *qwe* for reason." path))))
+;;(dot-to-svg (dot-string (dot-statements-from-tree '((c f) g c))))
 
 (cl-defun dotify-node-name (x)
   (cl-substitute ?_ ?- x))
@@ -91,6 +108,12 @@ The function uses `dot-program' to convert the DOT-STRING to a PNG image."
 
 (cl-defun dot-view (dot-string &key (path (dot-tmp-path dot-string)) extern-p)
   (awhen (dot-to-png dot-string :path path)
+    (if extern-p
+      (png-view-externally it)
+      (png-view it))))
+
+(cl-defun dot-view-svg (dot-string &key (path (dot-tmp-path dot-string)) extern-p)
+  (awhen (dot-to-svg dot-string :path path)
     (if extern-p
       (png-view-externally it)
       (png-view it))))
@@ -115,5 +138,9 @@ See http://localhost:631/ for further print options"
 ;;;; this could be moved to lilypond-<something>
 (cl-defun pdf-view (filename)
   (browse-url filename))
+
+(defun browse-dot ()
+  (interactive)
+  (pdf-view (buffer-file-name)))
 
 (provide 'dot)

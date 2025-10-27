@@ -46,11 +46,17 @@
 ;;(cl-loop for up in '("21fce84d-c227-48e4-99fc-ccd64f3c905a" "44328a92-a57c-4724-8257-a27e17d71920" "336dd2be-94e8-4f95-b184-adf18d58326f") collect (user-from-pseudonym up :name))
 ;;(ada-columns 'user)
 
-(cl-defun user-pseudonym (user-descriptor)
+(cl-defun user-pseudonym (user-descriptor &rest columns)
   (car (emacsql db
-	  [:select * :from user-pseudonym :where (= user-id $s1)]
-	  (id user-descriptor))))
-;;(second (user-pseudonym (car (user-from-name "%celev%99_1a_1 %"))))
+	 (vector :select (column-selection columns)
+		 :from 'user-pseudonym
+		 :where '(= user-id $s1))
+	 (id user-descriptor))))
+;;(user-pseudonym 321809 :user-pseudonym)
+
+(cl-defun user-pseudonym-string (user-descriptor)
+  (sstring (car (user-pseudonym 321809 :user-pseudonym))))
+;;(user-pseudonym-string 321809)
 
 ;; db['state-user-component-170'].find({userPseudonym: "40a520e7-392a-45f6-83e2-47c3923a2f52", componentUuid: "3d02de50-8e53-3c2e-b1e6-ccf84b00662c" }) 
 
@@ -68,7 +74,7 @@
 		 :where '(= id $s1))
 	 (id user-id-descriptor))))
 ;;(user-from-id 321211)
- 
+
 (cl-defun user (user-descriptor &rest columns)
   (if (stringp user-descriptor)
     (if (uuid-p user-descriptor)
@@ -83,7 +89,7 @@
 ;;(fuser '(322190))
 ;;(project (user-from-name "%claerer_no456326499_1%") '(0 1 2 3 ))
 ;;(mapcar #'user (list "claerer_no456326499_5%" "336dd2be-94e8-4f95-b184-adf18d58326f"))
- 
+
 ;;; UPDATE
 (cl-defun update-user-name (user-id-descriptor user-name)
   (emacsql db
@@ -94,12 +100,16 @@
 ;;; DELETE
 (cl-defun delete-user (user-id-descriptor)
   (let* ((user (user user-id-descriptor))
-	(id (id user)))
+	 (id (id user))
+	 (user-pseudonym (user-pseudonym-string id)))
     (emacsql db [:delete :from user-company-group :where (= user-id $s1)] id)
     (emacsql db [:delete :from user-ntp-module-codes :where (= user-id $s1)] id)
+    (emacsql db
+      [:delete :from user-component-status :where (like user-pseudonym $r1)]
+      user-pseudonym)
     (emacsql db [:delete :from user-pseudonym :where (= user-id $s1)] id)
     (emacsql db [:delete :from user :where (= id $s1)] id)))
-;;(delete-user 322221)
+;;(delete-user 321809)
 ;;(delete-user (user-from-name "Celev_no456326499_1a_1 CappelenDamm"))
 ;;(user-from-id 671726)
 ;;(delete-user 671726)

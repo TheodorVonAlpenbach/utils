@@ -133,4 +133,28 @@
   (should (equal (modify-if 1 #'zerop 'zero) 1))
   (should (equal (modify-if 0 #'zerop 'zero) 'zero)))
 
+(ert-deftest test-listify ()
+  "Test of `listify'"
+  (should (equal (listify "a") '("a")))
+  (should (equal (listify 'a) '(a)))
+  (should (equal (listify (list 1 2 3)) (list 1 2 3)))
+  (should (equal (listify #'(lambda () nil)) (lambda nil nil)))
+  (should (equal (listify [1 2 3]) (list 1 2 3))))
+
+(ert-deftest test-vectorify ()
+  "Test of `vectorify'"
+  (should (equal (vectorify "a") ["a"]))
+  (should (equal (vectorify 'a) [a]))
+  (should (equal (vectorify '(1 2 3)) [1 2 3]))
+  (should (equal (vectorify [1 2 3]) [1 2 3])))
+
+(ert-deftest test-apply-if ()
+  "Test of `apply-if'"
+  (should (equal (apply-if (1+ 1) (cl-oddp 1)) 2))
+  (should (equal (apply-if (1+ 1) (cl-oddp 1) #'1+) 3))
+  (should (equal (apply-if (1+ 1) (cl-oddp 1) #'1+ #'1+) 4))
+  (should (equal (apply-if (1+ 1) (cl-evenp 1)) 2))
+  (should (equal (apply-if (1+ 1) (cl-evenp 1) #'1+) 2))
+  (should (equal (apply-if (1+ 1) (cl-evenp 1) #'1+ #'1+) 2)))
+
 (provide 'test-mb-utils-div)

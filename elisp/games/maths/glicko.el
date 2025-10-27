@@ -32,7 +32,13 @@ This method guarantees to return a number of type float."
   (/ 1 (1+ (expt 10 (/ (* (glicko-g-function opponents-RD)
 			  (- players-rating opponents-rating))
 		       -400)))))
-;;(glicko-expected-score 1500 1300 50)
+;;(glicko-expected-score -169 -475 3.5)
+;;(glicko-expected-score -169 -470 3.5)
+;;(glicko-expected-score -169 -360 14)
+;;(glicko-expected-score -169 -300 3.5)
+;;(* .88 .85)
+;;(glicko-expected-score 29 487 3.5)
+;;(glicko-expected-score 117.2 35.1 51)
 
 (cl-defun glicko-expected-opponents-rating (players-rating opponents-rating opponents-RD)
   "Returns a float"

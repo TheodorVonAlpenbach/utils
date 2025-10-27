@@ -244,26 +244,39 @@ TODO: implement this. Probably involves some macro magic"
 ;;(funcall (bind* #'concat '("a" "b") '(0 1)) "c")
 ;;(mapcar (bind #'nth '(a b c) 0) '(0 2 1))
 
-(cl-defun compose (&rest fns)
-  "Return a function that applies functions FNS from right to left."
-  (let ((fns fns))
-    (if fns
-      (let ((fn1 (car (last fns)))
-		    (fns (butlast fns)))
+(cl-defun compose (&rest functions)
+  "Return a function that applies functions FUNCTIONS from right to left."
+  (let ((functions functions))
+    (if functions
+      (let ((fn1 (car (last functions)))
+		    (functions (butlast functions)))
 	(function (lambda (&rest args)
-	  (cl-reduce #'funcall fns 
+	  (cl-reduce #'funcall functions 
 		  :from-end t
 		  :initial-value (apply fn1 args)))))
       (function identity))))
 ;;(funcall (compose #'sq #'1+) 1)
 ;;(funcall (compose #'1+ #'sq) 1)
 
+(cl-defun apply-if (expression predicate &rest functions)
+  "Apply FUNCTIONS on EXPRESSION if PREDICATE is not nil.
+Otherwise return expression.
+
+Each FUNCTION is applied from right to left, in the mannar of `compose.'"
+  (if predicate (funcall (apply #'compose functions) expression) expression))
+;;(apply-if (1+ 1) (cl-oddp 1) #'1+ #'1+)
+
+(cl-defun modify-if (value test new-value)
+  "Return VALUE if (TEST VALUE) evaluates to nil, otherwise
+return NEW-VALUE"
+  (if (funcall test value) new-value value))
+
 (cl-defun disjoin (&rest predicates)
   "Return a function that returns t if any of PREDICATES return not nil."
   (let ((preds predicates))
     (function (lambda (&rest args)
       (cl-loop for p in preds thereis (apply p args))))))
-;;(mapcar (disjoin #'oddp #'primep) (0-n 10))
+;;(mapcar (disjoin #'cl-oddp #'primep) (0-n 10))
 
 (cl-defun not-disjoin (&rest predicates)
   "Return a function that returns t if all PREDICATES return nil."
@@ -694,12 +707,25 @@ converted to optional argument NIL-STRING."
 ;;(mapcar #'decolonize-symbol '(a :b))
 
 (cl-defun listify (x)
-  "Coerces x to become a cons. Also a lambda expression, which
-also is a cons, will be encapsulated in a list."
-  (if (or (not (listp x)) (functionp x))
-    (list x) x))
-;;(mapcar #'listify (list 'a (list 1 2 3) nil #'(lambda () nil)))
+  "Coerces X to become a cons. Also a lambda expression, which
+also is a cons, will be encapsulated in a list. If it is another
+sequence it will be coerced into a list"
+  (cond
+    ((stringp x) (list x))
+    ((listp x) x)
+    ((sequencep x) (cl-coerce x 'list))
+    (t (list x))))
+;;(mapcar #'listify (list "a" 'a (list 1 2 3) nil #'(lambda () nil)))
 
+(cl-defun vectorify (x)
+  "Coerces X to become a vector. If it is another
+sequence it will be coerced into a vector"
+  (cond
+    ((stringp x) (vector x))
+    ((vectorp x) x)
+    ((sequencep x) (cl-coerce x 'vector))
+    (t (vector x))))
+;;(mapcar #'vectorify (list "a" 'a  (list 1 2 3) [a b c]))
 
 ;;; symbols
 (cl-defun concat-symbols (symbol &rest symbols)
@@ -784,11 +810,6 @@ Return nil if PROP does not exist."
   `(awhen (plist-get ,plist ,prop)
      (setf ,plist (plist-delete ,plist ,prop))
      it))
-
-(cl-defun modify-if (value test new-value)
-  "Return VALUE if (TEST VALUE) evaluates to nil, otherwise
-return NEW-VALUE"
-  (if (funcall test value) new-value value))
 
 (defmacro dprint (sexp &optional tag)
   `(if ,tag

@@ -445,6 +445,7 @@ arguments DELIMITER, LAST-DELIMITER, and PAIR-DELIMITER.
                                (progn ,@(cdr cl)))))
                        clauses)))))
 ;;(string-case "C" (("a" "b") t) (("a" "b" "C") 'qwe))
+;;(string-case "C" ("C" t) (("a" "b" "C") 'qwe))
 
 (def-edebug-spec string-case (form &rest ([&or (&rest form) form] form)))
 

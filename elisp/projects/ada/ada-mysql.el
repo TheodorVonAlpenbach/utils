@@ -44,10 +44,14 @@
     (t :ada_dummy)))
 ;;(ada-prefix-to-environment t)
 
-(cl-defun ada-copy-to-clipboard-1 (n retrieve-fun token-type)
+(cl-defun ada-copy-to-clipboard-1 (n retrieve-fun token-type
+				   &optional show-value-p)
   (let ((env (ada-prefix-to-environment n)))
-    (string-to-clipboard (funcall retrieve-fun (ada-read-pwd env)) t)
-    (message "%s for %S was copied to clipboard" token-type env)))
+    (let ((value (funcall retrieve-fun (ada-read-pwd env))))
+      (string-to-clipboard value t)
+      (if show-value-p
+	(message "%s for %S (%s) was copied to clipboard" token-type env value)
+	(message "%s for %S was copied to clipboard" token-type env)))))
 
 (cl-defun ada-copy-password-to-clipboard ()
   (interactive)
@@ -57,7 +61,7 @@
 (cl-defun ada-copy-username-to-clipboard ()
   (interactive)
   (let ((n (or current-prefix-arg 5)))
-    (ada-copy-to-clipboard-1 n #'sixth "Username")))
+    (ada-copy-to-clipboard-1 n #'sixth "Username" t)))
 
 ;; prefix gh q
 (cl-defun mb-mysql-map ()
@@ -72,6 +76,7 @@
 ;;(setf db nil)
 
 (cl-defun ada-set-environment (&optional prefix)
+  "For keyboard shortcut, see `mb-mysql-map'"
   (interactive)
   (let ((env (ada-prefix-to-environment (or current-prefix-arg 1))))
     ;; if no exception
@@ -155,18 +160,18 @@
 ;;                [:set-transaction-isolation-level :serializable])
 ;;       (emacsql-register connection))))
 
-;; (cl-defmethod emacsql-parse ((connection emacsql-mysql-connection))
-;;   (with-current-buffer (emacsql-buffer connection)
-;;     (let ((standard-input (current-buffer)))
-;;       (bob)
-;;       (when (looking-at "ERROR")
-;;         (search-forward ": ")
-;;         (signal 'emacsql-error
-;;                 (list (buffer-substring (point) (line-end-position)))))
-;;       (butlast
-;;        (cl-loop for l in (string-lines (buffer-string))
-;; 	     collect (split-string l "\t"))
-;;        5))))
+(cl-defmethod emacsql-parse ((connection emacsql-mysql-connection))
+  (with-current-buffer (emacsql-buffer connection)
+    (let ((standard-input (current-buffer)))
+      (bob)
+      (when (looking-at "ERROR")
+        (search-forward ": ")
+        (signal 'emacsql-error
+                (list (buffer-substring (point) (line-end-position)))))
+      (butlast
+       (cl-loop for l in (string-lines (buffer-string))
+		collect (split-string l "\t"))
+       4))))
 ;;(user-from-name "%elev_no456326499_1a_1 %" :id)
 
 (cl-defun ada-tables (&optional regexp)

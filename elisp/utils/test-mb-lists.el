@@ -130,3 +130,7 @@
   (should (equal (memcase '(a b c) (d 'A) (otherwise 'B)) 'B))
   (should (equal (memcase '(a b c) ((a d) 'A) (otherwise 'B)) 'A))
   (should (equal (memcase '(a b c) ((d e) 'A) (otherwise 'B)) 'B)))
+
+(ert-deftest test-cars ()
+  "Test of `cars'"
+  (should (equal (cars '((a b c) (d e))) '(a d))))

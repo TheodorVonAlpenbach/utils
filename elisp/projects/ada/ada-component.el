@@ -60,7 +60,7 @@
 	    (cl-loop for x in component-descriptor
 		     collect (apply #'component x columns))))
     (otherwise (apply #'component-from-id (id component-descriptor) columns))))
-;;(car (component 16538 :uuid))
+;;(car (component (list 16538 16538) :uuid))
 ;;(cl-loop for id in (list 16538 31962 31963 31964 31967) collect (car (component id :uuid)))
 
 (cl-defun curriculum-ids-from-component-id (component-id)
@@ -139,7 +139,7 @@
   (aif (component component-descriptor :json-id)
     (json-from-id (string-to-integer (car it)))
     (error "No such component!")))
-;;(component-json '("6333f33ce2789f1fe3071906" "4"))
+;;(component-json 5304)
 
 (cl-defun fsub-competence-aim (sub-competence-aim-descriptor &rest columns)
   "Arugments COLUMNS are not yet supported"

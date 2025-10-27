@@ -343,7 +343,7 @@ between different"
 (cl-defun mb-eval-region-from-point (&optional printflag read-function)
   "Evalutates content from POINT to the end of the buffer."
   (interactive "r")
-  (mb-eval-region (bol*) (point-max) printflag read-function))
+  (mb-eval-region (bol) (point-max) printflag read-function))
 
 (cl-defun mb-eval-region-to-point (&optional printflag read-function)
   "Evalutates content from the end of the buffer to POINT."
