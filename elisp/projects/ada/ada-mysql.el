@@ -1,5 +1,6 @@
 ;; -*- lexical-binding: t; -*-
-(require 'emacsql-mysql)
+(require 'emacsql)
+:: (require 'emacsql-mysql)
 (require 'rot47)
 
 ;;; To debug an expression, use emacsql-compile, e.g:

@@ -18,8 +18,10 @@ else:
     if (nargs > 1):
         myJson = sys.argv[1]
 
-print(sys.argv)
-msunixtimeString = sys.argv[0]
+# print(sys.argv)
+print(myJson)
+msunixtimeString = sys.argv[1]
+print(msunixtimeString)
 msunixtimeLines = msunixtimeString.split('\n')
 # iso = unix2isoDate(msunixtime/1000)
 print(msunixtimeString)
