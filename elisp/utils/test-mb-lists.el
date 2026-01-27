@@ -131,6 +131,22 @@
   (should (equal (memcase '(a b c) ((a d) 'A) (otherwise 'B)) 'A))
   (should (equal (memcase '(a b c) ((d e) 'A) (otherwise 'B)) 'B)))
 
+(ert-deftest test-headtail ()
+  "Test of `headtail'"
+  (should (equal (headtail nil 17 56) nil))
+  (should (equal (headtail (0-n 4)) '(0 3)))
+  (should (equal (headtail (0-n 4) 1) '(0 3)))
+  (should (equal (headtail (0-n 4) 1 0) '(0)))
+  (should (equal (headtail (0-n 4) 0 1) '(3)))
+  (should (equal (headtail (0-n 4) 2) '(0 1 2 3)))
+  (should (equal (headtail (0-n 4) 2 2) '(0 1 2 3)))
+  (should (equal (headtail (0-n 4) 2 0) '(0 1)))
+  (should (equal (headtail (0-n 4) 2 1) '(0 1 3)))
+  (should (equal (headtail (0-n 4) 0 2) '(2 3)))
+  (should (equal (headtail (0-n 4) 1 2) '(0 2 3)))
+  (should (equal (headtail (0-n 4) 3) '(0 1 2 3)))
+  (should (equal (headtail (0-n 4) 1 1 '(foo bar)) '(0 foo bar 3))))
+
 (ert-deftest test-cars ()
   "Test of `cars'"
   (should (equal (cars '((a b c) (d e))) '(a d))))

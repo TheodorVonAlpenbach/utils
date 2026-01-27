@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Default tag
-adaTagTemplate="ADA-15600"
+adaTagTemplate="ADA-15800"
 
 # However, if the input argument is a number greater than 500
 # we use another 

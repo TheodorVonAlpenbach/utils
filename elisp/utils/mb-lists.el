@@ -25,9 +25,15 @@ element, -2 second last and so on."
   (nth (mod n (length list)) list))
 ;;(cl-mapcar (bind #'nth* (0-n 4)) (a-b -5 5))
 
-(cl-defun head (n list)
+(defun head (n list)
   (butlast list (- (length list) n)))
 ;;(head 2 '(a b c))
+
+(cl-defun headtail (list &optional (n-first 1) (n-last n-first) mid)
+  (if (>= (+ n-first n-last) (length list))
+    list
+    (append (head n-first list) (listify mid) (last list n-last))))
+;;(headtail (0-n 4) 1 2 'foo)
 
 (cl-defun l-explicit*< (x y list &rest cl-keys)
   "Returns a binary predicate (less-than-type) that evalutes to t

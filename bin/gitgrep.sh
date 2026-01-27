@@ -1,6 +1,6 @@
 #!/bin/bash
 
-defaultContextBeforeArgument=4
+defaultContextBeforeArgument=6
 defaultContextAfterArgument=1
 numberOfShownEntries=5
 

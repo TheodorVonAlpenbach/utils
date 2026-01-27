@@ -10,7 +10,8 @@
   :group 'mb-elisp)
 
 (defgroup dot nil
-  "Customizations for Elisp code based on the dot utility from the Graphviz package."
+  "Customizations for Elisp code based on the dot utility from the
+Graphviz package."
   :tag "dot"
   :group 'Graphviz)
 
@@ -112,7 +113,8 @@ The function uses `dot-program' to convert the DOT-STRING to a PNG image."
       (png-view-externally it)
       (png-view it))))
 
-(cl-defun dot-view-svg (dot-string &key (path (dot-tmp-path dot-string)) extern-p)
+(cl-defun dot-view-svg
+    (dot-string &key (path (dot-tmp-path dot-string)) extern-p)
   (awhen (dot-to-svg dot-string :path path)
     (if extern-p
       (png-view-externally it)
@@ -132,7 +134,8 @@ The function uses `dot-program' to convert the DOT-STRING to a PNG image."
   "Print png buffer.
 See http://localhost:631/ for further print options"
   (interactive)
-  (call-process* "lpr" "-P" "MX-2640NPCL_PS" "-o" "media=A3" (buffer-file-name)))
+  (call-process*
+   "lpr" "-P" "MX-2640NPCL_PS" "-o" "media=A3" (buffer-file-name)))
 ;;alias pr2l='lpr -P SHARP_MX-2640NPCL_PS -o media=A4,sides=two-sided-long-edge'
 
 ;;;; this could be moved to lilypond-<something>

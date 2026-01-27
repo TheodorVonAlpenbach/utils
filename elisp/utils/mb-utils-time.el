@@ -808,7 +808,7 @@ designators WEEK-DESIGNATOR1 and WEEK-DESIGNATOR2. See
 (cl-defun ms-unix-time (&optional (time-designator (now)))
   "Convert time-designator to the number of seconds since 1970-01-01 UTC."
   (* 1000 (unix-time time-designator)))
-;;(ms-unix-time "2023-11-13T16:00:00")
+;;(ms-unix-time "2025-07-01T16:00:00")
 ;;(ms-unix-time)
 
 (cl-defun parse-ms-unix-time (ms)

@@ -757,6 +757,14 @@ copied is displayed."
     (message "Copied string '%s' to clipboard" string)))
 ;;(string-to-clipboard "qwe")
 
+(cl-defun clipboard-to-string (&optional with-properties)
+  "Return last item added to `kill-ring'.
+If WITH-PROPERTIES is not nil, keep string properties to returned object"
+  (if with-properties
+    (car kill-ring)
+    (string-remove-props (car kill-ring))))
+;;(clipboard-to-string t)
+
 (cl-defun buffer-file-name-to-clipboard ()
   (interactive)
   (string-to-clipboard (buffer-file-name)))

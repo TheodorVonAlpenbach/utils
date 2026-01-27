@@ -124,7 +124,7 @@ For ARGS, see `cl-position'"
 (cl-defun split-if (predicate sequence &rest args)
   "Slits SEQUENCE into two at the positions where unary PREDICATE is true."
   (apply #'split-at-position sequence (apply #'positions-if predicate sequence args)))
-;;(split-if #'oddp '(1 2 3 4 5))
+;;(split-if #'cl-oddp '(1 2 3 4 5))
 
 (cl-defun elt-random (sequence)
   "Returns a random element in SEQUENCE"
