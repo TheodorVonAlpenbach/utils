@@ -8,13 +8,17 @@
 (defconst +glicko-max-RD+ 350)
 (defconst +glicko-RD-restore-time+ 14 "Days")
 (defconst +glicko-typical-RD+ 50)
-(defconst +glicko-c-constant+ (sqrt (/ (- (sq +glicko-max-RD+) (sq +glicko-typical-RD+))
-				     +glicko-RD-restore-time+)))
+(defconst +glicko-c-constant+
+  (sqrt (/ (- (sq +glicko-max-RD+)
+	      (sq +glicko-typical-RD+))
+	   +glicko-RD-restore-time+)))
 (defconst +glicko-init-rating+ (list 1500 +glicko-max-RD+))
 
 (cl-defun glicko-update-RD (old-RD &optional time-since-last-rating)
-  "If TIME-SINCE-LAST-RATING is not nil, update OLD-RD. Else, just return OLD-RD.
-This method guarantees to return a number of type float."
+  "Update the glicko ratings deviation.
+If TIME-SINCE-LAST-RATING is not nil, update OLD-RD. Else, just
+return OLD-RD. This method guarantees to return a number of type
+float."
   (if time-since-last-rating
     (sqrt (+ (sq old-RD) (* (sq +glicko-c-constant+) time-since-last-rating)))
     (float old-RD)))
@@ -27,11 +31,13 @@ This method guarantees to return a number of type float."
 ;;(mapcar #'glicko-g-function '(30 100 300))
 ;;(glicko-rating '(1500 200) '(((1400 30) 1) ((1550 100) 0) ((1700 300) 0)))
 
-(cl-defun glicko-expected-score (players-rating opponents-rating opponents-RD)
+(cl-defun glicko-expected-score (players-rating opponents-rating
+				 &optional (opponents-RD 0))
   "Returns a float"
   (/ 1 (1+ (expt 10 (/ (* (glicko-g-function opponents-RD)
 			  (- players-rating opponents-rating))
 		       -400)))))
+;;(glicko-expected-score -169 -475)
 ;;(glicko-expected-score -169 -475 3.5)
 ;;(glicko-expected-score -169 -470 3.5)
 ;;(glicko-expected-score -169 -360 14)
@@ -40,7 +46,8 @@ This method guarantees to return a number of type float."
 ;;(glicko-expected-score 29 487 3.5)
 ;;(glicko-expected-score 117.2 35.1 51)
 
-(cl-defun glicko-expected-opponents-rating (players-rating opponents-rating opponents-RD)
+(cl-defun glicko-expected-opponents-rating
+    (players-rating opponents-rating opponents-RD)
   "Returns a float"
   (/ 1 (1+ (expt 10 (/ (* (glicko-g-function opponents-RD)
 			  (- players-rating opponents-rating))
@@ -61,7 +68,8 @@ g-value and expected score, respectively, for the opponents"
 	     opponent-ratings opponent-RDs))
 
 (cl-defun glicko-reorder (player matches)
-  "Tranforms PLAYER and MATCHES to the list (player-rating player-RD ratings RDs scores)"
+  "Tranforms PLAYER and MATCHES to a list
+(player-rating player-RD ratings RDs scores)"
   (append player (transpose (cut (flatten matches) 3))))
 ;;(glicko-reorder '(1600 50) '(((1500 30) 1) ((1700 20) .5) ((2000 10) 0)))
 ;;(glicko-reorder '(1600 50) '((1500 30) 1))
