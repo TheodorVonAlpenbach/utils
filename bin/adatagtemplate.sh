@@ -1,13 +1,13 @@
 #!/bin/bash
 
 # Default tag
-adaTagTemplate="ADA-15800"
+adaTagTemplate="ADA-16000"
 
 # However, if the input argument is a number greater than 500
 # we use another 
-# if [[ $1 =~ ^[0-9]+$ ]] && [ $1 -gt 500 ]; then
-#     adaTagTemplate="ADA-14000"
-# fi
+if [[ $1 =~ ^[0-9]+$ ]] && [ $1 -gt 500 ]; then
+    adaTagTemplate="ADA-15000"
+fi
 
 adaSuffix=${1:-$adaTagTemplate}
 

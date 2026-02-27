@@ -6,7 +6,7 @@
 (defconst +glicko-q-squared+ (sq +glicko-q-constant+))
 (defconst +glicko-P-constant+ (* 3 (sq (/ +glicko-q-constant+ pi))))
 (defconst +glicko-max-RD+ 350)
-(defconst +glicko-RD-restore-time+ 14 "Days")
+(defconst +glicko-RD-restore-time+ 100 "Days") ;; was 14 previously
 (defconst +glicko-typical-RD+ 50)
 (defconst +glicko-c-constant+
   (sqrt (/ (- (sq +glicko-max-RD+)

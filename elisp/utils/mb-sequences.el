@@ -141,13 +141,22 @@ sequence as a side effect:
      (setf ,sequence (remove-nth ,n ,sequence))))
 ;;(let ((s (a-b 1 3))) (list (draw-nth 0 s) s))
 
-(cl-defmacro draw-random (sequence)
-  "Draw a random element in SEQUENCE.
+(cl-defmacro draw-random (sequence &optional (n 1))
+  "Draw a random elements in SEQUENCE.
 See `draw-nth' for a definition of the draw operation."
   (with-gensyms (gi)
     `(let ((,gi (random (length ,sequence))))
-      (draw-nth ,gi ,sequence))))
-;;(let ((s (a-b 1 10))) (list (draw-random s) s))
+       (cl-loop repeat ,n
+		collect (draw-nth ,gi ,sequence)))))
+
+(cl-defmacro draw-random (sequence &optional (n 1))
+  "Draw a random elements in SEQUENCE.
+See `draw-nth' for a definition of the draw operation."
+  (with-gensyms (gi)
+    `(cl-loop repeat ,n
+	      for ,gi = (random (length ,sequence))
+	      collect (draw-nth ,gi ,sequence))))
+;;(let ((l (0-n 10))) (list (draw-random l (length l)) l))
 
 (cl-defmacro draw (x cl-seq &rest cl-keys)
   "Draw all elements from SEQUENCE that matches X.
@@ -178,8 +187,7 @@ elements.
 (cl-defun randomize (sequence)
   "Return the elements of SEQUENCE in random order."
   (as-list (l sequence)
-    (cl-loop repeat (length sequence)
-	  collect (draw-random sequence))))
+    (draw-random sequence (length sequence))))
 ;;(randomize "Mats Bergstr;m")
 
 (cl-defun positions (x sequence &key (test #'eql) (key #'identity))
