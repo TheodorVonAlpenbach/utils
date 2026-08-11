@@ -344,8 +344,8 @@ The equivalence relation is given by keyword :test.
   "Special application for Munkholmserien"
   (merge-n-lists 
    (cl-mapcar #'(lambda (n sym) (make-list n sym))
-	    distribution-list
-	    (or categories-list '(g h k n s d)))))
+     distribution-list
+     (or categories-list '(g h k n s d)))))
 ;;(prin1 (distribute-categories '(10 10 8 10 5 7)))
 
 ;;; cycles (copy to separate module)
@@ -426,95 +426,95 @@ assuming the number of non-EQ elements is 2"
 	     for badness = (2cycle-badness
 			    cycle #'(lambda (x y) 
 				      (xnor (funcall test elt x) 
-					    (funcall test elt y))))))
-  ;;(cycle-badness '(a b c a b c b a c a b c))
+					    (funcall test elt y)))))))
+;;(cycle-badness '(a b c a b c b a c a b c))
 
-  (cl-defun cycle-best (cycles &optional (test #'eq))
-    "Calculate the best distribution of the elements in CYCLE.
+(cl-defun cycle-best (cycles &optional (test #'eq))
+  "Calculate the best distribution of the elements in CYCLE.
 See `cycle-badness' for the measure of a good cycle."
-    (cl-loop with min-cycle = (first cycles)
-	     with min = (cycle-badness min-cycle test)
-	     for c in cycles
-	     for badness = min then (cycle-badness c test)
-	     if (zerop badness) return c
-	     if (< badness min) do (setf min badness min-cycle c)
-	     finally return min-cycle))
-  ;;(cycle-best '((a a b b) (a b a b)))
+  (cl-loop with min-cycle = (first cycles)
+	   with min = (cycle-badness min-cycle test)
+	   for c in cycles
+	   for badness = min then (cycle-badness c test)
+	   if (zerop badness) return c
+	   if (< badness min) do (setf min badness min-cycle c)
+	   finally return min-cycle))
+;;(cycle-best '((a a b b) (a b a b)))
 
-  (cl-defun distribute-rest (list prefix-cycle &optional (test #'eq))
-    (let* ((test test))
-      (cycle-best (mapcar (bind #'append prefix-cycle)
-		    (cycle-rotations (distribute list test))))))
-  ;;(cycle-badness (distribute-rest '(a c a b e b) '(a a b)))
+(cl-defun distribute-rest (list prefix-cycle &optional (test #'eq))
+  (let* ((test test))
+    (cycle-best (mapcar (bind #'append prefix-cycle)
+		  (cycle-rotations (distribute list test))))))
+;;(cycle-badness (distribute-rest '(a c a b e b) '(a a b)))
 
-  ;; energy
-  (cl-defun p/th-to-NOK/MWh (p/th &optional (NOK/pound 11.5))
-    (* p/th 0.01 NOK/pound 34.1))
-  ;;(p/th-to-NOK/MWh 90)352.935
+;; energy
+(cl-defun p/th-to-NOK/MWh (p/th &optional (NOK/pound 11.5))
+  (* p/th 0.01 NOK/pound 34.1))
+;;(p/th-to-NOK/MWh 90)352.935
 
-  ;; trondheim
-  (cl-defun trondheim-percentage
-      (n-games game-price n-qs-delivered received-price/q wanted-price/q)
-    (/ (* n-qs-delivered (- wanted-price/q received-price/q))
-       (* 1.0 n-games game-price)))
-  ;;(trondheim-percentage 5000 500 1000 10 35)
+;; trondheim
+(cl-defun trondheim-percentage
+    (n-games game-price n-qs-delivered received-price/q wanted-price/q)
+  (/ (* n-qs-delivered (- wanted-price/q received-price/q))
+     (* 1.0 n-games game-price)))
+;;(trondheim-percentage 5000 500 1000 10 35)
 
 
-  (defconst bilkollektivet-price-table 
-    '((B 26 180 280 2.70 1.30)
-      (C 28.50 200 300 2.90 1.50)
-      (D 31.50 220 320 3.10 1.70))
-    "Format: (type NOK/hour NOK/days¹ NOK/days² NOK/km³ NOK/km°). where
+(defconst bilkollektivet-price-table 
+  '((B 26 180 280 2.70 1.30)
+    (C 28.50 200 300 2.90 1.50)
+    (D 31.50 220 320 3.10 1.70))
+  "Format: (type NOK/hour NOK/days¹ NOK/days² NOK/km³ NOK/km°). where
 ¹: 1-5 days, ²: >6 days, ³: 1-300 km, and °: >301 km")
 
-  (cl-defun bilkollektivet-price-calculator (type num-km
-					     &optional (days 0) (hours 0))
-    ""
-    (let* ((price-type (assoc type bilkollektivet-price-table))
-	   (price-km (* num-km (if (< num-km 301)
-				 (fifth price-type) (sixth price-type))))
-	   (price-days (* days (if (< days 6)
-				 (third price-type) (fourth price-type))))
-	   (price-hours (* hours (second price-type))))
-      (+ price-km price-days price-hours)))
-  ;;(bilkollektivet-price-calculator 'C 2000 5)
+(cl-defun bilkollektivet-price-calculator (type num-km
+					   &optional (days 0) (hours 0))
+  ""
+  (let* ((price-type (assoc type bilkollektivet-price-table))
+	 (price-km (* num-km (if (< num-km 301)
+			       (fifth price-type) (sixth price-type))))
+	 (price-days (* days (if (< days 6)
+			       (third price-type) (fourth price-type))))
+	 (price-hours (* hours (second price-type))))
+    (+ price-km price-days price-hours)))
+;;(bilkollektivet-price-calculator 'C 2000 5)
 
 
 ;;; div
-  (cl-defun is-divisible (n m)
-    (zerop (mod n m)))
+(cl-defun is-divisible (n m)
+  (zerop (mod n m)))
 					;(mapcar #'(lambda (n) (is-divisible n 5)) (cl-loop for i below 11 collect i))
 
-  (require 'mb-utils-10000-first-primes)
-  (cl-defun primep (n)
-    (not-null (cl-find n 10000-first-primes)))
-  ;;(cl-remove-if nil (mapcar #'primep (1-n 20)))
+(require 'mb-utils-10000-first-primes)
+(cl-defun primep (n)
+  (not-null (cl-find n 10000-first-primes)))
+;;(cl-remove-if nil (mapcar #'primep (1-n 20)))
 
-  (cl-defun factorize (n &optional (primes 10000-first-primes))
-    (let* ((max-prime (first (last primes)))
-	   (max-argument (sq max-prime))
-	   (factors '()))
-      (when (> n max-argument)
-	(error "Argument must be lower than %d" max-argument))
-      (while (and primes 
-		  (> n 1))
-	(let ((p (pop primes)))
-	  (while (is-divisible n p)
-	    (push p factors)
-	    (setq n (/ n p)))))
-      (when (> n 1)
-	(push n factors))
-      factors))
-  ;;(mapcar #'factorize (cl-loop for i from 2 to 100 collect i))
-  ;;(mapcar #'factorize '(324 180))
-  ;;(/ 180 36)
-  ;;(apply #'* (factorize 1047300))
-  ;;(/ 288 36)
+(cl-defun factorize (n &optional (primes 10000-first-primes))
+  (let* ((max-prime (first (last primes)))
+	 (max-argument (sq max-prime))
+	 (factors '()))
+    (when (> n max-argument)
+      (error "Argument must be lower than %d" max-argument))
+    (while (and primes 
+		(> n 1))
+      (let ((p (pop primes)))
+	(while (is-divisible n p)
+	  (push p factors)
+	  (setq n (/ n p)))))
+    (when (> n 1)
+      (push n factors))
+    factors))
+;;(mapcar #'factorize (cl-loop for i from 2 to 100 collect i))
+;;(mapcar #'factorize '(324 180))
+;;(/ 180 36)
+;;(apply #'* (factorize 1047300))
+;;(/ 288 36)
 
-  (cl-defun all-factors (n)
-    (cl-sort (cl-remove-duplicates
-		 (mapcar #'product (power-set (factorize n))))
-      #'<)))
+(cl-defun all-factors (n)
+  (cl-sort (cl-remove-duplicates
+	       (mapcar #'product (power-set (factorize n))))
+    #'<))
 ;;(all-factors 120)
 ;;(all-factors 284)
 
@@ -657,9 +657,9 @@ NUMBER-OF-BYTES is reached."
   "Calculates the integer represented by BYTES of bit length BYTE-SIZE."
   (calculate-n-ary
    (expt 2 8) (cl-case endianness
-     ((:big) (nreverse bytes))
-     ((:little) bytes)
-     (t (error "%s is not a correct :ENDIANNESS value" :endianness)))))
+		((:big) (nreverse bytes))
+		((:little) bytes)
+		(t (error "%s is not a correct :ENDIANNESS value" :endianness)))))
 ;;(bytes-to-int (list 1 0) :endianness :little)
 ;;(bytes-to-int (list 1 0) :endianness :big)
 
@@ -1014,9 +1014,9 @@ either 0 or 1)"
   "Returns a linear function with SLOPE going through point X.
 The point is represented as a pair (X0 X1)."
   (let* ((x0 (first x))
-		 (x1 (second x))
-		 (a slope)
-		 (b (- x1 (* a x0))))
+	 (x1 (second x))
+	 (a slope)
+	 (b (- x1 (* a x0))))
     #'(lambda (x) (+ (* a x) b))))
 ;;(mapcar (linear-function-slope-point 2 '(1 2)) (a-b -3 3))
 
@@ -1045,7 +1045,7 @@ The point is represented as a pair (X0 X1)."
 (cl-defun digit-sum-1 (n &optional (base 10))
   "Inner sum function for `digit-sum'" 
   (cl-loop for i below (log n base)
-	sum (nth-digit n i base)))
+	   sum (nth-digit n i base)))
 
 (cl-defun digit-sum (n &optional (base 10))
   "Returns the decimal digit sum of integer N" 
@@ -1107,9 +1107,9 @@ quotients by the gcd: (%d, %d)"
   "Tests that F(mlog3) = F(m(F(klog3))/k), for all m and k"
   (let ((log3 (log 3 2)))
     (cl-loop for m to max-m
-	  for a = (floor (* m log3))
-	  for b = (floor (/ (* m (floor (* k log3))) k))
-	  always (= a b))))
+	     for a = (floor (* m log3))
+	     for b = (floor (/ (* m (floor (* k log3))) k))
+	     always (= a b))))
 
 (cl-defun floor-test (k &optional (max-m k))
   "Tests that F(mlog3) = F(m(F(klog3))/k), for all m and k"

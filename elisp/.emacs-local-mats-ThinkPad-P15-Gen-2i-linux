@@ -54,12 +54,17 @@ sudo mount -a.")
 	(,+mb-lisp-dir+ "div/scratch.el")
 	(,+mb-lisp-dir+ "projects/ada/ada-mysql.el")
 	(,+mb-lisp-dir+ "projects/ada/ada-logins.el")
+	(,+mb-lisp-dir+ "projects/ada/ada-utils.el")
 	(,+mb-lisp-dir+ "data/historie.org")
+
+	(,+mb-utils-dir+ "bin/adatagtemplate.sh")
 
 	(,+home-dir+ "ada-tasks/ADA-7705-Feide2/ADA-7705-Feide2_0.org")
 	(,+home-dir+ ".bashrc" :point :end)
 	(,+home-dir+ ".bash_aliases" :point :end)
 	(,+home-dir+ ".bash_profile" :point :end)
+	(,+home-dir+ "~/.mongoshrc.js" :point :end)
+	
 	
 	(,+home-dir+ "doc/personer.org" :point :end :keyboard :no)
 	(,+home-dir+ "doc/technologies.org" :point :end)

@@ -42,6 +42,8 @@
     (5 :ada_dummy)
     (6 :ada_bummy)
     (7 :ada_key)
+    (8 :pf)
+    (9 :id)
     (t :ada_dummy)))
 ;;(ada-prefix-to-environment t)
 

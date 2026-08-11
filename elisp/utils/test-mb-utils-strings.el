@@ -75,11 +75,16 @@
 
 (ert-deftest test-split-string-modify-positions ()
   "Test of `split-string-modify-positions'"
-  (should (equal (split-string-modify-positions '((1 2) (5 6)) nil) '((0 1) (2 5) (6))))
-  (should (equal (split-string-modify-positions '((1 2) (5 6)) :none) '((0 1) (2 5) (6))))
-  (should (equal (split-string-modify-positions '((1 2) (5 6)) :left) '((0 1) (1 5) (5))))
-  (should (equal (split-string-modify-positions '((1 2) (5 6)) :right) '((0 2) (2 6) (6))))
-  (should (equal (split-string-modify-positions '((1 2) (5 6)) :only) '((1 2) (5 6)))))
+  (should (equal (split-string-modify-positions '((1 2) (5 6)) nil)
+		 '((0 1) (2 5) (6))))
+  (should (equal (split-string-modify-positions '((1 2) (5 6)) :none)
+		 '((0 1) (2 5) (6))))
+  (should (equal (split-string-modify-positions '((1 2) (5 6)) :left)
+		 '((0 1) (1 5) (5))))
+  (should (equal (split-string-modify-positions '((1 2) (5 6)) :right)
+		 '((0 2) (2 6) (6))))
+  (should (equal (split-string-modify-positions '((1 2) (5 6)) :only)
+		 '((1 2) (5 6)))))
 
 (ert-deftest test-split-string-regexp-list ()
   "Test of `split-string-regexp-list'"
@@ -206,3 +211,18 @@
   (should (equal (andcat '("Peter" "Paul" "Mary") "; ") "Peter; Paul; and Mary"))
   (should (equal (andcat '("Peter" "Paulus" "Maria") ", " " und " " und ")
 	   "Peter, Paulus und Maria")))
+
+(ert-deftest test-uint8array-string-to-hex-string ()
+  "Test of `uint8array-string-to-hex-string'"
+  (should (equal (uint8array-string-to-hex-string
+		  "{ buffer: new Uint8Array([105, 177, 111, 68, 136, 211]),}")
+		 "69b16f4488d3")))
+
+(ert-deftest test-uint8sequence-to-hex-string ()
+  "Test of `uint8sequence-to-hex-string'"
+  (should (equal (uint8sequence-to-hex-string
+		  [105 177 111 68 136 211 131 162 203 198 86 151])
+		 "69b16f4488d383a2cbc65697"))
+  (should (equal (uint8sequence-to-hex-string
+		  '(105 177 111 68 136 211 131 162 203 198 86 151))
+		 "69b16f4488d383a2cbc65697")))

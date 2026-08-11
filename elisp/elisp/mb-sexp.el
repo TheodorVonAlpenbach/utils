@@ -63,7 +63,7 @@ paranthesis."
 ;;(a b (c d))
 
 (defconst +defun-symbols+
-  '(cl-defun cl-defun
+  '(defun cl-defun
     defmacro cl-defmacro
     defparameter defconstant
     ert-deftest))
@@ -85,7 +85,7 @@ paranthesis."
 				  (defun-regexp +defun-regexp+))
   "Returns not nil if POINT is inside a defun form."
   (awhen (thing-at-point 'defun)
-    (string-match* (format "\\_<%s" defun-regexp) it)))
+    (string-match* (format "\\_<%s" defun-regexp) (string-remove-props it))))
 
 (definteractive defun-symbol)
 

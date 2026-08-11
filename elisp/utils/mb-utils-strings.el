@@ -904,4 +904,20 @@ Default language is :en. Other supported languages are: :no"
     (otherwise (error "Unknown language %S! Supported languages are: "
 		      +supported-alphabet-languages+))))
 
+(defun uint8sequence-to-hex-string (uint8sequence)
+  (cl-loop for uint8 in (cl-coerce uint8sequence 'list)
+	   concat (int-to-hex uint8)))
+;;(uint8array-to-hex-string [105 177 111 68 136 211 131 162 203 198 86 151])
+
+(defun uint8array-string-to-hex-string (uint8array-string)
+  (uint8sequence-to-hex-string
+   (cl-loop for s in
+	    (split-string
+	     (string-match*
+		 "\\[\\(\\([[:digit:]]+,[[:blank:]]*\\)*[[:digit:]]+\\)\\]"
+	       uint8array-string
+	       :num 1)
+	     "," t)
+	    collect (string-to-integer (string-trim s)))))
+
 (provide 'mb-utils-strings)

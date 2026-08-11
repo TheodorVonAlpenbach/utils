@@ -109,7 +109,7 @@
       user-pseudonym)
     (emacsql db [:delete :from user-pseudonym :where (= user-id $s1)] id)
     (emacsql db [:delete :from user :where (= id $s1)] id)))
-;;(delete-user 321809)
+;;(delete-user 321809 85682)
 ;;(delete-user (user-from-name "Celev_no456326499_1a_1 CappelenDamm"))
 ;;(user-from-id 671726)
 ;;(delete-user 671726)

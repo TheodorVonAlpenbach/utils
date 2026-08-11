@@ -429,7 +429,6 @@ loading of files."
 (setq ido-enable-flex-matching t)
 (setq ido-use-faces nil)
 
-
 ;;; GC optimize
 (setq gc-cons-threshold 20000000)
 
@@ -517,3 +516,8 @@ loading of files."
 
 (require 'json-mode)
 (require 'markdown-mode)
+
+(require 'mozc)
+(setq default-input-method "japanese-mozc")
+
+(setq ispell-dictionary "norsk")

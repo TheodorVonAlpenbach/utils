@@ -1,12 +1,14 @@
 #!/bin/bash
 
 # Default tag
-adaTagTemplate="ADA-16000"
+adaTagTemplate="ADA-16600"
+lastMillenial=1$(( 10#${adaTagTemplate: -4:-3} - 1))000 # E.g. 15000
+lastMillenialLimit=$(( 10#${adaTagTemplate: -3} + 200 )) # E.g. ADA-16300 -> 500
 
 # However, if the input argument is a number greater than 500
 # we use another 
-if [[ $1 =~ ^[0-9]+$ ]] && [ $1 -gt 500 ]; then
-    adaTagTemplate="ADA-15000"
+if [[ $1 =~ ^[0-9]+$ ]] && [ $1 -ge $lastMillenialLimit ]; then
+    adaTagTemplate="ADA-$lastMillenial"
 fi
 
 adaSuffix=${1:-$adaTagTemplate}
