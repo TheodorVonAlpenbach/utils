@@ -103,6 +103,8 @@ TIME passed since his last activity."
 				      for e in expected-scores
 				      sum (* g (- s e)))))))
       (list new-rating new-RD))))
-;;(glicko-rating '(1500 200) '(((1400 30) 1) ((1550 100) 0) ((1700 300) 0)))
-
+;;(glicko-rating '(-300 350) '(((1400 30) 1) ((1550 100) 0) ((1700 300) 0)))
+;;(glicko-rating '(-300 350) '(((700 700) 1.0)))
+(glicko-rating '(-300 350) '(((700 350) 1.0)))
+(glicko-rating '(700 350) '(((-300 350) 0.0)))
 (provide 'glicko)

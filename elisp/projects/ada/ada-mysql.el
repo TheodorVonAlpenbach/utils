@@ -5,6 +5,8 @@
 
 ;;; To debug an expression, use emacsql-compile, e.g:
 ;;; (emacsql-compile db [:select * :from component :where (= source-id $r1)] "617bac2c4075f937656d9d36")
+;;; Also look at the logs in buffers *emacsql-log* and *emacsql-mysql*
+;;; (both these buffers are hidden, you might need to list all buffers and select them with mouse click)
 
 (cl-defun column-selection (columns)
   (if columns
@@ -44,6 +46,7 @@
     (7 :ada_key)
     (8 :pf)
     (9 :id)
+    (10 :quizserien)
     (t :ada_dummy)))
 ;;(ada-prefix-to-environment t)
 
@@ -129,6 +132,9 @@
        (error "Argument is not an ID descriptor!")))))
 ;;(id (user 322181))
 ;;(id (list "1"))
+
+(cl-defun ids (x) (mapcar #'id (listify x)))
+;;(ids '(("17" "17")))
 
 (cl-defun json-from-id (id)
   (car (emacsql db [:select json :from json :where (= id $s1)] id)))

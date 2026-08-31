@@ -680,8 +680,9 @@ converted to optional argument NIL-STRING."
     ((stringp symbol-designator) (read symbol-designator))
     ((and (consp symbol-designator)
 	  (eql (first symbol-designator) 'quote))
-     (eval symbol-designator))))
-;;(mapcar #'ssymbol (list "qwe" '(quote qwe) 'qwe))
+     (eval symbol-designator))
+    ((consp symbol-designator) (mapcar #'ssymbol symbol-designator))))
+;;(mapcar #'ssymbol (list "qwe" '(quote qwe) 'qwe '(a "b")))
 
 (cl-defun iintern (symbol-name)
   (if (stringp symbol-name)

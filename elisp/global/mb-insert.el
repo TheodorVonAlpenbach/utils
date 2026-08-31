@@ -1,3 +1,4 @@
+;;; -*- lexical-binding: t; -*-
 (require 'mb-calendar)
 (require 'mb-utils-strings)
 
@@ -145,8 +146,8 @@ X should evaluate to a string designator."
     `(let ((,string-designator ,x))
        (lambda (&optional n)
 	 (interactive "P")
-	 (dotimes (i (or n 1))
-	   (insert (sstring ,string-designator)))))))
+	 (cl-loop repeat (or n 1)
+	   do (insert (sstring ,string-designator)))))))
 ;;(funcall (insert-n '¹) 2)
 ;;(funcall (insert-n "qwe") 2)
 
@@ -265,3 +266,4 @@ horizontally. Else, it is interted vertically."
 ;;(insert-alphabet -1)
 
 (provide 'mb-insert)
+

@@ -1,35 +1,123 @@
 * Personer
 ** Familie
-Alle memoreringsbilder her er i eller rett utenfor slottet på Bellevue
-(Germannløkken) i Oslo.
-
-Siden det på sikt kan være aktuelt å memorere svenske konger også, tar
-memoene for Karl-kongene utgangspunkt i det svenske konge-nummeret.
-Det norske er trivielt å regne seg til utfra dette.
 *** Morsiden                                                          :drill:
+SCHEDULED: <2026-08-28 Fri>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
+:ID:       8156ca95-2ac5-44f7-9777-bdcab5e7b90d
+:DRILL_LAST_INTERVAL: 4.14
+:DRILL_REPEATS_SINCE_FAIL: 2
+:DRILL_TOTAL_REPEATS: 1
+:DRILL_FAILURE_COUNT: 0
+:DRILL_AVERAGE_QUALITY: 5.0
+:DRILL_EASE: 2.6
+:DRILL_LAST_QUALITY: 5
+:DRILL_LAST_REVIEWED: [Y-08-24 Mon 13:%]
 :END:
-Ungene til Ida og ? heter Mikkel og ?
+Ungene til Ida og ? heter [Mikkel] og ?
 **** Memo
 *** Farsiden                                                          :drill:
+SCHEDULED: <2026-08-28 Fri>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
+:ID:       1d06f5c1-5328-4e40-90c5-4f5414ee2831
+:DRILL_LAST_INTERVAL: 4.14
+:DRILL_REPEATS_SINCE_FAIL: 2
+:DRILL_TOTAL_REPEATS: 1
+:DRILL_FAILURE_COUNT: 0
+:DRILL_AVERAGE_QUALITY: 5.0
+:DRILL_EASE: 2.6
+:DRILL_LAST_QUALITY: 5
+:DRILL_LAST_REVIEWED: [Y-08-24 Mon 13:%]
 :END:
-Ungene til Lars og Karin heter Lisa, Vilmer, Vidar og Malva.
+Ungene til Lars og [Karin] heter [Lisa], [Vilmer], [Vidar] og [Malva].
 **** Memo
 *** Farsiden                                                          :drill:
+SCHEDULED: <2026-08-28 Fri>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
+:ID:       7c242943-b324-4bf3-b0d1-49329fc6dd09
+:DRILL_LAST_INTERVAL: 4.14
+:DRILL_REPEATS_SINCE_FAIL: 2
+:DRILL_TOTAL_REPEATS: 1
+:DRILL_FAILURE_COUNT: 0
+:DRILL_AVERAGE_QUALITY: 5.0
+:DRILL_EASE: 2.6
+:DRILL_LAST_QUALITY: 5
+:DRILL_LAST_REVIEWED: [Y-08-24 Mon 13:%]
 :END:
-Kjæresten til Johan heter Anna Wagnell.
+Kjæresten til [Johan] heter [Anna] Wagnell.
 **** Memo
 ** Privat
-*** CVO
+*** CVO :drill:
+SCHEDULED: <2026-08-28 Fri>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
+:ID:       d8d4245d-252f-4114-bbee-2d6b34a92f1b
+:DRILL_LAST_INTERVAL: 4.14
+:DRILL_REPEATS_SINCE_FAIL: 2
+:DRILL_TOTAL_REPEATS: 1
+:DRILL_FAILURE_COUNT: 0
+:DRILL_AVERAGE_QUALITY: 5.0
+:DRILL_EASE: 2.6
+:DRILL_LAST_QUALITY: 5
+:DRILL_LAST_REVIEWED: [Y-08-24 Mon 13:%]
 :END:
-Viktor Strand og Pelin har en datter, Nora. Venninnen til Pelin heter Merve.
+Viktor Strand og Pelin har en datter, [Nora]. Venninnen til Pelin heter [Merve].
+**** Memo
+** Jobb
+*** Cappelen Damm :drill:
+SCHEDULED: <2026-08-28 Fri>
+:PROPERTIES:
+:DRILL_CARD_TYPE: hide2cloze
+:ID:       58bc02ca-87b2-48c5-a9f5-c6d5844072c2
+:DRILL_LAST_INTERVAL: 4.0
+:DRILL_REPEATS_SINCE_FAIL: 2
+:DRILL_TOTAL_REPEATS: 1
+:DRILL_FAILURE_COUNT: 0
+:DRILL_AVERAGE_QUALITY: 4.0
+:DRILL_EASE: 2.5
+:DRILL_LAST_QUALITY: 4
+:DRILL_LAST_REVIEWED: [Y-08-24 Mon 13:%]
+:END:
+Sommerstudinen, som er datter av [Anne], kusinen til Maren, heter [Lisa]
+Hørnes [Nygård]. Hun har (2026-08-24) akkurat fullført VGS.
+
+Hun er forøvrig kreditert som skuespiller i to norske filmer: Lave
+forventninger (Eivind Landsvik) Den største forbrytelsen (Eirik
+Svenson)
+**** Memo
+*** Cappelen Damm :drill:
+SCHEDULED: <2026-08-28 Fri>
+:PROPERTIES:
+:DRILL_CARD_TYPE: hide2cloze
+:ID:       92143bbf-3ee4-450d-85ae-34c051fa898e
+:DRILL_LAST_INTERVAL: 4.14
+:DRILL_REPEATS_SINCE_FAIL: 2
+:DRILL_TOTAL_REPEATS: 1
+:DRILL_FAILURE_COUNT: 0
+:DRILL_AVERAGE_QUALITY: 5.0
+:DRILL_EASE: 2.6
+:DRILL_LAST_QUALITY: 5
+:DRILL_LAST_REVIEWED: [Y-08-24 Mon 13:%]
+:END:
+Sommerstudenten med krøller heter [Teodor] [Hestenes]
+**** Memo
+*** Cappelen Damm :drill:
+SCHEDULED: <2026-08-28 Fri>
+:PROPERTIES:
+:DRILL_CARD_TYPE: hide2cloze
+:ID:       5ff51043-0683-4764-aa73-205560f3c751
+:DRILL_LAST_INTERVAL: 4.14
+:DRILL_REPEATS_SINCE_FAIL: 2
+:DRILL_TOTAL_REPEATS: 2
+:DRILL_FAILURE_COUNT: 1
+:DRILL_AVERAGE_QUALITY: 3.5
+:DRILL_EASE: 2.6
+:DRILL_LAST_QUALITY: 5
+:DRILL_LAST_REVIEWED: [Y-08-24 Mon 13:%]
+:END:
+Sommerstudinen med briller heter [Hanne] Minken [Farestveit]
 **** Memo
 
 

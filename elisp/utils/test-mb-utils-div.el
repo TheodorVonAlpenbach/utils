@@ -81,8 +81,9 @@
 (ert-deftest test-ssymbol ()
   "Test of `ssymbol'"
   (should (equal (mapcar #'ssymbol
-		   (list 1 0.3 "1" "0.3" "xcv" '(quote zxc) 'vbn))
-		 '(1 0.3 1 0.3 xcv zxc vbn))))
+		   (list 1 0.3 "1" "0.3" "xcv" '(quote zxc) 'vbn
+			 (list 1 0.3 "1" "0.3" "xcv" '(quote zxc) 'vbn)))
+		 '(1 0.3 1 0.3 xcv zxc vbn (1 0.3 1 0.3 xcv zxc vbn)))))
 
 (ert-deftest test-notf ()
   "Test of `notf'"

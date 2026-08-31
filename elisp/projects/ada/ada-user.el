@@ -135,5 +135,13 @@
 (cl-defun fusers (user-descriptors)
   (concat* user-descriptors :key #'fuser :in "\n\n"))
 ;;(fusers '("40a520e7-392a-45f6-83e2-47c3923a2f52" "40a520e7-392a-45f6-83e2-47c3923a2f52"))
- 
+
+(cl-defun rating-from-user (user &rest columns)
+  (awhen (ids user)
+    (emacsql db (vector :select (column-selection columns)
+		       :from 'user-rating
+		       :where 'user-id :in '$v1)
+	    (cl-coerce it 'vector))))
+;;(rating-from-user '(15))
+
 (provide 'ada-user)

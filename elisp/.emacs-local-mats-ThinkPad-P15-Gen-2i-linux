@@ -68,6 +68,7 @@ sudo mount -a.")
 	
 	(,+home-dir+ "doc/personer.org" :point :end :keyboard :no)
 	(,+home-dir+ "doc/technologies.org" :point :end)
+	(,+home-dir+ "doc/abbrevations.txt" :point :end)
 	(,+home-dir+ "doc/todo.org" :point :end)
 	(,+home-dir+ "doc/howto.org" :point :end)
 	(,+home-dir+ "doc/questions.org" :point :end :keyboard :no)

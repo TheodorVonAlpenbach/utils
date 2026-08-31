@@ -1,4 +1,3 @@
-(require 'mb-utils-div)
 (require 'mb-utils-sets)
 (require 'mb-sequences)
 (require 'mb-utils-math)

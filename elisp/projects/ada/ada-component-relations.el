@@ -30,9 +30,6 @@
 ;;(mapcar #'car (ada-columns 'gateway-condition))
 ;;(component 40938)
 
-(cl-defun ids (x) (mapcar #'id x))
-;;(ids '(("17" "17")))
-
 (cl-defun gateway-content-list-ids (gateway-id)
   (ids
    (car
