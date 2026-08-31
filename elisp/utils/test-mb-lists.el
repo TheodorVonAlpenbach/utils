@@ -150,3 +150,8 @@
 (ert-deftest test-cars ()
   "Test of `cars'"
   (should (equal (cars '((a b c) (d e))) '(a d))))
+
+(ert-deftest test-pad-list ()
+  "Test of `pad-list'"
+  (should (equal (pad-list '(a b c) 5 'd t) '(a b c d d)))
+  (should (equal (pad-list '(a b c) 5 'd) '(d d a b c))))

@@ -1,4 +1,4 @@
-;; Redirected from one of the following
+; Redirected from one of the following
 ;; c:/Users/Theodor/AppData/Roaming/.emacs
 ;; c:/Documents and Settings/matsb/Application Data/.emacs
 

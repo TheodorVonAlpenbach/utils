@@ -42,20 +42,28 @@
 ;;(time-to-touchdown 20)2.0196199771025523
 ;;(time-to-touchdown 4.9)
 
-(cl-defun celcius (temperature &optional (unit :kelvin))
-  (cl-case unit
-    (:kelvin (- temperature +kelvin+))))
+(cl-defun celsius-to-fahrenheit (x &optional reverse)
+  "Returns X degrees Celsius in Fahrenheit. If REVERSE is non-nil, the
+reverse operation is performed. "
+  (if reverse (* (- x 32) (/ 5 9.0)) (+ (* 1.8 x) 32)))
+;;(celsius-to-fahrenheit 100 t)
 
-(cl-defun kelvin (temperature &optional (unit :celcius))
+(cl-defun celsius (temperature &optional (unit :kelvin))
+  (cl-case unit
+    (:kelvin (- temperature +kelvin+))
+    (:fahrenheit (celsius-to-fahrenheit temperature t))))
+;;(celsius -20 :fahrenheit)
+
+(cl-defun kelvin (temperature &optional (unit :celsius))
   (cl-case unit
     (:kelvin temperature)
-    (:celcius (+ temperature +kelvin+))))
+    (:celsius (+ temperature +kelvin+))))
 ;;(kelvin 0)
 
 (cl-defun ideal-gas-molecules (volume &key (pressure +standard-atmosphere+) (temperature (kelvin 0)))
   (/ (* pressure volume) +boltzmann+ temperature))
 ;;(ideal-gas-molecules 0.001)
-;;(ideal-gas-molecules 0.001 :temperature (kelvin 20 :celcius))
+;;(ideal-gas-molecules 0.001 :temperature (kelvin 20 :celsius))
 
 (cl-defun coulomb-force (q1 q2 distance)
   (/ (* q1 q2) 4 pi +permittity-in-free-space+ (sq distance)))

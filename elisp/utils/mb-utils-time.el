@@ -823,9 +823,9 @@ designators WEEK-DESIGNATOR1 and WEEK-DESIGNATOR2. See
 ;;(minutes-to-mmss )
 
 (cl-defun mmss-to-minutes (mmss)
-  (cl-destructuring-bind (mm ss rest) mmss
-    (+ mm (/ (+ ss rest) 60.0))))
-;;(mmss-to-minutes '(1 29 .99))
+  (cl-destructuring-bind (mm ss) mmss
+    (+ mm (/ ss 60.0))))
+;;(mmss-to-minutes '(1 29.99))
 
 (cl-defun hours-to-hhmmss (hours)
   (cl-destructuring-bind (hh rest) (cl-floor hours)
@@ -837,9 +837,20 @@ designators WEEK-DESIGNATOR1 and WEEK-DESIGNATOR2. See
 ;;(cl-floor 59.9529019)
 
 (cl-defun hhmmss-to-hours (hhmmss)
+  "Convert a list of (H M S DECIMALS) to decimal hours."
   (cl-destructuring-bind (hh &rest mmss) hhmmss
     (+ hh (/ (mmss-to-minutes mmss) 60.0))))
-;;(hhmmss-to-hours '(59 59 59 0))
-;;(hhmmss-to-hours '(1 29 59 .99))
+
+(cl-defun parse-hhmmss-string (hhmmss-string &optional abbrevate-right-p)
+  "Convert a string \"HH:MM:SS.SECOND-DECIMALS\" to a number list of its parts.
+Handles substrings, with or without SECOND-DECIMALS
+MM:SS[.SECOND-DECIMALS]
+SS[.SECOND-DECIMALS]
+If ABBREVATE-RIGHT-P is not nil, then padding of HH, MM, SS is from right:
+HH:MM[.SECOND-DECIMALS]
+HH[.SECOND-DECIMALS]
+"
+  (maptree #'string-to-number
+    (pad-list (string-split hhmmss-string "[:]") 3 "0" abbrevate-right-p)))
 
 (provide 'mb-utils-time)

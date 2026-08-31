@@ -59,7 +59,7 @@
 
 ;;;; Annet
 ;;;; Generere nye kataloger
-;;;; for i in `seq 33 52`; do mkdir "$iuke" ; done
+;;;; for i in $(seq 34 52); do mkdir "${i}uke"; done
 
 ;;;; Endre antall runder i tabellen
 ;;;; ==============================

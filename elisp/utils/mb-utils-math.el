@@ -202,12 +202,6 @@ converting to float if the product is large for an integer."
 		(- score (elo-expected-score elo-old elo-average num-games)))))
 ;;(elo-new 2713 5.5 9 2713)
 
-(cl-defun celsius-to-fahrenheit (x &optional reverse)
-  "Returns X degrees Celsius in Fahrenheit. If REVERSE is non-nil, the
-reverse operation is performed. "
-  (if reverse (* (- x 32) (/ 5 9.0)) (+ (* 1.8 x) 32)))
-;;(celsius-to-fahrenheit 100 t)
-
 (cl-defun pound-to-kg (x &optional reverse)
   "Returns X degrees Celsius in Fahrenheit. If REVERSE is non-nil, the
 reverse operation is performed. "

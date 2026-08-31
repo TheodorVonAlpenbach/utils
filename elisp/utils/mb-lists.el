@@ -522,6 +522,15 @@ TODO: turn this into sequence<"
   (apply #'list< list2 list1 args))
 ;;(list> '(1 2 3 5) '(1 2 3 3 3))
 
+(defun pad-list (list n pad-value &optional to-right-p)
+  (let ((length (length list)))
+    (if (< length n)
+      (if to-right-p
+	(append list (make-list (- n length) pad-value))
+	(append (make-list (- n length) pad-value) list))
+      list)))
+;;(pad-list '(0 1 2) 4 3 t)
+
 (cl-defun pad-lists (lists &key (elt 0) (from-end t))
   "Returns a copy of LISTS, but with each list padded with ELT so
 that all lists have the same length. If FROM-END is nil, each

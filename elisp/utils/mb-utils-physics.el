@@ -36,6 +36,9 @@
 ;;(escape-velocity (* 10000 +moon-apogee+))
 ;;(escape-velocity (* 20000 +moon-apogee+))
 
+(cl-defun meter-to-parsec (&optional (meter 1))
+  (/ +astronomical-unit+ (tan (degrees-to-radians (/ 1.0 3600)))))
+;;(/ (meter-to-parsec) (* +light-speed+ 60 60 24 365.24))
 
 (cl-defun J-to-cal (J)
   (* 0.239005736 J))

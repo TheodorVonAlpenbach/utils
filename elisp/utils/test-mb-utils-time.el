@@ -389,4 +389,23 @@
   (should (equal (mapcar #'time-part-p '(:year :month :day :hour :minute :second))
 		 '(nil nil nil t t t))))
 
+(ert-deftest test-parse-hhmmss-string ()
+  "Test of `parse-hhmmss-string'"
+  (should (equal (parse-hhmmss-string "12:34:56.7") '(12 34 56.7)))
+  (should (equal (parse-hhmmss-string "12:34:56") '(12 34 56)))
+  (should (equal (parse-hhmmss-string "12:34.7") '(0 12 34.7)))
+  (should (equal (parse-hhmmss-string "12:34") '(0 12 34)))
+  (should (equal (parse-hhmmss-string "12.7") '(0 0 12.7)))
+  (should (equal (parse-hhmmss-string "12") '(0 0 12)))
+  (should (equal (parse-hhmmss-string "12:34:56.7" t) '(12 34 56.7)))
+  (should (equal (parse-hhmmss-string "12:34:56" t) '(12 34 56)))
+  (should (equal (parse-hhmmss-string "12:34.7" t) '(12 34.7 0)))
+  (should (equal (parse-hhmmss-string "12:34" t) '(12 34 0)))
+  (should (equal (parse-hhmmss-string "12.7" t) '(12.7 0 0)))
+  (should (equal (parse-hhmmss-string "12" t) '(12 0 0))))
+
+(ert-deftest test-hhmmss-to-hours ()
+  "Test of `hhmmss-to-hours'"
+ (should (equal (hhmmss-to-hours '(1 1 1 1)) nil)))
+
 (provide 'test-mb-utils-time.el)
