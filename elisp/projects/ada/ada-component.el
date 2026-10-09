@@ -7,7 +7,7 @@
 		      :where '(= source-id $r1)) source-id))
 ;;(car (components-from-source-id "65e0b7be720a665ffafad6db" :id :uuid))("65169" "3b0828c7-5783-377e-9635-3e68c93d747f")
 ;;(caar (components-from-source-id "5f57406a9abf8c1727301221" :uuid))
-;;(components-from-source-id "5f57406a9abf8c1727301221" :id :version :uuid)
+;;(components-from-source-id "694a7e16599af6aefbcd473e" :id :version :uuid)
 
 (cl-defun latest-component-id-from-source-id (source-id)
   (id (min-element (components-from-source-id source-id :id :version)

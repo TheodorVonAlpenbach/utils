@@ -765,6 +765,10 @@ If WITH-PROPERTIES is not nil, keep string properties to returned object"
     (string-remove-props (car kill-ring))))
 ;;(clipboard-to-string t)
 
+(cl-defun buffer-name-to-clipboard ()
+  (interactive)
+  (string-to-clipboard (buffer-name)))
+
 (cl-defun buffer-file-name-to-clipboard ()
   (interactive)
   (string-to-clipboard (buffer-file-name)))

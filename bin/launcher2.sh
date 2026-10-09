@@ -10,4 +10,5 @@ gnome-terminal --tab -- bash -c "cd $adadir; exec bash"
 gnome-terminal --tab -- bash -c "cd $adadir/java/pu-message-consumer; ../gradlew bootRun & echo 'Job finished.'; exec bash"
 gnome-terminal --tab -- bash -c "cd $adadir/java/portal-api; ../gradlew bootRun & echo 'Job finished.'; exec bash"
 gnome-terminal --tab -- bash -c "cd $adadir; top; exec bash"
+gnome-terminal --tab -- bash -c "cd $adadir; watch free -h; exec bash"
 

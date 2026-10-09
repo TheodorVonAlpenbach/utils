@@ -1,10 +1,22 @@
- 0 1964	Firelight
+* Film
+** Steven Spielberg
+*** Which film and year?                                              :drill:
+:PROPERTIES:
+:DRILL_CARD_TYPE: hide2cloze
+:END:
+0: <very short synopsis, with main characters>
+**** Answer
+Firelight (1964)
+**** Rotten Tomatoes
+Scores
+
+ # year title
+ 0 1964 Firelight
  1 1971	Duel
  2 1974	The Sugarland Express
  3 1975	Jaws
  4 1977	Close Encounters of the Third Kind
  5 1979	1941
- 
  6 1981	Raiders of the Lost Ark
  7 1982	E.T. the Extra-Terrestrial
  X 1983	Twilight Zone: The Movie
@@ -35,3 +47,4 @@
 32 2018	Ready Player One
 33 2021	West Side Story
 34 2022	The Fabelmans
+35 2026	Disclosure Day

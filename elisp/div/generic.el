@@ -1,0 +1,73 @@
+(require 'eieio)
+
+(defclass geometry () ())
+
+(defclass 0d-geometry (geometry) ())
+(defclass 1d-geometry (geometry) nil)
+(defclass 2d-geometry (geometry) nil)
+
+(defclass gpoint (0d-geometry)
+  ((x :initarg :x :accessor px)
+   (y :initarg :y :accessor py)))
+(defun make-gpoint (x y) (make-instance 'gpoint :x x :y y))
+(setf p0 (make-gpoint 0 0))
+(setf p1 (make-gpoint 1 2))
+
+(defclass ginterval (1d-geometry)
+  ((a :initarg :a)
+   (b :initarg :b)))
+(defun make-ginterval (a b)
+  (if (< a b)
+    (make-instance 'ginterval :a a :b b)
+    (make-instance 'ginterval :a b :b a)))
+;(make-ginterval 2 1)
+
+(defclass genvelope (2d-geometry)
+  ((x :initarg :x :type ginterval)
+   (y :initarg :y :type ginterval)))
+(defun make-genvelope (x y) (make-instance 'genvelope :x x :y y))
+
+(defclass gsegment
+  (1d-geometry)
+  ((a :initarg :a :type gpoint)
+   (b :initarg :b :type gpoint)))
+(defun make-gsegment-2 (a a) (make-instance 'gsegment :a a :b b))
+(defun make-gsegment-4 (x0 y0 x1 y1)
+  (make-instance 'gsegment
+    :a (make-gpoint x0 y0)
+    :b (make-gpoint x1 y1)))
+(setf s1 (make-gsegment-4 0 0 1 2))
+
+(cl-defgeneric x-envelope (g))
+(cl-defgeneric y-envelope (g))
+(cl-defmethod x-envelope ((gsegment gsegment))
+  (with-slots (a b) gsegment
+    (make-ginterval (px a) (px b))))
+;;(x-envelope s1)
+(cl-defmethod y-envelope ((gsegment gsegment))
+  (with-slots (a b) gsegment
+    (make-ginterval (py a) (py b))))
+;;(y-envelope s1)
+(defun envelope (g) (make-genvelope (x-envelope g) (y-envelope g)))
+;;(envelope s1)
+(cl-defgeneric glength (g)
+  (:documentation "Return length of G"))
+(cl-defmethod glength (g) nil)
+(cl-defmethod glength ((g 0d-geometry)) 0)
+(cl-defmethod glength ((i ginterval))
+  (with-slots (a b) i (- b a)))
+;;(glength (y-envelope s1))
+(cl-defmethod glength ((s gsegment))
+  (sqrt (+ (sq (glength (x-envelope s)))
+	   (sq (glength (y-envelope s))))))
+;;(glength s1)
+
+(cl-defgeneric overlap-p (x y)
+  (:documentation "Return nil iff X and Y do not overlap"))
+(cl-defmethod overlap-p ((x geometry) (y geometry)))
+;;(overlap-p p0 p1)
+(cl-defmethod overlap-p ((x gpoint) (y gpoint))
+  (equal x y))
+;;(overlap-p p0 p0)
+
+(provide 'generic)

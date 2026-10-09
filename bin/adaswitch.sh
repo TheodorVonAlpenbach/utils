@@ -53,14 +53,28 @@ fi
 
 # count space delimited strings in adaBranch
 set -- $adaBranchOrigin
+
 if [ $# -gt 1 ]; then
-    echo "Cannot switch, since multiple branches matches input tag:"
+    echo "Multiple branches match input tag:"
+
     branchList=($adaBranchOrigin)
-    for x in "${branchList[@]}"; do removeOrigin $x; done
-    exit 0
+
+    for i in "${!branchList[@]}"; do
+        echo "$((i + 1))) $(removeOrigin "${branchList[$i]}")"
+    done
+
+    read -p "Choose branch: " choice
+
+    if [[ "$choice" =~ ^[0-9]+$ ]] &&
+       (( choice >= 1 && choice <= ${#branchList[@]} )); then
+        adaBranchOrigin="${branchList[$((choice - 1))]}"
+    else
+        echo "Invalid choice"
+        exit 1
+    fi
 fi
 
-adaBranch=`removeOrigin $adaBranchOrigin`
+adaBranch=$(removeOrigin "$adaBranchOrigin")
 
 if [ -n "$verbose" ]; then
     echo adaBranch is \'$adaBranch\'
@@ -68,4 +82,4 @@ if [ -n "$verbose" ]; then
     echo "git switch $adaBranch"
 fi
 
-git switch $adaBranch
+git switch "$adaBranch"

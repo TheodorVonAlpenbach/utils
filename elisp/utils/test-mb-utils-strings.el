@@ -225,4 +225,5 @@
 		 "69b16f4488d383a2cbc65697"))
   (should (equal (uint8sequence-to-hex-string
 		  '(105 177 111 68 136 211 131 162 203 198 86 151))
-		 "69b16f4488d383a2cbc65697")))
+		 "69b16f4488d383a2cbc65697"))
+  (should (eql 1 1)))

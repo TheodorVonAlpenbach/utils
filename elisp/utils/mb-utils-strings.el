@@ -1,6 +1,7 @@
 (require 'mb-utils-sets)
 (require 'mb-sequences)
 (require 'mb-utils-math)
+;; README
 
 (cl-defun string> (string1 string2)
   "Returns non-nil iif string1 > string2. See `string<'"
@@ -910,7 +911,7 @@ Default language is :en. Other supported languages are: :no"
 
 (defun uint8array-string-to-hex-string (uint8array-string)
   (uint8sequence-to-hex-string
-   (cl-loop for s in
+  (cl-loop for s in
 	    (split-string
 	     (string-match*
 		 "\\[\\(\\([[:digit:]]+,[[:blank:]]*\\)*[[:digit:]]+\\)\\]"

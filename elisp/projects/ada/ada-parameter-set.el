@@ -12,7 +12,7 @@
 		      :from 'parameter-set-group
 		      :where 'source-id :in '$v1)
 	   (cl-coerce (ssymbol (listify source-id)) 'vector)))
-;;(parameter-set-group-from-source-id '(69ca6197922eb8e3549509f9))
+;;(parameter-set-group-from-source-id '(6abbc81829325027307a3204))
 
 (cl-defun parameter-set-group-rating (parameter-set-group &rest columns)
   "Return a list with elements (PARAMETER-SET-ID RATING)
@@ -34,20 +34,20 @@ for all parameter sets in PARAMETER-SET-GROUP."
 		      :from 'parameter-set
 		      :where 'parameter-set-group-id :in '$v1)
 	   (cl-coerce (ids parameter-set-group) 'vector)))
-;;(parameter-set-from-group 77 :id)
+;;(parameter-set-from-group 102 :id)
 
 (cl-defun delete-parameter-set-for-group-source-id (source-id &rest columns)
   (delete-parameter-set
    (parameter-set-from-group
     (parameter-set-group-from-source-id source-id :id) :id)))
-;;(delete-parameter-set-for-group-source-id "6a956194ddcb8cf764873c19")
+;;(delete-parameter-set-for-group-source-id "6abbc81829325027307a3204")
 
 (cl-defun delete-parameter-set (parameter-set &rest columns)
   (awhen (ids parameter-set)
     (delete-opponent (opponent-from-parameter-set it))
     (emacsql db (vector :delete :from 'parameter-set
 			:where 'id :in '$v1)
-	     (cl-coerce itts 'vector))))
+	     (cl-coerce it 'vector))))
 ;;(delete-parameter-set 2659)
 
 (cl-defun parameter-set-rating (parameter-set &rest columns)

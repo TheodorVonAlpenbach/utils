@@ -40,6 +40,15 @@
 edit fstab accordingly (as su), save, and run
 sudo mount -a.")
 
+;; lisp
+(setf inferior-lisp-program "sbcl --dynamic-space-size 5000")
+
+;; set slime arguments
+;; (require 'slime)
+;; (setf (cadar (cl-member "sbcl" slime-lisp-implementations :test #'string= :key #'car))
+     ;; (list "sbcl" "--dynamic-space-size 6000"))
+;;slime-lisp-implementations
+
 (setf *my-favorites*
       `((,+mb-lisp-dir+ ".emacs")
 	(,+mb-lisp-dir+ "utils/mb-utils-strings.el")
@@ -52,6 +61,7 @@ sudo mount -a.")
 	(,+mb-lisp-dir+ "mode-extensions/mb-evil-map.el")
 	(,+mb-lisp-dir+ "external/curl.el")
 	(,+mb-lisp-dir+ "div/scratch.el")
+	(,+mb-lisp-dir+ "div/generic.el")
 	(,+mb-lisp-dir+ "projects/ada/ada-mysql.el")
 	(,+mb-lisp-dir+ "projects/ada/ada-logins.el")
 	(,+mb-lisp-dir+ "projects/ada/ada-utils.el")
@@ -65,7 +75,6 @@ sudo mount -a.")
 	(,+home-dir+ ".bash_profile" :point :end)
 	(,+home-dir+ "~/.mongoshrc.js" :point :end)
 	
-	
 	(,+home-dir+ "doc/personer.org" :point :end :keyboard :no)
 	(,+home-dir+ "doc/technologies.org" :point :end)
 	(,+home-dir+ "doc/abbrevations.txt" :point :end)
@@ -74,19 +83,7 @@ sudo mount -a.")
 	(,+home-dir+ "doc/questions.org" :point :end :keyboard :no)
 	(,+home-dir+ "doc/log.org" :point :end :keyboard :no)
 	(,+home-dir+ "doc/manifest" :keyboard :no)
-
 	))
-;;/ssh:ssh:~/doc/arbeidslog-new
-
-;; lisp
-(setf inferior-lisp-program "sbcl --dynamic-space-size 5000")
-
-;; set slime arguments
-;; (require 'slime)
-;; (setf (cadar (cl-member "sbcl" slime-lisp-implementations :test #'string= :key #'car))
-     ;; (list "sbcl" "--dynamic-space-size 6000"))
-;;slime-lisp-implementations
-
 
 ;; dot
 (setf *dot-dir* "c:/Program Files/Graphviz2.30/bin/")

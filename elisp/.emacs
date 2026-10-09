@@ -518,6 +518,5 @@ loading of files."
 (require 'markdown-mode)
 
 (require 'mozc)
-(setq default-input-method "japanese-mozc")
-
-(setq ispell-dictionary "norsk")
+;;(setq default-input-method "japanese-mozc")
+;;(setq ispell-dictionary "norsk")

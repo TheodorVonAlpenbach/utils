@@ -1,12 +1,15 @@
 (require 'mb-utils-math)
 
 (cl-defun factorial (n &optional (m 1))
-  "Returns N!. See also `derangement'"
+  "Returns N!. See also `derangement'
+The highest argument Emacs Lisp can handle currently is 5910:
+(factorial 5910) ~ 4.86E19725"
   (cond
     ((zerop n) 1)
     ((minusp n) (error "FACTORIAL is only valid for non-negative integers."))
     (t (product-a-b m n))))
 ;;(mapcar #'factorial (0-n 10))
+;; (* 1.0 (factorial 5910))
 
 (cl-defun derangement (n &optional (!0 1) (!1 0))
   "Returns !N. See also `factorial'.
@@ -26,11 +29,11 @@ For the definition of !N, see https://en.wikipedia.org/wiki/Derangement"
 (defalias '!n 'derangement)
 
 (cl-defun factorials (n &optional (m 1))
-  "Returns M!, (M + 1)!, ... N!.
+  "Return M!, (M + 1)!, ... N!.
 By default, M is 1."
   (cl-loop for i from m to n
-	for p = (n! m) then (* p i)
-	collect p))
+	   for p = (n! m) then (* p i)
+	   collect p))
 ;;(factorials 5 3)
 
 (cl-defun fibonacci-numbers (n &optional (start-values '(0 1)))

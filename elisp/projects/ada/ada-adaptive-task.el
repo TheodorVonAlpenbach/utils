@@ -1,7 +1,6 @@
 (require 'ada-mysql)
 (require 'ada-component-relations)
 
-
 (cl-defun adaptive-task-from-source-id (source-id &rest columns)
   (emacsql db (vector :select (column-selection columns)
 		      :from 'adaptive-task

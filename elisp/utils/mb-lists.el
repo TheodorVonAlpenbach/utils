@@ -1,9 +1,12 @@
 ;;; Generators
-(cl-defun a-b (a &optional b inc) (number-sequence a b inc))
-(cl-defun 0-n (n &optional inc) (a-b 0 (1- n) inc))
-(cl-defun 1-n (n &optional inc) (a-b 1 n inc))
-(cl-defun b-a (b &optional a inc) (nreverse (a-b (or a b) b inc)))
-(cl-defun n-0 (n &optional inc) (nreverse (0-n n inc)))
+(cl-defun a-b (a &optional b inc key)
+  (if key
+    (mapcar key (number-sequence a b inc))
+    (number-sequence a b inc)))
+(cl-defun 0-n (n &optional inc key) (a-b 0 (1- n) inc key))
+(cl-defun 1-n (n &optional inc key) (a-b 1 n inc key))
+(cl-defun b-a (b &optional a inc key) (nreverse (a-b (or a b) b inc key)))
+(cl-defun n-0 (n &optional inc key) (nreverse (0-n n inc key)))
 ;;(1-n 10 2) ==> (1 2 3 4 5 6 7 8 9 10)
 ;;(a-b 0 10)
 ;;(b-a 10 8 2)

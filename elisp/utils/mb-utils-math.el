@@ -163,12 +163,16 @@ converting to float if the product is large for an integer."
 ;;(num-digits 10 2) ==> 4 ("1010")
 
 (cl-defun fixnum-floor (n m)
-  (* m (first (floor* n m))))
+  (* m (first (cl-floor n m))))
 ;;(mapcar #'(lambda (x) (list x (fixnum-floor x 8))) (0-n 10))
 
 (cl-defun fixnum-ceiling (n m)
   (* m (first (ceiling* n m))))
 ;;(mapcar #'(lambda (x) (list x (fixnum-ceiling x 8))) (0-n 10))
+
+(defun split-mod (x y)
+  (let ((remainder (cl-mod x y)))
+    (list (- x remainder) remainder)))
 
 (cl-defun eq-parity (x y)
   (eq (cl-oddp x) (cl-oddp y)))
@@ -222,10 +226,10 @@ http://www.matematikk.org/pub/mattetekst/Persnr/."
   (let* ((parts (butlast (mapcar #'string-to-number
 			   (apply #'split-at-position
 			     personnummer (1-n 10))) 2))
-	 (k1 (asetf (second (floor* (scalar-product
+	 (k1 (asetf (second (cl-floor (scalar-product
 				     '(3 7 6 1 8 9 4 5 2) parts) 11)) 
 		    (if (zerop it) 0 (- 11 it))))
-	 (k2 (asetf (second (floor* (scalar-product
+	 (k2 (asetf (second (cl-floor (scalar-product
 				     '(5 4 3 2 7 6 5 4 3 2)
 				     (append parts (list k1))) 11))
 		    (if (zerop it) 0 (- 11 it)))))
@@ -391,6 +395,7 @@ the rotation degree."
 
 (cl-defun 2cycle-to-optimal-lform (cycle &optional (test #'eq))
   (let* ((n (cl-count (first cycle) cycle :test test)))
+    q
     (2cycle-lform (cycle-normal-form (make-distributed-list n (length cycle))))))
 ;;(2cycle-to-optimal-lform '(a a a b b a))
 
@@ -946,9 +951,9 @@ either 0 or 1)"
 ;; then enter the text in that file's own buffer.
 
 ;;;;
-(cl-defun div-sec-min (seconds) (floor* seconds 60.0))
-(cl-defun div-min-hour (minutes) (floor* minutes 60.0))
-(cl-defun div-hour-day (hours) (floor* hours 24.0))
+(cl-defun div-sec-min (seconds) (cl-floor seconds 60.0))
+(cl-defun div-min-hour (minutes) (cl-floor minutes 60.0))
+(cl-defun div-hour-day (hours) (cl-floor hours 24.0))
 ;;(div-sec-min 72)
 
 (cl-defun leap-year-p (year)
@@ -1002,7 +1007,7 @@ either 0 or 1)"
     (mapcar #'round (list (first years) (first months) (second years) 
 			  (second days) (second hours) (second minutes)))))
 ;;(jstime 1199290500)
-;;(floor* 1199290500 60.0)
+;;(cl-floor 1199290500 60.0)
 
 (cl-defun linear-function-slope-point (slope x)
   "Returns a linear function with SLOPE going through point X.

@@ -1,5 +1,7 @@
 (require 'mb-evil)
 
+;;(setf key-chord-two-keys-delay 0.1)
+
 ;; check if this must be done before install
 (setf evil-exchange-key "go")
 (setf evil-exchange-cancel-key "gO")

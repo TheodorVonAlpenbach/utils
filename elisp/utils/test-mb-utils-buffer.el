@@ -14,4 +14,10 @@
 b
 c")))
 
+(ert-deftest test-buffer-name-to-clipboard ()
+  (with-current-buffer "test-mb-utils-buffer.el"
+    (buffer-name-to-clipboard)
+    (should (equal (clipboard-to-string)
+                   "test-mb-utils-buffer.el"))))
+
 (provide 'test-mb-utils-buffer.el)

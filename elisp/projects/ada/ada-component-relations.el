@@ -146,6 +146,7 @@ objects (hash tables)"
 
 (cl-defun gateway-root-ids (gateway-id)
   (flatten (gateway-root-ids-base gateway-id)))
+;;(setf root-ids-4 (gateway-root-ids 4))
 ;;(setf root-ids-14 (gateway-root-ids 14))
 ;;(setf root-ids-19 (gateway-root-ids 19))
 ;;(length root-ids-19)
@@ -222,7 +223,7 @@ return the pair (target-id source-id)."
 	 :from component-relations
 	 :where target-component-id :in $v1]
        (cl-coerce target-ids 'vector)))))
-;;(parent-relations (list 7205))
+;;(parent-relations (list 79318))
 
 (cl-defun component-parent-ids (target-id)
   "Return the IDs of TARGET-IDS' parent components"
@@ -240,6 +241,7 @@ return the pair (target-id source-id)."
 	   do (push-list new-ids all-ids)
 	   do (push-list rels all-rels)
 	   finally return (list all-rels all-ids)))
+;;(setf ancestors-79318 (find-component-ancestors 79318))
 ;;(setf ancestors-43436 (find-component-ancestors 43436))
 ;;(length (car ancestors-43436))
 ;;(mapcar #'ssymbol ancestors-43436)
@@ -326,18 +328,32 @@ return the pair (target-id source-id)."
   (car (gateway gateway-id :internal-title)))
 ;;(gateway-name 4)
 
-(defun gateway-relations (gateway-id)
+(defun include-relation-p (relation-type relation-filter)
+  (if (consp relation-filter)
+    (or (cl-find relation-type relation-filter)
+	(cl-find :all relation-filter))
+    (or (null relation-filter)
+	(eql relation-filter :all)
+	(eql relation-type relation-filter))))
+
+(defun gateway-relations (gateway-id &optional relation-filter)
   (let ((condition-ids (ids (gateway-conditions gateway-id :id)))
 	(gateway-name (gateway-name gateway-id)))
     (append
-     (top-relations gateway-name "Gateway Conditions" condition-ids)
-     (cl-loop for id in condition-ids append (condition-relations id))
-     (top-relations gateway-name "Syllabus Folders"
-		    (gateway-syllabus-folder-ids gateway-id))
-     (top-relations gateway-name "Articles" (gateway-article-folder-ids gateway-id))
-     (top-relations gateway-name "Symbolic Folders"
-		    (ada-symbolic-folder-ids-in-content-lists gateway-id)))))
-;;(setf gateway-relations-19 (gateway-relations 4))
+     (when (include-relation-p :gateway-condition relation-filter)
+       (top-relations gateway-name "Gateway Conditions" condition-ids))
+     (when (include-relation-p :gateway-condition-relation relation-filter)
+       (cl-loop for id in condition-ids append (condition-relations id)))
+     (when (include-relation-p :syllabus-folder relation-filter)
+       (top-relations gateway-name "Syllabus Folders"
+		      (gateway-syllabus-folder-ids gateway-id)))
+     (when (include-relation-p :article relation-filter)
+       (top-relations gateway-name "Articles"
+		      (gateway-article-folder-ids gateway-id)))
+     (when (include-relation-p :symbolic-folder relation-filter)
+       (top-relations gateway-name "Symbolic Folders"
+		      (ada-symbolic-folder-ids-in-content-lists gateway-id))))))
+;;(setf gateway-relations-4 (gateway-relations 4))
 
 (defun prune-non-ancestor-relations-pu (relations component-id gateway-id)
   (graph-relations
@@ -350,11 +366,12 @@ return the pair (target-id source-id)."
 ;;(gateway 4 :internal-title)
 
 (cl-defun all-relations (relations gateway-id component-id
-		      &optional prune-non-ancestors-p)
+			 &optional relation-filter)
   (apply-if (cl-remove-duplicates
-		(append (gateway-relations gateway-id) relations)
+		(append (gateway-relations gateway-id relation-filter)
+			relations)
 	      :test #'equal)
-	    prune-non-ancestors-p
+	    relation-filter
 	    #'(lambda (gateway-relations)
 		(prune-non-ancestor-relations-pu
 		 gateway-relations component-id gateway-id))))
@@ -362,13 +379,15 @@ return the pair (target-id source-id)."
 ;;(length (all-relations rel-16968 4 16968))
 
 (defun dot-statements-from-relations (relations gateway-id component-id
-				      &optional prune-non-ancestors-p)
-  (let* ((all-relations
-	  (all-relations
-	   relations gateway-id component-id prune-non-ancestors-p))
-	 (components (all-relation-components all-relations gateway-id)))
-    (append (mapcar #'dot-node-from-component components)
-	    (mapcar #'dot-relation-from-component-relation all-relations))))
+				      &optional relation-filter)
+  "Convert RELATIONS to dot statements.
+Also, add gateway relations to RELATIONS within gateway defined by GATEWAY-ID.
+If RELATION-FILTER is not nil, it specifies how to filter the relations.
+See `gateway-relations' for documentation of RELATION-FILTER."
+  (awhen (all-relations relations gateway-id component-id relation-filter)
+    (nconc
+     (mapcar #'dot-node-from-component (all-relation-components it gateway-id))
+     (mapcar #'dot-relation-from-component-relation it))))
 ;;(all-relations rel-43436 19 43436 t)
 ;;(dot-statements-from-relations rel-43436 19 43436)
 ;;(dot-statements-from-relations rel-16968 4 16968)
@@ -378,15 +397,17 @@ return the pair (target-id source-id)."
 ;;(setf ancestors-43436 (first (find-component-ancestors 43436)))
 
 (defun dot-string-from-component-id
-    (component-id &optional gateway-id prune-non-ancestor-relations)
+    (component-id &optional gateway-id relation-filter)
   "Note! This version demands GATEWAY-ID"
   (dot-string
    (dot-statements-from-relations
     (first (find-component-ancestors component-id))
     gateway-id
     component-id
-    prune-non-ancestor-relations)))
-;;(dot-view-svg (dot-string-from-component-id 43436 19))
+    relation-filter)))
+;;(find-component-ancestors 79318)
+;;(dot-view-svg (dot-string-from-component-id 85405 19 :article))
+;;(dot-view-svg (dot-string-from-component-id 16908 4 :syllabus-folder))
 ;;(setf dot-string-43436) (dot-string-from-component-id 43436 19)
 ;;(dot-view-svg (dot-string-from-component-id 16968 4))
 ;;(first (find-component-ancestors 16968))

@@ -1,0 +1,24 @@
+* Noun                                               :drill:
+:PROPERTIES:
+:DRILL_CARD_TYPE: multisided
+:ID:       b74cb5c2-58be-4d29-ae87-906e9cdb94de
+:DRILL_LAST_INTERVAL: 0.0
+:DRILL_REPEATS_SINCE_FAIL: 1
+:DRILL_TOTAL_REPEATS: 1
+:DRILL_FAILURE_COUNT: 1
+:DRILL_AVERAGE_QUALITY: 0.0
+:DRILL_EASE: 2.5
+:DRILL_LAST_QUALITY: 0
+:DRILL_LAST_REVIEWED: [Y-10-08 Thu 12:%]
+:END:
+	
+Translate.
+	
+** Spanish
+la mesa
+	
+** English
+the table
+
+** Picture
+[[file:table.jpg][PICTURE]]

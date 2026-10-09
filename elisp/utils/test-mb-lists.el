@@ -151,6 +151,18 @@
   "Test of `cars'"
   (should (equal (cars '((a b c) (d e))) '(a d))))
 
+(ert-deftest test-a-b ()
+  "Test of `a-b'"
+  (should (equal (a-b 2 7) '(2 3 4 5 6 7)))
+  (should (equal (a-b -1 2 2) '(-1 1)))
+  (should (equal (a-b 2 7 1 #'1+) '(3 4 5 6 7 8))))
+
+(ert-deftest test-0-n ()
+  "Test of `0-n'"
+  (should (equal (0-n 3) '(0 1 2)))
+  (should (equal (0-n 5 2) '(0 2 4)))
+  (should (equal (0-n 3 1 #'sq) '(0 1 4))))
+
 (ert-deftest test-pad-list ()
   "Test of `pad-list'"
   (should (equal (pad-list '(a b c) 5 'd t) '(a b c d d)))

@@ -93,4 +93,15 @@
   (should (equal (area-secant 1) 0.07926450759605175))
   (should (equal (area-secant float-pi) (/ float-pi 2))))
 
+(ert-deftest test-num-digits ()
+  "Test of `num-digits'"
+  (should (= (num-digits 1) (num-digits 9) 1))
+  (should (= (num-digits 10) (num-digits 99) 2))
+  (should (= (num-digits 100) (num-digits 999) 3))
+  (should (= (num-digits (expt 10 10)) (num-digits (1- (expt 10 11))) 11)))
+
+(ert-deftest test-split-mod ()
+  "Test of `split-mod'"
+  (should (equal (split-mod 123 10) '(120 3))))
+
 (provide 'test-mb-utils-math)
