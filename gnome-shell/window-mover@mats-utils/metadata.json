@@ -1,0 +1,7 @@
+{
+  "uuid": "window-mover@mats-utils",
+  "name": "Window Mover",
+  "description": "Move normal windows to an external monitor through a narrow session D-Bus API.",
+  "shell-version": ["50"],
+  "version": 1
+}
