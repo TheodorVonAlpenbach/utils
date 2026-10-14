@@ -260,6 +260,9 @@ The first subset is intentionally conservative:
 * [`test-mb-utils-economy.el`](./utils/test-mb-utils-economy.el): five ERT tests
   for growth, deposits, withdrawals, annualized profit, and basic financial
   helpers.
+* [`test-mb-math-functions.el`](./utils/test-mb-math-functions.el): six ERT
+  tests for degree and hyperbolic functions, finite and infinite series,
+  special functions, polynomial roots, and numerical root solvers.
 
 [`list-interval.el`](./list-interval.el) and
 [`mb-utils-sets.el`](./utils/mb-utils-sets.el) now declare their `cl-lib`
@@ -314,12 +317,12 @@ also remain explicit decisions before retirement or compatibility work begins.
 
 ### Initial utility migrations
 
-The closed-interval, envelope, set-helper, file, I/O, tree, thing-at-point, and
-economy modules are
+The closed-interval, envelope, set-helper, file, I/O, tree, thing-at-point,
+economy, and additional-math modules are
 independently loadable. Their validation comprises:
 
-* a clean `emacs -Q` load of all eight utility features and the ERT tooling;
-* 64 passing ERT tests from the batch entry point;
+* a clean `emacs -Q` load of all nine utility features and the ERT tooling;
+* 70 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -378,3 +381,11 @@ removed. The geometric-series calculation needed by the financial functions
 is now private to the module. `withdraw-to-zero` includes all N withdrawals
 rather than N-1; tests verify that using its returned balance in `growth`
 reaches zero.
+
+[`mb-math-functions.el`](./utils/mb-math-functions.el) now loads independently
+with lexical binding and no startup helper dependencies. Degree-function macro
+expansion uses symbols directly, while squaring and polynomial evaluation are
+implemented without startup helpers. The migration corrected three defects: the
+reversed sign of `tanh`, the finite geometric series for ratio -1, and endpoint
+damping results in `falsi-method` that were computed but discarded. Numerical
+characterization tests cover the affected functions.

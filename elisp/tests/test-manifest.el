@@ -11,6 +11,7 @@
   '("test-list-interval.el"
     "test-list-envelope.el"
     "mode-extensions/test-mb-ert.el"
+    "utils/test-mb-math-functions.el"
     "utils/test-mb-things.el"
     "utils/test-mb-utils-economy.el"
     "utils/test-mb-utils-file.el"

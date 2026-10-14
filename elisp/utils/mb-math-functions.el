@@ -1,20 +1,56 @@
-;;;; Standard math functions not supported by Emacs
-(cl-defun sec (x) (/ 1 (cos x)))
-(cl-defun scs (x) (/ 1 (sin x)))
-(cl-defun sinh (x) (/ (- (exp x) (exp (- x))) 2))
-(cl-defun cosh (x) (/ (+ (exp x) (exp (- x))) 2))
-(cl-defun tanh (x) (let ((y (exp (* 2 x)))) (/ (1- y) (1+ y))))
-;;(+ (sinh pi) (cosh pi) (- (exp pi)))
-;;(- (tanh 1) (/ (sinh 1) (cosh 1)))
+;;; mb-math-functions.el --- Additional mathematical functions -*- lexical-binding: t; -*-
+
+(require 'cl-lib)
+
+(defun mb-math--horner (coefficients x)
+  "Evaluate COEFFICIENTS at X using Horner's method."
+  (cl-loop for coefficient in (reverse coefficients)
+           for sum = coefficient then (+ (* sum x) coefficient)
+           finally return sum))
+
+(defun sec (x)
+  "Return the secant of X radians."
+  (/ 1.0 (cos x)))
+
+(defun scs (x)
+  "Return the cosecant of X radians."
+  (/ 1.0 (sin x)))
+
+(defun asec (x)
+  "Return the inverse secant of X in radians."
+  (acos (/ 1.0 x)))
+
+(defun ascs (x)
+  "Return the inverse cosecant of X in radians."
+  (asin (/ 1.0 x)))
+
+(defun sinh (x)
+  "Return the hyperbolic sine of X."
+  (/ (- (exp x) (exp (- x))) 2.0))
+
+(defun cosh (x)
+  "Return the hyperbolic cosine of X."
+  (/ (+ (exp x) (exp (- x))) 2.0))
+
+(defun tanh (x)
+  "Return the hyperbolic tangent of X."
+  (let ((y (exp (* 2 x))))
+    (/ (- y 1) (+ y 1))))
 
 (defmacro define-degree-trigonometry (fns)
-  `(let ((c ,(/ pi 180.0)))
-     ,@(cl-loop for fn in fns
-		collect `(cl-defun ,(intern (concat (sstring fn) "d")) (d)
-			   (,fn (* degrees-to-radians d)))
-		collect `(cl-defun ,(intern (concat "a" (sstring fn) "d")) (r)
-			   (* radians-to-degrees
-			      (,(intern (concat "a" (sstring fn))) r))))))
+  "Define degree-based variants of trigonometric functions FNS."
+  `(progn
+     ,@(cl-loop
+        for fn in fns
+        append
+        (let ((name (symbol-name fn)))
+          `((defun ,(intern (concat name "d")) (degrees)
+              ,(format "Apply `%s' to DEGREES." fn)
+              (,fn (* degrees-to-radians degrees)))
+            (defun ,(intern (concat "a" name "d")) (ratio)
+              ,(format "Apply inverse `%s' to RATIO and return degrees." fn)
+              (* radians-to-degrees
+                 (,(intern (concat "a" name)) ratio))))))))
 (define-degree-trigonometry (cos sin tan sec scs))
 ;;(cl-loop for fn in '(sind cosd tand) collect (funcall fn 45))
 ;;(list (asind 0.5) (acosd 0.5) (atand 1))
@@ -31,14 +67,14 @@ See http://mathworld.wolfram.com/Polylogarithm.html for a definition."
   (let ((y (/ 1 (- 1.0 x))))
     (- 0 
        (polylogarithm-abs-lt-1 (- 1 y) 2 num-iterations)
-       (/ (sq (log y)) 2))))
+       (/ (expt (log y) 2) 2))))
 ;;(dilog-lt-minus-1 -2)
 
 (cl-defun dilog-gt-1 (x &optional (num-iterations 50))
   (when (< x 1) (error "Input"))
-  (- (dilog 1)
+  (- (dilog 1 num-iterations)
     (* (log x) (log (- x 1)))
-     (dilog (- 1 x))))
+     (dilog (- 1 x) num-iterations)))
 ;;(dilog-gt-1 3 60)
 
 (cl-defun dilog (x &optional (num-iterations 50))
@@ -46,25 +82,19 @@ See http://mathworld.wolfram.com/Polylogarithm.html for a definition."
 http://functions.wolfram.com/webMathematica/FunctionEvaluation.jsp?name=PolyLog2"
   (cond
    ((= x 0) 0)
-   ((= x -1) (- (/ (sq pi) 12)))
-   ((= x 1) (/ (sq pi) 6))
+   ((= x -1) (- (/ (expt float-pi 2) 12)))
+   ((= x 1) (/ (expt float-pi 2) 6))
    ((< (abs x) 1) (polylogarithm-abs-lt-1 x 2 num-iterations))
    ((< x -1) (dilog-lt-minus-1 x num-iterations))
    ((> x 1) (dilog-gt-1 x num-iterations))))
 ;;(dilog 7)
 
 (cl-defun atan2 (x y)
-  "Arctan with two arguments"
-  ;; http://en.wikipedia.org/wiki/Atan2
-  (numcond x
-      (> (atan (/ (float y) x)))
-      (< (numcond y
-	   (>= (+ (atan (/ (float y) x)) float-pi))
-	   (<  (- (atan (/ (float y) x)) float-pi))))
-      (= (numcond y
-	   (> (/ float-pi 2))
-	   (< (- (/ float-pi 2)))
-	   (= 'indeterminate)))))
+  "Return the quadrant-aware arctangent for coordinates X and Y.
+Return `indeterminate' when both coordinates are zero."
+  (if (and (zerop x) (zerop y))
+      'indeterminate
+    (atan y x)))
 ;;(atan2 -1 0)
 
 ;;; erf function
@@ -74,7 +104,8 @@ http://functions.wolfram.com/webMathematica/FunctionEvaluation.jsp?name=PolyLog2
     -0.82215223 0.17087277))
 
 (cl-defun erf-tau-1 (x s)
-  (* s (exp (- (horner +erf-tau-polynomial+ s) (sq x)))))
+  (* s (exp (- (mb-math--horner +erf-tau-polynomial+ s)
+               (expt x 2)))))
 
 (cl-defun erf-tau (x)
   (erf-tau-1 x (/ 1 (+ 1 (* 0.5 (abs x))))))
@@ -83,7 +114,7 @@ http://functions.wolfram.com/webMathematica/FunctionEvaluation.jsp?name=PolyLog2
   "Calculate the erf function for X.
 See https://en.wikipedia.org/wiki/Error_function#Numerical_approximations
 for numerical implementation basis."
-  (if (minusp x)
+  (if (< x 0)
     (- (erf-tau x) 1)
     (- 1 (erf-tau x))))
 ;;(cl-loop for x from -3 to 3 by 0.5 collect (erf x))
@@ -95,13 +126,13 @@ for numerical implementation basis."
 
 (cl-defun inverse-erf (x)
   ""
-  (let* ((a (/ (* 8 (- pi 3))
-	       (* 3 pi (- 4 pi))))
-	 (ln1-x2 (log (- 1 (sq x))))
-	 (subexp (+ (/ 2 (* pi a))
+  (let* ((a (/ (* 8 (- float-pi 3))
+	       (* 3 float-pi (- 4 float-pi))))
+	 (ln1-x2 (log (- 1 (expt x 2))))
+	 (subexp (+ (/ 2 (* float-pi a))
 		    (/ ln1-x2 2))))
     (* (cl-signum x)
-       (sqrt (- (sqrt (- (sq subexp) (/ ln1-x2 a)))
+       (sqrt (- (sqrt (- (expt subexp 2) (/ ln1-x2 a)))
 		subexp)))))
 ;;(cl-loop for x in '(0 .1 .2 .5 1 1.2 1.5 1.82 2 3) collect (- x (inverse-erf (erf x))))
 
@@ -116,7 +147,7 @@ for numerical implementation basis."
     (if end
       (if (<= end start)
 	0
-	(if (= (abs r) 1)
+	(if (= r 1)
 	 (- end start)
 	 (/ (- 1.0 (expt r end))
 	    (- 1 r))))
@@ -129,13 +160,13 @@ for numerical implementation basis."
 
 (cl-defun quadratic-discriminant (a b c)
   "Return the discriminant of the quadratic polynomial ax2 + bx + c."
-  (- (sq b) (* 4 a c)))
+  (- (expt b 2) (* 4 a c)))
 ;;(quadratic-discriminant 1 1 1)
 
 (cl-defun quadratic-root (a b c)
   "Return the roots of the quadratic polynomial ax2 + bx + c."
   (let ((d (quadratic-discriminant a b c)))
-    (cl-assert (not (minusp d)) t "The discriminant is negative.")
+    (cl-assert (not (< d 0)) t "The discriminant is negative.")
     (let* ((2a (* 2.0 a))
 	   (b/2a (/ b 2.0 a))
 	   (sqrt-expr (/ (sqrt d) 2a)))
@@ -164,14 +195,14 @@ of iterations."
           (progn
             (setf b c fb fc)
             (if (= side -1)
-              (/2 fa))
+                (setq fa (/ fa 2.0)))
             (setf side -1))
           (if (> (* fa fc) 0)
 	    ;; fc and fa have same sign, copy c to a
             (progn
               (setf a c fa fc)
               (if (= side 1)
-                (/2 fb))
+                  (setq fb (/ fb 2.0)))
               (setf side 1))
             (setf n m))))
       (cl-incf n))
@@ -190,3 +221,5 @@ of iterations."
 ;;(setf qwe (newton-raphson #'(lambda (x) (- (area-secant x) (/ pi 3))) #'(lambda (x) (/ (- 1 (cos x)) 2)) 2.0))
 
 (provide 'mb-math-functions)
+
+;;; mb-math-functions.el ends here
