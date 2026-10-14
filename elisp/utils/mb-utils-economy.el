@@ -1,48 +1,54 @@
-(cl-defun to-double (x)
-  (* 1.0 x))
+;;; mb-utils-economy.el --- Small financial calculations -*- lexical-binding: t; -*-
 
-(setq list (sort (mapcar #'to-double '(
-216701	175655	-83052	389572	254190	-56571	-30054	149789	185863	542385	106097	354844	56010	150017	392696	57481	68233	34966	-6896	19425	229444	131412	295977	303217	63531	39318	145718	128850	278883	24976	2331	178033	-4231	288477	16911	103731	-25037	314809	336471	9600	289597	78001	182133	-35157	90558	202887	320238	484924	16441	380662	499789	187792	75510	269938	154543	124556	331645	203886	270924	175887	108522	40287	174276	113942	498425	193350	321124	176756	139804	246314	134765	78739	484209	180864	10535	180112	324054	21506	125995	99072	134299	223939	395228	255864	-140355	311904	-22696	10582	334070	152476	46065	176805	199467	136309	9899	415135	189218	278923	176768	-13028	250359	302291	182352	202311	212257	417415	172857	352796	-169414	588767	483978	303923	-56547	208320	173349	-33377	-51888	106404	327197	106201	303179	274957	247216	195088	90380	248194	150715	408986	275160	106406	333277	241180	53786	294545	259401	26424	200791	271858	319170	157995	150054	230677	161601	2367	236936	333515	271973	249211	166577	255777	213328	97694	406723	-63489	109767	74737	105740	245931	277966	351082	-20752	297080	219950	125650	576036	158213	382174	111411	84906	30225	118319	178038	-99803	287513	163971	186921	383855	287031	157424	-474	113719	228453	151231	179822	20893	92877	146835	31412	157740	117725	297101	297474	150059	110425	20076	63178	291393	290489	754232	331806	633505	-24696	191819	482767	205032	295350	120399	459424	70747	306932	279121	18646	136794	78524	328592	4406	214267	110864	236515	308418	345154	63693	422030	34121	49606	306225	62536	135409	161365	145137	284716	166105	95113	153298	283715	328023	152629	381640	354334	312608
-)) #'<))
+(require 'cl-lib)
 
-(cl-defun grew (increase sum)
-  (/ increase 1.0 (- sum increase)))
-;;(grew 4661 13304)
+(defun to-double (x)
+  "Return X converted to floating point."
+  (float x))
 
-(cl-defun CFaR (list &key (from 19) (to 29))
-  (- (average list) (average (subseq list from to))))
-;;(CFaR list)
+(defun grew (increase sum)
+  "Return the growth ratio represented by INCREASE in final SUM."
+  (/ (float increase) (- sum increase)))
 
-(require 'mb-math-functions)
+(cl-defun CFaR (values &key (from 19) (to 29))
+  "Return the difference between the mean of VALUES and a selected mean.
+FROM and TO delimit the selected subsequence."
+  (let ((selection (cl-subseq values from to)))
+    (- (/ (cl-reduce #'+ values) (float (length values)))
+       (/ (cl-reduce #'+ selection) (float (length selection))))))
+
+(defun mb-economy--geometric-series (ratio end)
+  "Return the sum of powers of RATIO from zero below END."
+  (cond
+   ((<= end 0) 0)
+   ((= ratio 1) end)
+   (t (/ (- 1.0 (expt ratio end))
+         (- 1 ratio)))))
+
 (cl-defun growth (n &optional (f 1.0) (c 1.0) (d 0.0))
-  "Accumulate C after N years with growth rate F.
+  "Accumulate C for N years with growth factor F and yearly deposit D.
 N = 0 is the amount at the beginning of year 0, which is C.
-N = 1 is the amount at the beginning of year 1, which is (C+D)*F.
-N = 2 is the amount at the beginning of year 2, which is ((C+D)*F + D)*F etc."
-  (+ (* c (expt f n)) (* d f (geometric-series f :end n))))
-;;(/ (growth 2021 1.02 (/ 0.03 3600)) 1E12)
+N = 1 is the amount at the beginning of year 1, which is (C+D)*F."
+  (+ (* c (expt f n))
+     (* d f (mb-economy--geometric-series f n))))
 
 (cl-defun deposit (n &optional (f 1.0) (c 1.0))
-  "Find the yearly deposit that turns an initiaal amount C into
-zero after N year given growth rate F."
+  "Return the yearly deposit that reduces initial amount C to zero.
+N is the number of years and F is the yearly growth factor."
   (- (/ (* c (expt f n))
-	f (geometric-series f :end n))))
-;;(deposit 37 1.07 -1.40352077574121)
+        (* f (mb-economy--geometric-series f n)))))
 
 (cl-defun withdraw-to-zero (n &optional (f 1.0) (d 1.0))
-  "Return the amount to have on your account on the beginning of
-year 0 to end up with zero after N year, withdrawing D at the
+  "Return the initial balance needed for N yearly withdrawals of D.
+F is the yearly growth factor.  Withdrawals happen at the
 beginning of each year."
-  (/ (* d f (geometric-series f :end (1- n))) (expt f n)))
-;;(growth 2 2 (withdraw-to-zero 2 2 1) -1)
-;;(growth 24 1.07 (withdraw-to-zero 24 1.07 1000) -1000)
-;;(withdraw-to-zero 1 1.045 100)
+  (/ (* d f (mb-economy--geometric-series f n))
+     (expt f n)))
 
 (cl-defun profit-to-interest (profit &optional (years 1.0))
-  "Calculate yearly interest based on PROFIT over YEARS
-p = f^y => ln(p) = y * ln(f) => ln(f) = ln(p)/y => f = p^(1 / y)"
+  "Return the yearly growth factor for PROFIT accumulated over YEARS."
   (expt profit (/ 1.0 years)))
-;;(profit-to-interest 1.5 3)
 
 (provide 'mb-utils-economy)
 
+;;; mb-utils-economy.el ends here

@@ -12,6 +12,7 @@
     "test-list-envelope.el"
     "mode-extensions/test-mb-ert.el"
     "utils/test-mb-things.el"
+    "utils/test-mb-utils-economy.el"
     "utils/test-mb-utils-file.el"
     "utils/test-mb-utils-io.el"
     "utils/test-mb-utils-sets.el"

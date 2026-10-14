@@ -257,6 +257,9 @@ The first subset is intentionally conservative:
 * [`test-mb-things.el`](./utils/test-mb-things.el): six ERT tests for generated
   thing recognition and movement, date/time/number increments, cyclic values,
   and coordinated weekday/date editing.
+* [`test-mb-utils-economy.el`](./utils/test-mb-utils-economy.el): five ERT tests
+  for growth, deposits, withdrawals, annualized profit, and basic financial
+  helpers.
 
 [`list-interval.el`](./list-interval.el) and
 [`mb-utils-sets.el`](./utils/mb-utils-sets.el) now declare their `cl-lib`
@@ -311,12 +314,12 @@ also remain explicit decisions before retirement or compatibility work begins.
 
 ### Initial utility migrations
 
-The closed-interval, envelope, set-helper, file, I/O, tree, and thing-at-point
-modules are
+The closed-interval, envelope, set-helper, file, I/O, tree, thing-at-point, and
+economy modules are
 independently loadable. Their validation comprises:
 
-* a clean `emacs -Q` load of all seven utility features and the ERT tooling;
-* 59 passing ERT tests from the batch entry point;
+* a clean `emacs -Q` load of all eight utility features and the ERT tooling;
+* 64 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -367,3 +370,11 @@ string operations are local and covered directly. Obsolete commented
 templates and the non-working weekday/date helper were removed, the original
 Latin-1 source was converted to UTF-8 without changing its Norwegian names,
 and generated thing functions now compile without warnings.
+
+[`mb-utils-economy.el`](./utils/mb-utils-economy.el) now loads independently
+with lexical binding and `cl-lib` as its only dependency. A large anonymous
+dataset that was sorted into the global variable `list` at load time has been
+removed. The geometric-series calculation needed by the financial functions
+is now private to the module. `withdraw-to-zero` includes all N withdrawals
+rather than N-1; tests verify that using its returned balance in `growth`
+reaches zero.
