@@ -263,6 +263,9 @@ The first subset is intentionally conservative:
 * [`test-mb-math-functions.el`](./utils/test-mb-math-functions.el): six ERT
   tests for degree and hyperbolic functions, finite and infinite series,
   special functions, polynomial roots, and numerical root solvers.
+* [`test-mb-sequences.el`](./utils/test-mb-sequences.el): twelve ERT tests for
+  sequence type preservation, selection, splitting, drawing, positions,
+  minima, projection, centering, insertion, and replacement.
 * [`test-mb-utils-iso-time.el`](./utils/test-mb-utils-iso-time.el): six ERT
   tests for ISO date, time, timezone and date-time formatting, numbered regexp
   captures, localized calendar names, and supported time designators.
@@ -321,11 +324,11 @@ also remain explicit decisions before retirement or compatibility work begins.
 ### Initial utility migrations
 
 The closed-interval, envelope, set-helper, file, I/O, tree, thing-at-point,
-economy, additional-math, and ISO-time modules are
+economy, additional-math, sequence, and ISO-time modules are
 independently loadable. Their validation comprises:
 
-* a clean `emacs -Q` load of all ten utility features and the ERT tooling;
-* 76 passing ERT tests from the batch entry point;
+* a clean `emacs -Q` load of all eleven utility features and the ERT tooling;
+* 88 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -368,6 +371,27 @@ the existing subtree-filter result shapes and verify relation conversion and
 copy independence. The older [`ert-mb-utils-tree.el`](./utils/ert-mb-utils-tree.el)
 remains in place but outside the manifest pending a later duplicate-test
 cleanup decision.
+
+[`mb-sequences.el`](./utils/mb-sequences.el) now loads without the startup
+environment and uses `cl-lib` directly. Its public helper names remain
+available because they have many callers, while dependencies on generic
+startup helpers have been replaced with local built-in operations. The
+duplicate `draw-random` definition and load-time debug message were removed.
+Rotation now uses its sequence argument, and minimum searches preserve their
+input while reporting original positions for `:from-end`.
+
+`deltas` previously delegated to `deltas-list` in
+[`mb-lists.el`](./utils/mb-lists.el), which still fails to load outside the
+startup environment. It is now expressed locally through the private
+`mb-sequences--pairs` helper, which reproduces the flanking behaviour of
+`pairs` and agrees with the original output for every input of three or more
+elements. Two-element input previously returned `((nil nil) (nil nil))` and
+now returns the surrounding half-difference. This small duplication is
+deliberate and should be reverted to the shared `pairs` helper once
+`mb-lists.el` is migrated. [`mb-lists.el`](./utils/mb-lists.el) now declares
+its `cl-lib` dependency, which is a necessary but not sufficient step: loading
+it standalone still fails on the startup-only `cl-indent`, and roughly two
+dozen helpers from `.emacs` and `mb-utils-div` remain undefined at call time.
 
 [`mb-things.el`](./utils/mb-things.el) now loads independently with lexical
 binding and built-in dependencies instead of pulling in the broad

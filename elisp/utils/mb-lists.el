@@ -1,3 +1,5 @@
+(require 'cl-lib)
+
 ;;; Generators
 (cl-defun a-b (a &optional b inc key)
   (if key

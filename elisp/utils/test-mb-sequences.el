@@ -1,141 +1,124 @@
+;;; test-mb-sequences.el --- Tests for mb-sequences -*- lexical-binding: t; -*-
+
 (require 'ert)
+(require 'mb-sequences)
 
-(ert-deftest test-minimum ()
-"Test of `positions'"
- (should (equal (minimum '(1 2 3 5 5) :start 3) '(5 3 5)))
- (should (equal (minimum '(1 2 3 5 5)) '(1 0 1)))
-)
+(ert-deftest mb-sequences-remove-and-rotate-preserve-type ()
+  (should (equal (remove-nth 1 '(a b c)) '(a c)))
+  (should (equal (remove-nths '(3 1 1) "abcde") "ace"))
+  (should (equal (rotate '(a b c d) 2) '(c d a b)))
+  (should (equal (rotate "abc" -1) "cab"))
+  (should (equal (rotate [] 3) [])))
 
-(ert-deftest test-positions ()
-"Test of `positions'"
- (should (equal (positions 'a '(a b c a)) '(0 3)))
- (should (equal (positions '(a) '(a b c a)) '(0 3)))
- (should (equal (positions '(a b b) '(a b c a)) '(0 1 3)))
- (should (equal (positions "a" '("a" "b" "c" "a")) nil))
- (should (equal (positions "a" '("a" "b" "c" "a") :test #'string=) '(0 3)))
- (should (equal (positions '(a) '((a) (b) (c) (a)) :key #'car) '(0 3))))
-
-(ert-deftest test-replace-sequence ()
-  "Test of `replace-sequence'"
-  (should (equal (replace-sequence "01234" "ab" 1)
-		 "0ab34"))
-  (should (equal (replace-sequence "01234" "ab" 1 1)
-		 "0ab1234"))
-  (should (equal (replace-sequence "01234" "ab" 1 -1)
-		 "0ab4")))
-
-(ert-deftest test-list< ()
-  "Test of list<"
-  ;; test types
-  (should (list< '("n") '("n" "c1") :test #'string<)))
-
-(ert-deftest test-min-element ()
-  "Test of min-element"
-  ;; test types
-  (should (equal (min-element '()) nil)))
-;;(string< "n" "o")
-
-(ert-deftest test-copy-if ()
-  "Test of copy-if"
-  ;; test types
-  (let ((seqs (list '() '(1) '(a) (make-list 1000 nil)
-		    (vector) (vector 1) "" "string")))
-    (should (equal (mapcar (bind #'copy-if #'always 1) seqs) seqs)))
-
-  ;; :from-end
+(ert-deftest mb-sequences-copy-and-select ()
   (should (equal (copy-if #'cl-oddp '(1 2 3 4) :count 1) '(1)))
-  (should (equal (copy-if #'cl-oddp '(1 2 3 4) :count 1 :from-end nil) '(1)))
-  (should (equal (copy-if #'cl-oddp '(1 2 3 4) :count 1 :from-end t) '(3)))
+  (should (equal (copy-if #'cl-oddp '(1 2 3 4) :count 1 :from-end t)
+                 '(3)))
+  (should (equal (copy "a" '("A" "b" "a") :test #'string-equal-ignore-case)
+                 '("A" "a")))
+  (should (equal (select [1 2 3 4] (list #'cl-evenp))
+                 '([2 4] [1 3]))))
 
-  ;; :count
-  (should (equal (length (copy-if #'always "12345" :count 0)) 0))
-  (should (equal (length (copy-if #'always "12345" :count 1)) 1))
-  (should (equal (length (copy-if #'always "12345" :count 5)) 5))
-  (should (equal (length (copy-if #'always "12345")) 5)))
+(ert-deftest mb-sequences-find-positions ()
+  (should (equal (positions 'a '(a b c a)) '(0 3)))
+  (should (equal (positions '(a b) '(a b c a)) '(0 1 3)))
+  (should (equal (positions "a" '("a" "b" "a") :test #'string=)
+                 '(0 2)))
+  (should (equal (positions-if #'cl-oddp [0 1 2 3 4] :start 2)
+                 '(3)))
+  (should (equal (positions-if #'cl-oddp [0 1 2 3 4] :from-end t)
+                 '(3 1)))
+  (should-error (positions-if #'cl-oddp [0 1 2 3 4] :end nil)
+                :type 'wrong-type-argument))
 
-(ert-deftest test-nminimum-nokey ()
-  "Test of nminimum-nokey"
-  (should (equal (nminimum-nokey [5118 5002 5116] #'<) '(5002 1)))
-  (should (equal (nminimum-nokey [5118 5002 5116] #'>) '(5118 0))))
+(ert-deftest mb-sequences-split ()
+  (should (equal (split2 ?b "abc") '("a" "bc")))
+  (should (equal (split2 ?x "abc") '("abc" nil)))
+  (should (equal (split-at-position "abcdef" 2 4) '("ab" "cd" "ef")))
+  (should (equal (split-if #'cl-oddp '(1 2 3 4 5))
+                 '(nil (1 2) (3 4) (5)))))
 
-(ert-deftest test-project ()
-  "Test of PROJECT"
-  (should (equal '(b a c b) (project '(a b c) '(1 0 2 1))))
-  (should (equal '(a b c) (project '(a b c) t)))
-  (should (equal 'b (project '(a b c) 1)))
-  (should (equal 99 (project "abc" 2)))
-  (should (equal "c" (project "abc" '(2))))
-  (should (equal 2 (project '(0 1 2 3) #'(lambda (x) (elt x 2)))))
-  (should (equal '(0 1 2 (3))
-		 (project '(0 1 2 3) (list #'first
-					   #'second
-					   #'(lambda (x) (elt x 2))
-					   #'last)))))
+(ert-deftest mb-sequences-draw-mutates-place ()
+  (let ((values (list 'a 'b 'a 'c)))
+    (should (equal (draw 'a values) '(a a)))
+    (should (equal values '(b c))))
+  (let ((values (list "a" "B" "A" "c")))
+    (should (equal (draw "a" values :test #'string-equal-ignore-case
+                         :start 1 :end 3)
+                   '("A")))
+    (should (equal values '("a" "B" "c"))))
+  (let ((values (copy-sequence "abc")))
+    (should (equal (draw ?x values) ""))
+    (should (equal values "abc")))
+  (let ((values [0 1 2 3]))
+    (should (= (draw-nth 2 values) 2))
+    (should (equal values [0 1 3]))))
 
-(ert-deftest test-project-sequence ()
-  "Test of PROJECT-SEQUENCE"
-  (should (equal '(49 57) (project-sequence '("01" "09") 1)))
-  (should (equal '("1" "9") (project-sequence '("01" "09") (list 1))))
-  (should (equal '((2 3) (5 6)) (project-sequence '((1 2 3) (4 5 6)) '(1 2)))))
+(ert-deftest mb-sequences-randomize-preserves-elements ()
+  (let ((result (randomize "abcde")))
+    (should (stringp result))
+    (should (equal (sort (string-to-list result) #'<)
+                   (string-to-list "abcde")))))
 
-(ert-deftest test-insert-sequence ()
-  "Test of INSERT-SEQUENCE"
-  (should (all-equal (insert-sequence "15010" "_" :start1 2)
-		     (insert-sequence "15010" "_" :start1 2 :end1 2)
-		     (insert-sequence "15010" "_" :start1 2 :end1 -3)
-		     (insert-sequence "15010" "_" :start1 -3 :end1 -3)
-		     (insert-sequence "15010" "_" :start1 -3 :end1 2)
-		     "15_010"))
-  (should (equal (insert-sequence "15010" "abc")
-		 "abc15010"))
-  (should (equal (insert-sequence "15010" "abc" :start1 1)
-		 "1abc5010"))
-  (should (equal (insert-sequence "15010" "abc" :start1 1 :end1 2)
-		 "1abc010"))
-  (should (equal (insert-sequence "15010" "abc" :start1 1 :end1 2 :start2 1)
-		 "1bc010"))
-  (should (equal (insert-sequence "15010" "abc" :start1 1 :end1 2 :start2 1 :end2 -1)
-		 "1b010"))
-  (should (equal '(1 2 3 4 5)
-		 (insert-sequence '(1 2 5) '(3 4) :start1 2)))
-  (should (equal [1 2 3 4 5]
-		 (insert-sequence [1 2 5] [3 4] :start1 2)))
-  (should (equal "complete"
-		 (insert-sequence "comete" "pl"
-				  :start1 3)))
-  (should (equal "concrete"
-		 (insert-sequence "comete" "ncr"
-				  :start1 2 :end1 3)))
-  (should (equal "concrete"
-		 (insert-sequence "comete" "incr"
-				  :start1 2 :end1 3 :start2 1)))
-  (should (equal "concrete"
-		 (insert-sequence "comete" "incredible"
-				  :start1 2 :end1 3 :start2 1 :end2 4)))
-  (should (equal "incrediblecomet"
-		 (insert-sequence "comet" "incredible")))
-  (should (equal "ediblecomet"
-		 (insert-sequence "comet" "incredible"
-				  :start2 4)))
-  (should (equal "incomet"
-		 (insert-sequence "comet" "incredible"
-				  :end2 2)))
-  (should (equal "dicomet"
-		 (insert-sequence "comet" "incredible" :start2 5 :end2 7))))
+(ert-deftest mb-sequences-minimum-respects-bounds-and-direction ()
+  (let ((values '(3 1 2 1)))
+    (should (equal (minimum values) '(1 1 1)))
+    (should (equal (minimum values :from-end t) '(1 3 1)))
+    (should (equal values '(3 1 2 1))))
+  (should (equal (minimum '((a . 4) (b . 2) (c . 3))
+                          :key #'cdr :start 1)
+                 '((b . 2) 1 2)))
+  (should-not (minimum '())))
 
-(ert-deftest test-as-list ()
-  "Test of `as-list'"
- (should (equal (as-list (x "abc")
-		  (rest x))
-		"bc")))
+(ert-deftest mb-sequences-minimum-accessors-and-ties ()
+  (should (equal (minimums [3 1 2 1] #'<) '(1 1)))
+  (should (equal (nminimums [3 1 2 1] #'<) '(1 1)))
+  (should (= (min-element '(3 1 2)) 1))
+  (should (= (min-position '(3 1 2)) 1))
+  (should (= (min-value '((a . 3) (b . 1)) :key #'cdr) 1)))
 
-(ert-deftest test-split-if ()
-  "Test of `split-if'"
- (should (equal (split-if #'cl-oddp '(1 2 3 4 5)) '(nil (1 2) (3 4) (5))))
- (should (equal (split-if (bind #'equal ?a) "babab") '("b" "ab" "ab"))))
+(ert-deftest mb-sequences-center-and-deltas ()
+  (should (equal (center "01234" 2) "12"))
+  (should (equal (center "01234" 2 t) "23"))
+  (should-error (center "abc" 4))
+  (should (equal (deltas [0 4 10])
+                 [(2.0 2.0) (2.0 3.0) (3.0 3.0)]))
+  (should (equal (deltas '(1 3 4))
+                 '((1.0 1.0) (1.0 0.5) (0.5 0.5))))
+  ;; Two elements yield a single half-difference; the old implementation
+  ;; returned ((nil nil) (nil nil)) here.
+  (should (equal (deltas '(2 7)) '((2.5 2.5) (2.5 2.5))))
+  (should-not (deltas '(5)))
+  (should-not (deltas '())))
 
-(ert-deftest test-type-of-super ()
-  "Test of `type-of-super'"
- (should (equal (type-of-super '(1 2 3)) 'list)))
+(ert-deftest mb-sequences-project ()
+  (should (equal (project '(a b c) '(1 0 2 1)) '(b a c b)))
+  (should (= (project "abc" 2) ?c))
+  (should (equal (project "abc" '(2)) "c"))
+  (should (equal (project-sequence '((1 2 3) (4 5 6)) '(1 2))
+                 '((2 3) (5 6))))
+  (should (equal (assoc-project '((a aa) (b bb)) 0 1)
+                 '((a . aa) (b . bb)))))
+
+(ert-deftest mb-sequences-insert-and-replace ()
+  (should (equal (insert-sequence "comete" "incredible"
+                                  :start1 2 :end1 3 :start2 1 :end2 4)
+                 "concrete"))
+  (should (equal (insert-sequence '(1 2 5) '(3 4) :start1 2)
+                 '(1 2 3 4 5)))
+  (should (equal (insert-sequence [1 2 5] [3 4] :start1 2)
+                 [1 2 3 4 5]))
+  (should (equal (replace-sequence "01234" "ab" 1) "0ab34"))
+  (should (equal (replace-sequence "01234" "ab" 1 -1) "0ab4")))
+
+(ert-deftest mb-sequences-as-list-preserves-sequence-type ()
+  (should (equal (as-list (values "abc")
+                   (cdr values))
+                 "bc"))
+  (should (equal (as-list (values [1 2 3])
+                   (reverse values))
+                 [3 2 1])))
 
 (provide 'test-mb-sequences)
+
+;;; test-mb-sequences.el ends here

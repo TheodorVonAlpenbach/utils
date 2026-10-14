@@ -1,42 +1,52 @@
-(cl-defun type-of-super (sequence)
-  (cl-typecase sequence
-    (cons 'list)
-    (otherwise (type-of sequence))))
+;;; mb-sequences.el --- General sequence utilities -*- lexical-binding: t; -*-
+
+(require 'cl-lib)
+(require 'macroexp)
+
+(defun mb-sequences--plist-without (plist keys)
+  "Return PLIST without entries whose keys occur in KEYS."
+  (cl-loop for (key value) on plist by #'cddr
+           unless (memq key keys)
+           append (list key value)))
+
+(defun type-of-super (sequence)
+  "Return a `cl-coerce' type specifier for SEQUENCE."
+  (if (listp sequence)
+      'list
+    (type-of sequence)))
 
 (defmacro random-elt (sequence)
-  (with-gensyms (gsequence)
-    `(let ((,gsequence ,sequence))
-       (message "%S" (length ,gsequence))
-       (elt ,gsequence (random (length ,gsequence))))))
-;;(random-elt '((a e) (b) (c) (d)))
-;;(random-elt (a-b -10 10))
+  "Return a random element of SEQUENCE, evaluating SEQUENCE once."
+  (declare (debug (form)))
+  (macroexp-let2 nil value sequence
+    `(elt ,value (random (length ,value)))))
 
-(cl-defun remove-nth (n sequence)
+(defun remove-nth (n sequence)
+  "Return SEQUENCE without the element at index N."
   (cl-concatenate (type-of-super sequence)
-    (subseq sequence 0 n)
-    (subseq sequence (cl-incf n))))
-;;(progn (setq qwe "abc") (remove-nth 1 qwe))
-;;(progn (setq qwe '(0 1 2)) (remove-nth 1 qwe))
+                  (cl-subseq sequence 0 n)
+                  (cl-subseq sequence (1+ n))))
 
-(cl-defun remove-nths (positions sequence)
-  "Intuitive extension of DELETE-NTH. POSITIONS is a integer list."
-  (let ((deletions 0))
-    (dolist (p positions sequence)
-      (setq sequence (remove-nth (- p deletions) sequence))
-      (cl-incf deletions))))
-;;(remove-nths '(1 3 7) "mats bergstrøm")
-;;(remove-nths '(1 3 7) '(a b c d e f g h))
+(defun remove-nths (positions sequence)
+  "Return SEQUENCE without the elements at POSITIONS.
+POSITIONS may be in any order; duplicate positions are ignored."
+  (let ((positions (delete-dups (sort (copy-sequence positions) #'<))))
+    (cl-loop for element in (append sequence nil)
+             for index from 0
+             unless (memq index positions)
+             collect element into result
+             finally return (cl-coerce result (type-of-super sequence)))))
 
 (cl-defun length* (sequence &key start end)
+  "Return the length of the part of SEQUENCE between START and END."
   (- (or end (length sequence)) (or start 0)))
-;;(length* '(1 2 3) :start nil :end nil)
-;;(subseq (a-b 1 10) -3)
 
-(cl-defun sequence-type (sequence)
+(defun sequence-type (sequence)
+  "Return the general sequence type of SEQUENCE."
   (cond ((listp sequence) 'list)
 	((vectorp sequence) 'vector)
-	((stringp sequence) 'string)))
-;;(sequence-type '(1 2))
+	((stringp sequence) 'string)
+        (t (signal 'wrong-type-argument (list 'sequencep sequence)))))
 
 (cl-defmacro as-list ((list sequence) &body body)
   "Evaluate body with SEQUENCE treated as a list.
@@ -45,34 +55,27 @@ evaluation of the last form in BODY is expected to be a list,
 which is finally coerced to the same type as SEQUENCE."
   `(let ((,list (cl-coerce ,sequence 'list)))
      (cl-coerce (progn ,@body) (sequence-type ,sequence))))
-(cl-indent 'as-list 1)
+(put 'as-list 'lisp-indent-function 1)
 
 (cl-defun copy-if (cl-pred cl-seq &key key count from-end)
-  "Return a copy of SEQ containing exactly the items in SEQ not satisfying PREDICATE.
-This is a non-destructive function; it makes a copy of SEQ if
-necessary to avoid corrupting the original SEQ. See also
-`cl-remove-if-not'.
+  "Return a copy of CL-SEQ containing items satisfying CL-PRED.
+At most COUNT matching items are retained, counting from the end
+when FROM-END is non-nil.
 
 Keywords supported:  :key :count :from-end
 \n(fn PREDICATE SEQ [KEYWORD VALUE]...)"
-  (if (listp cl-seq)
-    (cl-loop with max-count = (or count most-positive-fixnum)
-	  with current-count = 0
-	  with seq = (if from-end (reverse cl-seq) cl-seq)
-	  with cl-values = (if key (mapcar key seq) seq)
-	  for x in seq
-	  for v in cl-values
-	  if (= current-count max-count) return res
-	  if (funcall cl-pred v)
-	    do (cl-incf current-count) and
-	    collect x into res
-	  finally (return res))
-    ;; else we convert cl-seq to a list, call ourselves, and convert back
-    (cl-coerce (copy-if cl-pred (cl-coerce cl-seq 'list)
-	      :key key :count count :from-end from-end)
-	    (type-of cl-seq))))
-;;(copy-if #'oddp '(1 2 3 4) :key #'1+ :count 1 :from-end nil)
-;;(copy-if #'always "12345" :count 0)
+  (let* ((items (append cl-seq nil))
+         (input (if from-end (reverse items) items))
+         (remaining (or count most-positive-fixnum))
+         result)
+    (while (and input (> remaining 0))
+      (let* ((element (pop input))
+             (value (if key (funcall key element) element)))
+        (when (funcall cl-pred value)
+          (push element result)
+          (setq remaining (1- remaining)))))
+    (cl-coerce (if from-end result (nreverse result))
+               (type-of-super cl-seq))))
 
 (cl-defun copy (x cl-seq &key (test #'eql) key count from-end)
   "Return a copy of SEQ containing exactly the items matching X.
@@ -82,245 +85,241 @@ necessary to avoid corrupting the original SEQ.
 
 Keywords supported: :test :key :count :from-end
 \n(fn X SEQ [KEYWORD VALUE]...)"
-  (copy-if (bind test x 1) cl-seq :key key :count count :from-end from-end))
-;;(copy 3 '(1 2 3 4) :key #'1+ :test #'<)
+  (copy-if (lambda (element) (funcall test x element))
+           cl-seq :key key :count count :from-end from-end))
 
 (cl-defun select (sequence predicates &key key)
   "Return a list of sequences, matching PREDICATES on SEQUENCE.
 The Nth sequence in the result are the elements in SEQUENCE that
-satisfy then Nth predicate in PREDICATES. A last element in the
+satisfy the Nth predicate in PREDICATES.  A last element in the
 result is a sequence with elements that do not match any of
 PREDICATES."
-  (cl-loop for p in (push-back (apply #'not-disjoin predicates) predicates)
-	collect (copy-if p sequence :key key)))
+  (let ((fallback
+         (lambda (element)
+           (not (cl-some (lambda (predicate)
+                           (funcall predicate element))
+                         predicates)))))
+    (mapcar (lambda (predicate)
+              (copy-if predicate sequence :key key))
+            (append predicates (list fallback)))))
 
 (cl-defun rotate (sequence &optional (n 1))
-  "Returns a list that is LIST rotated N times."
-  (nrotate-list (copy-list list) n))
+  "Return a copy of SEQUENCE rotated N places to the left."
+  (if (zerop (length sequence))
+      (copy-sequence sequence)
+    (let ((split (mod n (length sequence))))
+      (cl-concatenate (type-of-super sequence)
+                      (cl-subseq sequence split)
+                      (cl-subseq sequence 0 split)))))
 
-(cl-defun positions-if (predicate sequence &key from-end (start 0) end key)
-  (cl-loop for start* = start then (1+ pos)
-	for pos = (cl-position-if predicate sequence
-		    :from-end from-end :start start* :end end :key key)
-	while pos collect pos))
-;;(positions-if #'oddp (vector 0 1 2 3 4 5) :start 2)
+(cl-defun positions-if
+    (predicate sequence &key from-end (start 0) (end (length sequence)) key)
+  "Return indices whose elements satisfy PREDICATE.
+Restrict the search with START and END.  When supplied, END must
+be an integer.  FROM-END reverses the order of the returned positions."
+  (cl-loop for index from start below end
+           for element = (elt sequence index)
+           when (funcall predicate (if key (funcall key element) element))
+           collect index into positions
+           finally return (if from-end (nreverse positions) positions)))
 
 (cl-defun split2 (x sequence &rest args)
   "Split SEQUENCE in two at the first occurrence of X.
 For ARGS, see `cl-position'"
-  (aif (apply #'cl-position x sequence args)
-    (split-at-position sequence it)
-    (list sequence nil)))
-;;(split2 1 '(1 2 3 4))
+  (let ((position (apply #'cl-position x sequence args)))
+    (if position
+        (split-at-position sequence position)
+      (list sequence nil))))
 
 (cl-defun split-at-position (sequence &rest positions)
   "Split SEQUENCE at POSITIONS and return the resulting subsequences as a list."
-  (cl-loop for position in (nreverse (cons (length sequence) (nreverse positions)))
+  (cl-loop for position in (append positions (list (length sequence)))
 	for start = 0 then end
 	for end = position
-	collect (subseq sequence start end)))
-;;(split-at-position "qweqwe" 2 4)
+	collect (cl-subseq sequence start end)))
 
 (cl-defun split-if (predicate sequence &rest args)
-  "Slits SEQUENCE into two at the positions where unary PREDICATE is true."
+  "Split SEQUENCE at positions where unary PREDICATE is true."
   (apply #'split-at-position sequence (apply #'positions-if predicate sequence args)))
-;;(split-if #'cl-oddp '(1 2 3 4 5))
 
 (cl-defun elt-random (sequence)
-  "Returns a random element in SEQUENCE"
+  "Return a random element in SEQUENCE."
   (elt sequence (random (length sequence))))
 
 (cl-defmacro draw-nth (n sequence)
-  "Draw the Nth element from sequence.
+  "Draw the Nth element from SEQUENCE.
 DRAWING is an operation where one or more elements are returned
 from a sequence and where these elements are deleted from the
 sequence as a side effect:
-\n(let ((s '(a b c))) (list (draw 'c s) s)) ==> (c (a b))
-\n(let ((s '(a b c))) (list (draw-nth 1 s) s)) ==> (b (a c))"
+\n  (let ((s \\='(a b c))) (list (draw \\='c s) s)) ==> (c (a b))
+\n  (let ((s \\='(a b c))) (list (draw-nth 1 s) s)) ==> (b (a c))"
   `(prog1 (elt ,sequence ,n)
      (setf ,sequence (remove-nth ,n ,sequence))))
-;;(let ((s (a-b 1 3))) (list (draw-nth 0 s) s))
 
 (cl-defmacro draw-random (sequence &optional (n 1))
-  "Draw a random elements in SEQUENCE.
+  "Draw N random elements from SEQUENCE.
 See `draw-nth' for a definition of the draw operation."
-  (with-gensyms (gi)
-    `(let ((,gi (random (length ,sequence))))
-       (cl-loop repeat ,n
-		collect (draw-nth ,gi ,sequence)))))
-
-(cl-defmacro draw-random (sequence &optional (n 1))
-  "Draw a random elements in SEQUENCE.
-See `draw-nth' for a definition of the draw operation."
-  (with-gensyms (gi)
+  (declare (debug (form &optional form)))
+  (let ((index (make-symbol "index")))
     `(cl-loop repeat ,n
-	      for ,gi = (random (length ,sequence))
-	      collect (draw-nth ,gi ,sequence))))
-;;(let ((l (0-n 10))) (list (draw-random l (length l)) l))
+              for ,index = (random (length ,sequence))
+              collect (draw-nth ,index ,sequence))))
 
 (cl-defmacro draw (x cl-seq &rest cl-keys)
-  "Draw all elements from SEQUENCE that matches X.
-This implementation seems spurious. What if there is no
-occurrences? Then it seems to delete all nil elements in
-sequence, which is probably not the intention. Also, it should
-clarify if only one element is drawn, or if all elements matching
-X are drawn.
-\nKeywords supported:  :key :count :start :end :from-end
+  "Draw all elements from CL-SEQ that match X.
+Return the matching elements and remove them from CL-SEQ.
+\nKeywords supported:  :test :key :count :start :end :from-end
 \n(fn ITEM SEQUENCE [KEYWORD VALUE]...)"
-  `(draw-if (bind (or ,(popf cl-keys :test) #'eql) ,x 1) ,cl-seq ,@cl-keys))
-;;(let ((s "qweqwe")) (list (draw ?e s :key #'identity :start 4) s))
+  (let ((test (or (plist-get cl-keys :test) '#'eql))
+        (keys (mb-sequences--plist-without cl-keys '(:test)))
+        (element (make-symbol "element")))
+    `(draw-if (lambda (,element) (funcall ,test ,x ,element))
+              ,cl-seq ,@keys)))
 
 (cl-defmacro draw-if (predicate sequence &rest cl-keys)
   "Draws all elements matching PREDICATE from SEQUENCE.
 A DRAW operation is a sequence modifying operation. It deletes
 the matching elements from the sequence, and returns those
 elements.
-\nKeywords supported:  :test :key :count :start :end :from-end
+\nKeywords supported:  :key :count :start :end :from-end
 \n(fn SEQUENCE PREDICATE [KEYWORD VALUE]...)"
-  `(prog1 (copy-if ,predicate
-	    (subseq ,sequence (or ,(getf cl-keys :start) 0) ,(getf cl-keys :end))
-	    ,@(mremf cl-keys :start :end))
-     (setf ,sequence (cl-delete-if ,predicate ,sequence ,@cl-keys))))
-;;(let ((s '(0 1 2 3 0 0))) (list (draw-if #'evenp s :key #'identity :count 2) s))
-;;(let ((s "qweqwe")) (list (draw-if (bind #'eql ?e) s :key #'identity :end 4) s))
+  (let ((selection-keys (mb-sequences--plist-without
+                         cl-keys '(:start :end))))
+    `(prog1
+         (copy-if ,predicate
+                  (cl-subseq ,sequence
+                             (or ,(plist-get cl-keys :start) 0)
+                             ,(plist-get cl-keys :end))
+                  ,@selection-keys)
+       (setf ,sequence
+             (cl-delete-if ,predicate ,sequence ,@cl-keys)))))
 
 (cl-defun randomize (sequence)
   "Return the elements of SEQUENCE in random order."
-  (as-list (l sequence)
-    (draw-random sequence (length sequence))))
-;;(randomize "Mats Bergstr;m")
+  (let ((remaining (copy-sequence sequence)))
+    (cl-coerce (draw-random remaining (length remaining))
+               (type-of-super sequence))))
 
 (cl-defun positions (x sequence &key (test #'eql) (key #'identity))
   "Return the positions of the elements in SEQUENCE that occur in X.
 X might be an atom or a sequence.
 
 Keywords supported: :test :key"
-  (let ((list (listify x)))
+  (let ((items (cond
+                ((stringp x) (list x))
+                ((listp x) x)
+                ((sequencep x) (cl-coerce x 'list))
+                (t (list x)))))
     (cl-loop for y in (if key
 			(cl-map 'list key sequence)
 			(cl-coerce sequence 'list)) 
 	  for i from 0
-	  if (cl-member y list :test test)
+	  if (cl-member y items :test test)
 	  collect i)))
-;;(positions 'a '(a b c a))
-
-;;; min/max function
-;;; This is a mess.
-;;; MINIMUMS is ok. It must also be implemented by sort.
-;;; MIN-ELT is also useful, and searches linearly through the sequence to find min.
-;;; However, the name wrong, since it returns the values (min-elt min-position min-value). 
-;;; MINIMUMS is absolutely not ok, since it is supposed to return the min-elt of MIN-ELT.
-
-;;; The solution to all this is to rename MIN-ELT to MINIMUM, and then DEFSUBSTing
-;;; min-element, min-position, and min-value to the return values of MINIMUM.
-
-;;; TODO: need to do a massive gfind to modify other utils due to
-;;; these changes. Best to log off here first, and then make sure
-;;; Drive updates and then do this at home
-
-(cl-defun nminimums (cl-seq cl-pred &rest cl-keys)
-  "Find all the minimum objects in SEQ according to PREDICATE.
-This is a destructive function; it reuses the storage of SEQ if possible.
-\nKeywords supported:  :key
-\n(fn SEQ PREDICATE [KEYWORD VALUE]...)"
-  (let* ((key-fn (second (member :key cl-keys)))
-	 (sorted-seq (apply #'sort* cl-seq cl-pred cl-keys))
-	 (first-min (if key-fn (funcall key-fn (first-elt sorted-seq)) (first-elt sorted-seq))))
-    (cl-loop for elt in sorted-seq
-	  while (not (funcall cl-pred first-min (if key-fn (funcall key-fn elt) elt)))
-	  collect elt)))
-;;(nminimums '(1 2 3 0 4 0 5) #'< :key #'1+)
 
 (cl-defun minimums (cl-seq cl-pred &rest cl-keys)
   "Find all the minimum objects in SEQ according to PREDICATE.
 \nKeywords supported:  :key
 \n(fn SEQ PREDICATE [KEYWORD VALUE]...)"
-  (apply #'nminimums (copy-sequence cl-seq) cl-pred cl-keys))
-;;(minimums '(1 2 3 0 4 0 5) #'<)
+  (let ((key (plist-get cl-keys :key))
+        best-value
+        minima
+        found)
+    (cl-loop for element in (append cl-seq nil)
+             for value = (if key (funcall key element) element)
+             do (cond
+                 ((not found)
+                  (setq found t
+                        best-value value
+                        minima (list element)))
+                 ((funcall cl-pred value best-value)
+                  (setq best-value value
+                        minima (list element)))
+                 ((not (funcall cl-pred best-value value))
+                  (push element minima))))
+    (nreverse minima)))
 
-(cl-defun nminimum-nokey (vec test)
-  "Helper for `nminimum'. Same as nminimum, but without key and from-end.
-Note that the function fails, if VEC is empty. It is the onus of
-the caller to avoid this.
-
-This function is not intended for use outside of this module."
-  (cl-loop with min = (elt vec 0)
-	with pos = 0
-	for i from 0
-	for x across vec
-	when (funcall test x min)
-	do (setf min x pos i)
-	finally (return (cl-values min pos))))
-;;(nminimum-nokey (vector 17 17) #'>=)
+(cl-defun nminimums (cl-seq cl-pred &rest cl-keys)
+  "Compatibility alias for `minimums'.
+CL-SEQ is not modified.
+\n(fn SEQ PREDICATE [KEYWORD VALUE]...)"
+  (apply #'minimums cl-seq cl-pred cl-keys))
+(make-obsolete 'nminimums 'minimums "2026-10-14")
 
 (cl-defun minimum (cl-seq &key (test #'<) key (start 0) end from-end)
   "Find the minimum of SEQ.
 The returned object is the value triple (ELEMENT POSITION VALUE)
 where ELEMENT is the minimum element in SEQ and POSITION is the
-positition of that element in SEQ. VALUE is an element identical
+position of that element in SEQ. VALUE is an element identical
 to (funcall KEY ELEMENT). The default values of the supported
-keywords TEST, KEY, AND FROM-END are #'<, #'IDENTITY, and NIL,
+keywords TEST, KEY, and FROM-END are `<', `identity', and nil,
 respectively.
 
 \nKeywords supported:  :test :key :start :end :from-end
 \n(fn SEQ [KEYWORD VALUE]...)"
-  (when (plusp (length cl-seq))
-    (if from-end
-      (minimum (nreverse cl-seq) :test test :key key)
-      (cl-destructuring-bind (min pos)
-	  (nminimum-nokey
-	   (if key
-	     (cl-map 'vector key (subseq cl-seq start end))
-	     (cl-coerce (subseq cl-seq start end) 'vector))
-	   test)
-	(let ((pos* (+ pos start)))
-	  (cl-values (elt cl-seq pos*) pos* min))))))
-;;(minimum '(1 2 3 5 5) :start 3)
+  (let ((end (or end (length cl-seq)))
+        best-element
+        best-position
+        best-value
+        found)
+    (cl-loop for position from start below end
+             for element = (elt cl-seq position)
+             for value = (if key (funcall key element) element)
+             when (or (not found)
+                      (funcall test value best-value)
+                      (and from-end
+                           (not (funcall test best-value value))))
+             do (setq found t
+                      best-element element
+                      best-position position
+                      best-value value))
+    (when found
+      (list best-element best-position best-value))))
 
 (cl-defun min-position (&rest args)
-  "Returns position of the minimum element in SEQUENCE.
+  "Return the position of the minimum element in SEQUENCE.
 \nKeywords supported:  :test :key :start :end :from-end
 \n(fn SEQ PREDICATE [KEYWORD VALUE]...)"
-  (second (apply #'minimum args)))
-;;(min-position '(1 2 1 3) :key #'1+ :from-end t)
+  (cadr (apply #'minimum args)))
 
 (cl-defun min-element (sequence &rest args)
-  "Returns minimum element in SEQUENCE
+  "Return the minimum element in SEQUENCE.
 \nKeywords supported:  :test :key :start :end :from-end
 \n(fn SEQ [KEYWORD VALUE]...)"
-  (first (apply #'minimum sequence args)))
-;;(min-element '(1 2 1 3) :key #'1+)
-;;(min-element '())
+  (car (apply #'minimum sequence args)))
 
 (cl-defun min-value (sequence &rest args)
-  "Returns minimum value in SEQUENCE
+  "Return the minimum value in SEQUENCE.
 \nKeywords supported:  :test :key :start :end :from-end
 \n(fn SEQ [KEYWORD VALUE]...)"
-  (third (apply #'minimum sequence args)))
-;;(min-value '(1 2 1 3) :key #'1+)
-;;(min-value '())
+  (caddr (apply #'minimum sequence args)))
 
 (cl-defun subseq* (seq &optional (start 0) (end nil))
-  "Same as SUBSEQ but takes negative limit arguments (meaning from end).
-Note that this is exactly the same code as in `substring*' !
-Note! This function is now obsolete. Use `subseq' instead."
-  (warn "SUBSEQ* function is now obsolete, since subseq now has the same behaviour.")
+  "Return the subsequence of SEQ from START to END.
+This compatibility function is obsolete; use `cl-subseq' instead."
   (unless (null seq)
-    (let ((n (length seq)))
-    (subseq seq 
-      (mod start n)
-      (when (numberp end) (mod end n))))))
-;;(subseq* '(a b c d) 1 -1)
-;;(subseq '(a b c d) 1 -1)
-;;(subseq* "abcde" 1 -1)
-;;(subseq* nil 1 -1)
+    (cl-subseq seq start end)))
+(make-obsolete 'subseq* 'cl-subseq "2026-10-14")
 
-;;; Here is the sequence version (not so fast)
+(defun mb-sequences--pairs (list)
+  "Return the consecutive overlapping pairs of LIST.
+This is a local counterpart of `pairs' in `mb-lists', which is not
+yet loadable outside the startup environment."
+  (cl-loop for (left right) on list while right collect (list left right)))
+
 (cl-defun deltas (sequence)
-  "Returns the canonical deltas around numbers in sequence.
-If A, B, C are consecutive numbers, the delta for B is (- (/ (+ A C) 2) B)."
-  (cl-coerce (deltas-list (cl-coerce sequence 'list)) (type-of sequence)))
-;;(deltas (vector 0 5 10 14 17 20 22))
+  "Return the canonical deltas around the numbers in SEQUENCE.
+If A, B, C are consecutive numbers, the delta for B is (- (/ (+ A C) 2) B).
+The first and last deltas are flanked by repeating their neighbour."
+  (let ((half-differences
+         (mapcar (lambda (pair) (/ (- (cadr pair) (car pair)) 2.0))
+                 (mb-sequences--pairs (cl-coerce sequence 'list)))))
+    (cl-coerce (mb-sequences--pairs
+                (when half-differences
+                  (append (list (car half-differences))
+                          half-differences
+                          (last half-differences))))
+               (type-of-super sequence))))
 
 (cl-defun center (sequence k &optional right)
   "Return SEQUENCE's central subsequence of length K.
@@ -336,16 +335,18 @@ to the right:
 \(center \"01234\" 2 t\) ==> \"23\""
   (let ((n (length sequence)))
     (if (> k n)
-      (error "Required center too long for sequence argument")
-      (let ((a (first (funcall (if right #'cl-ceiling #'cl-floor) (- n k) 2))))
-	(subseq sequence a (+ a k))))))
-;;(cl-loop with s = "01234" for k to (length s) collect (center s k t))
+        (error "Required center too long for sequence argument")
+      (let* ((difference (- n k))
+             (start (if right
+                        (/ (+ difference 1) 2)
+                      (/ difference 2))))
+        (cl-subseq sequence start (+ start k))))))
 
 (cl-defun assoc-project (sequence a b)
-  "Map each sequence element ELT of SEQUENCE to (cons (elt ELT A) (elt
-ELT B))."
-  (mapcar #'(lambda (x) (cons (elt x a) (elt x b))) sequence))
-;;(assoc-project '((a aa aaa) (b bb bbb)) 0 1)
+  "Map each element of SEQUENCE to a cons of its Ath and Bth elements."
+  (mapcar (lambda (element)
+            (cons (elt element a) (elt element b)))
+          sequence))
 
 (cl-defun project-1 (sequence x)
   "Apply projection object X on SEQUENCE.
@@ -382,37 +383,25 @@ returns SEQUENCE unaltered."
       (cl-coerce (cl-loop for x in (cl-coerce projection 'list)
 		    collect (project-1 sequence x))
 	      (type-of-super sequence)))))
-;;(project '(a b c) '(1 0 2 1))
-;;(project '(a b c) t)
-;;(project "abc" 2)
-;;(project "abc" '(2))
-;;(project '(0 1 2 3) #'(lambda (x) (elt x 2)))
 
 (cl-defun project-sequence (sequence projection)
   "Project multi-dimensional SEQUENCE according to PROJECTION-ARGS."
-  (cl-coerce (mapcar #'(lambda (x) (project x projection)) sequence)
+  (cl-coerce (mapcar (lambda (element) (project element projection)) sequence)
 	     (type-of-super sequence)))
-;;(project-sequence '("012" "098") '(0 2))
-;;(mapcar #'first (project-sequence '((1 2 3) (4 5 6)) '(1 2)))
-;;(project-sequence '((1 "Mats" 'qwe) (2 "Ludvik" 'ewq)) 1)
 
 (cl-defun insert-sequence (seq1 seq2
 			   &key (start1 0) (end1 start1) (start2 0) end2)
   "Insert the elements in SEQ2 into SEQ1."
-  (cl-flet ((is (x y z)
-	      (if (listp seq1)
-		(append x y z)
-		(cl-concatenate (type-of x) x y z))))
-    (is (subseq seq1 0 start1) (subseq seq2 start2 end2) (subseq seq1 end1))))
-;;(insert-sequence "15010" "_" :start1 2)
-;;(insert-sequence '(1 2 5) '(3 4) :start1 2 :end1 2)
-;;(insert-sequence '(0 1 2 3 4) '(a b) :start1 1 :end1 3 :start2 1)
+  (cl-concatenate (type-of-super seq1)
+                  (cl-subseq seq1 0 start1)
+                  (cl-subseq seq2 start2 end2)
+                  (cl-subseq seq1 end1)))
 
 (cl-defun replace-sequence (seq1 seq2 &optional (start 0) end)
   "Replace the elements in SEQ2 into SEQ1."
   (insert-sequence seq1 seq2
 		   :start1 start :end1 (or end (+ start (length seq2)))))
-;;(replace-sequence "01234" "ab" 1)
-;;(replace-sequence '(0 1 2 3 4) '(a b) 1 -2)
 
 (provide 'mb-sequences)
+
+;;; mb-sequences.el ends here
