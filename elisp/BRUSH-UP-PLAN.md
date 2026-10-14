@@ -246,6 +246,9 @@ The first subset is intentionally conservative:
 * [`test-mb-ert.el`](./mode-extensions/test-mb-ert.el): nine ERT tests for test
   filename recognition, source/test name swapping, definition navigation, and
   ordered test discovery.
+* [`test-mb-utils-file.el`](./utils/test-mb-utils-file.el): seven ERT tests for
+  path construction, directory membership, readable-file lookup, filename
+  transformations, parent directories, and recursive Scilab source copying.
 * [`test-mb-utils-sets.el`](./utils/test-mb-utils-sets.el): three ERT tests for
   open/closed interval boundaries, one-dimensional spheres, and set equality.
 
@@ -302,11 +305,11 @@ also remain explicit decisions before retirement or compatibility work begins.
 
 ### Initial utility migrations
 
-The closed-interval, envelope, set-helper, and I/O modules are independently
-loadable. Their validation comprises:
+The closed-interval, envelope, set-helper, file, and I/O modules are
+independently loadable. Their validation comprises:
 
-* a clean `emacs -Q` load of all four features;
-* 40 passing ERT tests from the batch entry point;
+* a clean `emacs -Q` load of all five utility features and the ERT tooling;
+* 47 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -333,3 +336,10 @@ an external JavaScript runtime.
 string, buffer, sequence, or definition-navigation helpers. Its duplicate
 whole-project runner was consolidated, and the compatibility command
 `elisp-test-all` delegates to the maintained runner.
+
+[`mb-utils-file.el`](./utils/mb-utils-file.el) now uses built-in path and
+recursive file APIs instead of startup aliases and the shell-oriented
+`unix-find` helper. Directory membership checks respect path-component
+boundaries, and recursive Scilab copying creates missing destination
+directories and replaces older destination files. Its tests use disposable
+directories rather than assuming that the home directory is under `/home`.

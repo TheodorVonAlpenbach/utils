@@ -1,7 +1,11 @@
+;;; mb-utils-file.el --- File and directory helpers -*- lexical-binding: t; -*-
+
+(require 'cl-lib)
+
 (cl-defun in-directory-p (filename directory)
   "Return not nil if FILENAME is in DIRECTORY."
-  (prefix-p (expand-file-name directory)
-	    (expand-file-name filename)))
+  (file-in-directory-p (expand-file-name filename)
+                       (expand-file-name directory)))
 ;;(in-directory-p "~/bin/mbtags.sh" "~/")
 
 (cl-defun expand-directory-name (directory-name &optional parent-directory-name)
@@ -26,12 +30,15 @@ true directory name."
 In this implementation the canonical form is the same as the
 result of FILE-TRUENAME without any trailing slash. Example:
 ~/my/dirctory/ --> /home/mbe/my/directory (not .../directory/)"
-  (string-trim-right* (file-truename directory) "/"))
+  (directory-file-name (file-truename directory)))
 
 (cl-defun find-filename (file &optional (dirs (list "./")))
   "Checks if FILE exists as readable in one of DIRS. If so it is
 returned. DIRS is sorted according to priority."
-  (find-if #'file-readable-p (mapcar #'(lambda (x) (concat x file)) dirs)))
+  (cl-find-if #'file-readable-p
+              (mapcar (lambda (directory)
+                        (expand-file-name file directory))
+                      dirs)))
 ;;(find-filename "TAGS" '("../"))
 ;;(file-readable-p "./mb-files.l")
 
@@ -43,10 +50,11 @@ priority."
 ;;(find-filenames '("TAGS") '("../"))
 
 (cl-defun find-file* (files &optional (dirs '("./")))
-  "See 'find-filenames' for arguments"
+  "Visit the first readable file found by `find-filenames'."
   (when (not (consp files)) (setq files (list files)))
-  (awhen (first (find-filenames files dirs))
-    (find-file it)))
+  (let ((filename (cl-find-if #'identity (find-filenames files dirs))))
+    (when filename
+      (find-file filename))))
 ;;(find-file* "TAGS" '("../"))
 
 (cl-defun directory-files* (dirs &rest args)
@@ -64,7 +72,10 @@ not be added like shown above. And if inherit-directory is nil
 the <directory of filename> part will not be added either."
   (concat (if inherit-directory (or (file-name-directory filename) "") "")
 	  new-filename
-	  (if inherit-extension (aif (file-name-extension filename) (concat "." it) "") "")))
+	  (if inherit-extension
+              (let ((extension (file-name-extension filename)))
+                (if extension (concat "." extension) ""))
+            "")))
 
 (cl-defun file-name-append (filename suffix &optional (inherit-extension t))
   "Returns a new filename based on FILENAME and SUFFIX.
@@ -89,13 +100,14 @@ see `file-name-alter'"
 ;;(file-name-change-extension "qwe/qwe.txt" "cpp")
 
 (cl-defun copy-libs (path1 path2)
-  (let* ((apath1 (file-truename path1))
-	 (paths1 (mapcar #'file-truename (unix-find path1 :name "*sc[ie]"))))
+  (let* ((apath1 (file-name-as-directory (file-truename path1)))
+	 (paths1 (directory-files-recursively apath1 "\\.sc[ie]\\'")))
     (cl-loop for p1 in paths1
-	  for relative-path = (substring p1 (length apath1))
+	  for relative-path = (file-relative-name p1 apath1)
 	  for p2 = (expand-file-name relative-path path2)
 	  do (when (file-newer-than-file-p p1 p2)
-	       (copy-file p1 p2)))))
+               (make-directory (file-name-directory p2) t)
+	       (copy-file p1 p2 t)))))
 ;;(copy-libs "~/tmp/SciLab" "~/sources/SciLab")
 
 (cl-defun rename-files (directory pattern replacement)
@@ -110,7 +122,7 @@ see `file-name-alter'"
 
 (cl-defun parent-directory-1 (file n)
   "Helper for `parent-directory'."
-  (if (plusp n)
+  (if (cl-plusp n)
     (parent-directory-1
      (file-name-directory (directory-file-name file)) (1- n))
     file))
@@ -125,3 +137,5 @@ retrive the Nth parent directory."
 ;;(parent-directory "/a/b/c")
 
 (provide 'mb-utils-file)
+
+;;; mb-utils-file.el ends here
