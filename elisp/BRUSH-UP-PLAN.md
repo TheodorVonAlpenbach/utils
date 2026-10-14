@@ -327,11 +327,11 @@ also remain explicit decisions before retirement or compatibility work begins.
 ### Initial utility migrations
 
 The closed-interval, envelope, set-helper, file, I/O, tree, thing-at-point,
-economy, additional-math, list, sequence, and ISO-time modules are
+economy, additional-math, anaphora, list, sequence, and ISO-time modules are
 independently loadable. Their validation comprises:
 
-* a clean `emacs -Q` load of all twelve utility features and the ERT tooling;
-* 117 passing ERT tests from the batch entry point;
+* a clean `emacs -Q` load of all thirteen utility features and the ERT tooling;
+* 122 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -400,6 +400,13 @@ cover trailing chunks in `cut`, list padding, repetition keyword forwarding,
 sorted insertion, and closure behavior. A small private list coercion helper
 temporarily duplicates `listify` from `mb-utils-div`; that duplication will be
 resolved when the latter module is migrated.
+
+The widely used `aif`, `awhen`, `acond`, and `asetf` macros now live in the
+small standalone [`mb-anaphora.el`](./utils/mb-anaphora.el) module rather than
+the broad `mb-utils-div` collection. `mb-utils-div` requires the new feature,
+so existing callers retain the same API without acquiring new dependencies.
+Focused tests cover branch values, single evaluation, short-circuiting,
+nested `it` bindings, and generalized assignment.
 
 [`mb-things.el`](./utils/mb-things.el) now loads independently with lexical
 binding and built-in dependencies instead of pulling in the broad

@@ -1,5 +1,6 @@
 ;; -*- lexical-binding: t; -*-
 (require 'mb-indent)
+(require 'mb-anaphora)
 
 (cl-defmacro without-message (&body body)
   `(let ((message-log-max nil))
@@ -310,34 +311,6 @@ return NEW-VALUE"
       (nor (apply lt args) (apply lt (nreverse args))))))
 ;;(funcall (lt-equal #'<) 1 1 1)
 
-;;; Anaphoric macros
-(defmacro aif (test-form then-form &rest else-forms)
-  "Anaphoric `if'"
-  `(let ((it ,test-form))
-     (if it ,then-form ,@else-forms)))
-;(aif (+ 5 5) it nil 1)
-;(aif nil it 1 2 3)
-(def-edebug-spec aif t)
-
-(cl-defmacro awhen (test-form &body body)
-  "Anaphoric `when'"
-  `(aif ,test-form
-        (progn ,@body)))
-;(awhen (+ 2 2) (princ (1+ it)) (princ (1- it)) (princ " cool!"))
-(def-edebug-spec awhen t)
-
-(defmacro acond (&rest clauses)
-  "Anaphoric `cond'"
-  (if (null clauses)
-      nil
-      (let ((cl1 (car clauses))
-            (sym (gensym)))
-        `(let ((,sym ,(car cl1)))
-           (if ,sym
-               (let ((it ,sym)) ,@(cdr cl1))
-               (acond ,@(cdr clauses)))))))
-(def-edebug-spec acond 'cond)
-
 (defmacro nilf (&rest args)
   "Sets all ARGS to nil."
   `(progn (setf ,@(mapcan #'(lambda (x) (list x nil)) args))))
@@ -357,13 +330,6 @@ return NEW-VALUE"
   "Sets PLACE to the maximum value of itself and each of NUMBERS."
   `(progn (setf ,place (max ,place ,@numbers))))
 ;;(let ((a 1)) (list (maxf a 0 3) a))
-
-(defmacro asetf (place expression)
-  `(let ((it ,place))
-    (setf ,place ,`,expression)))
-;;(setf ewq '((1) 1)) ==> ((1) 1)
-;;(asetf (first ewq) (* 2 (first it))) ==> 2
-;;ewq ==> (2 1)
 
 (defmacro interactivate (&rest body)
   `(lambda ()

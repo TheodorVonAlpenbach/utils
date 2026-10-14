@@ -11,6 +11,7 @@
   '("test-list-interval.el"
     "test-list-envelope.el"
     "mode-extensions/test-mb-ert.el"
+    "utils/test-mb-anaphora.el"
     "utils/test-mb-math-functions.el"
     "utils/test-mb-lists.el"
     "utils/test-mb-sequences.el"
