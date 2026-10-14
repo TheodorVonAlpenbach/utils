@@ -15,7 +15,7 @@
 ;;(mapcar #'column-selection '(nil (a :b)))
 
 (cl-defun ada-read-pwd (&optional (env :ada))
-  (cl-find env (read* "~/git/utils/elisp/projects/ada/.pwd") :key #'first))
+  (cl-find env (read* "~/data/.pwd") :key #'first))
 
 (cl-defun ada-mysql-connect (&optional (db-tag :ada))
   (cl-destructuring-bind (db-tag user password host port)
