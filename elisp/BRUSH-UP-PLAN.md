@@ -251,6 +251,9 @@ The first subset is intentionally conservative:
   transformations, parent directories, and recursive Scilab source copying.
 * [`test-mb-utils-sets.el`](./utils/test-mb-utils-sets.el): three ERT tests for
   open/closed interval boundaries, one-dimensional spheres, and set equality.
+* [`test-mb-utils-tree.el`](./utils/test-mb-utils-tree.el): six ERT tests for
+  relation conversion, subtree filtering, leaf and member traversal, and
+  independent tree copying.
 
 [`list-interval.el`](./list-interval.el) and
 [`mb-utils-sets.el`](./utils/mb-utils-sets.el) now declare their `cl-lib`
@@ -305,11 +308,11 @@ also remain explicit decisions before retirement or compatibility work begins.
 
 ### Initial utility migrations
 
-The closed-interval, envelope, set-helper, file, and I/O modules are
+The closed-interval, envelope, set-helper, file, I/O, and tree modules are
 independently loadable. Their validation comprises:
 
-* a clean `emacs -Q` load of all five utility features and the ERT tooling;
-* 47 passing ERT tests from the batch entry point;
+* a clean `emacs -Q` load of all six utility features and the ERT tooling;
+* 53 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -343,3 +346,12 @@ recursive file APIs instead of startup aliases and the shell-oriented
 boundaries, and recursive Scilab copying creates missing destination
 directories and replaces older destination files. Its tests use disposable
 directories rather than assuming that the home directory is under `/home`.
+
+[`mb-utils-tree.el`](./utils/mb-utils-tree.el) now uses lexical binding and
+declares its built-in dependencies. Its narrower redefinition of Emacs's
+`copy-tree` has been removed, and startup-provided `flatten` and `aif` helpers
+have been replaced with built-in operations. The maintained tests characterize
+the existing subtree-filter result shapes and verify relation conversion and
+copy independence. The older [`ert-mb-utils-tree.el`](./utils/ert-mb-utils-tree.el)
+remains in place but outside the manifest pending a later duplicate-test
+cleanup decision.

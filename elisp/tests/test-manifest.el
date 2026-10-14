@@ -13,7 +13,8 @@
     "mode-extensions/test-mb-ert.el"
     "utils/test-mb-utils-file.el"
     "utils/test-mb-utils-io.el"
-    "utils/test-mb-utils-sets.el"))
+    "utils/test-mb-utils-sets.el"
+    "utils/test-mb-utils-tree.el"))
 
 (defun mb-tests-add-load-paths ()
   "Add maintained test directories to `load-path'."

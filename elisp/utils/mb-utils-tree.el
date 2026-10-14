@@ -1,9 +1,7 @@
-(cl-defun copy-tree (tree)
-  "Return a clone of TREE which has no shared list structures with it."
-  (if (consp tree)
-    (cons (copy-tree (car tree)) (copy-tree (cdr tree)))
-    tree))
-;;(copy-tree nil)
+;;; mb-utils-tree.el --- Tree relation and traversal helpers -*- lexical-binding: t; -*-
+
+(require 'cl-lib)
+(require 'subr-x)
 
 (cl-defun relations->tree (relations &key (test #'eql) reverse-p)
   "Given list RELATIONS, return a list of family trees.
@@ -13,7 +11,7 @@ each subnode SN of a node N is a relation in list RELATIONS. If
 instead optional parameter REVERSE-P is not nil then Y is
 interpreted as the parent of X."
   (let ((nodes (mapcar #'list
-		 (cl-remove-duplicates (flatten relations) :test test))))
+		 (cl-remove-duplicates (flatten-tree relations) :test test))))
     ;; the loop builds child node lists and returns non-top nodes
     (let ((x (cl-loop for (p c) in (if reverse-p
 				  (mapcar #'reverse relations) relations)
@@ -77,26 +75,29 @@ direction."
 (cl-defun find-subtree (x trees &key (filter :down) (test #'eql) key
 				  from-end tree-from-end)
   "Find the first subtree in TREES with X as top node.
-If REVERSE-P is not nil, return the minimal ancestor tree
-containing X."
+FILTER controls whether the result contains descendants, ancestors,
+or both; see `copy-subtree-1'."
   (copy-subtree-1 x trees nil filter test key from-end tree-from-end))
 ;;(find-subtree 'f '((a (b (f (d)))) (e (f (g (h))))) :filter :prune)
 
 (cl-defun copy-subtree (x trees &key (filter :down) (test #'eql) key
 				  from-end tree-from-end)
   "Find all subtrees in TREES with X as top node.
-If REVERSE-P is not nil, return the minimal ancestor tree
-containing X."
+FILTER controls whether results contain descendants, ancestors,
+or both; see `copy-subtree-1'."
   (copy-subtree-1 x trees t filter test key from-end tree-from-end))
 ;;(copy-subtree 'f '((a (b (f (d)))) (e (f (g (h))))) :filter :up)
 
 (cl-defun tree-leaves (tree)
   (when tree
-    (aif (cdr tree)
-      (cl-loop for x in it append (tree-leaves x))
-      (list (car tree)))))
+    (let ((children (cdr tree)))
+      (if children
+          (cl-loop for child in children append (tree-leaves child))
+        (list (car tree))))))
 ;;(tree-leaves '(a))
 ;;(tree-leaves '(a))
 ;;(tree-leaves '(a (c (d (f))) (b (e))))
 
 (provide 'mb-utils-tree)
+
+;;; mb-utils-tree.el ends here
