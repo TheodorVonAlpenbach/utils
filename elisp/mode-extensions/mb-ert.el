@@ -1,10 +1,18 @@
+;;; mb-ert.el --- ERT navigation and test commands -*- lexical-binding: t; -*-
+
+(require 'cl-lib)
+(require 'ert)
+(require 'subr-x)
+
+(declare-function mb-tests-load-baseline "test-manifest")
+
 (defconst *mb-ert-file-prefix* "test-")
 (defconst *mb-ert-defun-prefix* "test-")
 
 (cl-defun mb-ert-map ()
   "Return a sub map for functions related to ERT."
   (let ((ert-map (make-sparse-keymap)))
-    (define-key ert-map "i" #'insert-ert-test-skeleton)
+    (define-key ert-map "i" #'mb-ert-insert-skeleton)
     (define-key ert-map "f" #'mb-ert-test-defun)
     (define-key ert-map "b" #'mb-ert-test-buffer)
     (define-key ert-map "d" #'mb-ert-test-buffer-directory)
@@ -14,42 +22,68 @@
 
 (cl-defun mb-ert-test-filename-p (filename)
   "Return non-nil if and only if FILENAME is an ERT module."
-  (and
-   ;; a (temporary? exception)
-   (not (string-match "mb-js-mode" filename))
-   (string-match (format "^%s.*.el$" *mb-ert-file-prefix*)
-		 (file-name-nondirectory filename))))
+  (and (stringp filename)
+       (string-match-p
+        (format "\\`%s.*\\.el\\'" (regexp-quote *mb-ert-file-prefix*))
+        (file-name-nondirectory filename))))
 ;;(mb-ert-test-filename-p "qwe/test-mb-utils-div.el")
 
-(cl-defun mb-ert-test-buffer-p (&optional buffer (current-buffer))
+(cl-defun mb-ert-test-buffer-p (&optional (buffer (current-buffer)))
   "Return non-nil if and only if BUFFER contains an ERT test module.
 BUFFER is optional with the current buffer as default value."
   (mb-ert-test-filename-p (buffer-name buffer)))
 ;;(mb-ert-test-buffer-p (get-buffer "test-mb-utils-div.el"))
 
-(cl-defun mb-ert-insert-skeleton (defun-name)
+(defun mb-ert--defun-symbol-at-point ()
+  "Return the symbol defined by the top-level form at point."
+  (save-excursion
+    (beginning-of-defun)
+    (let ((form (read (current-buffer))))
+      (and (listp form) (symbolp (cadr form)) (cadr form)))))
+
+(defun mb-ert--goto-definition (name)
+  "Move to the definition of NAME in the current buffer."
+  (goto-char (point-min))
+  (when (re-search-forward
+         (format
+          "^(\\(?:\\(?:cl-\\)?def\\(?:un\\|macro\\)\\|ert-deftest\\)[[:space:]]+%s\\_>"
+          (regexp-quote name))
+         nil t)
+    (beginning-of-line)
+    (point)))
+
+(cl-defun mb-ert-insert-skeleton
+    (&optional (defun-name (symbol-name (mb-ert--defun-symbol-at-point))))
   "Add test for the function DEFUN-NAME to the ERT test module.
 If such module does not exist, create one."
-  (when (empty-buffer-p)
-    (insertf "(require 'ert)\n(require '%s)\n\n(provide '%s)"
-	     (file-name-sans-extension
-	      (file-name-nondirectory (mb-ert-swap-filename (buffer-name))))
-	     (file-name-sans-extension (buffer-name))))
-  (eob)
+  (interactive)
+  (when (= (point-min) (point-max))
+    (insert
+     (format "(require 'ert)\n(require '%s)\n\n(provide '%s)"
+             (file-name-sans-extension
+              (file-name-nondirectory (mb-ert-swap-filename (buffer-name))))
+             (file-name-sans-extension (buffer-name)))))
+  (goto-char (point-max))
   (backward-sexp 1)
-  (insertf
-   "(ert-deftest %s%s ()\n  \"Test of `%s'\"\n (should (equal (%s ) nil)))\n\n"
-   *mb-ert-defun-prefix* defun-name defun-name defun-name)
+  (insert
+   (format
+    "(ert-deftest %s%s ()\n  \"Test of `%s'\"\n (should (equal (%s ) nil)))\n\n"
+    *mb-ert-defun-prefix* defun-name defun-name defun-name))
   (backward-char 10))
 
 ;;; Swapping
 (cl-defun mb-ert-swap-filename (filename)
   "Swap from module filename to ERT test module filename or vice-versa."
-  (awhen (string-match* (format "\\(%s\\)?\\(.*\\.el$\\)" *mb-ert-file-prefix*)
-	   (file-name-nondirectory filename) :num '(1 2))
-    (cl-destructuring-bind (test-prefix name) it
-      (expand-file-name (aif test-prefix name (concat *mb-ert-file-prefix* name))
-			(file-name-directory filename)))))
+  (let ((name (file-name-nondirectory filename)))
+    (when (string-match
+           (format "\\`\\(%s\\)?\\(.*\\.el\\)\\'"
+                   (regexp-quote *mb-ert-file-prefix*))
+           name)
+      (expand-file-name
+       (if (match-string 1 name)
+           (match-string 2 name)
+         (concat *mb-ert-file-prefix* (match-string 2 name)))
+       (file-name-directory filename)))))
 ;;(mb-ert-swap-filename "/dir/test-ert.el")
 
 (cl-defun mb-ert-get-test-filename (buffer-or-filename)
@@ -57,9 +91,10 @@ If such module does not exist, create one."
 The function assumes that if BUFFER-OR-FILENAME's path is
 \"path/filename.el\", then the associated test filename's path is
 \"path/test-filename.el\"."
-  (let ((filename (aif (get-buffer buffer-or-filename)
-		      (buffer-file-name it)
-		      buffer-or-filename)))
+  (let* ((buffer (get-buffer buffer-or-filename))
+         (filename (if buffer
+                       (buffer-file-name buffer)
+                     buffer-or-filename)))
     (if (mb-ert-test-filename-p filename)
      filename (mb-ert-swap-filename filename))))
 ;;(mb-ert-get-test-filename "~/mbe/ert/test-mymodule.el")
@@ -75,15 +110,21 @@ filename of BUFFER-OR-FILENAME."
 
 (cl-defun mb-ert-swap-file (&optional (filename (buffer-file-name)))
   "Return buffer containing the ERT brother of FILENAME"
-  (awhen (mb-ert-swap-filename filename)
-    (find-file it)))
+  (let ((other-file (mb-ert-swap-filename filename)))
+    (when other-file
+      (find-file other-file))))
 ;;(mb-ert-swap-file)
 
 (cl-defun mb-ert-name-p (name-or-symbol &optional (prefix "test-"))
-  (string-match* (concat "^" prefix) (sstring name-or-symbol)))
+  (string-prefix-p prefix
+                   (if (symbolp name-or-symbol)
+                       (symbol-name name-or-symbol)
+                     name-or-symbol)))
 
 (cl-defun mb-ert-swap-defun-name (&optional
-				  (defun-name (sstring (defun-symbol)))
+				  (defun-name
+                                   (symbol-name
+                                    (mb-ert--defun-symbol-at-point)))
 				  to
 				  (prefix "test-"))
   "Swap a defun name with the name of its ERT associated test defun, or vice versa.
@@ -105,22 +146,28 @@ if and only if it has PREFIX has prefix. By default, TO is nil.
 		 (mb-ert-swap-defun-name defun-name to* prefix)))))
 ;;(mb-ert-swap-defun-name)
 
-(cl-defun mb-ert-swap-defun-symbol (&optional (symbol (defun-symbol)) &rest args)
-  "Swap a defun SYMBOL with the symbol of its ERT associated test defun, or vice versa.
+(cl-defun mb-ert-swap-defun-symbol
+    (&optional (symbol (mb-ert--defun-symbol-at-point)) &rest args)
+  "Swap SYMBOL with the symbol of its associated ERT test, or vice versa.
 For more swap options, use `mb-ert-swap-defun-name'.
 \n(fn &optional SYMBOL TO PREFIX)"
-  (intern (apply #'mb-ert-swap-defun-name (sstring symbol) args)))
+  (intern (apply #'mb-ert-swap-defun-name (symbol-name symbol) args)))
 ;;(mb-ert-swap-defun-symbol 'mb-ert-swap-defun-symbol)
 
-(cl-defun mb-swap-ert-defun (&optional (symbol-or-name (defun-symbol)))
+(cl-defun mb-swap-ert-defun
+    (&optional (symbol-or-name (mb-ert--defun-symbol-at-point)))
   "Swap an emacs lisp file with its associated test file."
-  (let ((defun-name (sstring symbol-or-name)))
+  (let ((defun-name (if (symbolp symbol-or-name)
+                        (symbol-name symbol-or-name)
+                      symbol-or-name)))
     (when (and (mb-ert-swap-file (buffer-file-name))
 	       defun-name)
       (if (mb-ert-test-buffer-p)
-	(or (elisp-goto-defun (mb-ert-swap-defun-name defun-name :ert))
+	(or (mb-ert--goto-definition
+             (mb-ert-swap-defun-name defun-name :ert))
 	    (mb-ert-insert-skeleton defun-name))
-	(elisp-goto-defun (mb-ert-swap-defun-name defun-name :non-ert))))))
+	(mb-ert--goto-definition
+         (mb-ert-swap-defun-name defun-name :non-ert))))))
 ;;(mb-swap-ert-defun)
 
 (cl-defun mb-ert-forward-test ()
@@ -133,42 +180,49 @@ If no such test is found, it returns NIL."
   (unless (mb-ert-test-filename-p test-filename)
     (error "Argument is not a path to an ERT test file."))
   (with-temp-buffer
-    (insert-file test-filename)
+    (insert-file-contents test-filename)
     (cl-delete-duplicates
      (cl-loop while (mb-ert-forward-test)
-	   collect (defun-symbol (point) '(ert-deftest))))))
+	   collect (read (current-buffer)))
+     :from-end t)))
 ;;(mb-ert-file-defuns "~/projects/utils/elisp/mode-extensions/test-mb-texinfo.el")
 
 (cl-defun mb-ert-directory-defuns (directory)
   "Return a list of all ERT test function symbols in DIRECTORY."
-  (cl-loop for f in (directory-files directory t "\.el$")
+  (cl-loop for f in (directory-files directory t "\\.el\\'")
 	if (mb-ert-test-filename-p f)
 	append (mb-ert-file-defuns f)))
 ;;(mb-ert-directory-defuns "~/projects/utils/elisp/utils")
 
 (cl-defun mb-non-ert-files (&optional (directory "."))
   "Return a list of elisp files in DIRECTORY that are not test files."
-  (cl-remove "^test-" (directory-files directory nil "\.el$")
-	     :test #'string-match))
+  (cl-remove-if #'mb-ert-test-filename-p
+                (directory-files directory nil "\\.el\\'")))
 ;;(mb-non-ert-files ".")
 
 (cl-defun mb-ert-files (&optional (directory ".") verify-p)
   "Return a list of every ERT test file in DIRECTORY.
 If VERIFY-P is not nil, then the function checks that each test
 file corresponds to an actual elisp file in DIRECTORY."
-  (let ((res (directory-files directory nil "^test-.*\.el$")))
-    (awhen (and verify-p
-		(cl-set-difference
-		 (cl-loop for x in res collect (subseq x 5))
-		 (mb-non-ert-files directory)
-		 :test #'string=))
-      (warn "The following test files do not have matching elisp files:\n%s"
-	    (concat* it :in "\n" :key #'(lambda (x) (concat "test-" x)))))
+  (let ((res (directory-files directory nil "^test-.*\\.el\\'")))
+    (let ((unmatched
+           (and verify-p
+                (cl-set-difference
+                 (cl-loop for x in res
+                          collect (cl-subseq x
+                                            (length *mb-ert-file-prefix*)))
+                 (mb-non-ert-files directory)
+                 :test #'string=))))
+      (when unmatched
+        (warn "The following test files do not have matching elisp files:\n%s"
+              (mapconcat
+               (lambda (name) (concat *mb-ert-file-prefix* name))
+               unmatched "\n"))))
     res))
 ;;(mb-ert-files "." t)
 
 (cl-defun mb-test-ert-symbols (symbols)
-  (ert (cons 'member (listify symbols))))
+  (ert (cons 'member (if (listp symbols) symbols (list symbols)))))
 
 (cl-defun mb-eval/load (&optional (buffer-or-file (current-buffer)))
   "Evalute or load BUFFER-OR-FILE.
@@ -178,9 +232,10 @@ buffer, then the function will evaluate that buffer with
 `eval-buffer'. Else, if buffer-or-file is a path to an existing
 file, this file will be loaded, but not inserted to a new buffer
 in Emacs."
-  (aif (get-buffer buffer-or-file)
-    (eval-buffer it)
-    (load buffer-or-file)))
+  (let ((buffer (get-buffer buffer-or-file)))
+    (if buffer
+        (eval-buffer buffer)
+      (load buffer-or-file))))
 ;;(mb-eval/load "/tmp/eval-load-test")
 ;;(mb-eval/load (current-buffer))
   
@@ -208,11 +263,12 @@ associated function."
   "Perform ERT test of defun at point
 Does not support testing of defun when point is at its test function."
   (interactive)
-  (awhen (defun-symbol)
-    ;;(mb-eval/load-ert-pair)
-    (mb-ert-test-symbols (list (mb-ert-swap-defun-symbol it :ert-soft)))))
+  (let ((symbol (mb-ert--defun-symbol-at-point)))
+    (when symbol
+      (mb-ert-test-symbols
+       (list (mb-ert-swap-defun-symbol symbol :ert-soft))))))
 
-(cl-defun mb-ert-test-region (beg end)
+(cl-defun mb-ert-test-region (_beg _end)
   (interactive "r")
   (error "Not implemented"))
 
@@ -223,7 +279,7 @@ directory. It can be either a test file, or the module associated
 with a test file. In the latter case, every function in the
 module with a corresponding ert test function will be included in
 the test."
-  (interactive)
+(interactive "fModule or test file: ")
   (mb-eval/load-ert-pair filename)
   (mb-ert-test-symbols
    (mb-ert-file-defuns (mb-ert-get-test-filename filename))))
@@ -238,64 +294,45 @@ the test."
 (cl-defun mb-ert-test-files (files)
   "Invoke ERT on every test function in FILES.
 Note: Either this or mb-ert-test-file is obsolete."
-  (let ((fs (copy-if #'mb-ert-test-filename-p files)))
+  (let ((fs (cl-remove-if-not #'mb-ert-test-filename-p files)))
     (mapc #'mb-eval/load-ert-pair fs)
     (mb-ert-test-symbols (mapcan #'mb-ert-file-defuns fs))))
 
 (cl-defun mb-ert-test-buffer-directory (&optional (buffer (current-buffer)))
   "Invoke ERT on every test function in current directory."
   (interactive)
-  (mb-ert-test-files (directory-files (buffer-directory buffer) t "\.el$")))
+  (mb-ert-test-files
+   (directory-files
+    (with-current-buffer buffer default-directory) t "\\.el\\'")))
 
 (cl-defun mb-ert-test-buffer-directories (dirs)
   "Invoke ERT on every test function in directories DIRS."
   (mb-ert-test-symbols
    (cl-loop for d in dirs
-	 for fs = (copy-if #'mb-ert-test-filename-p
-		    (directory-files d t "\.el$"))
+	 for fs = (cl-remove-if-not
+                   #'mb-ert-test-filename-p
+		   (directory-files d t "\\.el\\'"))
 	 do (mapc #'mb-eval/load-ert-pair fs)
 	 append (mapcan #'mb-ert-file-defuns fs))))
 
-(cl-defun mb-ert-test-mb-elisp (&optional (buffer (current-buffer)))
-  "Invoke ERT on every test function in all of MB's elisp code."
+(cl-defun mb-ert-test-mb-elisp (&optional _buffer)
+  "Load and run the maintained Emacs Lisp test baseline."
   (interactive)
-  (mb-ert-test-buffer-directories
-   (subdirs (expand-file-name +mb-lisp-dir+))))
-
-(cl-defun mb-ert-test-mb-elisp (&optional (buffer (current-buffer)))
-  "Invoke ERT on every test function in all of MB's elisp code."
-  (interactive)
-  (mb-ert-test-buffer-directories
-   (subdirs (expand-file-name +mb-lisp-dir+))))
-
-(cl-defun elisp-test-all (&optional (buffer (current-buffer)))
-  "Run `ert' on all mb-elisp tests that exists.
-Currently it only tests the test functions that have been
-evaluated or compiled.
-
-Also, there seems to be a problem with how ERT handles
-environments. My `let' forms seem to be kept in a separate
-environment, which causes side effects to be kept until the time
-the test is run again. Because of this, you really need to
-evaluate the test function before each test in order to reset the
-bindings. I believe this is a bug.
-
-I guess the best implementation of this function is to actually
-locate every test fuction there is and re-evaluate each of them
-before calling (ert t)."
-  (interactive)
-  ;; TODO load all test buffers here
+  (require 'test-manifest)
+  (mb-tests-load-baseline)
   (ert t))
+
+(cl-defun elisp-test-all (&optional buffer)
+  "Compatibility command for `mb-ert-test-mb-elisp'."
+  (interactive)
+  (mb-ert-test-mb-elisp buffer))
 ;;(elisp-test-all (get-buffer "mb-utils-div.el"))
 
 (cl-defun ert-string-to-file (string file)
-  "Same as `string-to-file', but indended for use with ERT.
-The reason is that `string-to-file' calls `write-file' which
-issues an `args-out-of-range' error, which is catched by ERT, and
-causes the test to fail. This function, probably slower than
-`string-to-file', avoids this by using `with-temp-file'
-instead."
+  "Write STRING to FILE for use in ERT fixtures."
   (with-temp-file file
-    (overwrite-region string (point-min) (point-max))))
+    (insert string)))
 
 (provide 'mb-ert)
+
+;;; mb-ert.el ends here

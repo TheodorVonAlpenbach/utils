@@ -1,3 +1,5 @@
+;;; test-mb-ert.el --- Tests for mb-ert -*- lexical-binding: t; -*-
+
 (require 'ert)
 (require 'mb-ert)
 
@@ -33,7 +35,8 @@
   (should (mb-ert-test-filename-p "~/path/test-qwe.el"))
   (should-not (mb-ert-test-filename-p "~/path/qwe.el"))
   (should-not (mb-ert-test-filename-p "~/projects/utils/elisp/mode-extensions/mb-js-mode.el"))
-  (should-not (mb-ert-test-filename-p "~/projects/utils/elisp/mode-extensions/test-mb-js-mode.el")))
+  (should (mb-ert-test-filename-p
+           "~/projects/utils/elisp/mode-extensions/test-mb-js-mode.el")))
 
 (ert-deftest test-mb-ert-name-p ()
   "Test of `mb-ert-name-p'"
@@ -44,12 +47,38 @@
 
 (ert-deftest test-mb-ert-file-defuns ()
   "Test of `mb-ert-file-defuns'"
-  (should-error (mb-ert-file-defuns "~/projects/utils/elisp/utils/mb-sequences.el")))
+  (should-error (mb-ert-file-defuns "~/projects/utils/elisp/utils/mb-sequences.el"))
+  (let ((file (make-temp-file "test-mb-ert-" nil ".el")))
+    (unwind-protect
+        (progn
+          (with-temp-file file
+            (insert "(ert-deftest test-one () t)\n"
+                    "(ert-deftest test-two () t)\n"
+                    "(ert-deftest test-one () t)\n"))
+          (should (equal (mb-ert-file-defuns file)
+                         '(test-one test-two))))
+      (delete-file file))))
 
 (ert-deftest test-mb-ert-swap-defun-symbol ()
   "Test of `mb-ert-swap-defun-symbol'"
   (should (equal (mb-ert-swap-defun-symbol 'qwe) 'test-qwe))
   (should (equal (mb-ert-swap-defun-symbol 'qwe) 'test-qwe)))
 
+(ert-deftest test-mb-ert-definition-navigation ()
+  "Test definition detection and navigation without startup helpers."
+  (with-temp-buffer
+    (emacs-lisp-mode)
+    (insert "(defun first-function () nil)\n\n"
+            "(ert-deftest test-second-function () t)\n\n"
+            "(defmacro third-macro () nil)\n")
+    (goto-char (point-min))
+    (search-forward "nil")
+    (should (eq (mb-ert--defun-symbol-at-point) 'first-function))
+    (should (mb-ert--goto-definition "test-second-function"))
+    (should (looking-at "(ert-deftest test-second-function"))
+    (should (mb-ert--goto-definition "third-macro"))
+    (should (looking-at "(defmacro third-macro"))))
+
 (provide 'test-mb-ert)
 
+;;; test-mb-ert.el ends here
