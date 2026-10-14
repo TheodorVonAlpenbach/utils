@@ -263,6 +263,9 @@ The first subset is intentionally conservative:
 * [`test-mb-math-functions.el`](./utils/test-mb-math-functions.el): six ERT
   tests for degree and hyperbolic functions, finite and infinite series,
   special functions, polynomial roots, and numerical root solvers.
+* [`test-mb-utils-iso-time.el`](./utils/test-mb-utils-iso-time.el): six ERT
+  tests for ISO date, time, timezone and date-time formatting, numbered regexp
+  captures, localized calendar names, and supported time designators.
 
 [`list-interval.el`](./list-interval.el) and
 [`mb-utils-sets.el`](./utils/mb-utils-sets.el) now declare their `cl-lib`
@@ -318,11 +321,11 @@ also remain explicit decisions before retirement or compatibility work begins.
 ### Initial utility migrations
 
 The closed-interval, envelope, set-helper, file, I/O, tree, thing-at-point,
-economy, and additional-math modules are
+economy, additional-math, and ISO-time modules are
 independently loadable. Their validation comprises:
 
-* a clean `emacs -Q` load of all nine utility features and the ERT tooling;
-* 70 passing ERT tests from the batch entry point;
+* a clean `emacs -Q` load of all ten utility features and the ERT tooling;
+* 76 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -389,3 +392,10 @@ implemented without startup helpers. The migration corrected three defects: the
 reversed sign of `tanh`, the finite geometric series for ratio -1, and endpoint
 damping results in `falsi-method` that were computed but discarded. Numerical
 characterization tests cover the affected functions.
+
+[`mb-utils-iso-time.el`](./utils/mb-utils-iso-time.el) now uses lexical binding
+and built-in Emacs time conversion rather than relying circularly on
+`mb-utils-time` parsing and accessor functions. Its public constants and
+numbered regexp capture groups are preserved. Timezones are now genuinely
+optional in `iso-time-regexp`, and fractional seconds require a literal dot
+followed by at least one digit.
