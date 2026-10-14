@@ -12,13 +12,8 @@
                (expand-file-name "utils" mb-tests-elisp-directory)))
   (add-to-list 'load-path directory))
 
-;; The initial suite records startup coupling without loading the personal init.
-(defalias 'first #'cl-first)
-(defalias 'second #'cl-second)
-
 (defconst mb-tests-baseline-files
   '("test-list-interval.el"
-    "utils/mb-utils-sets.el"
     "utils/test-mb-utils-sets.el"))
 
 (dolist (file mb-tests-baseline-files)

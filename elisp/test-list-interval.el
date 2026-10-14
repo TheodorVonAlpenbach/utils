@@ -1,5 +1,14 @@
+;;; test-list-interval.el --- Tests for list-interval -*- lexical-binding: t; -*-
+
 (require 'ert)
 (require 'list-interval)
+
+(ert-deftest test-i-make-interval-and-accessors ()
+  "Test construction and accessors for list-based intervals."
+  (let ((interval (i-make-interval -1 2)))
+    (should (equal interval '(-1 2)))
+    (should (= (i-left interval) -1))
+    (should (= (i-right interval) 2))))
 
 (ert-deftest test-i-contain-p ()
   "Test of `i-contain-p'"
@@ -120,3 +129,5 @@
   (should (equal (i-union nil '(10 30)) '(10 30))))
 
 (provide 'test-list-interval)
+
+;;; test-list-interval.el ends here

@@ -1,4 +1,6 @@
-(provide 'mb-utils-sets)
+;;; mb-utils-sets.el --- Interval and set helpers -*- lexical-binding: t; -*-
+
+(require 'cl-lib)
 
 (cl-defstruct
   (interval
@@ -41,3 +43,7 @@ later."
   (and (apply #'cl-subsetp list1 list2 args)
        (apply #'cl-subsetp list2 list1 args)))
 ;;(set-equal '(a) '(a a))
+
+(provide 'mb-utils-sets)
+
+;;; mb-utils-sets.el ends here

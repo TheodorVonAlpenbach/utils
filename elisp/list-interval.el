@@ -1,32 +1,39 @@
-;;;; closed intervals: '(a b) is [a b]
-;;;; empty intervals are represented as nil 
-;;;; parameter symbols X represent either a number or an interval 
+;;; list-interval.el --- Closed list-based intervals -*- lexical-binding: t; -*-
+
+(require 'cl-lib)
+
+;;;; Closed intervals: '(a b) is [a b].
+;;;; Empty intervals are represented as nil.
+;;;; Parameter symbols X represent either a number or an interval.
+
 (cl-defun i-make-interval (a b)
   "Return the closed interval [A B]."
   (list a b))
 
-(cl-defun i-left (interval) (first interval))
-(cl-defun i-right (interval) (second interval))
+(cl-defun i-left (interval) (car interval))
+(cl-defun i-right (interval) (cadr interval))
 
 (cl-defun i-interval-p (interval)
   "Return not nil if INTERVAL is a valid interval object."
   (and interval
        (consp interval)
        (= (length interval) 2)
-       (numberp (first interval))
-       (numberp (second interval))
-       (<= (first interval) (second interval))
+       (numberp (i-left interval))
+       (numberp (i-right interval))
+       (<= (i-left interval) (i-right interval))
        interval))
 
 (cl-defun i-contain-p (interval x &optional strictly-p) 
   "Return not nil if number x is within interval"
   (if strictly-p
     (if (listp x)
-      (and (< (first interval) (first x) (second x) (second interval)))
-      (< (first interval) x (second interval)))
+      (and (< (i-left interval) (i-left x) (i-right x)
+              (i-right interval)))
+      (< (i-left interval) x (i-right interval)))
     (if (listp x)
-      (and (<= (first interval) (first x) (second x) (second interval)))
-      (<= (first interval) x (second interval)))))
+      (and (<= (i-left interval) (i-left x) (i-right x)
+               (i-right interval)))
+      (<= (i-left interval) x (i-right interval)))))
 
 (cl-defun i-within-p (x interval &optional strictly-p) 
   (i-contain-p interval x strictly-p))
@@ -61,9 +68,11 @@
   ;; Need to handle the fact that I ∪ ∅ ≍ I
   (if (i-interval-p interval1)
     (if (i-interval-p interval2)
-      (i-make-interval (min (first interval1) (first interval2))
-		       (max (second interval1) (second interval2)))
+      (i-make-interval (min (i-left interval1) (i-left interval2))
+		       (max (i-right interval1) (i-right interval2)))
       interval1)
     (i-interval-p interval2)))
 
 (provide 'list-interval)
+
+;;; list-interval.el ends here
