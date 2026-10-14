@@ -21,11 +21,11 @@ Backup/autosave files are not source and are outside the cleanup scope.
 | Finding | Evidence | Proposed treatment |
 | --- | --- | --- |
 | Initialization and libraries are coupled | [`.emacs`](./.emacs) defines global Common Lisp aliases, assembles broad load paths, eagerly loads many features, and opens files. Libraries such as [`mb-lists.el`](./utils/mb-lists.el) use those aliases without declaring them. | Establish independent library loading before simplifying startup. Remove aliases only after migrating their callers. |
-| Repeated definitions hide earlier implementations | The reader scan found 37 repeated top-level function/macro definitions. Examples include `parse-csv-string` in [`mb-utils-io.el`](./utils/mb-utils-io.el), `nor` in [`mb-utils-div.el`](./utils/mb-utils-div.el), and `set-indent` in [`mb-indent.el`](./global/mb-indent.el). | Compare implementations and call sites, test the intended contract, and retain one implementation. Do not assume the earlier version is expendable. |
+| Repeated definitions hide earlier implementations | The reader scan found 37 repeated top-level function/macro definitions. Examples include `nor` in [`mb-utils-div.el`](./utils/mb-utils-div.el) and `set-indent` in [`mb-indent.el`](./global/mb-indent.el). The duplicate `parse-csv-string` in [`mb-utils-io.el`](./utils/mb-utils-io.el) has since been consolidated. | Compare implementations and call sites, test the intended contract, and retain one implementation. Do not assume the earlier version is expendable. |
 | Existing tests are a useful but inconsistent starting point | [`test-mb-utils-strings.el`](./utils/test-mb-utils-strings.el) declares its library dependency; [`test-mb-sequences.el`](./utils/test-mb-sequences.el) does not. [`test-mb-utils-file.el`](./utils/test-mb-utils-file.el) assumes a particular home-directory layout. | Make tests independent of a populated interactive session and the developer's machine. |
 | Test discovery and execution need consolidation | [`mb-ert.el`](./mode-extensions/mb-ert.el) excludes `mb-js-mode` filenames, repeats a runner definition, and has a command that runs only already-loaded tests. Both [`ert-mb-utils-tree.el`](./utils/ert-mb-utils-tree.el) and [`test-mb-utils-tree.el`](./utils/test-mb-utils-tree.el) exist. | Inspect and document exceptions; use one explicit batch test manifest initially, shared where practical with interactive commands. |
 | Lexical binding needs a careful migration | Only 10 tracked files have a first-line `lexical-binding: t` header. [`mb-lists.el`](./utils/mb-lists.el) returns lambdas referencing local bindings, for example in `explicit<`. | Test returned functions after their creator returns. Migrate one module at a time; preserve intentional dynamic variables with `defvar` or `defcustom`. |
-| Core helpers mix infrastructure with experiments | [`mb-utils-math.el`](./utils/mb-utils-math.el) includes experimental helpers after an initial `provide`; [`mb-utils-io.el`](./utils/mb-utils-io.el) includes top-level sample expressions and Windows temporary-directory assumptions. | Separate demonstrations from reusable definitions and eliminate unintended load-time work. |
+| Core helpers mix infrastructure with experiments | [`mb-utils-math.el`](./utils/mb-utils-math.el) includes experimental helpers after an initial `provide`. Load-time samples and Windows-only temporary paths have been removed from [`mb-utils-io.el`](./utils/mb-utils-io.el). | Separate demonstrations from reusable definitions and eliminate unintended load-time work. |
 | Global setup contains conflicting or machine-specific bindings | [`global-map.el`](./global/global-map.el) binds F12 twice and includes a hard-coded document compilation command. [`mb-org.el`](./mode-extensions/mb-org.el) assumes Evil and key-chord functionality in its mode hook. | Preserve useful commands, make optional integrations explicit, and move machine-specific behavior out of shared setup. |
 | Legacy API usage remains | [`php.el`](./c++/php.el) uses `defadvice`; [`qt-chess.el`](./c++/qt-chess.el) uses unprefixed `flet`. | If retained, replace with supported APIs after testing advice ordering and rebinding semantics. |
 | Potential library-name collision | [`sql-mode.el`](./mode-extensions/sql-mode.el) contains personal extensions to built-in SQL mode. | Give the extension an unambiguous feature/file name and arrange setup after built-in SQL loads. |
@@ -240,6 +240,9 @@ The first subset is intentionally conservative:
 * [`test-list-envelope.el`](./test-list-envelope.el): nine ERT tests for
   rectangle construction, validation, containment, overlap, intersection, and
   union.
+* [`test-mb-utils-io.el`](./utils/test-mb-utils-io.el): ten ERT tests for text
+  and binary file I/O, temporary-file cleanup, directory binding, CSV parsing,
+  field iteration, and serialization.
 * [`test-mb-utils-sets.el`](./utils/test-mb-utils-sets.el): three ERT tests for
   open/closed interval boundaries, one-dimensional spheres, and set equality.
 
@@ -296,10 +299,20 @@ also remain explicit decisions before retirement or compatibility work begins.
 
 ### Initial utility migrations
 
-The closed-interval, envelope, and set-helper group is independently loadable.
-Its validation comprises:
+The closed-interval, envelope, set-helper, and I/O modules are independently
+loadable. Their validation comprises:
 
-* a clean `emacs -Q` load of all three features;
-* 21 passing ERT tests from the batch entry point;
+* a clean `emacs -Q` load of all four features;
+* 31 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
+
+The [`mb-utils-io.el`](./utils/mb-utils-io.el) migration consolidated its
+duplicate CSV parser, removed load-time scratch expressions and startup helper
+dependencies, and replaced Windows-only temporary paths. Character-separated
+CSV parsing now retains every field, supports quoted separators and escaped
+quotes, and reports unterminated quoted fields. The simple string-separator
+behavior remains unchanged. The quote/escape state machine is isolated in a
+single-field reader, leaving `parse-csv-line` as a short collecting loop.
+Binary vector writing was also repaired and is covered by a range round-trip
+test.

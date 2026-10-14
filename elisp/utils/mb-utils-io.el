@@ -1,10 +1,17 @@
+;;; mb-utils-io.el --- File, CSV, and binary I/O helpers -*- lexical-binding: t; -*-
+
+(require 'cl-lib)
+(require 'hexl)
+(require 'pp)
+(require 'subr-x)
+
 (cl-defun overwrite-buffer-with-file (f &optional buf &key (pos nil))
   "Deletes buffer content and inserts file F instead. If :POS is
 specified, then goto that posistion in file. Else goto beginning of
 file."
   (when buf (set-buffer buf))
   (blank-buffer (current-buffer))
-  (insert-file f)
+  (insert-file-contents f)
   (goto-char (or pos (point-min))))
 
 (cl-defun read* (file)
@@ -28,7 +35,7 @@ file."
 ;;(prinl '(a b c))
 
 (cl-defun buffer-string-no-properties (&optional (buffer (current-buffer)))
-  (with-buffer buffer
+  (with-current-buffer buffer
     (buffer-substring-no-properties (point-min) (point-max))))
 ;;(substring (buffer-string-no-properties) 1 30)
 
@@ -109,7 +116,7 @@ default value of optional parameter BUFFER is the current buffer."
   "Insert FILE in a temporary buffer, evaluate body and save the
 \(possibly\) modified buffer back to FILE."
   `(with-temp-file ,file
-     (insert-file ,file)
+     (insert-file-contents ,file)
      ,@body))
 (def-edebug-spec with-file t)
 
@@ -118,79 +125,107 @@ default value of optional parameter BUFFER is the current buffer."
   `(with-temp-buffer
      (unwind-protect 
        (progn
-	 (insert-file ,file)
+	 (insert-file-contents ,file)
 	 ,@body))))
 (def-edebug-spec with-file-readonly t)
 
 (cl-defun get-temp-file-name ()
-  "Returns a list of two items: a unique file name and a path to a tmp
-dir."
-  (list (iso-date-and-time :with-seconds t) "C:/WINNT/Temp/"))
+  "Return a unique file name and its temporary directory.
+The result is a list of the form (NAME DIRECTORY).  The file is
+not created."
+  (let ((path (make-temp-name
+               (expand-file-name "mb-utils-" temporary-file-directory))))
+    (list (file-name-nondirectory path) (file-name-directory path))))
 
 (defmacro with-temp-file* (&rest body)
-  "Creates a new file and corresponding buffer, evaluates BODY in that
-buffer, and kills file and buffer afterwords. Symbol FILE takes the
-temporary file name as value."
-  `(let ((file (format "C:/WINNT/Temp/%s" (iso-date-and-time :with-seconds t))))
-      (unwind-protect
-	(progn
-	  (find-file-noselect ,file)
-	  ,@body)
-	(set-buffer ,current))))
+  "Evaluate BODY in a temporary file buffer.
+The temporary path is bound to `file'.  Delete the file and kill
+the buffer after BODY finishes."
+  (declare (indent 0) (debug t))
+  (let ((temporary-path (cl-gensym "temporary-path")))
+    `(let* ((,temporary-path (make-temp-file "mb-utils-"))
+            (file ,temporary-path))
+       (unwind-protect
+           (with-temp-buffer
+             (setq buffer-file-name file)
+             ,@body)
+         (when (file-exists-p ,temporary-path)
+           (delete-file ,temporary-path))))))
   
 (defmacro with-current-directory (directory &rest body)
   "Evalute BODY with current directory temporarily set to DIRECTORY."
-  `(let ((default-directory directory))
+  `(let ((default-directory ,directory))
      ,@body))
   
 (cl-defun blank-buffer (&key (buffer (current-buffer)) start end)
-  (with-buffer buffer
+  (with-current-buffer buffer
     (kill-region (or start (point-min)) (or end (point-max)))))
 
-(read-from-string ",\"FR165 L34P LO S.S., MIN\",** 30031")
-(read-from-string ",** 30031,\"FR165 L34P LO S.S., MIN\",** 30031")
-(read-from-string "** 30031,\"FR165 L34P LO S.S., MIN\",** 30031")
-
-(cl-defun parse-csv-column (line &optional (pos 0) (char-separator ?,) (omit-nulls t))
-  "Assumes LINE starts with a comma. Use destructuring-bind when this is stable"
-  (let* ((x (read-from-string line pos))
-	 (res (car x))
-	 (newpos (cdr x)))
-    (if (stringp res)
-      (list res newpos)
-      (let ((newpos (cl-position char-separator line :start (1+ pos))))
-	(list (substring line pos newpos) newpos)))))
-;;(parse-csv-column "** 30031,\"FR165 L34P LO S.S., MIN\",** 30031")
-;;(parse-csv-column ",\"FR165 L34P LO S.S., MIN\",** 30031")
-;;(parse-csv-column "\n")
+(cl-defun mb-csv--read-field (line start char-separator)
+  "Read one field from LINE at START.
+Return (FIELD . NEXT-POSITION), where NEXT-POSITION is nil after
+the final field.  CHAR-SEPARATOR delimits unquoted fields."
+  (cl-loop with field
+           with quoted
+           with length = (length line)
+           for index from start below length
+           for character = (aref line index)
+           do
+           (cond
+            (quoted
+             (cond
+              ((and (= character ?\")
+                    (< (1+ index) length)
+                    (= (aref line (1+ index)) ?\"))
+               (push ?\" field)
+               (cl-incf index))
+              ((and (= character ?\\)
+                    (< (1+ index) length))
+               (cl-incf index)
+               (push (aref line index) field))
+              ((= character ?\")
+               (setq quoted nil))
+              (t
+               (push character field))))
+            ((= character ?\")
+             (setq quoted t))
+            ((= character char-separator)
+             (cl-return (cons (concat (nreverse field)) (1+ index))))
+            (t
+             (push character field)))
+           finally
+           (when quoted
+             (error "Unterminated quoted CSV field"))
+           (cl-return (cons (concat (nreverse field)) nil))))
 
 (cl-defun parse-csv-line (line &optional (char-separator ?,) (omit-nulls t))
-  (cl-loop with i = 0
-	with n = (length line)
-	with s = (string-trim (concat "," line))
-	for (x pos) = (parse-csv-column s 0) then (parse-csv-column s (1+ pos))
-	while (and pos (< pos n)) collect x))
+  "Parse one CSV LINE separated by CHAR-SEPARATOR.
+Quoted fields may contain separators.  Both doubled quotes and
+backslash-escaped characters are accepted inside quoted fields.
+When OMIT-NULLS is non-nil, omit empty fields."
+  (cl-loop with position = 0
+           with done
+           until done
+           for (field . next-position) =
+           (mb-csv--read-field line position char-separator)
+           unless (and omit-nulls (string-empty-p field))
+           collect field
+           do (if next-position
+                (setq position next-position)
+                (setq done t))))
 ;;(parse-csv-line "** 30031,\"FR165 L34P LO S.S., MIN\",** 30031")
 ;;(parse-csv-line "")
-
-(cl-defun parse-csv-string (string &optional (column-separator ";") line-separator (omit-nulls t))
-  "Parses csv file FILENAME to a list of lists."
-  (mapcar #'(lambda (x) (if (stringp column-separator)
-			  (split-string x column-separator)
-			  (parse-csv-line x column-separator omit-nulls)))
-	  (split-string string (or line-separator "\n") omit-nulls)))
-;;(parse-csv-string "")
 
 (defvar *csv-show-progress* nil)
 
 (cl-defun parse-csv-string (string &optional
 				   (column-separator ";")
 				   line-separator (omit-nulls t))
-  "Parses csv file FILENAME to a list of lists."
+  "Parse CSV data in STRING into a list of rows."
   (cl-loop with lines = (split-string string (or line-separator "\n") omit-nulls)
 	for x in lines
 	for i from 0
-	while (and x (not (empty-string-p (string-trim x))))
+	while (and x (not (string-empty-p (string-trim x))))
 	if *csv-show-progress* do (message "%d/%d" i (length lines))
 	collect (if (stringp column-separator)
 		  (split-string x column-separator)
@@ -205,13 +240,12 @@ See `parse-csv-string' for more details"
 (cl-defun csv-string (lists &optional (column-separator ";")
 			      line-separator (nil-conversion ""))
   "Default LINE-SEPARATOR is \\n"
-  (concat* lists 
-	   :in (or line-separator "\n")
-	   :key #'(lambda (list)
-		    (concat* list 
-			     :in column-separator 
-			     :key #'(lambda (x)
-				      (if x (format "%S" x) nil-conversion))))))
+  (mapconcat
+   (lambda (row)
+     (mapconcat (lambda (value)
+                  (if value (format "%S" value) nil-conversion))
+                row column-separator))
+   lists (or line-separator "\n")))
 ;;(csv-string '((a b c) (1 nil 3)))
 
 (cl-defun write-csv (lists filename &key column-separator line-separator
@@ -230,9 +264,10 @@ See `parse-csv-string' for more details"
 ;;(pp (read-byte-vector "/cygdrive/c/Users/eier/Documents/MATLAB/miningsuite/ragtime.wav" :to 10000))
 
 (cl-defun write-byte-vector (vector file &key (from 0) to)
-  (with-temp-file file 
+  (with-temp-file file
     (set-buffer-multibyte nil)
-    (insert (subseq vector from to))))
+    (mapc (lambda (byte) (insert-char byte))
+          (cl-subseq vector from to))))
 
 (cl-defun test-io-byte-vector ()
   (let ((f1 "/cygdrive/c/Users/eier/Documents/MATLAB/miningsuite/ragtime.wav")
@@ -240,17 +275,16 @@ See `parse-csv-string' for more details"
     (write-byte-vector (cl-coerce (read-byte-vector f1) 'string) f2)))
 ;;(test-io-byte-vector)
 
-(require 'hexl)
 (cl-defun file-to-bytes (file)
   (with-temp-buffer
-    (insert-file file)
+    (insert-file-contents file)
     (hexl-mode)
     (buffer-to-bytes (current-buffer))))
 ;;(file-to-bytes "c:/emacs-22.1/site-lisp/mb-lisp/midi/test-new2.midi")
   
 (cl-defun buffer-to-bytes (buffer)
   "this has been checked and ok! next step is to make a read file thing."
-  (with-buffer buffer
+  (with-current-buffer buffer
     (hexl-beginning-of-buffer 1)
     (cl-loop with bytes = (list (hexl-char-after-point))
 	  for n below hexl-max-address
@@ -273,28 +307,28 @@ Must be called in a hexl mode buffer context."
 
 (cl-defun bs-read-string (n)
   "Reads N bytes from the buffer stream and converts them to a string of length N"
-  (apply #'concat (mapcar #'byte-to-char (read-bytes n))))
+  (apply #'string (read-bytes n)))
 ;;(bs-read-string (read-bytes-from-file "c:/emacs-22.1/site-lisp/mb-lisp/music-analyzer/test.midi") 4)
 
 (cl-defun read-integer (&optional (n 4))
   "Reads N bytes from the buffer stream and converts them to a N bytes integer"
   (hexl-hex-string-to-integer
-   (apply #'concat (mapcar #'byte-to-2hex (read-bytes n)))))
+   (mapconcat (lambda (byte) (format "%02x" byte)) (read-bytes n) "")))
 
 (cl-defun read-byte (&optional (n 1))
   "Returns the Nth next byte in the buffer stream, and moves
 stream marker to the point after this byte. The bytes 1...N-1 are
 discareded. Must be called in a hexl mode buffer context."
-  (first (last (read-bytes n))))
+  (car (last (read-bytes n))))
 
 (cl-defun insert-bytes-in-buffer (bytes buffer)
   "Inserts the BYTES list into BUFFER at curent point"
-  (with-buffer buffer
+  (with-current-buffer buffer
     (mapc #'insert bytes)))
 
 (cl-defun bytes-to-buffer (bytes buffer)
   "Removes exising content in BUFFER and inserts the BYTES list into it."
-  (with-buffer buffer
+  (with-current-buffer buffer
     (delete-region (point-min) (point-max))
     (mapc #'insert bytes)))
 
@@ -313,6 +347,10 @@ If FILE already exists, it will be overwritten."
 		(cl-loop for byte = (read-byte) then (read-byte)
 		      collect (mod byte 128)
 		      until (< byte 128)))))
-    (list (calculate-n-ary 128 bytes) (length bytes))))
+    (list (cl-reduce (lambda (value byte) (+ (* value 128) byte))
+                     bytes :initial-value 0)
+          (length bytes))))
 
 (provide 'mb-utils-io)
+
+;;; mb-utils-io.el ends here
