@@ -237,6 +237,9 @@ The first subset is intentionally conservative:
 
 * [`test-list-interval.el`](./test-list-interval.el): nine ERT tests for the
   closed-interval helpers, including construction and accessors.
+* [`test-list-envelope.el`](./test-list-envelope.el): nine ERT tests for
+  rectangle construction, validation, containment, overlap, intersection, and
+  union.
 * [`test-mb-utils-sets.el`](./utils/test-mb-utils-sets.el): three ERT tests for
   open/closed interval boundaries, one-dimensional spheres, and set equality.
 
@@ -247,10 +250,10 @@ Their test files require their subject libraries directly. The temporary
 `first` and `second` aliases originally supplied by the batch runner have
 therefore been removed.
 
-[`test-list-envelope.el`](./test-list-envelope.el) was considered but excluded:
-[`list-envelope.el`](./list-envelope.el) calls the startup-only `cl-indent`
-helper while loading. The broader utility tests remain excluded until their
-dependencies and machine assumptions have been characterized.
+[`list-envelope.el`](./list-envelope.el) is also independently loadable. Its
+indentation property is declared directly instead of calling the startup-only
+`cl-indent` helper, and its former dependencies on startup aliases have been
+replaced with built-in operations.
 
 ### Startup inventory
 
@@ -291,17 +294,12 @@ usage. Static inspection cannot decide which optional integrations should remain
 supported. The minimum Emacs version and the status of Windows/Cygwin and Scilab
 also remain explicit decisions before retirement or compatibility work begins.
 
-### First utility migration
+### Initial utility migrations
 
-The closed-interval and set-helper group is the first independently loadable
-utility package. Its validation comprises:
+The closed-interval, envelope, and set-helper group is independently loadable.
+Its validation comprises:
 
-* a clean `emacs -Q` load of both features;
-* 12 passing ERT tests from the batch entry point;
-* byte-compilation of both libraries, their tests, and the batch runner without
+* a clean `emacs -Q` load of all three features;
+* 21 passing ERT tests from the batch entry point;
+* byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
-
-[`list-envelope.el`](./list-envelope.el) remains excluded because its top-level
-indentation declaration depends on `cl-indent` from
-[`mb-indent.el`](./global/mb-indent.el). It should be migrated separately rather
-than restoring that startup dependency to the clean test runner.

@@ -14,6 +14,7 @@
 
 (defconst mb-tests-baseline-files
   '("test-list-interval.el"
+    "test-list-envelope.el"
     "utils/test-mb-utils-sets.el"))
 
 (dolist (file mb-tests-baseline-files)

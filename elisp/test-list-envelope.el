@@ -1,3 +1,5 @@
+;;; test-list-envelope.el --- Tests for list-envelope -*- lexical-binding: t; -*-
+
 (require 'ert)
 (require 'list-envelope)
 
@@ -18,6 +20,8 @@
 
 (ert-deftest test-e-contain-p ()
   "Test of `e-contain-p'"
+  (should (e-contain-p '((0 3) (0 3)) '(1 2)))
+  (should-not (e-contain-p '((0 3) (0 3)) '(0 2) t))
   (should (e-contain-p '((0 3) (0 3)) '((1 2) (1 2))))
   (should (e-contain-p '((0 3) (0 3)) '((1 2) (1 2)) nil))
   (should (e-contain-p '((0 3) (0 3)) '((1 2) (1 2)) t))
@@ -26,9 +30,9 @@
 
 (ert-deftest test-e-within-p ()
   "Test of `e-within-p'"
-  (should (e-contain-p '((0 3) (0 3)) '((1 2) (1 2))))
-  (should (e-contain-p '((0 3) (0 3)) '((1 2) (1 2)) nil))
-  (should (e-contain-p '((0 3) (0 3)) '((1 2) (1 2)) t)))
+  (should (e-within-p '((1 2) (1 2)) '((0 3) (0 3))))
+  (should (e-within-p '((1 2) (1 2)) '((0 3) (0 3)) nil))
+  (should (e-within-p '((1 2) (1 2)) '((0 3) (0 3)) t)))
 
 (ert-deftest test-e-touch-p ()
   "Test of `e-touch-p'"
@@ -73,4 +77,12 @@
   (should (equal (e-intersection '((0 3) (0 3)) '((2 4) (1 3)))
 		 '((2 3) (1 3)))))
 
+(ert-deftest test-e-union ()
+  "Test of `e-union'."
+  (should (equal (e-union '((0 3) (0 3)) '((2 4) (1 5)))
+                 '((0 4) (0 5))))
+  (should-not (e-union '((3 0) (0 3)) '((2 4) (1 5)))))
+
 (provide 'test-list-envelope)
+
+;;; test-list-envelope.el ends here
