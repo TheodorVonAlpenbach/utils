@@ -254,6 +254,9 @@ The first subset is intentionally conservative:
 * [`test-mb-utils-tree.el`](./utils/test-mb-utils-tree.el): six ERT tests for
   relation conversion, subtree filtering, leaf and member traversal, and
   independent tree copying.
+* [`test-mb-things.el`](./utils/test-mb-things.el): six ERT tests for generated
+  thing recognition and movement, date/time/number increments, cyclic values,
+  and coordinated weekday/date editing.
 
 [`list-interval.el`](./list-interval.el) and
 [`mb-utils-sets.el`](./utils/mb-utils-sets.el) now declare their `cl-lib`
@@ -286,7 +289,7 @@ replaced with built-in operations.
 | `global-map` | [`global-map.el`](./global/global-map.el) | Active startup/keymap; global side effects |
 | `mb-utils-io` | [`mb-utils-io.el`](./utils/mb-utils-io.el) | Active shared utility; startup-coupled |
 | `mb-evil-map` | [`mb-evil-map.el`](./mode-extensions/mb-evil-map.el) | Active optional integration; global keymaps |
-| `mb-things` | [`mb-things.el`](./utils/mb-things.el) | Active shared utility; broad dependencies |
+| `mb-things` | [`mb-things.el`](./utils/mb-things.el) | Active shared utility; independently loadable |
 | `radio-playlists` | [`radio-playlists.el`](./browser/radio-playlists.el) | Usage decision needed; external programs/network |
 | `mb-lisp` | [`mb-lisp.el`](./mode-extensions/mb-lisp.el) | Active mode extension |
 | `mb-python` | [`mb-python.el`](./mode-extensions/mb-python.el) | Active mode extension |
@@ -308,11 +311,12 @@ also remain explicit decisions before retirement or compatibility work begins.
 
 ### Initial utility migrations
 
-The closed-interval, envelope, set-helper, file, I/O, and tree modules are
+The closed-interval, envelope, set-helper, file, I/O, tree, and thing-at-point
+modules are
 independently loadable. Their validation comprises:
 
-* a clean `emacs -Q` load of all six utility features and the ERT tooling;
-* 53 passing ERT tests from the batch entry point;
+* a clean `emacs -Q` load of all seven utility features and the ERT tooling;
+* 59 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -355,3 +359,11 @@ the existing subtree-filter result shapes and verify relation conversion and
 copy independence. The older [`ert-mb-utils-tree.el`](./utils/ert-mb-utils-tree.el)
 remains in place but outside the manifest pending a later duplicate-test
 cleanup decision.
+
+[`mb-things.el`](./utils/mb-things.el) now loads independently with lexical
+binding and built-in dependencies instead of pulling in the broad
+`mb-utils-div` and `mb-utils-time` stacks. Its small date, clock, case, and
+string operations are local and covered directly. Obsolete commented
+templates and the non-working weekday/date helper were removed, the original
+Latin-1 source was converted to UTF-8 without changing its Norwegian names,
+and generated thing functions now compile without warnings.
