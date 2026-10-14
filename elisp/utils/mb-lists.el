@@ -1,4 +1,30 @@
+;;; mb-lists.el --- General list utilities -*- lexical-binding: t; -*-
+
+;;; Code:
+
 (require 'cl-lib)
+(require 'mb-sequences)
+
+(defun mb-lists--listify (x)
+  "Coerce X to a list suitable for list combinators.
+Strings and other atoms are wrapped, lists are returned unchanged,
+and other sequences are coerced to lists."
+  (cond ((stringp x) (list x))
+        ((listp x) x)
+        ((sequencep x) (cl-coerce x 'list))
+        (t (list x))))
+
+(defun mb-lists--lt-equal (less-than-function)
+  "Return the equality predicate induced by LESS-THAN-FUNCTION."
+  (lambda (x y)
+    (not (or (funcall less-than-function x y)
+             (funcall less-than-function y x)))))
+
+(defun mb-lists--random-float (a b)
+  "Return a pseudo-random float between A and B."
+  (+ a (* (- b a)
+          (/ (- (float (random)) most-negative-fixnum)
+             (- most-positive-fixnum most-negative-fixnum)))))
 
 ;;; Generators
 (cl-defun a-b (a &optional b inc key)
@@ -37,44 +63,41 @@ element, -2 second last and so on."
 (cl-defun headtail (list &optional (n-first 1) (n-last n-first) mid)
   (if (>= (+ n-first n-last) (length list))
     list
-    (append (head n-first list) (listify mid) (last list n-last))))
+    (append (head n-first list) (mb-lists--listify mid) (last list n-last))))
 ;;(headtail (0-n 4) 1 2 'foo)
 
 (cl-defun l-explicit*< (x y list &rest cl-keys)
-  "Returns a binary predicate (less-than-type) that evalutes to t
-iff first argument comes before second argument in LIST. If not both arguments are in list, 'NA is returned. Else, it returns nil"
-  (let* ((fkey (or (popf cl-keys :fkey) #'identity))
-	 (x-pos (apply #'position (funcall fkey x) list cl-keys))
-	 (y-pos (apply #'position (funcall fkey y) list cl-keys)))
-    (if (and x-pos y-pos)
-      (< x-pos y-pos)
-      'na)))
+  "Compare X and Y according to their positions in LIST.
+Return t if X precedes Y, nil if it does not, and `na' if either
+value is absent.  CL-KEYS are passed to `cl-position'; the
+additional keyword `:fkey' transforms X and Y before lookup."
+  (let ((fkey (or (plist-get cl-keys :fkey) #'identity)))
+    (cl-remf cl-keys :fkey)
+    (let ((x-pos (apply #'cl-position (funcall fkey x) list cl-keys))
+          (y-pos (apply #'cl-position (funcall fkey y) list cl-keys)))
+      (if (and x-pos y-pos)
+          (< x-pos y-pos)
+        'na))))
 ;;(l-explicit*< '(c) '(d) '(c a b c d) :fkey #'first)
 
 (cl-defun l-explicit< (x y list &rest cl-keys)
-  "Same as l-explicit*<, but returns nil instead of 'na"
-  (awhen (apply #'l-explicit*< x y list cl-keys)
-    (neq it 'na)))
+  "Like `l-explicit*<', but return nil instead of `na'."
+  (let ((result (apply #'l-explicit*< x y list cl-keys)))
+    (and result (not (eq result 'na)))))
 ;;(l-explicit< 'c 'e '(c a b c d))
 
 (cl-defun explicit*< (list &rest cl-keys)
-  "Returns a binary predicate similar to `l-explicit*<', but binding the list argument.
-TODO: when bind* is finished this method is obsolete (or becomes a simple one-liner):
-\\(bind* #'l-explicit*< list 2)"
-  (let ((list* list)
-		(cl-keys* cl-keys))
-    (lambda (x y)
-      (l-explicit*< x y list* cl-keys*))))
+  "Return an `l-explicit*<' predicate with LIST and CL-KEYS bound."
+  (lambda (x y)
+    (apply #'l-explicit*< x y list cl-keys)))
 ;;(funcall (explicit*< '(c a b c d)) 'c 'e)
 
 (cl-defun explicit< (list &rest cl-keys)
   "Is to `l-explicit<' what `explicit*<' is to `l-explicit*<'."
-  (let ((list* list)
-		(cl-keys* cl-keys))
-    (lambda (x y)
-      (let ((x-pos (apply #'position x list* cl-keys*))
-	    (y-pos (apply #'position y list* cl-keys*)))
-	(and x-pos y-pos (< x-pos y-pos))))))
+  (lambda (x y)
+    (let ((x-pos (apply #'cl-position x list cl-keys))
+	  (y-pos (apply #'cl-position y list cl-keys)))
+      (and x-pos y-pos (< x-pos y-pos)))))
 ;;(funcall (explicit< '(c a b c d)) 'e 'c)
 
 (cl-defun group-positions (list &key (test #'eql) (key #'identity))
@@ -91,14 +114,13 @@ according to TEST and KEY."
 ;; is controlled by a /binary/ predicate
 ;; Also generalize to split-if2
 (cl-defun group (list &key (test #'eql) (key #'identity))
-  "Groups LIST into a list of sublists where all elements are equal
-according to TEST and KEY.
-Note that `group' to not consider LIST as a set. To do this, LIST must be sorted first."
+  "Group adjacent elements of LIST that are equal under TEST and KEY.
+To group LIST as a set, sort it first."
   (when list
     (cl-loop for a = 0 then b
 	  for b in (group-positions list :test test :key key)
-	  collect (subseq list a b) into res
-	  finally return (nconc res (list (subseq list a))))))
+	  collect (cl-subseq list a b) into res
+	  finally return (nconc res (list (cl-subseq list a))))))
 ;;(group '(a a b a b) :test #'equal)
 ;;(group (cl-sort '(a a b a b) #'string< :key #'symbol-name) :test #'equal)
 ;;(group '((1 2) (1 3) (1 2)) :test #'equal)
@@ -136,7 +158,7 @@ ELEMENTS are exactly the elements in LIST that evaluates to K."
 ;;(equivalence-class-with-key '((a) (b) (c) (a) (b) (a) (d)) :key #'car)
 
 (cl-defun listify-atoms (list-or-atoms)
-  (let* ((list (find-if #'listp list-or-atoms))
+  (let* ((list (cl-find-if #'listp list-or-atoms))
 	 (n (length list)))
     (cl-loop for x in list-or-atoms collect (if (listp x) x (make-list n x)))))
 ;;(listify-atoms '(a (1 2 3) (d f)))
@@ -154,7 +176,7 @@ ELEMENTS are exactly the elements in LIST that evaluates to K."
 TODO: something is wrong, see test below."
   (cl-loop with heads = (cl-loop for i below n collect (nthcdr i list))
 	with pointers = (cl-copy-list heads)
-	while (first pointers)
+	while (car pointers)
 	do (cl-loop for p in-ref pointers 
 		 while p
 		 do (progn (setf (cdr p) (nthcdr n p))
@@ -166,14 +188,13 @@ TODO: something is wrong, see test below."
 ;;(unzip (0-n 10) 3)
 
 (cl-defun repeat-elements (x &optional n)
-  (awhen (make-list (or n 2) x)
-    (apply #'zip it)))
+  (let ((copies (make-list (or n 2) x)))
+    (and copies (apply #'zip copies))))
 ;;(repeat-elements (0-n 3) 2)
 
-(require 'function-signature)
 (cl-defun infix-list (list infix &optional infix-is-function-p) 
   "Zip list with INFIX-es.
-'(a b c) => '(a INFIX b INFIX c).
+For example, (a b c) becomes (a INFIX b INFIX c).
 
 INFIX may be a function with signature (I &optional N), where
 argument I is the nth time FN will be called by INFIX-LIST, and N
@@ -184,9 +205,9 @@ INFIX as a constant sexp."
   (when list
     (let ((n (length list)))
       (butlast (zip list (if infix-is-function-p
-			   (mapcar (if (= 1 (cdr (function-arity infix)))
+			   (mapcar (if (= 1 (cdr (func-arity infix)))
 				     infix
-				     (bind infix n))
+				     (lambda (i) (funcall infix i n)))
 			     (0-n n))
 			   (make-list n infix)))))))
 ;(infix-list '(a b c) #'1+ t)
@@ -231,32 +252,29 @@ TODO: implement a mapping key, see `pairs' (when needed)"
   (if (zerop n)
     '(())
     (let ((psi-1 (power-set-indices (1- n))))
-      (append psi-1 (mapcar (bind #'rcons (1- n)) psi-1)))))
-
-(cl-defun power-set-indices (n)
-  "Return the indices corresponding to a power set for at set with N elements"
-  (if (zerop n)
-    '(())
-    (let ((psi-1 (power-set-indices (1- n))))
       (append psi-1 (mapcar (lambda (x) (cons (1- n) x)) psi-1)))))
 ;;(power-set-indices 3)
 ;;(length (power-set-indices 4))
 
 (cl-defun power-set (list)
   "Return the set of all subsets of list taken as a set."
-  (maptree (bind #'nth list) (power-set-indices (length list))))
+  (mapcar (lambda (indices)
+            (mapcar (lambda (index) (nth index list)) indices))
+          (power-set-indices (length list))))
 ;;(power-set '(a b c))
 
 (cl-defun cut (list &optional (n 2) (include-remainer nil))
   "Cuts LIST into sublists of length N while preserving order.
 If INCLUDE-REMAINER is nil and last element in the result list
 has length shorter than N, this last element is discarded."
-  (cl-assert (plusp n)) ;; otherwise we'll fall into an infinite loop
-  (cl-loop for x on list by (bind #'nthcdr n 1)
-	collect (butlast* x (- n)) into res
-	finally return (if (nor include-remainer
-				(zerop (mod (length list) n)))
-			 (butlast res) res)))
+  (cl-assert (cl-plusp n)) ;; otherwise we'll fall into an infinite loop
+  (cl-loop for tail on list by (lambda (items) (nthcdr n items))
+           collect (cl-subseq tail 0 (min n (length tail))) into result
+           finally return
+           (if (or include-remainer
+                   (zerop (mod (length list) n)))
+               result
+             (butlast result))))
 ;;(cut (0-n 5) 3 nil)
 ;;(cut '(1 2 3 4 5) 2 t)
 
@@ -266,13 +284,14 @@ If INCLUSION is not nil, then the element in LIST matching
 PREDICATE is included in the result."
   (cl-loop for start = 0 then end
 	for end in (apply #'positions-if predicate list args)
-	if (subseq list start end) collect it into res
+	if (cl-subseq list start end) collect it into res
 	finally (return (if inclusion
-			  (append res (list (subseq list (or end 0))))
-			  (mapcar #'(lambda (x) (subseq x 1))
-			    (append res (list (subseq list (or end 0)))))))))
+			  (append res (list (cl-subseq list (or end 0))))
+			  (mapcar #'(lambda (x) (cl-subseq x 1))
+			    (append res (list (cl-subseq list (or end 0)))))))))
 ;;(cut-list-if #'primep (0-n 10) t)
-(cl-indent 'cut-list-if 'prog1)
+(put 'cut-list-if 'common-lisp-indent-function
+     (get 'prog1 'common-lisp-indent-function))
 
 (cl-defun relations (list &optional with-identity ordered)
   "Returns a list containing all possible binary relations of the
@@ -282,19 +301,19 @@ If ORDERED is non-nil, both (a b) and its reflection, (b a), is
 included in the result. Else, only the element (a b) is included,
 where a comes before b in LIST."
   (cl-loop for sublist1 on list nconc
-	(cl-loop for sublist2 on (if with-identity sublist1 (rest sublist1))
-	      collect (list (first sublist1) (first sublist2))
+	(cl-loop for sublist2 on (if with-identity sublist1 (cdr sublist1))
+	      collect (list (car sublist1) (car sublist2))
 	      if (and ordered
-		      (neq (first sublist1) (first sublist2)))
-	      collect (list (first sublist2) (first sublist1)))))
+		      (not (eq (car sublist1) (car sublist2))))
+	      collect (list (car sublist2) (car sublist1)))))
 ;;(relations '(a b c))
 
 (cl-defun combine2 (list1 list2 &optional ordered)
   (if ordered
     (nconc (combine2 list1 list2)
 	   (combine2 list2 list1))
-    (cl-loop for x1 in (listify list1) nconc 
-	  (cl-loop for x2 in (listify list2)
+    (cl-loop for x1 in (mb-lists--listify list1) nconc
+	  (cl-loop for x2 in (mb-lists--listify list2)
 		collect (list x1 x2)))))
 ;;(combine2 '(a) '())
 ;;(combine2 '(a) '(b))
@@ -307,17 +326,17 @@ where a comes before b in LIST."
   "Generalization of combine2"
   (cl-case (length lists)
     (0 nil)
-    (1 (list (listify (first lists))))
-    (2 (combine2 (first lists) (second lists)))
-    (t  (cl-loop for (x y) in (combine2 (first lists)
-				  (combine-1 (rest lists)))
+    (1 (list (mb-lists--listify (car lists))))
+    (2 (combine2 (car lists) (cl-second lists)))
+    (t  (cl-loop for (x y) in (combine2 (car lists)
+				  (combine-1 (cdr lists)))
 	   collect (cons x y)))))
 ;;(combine-1 '((a b) c (d e)))
 
 (cl-defun combine (lists &key key)
   "Generalization of combine2"
   (if key
-    (mapcar (bind #'apply key 1) (combine-1 lists))
+    (mapcar (lambda (args) (apply key args)) (combine-1 lists))
     (combine-1 lists)))
 ;;(combine '((0 1 2) (("3" 1) ("7" 1))))
 
@@ -333,7 +352,7 @@ where a comes before b in LIST."
   "Accumulates sorted LIST. See `accumulate-list' for details."
   (cl-loop for x in (group list :test test :key key)
 	for l = (funcall accumulator x)
-	if (>= l min-occurrences) collect (list (funcall key (first x)) l)))
+	if (>= l min-occurrences) collect (list (funcall key (car x)) l)))
 ;;(accumulate-sorted-list '((a 1) (a 2) (b 4) (b 5) (c 100)) :key #'first :accumulator #'(lambda (x) (sum x :key #'second)))
 ;;(accumulate-sorted-list '(a a a b b c d c) :test 'equal :min-occurences 2)
 
@@ -343,7 +362,7 @@ where a comes before b in LIST."
 list and count-X is the number of occurrences of X. Note that the
 resulting list is sorted on the value of COUNT-X"
   (accumulate-sorted-list (cl-sort (cl-copy-list list) test :key key)
-    :test (lt-equal test) :key key
+  :test (mb-lists--lt-equal test) :key key
     :min-occurrences min-occurrences :accumulator accumulator))
 ;;(accumulate-list '((a 1) (a 2) (b 4) (c 100) (b 5)) :test #'symbol< :key #'first :accumulator #'(lambda (x) (sum x :key #'second)))
 ;;(accumulate-list '(a b c a b a d) :test #'symbol<)
@@ -353,20 +372,20 @@ resulting list is sorted on the value of COUNT-X"
   "Returns a list of repetitions from first element in list"
   (cl-loop with target-list = list
   	with cycle-length = 1
-	for x in (rest list)
+	for x in (cdr list)
 	for i from 2
-	for match = (funcall test x (first target-list))
-	for match-first = (funcall test x (first list))
+	for match = (funcall test x (car target-list))
+	for match-first = (funcall test x (car list))
 	for complete-cycle = (zerop (mod i cycle-length))
 
 	if match
 	 if complete-cycle
 	  collect (list start-index cycle-length) 
 	  and do (setf target-list list) 
-	 else do (setf target-list (rest target-list))
+	 else do (setf target-list (cdr target-list))
         else do (if match-first
 		  (setf cycle-length (1- i)
-			target-list (rest list))
+			target-list (cdr list))
 		  (setf cycle-length i
 			target-list list))))
 ;;(repetitions-1 '(a b c a b c a b c a b c))
@@ -383,7 +402,7 @@ Algorithm i O(n^2)."
   (cl-loop for x on list 
 	for i from 0
 	if (repetitions-1 x i test)
-	append (accumulate-sorted-list it #'equal)))
+	append (accumulate-sorted-list it :test #'equal)))
 ;;(repetitions '(a a a a a a)) => (((0 1) 5) ((1 1) 4) ((2 1) 3) ((3 1) 2) ((4 1) 1))
 ;;(repetitions '(a b a b a))
 ;;(cl-loop for i below 10 do (repetitions '(a b a b a)))
@@ -396,7 +415,8 @@ informative."
 	append (cl-loop for k below i
 		     for shifted-list on list
 		     for i-tuples = (cut shifted-list i)
-		     append (accumulate-sorted-list i-tuples #'equal 2))))
+		     append (accumulate-sorted-list
+                             i-tuples :test #'equal :min-occurrences 2))))
 ;;(x-repetitions '(a b a b a b))
 ;;(x-repetitions (0-n 500))
 ;;(repetitions (0-n 500))
@@ -405,9 +425,10 @@ informative."
 (cl-defun swap-head (list predicate)
   "Swaps first element in LIST with the first element in that
 matches PREDICATE"
-  (awhen (member-if predicate list)
-    (cl-rotatef (first it) (first list))
-    list))
+  (let ((tail (cl-member-if predicate list)))
+    (when tail
+      (cl-rotatef (car tail) (car list))
+      list)))
 ;;(dv-swap-head '(4 3 2 1) (bind #'< 4))
 
 (defmacro mrotate-list (list &rest positions)
@@ -433,10 +454,6 @@ matches PREDICATE"
 
 (cl-defmacro rotatef-list (list &optional (n 1))
   `(setf ,list (rotate-list ,list ,n)))
-
-(cl-defun rotate (sequence &optional (n 1))
-  "Returns a list that is LIST rotated N times."
-  (nrotate-list (cl-copy-list list) n))
 
 (defmacro list-insert (x n list)
   "Inserts element X at position N in LIST. Returns the tail of
@@ -475,14 +492,14 @@ TODO: this looks like draw. Check out and clean up if necessary"
   (let ((list (0-n n)))
     (cl-loop for i below n
 	  collect (let ((list* (cl-copy-list list)))
-		    (values (nsplit-nth i list*) list*)))))
+		    (list (nsplit-nth i list*) list*)))))
 ;;(test-split-nth) => (((0 (1 2)) (0 1 2)) ((1 (0 2)) (0 2)) ((2 (0 1)) (0 1)))
 
 (cl-defun filter-duplicates (list1 list2 &key (test #'eql) (start 0) end)
   "Removes all elements from row and fasit that are equal and is
 in the same position."
-  (cl-loop for elt1 in (subseq list1 start end)
-	for elt2 in (subseq list2 start end)
+  (cl-loop for elt1 in (cl-subseq list1 start end)
+	for elt2 in (cl-subseq list2 start end)
 	unless (funcall test elt1 elt2)
 	collect elt1 into list1* and collect elt2 into list2*
 	finally return (list list1* list2*)))
@@ -540,12 +557,15 @@ TODO: turn this into sequence<"
   "Returns a copy of LISTS, but with each list padded with ELT so
 that all lists have the same length. If FROM-END is nil, each
 list is prefixed with ELTs, otherwise it is suffixed."
-  (let* ((lengths (mapcar #'length lists)))
-    (cl-mapcar #'(lambda (l n)
-		   (if from-end 
-		     (append l (make-list n elt))
-		     (append (make-list n elt) l)))
-	       lists (mapcar (bind #'- (minimum lengths #'>) 1) lengths))))
+  (when lists
+    (let* ((lengths (mapcar #'length lists))
+           (width (apply #'max lengths)))
+      (cl-mapcar (lambda (list length)
+                   (let ((padding (make-list (- width length) elt)))
+                     (if from-end
+                         (append list padding)
+                       (append padding list))))
+                 lists lengths))))
 ;;(pad-lists '((1) (1 1) (1 1 0)) :elt 'qwe :from-end nil)
 
 (cl-defun vlist< (l1 l2)
@@ -564,9 +584,8 @@ different, see test cases below."
       (cl-loop with l = list
 	    while (and (cdr l) (> x (cadr l)))
 	    do (setf l (cdr l))
-	    finally
-	    do (setf (cdr l) (cons x (cdr l)))
-	    return list))
+	    finally (setf (cdr l) (cons x (cdr l)))
+                    (cl-return list)))
     (cons x nil)))
 ;;(let ((l '(0 2))) (ninsert-sorted-list 1 l) l)
 ;;(let ((l '(0))) (ninsert-sorted-list 1 l) l)
@@ -575,16 +594,17 @@ different, see test cases below."
 ;;;; Sorted trees
 (cl-defun insert-sorted-tree (x tree)
   (if tree
-    (if (< x (first tree)) ;search left tree
-      (if (second tree)
-	(insert-sorted-tree x (second tree))
-	(setf (second tree) (list x nil nil)))
-      (if (third tree)
-	(insert-sorted-tree x (third tree))
-	(setf (third tree) (list x nil nil))))
+    (if (< x (car tree)) ;search left tree
+      (if (cl-second tree)
+	(insert-sorted-tree x (cl-second tree))
+	(setf (cl-second tree) (list x nil nil)))
+      (if (cl-third tree)
+	(insert-sorted-tree x (cl-third tree))
+	(setf (cl-third tree) (list x nil nil))))
     (setf tree (list x nil nil))))
 
 (cl-defun test-insert-sorted-tree (&optional (n 5) (limit 20))
+  (ignore n limit)
   (let (tree)
     (setf tree (insert-sorted-tree 8 tree))
     (cl-loop for i in (list 14 7 11 5 7 3)
@@ -594,19 +614,20 @@ different, see test cases below."
 ;;(test-insert-sorted-tree)
 
 (cl-defun remove-minimum-element-sorted-tree (tree)
-  (if (second tree)
-    (setf (second tree) (remove-minimum-element-sorted-tree (second tree)))
-    (if (third tree)
-      (setf (third tree) (remove-minimum-element-sorted-tree (third tree)))
+  (if (cl-second tree)
+    (setf (cl-second tree) (remove-minimum-element-sorted-tree (cl-second tree)))
+    (if (cl-third tree)
+      (setf (cl-third tree) (remove-minimum-element-sorted-tree (cl-third tree)))
       (setf tree nil)))
   tree)
 ;;(test-insert-sorted-tree)
 
 (cl-defun collect-sorted-tree (tree &optional (res ()))
+  (ignore res)
   (if tree
-    (nconc (collect-sorted-tree (second tree))
-	   (list (first tree))
-	   (collect-sorted-tree (third tree)))))
+    (nconc (collect-sorted-tree (cl-second tree))
+	   (list (car tree))
+	   (collect-sorted-tree (cl-third tree)))))
 ;;(collect-sorted-tree (test-insert-sorted-tree))
 
 (cl-defun sort-to-order (list order predicate &optional (key #'identity))
@@ -620,17 +641,17 @@ different, see test cases below."
 
 
 (cl-defun mapcol (function colpos table)
-  "Returns a copy of table, but where the column at COLPOS (only) is mapped by FUNCTION.
-The TABLE must be a tree, i.e. a list of lists."
+  "Return a copy of TABLE with column COLPOS mapped by FUNCTION.
+TABLE must be a list of lists."
   (mapcar #'(lambda (x) 
 	      (let ((x* (cl-copy-list x)))
-		(asetf (nth colpos x*) (funcall function it))
+		(setf (nth colpos x*) (funcall function (nth colpos x*)))
 		x*))
 	  table))
 
 (cl-defun expand-repeat (list n)
   (cl-destructuring-bind (a b) (cl-floor n (length list))
-    (append list (flatten (make-list a list)) (subseq list 0 b))))
+    (append list (apply #'append (make-list a list)) (cl-subseq list 0 b))))
 ;;(expand-repeat '(1 2 3 4) 6)
 
 (cl-defun diffs-list (list)
@@ -641,19 +662,13 @@ The TABLE must be a tree, i.e. a list of lists."
   (let ((length (length list)))
     (if (< length n)
       (funcall extend-fn list (- n length))
-      (subseq list 0 n))))
+      (cl-subseq list 0 n))))
 ;;(resize-list '(1 2 4) 6)
 
 (cl-defun expand-list (list &optional (n 1) (pattern-length 2))
   (let ((diffs (diffs-list (last list pattern-length))))
     (resize-list diffs n)))
 ;;(expand-list (list 1 2 4))
-
-(cl-defun deltas-list (floats)
-  "Finds the mid-points between FLOATS and returns the interval
-consisting of each floats neighbouring mid-points."
-  (pairs (cl-loop for (a b) in (pairs floats) collect (/ (- b a) 2.0)) :flank-p t))
-;;(deltas-list '(1 3 4))
 
 (cl-defun boundaries-1 (list)
   (cl-loop for (a b) in (pairs list) collect (/ (+ b a) 2)))
@@ -668,18 +683,18 @@ consisting of each floats neighbouring mid-points."
 ;;(boundaries (list -4.0 -3.0 -1.0) t)
 
 (cl-defun randomize-intervals (pairs)
-  (cl-loop for (a b) in pairs collect (random-float a b)))
+  (cl-loop for (a b) in pairs collect (mb-lists--random-float a b)))
 ;;(randomize-intervals (pairs (0-n 5)))
 
 (cl-defun randomize-elements (sequence)
   (let ((ivs (pairs (boundaries (cl-coerce sequence 'list) t))))
-    (values (cl-coerce (randomize-intervals ivs) (type-of sequence))
-	    ivs)))
+    (cl-values (cl-coerce (randomize-intervals ivs) (type-of sequence))
+	       ivs)))
 ;;(randomize-elements (vector -4.0 -3.0 -1.0))
 
 (cl-defun group-consequtive-integers (integers &optional sorted-p)
   "Group list of INTEGERS into lists of consequtive integers.
-E.g. '(1 2 3 6 7 8 11) ==> '((1 2 3) (6 7 8) (11)).
+For example, (1 2 3 6 7 8 11) becomes ((1 2 3) (6 7 8) (11)).
 
 If SORTED-P is not nil, the function assumes that INTEGERS are
 sorted with #'<.
@@ -727,14 +742,14 @@ Keywords supported:  :test
 If a target in TARGETS matches an element in list, this position
 cannot be used for later matches. For example
 
-\(position-unique '(1 1) '(1 2 3 1)) => (0 3)
-\(position-unique '(1 1) '(1 2 3)) => (0 nil)
+\(position-unique (list 1 1) (list 1 2 3 1)) => (0 3)
+\(position-unique (list 1 1) (list 1 2 3)) => (0 nil)
 "
   (cl-loop with maps = (cl-loop for x in (cl-remove-duplicates targets)
 			 collect (list x (positions x list)))
 	for x in targets
-	for map = (cl-find x maps :key #'first)
-	collect (pop (second map))))
+	for map = (cl-find x maps :key #'car)
+	collect (pop (cadr map))))
 ;;(position-unique '(1 1 3 2 3) '(1 2 3))
 ;;(position-unique '(1 1) '(1 2 3 1))
 
@@ -742,3 +757,5 @@ cannot be used for later matches. For example
 ;;(cars '((1 2) (3 4 5)))
 
 (provide 'mb-lists)
+
+;;; mb-lists.el ends here

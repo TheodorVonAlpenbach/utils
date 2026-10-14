@@ -263,6 +263,9 @@ The first subset is intentionally conservative:
 * [`test-mb-math-functions.el`](./utils/test-mb-math-functions.el): six ERT
   tests for degree and hyperbolic functions, finite and infinite series,
   special functions, polynomial roots, and numerical root solvers.
+* [`test-mb-lists.el`](./utils/test-mb-lists.el): twenty-nine ERT tests for
+  list generation, grouping, products, ordering, partitioning, repetition
+  detection, rotation, padding, sorted structures, and list transformations.
 * [`test-mb-sequences.el`](./utils/test-mb-sequences.el): twelve ERT tests for
   sequence type preservation, selection, splitting, drawing, positions,
   minima, projection, centering, insertion, and replacement.
@@ -324,11 +327,11 @@ also remain explicit decisions before retirement or compatibility work begins.
 ### Initial utility migrations
 
 The closed-interval, envelope, set-helper, file, I/O, tree, thing-at-point,
-economy, additional-math, sequence, and ISO-time modules are
+economy, additional-math, list, sequence, and ISO-time modules are
 independently loadable. Their validation comprises:
 
-* a clean `emacs -Q` load of all eleven utility features and the ERT tooling;
-* 88 passing ERT tests from the batch entry point;
+* a clean `emacs -Q` load of all twelve utility features and the ERT tooling;
+* 117 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -368,9 +371,7 @@ declares its built-in dependencies. Its narrower redefinition of Emacs's
 `copy-tree` has been removed, and startup-provided `flatten` and `aif` helpers
 have been replaced with built-in operations. The maintained tests characterize
 the existing subtree-filter result shapes and verify relation conversion and
-copy independence. The older [`ert-mb-utils-tree.el`](./utils/ert-mb-utils-tree.el)
-remains in place but outside the manifest pending a later duplicate-test
-cleanup decision.
+copy independence. The older duplicate `ert-mb-utils-tree.el` test file has been removed.
 
 [`mb-sequences.el`](./utils/mb-sequences.el) now loads without the startup
 environment and uses `cl-lib` directly. Its public helper names remain
@@ -386,12 +387,19 @@ startup environment. It is now expressed locally through the private
 `mb-sequences--pairs` helper, which reproduces the flanking behaviour of
 `pairs` and agrees with the original output for every input of three or more
 elements. Two-element input previously returned `((nil nil) (nil nil))` and
-now returns the surrounding half-difference. This small duplication is
-deliberate and should be reverted to the shared `pairs` helper once
-`mb-lists.el` is migrated. [`mb-lists.el`](./utils/mb-lists.el) now declares
-its `cl-lib` dependency, which is a necessary but not sufficient step: loading
-it standalone still fails on the startup-only `cl-indent`, and roughly two
-dozen helpers from `.emacs` and `mb-utils-div` remain undefined at call time.
+now returns the surrounding half-difference. This small duplication remains deliberate because [`mb-lists.el`](./utils/mb-lists.el)
+depends on the lower-level sequence module; making the sequence module call
+back into `mb-lists` would create a cycle. The redundant list-only
+`deltas-list` has been removed.
+
+[`mb-lists.el`](./utils/mb-lists.el) now loads independently with lexical
+binding and explicit `cl-lib` and sequence dependencies. Startup aliases and
+the `cl-indent` helper have been replaced with supported APIs. The duplicate
+`power-set-indices` and broken list-only `rotate` shadow were removed. Repairs
+cover trailing chunks in `cut`, list padding, repetition keyword forwarding,
+sorted insertion, and closure behavior. A small private list coercion helper
+temporarily duplicates `listify` from `mb-utils-div`; that duplication will be
+resolved when the latter module is migrated.
 
 [`mb-things.el`](./utils/mb-things.el) now loads independently with lexical
 binding and built-in dependencies instead of pulling in the broad
