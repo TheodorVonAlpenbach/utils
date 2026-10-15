@@ -23,6 +23,7 @@
     "utils/test-mb-utils-iso-time.el"
     "utils/test-mb-utils-sets.el"
     "utils/test-mb-utils-strings.el"
+    "utils/test-mb-utils-time.el"
     "utils/test-mb-utils-tree.el"))
 
 (defun mb-tests-add-load-paths ()

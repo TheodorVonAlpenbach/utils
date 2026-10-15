@@ -335,12 +335,12 @@ also remain explicit decisions before retirement or compatibility work begins.
 ### Initial utility migrations
 
 The closed-interval, envelope, set-helper, file, I/O, tree, thing-at-point,
-economy, additional-math, anaphora, general, list, sequence, string, and
+economy, additional-math, anaphora, general, list, sequence, string, time, and
 ISO-time modules are
 independently loadable. Their validation comprises:
 
-* a clean `emacs -Q` load of all fifteen utility features and the ERT tooling;
-* 173 passing ERT tests from the batch entry point;
+* a clean `emacs -Q` load of all sixteen utility features and the ERT tooling;
+* 215 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -442,6 +442,17 @@ messages. Loading the library no longer installs global quote-word keybindings;
 those commands remain available for explicit configuration. Its 29 namespaced
 tests now run in the maintained baseline.
 
+[`mb-utils-time.el`](./utils/mb-utils-time.el) now loads independently with
+lexical binding and explicit sequence, string, interval, list, ISO-time, and
+built-in time dependencies. Removed load-time side effects include an obsolete
+`cl-indent` call, a scratch formatting expression, and debug messages.
+Decoded-time accessors now delegate to Emacs's standard accessors, encoded-time
+comparison accepts every supported timestamp representation, and temporary
+timezone changes are restored even when their body signals. Repairs cover
+invalid-designator errors, four-part hours/minutes/seconds conversion, exact
+rounding boundaries, and ISO weeks beginning in the following calendar year.
+Its 42 namespaced tests now run in the maintained baseline.
+
 [`mb-things.el`](./utils/mb-things.el) now loads independently with lexical
 binding and built-in dependencies instead of pulling in the broad
 `mb-utils-div` and `mb-utils-time` stacks. Its small date, clock, case, and
@@ -502,6 +513,12 @@ matched. They are safe retirement candidates once callers are checked.
 | `string-fill-paragraph` | `string-fill` | Standard takes an explicit width. |
 | `string-trim*` and its side variants | `string-trim`, `string-trim-left`, `string-trim-right` | Standard also accepts trim regexps; the `:left`/`:right`/`:both` dispatch is the only extra. |
 | `string-remove-props` | `substring-no-properties` | Already self-declared obsolete. Differs only in stripping destructively in place rather than copying. |
+| `dtime-second` through `dtime-time-zone` | `decoded-time-second` through `decoded-time-zone` | The public local names now alias the standard decoded-time accessors. |
+| `etime<` | `time-less-p` | The local wrapper now delegates to the standard predicate, which also supports integer and tick/frequency timestamps. |
+| `diff-current-time-msec` | `time-subtract` plus `float-time` | The standard operations preserve timestamp representation independence; multiply the result by 1000 for milliseconds. |
+| `parse-ms` | `seconds-to-time` | Divide milliseconds by 1000.0 before calling the standard function. |
+| `unix-time` and `ms-unix-time` | `float-time` | The local versions additionally accept the broader `parse-time` designators. |
+| `yearweek-number` and `week-number` | `format-time-string` with `%G` and `%V` | Results agree at tested ISO-year boundaries after repairing exact first-Monday handling. |
 
 ### Differ in edge cases — do not substitute blindly
 
@@ -515,6 +532,10 @@ These look replaceable but are not, and the difference is easy to miss.
 | `blank-p` | `string-blank-p` | `blank-p` returns a boolean; `string-blank-p` returns a match position. Interchangeable in conditionals, not under `equal`. |
 | `constantly` | `always` | `always` only covers the constantly-`t` case; `constantly` builds a closure returning any value. |
 | `pure-string` | `substring-no-properties` | Despite its docstring, `pure-string` does not strip text properties: its string branch returns the argument unchanged. Its other branch unwraps a non-string sequence to its first element, which is unrelated to formatting. |
+| `add-etime-date` | `decoded-time-add` | Both add calendar fields, but invalid dates differ: adding one month to 2019-01-31 normalizes to March 3 locally and clamps to February 28 in `decoded-time-add`. DST handling also needs comparison before substitution. |
+| `now` | `current-time` | With no arguments both represent the current instant, but `now` round-trips through decoded time and discards subsecond precision. It also retains a deprecated keyword-adjustment interface. |
+| `parse-time` | `date-to-time`, `seconds-to-time`, and `encode-time` | The local dispatcher accepts strings, symbols, numbers, decoded times, and encoded times; no single standard function has that combined contract. |
+| `time` and `time-val` | `benchmark-run` and `benchmark-call` | Standard benchmarking reports elapsed/GC timing, while the local macros evaluate once, preserve the expression value, and report milliseconds. |
 
 ### Still first-party
 

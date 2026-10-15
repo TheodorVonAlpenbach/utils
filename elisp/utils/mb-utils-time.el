@@ -1,6 +1,18 @@
-;; -*- lexical-binding: t; -*-
+;;; mb-utils-time.el --- General date and time utilities -*- lexical-binding: t; -*-
 
-;;;; Time utils library --- A new approach 
+(require 'cl-lib)
+(require 'subr-x)
+(require 'timezone)
+(require 'mb-lists)
+(require 'mb-sequences)
+(require 'mb-utils-div)
+(require 'mb-utils-iso-time)
+(require 'mb-utils-sets)
+(require 'mb-utils-strings)
+
+;;; Code:
+
+;;;; Time utils library --- A new approach
 
 ;;;; The time utils in Emacs are more powerful than I thought. This
 ;;;; new approach will expolit that. Also, it will strive for a more
@@ -30,19 +42,15 @@
 ;;;; See also http://tycho.usno.navy.mil/leapsec.html
 ;;;; You can check if leap seconds are supported by invoking the method leap-seconds-supported-p
 
-(require 'mb-utils-sets)
-(require 'mb-utils-div)
-(require 'mb-lists)
-
-(defalias 'dtime-second 'first)
-(defalias 'dtime-minute 'second)
-(defalias 'dtime-hour 'third)
-(defalias 'dtime-day 'fourth)
-(defalias 'dtime-month 'fifth)
-(defalias 'dtime-year 'sixth)
-(defalias 'dtime-day-of-week 'seventh) ;;0 is Sunday ...
-(defalias 'dtime-daylight-saving-time-p 'eighth)
-(defalias 'dtime-time-zone 'ninth)
+(defalias 'dtime-second #'decoded-time-second)
+(defalias 'dtime-minute #'decoded-time-minute)
+(defalias 'dtime-hour #'decoded-time-hour)
+(defalias 'dtime-day #'decoded-time-day)
+(defalias 'dtime-month #'decoded-time-month)
+(defalias 'dtime-year #'decoded-time-year)
+(defalias 'dtime-day-of-week #'decoded-time-weekday) ;; 0 is Sunday.
+(defalias 'dtime-daylight-saving-time-p #'decoded-time-dst)
+(defalias 'dtime-time-zone #'decoded-time-zone)
 
 (cl-defun etime-second (x) (dtime-second (decode-time x)))
 (cl-defun etime-minute (x) (dtime-minute (decode-time x)))
@@ -56,13 +64,12 @@
 
 (defmacro with-timezone (timezone-name &rest body)
   "Temporarily set local timezone to TIMEZONE-NAME and evaluate BODY."
+  (declare (indent 1) (debug t))
   `(let ((currentenv-tz (getenv "TZ")))
-     (prog1
-	 (condition-case ()
-	     (progn
-	       (setenv "TZ" ,timezone-name)
-	       ,@body)
-	   (error nil))
+     (unwind-protect
+	 (progn
+	   (setenv "TZ" ,timezone-name)
+	   ,@body)
        (setenv "TZ" currentenv-tz))))
 (def-edebug-spec with-timezone t)
 ;;(getenv "TZ")
@@ -72,7 +79,7 @@
 ;;(set-timezone nil)
 
 (cl-defun current-timezone ()
-  (or (getenv "TZ") (second (current-time-zone))))
+  (or (getenv "TZ") (cl-second (current-time-zone))))
 ;;(current-timezone)
 
 (cl-defun --time-encode (dtime &optional universal-p)
@@ -87,37 +94,12 @@ time zone offset in DTIME."
   (decode-time (--time-encode dtime)))
 
 (cl-defmacro without-tz-modification ((dtime expr) &rest body)
-  "Ensure time part of BODY's result is the same as for DTIME.
-
-\(without-tz-modification (DTIME DTIME-EXPRESSION) BODY...)
-
-DTIME is bound to the result of evaluating DTIME-EXPRESSION. BODY
-is assumed to return a decoded time object. If the date is in
-another time zone than DTIME, the `decode-time' will change the
-time part accordingly. But for some time operations, like
-`yearstart', `monthstart', `weekstart', `add-etime-date' these
-time part changes are not wanted.
-
-For instance, we usually want noon of yesterday to be 12:00 even
-if there was a change in daylight saving time status during the
-night. Without using something like this macro `decode-time' will
-return the time exactly 24 hours ago, which in this case will not
-be at noon.
-
-Warning! As with all macros of this type, be careful to use
-destructive functions where DTIME is involved. For instance, if
-use set DTIME-EXPRESSION to
-
-\(nconc '(0 0 0 1 1) (subseq dtime 5))
-
-then most likely the result will be not what you inteded to since
-`nonc' will probably alter DTIME, and the calulations in the
-macro involving DTIME will produce unwanted results. Instead, in
-this particular case, use the non-destructive `append', or wrap the expression with a `setf':
-\(progn
-   (setf (nconc '(0 0 0 1 1) (subseq dtime 5)))
-   dtime)"
-  (let ((gdtime-res (gensym)))
+  "Evaluate BODY without changing the clock fields of DTIME.
+Bind DTIME to EXPR, which must produce a decoded time.  BODY must
+also produce a decoded time.  Correct the result for any timezone
+offset change, such as one caused by crossing a daylight-saving
+boundary.  BODY should not modify DTIME destructively."
+  (let ((gdtime-res (cl-gensym)))
     `(let* ((,dtime ,expr)
 	    (,gdtime-res (clean-dtime (progn ,@body))))
        (--add-dtime ,gdtime-res
@@ -142,8 +124,8 @@ this particular case, use the non-destructive `append', or wrap the expression w
   ;; change in daylight saving time status.
   (append (cl-mapcar #'+
 	    (list second minute hour)
-	    (subseq dtime 0 3))
-	  (subseq dtime 3)))
+	    (cl-subseq dtime 0 3))
+	  (cl-subseq dtime 3)))
 ;;(--add-dtime (decode-time) :hour 1)
 
 
@@ -199,26 +181,23 @@ Keywords supported: :year :month :week :day :hour :minute :second
    (add-etime-date etime :year year :month month :week week :day day)
    :hour hour :minute minute :second second))
 
-(cl-indent 'add-etime 'prog1)
 ;;(iso-dttm (add-etime (parse-time "2018-03-24 12:00") :day 10))
 ;;(format-time-string "%T%z" (add-etime (date-to-time "2000-10-28 12:00") :hour 1))
 ;;(format-time-string "%T%z" (date-to-time "2000-10-28 12:00CET"))
 ;;(add-etime "13:12" :minute 1)
 ;;(add-etime '(0 0 0 28 10 2001 0 t 7200) :day 1)
 ;;(add-etime "1990-12-31T22:59:59" :second 2 :hour 2)
-(format-time-string "%z" (date-to-time "2018-05-24T12:00:00"))
 
 ;;; Parser functions
 (defalias 'copy-time #'cl-copy-list)
 
 (cl-defun append-timezone-regexp (zone)
-  "Create a regular expression matching a date ending with ZONE's code.
+  "Create a regular expression matching a date ending with the ZONE code.
 ZONE is a pair (ZONE-CODE . UTC-OFFSET). The result is on the form
 \(ZONE-CODE UTC-OFFSET ZONE-REGEXP\)."
   (cl-destructuring-bind (zone-code . zone-offset) zone
       (list zone-code zone-offset (format "\\(%s\\)$" zone-code))))
 
-(require 'timezone)
 (defvar *mb-time-zones*
   (mapcar #'append-timezone-regexp
     (append '(("Z"    .  +0000)
@@ -232,11 +211,13 @@ ZONE is a pair (ZONE-CODE . UTC-OFFSET). The result is on the form
 	    if (string-match regexp string)
 	    return (concat (substring string 0 (- (length code)))
 			   (format "%+05d" offset)))
-      (awhen (string-match* (iso-time-zone-regexp) string :num '(0 1 2 3))
-	(cl-destructuring-bind (all sign h m) it
+      (let ((match (string-match* (iso-time-zone-regexp)
+				   string :num '(0 1 2 3))))
+	(when match
+	  (cl-destructuring-bind (all sign h m) match
 	  (format "%s%s%s%s"
 	    (substring string 0 (- (length all)))
-	    sign h (or m "00"))))
+	    sign h (or m "00")))))
       ;; Code suffix not found
       string))
 ;;(clean-time-zone-suffix "1972-01-05")
@@ -273,7 +254,7 @@ Argument may be a time objects itself or a string."
     (string (mb-parse-date-string time-designator))
     (symbol (parse-time (symbol-name time-designator)))
     (number (seconds-to-time time-designator))
-    (otherwise (error "%s is not a legar time designator"))))
+    (otherwise (error "%S is not a legal time designator" time-designator))))
 ;;(mapcar #'parse-time (list 1527598870.823139 "2005-01-18 09:15" '2014-04-02))
 
 (cl-defun parse-ms (ms)
@@ -297,7 +278,7 @@ Argument may be a time objects itself or a string."
 ;;(decode-time +the-creation+)
 
 (defconst +the-apocalypse+
-  (if (cygwin-emacs-p)
+  (if (eq system-type 'cygwin)
       (encode-time 0 0 0 31 12 2147483647 0)
       (encode-time 0 0 0 31 12 2147485547 0))
   "The latest date that encode-time and decode-time can handle on
@@ -316,8 +297,9 @@ Argument may be a time objects itself or a string."
 	 (decoded-time-after-leap-second '(0 0 0 1 1 1991 0))
 	 (encoded-time-before-leap-second (apply #'encode-time decoded-time-before-leap-second))
 	 (encoded-time-after-leap-second (apply #'encode-time decoded-time-after-leap-second)))
-    (eq 2 (apply #'- (mapcar #'second (list encoded-time-after-leap-second
-					    encoded-time-before-leap-second))))))
+    (eq 2 (apply #'- (mapcar #'cl-second
+			     (list encoded-time-after-leap-second
+				   encoded-time-before-leap-second))))))
 ;;(leap-seconds-supported-p)
 
 (cl-defun --dtime-set-time (dtime second minute hour)
@@ -370,12 +352,15 @@ TODO: need to handle base 1 of the month and day cases.
 \(Also, initutition tells me that there must be simpler
 implementation.)"
   (let* ((etime-part (etime-part etime part universal-p))
-	 (diff (- (funcall (if (minusp quantity)
-			     #'next-smaller-multiple #'next-greater-multiple)
-		    etime-part (abs quantity))
-		  etime-part)))
-    (message "%d" diff)
-    (when (and (zerop diff) (plusp quantity))
+	 (multiple (abs quantity))
+	 (rounded (* multiple
+		     (cl-first
+		      (funcall (if (cl-minusp quantity)
+				   #'cl-ceiling
+				 #'cl-floor)
+			       (+ etime-part quantity) multiple))))
+	 (diff (- rounded etime-part)))
+    (when (and (zerop diff) (cl-plusp quantity))
       (cl-incf diff quantity))
     (cl-case part
       (:year (yearstart (add-etime-date etime part diff)))
@@ -399,16 +384,16 @@ is positive or negative. For furhter information on PART and
 UNIVERSAL-P, see `etime-part'.
 
 Note that PARTs :MONTH and :DAY are currently not supported."
-  (cl-assert (not (minusp n)) t "N cannot be negative")
+  (cl-assert (not (cl-minusp n)) t "N cannot be negative")
   (if (zerop n)
     etime
     (if (time-part-p part)
       (add-etime-time
        (etime-round-1 etime part quantity universal-p)
-       part (* (if (minusp n) n (1- n)) quantity))
+       part (* (if (cl-minusp n) n (1- n)) quantity))
       (add-etime-date
        (etime-round-1 etime part quantity universal-p)
-       part (* (if (minusp n) n (1- n)) quantity)))))
+       part (* (if (cl-minusp n) n (1- n)) quantity)))))
 ;;(iso-dttm (etime-round (parse-time "1972-01-06T08:15:17") :hour -1 1))
 ;;(iso-dttm (etime-round (parse-time "1972-01-06T08:15:17") :minute 15 1))
 
@@ -458,9 +443,7 @@ If UNIVERSAL-P is not nil, return the `next-midnight' in UTC."
 
 (cl-defun yearstart (&optional etime)
   (--time-encode (without-tz-modification (dtime (decode-time etime))
-		   (message "%S" (subseq dtime 5))
-		   (message "%S" dtime)
-		   (append '(0 0 0 1 1) (subseq dtime 5)))))
+		   (append '(0 0 0 1 1) (cl-subseq dtime 5)))))
 ;;(iso-dttm (yearstart (parse-time "1972-01-06")))
 
 (cl-defun yearend (&optional etime)
@@ -469,17 +452,15 @@ If UNIVERSAL-P is not nil, return the `next-midnight' in UTC."
 
 (cl-defun monthstart (&optional etime old-etime)
   "Return encoded time of the start of the month ETIME is in.
-Optional argument OFFSET shifts the result OFFSET number of
-months. Negative OFFSET shifts result backward in time. ETIME
-must be an encoded time object, see `encode-time'. Default is
-current time. A second optional parameter defines the start day
-of the week."
+ETIME must be an encoded time object; nil means the current time.
+For compatibility, an integer ETIME is treated as a month offset
+from OLD-ETIME, or from the current time when OLD-ETIME is nil."
   (if (integerp etime)
     ;; Old version (MONTHSTART OFFSET ETIME) is now deprecated
     (progn (warn "This way of calling monthstart is deprecated!")
 	   (add-etime-date (monthstart (or old-etime (now))) :month etime))
     (--time-encode (without-tz-modification (dtime (decode-time etime))
-		     (append '(0 0 0 1) (subseq dtime 4))))))
+		     (append '(0 0 0 1) (cl-subseq dtime 4))))))
 ;;(iso-dttm (monthstart (parse-time "1972-01-06")))
 ;;(iso-dttm (--time-encode (clean-dtime (decode-time (parse-time "1972-01-06")))))
 ;;(iso-dttm (monthstart (parse-time "2018-03-31")))
@@ -507,17 +488,17 @@ day of the week."
 
 (cl-defun daystart (&optional etime)
   (--time-encode (without-tz-modification (dtime (decode-time etime))
-		   (append '(0 0 0) (subseq dtime 3)))))
+		   (append '(0 0 0) (cl-subseq dtime 3)))))
 ;;(iso-dttm (daystart (parse-time "1972-01-06")))
 
 (cl-defun hourstart (&optional etime)
   (--time-encode (without-tz-modification (dtime (decode-time etime))
-		   (append '(0 0) (subseq dtime 2)))))
+		   (append '(0 0) (cl-subseq dtime 2)))))
 ;;(iso-dttm (hourstart (parse-time "1972-01-06T08:15")))
 
 (cl-defun minutestart (&optional etime)
   (--time-encode (without-tz-modification (dtime (decode-time etime))
-		   (append '(0) (subseq dtime 1)))))
+		   (append '(0) (cl-subseq dtime 1)))))
 ;;(iso-dttm (minutestart (parse-time "1972-01-06T08:15:17")))
 
 (cl-defun secondstart (&optional etime)
@@ -527,9 +508,7 @@ day of the week."
 ;; Other utils
 (cl-defun etime< (encoded-time1 encoded-time2)
   "Returns non-nil iff ENCODED-TIME1 comes before ENCODED-TIME2."
-  (if (= (first encoded-time1) (first encoded-time2))
-    (< (second encoded-time1) (second encoded-time2))
-    (< (first encoded-time1) (first encoded-time2))))
+  (time-less-p encoded-time1 encoded-time2))
 
 (cl-defun time< (time-designator1 time-designator2)
   "Returns non-nil iff TIME1 comes before TIME2."
@@ -541,27 +520,29 @@ day of the week."
   (not (time< time-designator2 time-designator1)))
 
 ;;;; Time units
-(let* ((2^16 (expt 2 16))
-       (s 1.0) (m (* 60 s)) (h (* 60 m)) (d (* 24 h))
-       (w (* 7 d)) (mo (* 30 d)) (y (* 365.24 d)))
-  (defun unit-factor (unit)
+(defun unit-factor (unit)
+  (let* ((second 1.0)
+	 (minute (* 60 second))
+	 (hour (* 60 minute))
+	 (day (* 24 hour))
+	 (week (* 7 day))
+	 (month (* 30 day))
+	 (year (* 365.24 day)))
     (cl-case unit
-      (:second s) (:minute m) (:hour h) (:day d) (:week w)
-      (:month mo) (:year y) (:olympiad (* 4 y))
-      (:decennium (* 10 y)) (:century (* 100 y))
-      (:millenium (* 1000 y))
-      (otherwise (error "Unknown unit `%S'." unit))))
+      (:second second) (:minute minute) (:hour hour)
+      (:day day) (:week week) (:month month) (:year year)
+      (:olympiad (* 4 year)) (:decennium (* 10 year))
+      (:century (* 100 year)) (:millenium (* 1000 year))
+      (otherwise (error "Unknown unit `%S'." unit)))))
 
-  (cl-defun etime/-1 (etime1 etime2 divisor)
-    "Divide by DIVISOR the number of seconds represented by an encoded time object ETIME."
-    (+ (* etime1 (/ 2^16 divisor))
-       (/ etime2 divisor))))
+(cl-defun etime/-1 (etime1 etime2 divisor)
+  "Divide the old-style time pair ETIME1/ETIME2 by DIVISOR."
+  (+ (* etime1 (/ (expt 2 16) divisor))
+     (/ etime2 divisor)))
 
 (cl-defun etime/ (etime divisor)
-    "Divide by DIVISOR the number of seconds represented by an encoded time object ETIME."
-    (if (listp etime)
-      (etime/-1 (first etime) (second etime) divisor)
-      (etime/-1 0 etime divisor)))
+  "Divide the seconds represented by encoded time ETIME by DIVISOR."
+  (/ (float-time etime) divisor))
 ;;(etime/ (now) 1000)
 
 (cl-defun etime- (etime1 etime2 &optional (unit :day))
@@ -605,6 +586,7 @@ TIMEs, not time designators."
     (format "%s/%s" (iso-dttm a) (iso-dttm b))))
 
 (cl-defun period-to-string (p &optional format)
+  (ignore p format)
   (warn "period-to-string is deprecated. Use `iso-period' instead."))
 
 (cl-defun period-length (period &optional (unit :second))
@@ -613,7 +595,8 @@ TIMEs, not time designators."
 ;;(period-length (today))
 
 ;;; Some standard periods
-(defconst +always+ (period :from (the-creation) :to (the-apocalypse)))
+(with-suppressed-warnings ((lexical +always+))
+  (defconst +always+ (period :from (the-creation) :to (the-apocalypse))))
 
 (cl-defun today (&optional etime)
   "Period from midnight of ETIME to the following midnight.
@@ -648,13 +631,14 @@ intervals."
   (if (interval-p time-extension)
     (within time time-extension :test #'time<)
     (and time-extension
-	 (or (within-time time (first time-extension))
-	     (within-time time (rest time-extension))))))
+	 (or (within-time time (cl-first time-extension))
+	     (within-time time (cl-rest time-extension))))))
 ;;(within-time (now :hour 35) `(,(tomorrow) ,(today)))
 
 (cl-defun interpolate-time (x period &key (a 0) (b 1) (unit :second))
   "Returns the time corresponding to X such that X in [A B)
   corresponds linearly to the result in PERIOD"
+  (ignore unit)
   (add-time (interval-l period)
 	    :second (round (* (/ (- x a) (- b a))
 			      (period-length period :second)))))
@@ -666,10 +650,7 @@ intervals."
 in milliseconds. Note that arguments are not times in the (second
 minute ... ) format, but in that same format as is returned by
 `current-time'"
-  (+ (* 1000 (+ (* (expt 2 16) (- (first current-time2) 
-				  (first current-time1)))
-	     (- (second current-time2) (second current-time1))))
-     (/ (- (third current-time2) (third current-time1)) 1000)))
+  (* 1000.0 (float-time (time-subtract current-time2 current-time1))))
 ;;(let ((x (current-time))) (cl-loop for i below (expt 10 6)) (diff-current-time-msec x (current-time)))
 
 ;;;; Elapsed time
@@ -692,16 +673,16 @@ PRINT-RESULT-P (default T) is T the time is also printed with
 
 (defmacro time (expression) 
   "Evaluates EXPRESSION and prints the evaluation time (ms) ."
-  (let ((time-val (gensym)))
+  (let ((time-val (cl-gensym)))
     `(let ((,time-val (time-val ,expression)))
-       (princ (format "Time spent: %d (ms); Result: " (first ,time-val)))
-       (second ,time-val))))
+       (princ (format "Time spent: %d (ms); Result: " (cl-first ,time-val)))
+       (cl-second ,time-val))))
 
 (defmacro time-val (expression)
-  "Returns '\(TIME VALUE\) where TIME is the time (ms) it takes to evaluate
+  "Return `(TIME VALUE)', with evaluation time in milliseconds.
 EXPRESSION and VALUE is the corresponding evaluation value."
-  (let ((current-time-start (gensym))
-	(result (gensym)))
+  (let ((current-time-start (cl-gensym))
+	(result (cl-gensym)))
     `(let ((,current-time-start (current-time))
 	   (,result ,expression)) ;unwind-?
        (cl-values (diff-current-time-msec ,current-time-start
@@ -730,7 +711,7 @@ EXPRESSION and VALUE is the corresponding evaluation value."
 	(string-match* (american-date-regexp) s :num '(1 2 3))
       (format "%04d-%02d-%02d"
 	(string-to-number y)
-	(1+ (position m (second (assoc :en *months*)) :test #'equal))
+	(1+ (cl-position m (cl-second (assoc :en *months*)) :test #'equal))
 	(string-to-number d)))))
 ;;(parse-american-date "December 29, 1995")
 ;;(parse-american-date "1 December 1973")
@@ -746,7 +727,6 @@ EXPRESSION and VALUE is the corresponding evaluation value."
     (insert new-region)))
 
 ;;;; Week numbers
-(require 'mb-utils-iso-time)
 
 (cl-defun first-week-start (year)
   "Returns the date of the monday in the first week in YEAR.
@@ -756,21 +736,21 @@ This function is mainly a helper for `week-number'"
 ;;(iso-dttm (first-week-start 1972))
 
 (cl-defun yearweek-number (&optional (etime (now)))
-  "Return (YEAR WEEK) if ETIME is within YEAR's WEEKth week."
+  "Return (YEAR WEEK) if ETIME is within WEEK of YEAR."
   (cl-flet ((weekno (y etime)
 	      (list y (round (1+ (time- (weekstart etime) (first-week-start y)
 					:week))))))
     (let ((year (etime-year etime)))
       (if (etime< etime (first-week-start year))
 	(weekno (1- year) etime)
-	(if (etime< (first-week-start (1+ year)) etime)
+	(if (not (etime< etime (first-week-start (1+ year))))
 	  (weekno (1+ year) etime)
 	  (weekno year etime))))))
 ;;(mapcar (compose #'yearweek-number #'parse-time) '(1972-01-01 1972-01-06 2001-12-31 2008-12-29))
 
 (cl-defun week-number (&optional (etime (now)))
   "Return the week number of ETIME."
-  (second (yearweek-number etime)))
+  (cl-second (yearweek-number etime)))
 ;;(mapcar (compose #'week-number #'parse-time) '(1972-01-01 1972-01-06 2001-12-31 2008-12-29))
 
 (cl-defun max-week-number (year &optional zone)
@@ -783,7 +763,7 @@ This function is mainly a helper for `week-number'"
 ;;(max-week-number 2001)
 
 (cl-defun parse-week (week-designator)
-  "WEEK-DESIGNATOR is either a string on format 'yyyy-mm' or a list (year week)"
+  "Parse WEEK-DESIGNATOR in `yyyy-mm' or (YEAR WEEK) form."
   (cl-etypecase week-designator
     (symbol (parse-week (symbol-name week-designator)))
     (string (mapcar #'string-to-number (split-string week-designator "-")))
@@ -806,13 +786,13 @@ designators WEEK-DESIGNATOR1 and WEEK-DESIGNATOR2. See
 ;;(cons (unix-time) (mapcar #'unix-time '("2020-03-02T12:26:30")))
 
 (cl-defun ms-unix-time (&optional (time-designator (now)))
-  "Convert time-designator to the number of seconds since 1970-01-01 UTC."
+  "Convert TIME-DESIGNATOR to milliseconds since 1970-01-01 UTC."
   (* 1000 (unix-time time-designator)))
 ;;(ms-unix-time "2025-07-01T16:00:00")
 ;;(ms-unix-time)
 
 (cl-defun parse-ms-unix-time (ms)
-  "Convert unix-time in milliseconds to ETIME."
+  "Convert Unix time MS in milliseconds to an ISO date-time string."
   (iso-dttm (parse-time (/ ms 1000))))
 ;;(parse-ms-unix-time 1681077600000)"2023-04-10T00:00:00CEST"
 ;;(weekday :no (now))
@@ -823,8 +803,8 @@ designators WEEK-DESIGNATOR1 and WEEK-DESIGNATOR2. See
 ;;(minutes-to-mmss )
 
 (cl-defun mmss-to-minutes (mmss)
-  (cl-destructuring-bind (mm ss) mmss
-    (+ mm (/ ss 60.0))))
+  (cl-destructuring-bind (mm ss &optional (second-fraction 0)) mmss
+    (+ mm (/ (+ ss second-fraction) 60.0))))
 ;;(mmss-to-minutes '(1 29.99))
 
 (cl-defun hours-to-hhmmss (hours)
@@ -854,3 +834,5 @@ HH[.SECOND-DECIMALS]
     (pad-list (string-split hhmmss-string "[:]") 3 "0" abbrevate-right-p)))
 
 (provide 'mb-utils-time)
+
+;;; mb-utils-time.el ends here
