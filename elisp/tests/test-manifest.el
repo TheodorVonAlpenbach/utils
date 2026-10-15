@@ -24,6 +24,7 @@
     "utils/test-mb-utils-file.el"
     "utils/test-mb-utils-io.el"
     "utils/test-mb-utils-iso-time.el"
+    "utils/test-mb-utils-regexp.el"
     "utils/test-mb-utils-sets.el"
     "utils/test-mb-utils-strings.el"
     "utils/test-mb-utils-time.el"
