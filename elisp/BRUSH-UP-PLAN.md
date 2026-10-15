@@ -335,12 +335,12 @@ also remain explicit decisions before retirement or compatibility work begins.
 ### Initial utility migrations
 
 The closed-interval, envelope, set-helper, file, I/O, tree, thing-at-point,
-economy, additional-math, anaphora, general, list, sequence, string, time, and
-ISO-time modules are
+economy, additional-math, general-math, anaphora, general, list, sequence,
+string, time, and ISO-time modules are
 independently loadable. Their validation comprises:
 
-* a clean `emacs -Q` load of all sixteen utility features and the ERT tooling;
-* 215 passing ERT tests from the batch entry point;
+* a clean `emacs -Q` load of all seventeen utility features and the ERT tooling;
+* 235 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -453,6 +453,17 @@ invalid-designator errors, four-part hours/minutes/seconds conversion, exact
 rounding boundaries, and ISO weeks beginning in the following calendar year.
 Its 42 namespaced tests now run in the maintained baseline.
 
+[`mb-utils-math.el`](./utils/mb-utils-math.el) is now UTF-8 with lexical
+binding and explicit list, sequence, anaphora, prime-data, general-utility, and
+additional-math dependencies. Startup-only Common Lisp aliases and obsolete
+`pi`/`lsh` uses were replaced, the premature `provide` was removed, and two
+unfinished functions now signal explicit not-implemented errors. Repairs cover
+integer rounding, free variables, cycle scoring, Haversine latitude handling,
+annual interest, byte truncation/endianness/width, signed-byte boundaries,
+four-part date decomposition, and configurable epoch years. The former
+probabilistic test now uses deterministic weighted-selection boundaries. Its
+20 namespaced tests run in the maintained baseline.
+
 [`mb-things.el`](./utils/mb-things.el) now loads independently with lexical
 binding and built-in dependencies instead of pulling in the broad
 `mb-utils-div` and `mb-utils-time` stacks. Its small date, clock, case, and
@@ -519,6 +530,10 @@ matched. They are safe retirement candidates once callers are checked.
 | `parse-ms` | `seconds-to-time` | Divide milliseconds by 1000.0 before calling the standard function. |
 | `unix-time` and `ms-unix-time` | `float-time` | The local versions additionally accept the broader `parse-time` designators. |
 | `yearweek-number` and `week-number` | `format-time-string` with `%G` and `%V` | Results agree at tested ISO-year boundaries after repairing exact first-Monday handling. |
+| `bytes-to-string` | `unibyte-string` | The local wrapper now delegates to the standard constructor and genuinely returns a unibyte string for bytes above 127. |
+| `string-to-bytes` | `string-to-list` | The local wrapper now delegates directly to the standard function. |
+| `int-to-hex` | `format` with `%x` | The helper only adds optional zero-padding. |
+| `current-year` | `format-time-string` with `%Y`, or `decoded-time-year` | The local helper now uses the standard decoded-time accessor. |
 
 ### Differ in edge cases — do not substitute blindly
 
@@ -536,6 +551,10 @@ These look replaceable but are not, and the difference is easy to miss.
 | `now` | `current-time` | With no arguments both represent the current instant, but `now` round-trips through decoded time and discards subsecond precision. It also retains a deprecated keyword-adjustment interface. |
 | `parse-time` | `date-to-time`, `seconds-to-time`, and `encode-time` | The local dispatcher accepts strings, symbols, numbers, decoded times, and encoded times; no single standard function has that combined contract. |
 | `time` and `time-val` | `benchmark-run` and `benchmark-call` | Standard benchmarking reports elapsed/GC timing, while the local macros evaluate once, preserve the expression value, and report milliseconds. |
+| `sum` and `product` | `seq-reduce` or `cl-reduce` | The local helpers retain richer keyword forwarding (`sum`) and key/initial-value defaults (`product`), so callers need checking before replacement. |
+| `product-safe` and `product-safe-list` | ordinary integer multiplication | They detect fixnum overflow and switch to floats, but modern Emacs has arbitrary-precision integers. Keeping the old fallback can unnecessarily lose precision; retire only after checking callers that may expect floats. |
+| `jstime` | `seconds-to-time` plus `decode-time` | The standard pair handles Unix timestamps directly. The local result instead uses zero-based month and day-within-month fields and supports a custom base year. |
+| `leap-year-p` and `days-in-month` | `calendar-leap-year-p` and `calendar-last-day-of-month` | The local month argument is zero-based, whereas the calendar API uses months 1 through 12. |
 
 ### Still first-party
 

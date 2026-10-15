@@ -1,6 +1,17 @@
-(require 'mb-lists)
+;;; mb-utils-math.el --- General mathematical utilities -*- lexical-binding: t; -*-
 
-(defconst 2pi (* 2 pi))
+(require 'cl-lib)
+(require 'mb-anaphora)
+(require 'mb-lists)
+(require 'mb-math-functions)
+(require 'mb-sequences)
+(require 'mb-utils-10000-first-primes)
+(require 'mb-utils-div)
+
+;;; Code:
+
+(with-suppressed-warnings ((lexical 2pi))
+  (defconst 2pi (* 2 float-pi)))
 
 (cl-defun 2* (number) (* 2 number))
 (cl-defun /2 (number) (/ number 2))
@@ -33,11 +44,11 @@ The return value is the incremented value of PLACE."
 ;;(cl-loop for i from -4 to 4 collect (modb i 4 -2))
 
 (cl-defun floor-to (arg divisor)
-  (* divisor (first (cl-floor arg divisor))))
+  (* divisor (cl-first (cl-floor arg divisor))))
 ;;(floor-to 99 25)
 
 (cl-defun ceiling-to (arg divisor)
-  (* divisor (first (cl-ceiling arg divisor))))
+  (* divisor (cl-first (cl-ceiling arg divisor))))
 ;;(ceiling-to 99 25)
 
 (cl-defun next-greater-multiple (x multiple &optional (n 1))
@@ -142,11 +153,11 @@ converting to float if the product is large for an integer."
   `(setf ,n (abs ,n)))
 
 (cl-defun plusp* (&rest factors)
-  (cl-oddp (count-if #'plusp factors)))
+  (cl-oddp (cl-count-if #'cl-plusp factors)))
 ;;(plusp* 1 -1)
 
 (cl-defun minusp* (&rest factors)
-  (cl-oddp (count-if #'minusp factors)))
+  (cl-oddp (cl-count-if #'cl-minusp factors)))
 ;;(minusp* -1 -2 -3 4)
 
 (cl-defun signum* (&rest factors)
@@ -163,11 +174,11 @@ converting to float if the product is large for an integer."
 ;;(num-digits 10 2) ==> 4 ("1010")
 
 (cl-defun fixnum-floor (n m)
-  (* m (first (cl-floor n m))))
+  (* m (cl-first (cl-floor n m))))
 ;;(mapcar #'(lambda (x) (list x (fixnum-floor x 8))) (0-n 10))
 
 (cl-defun fixnum-ceiling (n m)
-  (* m (first (ceiling* n m))))
+  (* m (cl-first (cl-ceiling n m))))
 ;;(mapcar #'(lambda (x) (list x (fixnum-ceiling x 8))) (0-n 10))
 
 (defun split-mod (x y)
@@ -226,12 +237,18 @@ http://www.matematikk.org/pub/mattetekst/Persnr/."
   (let* ((parts (butlast (mapcar #'string-to-number
 			   (apply #'split-at-position
 			     personnummer (1-n 10))) 2))
-	 (k1 (asetf (second (cl-floor (scalar-product
-				     '(3 7 6 1 8 9 4 5 2) parts) 11)) 
+	 (k1 (asetf (cl-second
+		     (cl-floor (apply #'+
+				      (cl-mapcar #'* '(3 7 6 1 8 9 4 5 2)
+						 parts))
+			       11))
 		    (if (zerop it) 0 (- 11 it))))
-	 (k2 (asetf (second (cl-floor (scalar-product
-				     '(5 4 3 2 7 6 5 4 3 2)
-				     (append parts (list k1))) 11))
+	 (k2 (asetf (cl-second
+		     (cl-floor
+		      (apply #'+
+			     (cl-mapcar #'* '(5 4 3 2 7 6 5 4 3 2)
+					(append parts (list k1))))
+		      11))
 		    (if (zerop it) 0 (- 11 it)))))
     (list (int-to-string (+ (* 10 k1) k2)) (substring personnummer 9))))
 ;;(personnummer-check "06017229573")
@@ -270,14 +287,15 @@ way."
   "Merges contents of the each list in LISTS and in an optimally distributed
 way. Assumes that LISTS is sorted by the length of its elements (lists)."
   (if lists
-    (if (rest lists)
-      (merge-2-lists (first lists) (merge-n-lists (rest lists)))
-      (first lists))))
+    (if (cl-rest lists)
+      (merge-2-lists (cl-first lists)
+		     (merge-n-lists (cl-rest lists)))
+      (cl-first lists))))
 
 (cl-defun merge-n-lists (lists)
   "Merges contents of the each list in LISTS and in an optimally distributed
 way. Assumes that LISTS is sorted by the length of its elements (lists)."
-  (merge-n-lists-sorted-by-length (sort* lists #'> :key #'length)))
+  (merge-n-lists-sorted-by-length (cl-sort lists #'> :key #'length)))
 ;;(merge-n-lists (partition '(a b d a b c b a)))
 
 
@@ -286,20 +304,21 @@ way. Assumes that LISTS is sorted by the length of its elements (lists)."
   (let ((rest (cl-loop for elt in list
 		       if (funcall test (funcall key elt) (funcall key x))
 		       collect elt)))
-    (setf list (delete* x list :test test :key key))
+    (setf list (cl-delete x list :test test :key key))
     rest))
 ;;(let ((list '(a b c d a))) (list (extract 'a list) list))
 
 (cl-defun list-move (x list-from list-to &key (test #'eq) (key #'identity))
   "Not implemented"
-  (o7tf))
+  (ignore x list-from list-to test key)
+  (error "list-move is not implemented"))
 
 (cl-defun partition-from-ordering (list &key (test #'<) (key #'identity))
   "Returns a partition of set LIST corresponding to the
 equivalence relation based on the strict ordering TEST on LIST
 \(Two elements x, y in LIST are equal iff neither x < y nor y <
 x.)"
-  (group (sort* list order-relation :key key)))
+  (group (cl-sort list test :key key)))
 ;;(partition-from-ordering '(a b d a b c b a) :order-relation #'symbol<)
 
 (defmacro pushhash (key value hash-table)
@@ -314,7 +333,7 @@ equivalence relation TEST on LIST."
 	     for x in rlist
 	     for kx in (if key (mapcar key rlist) rlist)
 	     do (pushhash kx x ht))
-    (cl-loop for k being the hash-keys of ht using (hash-values v)
+    (cl-loop for _k being the hash-keys of ht using (hash-values v)
 	     collect v)))
 ;;(npartition (0-n 10) :key (bind #'mod 3))
 
@@ -363,7 +382,7 @@ the rotation degree."
 ;;(cycle-rotate-until '(a b a a a) #'(lambda (x) (funcall 'neq (first x) (last-elt x))))
 
 (cl-defun cycle-rotations (cycle)
-  (cl-loop for x in cycle
+  (cl-loop repeat (length cycle)
 	   for rot = cycle then (cycle-rotate rot)
 	   collect rot))
 ;;(cycle-rotations '(a a b b a b a))
@@ -379,8 +398,9 @@ the rotation degree."
   (let ((test test)) 
     (min-element
      (cycle-rotations
-      (group (cycle-rotate-until 
-	      list #'(lambda (x) (not (funcall test (first x) (last-elt x)))))
+      (group (cycle-rotate-until
+	      list (lambda (x)
+		     (not (funcall test (cl-first x) (last-elt x)))))
 	:test test))
      :test #'(lambda (x y) (list> x y :key #'length)))))
 ;;(cycle-grouped-normal-form '(a a a b c d a e f))
@@ -394,19 +414,18 @@ the rotation degree."
 ;;(2cycle-lform '(a b a a b b b a))
 
 (cl-defun 2cycle-to-optimal-lform (cycle &optional (test #'eq))
-  (let* ((n (cl-count (first cycle) cycle :test test)))
-    q
+  (let* ((n (cl-count (cl-first cycle) cycle :test test)))
     (2cycle-lform (cycle-normal-form (make-distributed-list n (length cycle))))))
 ;;(2cycle-to-optimal-lform '(a a a b b a))
 
 (cl-defun 2cycle-badness (cycle &optional (test #'eq))
-  "Calculates how good the elements of CYCLE is distributed, assuming the number of non-EQ elements is 2"
+  "Measure how evenly the two distinct elements of CYCLE are distributed."
   (let* ((n (length cycle))
-	 (nfirst (cl-count (first cycle) cycle :test test))
-	 (pos (positions (first cycle) cycle
+	 (nfirst (cl-count (cl-first cycle) cycle :test test))
+	 (pos (positions (cl-first cycle) cycle
 			 :test (if (> (+ nfirst nfirst) n) 
 				 (compose #'not test) test)))
-	 (distances (cons (- (+ n (first pos)) (last-elt pos)) 
+	 (distances (cons (- (+ n (cl-first pos)) (last-elt pos))
 			  (mapcar (compose #'- (bind #'apply #'- 1))
 			    (pairs pos))))
 	 (optimal-distance (/ (float n) (length pos)))
@@ -425,13 +444,14 @@ assuming the number of non-EQ elements is 2"
 	     for badness = (2cycle-badness
 			    cycle #'(lambda (x y) 
 				      (xnor (funcall test elt x) 
-					    (funcall test elt y)))))))
+					    (funcall test elt y))))
+	     sum badness)))
 ;;(cycle-badness '(a b c a b c b a c a b c))
 
 (cl-defun cycle-best (cycles &optional (test #'eq))
   "Calculate the best distribution of the elements in CYCLE.
 See `cycle-badness' for the measure of a good cycle."
-  (cl-loop with min-cycle = (first cycles)
+  (cl-loop with min-cycle = (cl-first cycles)
 	   with min = (cycle-badness min-cycle test)
 	   for c in cycles
 	   for badness = min then (cycle-badness c test)
@@ -463,18 +483,18 @@ See `cycle-badness' for the measure of a good cycle."
   '((B 26 180 280 2.70 1.30)
     (C 28.50 200 300 2.90 1.50)
     (D 31.50 220 320 3.10 1.70))
-  "Format: (type NOK/hour NOK/days¹ NOK/days² NOK/km³ NOK/km°). where
-¹: 1-5 days, ²: >6 days, ³: 1-300 km, and °: >301 km")
+  "Format: (type NOK/hour NOK/daysÂ¹ NOK/daysÂ² NOK/kmÂ³ NOK/kmÂ°). where
+Â¹: 1-5 days, Â²: >6 days, Â³: 1-300 km, and Â°: >301 km")
 
 (cl-defun bilkollektivet-price-calculator (type num-km
 					   &optional (days 0) (hours 0))
   ""
   (let* ((price-type (assoc type bilkollektivet-price-table))
 	 (price-km (* num-km (if (< num-km 301)
-			       (fifth price-type) (sixth price-type))))
+			       (cl-fifth price-type) (cl-sixth price-type))))
 	 (price-days (* days (if (< days 6)
-			       (third price-type) (fourth price-type))))
-	 (price-hours (* hours (second price-type))))
+			       (cl-third price-type) (cl-fourth price-type))))
+	 (price-hours (* hours (cl-second price-type))))
     (+ price-km price-days price-hours)))
 ;;(bilkollektivet-price-calculator 'C 2000 5)
 
@@ -484,13 +504,12 @@ See `cycle-badness' for the measure of a good cycle."
   (zerop (mod n m)))
 					;(mapcar #'(lambda (n) (is-divisible n 5)) (cl-loop for i below 11 collect i))
 
-(require 'mb-utils-10000-first-primes)
 (cl-defun primep (n)
   (not-null (cl-find n 10000-first-primes)))
 ;;(cl-remove-if nil (mapcar #'primep (1-n 20)))
 
 (cl-defun factorize (n &optional (primes 10000-first-primes))
-  (let* ((max-prime (first (last primes)))
+  (let* ((max-prime (cl-first (last primes)))
 	 (max-argument (sq max-prime))
 	 (factors '()))
     (when (> n max-argument)
@@ -554,7 +573,7 @@ See `cycle-badness' for the measure of a good cycle."
   (let ((res ()))
     (while (> n 0)
       (push (logand 1 n) res)
-      (setq n (lsh n -1)))
+      (setq n (ash n -1)))
     res))
 ;;(int-to-bin-array 1235)
 
@@ -565,7 +584,7 @@ See `cycle-badness' for the measure of a good cycle."
 (cl-defun uint-length-1 (n &optional (base 10))
   "Return the number of digits in N in the BASE-number system.
 BASE is 10 by default."
-  (cl-assert (not (minusp n)))
+  (cl-assert (not (cl-minusp n)))
   (ceiling (log (1+ n) base)))
 
 (cl-defun uint-length (n &optional (base 10))
@@ -595,7 +614,7 @@ prefixed by zeros."
 ;;(cl-loop for i in (a-b 99 101) collect (uint-to-n-base i))
 
 (cl-defun bin-to-int-array (binary-string)
-  (mapcar #'string-to-int (split-string binary-string "" t)))
+  (mapcar #'string-to-number (split-string binary-string "" t)))
 ;;(bin-to-int-array "01101")
 
 (cl-defun byte-to-2hex (byte) (format "%02x" byte))
@@ -604,19 +623,17 @@ prefixed by zeros."
 ;;(mapcar #'byte-to-2hex (read-bytes-from-buffer midi-buffer))
 
 (cl-defun bytes-to-string (bytes)
-  "Converts a list of 8-bits bytes to a unibyte STRING.
-TODO: handle multibyte strings."
-  (apply #'concat (mapcar #'byte-to-char bytes)))
+  "Convert a list of 8-bit BYTES to a unibyte string."
+  (apply #'unibyte-string bytes))
 ;;(bytes-to-string '(65 66 67 68))
 
 (cl-defun string-to-bytes (string)
-  "Converts a unibyte STRING to a list of 8-bits bytes. 
-TODO: handle multibyte strings."
-  (mapcar #'string-to-char (split-string string "" t)))
+  "Convert unibyte STRING to a list of 8-bit bytes."
+  (string-to-list string))
 ;;(string-to-bytes "ABCD") ==> (65 66 67 68)
 
 (cl-defun nth-bit (integer n)
-  (logand 1 (lsh integer (- n))))
+  (logand 1 (ash integer (- n))))
 ;;(mapcar (bind #'nth-bit 16 1) (b-a 7 0))
 
 (cl-defun int-to-n-bit-bytes
@@ -635,12 +652,12 @@ NUMBER-OF-BYTES is reached."
 	   (bytes
 	    (reverse
 	     (cl-loop for i below number-of-total-bytes
-		      for integer-i = (lsh integer (- (* i number-of-bits)))
+		      for integer-i = (ash integer (- (* i number-of-bits)))
 		      collect (logand integer-i mask)))))
       
       (if number-of-bytes
 	(if (> (length bytes) number-of-bytes)
-	  (nthcdr bytes (- (length bytes) number-of-bytes)) ;;truncate
+	  (nthcdr (- (length bytes) number-of-bytes) bytes) ;; truncate
 	  (append (make-list (- number-of-bytes (length bytes)) 0) bytes))
 	bytes))))
 ;;(int-to-n-bit-bytes 0 7)
@@ -655,8 +672,8 @@ NUMBER-OF-BYTES is reached."
 (cl-defun bytes-to-int (bytes &key (byte-size 8) (endianness :big))
   "Calculates the integer represented by BYTES of bit length BYTE-SIZE."
   (calculate-n-ary
-   (expt 2 8) (cl-case endianness
-		((:big) (nreverse bytes))
+   (expt 2 byte-size) (cl-case endianness
+		((:big) (reverse bytes))
 		((:little) bytes)
 		(t (error "%s is not a correct :ENDIANNESS value" :endianness)))))
 ;;(bytes-to-int (list 1 0) :endianness :little)
@@ -674,7 +691,7 @@ definition."
 ;;(int-to-variable-length-quantity 0)
 
 (cl-defun signed-byte-positive-p (signed-byte &optional (sign-bit-postition 8))
-  (zerop (logand (lsh signed-byte (- 1 sign-bit-postition)) 1)))
+  (zerop (logand (ash signed-byte (- 1 sign-bit-postition)) 1)))
 ;;(signed-byte-positive-p 255)
 
 (cl-defun signed-byte-to-int (signed-byte &optional (sign-bit-postition 8))
@@ -684,14 +701,15 @@ definition."
 
 (cl-defun int-to-signed-byte (integer &optional (number-of-bits 8))
   (let ((mask (expt 2 (1- number-of-bits))))
-    (unless (< integer mask)
-      (error "Integer %d is too big for specified byte size %d" integer number-of-bits))
+    (unless (<= (- mask) integer (1- mask))
+      (error "Integer %d does not fit in %d signed bits"
+	     integer number-of-bits))
     (if (< integer 0)
       (+ (* mask 2) integer) integer)))
 ;;(int-to-signed-byte -1)
 
 (cl-defun 2s-complement (integer &optional (number-of-bits 16))
-  (if (> integer (expt 2 (1- number-of-bits)))
+  (if (>= integer (expt 2 (1- number-of-bits)))
     (- integer (expt 2 number-of-bits))
     integer))
 ;;(time (mapcar #'2s-complement (0-n (expt 2 8))))
@@ -709,8 +727,8 @@ behavior when the argument is not an integer"
     (lambda (x)
       (if (integerp x)
 	(if inverse
-	  (if (minusp x) (+ x 2^n) x)
-	  (if (> x 2^n-1) (- x 2^n) x))
+	  (if (cl-minusp x) (+ x 2^n) x)
+	  (if (>= x 2^n-1) (- x 2^n) x))
 	(cl-case with-non-integer
 	  (:error (error "Argument %S is not an integer" x))
 	  (:leave x)
@@ -720,7 +738,7 @@ behavior when the argument is not an integer"
 (cl-defun split-byte (byte &optional (pos 4))
   "Splits BYTE at bit position POS"
   (let ((mask (1- (expt 2 pos))))
-    (list (lsh byte (- pos))
+    (list (ash byte (- pos))
 	  (logand mask byte))))
 ;;(split-byte 255 0)
 
@@ -791,7 +809,8 @@ value in the specified interval. Else, it will be an integer."
 ;;(random-weights-given-probabilities 5 .5)
 
 (cl-defun random-weighted-element-1 (elements)
-  (first (nth (random-weighted-index (project-sequence elements 1)) elements)))
+  (cl-first
+   (nth (random-weighted-index (project-sequence elements 1)) elements)))
 
 (cl-defun random-weighted-element (elements &optional inverse)
   (random-weighted-element-1
@@ -811,6 +830,7 @@ value in the specified interval. Else, it will be an integer."
 
 (cl-defun random-log-fun (&optional (h 1) (m 0.1) seed)
   ""
+  (ignore seed)
   (cl-destructuring-bind (a b k) (random-log-parameters h m)
     (let ((a a) (b b) (k k))
       (lambda (x)
@@ -830,13 +850,14 @@ value in the specified interval. Else, it will be an integer."
 (cl-defun fractional-ball-angle (fraction
 				 &optional with-object-ball-throw-correction)
   "Optional argument WITH-OBJECT-BALL-THROW-CORRECTION is not implemented"
+  (ignore with-object-ball-throw-correction)
   (cl-assert (between= fraction 0 1))
   (radians-to-degrees (asin (- 1 fraction))))
 ;;(fractional-ball-angle .5)
 
 
 ;;map utils
-(cl-defun geo-distance (x y &optional (radius earth-radius-mean))
+(cl-defun geo-distance (x y &optional (radius 6371000.0))
   "Calculates the distance between X and Y over a sphere surface.
 Default sphere dimension corresponds to Earth's.
 The algorithm used is the old Haversine formula, see
@@ -845,14 +866,14 @@ http://en.wikipedia.org/wiki/Haversine_formula
 For a better distance approximation, use for instance Lambert's
 formulae:
 http://en.wikipedia.org/wiki/Geographical_distance#Lambert.27s_formulae"
-  (let* ((diff-lat-rad (degrees-to-radians (- (first y) (first x))))
-	 (diff-lon-rad (degrees-to-radians (- (second y) (second x))))
-	 (x-lat-rad (degrees-to-radians (first x)))
-	 (y-lat-rad (degrees-to-radians (first y)))
+  (let* ((diff-lat-rad (degrees-to-radians (- (cl-first y) (cl-first x))))
+	 (diff-lon-rad (degrees-to-radians (- (cl-second y) (cl-second x))))
+	 (x-lat-rad (degrees-to-radians (cl-first x)))
+	 (y-lat-rad (degrees-to-radians (cl-first y)))
 	 (a (+ (sq (sin (/ diff-lat-rad 2)))
 	       (* (sq (sin (/ diff-lon-rad 2)))
 		  (cos x-lat-rad)
-		  (cos x-lat-rad))))
+		  (cos y-lat-rad))))
 	 (c (* 2 (atan (sqrt a) (sqrt (- 1 a)))))
 	 (d (* radius c)))
     d))
@@ -877,23 +898,23 @@ either 0 or 1)"
 
 (cl-defun aggregate (numbers &optional (init 0))
   (when numbers
-    (let ((head (+ init (first numbers))))
-      (cons head (aggregate (rest numbers) head)))))
+    (let ((head (+ init (cl-first numbers))))
+      (cons head (aggregate (cl-rest numbers) head)))))
 ;;(aggregate '(1 2 3 4))
 
 (cl-defun normalize (numbers)
-  (map (type-of numbers) (bind #'/ (float (sum numbers))) numbers))
+  (cl-map (type-of numbers) (bind #'/ (float (sum numbers))) numbers))
 ;;(normalize (vector 1 2 3))
 
 (cl-defun waverage (list)
-  "Returns the Weighted average of the number and weight pairs in LIST: ((x1 w1) (x2 w2) ...)"
+  "Return the weighted average of number-weight pairs in LIST."
   (/ (sum (mapcar (bind #'apply #'* 1) list))
-     (float (sum (mapcar #'second list)))))
+     (float (sum (mapcar #'cl-second list)))))
 ;;uio grades
 ;;(waverage '((1 10) (1 10) (3 10) (1 10) (3 15) (4 10) (1 10) (1 5) (2 5) (2 10) (1 5) (1 5)))
 
 (cl-defun hourly-from-yearly-salary (yearly-salary &optional (num-hours-per-year 1650) (arbeidsgiveravgift .14) (holiday-money .12) (company-costs .05))
-  "For num-hours-per-year in Norway, see http://no.wikipedia.org/wiki/Årsverk.
+  "For num-hours-per-year in Norway, see http://no.wikipedia.org/wiki/Ã…rsverk.
 "
   (let* ((hourly-salary-raw (/ (float yearly-salary) num-hours-per-year))
 	 (hourly-salary-with-holiday-money (* hourly-salary-raw (1+ holiday-money)))
@@ -911,15 +932,15 @@ either 0 or 1)"
 
 (cl-defun ceilx*x-solver (y)
   "Assume y and solution is positive"
-  (let* ((min (first (quadratic-solver 1 1 (- y))))
-	 (max (first (quadratic-solver 1 0 (- y))))
+  (let* ((min (cl-first (quadratic-solver 1 1 (- y))))
+	 (max (cl-first (quadratic-solver 1 0 (- y))))
 	 (range (mapcar 'float (a-b (ceiling min) (ceiling max))))
 	 (solution-candidates (mapcar (bind #'/ y 1) range)))
     (cl-find y solution-candidates :test #'= :key #'(lambda (x) (* (ceiling x) x)))))
 ;;(ceilx*x-solver 3.1)
 
 ;; financial
-(cl-defun interest-annual (x interest year)
+(cl-defun interest-annual (x interest years)
   (* x (expt (1+ interest) years)))
 ;;(interest-annual 1000 .06 5)
 
@@ -942,7 +963,8 @@ either 0 or 1)"
 
 (cl-defun swimming-relative-distances
     (&optional (style-symbol 'crawl) (distance 100))
-  (let ((style (cl-find style-symbol swimming-records :key #'second)))))
+  (ignore style-symbol distance)
+  (error "swimming-relative-distances is not implemented"))
 ;;(swimming-relative-distances 'crawl 50)
 
 ;;; div js dates (TODO move this later)
@@ -971,18 +993,21 @@ either 0 or 1)"
 	   sum (days-in-year y)))
 ;;(days-between-years 1970 1971)
 
-(cl-defun current-year () (sixth (decode-time)))
+(cl-defun current-year () (decoded-time-year (decode-time)))
 
 (cl-defun days-after-year (&optional (year1 1970) (year2 (current-year)))
   (sum (mapcar #'days-in-year (a-b year1 year2))))
 ;;(days-after-year 2012)
 
 (cl-defun div-day-year (days &optional (base-year 1970))
-  (let* ((days-list (days-after-year base-year))
-	 (pos (position days days-list :test #'<))
-	 (val (if (zerop pos) 
-		0 (nth (1- pos) days-list))))
-    (list (+ base-year pos) (- days val))))
+  (cl-assert (not (cl-minusp days)))
+  (cl-loop with year = base-year
+	   with remaining = days
+	   for year-length = (days-in-year year)
+	   while (>= remaining year-length)
+	   do (cl-decf remaining year-length)
+	      (cl-incf year)
+	   finally return (list year remaining)))
 ;;(div-day-year 3000)
 
 (cl-defun days-in-month (month &optional (year (current-year)))
@@ -991,8 +1016,11 @@ either 0 or 1)"
 ;;(mapcar (bind #'days-in-month 2001) (0-n 12))
 
 (cl-defun div-day-month (days &optional (year (current-year)))
-  (let* ((days-list (sum (mapcar (bind #'days-in-month year) (0-n 12))))
-	 (pos (position days days-list :test #'<))
+  (let* ((days-list (cumsum-list
+		     (mapcar (bind #'days-in-month year) (0-n 12))))
+	 (pos (cl-position-if (lambda (cumulative-days)
+			       (< days cumulative-days))
+			     days-list))
 	 (val (if (zerop pos) 
 		0 (nth (1- pos) days-list))))
     (list pos (- days val))))
@@ -1000,20 +1028,21 @@ either 0 or 1)"
 
 (cl-defun jstime (seconds &optional (unix-base-year 1970))
   (let* ((minutes (div-sec-min seconds))
-	 (hours (div-min-hour (first minutes)))
-	 (days (div-hour-day (first hours)))
-	 (years (div-day-year (first days)))
-	 (months (div-day-month (second years))))
-    (mapcar #'round (list (first years) (first months) (second years) 
-			  (second days) (second hours) (second minutes)))))
+	 (hours (div-min-hour (cl-first minutes)))
+	 (days (div-hour-day (cl-first hours)))
+	 (years (div-day-year (cl-first days) unix-base-year))
+	 (months (div-day-month (cl-second years) (cl-first years))))
+    (mapcar #'round
+	    (list (cl-first years) (cl-first months) (cl-second months)
+		  (cl-second days) (cl-second hours) (cl-second minutes)))))
 ;;(jstime 1199290500)
 ;;(cl-floor 1199290500 60.0)
 
 (cl-defun linear-function-slope-point (slope x)
   "Returns a linear function with SLOPE going through point X.
 The point is represented as a pair (X0 X1)."
-  (let* ((x0 (first x))
-	 (x1 (second x))
+  (let* ((x0 (cl-first x))
+	 (x1 (cl-second x))
 	 (a slope)
 	 (b (- x1 (* a x0))))
     #'(lambda (x) (+ (* a x) b))))
@@ -1023,8 +1052,8 @@ The point is represented as a pair (X0 X1)."
   "Returns a linear function going through points X and Y. Both
   poings are represented as a pair of numbers. See
   `linear-function-slope-point'"
-  (linear-function-slope-point (/ (float (- (second y) (second x)))
-				  (float (- (first y) (first x))))
+  (linear-function-slope-point (/ (float (- (cl-second y) (cl-second x)))
+				  (float (- (cl-first y) (cl-first x))))
 			       x))
 ;;(mapcar (linear-function-point-to-point '(0 0) '(1 2)) (a-b -3 3))
 
@@ -1054,14 +1083,14 @@ The point is represented as a pair (X0 X1)."
 	   finally return res))
 ;;(digit-sum 123 2)
 
-(cl-defun tall-navn (n &optional intetkjønn-p)
+(cl-defun tall-navn (n &optional intetkjÃ¸nn-p)
   (cond ((= n 0) "null")
-	((= n 1) (if intetkjønn-p "ett" "en"))
+	((= n 1) (if intetkjÃ¸nn-p "ett" "en"))
 	((< n 20) 
-	 (symbol-name (nth (- n 2) '(to tre fire fem seks sju åtte ni ti elleve tolv tretten fjorten femten seksten sytten atten nitten))))
+	 (symbol-name (nth (- n 2) '(to tre fire fem seks sju Ã¥tte ni ti elleve tolv tretten fjorten femten seksten sytten atten nitten))))
 	((and (zerop (mod n 10))
 	      (<= n 100))
-	 (symbol-name (nth (- (/ n 10) 2) '(tjue tretti førti femti seksti sytti åtti nitti hundre))))
+	 (symbol-name (nth (- (/ n 10) 2) '(tjue tretti fÃ¸rti femti seksti sytti Ã¥tti nitti hundre))))
 	((< n 100) (concat (tall-navn (* 10 (floor n 10))) (tall-navn (mod n 10))))
 	((= n 100) "ett hundre")
 	((< n 1000) (concat (tall-navn (floor n 100) t) " hundre og " (tall-navn (mod n 100))))
@@ -1071,14 +1100,14 @@ The point is represented as a pair (X0 X1)."
 	((< n 2000000) (concat (tall-navn (floor n 1000000)) " million " (tall-navn (mod n 1000000))))
 	((< n 1000000000) (concat (tall-navn (floor n 1000000)) " millioner " (tall-navn (mod n 1000000))))
 	((= n 1000000000) "milliard")
-	(t (error))))
+	(t (error "Number %S is outside the supported range" n))))
 ;;(tall-navn 221134923)
 
 (cl-defun extended-gcd (a b)
   (let* ((s 0) (old-s 1)
 	 (t* 1) (old-t* 0)
 	 (r b) (old-r a)
-	 quotient)
+	 quotient tmp)
     (while (not (zerop r))
       (setf quotient (/ old-r r))
       (setf tmp r)
@@ -1092,7 +1121,7 @@ The point is represented as a pair (X0 X1)."
       (setf tmp t*)
       (setf t* (- old-t* (* quotient tmp)))
       (setf old-t* tmp))
-    (message "Bézout coefficients: (%d, %d)
+    (message "BÃ©zout coefficients: (%d, %d)
 greatest common divisor: %d
 quotients by the gcd: (%d, %d)"
 	     old-s old-t* old-r t* s)
@@ -1152,7 +1181,7 @@ quotients by the gcd: (%d, %d)"
 	  (* l-inverse s)
 	  (mod (* l-inverse s) k)
 	  (* l (mod (* l-inverse s) k))
-	  (first (cl-floor (* l (mod (* l-inverse s) k)) k)))))
+	  (cl-first (cl-floor (* l (mod (* l-inverse s) k)) k)))))
 ;;(cl-loop for s below 10 collect (test3 s))
 
 (cl-defun factors (n)
@@ -1194,10 +1223,8 @@ p) q)))"
 	   if (/= res1 res2) collect (list r p q res1 res2)))
 ;;(test-another-integer-operation 100000)
 
-(provide 'mb-utils-math)
-
 (cl-defun problem (n)
-  (/ (cl-loop with primes = (subseq 10000-first-primes 0 15)
+  (/ (cl-loop with primes = (cl-subseq 10000-first-primes 0 15)
 	      repeat n
 	      for s = (+ (random-integer 1 50) (random-integer 1 50))
 	      count (and (cl-find s primes) (< s 50)))
@@ -1215,7 +1242,6 @@ TODO: move this to some yamal elisp module."
     (cl-loop for m from 73 below max-m
 	     for n-min = (ceiling (fn f (- eps) m))
 	     for n-max = (floor (fn f eps m))
-	     for n-best = (if (< (abs n-min) (abs n-max)) n-min n-max)
 	     unless (< n-max n-min) return (list n-min n-max m (fz n-min m))
 	     for nn-min = (ceiling (fn f (- eps) (- m)))
 	     for nn-max = (floor (fn f eps (- m)))
@@ -1224,7 +1250,7 @@ TODO: move this to some yamal elisp module."
 ;;(approximate-frequency (* 100 pi) 1)
 
 (cl-defun volume-ellipsoid (r1 &optional (r2 r1) (r3 r2))
-  (/ (* 4 pi r1 r2 r3) 3))
+  (/ (* 4 float-pi r1 r2 r3) 3))
 ;; Volume Himalia (Jupiter moon)
 ;;(volume-ellipsoid (/ 170 2))                     2572440.7845144426
 ;; Volume Amalthea (Jupiter moon) as an ellipsoid
@@ -1237,3 +1263,5 @@ TODO: move this to some yamal elisp module."
   (* (/ (sq radius) 2.0) (- theta (sin theta))))
 
 (provide 'mb-utils-math)
+
+;;; mb-utils-math.el ends here
