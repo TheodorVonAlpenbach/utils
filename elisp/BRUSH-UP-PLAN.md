@@ -49,7 +49,10 @@ abandoned features merely to make a whole-tree scan green.
 
 ### Old or potentially obsolete code
 
-Age is evidence for investigation, not proof that a feature is unused.
+Age is evidence for investigation, not proof that a feature is unused. Age may
+also mean a utility now duplicates a standard function added in a later Emacs
+release; those cases are tracked in the
+[standard-library supersession register](#standard-library-supersession-register).
 
 * **Strong retirement candidates:** Internet Explorer Favorites management in
   [`ie.el`](./browser/ie.el), which assumes `C:/Documents and Settings`; obsolete
@@ -180,6 +183,11 @@ Archive or remove only approved unused code, adjusting references, hooks,
 load paths, and documentation together. Obtain approval for destructive changes.
 Document retained third-party sources and local modifications. Do not include
 backup files or manually refactor generated tables.
+
+Work through the
+[standard-library supersession register](#standard-library-supersession-register)
+here, honouring the recorded edge cases rather than substituting on name
+similarity.
 
 Add concise usage/dependency notes for active modules and one top-level guide to
 loading and testing. Keep historical experiments outside the active test/build
@@ -464,3 +472,53 @@ and built-in Emacs time conversion rather than relying circularly on
 numbered regexp capture groups are preserved. Timezones are now genuinely
 optional in `iso-time-regexp`, and fractional seconds require a literal dot
 followed by at least one digit.
+
+## Standard-library supersession register
+
+Many utilities here predate the Emacs releases that added equivalent built-ins:
+`flatten-tree` and `proper-list-p` arrived in 27.1; `string-replace`,
+`string-search`, `string-fill`, `string-pad`, `ensure-list`, `always`, and
+`string-distance` in 28.1; `take`/`ntake` and `string-pixel-width` in 29.1.
+A utility written before its standard counterpart is not automatically
+redundant, so this register records candidates and, more importantly, the
+**edge cases where the local version and the standard one genuinely differ**.
+
+Append to this register whenever a migration turns up another candidate.
+Retirement itself belongs to
+[phase 5](#5-retire-confirmed-obsolete-code-and-document-the-remainder) and
+needs the usual usage check across callers first.
+
+### Behaviourally equivalent for observed uses
+
+These were compared against the standard function on the cases that matter and
+matched. They are safe retirement candidates once callers are checked.
+
+| Local | Standard | Note |
+| --- | --- | --- |
+| `string-to-character-list` | `string-to-list` | Identical. |
+| `lines-to-string` | `string-join` with `"\n"` | Identical for string lists. |
+| `empty-string-p` | `string-empty-p` | Both return nil for nil input. |
+| `blanks` | `make-string`, or `string-pad` | Already a thin `make-string` wrapper. |
+| `string-fill-paragraph` | `string-fill` | Standard takes an explicit width. |
+| `string-trim*` and its side variants | `string-trim`, `string-trim-left`, `string-trim-right` | Standard also accepts trim regexps; the `:left`/`:right`/`:both` dispatch is the only extra. |
+| `string-remove-props` | `substring-no-properties` | Already self-declared obsolete. Differs only in stripping destructively in place rather than copying. |
+
+### Differ in edge cases — do not substitute blindly
+
+These look replaceable but are not, and the difference is easy to miss.
+
+| Local | Nearest standard | Divergence |
+| --- | --- | --- |
+| `listify` | `ensure-list` | **Interpreted lambdas**: `(lambda () nil)` is itself a list, so `ensure-list` returns it unwrapped while `listify` wraps it. **Vectors**: `listify` coerces element-wise to `(1 2)`; `ensure-list` wraps to `([1 2])`. Byte-compiled lambdas happen to agree. |
+| `flatten` | `flatten-tree` | Agree on full flattening, including nil removal, but `flatten` takes a `LEVELS` argument for partial flattening that has no standard equivalent. |
+| `substring*` | `substring` | Standard `substring` already supports negative indices, so that is no longer a reason to keep this. They diverge only out of range: `substring*` wraps via `mod` and silently returns a value where `substring` signals `args-out-of-range`. Decide whether that masking is wanted before retiring. |
+| `blank-p` | `string-blank-p` | `blank-p` returns a boolean; `string-blank-p` returns a match position. Interchangeable in conditionals, not under `equal`. |
+| `constantly` | `always` | `always` only covers the constantly-`t` case; `constantly` builds a closure returning any value. |
+| `pure-string` | `substring-no-properties` | Despite its docstring, `pure-string` does not strip text properties: its string branch returns the argument unchanged. Its other branch unwraps a non-string sequence to its first element, which is unrelated to formatting. |
+
+### Still first-party
+
+No standard equivalent found: `multiply-string` (string repetition),
+`not-empty`, `concat*` and `andcat` (keyword-driven joining beyond
+`string-join`), the `split-string-*` family, and the BSG, UUID, alphabet,
+tab-formatting, and literary-number helpers.
