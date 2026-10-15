@@ -1,6 +1,16 @@
+;;; mb-utils-buffer.el --- Buffer and region utility functions -*- lexical-binding: t; -*-
+
+(require 'cl-lib)
+(require 'subr-x)
+(require 'thingatpt)
+(require 'mb-utils-iso-time)
+(require 'mb-utils-strings)
+
+;;; Code:
+
 (cl-defun empty-buffer-p (&optional (buffer (current-buffer)))
-  (with-buffer buffer
-    (empty-string-p (buffer-string))))
+  (with-current-buffer buffer
+    (= (buffer-size) 0)))
 ;;(empty-buffer-p)
 
 (cl-defun buffer-major-mode (buffer-or-name)
@@ -13,11 +23,13 @@ The result type is SYMBOL."
   (eql (buffer-major-mode buffer-or-name) mode))
 
 (cl-defun buffer-file-name-nondirectory (&optional (buffer (current-buffer)))
-  (file-name-nondirectory (buffer-file-name buffer)))
+  (with-current-buffer buffer
+    (file-name-nondirectory buffer-file-name)))
 ;;(buffer-file-name-nondirectory)
 
 (cl-defun buffer-directory (&optional (buffer (current-buffer)))
-  (file-name-directory (buffer-file-name buffer)))
+  (with-current-buffer buffer
+    (file-name-directory buffer-file-name)))
 ;;(buffer-directory)
 ;;(def-edebug-spec buffer-directory (&optional (symbolp form)))
 
@@ -31,23 +43,22 @@ The result type is SYMBOL."
 ;;(region-end*)
 
 (cl-defun region (&optional force)
-  (list (region-beginning*) (region-end*)))
+  (list (region-beginning* force) (region-end* force)))
 ;;(region)
 
 (cl-defun mark-region (beg-or-region &optional end)
-  (if (not end)
-    (apply #'mark-region beg-or-region)
-    (push-mark beg-or-region nil t)
-    (goto-char end)))
+  (unless end
+    (setq end (cl-second beg-or-region)
+	  beg-or-region (cl-first beg-or-region)))
+  (push-mark beg-or-region nil t)
+  (goto-char end))
 
 (cl-defun marked-text-region (&optional (buffer (current-buffer)))
   "Returns nil if mark is not active, else it returns the marked text.
-The function operates on BUFFER which defaults to the current
-pbuffer. The marked text is returned without text properties iff
-WITH-PROPERTIES is nil."
-  (and mark-active
-       (with-buffer buffer
-	 (list (region-beginning* t) (region-end*)))))
+The function operates on BUFFER, which defaults to the current buffer."
+  (with-current-buffer buffer
+    (and mark-active
+	 (list (region-beginning* t) (region-end* t)))))
 ;;(marked-text-region)
 
 (cl-defun marked-text (&optional with-properties (buffer (current-buffer)))
@@ -55,21 +66,29 @@ WITH-PROPERTIES is nil."
 The function operates on BUFFER which defaults to the current
 buffer. The marked text is returned without text properties iff
 WITH-PROPERTIES is nil."
-  (awhen (marked-text-region buffer)
-    (apply (if with-properties #'buffer-substring #'buffer-substring-no-properties) it)))
+  (let ((region (marked-text-region buffer)))
+    (when region
+      (with-current-buffer buffer
+	(apply (if with-properties
+		   #'buffer-substring
+		 #'buffer-substring-no-properties)
+	       region)))))
 ;;(marked-text)
 
 (cl-defun buffer-clear (&optional (buffer (current-buffer)))
-  (kill-region (point-min) (point-max)))
+  (with-current-buffer buffer
+    (kill-region (point-min) (point-max))))
 
 (cl-defmacro buffer-do-regions (beg end (regexp &optional (subexp 0)) &rest body)
   "With current buffer. Start at min point and traverse buffer in
 regions defined by REGEXP. For each region, BEG and END are set to the
 end point that defines the region, before the BODY forms are
 executed. No validation checks in this version."
-  (with-gensyms (gregexp gsubexp)
+  (cl-with-gensyms (gregexp gsubexp)
     `(let ((,gregexp ,regexp)
-	   (,gsubexp ,subexp))
+	   (,gsubexp ,subexp)
+	   ,beg
+	   ,end)
        (save-excursion
 	 (goto-char (point-min))
 	 (while (re-search-forward ,gregexp nil t)
@@ -80,10 +99,10 @@ executed. No validation checks in this version."
 
 (cl-defun buffer-tail (&optional (n 10) (buffer (current-buffer)))
   "Returns a string containing the N last lines in buffer"
-  (with-buffer buffer
+  (with-current-buffer buffer
     (save-excursion
       (goto-char (point-max))
-      (previous-line n)
+      (forward-line (- n))
       (buffer-substring-no-properties (point) (point-max)))))
 
 (cl-defun buffer-line-point (line)
@@ -98,31 +117,30 @@ executed. No validation checks in this version."
   (save-excursion
     (cond ((< line 0) 
 	       (goto-char (point-max))
-	       (previous-line (- line))
+	       (forward-line line)
 	       (beginning-of-line))
 	  (t
 	   (goto-char (point-min))
-	   (next-line line)
+	   (forward-line line)
 	   (beginning-of-line)))
     (point)))
 ;;(buffer-line-point 1)
 
-(cl-defun buffer-paragraph-point (line)
+(cl-defun buffer-paragraph-point (paragraph)
   "Returns point at beginning of the current buffer's n'th PARAGRAPH.
   If PARAGRAPH is negative, it is interpreted as the n'th last PARAGRAPH in
   buffer. For large buffers this is also a faster way to identify
   the point. Note that 0 returns beginning of first paragraph, -1
   means beginning of last paragraph.
 TODO: some magic with trailing newline."
-  (let ((old-point (point))
-	(result (cond ((< line 0) 
-		       (goto-char (point-max))
-		       (backward-paragraph (- line)))
-		      (t
-		       (goto-char (point-min))
-		       (forward-paragraph line)))))
-    (goto-char old-point)
-    result))
+  (save-excursion
+    (if (< paragraph 0)
+	(progn
+	  (goto-char (point-max))
+	  (backward-paragraph (- paragraph)))
+      (goto-char (point-min))
+      (forward-paragraph paragraph))
+    (point)))
 
 (cl-defun rpoint (&optional (point (point)))
   "Same as `point' but accepts negative argument POINT. If POINT
@@ -185,24 +203,26 @@ Note that line numbers and paragraph numbers (check) starts from base 0."
 
 (cl-defun next-line-point () "Return position of point after nextline"
   (save-excursion
-    (next-line 1)
+    (forward-line 1)
     (point)))
 
 
 ;;; Beginning / end of helper functions 
 (cl-defun bo-thing (thing &optional n)
   "Move to the beginning of the current THING and return point."
-  (awhen (bounds-of-thing-at-point thing)
-    (goto-char (car it))
-    (when n (forward-thing thing (- 1 n)))
-    (point)))
+  (let ((bounds (bounds-of-thing-at-point thing)))
+    (when bounds
+      (goto-char (car bounds))
+      (when n (forward-thing thing (- 1 n)))
+      (point))))
 
 (cl-defun eo-thing (thing &optional n)
   "Move to the end of the current word and return POINT."
-  (awhen (bounds-of-thing-at-point thing)
-    (goto-char (cdr it))
-    (when n (forward-thing thing (1- n)))
-    (point)))
+  (let ((bounds (bounds-of-thing-at-point thing)))
+    (when bounds
+      (goto-char (cdr bounds))
+      (when n (forward-thing thing (1- n)))
+      (point))))
 
 
 ;;; Sexp stuff
@@ -276,7 +296,7 @@ For optional argument point, see `region-replace-raw'."
   (interactive "r")
   (string-lines (region-string beg end)))
 
-(cl-defun region-as-line-strings (beg end)
+(cl-defun region-as-line-strings (_beg _end)
   (interactive "r")
   (warn "Deprecated. Use REGION-LINES instead."))
 
@@ -290,21 +310,24 @@ For optional argument point, see `region-replace-raw'."
 If optional ENSURE-NEWLINE-P is not nil, then insert a newline at the
 end of buffer if not already present."
   (goto-char (point-max))
-  (when (and ensure-newline-p (plusp (current-column)))
+  (when (and ensure-newline-p (cl-plusp (current-column)))
     (newline))
   (point))
 ;;(save-excursion (eob))
 
 (cl-defun buffer-region (&optional (buffer (current-buffer)))
-  (with-buffer buffer (save-excursion (list (bob) (eob)))))
+  (with-current-buffer buffer
+    (save-excursion (list (bob) (eob)))))
 ;;(buffer-region)
 
 (cl-defun buffer-lines (&optional (buffer (current-buffer)))
-  (with-buffer buffer (save-excursion (region-lines (bob) (eob)))))
+  (with-current-buffer buffer
+    (save-excursion (region-lines (bob) (eob)))))
 ;;(buffer-lines)
 
 (cl-defun buffer-string* (&optional (buffer (current-buffer)))
-  (with-buffer buffer (buffer-string-no-properties)))
+  (with-current-buffer buffer
+    (buffer-substring-no-properties (point-min) (point-max))))
 ;;(buffer-lines)
 
 ;;; Paragraph stuff
@@ -348,8 +371,10 @@ If RESTRICT-TO-CURRENT-FIELD is true, the function constrains
 point to the current field, see `beginning-of-line'"
   (let ((inhibit-field-text-motion (not restrict-to-current-field)))
     (if linum
-      (goto-line linum)
-      (if point (goto-char point)))
+	(progn
+	  (goto-char (point-min))
+	  (forward-line (1- linum)))
+    (if point (goto-char point)))
     (beginning-of-line (1+ offset))
     (point)))
 ;;(bol :point 9867)
@@ -359,7 +384,9 @@ point to the current field, see `beginning-of-line'"
 For RESTRICT-TO-CURRENT-FIELD, see `bol'."
   (let ((inhibit-field-text-motion (not restrict-to-current-field)))
     (if linum
-      (goto-line linum)
+	(progn
+	  (goto-char (point-min))
+	  (forward-line (1- linum)))
       (if point (goto-char point)))
     (end-of-line (1+ offset))
     (point)))
@@ -375,7 +402,7 @@ Note: if you are not using any of the keyword arguments, see
     (warn "bol* called without keyword arguments from function: %s"
 	  ;; Note that 6 is carefully calculated from the current form
 	  ;; hierarchy
-	  (second (backtrace-frame 6))))
+	  (cl-second (backtrace-frame 6))))
   (save-excursion (apply #'bol args)))
 
 (cl-defun eol* (&rest args)
@@ -387,16 +414,17 @@ Note: if you are not using any of the keyword arguments, see
     (warn "eol* called without keyword arguments from function: %s"
 	  ;; Note that 6 is carefully calculated from the current form
 	  ;; hierarchy
-	  (second (backtrace-frame 6))))
+	  (cl-second (backtrace-frame 6))))
   (save-excursion (apply #'eol args)))
 
 (cl-defun line-region (&optional linums (buffer (current-buffer)))
   "Returns the region covering the current line in BUFFER.
 If LINUMS is specified it returns the region covering those
 lines."
-  (with-buffer buffer
-    (list (bol :linum (and linums (cl-reduce #'min (listify linums))))
-	  (eol :linum (and linums (cl-reduce #'max (listify linums)))))))
+  (with-current-buffer buffer
+    (let ((lines (if (listp linums) linums (list linums))))
+      (list (bol :linum (and linums (cl-reduce #'min lines)))
+	    (eol :linum (and linums (cl-reduce #'max lines)))))))
 ;;(line-region)
 
 (cl-defun line-string (&key to-point from-point
@@ -408,13 +436,14 @@ returned. If FROM-POINT is true, only the part of line after
 `point' is returned. If WITH-PROPERTIES is true, properties are
 included in the returned string. For RESTRICT-TO-CURRENT-FIELD,
 see `bol'"
-  (cl-assert (nand to-point from-point)
+  (cl-assert (not (and to-point from-point))
 	  "Both to-point and from-point cannot be non-nil!")
   (save-excursion
+    (goto-char point)
     (let* ((end (eol :restrict-to-current-field restrict-to-current-field))
 	   (beg (bol :restrict-to-current-field restrict-to-current-field)))
-      (cond (to-point (minf end point))
-	    (from-point (maxf beg point)))
+      (cond (to-point (setq end (min end point)))
+	    (from-point (setq beg (max beg point))))
       (if with-properties
 	(buffer-substring beg end)
 	(buffer-substring-no-properties beg end)))))
@@ -445,12 +474,12 @@ see `bol'"
 
 (cl-defun bod* (&optional n)
   "Return the POINT at the beginning of the current defun."
-  (save-excursion (bod)))
+  (save-excursion (bod n)))
 ;;(bod*)
 
 (cl-defun eod* (&optional n)
   "Return the POINT at the end of the current defun."
-  (save-excursion (eod)))
+  (save-excursion (eod n)))
 ;;(eod*)
 
 (cl-defun defun-region ()
@@ -473,12 +502,12 @@ The return value is a pair of points \(START END\)."
 
 (cl-defun bof* (&optional n)
   "Return the POINT at the beginning of the current form."
-  (save-excursion (bof)))
+  (save-excursion (bof n)))
 ;;(bof*)
 
 (cl-defun eof* (&optional n)
   "Return the POINT at the end of the current form."
-  (save-excursion (eof)))
+  (save-excursion (eof n)))
 ;;(eof*)
 
 ;;; word
@@ -551,9 +580,20 @@ See arbeidslog for an example of a time paragraph"
 ;; A few helpers
 (defvar *sexp-statt-word* nil)
 
+(defun mb-buffer--count-sexps (beg end)
+  "Return the number of sexps between BEG and END."
+  (save-excursion
+    (save-restriction
+      (narrow-to-region beg end)
+      (goto-char (point-min))
+      (cl-loop while (condition-case nil
+			 (progn (forward-sexp 1) t)
+		       (scan-error nil))
+	       count 1))))
+
 (cl-defun count-w-or-s (beg end)
   (if *sexp-statt-word*
-    (count-sexps-region beg end)
+    (mb-buffer--count-sexps beg end)
     (count-words beg end)))
 
 (cl-defun transpose-w-or-s (n)
@@ -570,7 +610,7 @@ See arbeidslog for an example of a time paragraph"
   "Rotate words in region from BEG to END N times.
 N is optional, and is 1 by default."
   (let ((nwords (count-w-or-s beg end)))
-    (when (plusp nwords)
+    (when (cl-plusp nwords)
       (save-excursion
 	(cl-loop repeat (mod (- n) nwords)
 		 do (goto-char beg)
@@ -598,7 +638,7 @@ If region is not active this function is equivalent with
   "Reverse words in region from BEG to END.
 Helper function for `reverse-words'."
   (let ((n (count-w-or-s beg end)))
-    (when (plusp n)
+    (when (cl-plusp n)
       (save-excursion
 	(goto-char beg)
 	(cl-loop for i from (1- n) downto 1
@@ -621,8 +661,6 @@ If region is not active this function is equivalent with
   (interactive "^p")
   (let ((*sexp-statt-word* t))
     (reverse-words n)))
-
-(define-key global-map "\M-t" #'reverse-words)
 
 (defalias 'reverse-lines #'reverse-region)
 
@@ -654,25 +692,21 @@ emacs-shortcut-to-switch-from-a-horizontal-split-to-a-vertical-split-in-one-move
       (select-window first-win)
       (if this-win-2nd (other-window 1))))))
 
-(global-set-key (kbd "C-x |") 'toggle-window-split)
-
 (cl-defun just-one-blank-line (&optional n)
   "Delete all blank lines above and below current leaving one blank line
 \(or N blank lines\).
 Should this method be interactive?"
   (newline 3)
-  (previous-line 1)
+(forward-line -1)
   (delete-blank-lines)
-  (when (and n (numberp n) (plusp n))
+  (when (and n (numberp n) (cl-plusp n))
     (newline (* 2 (1- n)))
-    (previous-line (1- n))))
+  (forward-line (- 1 n))))
 
 (defmacro with-other-window (&rest body)
   "Eval BODY in the other window's buffer."
-  `(prog2
-       (other-window 1)
-       (progn ,@body)
-     (other-window 1)))
+  `(with-selected-window (next-window)
+     ,@body))
 
 (cl-defun comment-region* (beg end &optional arg)
   (interactive "*r\nP")
@@ -685,12 +719,6 @@ Should this method be interactive?"
   (if (use-region-p)
     (uncomment-region beg end arg)
     (uncomment-region (line-beginning-position) (line-end-position) arg)))
-
-;;; Smart comment stuff
-(cl-defun commented-string-p (string)
-  "Returns nil iff current line is not commented"
-  (warn "commented-string-p is not supported!")
-  (string-match* "^[[:space:]]*;" string))
 
 (cl-defun commented-line-p ()
   "Returns nil iff current line is not commented"
@@ -705,11 +733,14 @@ Should this method be interactive?"
      (comment-region beg end arg))))
 
 (cl-defun toggle-comment-region (beg end &optional arg)
-  (save-excursion
-    (goto-char beg)
-    (while (< (point) end)
-      (toggle-comment-line arg)
-      (forward-line 1))))
+  (let ((end-marker (copy-marker end)))
+    (unwind-protect
+	(save-excursion
+	  (goto-char beg)
+	  (while (< (point) end-marker)
+	    (toggle-comment-line arg)
+	    (forward-line 1)))
+      (set-marker end-marker nil))))
 
 (cl-defun toggle-comment-region* (beg end &optional arg)
   (interactive "*r\nP")
@@ -721,8 +752,8 @@ Should this method be interactive?"
 (cl-defun save-as-1 (filename)
   "Write current buffer file to FILENAME, and rename buffer.
 It assumes that there will be no write conflicts."
-  (copy-file (buffer-file-name) new)
-  (set-visited-file-name new)
+  (copy-file (buffer-file-name) filename)
+  (set-visited-file-name filename)
   (set-buffer-modified-p nil))
 
 (cl-defun save-as ()
@@ -741,9 +772,10 @@ It assumes that there will be no write conflicts."
   "Create a temporary file and evaluate BODY there.
 Afterwards delete the file."
   `(let ((file (make-temp-file "qwe")))
-     (with-file file
-       (message "buffer: %s" ,(buffer-directory))
-       (prog1 (progn ,@body)
+     (unwind-protect
+	 (with-temp-file file
+	   ,@body)
+       (when (file-exists-p file)
 	 (delete-file file)))))
 ;;(within-temp-file (+ 2 2))
 (def-edebug-spec within-temp-file progn)
@@ -761,8 +793,8 @@ copied is displayed."
   "Return last item added to `kill-ring'.
 If WITH-PROPERTIES is not nil, keep string properties to returned object"
   (if with-properties
-    (car kill-ring)
-    (string-remove-props (car kill-ring))))
+      (car kill-ring)
+    (substring-no-properties (car kill-ring))))
 ;;(clipboard-to-string t)
 
 (cl-defun buffer-name-to-clipboard ()
@@ -777,12 +809,12 @@ If WITH-PROPERTIES is not nil, keep string properties to returned object"
   (interactive)
   (let ((new-lines (sort-strings-with-comments (buffer-lines) comment-start)))
     (apply #'delete-region (buffer-region))
-    (insert (concat* new-lines :in "\n"))))
+    (insert (string-join new-lines "\n"))))
 ;;(sort-lines-with-comments)
 
 (cl-defun transpose-string (string)
   "Insert a newline between each character in STRING"
-  (cl-coerce (nbutlast (zip (cl-coerce string 'list) 10)) 'string))
+  (string-join (mapcar #'char-to-string (string-to-list string)) "\n"))
 
 (cl-defun insert-alphabet (n)
   "Insert alphabet at point"
@@ -796,3 +828,5 @@ If WITH-PROPERTIES is not nil, keep string properties to returned object"
     (insert string)))
 
 (provide 'mb-utils-buffer)
+
+;;; mb-utils-buffer.el ends here

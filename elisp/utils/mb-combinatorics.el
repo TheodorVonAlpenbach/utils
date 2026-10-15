@@ -73,14 +73,8 @@ resulting sequence."
   (mapcar (bind #'/ (apply #'cl-gcd ratio)) ratio))
 ;;(simplify-ratio '(6 10))
 
-(cl-defun divisor-function (n &optional (order 1))
-  (Ln-sum (all-factors n) order))
-;;(divisor-function 220)
-;;(divisor-function 284)
-
 (cl-defun aliquot-sum (n)
-  (- (divisor-function n 1) n))
-(cl-defun aliquot-sum (n) (sum (all-factors n t)))
+  (sum (all-factors n t)))
 ;;(mapcar #'aliquot-sum (1-n 10))
 
 (cl-defun amicable-numbers-p (x y)

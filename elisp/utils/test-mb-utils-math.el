@@ -47,6 +47,12 @@
   (should (equal (sum '(1 2 3 4) :operator #'+ :start 1 :initial-value 1) 10))
   (should (equal (sum '(1 2 3 4) :operator #'* :start 1 :initial-value 1) 24)))
 
+(ert-deftest mb-utils-math-all-factors ()
+  (should (equal (all-factors 1) '(1)))
+  (should (equal (all-factors 1 t) nil))
+  (should (equal (all-factors 12) '(1 2 3 4 6 12)))
+  (should (equal (all-factors 12 t) '(1 2 3 4 6))))
+
 (ert-deftest mb-utils-math-floor-to ()
   "Test of `floor-to'"
   (should (equal (floor-to 70 25) 50))

@@ -73,7 +73,7 @@ Keywords supported: :operator :start :end :from-end
   "Return the Ln-sum of order ORDER for SEQUENCE. 
 See `sum' for a descriptions of the keywords."
   (apply #'sum (mapcar (bind #'expt order) sequence) cl-keys))
-;;(L-sum '(1 2 3) 2)
+;;(Ln-sum '(1 2 3) 2)
 
 (cl-defun Ln-norm (sequence order &rest cl-keys)
   "Return the Ln-norm of order ORDER for SEQUENCE.
@@ -529,10 +529,17 @@ See `cycle-badness' for the measure of a good cycle."
 ;;(apply #'* (factorize 1047300))
 ;;(/ 288 36)
 
-(cl-defun all-factors (n)
-  (cl-sort (cl-remove-duplicates
-	       (mapcar #'product (power-set (factorize n))))
+(cl-defun all-factors--including-n (n)
+  "A helper for `all-factors'"
+  (cl-sort (cl-remove-duplicates (mapcar #'product (power-set (factorize n))))
     #'<))
+
+(cl-defun all-factors (n &optional proper-p)
+  "Return the positive factors of N in ascending order.
+If PROPER-P is non-nil, exclude N itself."
+  (if proper-p
+    (butlast (all-factors--including-n n))
+    (all-factors--including-n n)))
 ;;(all-factors 120)
 ;;(all-factors 284)
 

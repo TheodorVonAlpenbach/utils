@@ -251,6 +251,10 @@ The first subset is intentionally conservative:
 * [`test-mb-utils-io.el`](./utils/test-mb-utils-io.el): ten ERT tests for text
   and binary file I/O, temporary-file cleanup, directory binding, CSV parsing,
   field iteration, and serialization.
+* [`test-mb-utils-buffer.el`](./utils/test-mb-utils-buffer.el): fifteen ERT
+  tests for buffer metadata, marks and regions, line navigation, editing,
+  comments, word transformations, temporary files, save-as behavior, and the
+  kill ring.
 * [`test-mb-ert.el`](./mode-extensions/test-mb-ert.el): nine ERT tests for test
   filename recognition, source/test name swapping, definition navigation, and
   ordered test discovery.
@@ -335,12 +339,12 @@ also remain explicit decisions before retirement or compatibility work begins.
 ### Initial utility migrations
 
 The closed-interval, envelope, set-helper, file, I/O, tree, thing-at-point,
-economy, additional-math, general-math, combinatorics, anaphora, general, list,
-sequence, string, time, and ISO-time modules are
+economy, additional-math, general-math, combinatorics, buffer, anaphora,
+general, list, sequence, string, time, and ISO-time modules are
 independently loadable. Their validation comprises:
 
-* a clean `emacs -Q` load of all eighteen utility features and the ERT tooling;
-* 248 passing ERT tests from the batch entry point;
+* a clean `emacs -Q` load of all nineteen utility features and the ERT tooling;
+* 264 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -474,6 +478,16 @@ The UEFA recursion is characterized with a small deterministic fixture rather
 than only the historical tournament data. Its 13 namespaced tests run in the
 maintained baseline.
 
+[`mb-utils-buffer.el`](./utils/mb-utils-buffer.el) now loads independently
+with lexical binding and explicit dependencies. Loading it no longer changes
+the global `M-t` or `C-x |` bindings. Repairs cover region marking, operations
+on non-current buffers, paragraph and line positions, optional navigation
+counts, line extraction around an explicit point, comment-region termination,
+exception-safe temporary-file cleanup, and `save-as-1` using its argument.
+The unsupported `commented-string-p` definition was removed because it
+shadowed the maintained string utility. Its 15 namespaced tests run in the
+maintained baseline.
+
 [`mb-things.el`](./utils/mb-things.el) now loads independently with lexical
 binding and built-in dependencies instead of pulling in the broad
 `mb-utils-div` and `mb-utils-time` stacks. Its small date, clock, case, and
@@ -544,6 +558,8 @@ matched. They are safe retirement candidates once callers are checked.
 | `string-to-bytes` | `string-to-list` | The local wrapper now delegates directly to the standard function. |
 | `int-to-hex` | `format` with `%x` | The helper only adds optional zero-padding. |
 | `current-year` | `format-time-string` with `%Y`, or `decoded-time-year` | The local helper now uses the standard decoded-time accessor. |
+| `reverse-lines` | `reverse-region` | The local name is only an alias for the standard operation. |
+| `buffer-string*` | `buffer-substring-no-properties` from `point-min` to `point-max` | The local helper only adds an optional buffer argument. |
 
 ### Differ in edge cases — do not substitute blindly
 
@@ -566,14 +582,14 @@ These look replaceable but are not, and the difference is easy to miss.
 | `jstime` | `seconds-to-time` plus `decode-time` | The standard pair handles Unix timestamps directly. The local result instead uses zero-based month and day-within-month fields and supports a custom base year. |
 | `leap-year-p` and `days-in-month` | `calendar-leap-year-p` and `calendar-last-day-of-month` | The local month argument is zero-based, whereas the calendar API uses months 1 through 12. |
 
-### Internal consolidation candidates
+### Internal consolidations
 
 These are not replacements by standard library functions, but local APIs whose
-responsibilities overlap unnecessarily:
+overlapping responsibilities have been consolidated:
 
-| Current APIs | Proposed consolidation | Note |
+| Previous APIs | Consolidation | Note |
 | --- | --- | --- |
-| `all-factors`, `aliquot-sum`, and `divisor-function` | Add an optional proper-divisor flag to `all-factors`; define `aliquot-sum` as `(sum (all-factors n t))`; retire `divisor-function` | The current amicable-number implementation only needs proper divisors. `divisor-function` is a thin power-sum wrapper and is not otherwise a standard-library compatibility layer; check callers before removing it. |
+| `all-factors`, `aliquot-sum`, and `divisor-function` | `all-factors` accepts an optional proper-divisor flag; `aliquot-sum` is `(sum (all-factors n t))`; `divisor-function` was retired | The only callers of `divisor-function` were the superseded `aliquot-sum` definition and examples beside it. |
 
 ### Still first-party
 
