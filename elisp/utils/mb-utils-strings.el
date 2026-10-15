@@ -1,7 +1,14 @@
-(require 'mb-utils-sets)
+;;; mb-utils-strings.el --- String utilities -*- lexical-binding: t; -*-
+
+(require 'cl-lib)
+(require 'subr-x)
+(require 'mb-lists)
 (require 'mb-sequences)
+(require 'mb-utils-div)
 (require 'mb-utils-math)
-;; README
+(require 'mb-utils-sets)
+
+;;; Code:
 
 (cl-defun string> (string1 string2)
   "Returns non-nil iif string1 > string2. See `string<'"
@@ -73,7 +80,8 @@ starts with two upper case characters, the entire result is upcased. If
 PATTERN starts with an upcase character followed by a downcase, the
 result is capitalized. Else the entire result is downcased."
   (if (upper-case-p (char pattern 0))
-    (if (upper-case-p (char pattern 1))
+    (if (and (> (length pattern) 1)
+	     (upper-case-p (char pattern 1)))
       (upcase string)
       (capitalize string))
     (downcase string)))
@@ -81,22 +89,22 @@ result is capitalized. Else the entire result is downcased."
 (cl-defun pure-string (string)
   "Removes formatting from STRING and returns result."
   (cl-typecase string
-    (sequence (elt string 0))
     (string string)
+    (sequence (elt string 0))
     (otherwise (error "unknown string format"))))
 
 (cl-defun blanks (n &optional (char 32))
-  "Return a sting made up of N spaces.
-This is a shortcut for \(make-string N 32\))"
-  (make-string n 32))
+  "Return a string made up of N copies of CHAR."
+  (make-string n char))
 
 (cl-defun empty-string-p (string)
   (and (stringp string)
-       (zerop (length string))))
+       (string-empty-p string)))
 ;;(empty-string-p "")
 
 (cl-defun not-empty (string)
-  "Returns 'nil if STRING is empty. Otherwise returns STRING. Useful
+  "Return nil if STRING is empty, otherwise return STRING.
+This is useful
 in connection with e.g. `or'"
   (and (not (empty-string-p string))
        string))
@@ -109,13 +117,13 @@ in connection with e.g. `or'"
 (cl-defun string-match-end (regexp string &optional start)
   "Same as `string-match', except that it returns the position after
 match."
-  (let ((pos (string-match regexp string)))
+  (let ((pos (string-match regexp string start)))
     (if pos (match-end 0) nil)))
 
 (cl-defun split-string-at-pos (string &rest positions)
   (warn "split-string-at-pos is deprecated.
 Use `split-at-position' instead. Called from %s"
-	(second (backtrace-frame 6)))
+	(cl-second (backtrace-frame 6)))
   (apply #'split-at-position string positions))
 ;;(length (split-string-at-pos "qweqweqwe" 1))
 
@@ -140,8 +148,8 @@ STRING that matches REGEXP"
 (cl-defun split-string-modify-positions (positions with-separator)
   (cl-case with-separator
     ((:none nil) (cut (cons 0 (flatten positions)) 2 t))
-    (:left (cut (cons 0 (repeat-elements (mapcar #'first positions))) 2 t))
-    (:right (cut (cons 0 (repeat-elements (mapcar #'second positions))) 2 t))
+    (:left (cut (cons 0 (repeat-elements (mapcar #'cl-first positions))) 2 t))
+    (:right (cut (cons 0 (repeat-elements (mapcar #'cl-second positions))) 2 t))
     (:only positions)))
 
 (cl-defun split-string* (string &optional separators (with-separator :none))
@@ -151,7 +159,7 @@ string is prefixed to the split result at that point. A similar
 effect is achived with value :right. If WITH-SEPARATOR is :only,
 only the matching separators are returned"
   (mapcar #'(lambda (x) 
-	      (substring string (first x) (second x))) 
+	      (substring string (cl-first x) (cl-second x)))
 	  (split-string-modify-positions
 	   (regexp-consecutive-matches (or separators "[ \f\t\n\r\v]+") string)
 	   with-separator)))
@@ -164,15 +172,15 @@ ENDP is non-nil, the split is at end of regexp match."
     (let* ((pos (if endp
 		  (string-match-end regexp string)
 		  (string-match regexp string))))
-      (values (substring string 0 pos)
-	      (if pos (substring string pos) "")
-	      pos))
+      (cl-values (substring string 0 pos)
+		 (if pos (substring string pos) "")
+		 pos))
     (let ((res-first (split-string-2 string regexp nil))
 	  (res-second (split-string-2 string regexp t)))
-      (values (first res-first)
-	      (second res-second)
-	      (third res-first)
-	      (third res-second)))))
+      (cl-values (cl-first res-first)
+		 (cl-second res-second)
+		 (cl-third res-first)
+		 (cl-third res-second)))))
 ;;(split-string-2 "abcdef" "g" nil t)
 
 (cl-defun split-string-3 (string regexp-interval)
@@ -189,7 +197,7 @@ the result is undefined."
       (split-string-2 (if match1 rest beg)
 		      (interval-r regexp-interval) 
 		      (closed-right-p regexp-interval))
-    (values (if match1 beg "") mid end (and match1 match2)))))
+    (cl-values (if match1 beg "") mid end (and match1 match2)))))
 ;;(split-string-3 "abcdef" (interval-co "b" "d"))
 
 ;;; split string regexp
@@ -200,11 +208,10 @@ the result is undefined."
 ;;(split-string-once "gabcdg" "\\`g")
 
 (cl-defun split-string-regexp-1 (string regexp)
-  (cl-loop for s = string then (third split)
+  (cl-loop for s = string then (cl-third split)
 	for split = (split-string-once s regexp)
 	while split
 	collect split))
-(split-string-regexp-1 "babcdbefgb" "b")
 
 (cl-defun split-string-regexp-list (string regexp &optional trim (side :both))
   "Splits STRING at places where REGEXP matches a substring of STRING.
@@ -235,7 +242,7 @@ PREFIXED is nil and to \(\(substring-1 regexp-match-1\)
 ... \(substring-N regexp-match-N\)\) if it is true.
 
 For the use of TRIM and SEPARATOR, see `split-string-regexp-list'"
-  (cut (funcall (if prefixed #'rest #'butlast)
+  (cut (funcall (if prefixed #'cl-rest #'butlast)
 	 (split-string-regexp-list string regexp trim side))))
 ;;(split-string-regexp-pairs "babcdbefgb" "b" :trim nil :side :left)
 
@@ -248,16 +255,10 @@ If OMIT-NULLS is true, it detracts from the result all substrings
 that are empty strings.
 
 For the use of TRIM and SEPARATOR, see `split-string-regexp-list'."
-  (let ((res (first
+  (let ((res (cl-first
 	      (nunzip (split-string-regexp-list string regexp trim side)))))
     (if omit-nulls (cl-delete "" res :test #'string=) res)))
 ;;(split-string-regexp "bab cd bqwerb" "b" t nil)
-
-(cl-defun substring-intv (string regexp-interval &optional (cl-count 1))
-  "Returns substring of STRING matching REGEXP-INTERVAL."
-  (cl-assert (>= count 0))
-  (multiple-value-call #'(lambda (beg mid end match) (if match mid ""))
-		       (split-string-3 string regexp-interval)))
 
 (cl-defun substring-intv (string regexp-interval &optional (n :once))
   "Returns substring of STRING matching REGEXP-INTERVAL
@@ -266,7 +267,7 @@ is :ONCE, the method returns either the first match or an empty
 string. If N is :ALL it returns all matches in a list of strings.
 If N is a non-negative it returns the the first N matches in a
 list of strings."
-  (let ((cl-count (cl-case n 
+  (let ((count (cl-case n
 		 (:once 1)
 		 (:all most-positive-fixnum)
 		 (t n)))
@@ -274,7 +275,7 @@ list of strings."
     (cl-assert (and (numberp count) (>= count 0)))
     (while (and (> (length string) 0)
 		(> count 0))
-      (cl-multiple-value-bind (beg mid end match)
+      (cl-multiple-value-bind (_beg mid end match)
 	  (split-string-3 string regexp-interval)
 	(if match
 	  (push mid res)
@@ -282,14 +283,14 @@ list of strings."
 	(setq string end))
       (cl-decf count))
     (if (eq n :once)
-      (if (first res) (first res) "")
+      (if (cl-first res) (cl-first res) "")
       (nreverse res))))
 ;(substring-intv "abcdefgabcdefg" (interval-oc "b" "d"))
 
 (cl-defun string-replace-intv (string regexp-interval &optional (newstring ""))
   "Replaces all substrings in STRING that matches REGEXP-INTERVAL with
 NEWSTRING (empty string by default)."
-  (cl-multiple-value-bind (beg mid end match)
+  (cl-multiple-value-bind (beg _mid end match)
       (split-string-3 string regexp-interval)
     (if match 
       (concat beg newstring (string-replace-intv end regexp-interval newstring)) 
@@ -304,7 +305,7 @@ NEWSTRING."
     (insert string)
     (goto-char (point-min))
     (while (re-search-forward regexp nil t)
-      (replace-match newstring nil nil))
+      (replace-match newstring preserve-case-p nil))
     (buffer-string)))
 ;;(mb-string-replace (setq string-replace-test-string "") "b" "c")
 
@@ -315,7 +316,7 @@ NEWSTRING."
     (if (/= 3 (length substrings))
       (error "FROM (%d) and TO (%d) arguments are invalid for STRING %s"
 	     string from to)
-      (concat (first substrings) subst-string (third substrings)))))
+      (concat (cl-first substrings) subst-string (cl-third substrings)))))
 ;;(substitute-string "012qwe678" "ewq" 3 6)
 
 (cl-defun string-replace-f (string regexp function)
@@ -339,14 +340,14 @@ result of FUNCTION."
   "Alters STRING according to MAP. A map is an list of pairs
 \(FROM-STRING TO-STRING\). This is very slow"
   (dolist (x map string) 
-    (setq string (mb-string-replace string (first x)
-				 (if (listp (rest x))
-				   (second x) ;cons is a one element list
-				   (rest x)   ;cons is an element
+    (setq string (mb-string-replace string (cl-first x)
+				 (if (listp (cl-rest x))
+				   (cl-second x) ;cons is a one element list
+				   (cl-rest x)   ;cons is an element
 				   )))))
 :;(string-replace-map "Àøå" (list (cons "À" "Æ") (cons "ø" "Ø ")))
 :;(string-replace-map "Àøå"
-:;  (mapcar #'(lambda (x) (cons (first x) (third x))) *iso-latin1-encoding*))
+:;  (mapcar #'(lambda (x) (cons (cl-first x) (cl-third x))) *iso-latin1-encoding*))
 
 (cl-defun string-indent-lines (string indent-string)
   "Prepend all lines in STRING with INDENT-STRING."
@@ -405,8 +406,8 @@ arguments DELIMITER, LAST-DELIMITER, and PAIR-DELIMITER.
 "
   (cl-case (length list)
     (0 "")
-    (1 (car list))
-    (2 (concat (first list) pair-delimiter (second list)))
+    (1 (cl-first list))
+    (2 (concat (cl-first list) pair-delimiter (cl-second list)))
     (t (concat* (butlast list)
 	 :in delimiter
 	 :suf (concat last-delimiter (last-elt list))))))
@@ -428,21 +429,18 @@ arguments DELIMITER, LAST-DELIMITER, and PAIR-DELIMITER.
 
 ;(quote-word)
 
-(define-key global-map "\M-\"" 'quote-word)
-(define-key global-map [(control \")] 'quote-region); går ikke !!!
-
 (defmacro string-case (arg &rest clauses)
   "Same as case, but compares with `string-equal' instead of `eql'."
-  (let ((g (gensym)))
+  (let ((g (cl-gensym "value")))
     `(let ((,g ,arg))
        (cond ,@(mapcar #'(lambda (cl)
-                           (let ((k (car cl)))
+                           (let ((k (cl-first cl)))
                              `(,(cond ((member k '(t otherwise))
                                        t)
                                       ((consp k)
                                        `(cl-member ,g ',k :test #'string=))
                                       (t `(string= ,g ',k)))
-                               (progn ,@(cdr cl)))))
+                               (progn ,@(cl-rest cl)))))
                        clauses)))))
 ;;(string-case "C" (("a" "b") t) (("a" "b" "C") 'qwe))
 ;;(string-case "C" ("C" t) (("a" "b" "C") 'qwe))
@@ -488,7 +486,7 @@ tree. Then a tree of corresponding matches is returned."
   (with-temp-buffer
     (insert string)
     (goto-char (or start (if from-end (point-max) (point-min))))
-    (cl-loop for i below count
+    (cl-loop for i below cl-count
 	     for beg = (funcall (if from-end
 				  #'re-search-backward
 				  #'re-search-forward)
@@ -502,6 +500,7 @@ tree. Then a tree of corresponding matches is returned."
 (cl-defun string-match-exact (regexp string &optional
 					      (num 0) (start 0) (cl-count :once))
   "Returns the part of STRING that matches REGEXP."
+  (ignore cl-count)
   (and (string-match regexp string start)
        (string= (match-string num string) string)
        (match-string num string)))
@@ -519,13 +518,13 @@ tree. Then a tree of corresponding matches is returned."
 ;; that Slime loads. Should consider renaming them to mb-string-*
 (cl-defun string-trim-left* (string &optional regexp)
   "Returns a copy of STRING trimmed at left with REGEXP."
-  (or (third (split-string-once string (mb-trim-regexp regexp :left)))
+  (or (cl-third (split-string-once string (mb-trim-regexp regexp :left)))
       string))
 ;;(string-trim-left* "***qwe" "\\*")
 
 (cl-defun string-trim-right* (string &optional regexp)
   "Returns a copy of STRING trimmed at right with REGEXP."
-  (or (first (split-string-once string (mb-trim-regexp regexp :right)))
+  (or (cl-first (split-string-once string (mb-trim-regexp regexp :right)))
       string))
 ;;(string-trim-right* "qwe***" "\\**")
 
@@ -646,14 +645,13 @@ one applied `fill-paragraph' to it"
 	     ""
 	     (concat long-separator (integer-to-literary-string (mod n 1000))))))
 	((< n (expt 10 12))
-	 (format "%s billion"
+	 (format "%s billion%s"
 	   (integer-to-literary-string (round (/ n 1000000000.0)))
 	   (if (zerop (mod n 1000))
 	     ""
 	     (concat long-separator
 		     (integer-to-literary-string (mod n 1000))))))
 	(t (error "Number %d is not supported" n))))
-(integer-to-literary-string 1234567890)
 
 (defconst +password-special-characters+
   " !\"#$%&'()*+,-./:;<=>?@[\]^_`{|}~"
@@ -719,12 +717,12 @@ you (the other player) win or lose."
        (if (bsg-lost-p left-move)
 	 (list :left left-move)
 	 (list :right (substring string 0 -1)))))
-    (error "%s is not a legal BSG string!")))
+    (error "%s is not a legal BSG string!" string)))
 ;;(bsg-move "101")
 
 (cl-defun format-integer-ranges (integers &optional sorted-p)
   "Return a string that expresses the list INTEGERS in a condensed form.
-E.g. '(1 2 3 6 7 8 11) ==> \"1--3, 6--8, 11\".
+For example, (1 2 3 6 7 8 11) becomes \"1--3, 6--8, 11\".
 
 If SORTED-P is not nil, the function assumes that INTEGERS are
 sorted with #'<.
@@ -734,8 +732,8 @@ See also `group-consequtive-integers'."
     :in ", "
     :key #'(lambda (x)
 	     (if (= (length x) 1)
-	       (number-to-string (first x))
-	       (concat* (list (first x) (last-elt x))
+	       (number-to-string (cl-first x))
+	       (concat* (list (cl-first x) (last-elt x))
 		 :in "--"
 		 :key #'number-to-string)))))
 ;;(format-integer-ranges '(1 2 3 6 7 8 11))
@@ -748,7 +746,8 @@ See also `group-consequtive-integers'."
 ;;(read-whole-string "a b (c d)")
 
 (cl-defun string-head (string &optional (n 1))
-  (lines-to-string (head n (string-lines string))))
+  (let ((lines (string-lines string)))
+    (lines-to-string (cl-subseq lines 0 (min n (length lines))))))
 
 (cl-defun string-tail (string &optional (n 1))
   (lines-to-string (last (string-lines string) n)))
@@ -792,7 +791,7 @@ length."
 (cl-defun split-name (name)
   (cl-destructuring-bind (firsts last)
       (split-at-position (split-string name) -1)
-    (list (concat* firsts :in " ") (car last))))
+    (list (concat* firsts :in " ") (cl-first last))))
 ;;(split-name "Sverre Kristian Valskrå")
 
 ;;; tab format. TODO move this somewhere else
@@ -806,10 +805,11 @@ length."
 ;;(tab-column-type '("qe" "qe"))
 
 (cl-defun tab-column-width (column &optional (type (tab-column-type column)))
-  (awhen (cl-case type 
-	   (string column)
-	   (integer (mapcar #'number-to-string column)))
-    (apply #'max (mapcar #'length it))))
+  (let ((strings (cl-case type
+		   (string column)
+		   (integer (mapcar #'number-to-string column)))))
+    (when strings
+      (apply #'max (mapcar #'length strings)))))
 ;;(tab-column-width '(1 123))
 
 (cl-defun tab-flag (width &optional type)
@@ -822,7 +822,7 @@ length."
 
 (cl-defun tab-format (string-table
 		      &key header (column-separator " ") (underline-char ?=))
-  (let ((first-row (first string-table)))
+  (let ((first-row (cl-first string-table)))
     (when header
       (cl-assert (and (= (length first-row) (length header))
 		      (eql (tab-column-type header) 'string))))
@@ -876,21 +876,22 @@ SEPARATOR"
 ;;(length "b3065a578a7f")
 ;;(uuid-p "594d3459cb99b500132bc742")
 
-(cl-defun commented-string-p (string comment-start &optional empty-is-comment-p)
+(cl-defun commented-string-p (string comment-prefix &optional empty-is-comment-p)
   (or (and empty-is-comment-p (empty-string-p string))
-      (string-match (format "^%s" comment-start) string)))
+      (string-match (format "^%s" comment-prefix) string)))
 ;;(commented-string-p "#!/bin/bash" "#")
 ;;(commented-string-p "" "#" t)
 
-(cl-defun sort-strings-with-comments (strings comment-start)
+(cl-defun sort-strings-with-comments (strings comment-prefix)
   (let ((comments ()))
     (cl-loop for string in strings
-	     if (commented-string-p string comment-start t)
+	     if (commented-string-p string comment-prefix t)
 	     do (push string comments)
 	     else
 	     collect (list (nreverse comments) string) into res
 	     and do (setf comments ())
-	     finally return (flatten (cl-sort res #'string< :key #'second)))))
+	     finally return
+	     (flatten (cl-sort res #'string< :key #'cl-second)))))
 ;;(sort-strings-with-comments (file-lines "~/git/utils/bin/adafind.sh") "#")
 
 (defconst +supported-alphabet-languages+ '(:en :no))
@@ -901,8 +902,9 @@ Default language is :en. Other supported languages are: :no"
   (cl-case language
     (:en "abcdefghijklmnopqrstuvwxyz")
     (:no "abcdefghijklmnopqrstuvwxyzæøå")
-    (otherwise (error "Unknown language %S! Supported languages are: "
-		      +supported-alphabet-languages+))))
+    (otherwise
+     (error "Unknown language %S! Supported languages are: %S"
+	    language +supported-alphabet-languages+))))
 
 (defun uint8sequence-to-hex-string (uint8sequence)
   (cl-loop for uint8 in (cl-coerce uint8sequence 'list)
@@ -921,3 +923,5 @@ Default language is :en. Other supported languages are: :no"
 	    collect (string-to-integer (string-trim s)))))
 
 (provide 'mb-utils-strings)
+
+;;; mb-utils-strings.el ends here

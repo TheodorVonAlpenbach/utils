@@ -327,11 +327,12 @@ also remain explicit decisions before retirement or compatibility work begins.
 ### Initial utility migrations
 
 The closed-interval, envelope, set-helper, file, I/O, tree, thing-at-point,
-economy, additional-math, anaphora, general, list, sequence, and ISO-time modules are
+economy, additional-math, anaphora, general, list, sequence, string, and
+ISO-time modules are
 independently loadable. Their validation comprises:
 
-* a clean `emacs -Q` load of all fourteen utility features and the ERT tooling;
-* 144 passing ERT tests from the batch entry point;
+* a clean `emacs -Q` load of all fifteen utility features and the ERT tooling;
+* 173 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -422,6 +423,16 @@ baseline. Repairs cover zero-position binding in `bind*`, lexical closures in
 and function argument inspection under lexical binding.
 Default handling in `pop-until` and removal of nil-valued properties in
 `plist-pop` are also covered.
+
+[`mb-utils-strings.el`](./utils/mb-utils-strings.el) now loads independently
+with lexical binding and explicit list, sequence, math, set, and general
+utility dependencies. Startup aliases and two load-time sample expressions
+were removed, as was a shadowed `substring-intv` implementation. Repairs cover
+its count variables, positional accessors, custom fill character, string
+preservation, match starting position, replacement formatting, and error
+messages. Loading the library no longer installs global quote-word keybindings;
+those commands remain available for explicit configuration. Its 29 namespaced
+tests now run in the maintained baseline.
 
 [`mb-things.el`](./utils/mb-things.el) now loads independently with lexical
 binding and built-in dependencies instead of pulling in the broad
