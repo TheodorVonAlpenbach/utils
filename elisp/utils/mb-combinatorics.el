@@ -1,12 +1,17 @@
+;;; mb-combinatorics.el --- Combinatorial utility functions -*- lexical-binding: t; -*-
+
+(require 'cl-lib)
 (require 'mb-utils-math)
 
+;;; Code:
+
 (cl-defun factorial (n &optional (m 1))
-  "Returns N!. See also `derangement'
-The highest argument Emacs Lisp can handle currently is 5910:
-(factorial 5910) ~ 4.86E19725"
+  "Return the product M through N.
+With the default M of 1, return N!.  See also `derangement'."
   (cond
     ((zerop n) 1)
-    ((minusp n) (error "FACTORIAL is only valid for non-negative integers."))
+    ((cl-minusp n)
+     (error "FACTORIAL is only valid for non-negative integers"))
     (t (product-a-b m n))))
 ;;(mapcar #'factorial (0-n 10))
 ;; (* 1.0 (factorial 5910))
@@ -14,19 +19,21 @@ The highest argument Emacs Lisp can handle currently is 5910:
 (cl-defun derangement (n &optional (!0 1) (!1 0))
   "Returns !N. See also `factorial'.
 For the definition of !N, see https://en.wikipedia.org/wiki/Derangement"
-  (cl-case n
-    (0 !0) 
-    (1 !1) 
-    (otherwise 
-     (cl-loop for i from 2 to n
-	   for Ln-2 = !0 then Ln-1
-	   for Ln-1 = !1 then Ln
-	   for Ln = (* (1- i) (+ Ln-1 Ln-2))
-	   finally return Ln))))
+  (if (cl-minusp n)
+      (error "DERANGEMENT is only valid for non-negative integers")
+    (cl-case n
+      (0 !0)
+      (1 !1)
+      (otherwise
+       (cl-loop for i from 2 to n
+		for Ln-2 = !0 then Ln-1
+		for Ln-1 = !1 then Ln
+		for Ln = (* (1- i) (+ Ln-1 Ln-2))
+		finally return Ln)))))
 ;;(mapcar #'derangement (0-n 11))
 
-(defalias 'n! 'factorial)
-(defalias '!n 'derangement)
+(defalias 'n! #'factorial)
+(defalias '!n #'derangement)
 
 (cl-defun factorials (n &optional (m 1))
   "Return M!, (M + 1)!, ... N!.
@@ -41,10 +48,10 @@ By default, M is 1."
 The optional START-VALUES modifies the two first elements in the
 resulting sequence."
   (if (< n 2)
-    (head n start-values)
+    (cl-subseq start-values 0 n)
     (let ((res (reverse start-values)))
      (cl-loop for i below (- n 2)
-	   do (push (+ (first res) (second res)) res))
+	   do (push (+ (cl-first res) (cl-second res)) res))
      (nreverse res))))
 ;;(fibonacci-numbers 0)
 
@@ -73,10 +80,13 @@ resulting sequence."
 
 (cl-defun aliquot-sum (n)
   (- (divisor-function n 1) n))
+(cl-defun aliquot-sum (n) (sum (all-factors n t)))
 ;;(mapcar #'aliquot-sum (1-n 10))
 
 (cl-defun amicable-numbers-p (x y)
-  (= (divisor-function x) (divisor-function y)))
+  (and (/= x y)
+       (= (aliquot-sum x) y)
+       (= (aliquot-sum y) x)))
 ;;(amicable-numbers-p 220 284)
 
 (cl-defun abundancy-index (n)
@@ -93,7 +103,7 @@ resulting sequence."
 
 (cl-defun binomial-coefficient (n m &optional (method :auto))
   "Returns n!/(m!*(n-m)!"
-  (if (minusp m)
+  (if (or (cl-minusp m) (> m n))
     0
     (let* ((m* (max m (- n m)))
 	   (factors
@@ -140,11 +150,11 @@ The Catalan numbers form the sequence A000108 in the OEIS."
 ;;(uefa-team-nation-map)
 
 (cl-defun uefa-winners (&optional (groups uefa-groups))
-  (mapcar (compose #'first #'first) groups))
+  (mapcar (compose #'cl-first #'cl-first) groups))
 ;;(uefa-winners)
 
 (cl-defun uefa-runner-ups (&optional (groups uefa-groups))
-  (mapcar (compose #'first #'second) groups))
+  (mapcar (compose #'cl-first #'cl-second) groups))
 ;;(uefa-runner-ups)
 
 (cl-defun uefa-winner-p (team &optional (groups uefa-groups))
@@ -156,7 +166,7 @@ The Catalan numbers form the sequence A000108 in the OEIS."
 ;;(uefa-teams)
 
 (cl-defun uefa-group-member-p (team group)
-  (cl-member team (mapcar #'first group) :test #'equal))
+  (cl-member team (mapcar #'cl-first group) :test #'equal))
 ;;(uefa-group-member-p 'PSG (first uefa-groups))
 
 (cl-defun uefa-group (team &optional (groups uefa-groups))
@@ -168,7 +178,7 @@ The Catalan numbers form the sequence A000108 in the OEIS."
 ;;(uefa-same-group-p 'Schalke 'Arsenal)
 
 (cl-defun uefa-team-country (team &optional (groups uefa-groups))
-  (second (cl-find team (uefa-group team groups) :key #'first)))
+  (cl-second (cl-find team (uefa-group team groups) :key #'cl-first)))
 ;;(uefa-team-country 'PSG)
 
 (cl-defun uefa-same-country-p (team1 team2 &optional (groups uefa-groups))
@@ -180,18 +190,23 @@ The Catalan numbers form the sequence A000108 in the OEIS."
 `uefa-possible-opponents-p'"
   (not (or (uefa-same-group-p team1 team2 groups)
 	   (uefa-same-country-p team1 team2 groups)
-	   (all-true (uefa-winner-p team1 groups) (uefa-winner-p team2 groups)))))
+	   (eq (not (null (uefa-winner-p team1 groups)))
+	       (not (null (uefa-winner-p team2 groups)))))))
 ;;(uefa-possible-opponents-gen-p 'Schalke 'PSG)
 
 (cl-defun uefa-possible-opponents-gen (team &optional (groups uefa-groups))
   "Returns a list of all the teams that are allowed to meet TEAM.
 See also `uefa-possible-opponents-gen"
-  (copy-if #'(lambda (x) (uefa-possible-opponents-p x team groups)) (uefa-teams groups)))
+  (cl-remove-if-not
+   (lambda (opponent)
+     (uefa-possible-opponents-gen-p team opponent groups))
+   (uefa-teams groups)))
 ;;(uefa-possible-opponents-gen 'Barcelona)
 
 (cl-defun uefa-opposite-team-group (team &optional (groups uefa-groups))
   (if (uefa-winner-p team groups)
-    (uefa-winners groups) (uefa-runner-ups groups)))
+    (uefa-runner-ups groups)
+    (uefa-winners groups)))
 ;;(uefa-opposite-team-group 'Barcelona)
 
 (cl-defun uefa-possible-opponents-p (winner runner-up &optional (groups uefa-groups))
@@ -204,23 +219,24 @@ See also `uefa-possible-opponents-gen"
 ;; 	   (uefa-runner-ups groups))
 ;;(uefa-possible-opponents 'Barcelona)
 
-(cl-defun uefa-possible-draws (winners-left runner-ups-left &optional (groups uefa-groups))
-  "Recursive function that on each recursion stage returns list of elements on the form (MATCH DRAWS-GIVEN-MATCH),
-where MATCH is formed fro"
+(cl-defun uefa-possible-draws
+    (winners-left runner-ups-left &optional (groups uefa-groups))
+  "Return all valid draws between WINNERS-LEFT and RUNNER-UPS-LEFT.
+Each recursive result has the form (MATCH . DRAWS-GIVEN-MATCH)."
   (if winners-left
-    (cl-loop with winner = (first winners-left)
+    (cl-loop with winner = (cl-first winners-left)
 	  for runner-up in runner-ups-left
 	  for match = (list winner runner-up)
 	  for draws-given-match =
 	  (and (uefa-possible-opponents-p winner runner-up groups)
-	       (uefa-possible-draws (rest winners-left)
+	       (uefa-possible-draws (cl-rest winners-left)
 				    (remove runner-up runner-ups-left) groups))
-	  if res collect (cons match draws-given-match))
+	  if draws-given-match collect (cons match draws-given-match))
     (list t)))
 
 (cl-defun uefa-possible-draws-main (&optional (groups uefa-groups))
-  (uefa-possible-draws (copy-list (uefa-winners groups)) 
-		       (copy-list (uefa-runner-ups groups))
+  (uefa-possible-draws (copy-sequence (uefa-winners groups))
+		       (copy-sequence (uefa-runner-ups groups))
 		       groups))
 ;;(setf res (uefa-possible-draws-main))
 ;;(cl-count t (flatten res))
@@ -228,8 +244,8 @@ where MATCH is formed fro"
 (cl-defun rummy-hands (&optional (players 2) (cards (if (< players 5) 10 6)) (deck 52))
   "Return the number of possible initial rummy hands,
 given PLAYERS number of players each having HANDS initial hands.
-The function is inspired by the film 'The Midnight Sky' where XXX
-claims there are over 60 billions initial rummy hands. Since the
+The function is inspired by the film \"The Midnight Sky\", where XXX
+claims there are over 60 billion initial rummy hands. Since the
 scene where this quote occurs involves two players, we assume
 PLAYERS is 2 and CARDS is 10.
 
@@ -238,14 +254,14 @@ standard rummy."
   (cl-assert (<= (* players cards) deck) t "Too many players or cards!")
   (/ (product (cl-loop for n below players
 		    collect (binomial-coefficient deck cards)
-		    do (decf deck cards)))
+		    do (cl-decf deck cards)))
      (n! players)))
 ;;(rummy-hands 2)
 
 (cl-defun stirling-numbers-2 (n k)
-  "Return coefficients s(n, k), i.e. a Stirling number of the first kind.
-This is the number of permutations of n elements with k disjoint
-cycles."
+  "Return the Stirling number of the second kind S(N, K).
+This is the number of partitions of N labeled elements into K
+nonempty subsets."
   (round
    (cl-loop with k-i!s = (nreverse (factorials k 0))
 	 for i from 0 to k
@@ -273,3 +289,5 @@ cycles."
 ;;(cl-loop for k to 4 collect (stirling-numbers-1 4 k))
 
 (provide 'mb-combinatorics)
+
+;;; mb-combinatorics.el ends here

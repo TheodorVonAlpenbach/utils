@@ -335,12 +335,12 @@ also remain explicit decisions before retirement or compatibility work begins.
 ### Initial utility migrations
 
 The closed-interval, envelope, set-helper, file, I/O, tree, thing-at-point,
-economy, additional-math, general-math, anaphora, general, list, sequence,
-string, time, and ISO-time modules are
+economy, additional-math, general-math, combinatorics, anaphora, general, list,
+sequence, string, time, and ISO-time modules are
 independently loadable. Their validation comprises:
 
-* a clean `emacs -Q` load of all seventeen utility features and the ERT tooling;
-* 235 passing ERT tests from the batch entry point;
+* a clean `emacs -Q` load of all eighteen utility features and the ERT tooling;
+* 248 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -464,6 +464,16 @@ four-part date decomposition, and configurable epoch years. The former
 probabilistic test now uses deterministic weighted-selection boundaries. Its
 20 namespaced tests run in the maintained baseline.
 
+[`mb-combinatorics.el`](./utils/mb-combinatorics.el) now loads independently
+with lexical binding and supported Common Lisp accessors. The obsolete
+factorial size warning was removed because modern Emacs integers are
+arbitrary-precision. Repairs cover negative derangements, out-of-range
+binomial coefficients, distinctness in amicable pairs, UEFA side/opponent
+selection, recursive draw generation, and Stirling-number documentation.
+The UEFA recursion is characterized with a small deterministic fixture rather
+than only the historical tournament data. Its 13 namespaced tests run in the
+maintained baseline.
+
 [`mb-things.el`](./utils/mb-things.el) now loads independently with lexical
 binding and built-in dependencies instead of pulling in the broad
 `mb-utils-div` and `mb-utils-time` stacks. Its small date, clock, case, and
@@ -556,9 +566,19 @@ These look replaceable but are not, and the difference is easy to miss.
 | `jstime` | `seconds-to-time` plus `decode-time` | The standard pair handles Unix timestamps directly. The local result instead uses zero-based month and day-within-month fields and supports a custom base year. |
 | `leap-year-p` and `days-in-month` | `calendar-leap-year-p` and `calendar-last-day-of-month` | The local month argument is zero-based, whereas the calendar API uses months 1 through 12. |
 
+### Internal consolidation candidates
+
+These are not replacements by standard library functions, but local APIs whose
+responsibilities overlap unnecessarily:
+
+| Current APIs | Proposed consolidation | Note |
+| --- | --- | --- |
+| `all-factors`, `aliquot-sum`, and `divisor-function` | Add an optional proper-divisor flag to `all-factors`; define `aliquot-sum` as `(sum (all-factors n t))`; retire `divisor-function` | The current amicable-number implementation only needs proper divisors. `divisor-function` is a thin power-sum wrapper and is not otherwise a standard-library compatibility layer; check callers before removing it. |
+
 ### Still first-party
 
 No standard equivalent found: `multiply-string` (string repetition),
 `not-empty`, `concat*` and `andcat` (keyword-driven joining beyond
 `string-join`), the `split-string-*` family, and the BSG, UUID, alphabet,
-tab-formatting, and literary-number helpers.
+tab-formatting, literary-number, factorial, derangement, Fibonacci, binomial,
+Catalan, and Stirling-number helpers.
