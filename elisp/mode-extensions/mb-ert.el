@@ -39,7 +39,9 @@ BUFFER is optional with the current buffer as default value."
   (save-excursion
     (beginning-of-defun)
     (let ((form (read (current-buffer))))
-      (and (listp form) (symbolp (cadr form)) (cadr form)))))
+      (and (listp form)
+           (symbolp (cl-second form))
+           (cl-second form)))))
 
 (defun mb-ert--goto-definition (name)
   "Move to the definition of NAME in the current buffer."

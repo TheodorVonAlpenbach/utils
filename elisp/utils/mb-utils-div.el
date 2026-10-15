@@ -1,6 +1,11 @@
-;; -*- lexical-binding: t; -*-
-(require 'mb-indent)
+;;; mb-utils-div.el --- General utility functions -*- lexical-binding: t; -*-
+
+(require 'cl-lib)
+(require 'subr-x)
 (require 'mb-anaphora)
+(require 'mb-utils-iso-time)
+
+;;; Code:
 
 (cl-defmacro without-message (&body body)
   `(let ((message-log-max nil))
@@ -37,7 +42,7 @@ corresponding TAG was found and removed.
 (cl-defun mremf (plist &rest tags)
   "Remove the TAGS from property list PLIST.
 \nSee `delf' for a similar destructive version."
-  (let ((place (copy-list plist)))
+  (let ((place (copy-sequence plist)))
     (cl-loop for tag in tags do (cl-remf place tag))
     place))
 ;;(let ((p '(:where 123 :columns 321))) (list (mremf p :where :columns :fitna) p))
@@ -48,7 +53,7 @@ corresponding TAG was found and removed.
 ;;(remf* '(:where 123 :columns 321 :qwe) :where :columns :fitna)
 
 (cl-defun mapprop (proplist propnames)
-  (mapcar (bind #'getf proplist 1) propnames))
+  (mapcar (lambda (property) (plist-get proplist property)) propnames))
 ;;(mapprop '(:a 1 :b 2) '(:a :a :b))
 
 (cl-defun smart-insert (&rest line)
@@ -64,9 +69,9 @@ indents it."
   "Returns the common value if all ARGS are EQ, else nil.
 If no arguments is given, t is returned."
   (if (not args) t
-    (if (not (rest args)) (first args)
-      (if (eq (first args) (second args))
-	  (apply 'eq* (rest args))
+    (if (not (cl-rest args)) (cl-first args)
+      (if (eq (cl-first args) (cl-second args))
+	  (apply #'eq* (cl-rest args))
 	nil))))
 ;;(eq* 2 1 2 2 )
 
@@ -83,11 +88,11 @@ If no arguments is given, t is returned."
 (defmacro nand (&rest conditions)
   "Return nil if at least one of CONDITIONS is nil, otherwise return t."
   `(not (and ,@conditions)))
-(def-edebug-spec nor t)
+(def-edebug-spec nand t)
 
 (defmacro nor (&rest conditions)
-  "Return t if all CONDITIONS is nil, otherwise return nil."
-  `(and ,@(mapcar #'(lambda (x) `(not ,x)) conditions)))
+  "Return t if all CONDITIONS are nil, otherwise return nil."
+  `(not (or ,@conditions)))
 (def-edebug-spec nor t)
 
 (cl-defun xor (&rest conditions)
@@ -97,7 +102,7 @@ If no arguments is given, t is returned."
 
 (cl-defun xnor (&rest conditions)
   "Return nil iff there are an even number of conditions that evaluates to non nil."
-  (cl-oddp (count-if (complement #'null) conditions)))
+  (cl-oddp (cl-count-if (complement #'null) conditions)))
 ;;(xnor t t nil)
 
 ;; push/pop
@@ -106,7 +111,7 @@ If no arguments is given, t is returned."
 If reverse i non nil, it returns the first popped element"
   `(prog1 
        (if ,reverse 
-	 (car ,place)
+	 (cl-first ,place)
 	 (nth (1- ,n) ,place))
      (setf ,place (nthcdr ,n ,place))))
 ;;(setq qwe '(1 2 3 4 5 6))
@@ -127,11 +132,6 @@ If reverse i non nil, it returns the first popped element"
 (defmacro push-back (x place)
   `(setf ,place (nconc ,place (list ,x))))
 
-(cl-defun test-push-back1 ()
-  (let ((l (list 'a)))
-    (list (push-back 'b l) l)))
-;;(test-push-back1)
-
 ;;(setf qwe '(a))
 ;;(push-back 1 qwe)
 
@@ -149,38 +149,43 @@ If reverse i non nil, it returns the first popped element"
 (cl-defmacro pop-list (place &optional (n 1) (reverse nil))
   "Pops n times from list at PLACE and returns all the popped
 elements as a list maintaing the order."
-  (let ((glist (gensym)))
+  (let ((glist (cl-gensym "list")))
     `(let ((,glist ()))
-       (dotimes (i ,n)
+       (dotimes (_ ,n)
 	 (push (pop ,place) ,glist))
        (if ,reverse ,glist (nreverse ,glist)))))
 ;;(let ((qwe '(1 2 3 4))) (list (pop-list qwe 2 t) qwe))
 
-(cl-defmacro pop-until (place &optional (elt (first place)) test)
-  "Pops list place containing all top elements not equal to elt"
-  (let ((gelt (gensym))
-	(gtest (gensym)))
-    `(let ((,gelt ,elt)
+(cl-defmacro pop-until (place &optional (elt nil elt-supplied-p) test)
+  "Pop and return leading elements from PLACE until ELT is found."
+  (let ((gelt (cl-gensym "element"))
+	(gtest (cl-gensym "test"))
+	(element-form (if elt-supplied-p elt `(cl-first ,place))))
+    `(let ((,gelt ,element-form)
 	   (,gtest ,test))
        (cl-loop for x in ,place
 	     while (not (funcall (or ,gtest #'eq) x ,gelt))
 	     collect (pop ,place)))))
 ;;(let ((qwe '(1 2 3 4))) (list (pop-until qwe 3) qwe))
 
-(defmacro nor (&rest args) `(not (or ,@args)))
-;;(nor nil nil t)
-
 (cl-defun min* (&rest args)
-  (minimum args #'<))
+  (apply #'min args))
 ;;(min* 1 2 3)
 
 (cl-defun max* (&rest args)
-  (minimum args #'>))
+  (apply #'max args))
 ;;(max* 1)
 
 ;;; Function objects
-(cl-defun always (&rest args) "Returns t, ALWAYS" t)
-(cl-defun never (&rest args) "Returns nil, always" nil)
+(cl-defun always (&rest args)
+  "Return t, ignoring ARGS."
+  (ignore args)
+  t)
+
+(cl-defun never (&rest args)
+  "Return nil, ignoring ARGS."
+  (ignore args)
+  nil)
 
 (cl-defun complement (function)
   "Returns a function that is the complement of FUNCTION"
@@ -189,19 +194,10 @@ elements as a list maintaing the order."
 ;;(mapcar (complement #'oddp) (0-n 4))
 
 (cl-defun bind (function fixed-argument &optional (floating-argument-position 0))
-  "Changes a binary FUNCTION(x,y) to the unary FUNCTION2(y) by
-binding first variable x to FIXED-ARGUMENT. If
-FLOATING-ARGUMENT-POSITION is set to 1 then y is fixed to
-FIXED-ARGUMENT and methods becomes FUNCTION3(x).
-
-Could be extended to take multiple FIXED-ARGUMENTS and likewise
-multiple FLOATING-ARGUMENT-POSITIONS. Then one could tranform
-FUNCTION(x,y,z,w,v) to FUNCTION3(x,z) = FUNCTION(x,a,z,b,c),
-where '(a b c) are the FIXED-ARGUMENTS and '(1 3 4) are the
-FLOATING-ARGUMENT-POSITIONS.
-
-TODO: parse FUNCTIONs argument list and return a function accordingly.
-Also take an argument FIXED-ARGUMENTS and and optional FLOATING-ARGUMENT-POSITIONS"
+  "Bind one argument of binary FUNCTION to FIXED-ARGUMENT.
+Return a unary function.  FLOATING-ARGUMENT-POSITION zero means
+the returned function supplies FUNCTION's first argument; one
+means it supplies the second."
   (let ((f function)
 		(a fixed-argument)
 		(pos floating-argument-position))
@@ -212,34 +208,27 @@ Also take an argument FIXED-ARGUMENTS and and optional FLOATING-ARGUMENT-POSITIO
 	 (funcall f a x))))))
 
 (cl-defun bind* (function fixed-arguments &optional fixed-argument-positions)
-  "Changes FUNCTION(args optional-args) to FUNCTION2(args*
-optional-args*) by binding a subset of args to the
-FIXED-ARGUMENTs. By default the head of args is bound, but thi
-can be overriden by providing the list FIXED-ARGUMENT-POSITIONS
-with the indexes of the args to be bound by FIXED-ARGUMENTS.
-
-If only one argument is to be bound, fixed-arguments (and
-fixed-argument-positions) could be provided as an atom for
-simplicity: 
-\(bind* #'length \"qwe\") => (lambda () (length \"qwe\"))
-\(funcall (bind* #'length \"qwe\")) => 0
-\(bind* #'/ 2 1) => (lambda (dividend &rest divisors) (apply #'/ dividend 16 divisors))
-\(funcall (bind* #'/ 2 1) 16 4 2) => 1
-\(funcall (bind* #'/ 2 0) 16.0 4 2) => 0.015625 ie. (/ 2 16.0 4 2)
-
-TODO: implement this. Probably involves some macro magic"
+  "Bind selected arguments of FUNCTION to FIXED-ARGUMENTS.
+FIXED-ARGUMENT-POSITIONS gives their zero-based positions.  When
+it is nil, append the fixed arguments after the supplied ones.
+Atoms are accepted in place of one-element fixed argument and
+position lists."
   (let ((f function)
 		(fargs (listify fixed-arguments))
 		(positions (listify fixed-argument-positions)))
     (function 
      (lambda (&rest args)
-       (let* ((args* (copy-list args))
-	      (all-args (if (first positions)
-			  (cl-loop for i in positions 
-				for x in fargs
-				do (list-insert x i args*)
-				finally return args*)
-			  (append args* fargs))))
+       (let* ((args* (copy-sequence args))
+	      (all-args
+	       (if positions
+		   (cl-loop for i in positions
+			    for x in fargs
+			    do (setq args*
+				     (append (cl-subseq args* 0 i)
+					     (list x)
+					     (nthcdr i args*)))
+			    finally return args*)
+		 (append args* fargs))))
 	 (apply f all-args))))))
 ;;(funcall (bind* #'length ""))
 ;;(funcall (bind* #'concat '("a" "b") '(0 1)) "c")
@@ -249,7 +238,7 @@ TODO: implement this. Probably involves some macro magic"
   "Return a function that applies functions FUNCTIONS from right to left."
   (let ((functions functions))
     (if functions
-      (let ((fn1 (car (last functions)))
+      (let ((fn1 (cl-first (last functions)))
 		    (functions (butlast functions)))
 	(function (lambda (&rest args)
 	  (cl-reduce #'funcall functions 
@@ -308,18 +297,18 @@ return NEW-VALUE"
   "Returns the equality induced by the ordering LESS-THAN-FUNCTION"
   (let ((lt less-than-function))
     #'(lambda (&rest args)
-      (nor (apply lt args) (apply lt (nreverse args))))))
+      (nor (apply lt args) (apply lt (reverse args))))))
 ;;(funcall (lt-equal #'<) 1 1 1)
 
 (defmacro nilf (&rest args)
   "Sets all ARGS to nil."
   `(progn (setf ,@(mapcan #'(lambda (x) (list x nil)) args))))
-;;(macroexpand '(nilf (first c) b))
+;;(macroexpand '(nilf (cl-first c) b))
 
 (defmacro notf (&rest args)
   "Sets each ARG in ARGS to (not ARG)."
   `(progn (setf ,@(mapcan #'(lambda (x) (list x `(not ,x))) args))))
-;;(macroexpand '(notf (first c) b))
+;;(macroexpand '(notf (cl-first c) b))
 
 (defmacro minf (place &rest numbers)
   "Sets PLACE to the minimum value of itself and each of NUMBERS."
@@ -368,7 +357,7 @@ TODO: font-lock face as `defun'."
 
 (defmacro with-gensyms (syms &rest body)
   `(let ,(mapcar #'(lambda (s)
-                     `(,s (gensym)))
+                     `(,s (cl-gensym)))
                  syms)
      ,@body))
 ;;(with-gensyms (gx gy) 1)
@@ -380,14 +369,14 @@ TODO: font-lock face as `defun'."
 
 (cl-defun first-elt (sequence)
   "Return first element of SEQUENCE."
-  (and (plusp (length sequence))
+  (and (cl-plusp (length sequence))
        (elt sequence 0)))
 
 ;;; since elisp's let sucks...
 (cl-defmacro with-variable ((variable &optional temp-value) &body body)
   "`setf's VARIABLE to TEMP-VALUE and executes BODY. Then VARIABLE's
 value is reset."
-  (let ((old-value (gensym)))
+  (let ((old-value (cl-gensym "old-value")))
     `(let ((,old-value ,variable))
       (setf ,variable ,temp-value)
       (unwind-protect
@@ -398,7 +387,7 @@ value is reset."
 (cl-defmacro with-constant-match-data (&body body)
   "`setf's VARIABLE to TEMP-VALUE and executes BODY. Then VARIABLE's
 value is reset."
-  (let ((old-match-data (gensym)))
+  (let ((old-match-data (cl-gensym "match-data")))
     `(let ((,old-match-data (match-data)))
       (unwind-protect
 	(progn ,@body)
@@ -409,25 +398,28 @@ value is reset."
 This is useful for such constructs as
 
 \(let ((x expr))
-   (setf (third x)) 'qwe)
+   (setf (cl-third x)) \='qwe)
    x) ==
 \(with-object (x expr)
-   (setf (third x) 'qwe))"
+   (setf (cl-third x) \='qwe))"
   `(let ((,x ,expr))
      ,@body
      ,x))
-;;(with-object (x '(a b d)) (setf (third x) 'c))
+;;(with-object (x '(a b d)) (setf (cl-third x) 'c))
 (def-edebug-spec with-object
     ((symbolp form)
      body))
 
 (cl-defun constantly (x)
-  (let ((x x)) #'(lambda (&rest args) x)))
+  (let ((x x))
+    #'(lambda (&rest args)
+        (ignore args)
+        x)))
 ;;(mapcar (constantly 1) '(a b c))
 
 (cl-defmacro with-syntax-table (table &body body)
   "See doc at emacs lisp info."
-  (let ((old-table (gensym)))
+  (let ((old-table (cl-gensym "syntax-table")))
     `(let ((,old-table (syntax-table)))
        (set-syntax-table ,table)
        (unwind-protect
@@ -444,11 +436,12 @@ to get return value, default nil."
 
 (cl-defun group-list (source &optional (n 2))
   "Obsolete.  See `cut'"
+  (ignore source n)
   (error "Obsolete, use cut instead"))
 
 (cl-defun rmapcar (fn &rest args)
   "A recursive generalization of `mapcar*'"
-  (if (some #'atom args)
+  (if (cl-some #'atom args)
       (apply fn args)
       (apply #'cl-mapcar
              #'(lambda (&rest args) 
@@ -462,8 +455,8 @@ to get return value, default nil."
 number, only flatten down this many tree levels."
   (if (and x (atom x))
     (list x)
-    (if (plusp levels)
-      (mapcan (bind #'flatten (1- levels)) x)    
+    (if (cl-plusp levels)
+      (cl-mapcan (bind #'flatten (1- levels)) x)
       x)))
 ;;(flatten '((1) 2 (2 (3))))
 ;;(flatten '(nil))
@@ -481,7 +474,7 @@ FUNCTION If optional argument LEVEL is provided, the mapping goes
 only this number deep in TREE. If LEVEL is 1 the method is
 similar to `mapcar'"
   (if (and (listp tree) 
-	   (plusp levels))
+	   (cl-plusp levels))
     (if (and with-assoc (assocp tree))
       (mapassoc function tree)
       (cl-loop for x in tree
@@ -520,16 +513,14 @@ the list ((fn1 arg1 arg2 ...) (fn2 arg1 arg2 ...) ...)"
 not found. Instead of returning nil, the length of CL-SEQ is returned.
 It is useful in connection with functions like `SUBSEQ', `SUBSTRING',
 etc. NB! Check if obsolete!"
-  (or (apply #'position cl-item cl-seq cl-keys)
+  (or (apply #'cl-position cl-item cl-seq cl-keys)
       (length cl-seq)))
 
 (cl-defmacro push-unique (x place &optional test)
   "Like `push', but pushes X on PLACE only if PLACE does not contain X."
   `(if (cl-member ,x ,place :test ,(or test `#'eql))
      ,place
-     ,(if (symbolp place)
-      `(setq ,place (cons ,x ,place))
-      `(callf2 cons ,x ,place))))
+     (setf ,place (cons ,x ,place))))
 ;;(push-unique (1 1) #'equal)
 
 (defmacro modf (x y)
@@ -539,8 +530,8 @@ etc. NB! Check if obsolete!"
 (cl-defun struct-name (x)
   (if (eq (type-of x) 'vector)
     (let* ((px (split-string (format "%S" x))))
-      (substring (first px) (1+ (length "cl-struct-"))))
-    (first x)))
+      (substring (cl-first px) (1+ (length "cl-struct-"))))
+    (cl-first x)))
 ;;(defstruct qwe)
 ;;(struct-name (make-key))
 ;;(intern-soft "qwe")
@@ -552,13 +543,14 @@ etc. NB! Check if obsolete!"
 
 (cl-defun all-equal (&rest args)
   "Return T if all ARGS are EQUAL and NIL if not."
-  (not (and args (some (bind #'nequal (car args)) (cdr args)))))
+  (not (and args
+	    (cl-some (bind #'nequal (cl-first args)) (cl-rest args)))))
 
 (cl-defun equal-elements (sequence &optional (test #'equal))
   "Return T if all ARGS are EQUAL and NIL if not."
-  (not (and (plusp (length sequence))
-	    (some (bind (compose #'not test) (elt sequence 0))
-		  (subseq sequence 1)))))
+  (not (and (cl-plusp (length sequence))
+	    (cl-some (bind (compose #'not test) (elt sequence 0))
+		     (cl-subseq sequence 1)))))
 ;;(equal-elements [1 1])
 
 (cl-defun mequal (map-function &rest args)
@@ -572,51 +564,57 @@ on them. TODO: somehow make test function (EQUAL) configurable"
 ;;(all-true t t)
 
 (cl-defun function-signature (function)
-  "Returns FUNCTION's signature"
-  (second (symbol-function function)))
+  "Return FUNCTION's argument list."
+  (help-function-arglist function t))
 ;;(function-signature 'test-function-special-args)
 
-(cl-defun test-function-special-args (a &optional b &keys c &rest d))
-
 (cl-defun function-args (function &optional (argument-type t))
-  "Returns the FUNCTION's' arguments.
-If ARGUMENT-TYPE is one of '&optional '&keys '&rest (note the
-quote), only the respective arguments belonging to this sections
-are returned. If it is nil, only the fixed arguments are
-returned. If t (default), then all arguments."
+  "Return arguments from FUNCTION's signature.
+When ARGUMENT-TYPE is nil, return required arguments.  When it is
+`&optional', `&key', or `&rest', return that section.  The legacy
+marker `&keys' is accepted as an alias for `&key'.  When it is t,
+return all arguments without lambda-list markers."
   (let* ((signature (function-signature function))
-	 (special-argument-types '(&optional &keys &rest))
-	 (start-pos) (end-pos))
+	 (argument-type (if (eq argument-type '&keys) '&key argument-type))
+	 (special-argument-types '(&optional &key &keys &rest &aux
+				   &allow-other-keys)))
     (cond
      ((eq argument-type t)
-      (remove-if #'(lambda (x) (member x special-argument-types))
-		 signature))
-
+      (cl-remove-if (lambda (x) (memq x special-argument-types))
+		    signature))
      ((eq argument-type nil)
-      (subseq signature 
-	0 
-	(position-if #'(lambda (x) 
-			 (member x special-argument-types))
-		     signature)))
-     (t (setq signature (member argument-type signature))
-	(let ((end-pos (or (position-if #'(lambda (x)
-					    (member x (remove argument-type special-argument-types)))
-					signature)
-			   (length signature))))
-	  (subseq signature 1 end-pos))))))
+      (cl-subseq signature
+		 0
+		 (or (cl-position-if
+		      (lambda (x) (memq x special-argument-types))
+		      signature)
+		     (length signature))))
+     (t
+      (let ((section (memq argument-type signature)))
+	(when section
+	  (let ((end (or (cl-position-if
+			  (lambda (x)
+			    (and (memq x special-argument-types)
+				 (not (eq x argument-type))))
+			  (cl-rest section))
+			 (length (cl-rest section)))))
+	    (cl-subseq section 1 (1+ end)))))))))
 ;;(function-args 'test-function-special-args '&keys)
 ;;(function-args 'test-function-special-args t)
 ;;(function-args 'test-function-special-args '&keys)
 
 (cl-defun re-evaluate-function (function-symbol)
   (let* ((file-orig (symbol-file function-symbol 'defun))
-	 (file (if (string-match "\\.elc$" file-orig)
-		 (substring* file-orig 0 -1)
-		 file-orig)))
+	 (file (and file-orig (string-remove-suffix "c" file-orig))))
     (when file
-      (with-file-readonly file
-	(re-search-forward (concat "^" (regexp-quote (format "(cl-defun %s " (symbol-name function-symbol)))))
-	(eval-defun nil)))))
+      (with-current-buffer (find-file-noselect file)
+	(save-excursion
+	  (goto-char (point-min))
+	  (re-search-forward
+	   (concat "^"
+		   (regexp-quote
+		    (format "(cl-defun %s " (symbol-name function-symbol)))))
+	  (eval-defun nil))))))
 
 (cl-defun sstring (string-designator &optional (nil-string nil) (integer-is-char-p nil))
   "Converts STRING-DESIGNATOR to a string.
@@ -631,7 +629,7 @@ converted to optional argument NIL-STRING."
     (cond ((stringp string-designator) string-designator)
 	  ((and integer-is-char-p
 		(integerp string-designator)
-		(not (minusp string-designator)))
+		(not (cl-minusp string-designator)))
 	   (string string-designator))
 	  ((keywordp string-designator) (keyword-name string-designator))
 	  ((symbolp string-designator) (symbol-name string-designator))
@@ -640,28 +638,32 @@ converted to optional argument NIL-STRING."
 ;;(cl-loop for x in '(nil :qwe qwe "qwe" 123 -1 (:read 2 3)) collect (sstring x 0 t))
 
 (cl-defun ssymbol (symbol-designator)
-  (acond
-    ((or (symbolp symbol-designator)
-	 (numberp symbol-designator)) symbol-designator)
-    ((stringp symbol-designator) (read symbol-designator))
-    ((and (consp symbol-designator)
-	  (eql (first symbol-designator) 'quote))
-     (eval symbol-designator))
-    ((consp symbol-designator) (mapcar #'ssymbol symbol-designator))))
+  (cond
+   ((or (symbolp symbol-designator)
+	(numberp symbol-designator))
+    symbol-designator)
+   ((stringp symbol-designator)
+    (read symbol-designator))
+   ((and (consp symbol-designator)
+	 (eq (cl-first symbol-designator) 'quote))
+    (cl-second symbol-designator))
+   ((consp symbol-designator)
+    (mapcar #'ssymbol symbol-designator))))
 ;;(mapcar #'ssymbol (list "qwe" '(quote qwe) 'qwe '(a "b")))
 
 (cl-defun iintern (symbol-name)
   (if (stringp symbol-name)
-    (if (empty-string-p symbol-name)
+    (if (string-empty-p symbol-name)
       nil
-      (if (integer-string-p symbol-name)
-	(integer-to-string symbol-name)
+      (if (string-match-p "\\`[+-]?[0-9]+\\'" symbol-name)
+	(string-to-number symbol-name)
 	(intern symbol-name)))
     symbol-name))
 ;;(mapcar #'symbolp (mapcar #'iintern (list 1 "a" 'b "")))
 
 (cl-defun decolonize-symbol-name (symbol-name &optional string-key)
-  (let ((res (if (= (char symbol-name 0) ?:)
+  (let ((res (if (and (not (string-empty-p symbol-name))
+		      (= (aref symbol-name 0) ?:))
 	       (substring symbol-name 1) symbol-name)))
     (if string-key
       (funcall string-key res)
@@ -679,6 +681,7 @@ also is a cons, will be encapsulated in a list. If it is another
 sequence it will be coerced into a list"
   (cond
     ((stringp x) (list x))
+    ((functionp x) (list x))
     ((listp x) x)
     ((sequencep x) (cl-coerce x 'list))
     (t (list x))))
@@ -698,8 +701,8 @@ sequence it will be coerced into a vector"
 (cl-defun concat-symbols (symbol &rest symbols)
   (if symbols
     (apply #'concat-symbols 
-	   (iintern (concat (sstring symbol) (sstring (first symbols))))
-	   (rest symbols))
+	   (iintern (concat (sstring symbol) (sstring (cl-first symbols))))
+	   (cl-rest symbols))
     symbol))
 ;;(concat-symbols 'a 1)
 
@@ -725,17 +728,18 @@ sequence it will be coerced into a vector"
 
 (cl-defun numcond-transform-clauses (clauses gx gy)
   "TODO: handle t and otherwise like in `cond'"
-  `(cond ,@(mapcar #'(lambda (x) `((,(first x) ,gx ,gy) ,@(rest x)))
+  `(cond ,@(mapcar #'(lambda (x)
+		       `((,(cl-first x) ,gx ,gy) ,@(cl-rest x)))
 		       clauses)))
 ;;(pp (macroexpand '(numcond (3 3) ((= 'eq)))))
 
 (cl-defmacro numcond (arg &rest clauses)
+  (declare (indent 1))
   (when (atom arg)
     (setf arg (list arg 0)))
   (with-gensyms (gx gy) 
     `(cl-destructuring-bind (,gx ,gy) (list ,@arg)
         ,(numcond-transform-clauses clauses gx gy))))
-(cl-indent 'numcond 'case)
 ;;(numcond (4 3) (= 'eq) (< 'lt) (> 'geq))
 
 (cl-defun call-if (predicate function x)
@@ -750,7 +754,7 @@ Otherwise return x"
   "Return the property position of PROP in PLIST.
 The position includes both property symbol and value."
   (cl-loop for pos from 0
-	for (property value) = (pop-list plist 2)
+	for (property _value) = (pop-list plist 2)
 	if (eq property prop) return pos
 	while plist))
 ;;(plist-position '(:qwe qwe :ewq ewq) :ewq)
@@ -768,15 +772,17 @@ The position includes both property symbol and value."
 
 (cl-defun plist-remove (plist prop)
   "Remove property PROP from PLIST."
-  (plist-delete (copy-list plist) prop))
+  (plist-delete (copy-sequence plist) prop))
 ;;(plist-remove '(:qwe qwe :ewq ewq) :ewq)
 
 (defmacro plist-pop (plist prop)
-  "Pops property PROP from PLIST and return its value.
+  "Pop property PROP from PLIST and return its value.
 Return nil if PROP does not exist."
-  `(awhen (plist-get ,plist ,prop)
-     (setf ,plist (plist-delete ,plist ,prop))
-     it))
+  (let ((value (cl-gensym "value")))
+    `(let ((,value (plist-get ,plist ,prop)))
+       (when (plist-member ,plist ,prop)
+	 (setf ,plist (plist-delete ,plist ,prop)))
+       ,value)))
 
 (defmacro dprint (sexp &optional tag)
   `(if ,tag
@@ -785,3 +791,5 @@ Return nil if PROP does not exist."
 ;;(dprint 123 'qwe)
 
 (provide 'mb-utils-div)
+
+;;; mb-utils-div.el ends here

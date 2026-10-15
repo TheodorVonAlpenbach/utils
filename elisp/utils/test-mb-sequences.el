@@ -72,7 +72,8 @@
 
 (ert-deftest mb-sequences-minimum-accessors-and-ties ()
   (should (equal (minimums [3 1 2 1] #'<) '(1 1)))
-  (should (equal (nminimums [3 1 2 1] #'<) '(1 1)))
+  (with-suppressed-warnings ((obsolete nminimums))
+    (should (equal (nminimums [3 1 2 1] #'<) '(1 1))))
   (should (= (min-element '(3 1 2)) 1))
   (should (= (min-position '(3 1 2)) 1))
   (should (= (min-value '((a . 3) (b . 1)) :key #'cdr) 1)))
@@ -113,7 +114,7 @@
 
 (ert-deftest mb-sequences-as-list-preserves-sequence-type ()
   (should (equal (as-list (values "abc")
-                   (cdr values))
+                   (cl-rest values))
                  "bc"))
   (should (equal (as-list (values [1 2 3])
                    (reverse values))

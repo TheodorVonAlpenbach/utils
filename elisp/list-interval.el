@@ -10,8 +10,8 @@
   "Return the closed interval [A B]."
   (list a b))
 
-(cl-defun i-left (interval) (car interval))
-(cl-defun i-right (interval) (cadr interval))
+(cl-defun i-left (interval) (cl-first interval))
+(cl-defun i-right (interval) (cl-second interval))
 
 (cl-defun i-interval-p (interval)
   "Return not nil if INTERVAL is a valid interval object."

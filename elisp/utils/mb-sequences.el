@@ -280,19 +280,19 @@ respectively.
   "Return the position of the minimum element in SEQUENCE.
 \nKeywords supported:  :test :key :start :end :from-end
 \n(fn SEQ PREDICATE [KEYWORD VALUE]...)"
-  (cadr (apply #'minimum args)))
+  (cl-second (apply #'minimum args)))
 
 (cl-defun min-element (sequence &rest args)
   "Return the minimum element in SEQUENCE.
 \nKeywords supported:  :test :key :start :end :from-end
 \n(fn SEQ [KEYWORD VALUE]...)"
-  (car (apply #'minimum sequence args)))
+  (cl-first (apply #'minimum sequence args)))
 
 (cl-defun min-value (sequence &rest args)
   "Return the minimum value in SEQUENCE.
 \nKeywords supported:  :test :key :start :end :from-end
 \n(fn SEQ [KEYWORD VALUE]...)"
-  (caddr (apply #'minimum sequence args)))
+  (cl-third (apply #'minimum sequence args)))
 
 (cl-defun subseq* (seq &optional (start 0) (end nil))
   "Return the subsequence of SEQ from START to END.
@@ -312,11 +312,12 @@ yet loadable outside the startup environment."
 If A, B, C are consecutive numbers, the delta for B is (- (/ (+ A C) 2) B).
 The first and last deltas are flanked by repeating their neighbour."
   (let ((half-differences
-         (mapcar (lambda (pair) (/ (- (cadr pair) (car pair)) 2.0))
+         (mapcar (lambda (pair)
+                   (/ (- (cl-second pair) (cl-first pair)) 2.0))
                  (mb-sequences--pairs (cl-coerce sequence 'list)))))
     (cl-coerce (mb-sequences--pairs
                 (when half-differences
-                  (append (list (car half-differences))
+                  (append (list (cl-first half-differences))
                           half-differences
                           (last half-differences))))
                (type-of-super sequence))))

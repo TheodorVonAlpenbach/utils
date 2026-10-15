@@ -12,14 +12,14 @@
   (and envelope
        (consp envelope)
        (= (length envelope) 2)
-       (i-interval-p (car envelope))
-       (i-interval-p (cadr envelope))
+       (i-interval-p (cl-first envelope))
+       (i-interval-p (cl-second envelope))
        envelope))
 
 (cl-defun e-contain-p (envelope x &optional strictly-p) 
   "X may be envelope or 2d point"
-  (and (i-contain-p (car envelope) (car x) strictly-p)
-       (i-contain-p (cadr envelope) (cadr x) strictly-p)))
+  (and (i-contain-p (cl-first envelope) (cl-first x) strictly-p)
+       (i-contain-p (cl-second envelope) (cl-second x) strictly-p)))
 
 (cl-defun e-within-p (x envelope &optional strictly-p) 
   (e-contain-p envelope x strictly-p))
@@ -32,8 +32,8 @@
 	     (i-overlap-p ix1 ix2)))))
 
 (cl-defun e-overlap-p (envelope1 envelope2 &optional strictly-p)
-  (and (i-overlap-p (car envelope1) (car envelope2))
-       (i-overlap-p (cadr envelope1) (cadr envelope2))
+  (and (i-overlap-p (cl-first envelope1) (cl-first envelope2))
+       (i-overlap-p (cl-second envelope1) (cl-second envelope2))
        (not (and strictly-p (e-touch-p envelope1 envelope2)))))
 ;;(e-overlap-p '((0 3) (0 3)) '((2 4) (1 3)) t)
 ;;(e-touch-p '((0 3) (0 3)) '((2 4) (1 3)) )
@@ -45,15 +45,15 @@
 
 (cl-defun e-intersection (envelope1 envelope2)
   (e-make-envelope
-   (i-intersection (car envelope1) (car envelope2))
-   (i-intersection (cadr envelope1) (cadr envelope2))))
+   (i-intersection (cl-first envelope1) (cl-first envelope2))
+   (i-intersection (cl-second envelope1) (cl-second envelope2))))
 
 (cl-defun e-union (envelope1 envelope2)
   (and (e-envelope-p envelope1)
        (e-envelope-p envelope2)
        (e-make-envelope
-	(i-union (car envelope1) (car envelope2))
-	(i-union (cadr envelope1) (cadr envelope2)))))
+	(i-union (cl-first envelope1) (cl-first envelope2))
+	(i-union (cl-second envelope1) (cl-second envelope2)))))
 
 (cl-defun e-stack-envelopes (_orientation envelopes)
   envelopes)

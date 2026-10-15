@@ -319,7 +319,7 @@ Must be called in a hexl mode buffer context."
   "Returns the Nth next byte in the buffer stream, and moves
 stream marker to the point after this byte. The bytes 1...N-1 are
 discareded. Must be called in a hexl mode buffer context."
-  (car (last (read-bytes n))))
+  (cl-first (last (read-bytes n))))
 
 (cl-defun insert-bytes-in-buffer (bytes buffer)
   "Inserts the BYTES list into BUFFER at curent point"

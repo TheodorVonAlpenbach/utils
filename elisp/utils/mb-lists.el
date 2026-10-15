@@ -78,7 +78,7 @@ additional keyword `:fkey' transforms X and Y before lookup."
       (if (and x-pos y-pos)
           (< x-pos y-pos)
         'na))))
-;;(l-explicit*< '(c) '(d) '(c a b c d) :fkey #'first)
+;;(l-explicit*< '(c) '(d) '(c a b c d) :fkey #'cl-first)
 
 (cl-defun l-explicit< (x y list &rest cl-keys)
   "Like `l-explicit*<', but return nil instead of `na'."
@@ -176,7 +176,7 @@ ELEMENTS are exactly the elements in LIST that evaluates to K."
 TODO: something is wrong, see test below."
   (cl-loop with heads = (cl-loop for i below n collect (nthcdr i list))
 	with pointers = (cl-copy-list heads)
-	while (car pointers)
+	while (cl-first pointers)
 	do (cl-loop for p in-ref pointers 
 		 while p
 		 do (progn (setf (cdr p) (nthcdr n p))
@@ -301,11 +301,11 @@ If ORDERED is non-nil, both (a b) and its reflection, (b a), is
 included in the result. Else, only the element (a b) is included,
 where a comes before b in LIST."
   (cl-loop for sublist1 on list nconc
-	(cl-loop for sublist2 on (if with-identity sublist1 (cdr sublist1))
-	      collect (list (car sublist1) (car sublist2))
+	(cl-loop for sublist2 on (if with-identity sublist1 (cl-rest sublist1))
+	      collect (list (cl-first sublist1) (cl-first sublist2))
 	      if (and ordered
-		      (not (eq (car sublist1) (car sublist2))))
-	      collect (list (car sublist2) (car sublist1)))))
+		      (not (eq (cl-first sublist1) (cl-first sublist2))))
+	      collect (list (cl-first sublist2) (cl-first sublist1)))))
 ;;(relations '(a b c))
 
 (cl-defun combine2 (list1 list2 &optional ordered)
@@ -326,10 +326,10 @@ where a comes before b in LIST."
   "Generalization of combine2"
   (cl-case (length lists)
     (0 nil)
-    (1 (list (mb-lists--listify (car lists))))
-    (2 (combine2 (car lists) (cl-second lists)))
-    (t  (cl-loop for (x y) in (combine2 (car lists)
-				  (combine-1 (cdr lists)))
+    (1 (list (mb-lists--listify (cl-first lists))))
+    (2 (combine2 (cl-first lists) (cl-second lists)))
+    (t  (cl-loop for (x y) in (combine2 (cl-first lists)
+				  (combine-1 (cl-rest lists)))
 	   collect (cons x y)))))
 ;;(combine-1 '((a b) c (d e)))
 
@@ -352,8 +352,9 @@ where a comes before b in LIST."
   "Accumulates sorted LIST. See `accumulate-list' for details."
   (cl-loop for x in (group list :test test :key key)
 	for l = (funcall accumulator x)
-	if (>= l min-occurrences) collect (list (funcall key (car x)) l)))
-;;(accumulate-sorted-list '((a 1) (a 2) (b 4) (b 5) (c 100)) :key #'first :accumulator #'(lambda (x) (sum x :key #'second)))
+	if (>= l min-occurrences)
+	collect (list (funcall key (cl-first x)) l)))
+;;(accumulate-sorted-list '((a 1) (a 2) (b 4) (b 5) (c 100)) :key #'cl-first :accumulator #'(lambda (x) (sum x :key #'cl-second)))
 ;;(accumulate-sorted-list '(a a a b b c d c) :test 'equal :min-occurences 2)
 
 (cl-defun accumulate-list (list &key (test #'<) (min-occurrences 1)
@@ -364,7 +365,7 @@ resulting list is sorted on the value of COUNT-X"
   (accumulate-sorted-list (cl-sort (cl-copy-list list) test :key key)
   :test (mb-lists--lt-equal test) :key key
     :min-occurrences min-occurrences :accumulator accumulator))
-;;(accumulate-list '((a 1) (a 2) (b 4) (c 100) (b 5)) :test #'symbol< :key #'first :accumulator #'(lambda (x) (sum x :key #'second)))
+;;(accumulate-list '((a 1) (a 2) (b 4) (c 100) (b 5)) :test #'symbol< :key #'cl-first :accumulator #'(lambda (x) (sum x :key #'cl-second)))
 ;;(accumulate-list '(a b c a b a d) :test #'symbol<)
 ;;(accumulate-list '(a b c a b a d) :test #'symbol< :min-occurences 2)
 
@@ -372,20 +373,20 @@ resulting list is sorted on the value of COUNT-X"
   "Returns a list of repetitions from first element in list"
   (cl-loop with target-list = list
   	with cycle-length = 1
-	for x in (cdr list)
+	for x in (cl-rest list)
 	for i from 2
-	for match = (funcall test x (car target-list))
-	for match-first = (funcall test x (car list))
+	for match = (funcall test x (cl-first target-list))
+	for match-first = (funcall test x (cl-first list))
 	for complete-cycle = (zerop (mod i cycle-length))
 
 	if match
 	 if complete-cycle
 	  collect (list start-index cycle-length) 
 	  and do (setf target-list list) 
-	 else do (setf target-list (cdr target-list))
+	 else do (setf target-list (cl-rest target-list))
         else do (if match-first
 		  (setf cycle-length (1- i)
-			target-list (cdr list))
+			target-list (cl-rest list))
 		  (setf cycle-length i
 			target-list list))))
 ;;(repetitions-1 '(a b c a b c a b c a b c))
@@ -427,7 +428,7 @@ informative."
 matches PREDICATE"
   (let ((tail (cl-member-if predicate list)))
     (when tail
-      (cl-rotatef (car tail) (car list))
+      (cl-rotatef (cl-first tail) (cl-first list))
       list)))
 ;;(dv-swap-head '(4 3 2 1) (bind #'< 4))
 
@@ -481,9 +482,9 @@ Optional LENGTH defines length of substituted sublist."
   "Returns Nth element in LIST and the remainder of LIST. Destructive.
 TODO: this looks like draw. Check out and clean up if necessary"
   (if (zerop n)
-    (list (car list) (setf list (cdr list)))
+    (list (cl-first list) (setf list (cl-rest list)))
     (let* ((prev (nthcdr (1- n) list))
-	   (element (cadr prev)))
+	   (element (cl-second prev)))
       (setf (cdr prev) (cddr prev))
       (list element list))))
 ;;(let ((l (list 0 1 2 3))) (values (nsplit-nth 1 l) l))
@@ -579,11 +580,11 @@ different, see test cases below."
 
 (cl-defun ninsert-sorted-list (x list)
   (if list
-    (if (< x (car list))
+    (if (< x (cl-first list))
       (cons x list)
       (cl-loop with l = list
-	    while (and (cdr l) (> x (cadr l)))
-	    do (setf l (cdr l))
+	    while (and (cl-rest l) (> x (cl-second l)))
+	    do (setf l (cl-rest l))
 	    finally (setf (cdr l) (cons x (cdr l)))
                     (cl-return list)))
     (cons x nil)))
@@ -594,7 +595,7 @@ different, see test cases below."
 ;;;; Sorted trees
 (cl-defun insert-sorted-tree (x tree)
   (if tree
-    (if (< x (car tree)) ;search left tree
+    (if (< x (cl-first tree)) ;search left tree
       (if (cl-second tree)
 	(insert-sorted-tree x (cl-second tree))
 	(setf (cl-second tree) (list x nil nil)))
@@ -626,7 +627,7 @@ different, see test cases below."
   (ignore res)
   (if tree
     (nconc (collect-sorted-tree (cl-second tree))
-	   (list (car tree))
+	   (list (cl-first tree))
 	   (collect-sorted-tree (cl-third tree)))))
 ;;(collect-sorted-tree (test-insert-sorted-tree))
 
@@ -637,7 +638,7 @@ different, see test cases below."
 	  do (puthash x i order-positions))
     (cl-sort list predicate
 	     :key (lambda (x) (gethash (funcall key x) order-positions)))))
-;;(sort-to-order '((0) (1) (2)) '(3 2 1 0) #'< #'first)
+;;(sort-to-order '((0) (1) (2)) '(3 2 1 0) #'< #'cl-first)
 
 
 (cl-defun mapcol (function colpos table)
@@ -676,9 +677,10 @@ TABLE must be a list of lists."
 
 (cl-defun boundaries (list &optional flank-p)
   (boundaries-1 (if flank-p
-		  (nflank (- (* 2 (car list)) (cadr list))
+		  (nflank (- (* 2 (cl-first list)) (cl-second list))
 			  list
-			  (- (* 2 (car (last list))) (car (last list 2))))
+			  (- (* 2 (cl-first (last list)))
+			     (cl-first (last list 2))))
 		  list)))
 ;;(boundaries (list -4.0 -3.0 -1.0) t)
 
@@ -717,13 +719,13 @@ for comparison."
        (unless (consp ,g)
 	 (error "First argument of MEMCASE must be a list!"))
        (cond ,@(mapcar #'(lambda (clause)
-                           (let ((k (car clause)))
+                           (let ((k (cl-first clause)))
                              `(,(cond ((member k '(t otherwise))
                                        t)
                                       ((consp k)
                                        `(cl-intersection ,g ',k :test #'eql))
                                       (t `(member ',k ,g)))
-                               (progn ,@(cdr clause)))))
+                               (progn ,@(cl-rest clause)))))
                        clauses)))))
 
 (cl-defun swap (x pairs &key (test #'eql))
@@ -749,7 +751,7 @@ cannot be used for later matches. For example
 			 collect (list x (positions x list)))
 	for x in targets
 	for map = (cl-find x maps :key #'car)
-	collect (pop (cadr map))))
+	collect (pop (cl-second map))))
 ;;(position-unique '(1 1 3 2 3) '(1 2 3))
 ;;(position-unique '(1 1) '(1 2 3 1))
 

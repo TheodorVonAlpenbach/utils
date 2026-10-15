@@ -85,10 +85,10 @@ offset minute."
 FORMAT may be `:description' or any other value for language
 keys.  Unless SKIP-NUMBER-SEQUENCES-P is nil, omit numeric
 weekday conventions."
-  (mapcar (if (eq format :description) #'caddr #'car)
+  (mapcar (if (eq format :description) #'cl-third #'cl-first)
           (if skip-number-sequences-p
               (cl-remove-if (lambda (entry)
-                              (integerp (car (cadr entry))))
+                              (integerp (cl-first (cl-second entry))))
                             *weekdays*)
             *weekdays*)))
 
@@ -105,7 +105,7 @@ weekday conventions."
   "Return month N in language LANG from MONTHS.
 When SHORT-FORM is non-nil, return at most SHORT-FORM-SIZE
 characters."
-  (let ((name (nth n (cadr (assoc lang months)))))
+  (let ((name (nth n (cl-second (assoc lang months)))))
     (if short-form
         (substring name 0 (min short-form-size (length name)))
       name)))
@@ -140,7 +140,7 @@ When SIMPLE-P is non-nil, omit dashes."
 (cl-defun weekday (&optional (lang :no) (time-designator (current-time)))
   "Return the weekday of TIME-DESIGNATOR in language LANG."
   (nth (nth 6 (mb-iso-time--decode time-designator))
-       (cadr (assoc lang *weekdays*))))
+       (cl-second (assoc lang *weekdays*))))
 
 (cl-defun full-date (&optional (lang :no) (time-designator (current-time)))
   "Return TIME-DESIGNATOR with weekday in language LANG."

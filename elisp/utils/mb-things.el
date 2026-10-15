@@ -4,8 +4,8 @@
 (require 'thingatpt)
 
 (defmacro defthing (name regexp)
-  (let* ((symbol (if (and (consp name) (eq (car name) 'quote))
-                     (cadr name)
+  (let* ((symbol (if (and (consp name) (eq (cl-first name) 'quote))
+                     (cl-second name)
                    name))
 	 (bounds (gensym))
 	 (n (gensym))
@@ -43,13 +43,13 @@ This function is generated with macro `defthing' in module
 	    (function (lambda ()
 	      (let ((,bounds (,thing-at-point-bounds-of-name)))
 		(if ,bounds
-		  (goto-char (cdr ,bounds))
+		  (goto-char (cl-rest ,bounds))
 		  (error "No %s here" ,sname))))))
        (put ',symbol 'beginning-op
 	    (function (lambda ()
 	      (let ((,bounds (,thing-at-point-bounds-of-name)))
 		(if ,bounds
-		  (goto-char (car ,bounds))
+		  (goto-char (cl-first ,bounds))
 		  (error "No %s here" ,sname))))))
 
        (cl-defun ,forward-name (&optional (,n 1))
@@ -62,14 +62,14 @@ With negative N, move backward." sname)
 	     (if (> ,n 0)
 	       ;; forward
 	       (if (and ,bounds 
-			(< ,point (cdr ,bounds)))
-		 (progn (goto-char (cdr ,bounds))
+			(< ,point (cl-rest ,bounds)))
+		 (progn (goto-char (cl-rest ,bounds))
 			(re-search-forward ,name-regxp nil (- ,n 1)))
 		 (re-search-forward ,name-regxp nil t ,n))
 	       ;; backward
 	       (if (and ,bounds 
-			(< (car ,bounds) ,point))
-		 (progn (goto-char (car ,bounds))
+			(< (cl-first ,bounds) ,point))
+		 (progn (goto-char (cl-first ,bounds))
 			(re-search-backward ,name-regxp nil t (- (abs ,n) 1)))
 		 (re-search-backward ,name-regxp nil t (- ,n)))))))
 
@@ -138,35 +138,35 @@ must be a member of a cycle preceding the cycle of the latter.")
 
 ;; Define cyclic things for each list element in *CYCLIC-THINGS*
 ;; Can't do this in a loop because the macro must take a symbol directly
-(defthing 'weekday (regexp-opt (cadr (assoc 'weekday *cyclic-things*))))
-(defthing 'ukedag (regexp-opt (cadr (assoc 'ukedag *cyclic-things*))))
-(defthing 'month-short (regexp-opt (cadr (assoc 'month-short *cyclic-things*))))
-(defthing 'month (regexp-opt (cadr (assoc 'month *cyclic-things*))))
-(defthing 'måned (regexp-opt (cadr (assoc 'måned *cyclic-things*))))
+(defthing 'weekday (regexp-opt (cl-second (assoc 'weekday *cyclic-things*))))
+(defthing 'ukedag (regexp-opt (cl-second (assoc 'ukedag *cyclic-things*))))
+(defthing 'month-short (regexp-opt (cl-second (assoc 'month-short *cyclic-things*))))
+(defthing 'month (regexp-opt (cl-second (assoc 'month *cyclic-things*))))
+(defthing 'måned (regexp-opt (cl-second (assoc 'måned *cyclic-things*))))
 
 ;; Define every leaf node in *CYCLIC-THINGS* as a 'CYCLIC thing
-(defthing 'cyclic (regexp-opt (mapcan #'cadr (copy-tree *cyclic-things*))))
+(defthing 'cyclic (regexp-opt (mapcan #'cl-second (copy-tree *cyclic-things*))))
 
 (defthing 'date mb-things--iso-date-regexp)
 (defthing 'time mb-things--iso-time-regexp)
 
 (cl-defun cycle-type (string)
   "Return the cycle type when STRING is a `cyclic' thing."
-  (car (cl-find string *cyclic-things*
+  (cl-first (cl-find string *cyclic-things*
                 :test (lambda (candidate cycle)
                         (cl-find candidate cycle
                                  :test #'string-equal-ignore-case))
-                :key #'cadr)))
+                :key #'cl-second)))
 
 (cl-defun replace-thing-at-point (new thing)
   "Replace THING at point with NEW."
   (let* ((bounds (or (bounds-of-thing-at-point thing)
 		     (bounds-of-thing-at-point 'sexp)))
-	 (offset (- (point) (car bounds)))
+	 (offset (- (point) (cl-first bounds)))
         (text (mb-things--string new)))
-    (delete-region (car bounds) (cdr bounds))
+    (delete-region (cl-first bounds) (cl-rest bounds))
     (insert text)
-    (goto-char (+ (car bounds) (min offset (length text))))))
+    (goto-char (+ (cl-first bounds) (min offset (length text))))))
 ;;(definteractive number-at-point)
 
 (cl-defun inc-thing-at-point (n level)
@@ -179,7 +179,7 @@ must be a member of a cycle preceding the cycle of the latter.")
     (date
     (save-excursion
       (replace-thing-at-point (inc-date date n level) 'date)
-      (goto-char (car (bounds-of-thing-at-point 'sexp)))
+      (goto-char (cl-first (bounds-of-thing-at-point 'sexp)))
       (backward-sexp 1)
       (when (or (weekday-at-point) (ukedag-at-point))
 	 (replace-thing-at-point (inc-cyclic (thing-at-point 'cyclic) n level) 'cyclic))))
@@ -193,7 +193,7 @@ must be a member of a cycle preceding the cycle of the latter.")
     (cyclic
     (save-excursion
       (replace-thing-at-point (inc-cyclic cyclic n level) 'cyclic)
-      (goto-char (cdr (bounds-of-thing-at-point 'sexp)))
+      (goto-char (cl-rest (bounds-of-thing-at-point 'sexp)))
       (forward-sexp 1)
       (when (date-at-point)
 	 (replace-thing-at-point (inc-date (thing-at-point 'date) n level) 'date))))  
@@ -244,7 +244,8 @@ A level of the form (UNIT QUANTITY) rounds in the direction of
 QUANTITY and advances to the Nth boundary."
   (let* ((seconds (mb-things--clock-seconds time))
          (with-seconds (or (string-match-p ":[0-9][0-9]:" time)
-                           (and (listp level) (eq (car level) :second))))
+                           (and (listp level)
+                                (eq (cl-first level) :second))))
          result)
     (if (listp level)
         (progn
@@ -305,8 +306,8 @@ LEVEL 3, return x ^ (2 ^ N)
 (cl-defun inc-cyclic (string n level &optional thing)
   (ignore level)
   (let* ((cycle-list (or thing
-                         (cadr (assoc (cycle-type string)
-                                      *cyclic-things*))))
+                         (cl-second (assoc (cycle-type string)
+                                           *cyclic-things*))))
          (position (cl-position string cycle-list
                                 :test #'string-equal-ignore-case)))
     (unless position

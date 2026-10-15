@@ -327,11 +327,11 @@ also remain explicit decisions before retirement or compatibility work begins.
 ### Initial utility migrations
 
 The closed-interval, envelope, set-helper, file, I/O, tree, thing-at-point,
-economy, additional-math, anaphora, list, sequence, and ISO-time modules are
+economy, additional-math, anaphora, general, list, sequence, and ISO-time modules are
 independently loadable. Their validation comprises:
 
-* a clean `emacs -Q` load of all thirteen utility features and the ERT tooling;
-* 122 passing ERT tests from the batch entry point;
+* a clean `emacs -Q` load of all fourteen utility features and the ERT tooling;
+* 144 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -398,8 +398,10 @@ the `cl-indent` helper have been replaced with supported APIs. The duplicate
 `power-set-indices` and broken list-only `rotate` shadow were removed. Repairs
 cover trailing chunks in `cut`, list padding, repetition keyword forwarding,
 sorted insertion, and closure behavior. A small private list coercion helper
-temporarily duplicates `listify` from `mb-utils-div`; that duplication will be
-resolved when the latter module is migrated.
+duplicates `listify` from `mb-utils-div`. It remains private rather than making
+the lower-level list module depend on the broad general utility collection;
+both copies should move to a small shared primitive module when that collection
+is split further.
 
 The widely used `aif`, `awhen`, `acond`, and `asetf` macros now live in the
 small standalone [`mb-anaphora.el`](./utils/mb-anaphora.el) module rather than
@@ -407,6 +409,19 @@ the broad `mb-utils-div` collection. `mb-utils-div` requires the new feature,
 so existing callers retain the same API without acquiring new dependencies.
 Focused tests cover branch values, single evaluation, short-circuiting,
 nested `it` bindings, and generalized assignment.
+
+[`mb-utils-div.el`](./utils/mb-utils-div.el) now loads independently with
+explicit Common Lisp, string, anaphora, and ISO-time dependencies instead of
+pulling in the global indentation configuration. Startup aliases have been
+replaced with supported APIs, including `cl-first` and `cl-rest` where the code
+expresses positional list access. `car` and `cdr` remain for structural cons
+operations. Its duplicate `nor` definition and embedded test
+helpers were removed, and the old tests now run in the maintained clean
+baseline. Repairs cover zero-position binding in `bind*`, lexical closures in
+`listify`, numeric strings in `iintern`, generalized places in `push-unique`,
+and function argument inspection under lexical binding.
+Default handling in `pop-until` and removal of nil-valued properties in
+`plist-pop` are also covered.
 
 [`mb-things.el`](./utils/mb-things.el) now loads independently with lexical
 binding and built-in dependencies instead of pulling in the broad
