@@ -258,6 +258,9 @@ The first subset is intentionally conservative:
 * [`test-mb-utils-regexp.el`](./utils/test-mb-utils-regexp.el): seven ERT
   tests for alternatives, integer alternatives, adjacent grouping, string
   factoring, unmatchable expressions, and exact finite-set complements.
+* [`test-mb-utils-matrix.el`](./utils/test-mb-utils-matrix.el): eleven ERT
+  tests for vector generation and arithmetic, geometric operations, matrix
+  dimensions and products, norms, pseudoinverses, and permutations.
 * [`test-mb-ert.el`](./mode-extensions/test-mb-ert.el): nine ERT tests for test
   filename recognition, source/test name swapping, definition navigation, and
   ordered test discovery.
@@ -342,12 +345,12 @@ also remain explicit decisions before retirement or compatibility work begins.
 ### Initial utility migrations
 
 The closed-interval, envelope, set-helper, file, I/O, tree, thing-at-point,
-economy, additional-math, general-math, combinatorics, buffer, regexp,
+economy, additional-math, general-math, combinatorics, buffer, regexp, matrix,
 anaphora, general, list, sequence, string, time, and ISO-time modules are
 independently loadable. Their validation comprises:
 
-* a clean `emacs -Q` load of all twenty utility features and the ERT tooling;
-* 271 passing ERT tests from the batch entry point;
+* a clean `emacs -Q` load of all twenty-one utility features and the ERT tooling;
+* 282 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -500,6 +503,15 @@ an anchored trie-complement regexp that rejects exactly the supplied finite
 set, including empty strings, prefixes, duplicates, newlines, and regexp
 metacharacters. Its seven namespaced tests run in the maintained baseline.
 
+[`mb-utils-matrix.el`](./utils/mb-utils-matrix.el) now loads independently
+with lexical binding and explicit dependencies. Vector and matrix operations
+validate their dimensions instead of silently truncating through `cl-mapcar`.
+Repairs cover seeded vector generation, vector-by-matrix orientation, the
+missing square root in the Frobenius norm, zero-vector pseudoinverses,
+unsupported general matrix pseudoinverses, obsolete `pi`, stable angle
+clamping, and the previously non-working permutation row switch. Its eleven
+namespaced tests run in the maintained baseline.
+
 [`mb-things.el`](./utils/mb-things.el) now loads independently with lexical
 binding and built-in dependencies instead of pulling in the broad
 `mb-utils-div` and `mb-utils-time` stacks. Its small date, clock, case, and
@@ -604,6 +616,7 @@ overlapping responsibilities have been consolidated:
 | Previous APIs | Consolidation | Note |
 | --- | --- | --- |
 | `all-factors`, `aliquot-sum`, and `divisor-function` | `all-factors` accepts an optional proper-divisor flag; `aliquot-sum` is `(sum (all-factors n t))`; `divisor-function` was retired | The only callers of `divisor-function` were the superseded `aliquot-sum` definition and examples beside it. |
+| Duplicate `transpose` definitions in `mb-lists` and `mb-utils-matrix` | Retain the independently tested `mb-lists` implementation | Both definitions used `cl-mapcar` to transpose lists and had the same shortest-input behavior. |
 
 ### Still first-party
 
