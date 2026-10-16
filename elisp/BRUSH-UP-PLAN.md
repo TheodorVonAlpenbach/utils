@@ -270,6 +270,9 @@ The first subset is intentionally conservative:
 * [`test-mb-utils-search.el`](./utils/test-mb-utils-search.el): four ERT tests
   for searches in current, designated, and narrowed buffers, including point
   and match-data preservation.
+* [`test-mb-utils-xml.el`](./utils/test-mb-utils-xml.el): seven ERT tests for
+  attribute parsing and filtering, balanced nested-node extraction, directional
+  limits, inner text, entity decoding, and temporary-buffer callbacks.
 * [`test-mb-ert.el`](./mode-extensions/test-mb-ert.el): nine ERT tests for test
   filename recognition, source/test name swapping, definition navigation, and
   ordered test discovery.
@@ -355,11 +358,12 @@ also remain explicit decisions before retirement or compatibility work begins.
 
 The closed-interval, envelope, set-helper, file, I/O, tree, thing-at-point,
 economy, additional-math, general-math, combinatorics, buffer, regexp, matrix,
-physics, geometry, search, anaphora, general, list, sequence, string, time, and
-ISO-time modules are independently loadable. Their validation comprises:
+physics, geometry, search, XML, anaphora, general, list, sequence, string,
+time, and ISO-time modules are independently loadable. Their validation
+comprises:
 
-* a clean `emacs -Q` load of all twenty-four utility features and the ERT tooling;
-* 299 passing ERT tests from the batch entry point;
+* a clean `emacs -Q` load of all twenty-five utility features and the ERT tooling;
+* 306 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -546,6 +550,15 @@ both point and match data, respects narrowing, and documents that it returns
 the match end position rather than a boolean. Its four namespaced tests run in
 the maintained baseline.
 
+[`mb-utils-xml.el`](./utils/mb-utils-xml.el) now loads independently with
+lexical binding and supported dependencies. Attribute parsing accepts quoted,
+single-quoted, unquoted, and boolean attributes in any order. Raw-fragment
+extraction now balances nested nodes of the same name and handles positive and
+negative limits without capture-number assumptions. Inner-text extraction
+discards child nodes, entity decoding delegates to the standard XML decoder,
+and callback closures use lexical binding. Its seven namespaced tests run in
+the maintained baseline.
+
 [`mb-things.el`](./utils/mb-things.el) now loads independently with lexical
 binding and built-in dependencies instead of pulling in the broad
 `mb-utils-div` and `mb-utils-time` stacks. Its small date, clock, case, and
@@ -619,6 +632,7 @@ matched. They are safe retirement candidates once callers are checked.
 | `reverse-lines` | `reverse-region` | The local name is only an alias for the standard operation. |
 | `buffer-string*` | `buffer-substring-no-properties` from `point-min` to `point-max` | The local helper only adds an optional buffer argument. |
 | `*empty-regexp*` | `regexp-unmatchable` | The local constant now uses the standard value; its former `"\\`\\`"` value incorrectly matched the empty string at the start of input. |
+| `xml-decode-characters` | `xml-substitute-special` | The local wrapper now delegates to the standard XML entity and numeric-character-reference decoder; its obsolete locale-table argument is retained only for call compatibility. |
 
 ### Differ in edge cases — do not substitute blindly
 
@@ -641,6 +655,7 @@ These look replaceable but are not, and the difference is easy to miss.
 | `jstime` | `seconds-to-time` plus `decode-time` | The standard pair handles Unix timestamps directly. The local result instead uses zero-based month and day-within-month fields and supports a custom base year. |
 | `leap-year-p` and `days-in-month` | `calendar-leap-year-p` and `calendar-last-day-of-month` | The local month argument is zero-based, whereas the calendar API uses months 1 through 12. |
 | `regexp-or` | `regexp-opt` | `regexp-or` combines raw regexp fragments such as `"a+"`; `regexp-opt` treats its input as literal strings and quotes regexp operators. |
+| `xml-extract-nodes` | `libxml-parse-html-region`, `libxml-parse-xml-region`, and DOM helpers | The standard parsers produce normalized node trees. Existing callers require original source fragments, regexp-valued attribute filters, and reverse extraction, so substitution would change their contract. |
 
 ### Internal consolidations
 

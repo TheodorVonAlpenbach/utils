@@ -1,114 +1,187 @@
+;;; mb-utils-xml.el --- Raw XML and HTML fragment helpers -*- lexical-binding: t; -*-
+
+(require 'cl-lib)
+(require 'xml)
 (require 'mb-utils-strings)
 
-(defconst xml-test-node "<tr itemprop=\"albums\" itemscope itemtype=\"http://schema.org/MusicAlbum\"><a name=\"6159\"></a>Some inner text<a></a></tr>")
+;;; Code:
 
 (cl-defun xml-attribute-regexp (name &optional value)
-  (let ((wildcard-name "[^=[:space:]]+")
-	(wildcard-value "[^\"]*"))
-    (when (string= name "*") (setf name wildcard-name))
-    (when (string= value "*") (setf value wildcard-value))
+  "Return a regexp matching attribute NAME and optional VALUE.
+NAME and VALUE are raw regexps.  The string `*' matches any name or value."
+  (let ((name (if (string= name "*") "[^=[:space:]>]+" name))
+	(value (if (string= value "*") "[^\"']*" value)))
     (if value
-      (format "%s=\"\\(%s\\)\"" name value)
+	(format "%s[[:space:]]*=[[:space:]]*[\"']\\(?:%s\\)[\"']"
+		name value)
       name)))
-;;(xml-attribute-regexp "qwe" "123222")
-;;(xml-attribute-regexp "qwe")
-;;(xml-attribute-regexp "*" "*")
+
+(defun mb-xml--parse-attributes (opening-tag)
+  "Return attributes parsed from OPENING-TAG as an alist."
+  (let ((position (string-match "[[:space:]/>]" opening-tag))
+	(regexp
+	 "\\([[:alnum:]_:.][-[:alnum:]_:.]*\\)\\(?:[[:space:]]*=[[:space:]]*\\(?:\"\\([^\"]*\\)\"\\|'\\([^']*\\)'\\|\\([^[:space:]>]+\\)\\)\\)?")
+	attributes)
+    (while (and position (string-match regexp opening-tag position))
+      (push (cons (match-string 1 opening-tag)
+		  (or (match-string 2 opening-tag)
+		      (match-string 3 opening-tag)
+		      (match-string 4 opening-tag)))
+	    attributes)
+      (setq position (match-end 0)))
+    (nreverse attributes)))
+
+(defun mb-xml--full-match-p (regexp string)
+  "Return non-nil when REGEXP matches all of STRING."
+  (string-match-p (concat "\\`\\(?:" regexp "\\)\\'") string))
+
+(defun mb-xml--attribute-spec-match-p (specification attribute)
+  "Return non-nil when SPECIFICATION matches ATTRIBUTE."
+  (let* ((pair (if (listp specification)
+		   specification
+		 (list specification "*")))
+	 (name (cl-first pair))
+	 (value (or (cl-second pair) "*")))
+    (and (or (string= name "*")
+	     (mb-xml--full-match-p name (car attribute)))
+	 (or (string= value "*")
+	     (and (cdr attribute)
+		  (mb-xml--full-match-p value (cdr attribute)))))))
+
+(defun mb-xml--attributes-match-p (specifications opening-tag)
+  "Return non-nil when OPENING-TAG satisfies SPECIFICATIONS."
+  (or (null specifications)
+      (equal specifications "*")
+      (let ((attributes (mb-xml--parse-attributes opening-tag)))
+	(cl-every
+	 (lambda (specification)
+	   (cl-some
+	    (lambda (attribute)
+	      (mb-xml--attribute-spec-match-p specification attribute))
+	    attributes))
+	 (if (and (listp specifications)
+		  (not (stringp (cl-first specifications))))
+	     specifications
+	   (list specifications))))))
 
 (cl-defun xml-attribute (name xml)
-  (string-match* (xml-attribute-regexp name "*") xml :num 1))
-;;(xml-attribute "itemprop" xml-test-node)
+  "Return the value of attribute NAME in XML, or nil."
+  (cdr (assoc-string name (mb-xml--parse-attributes xml) t)))
 
 (cl-defun xml-attributes-regexp (attributes &optional exact-p)
-  "Converts list designator ATTRIBUTES to a regular expression
-for matching the attribute part in an XML node. ATTRIBUTES is a
-list where each element is either a pair of strings, (NAME
-VALUE), or just a STRING. Both NAME and VALUE should be regular
-expressions for an attribute name and attribute value
-respectively. VALUE can also be set to the string \"*\" for
-matching all attribute values. Specifying STRING is just a
-shortcut for (STRING *).
+  "Return a regexp approximating an XML attribute list.
+ATTRIBUTES contains names or (NAME VALUE) pairs expressed as raw regexps.
+When EXACT-P is nil, allow additional attributes after those requested."
+  (if (or (null attributes) (equal attributes "*"))
+      "\\(?:[[:space:]][^>]*\\)?"
+    (concat
+     "[[:space:]]+"
+     (mapconcat
+      (lambda (attribute)
+	(apply #'xml-attribute-regexp
+	       (if (listp attribute) attribute (list attribute "*"))))
+      (if (and (listp attributes)
+	       (not (stringp (cl-first attributes))))
+	  attributes
+	(list attributes))
+      "[[:space:]]+")
+     (unless exact-p "\\(?:[[:space:]][^>]*\\)?"))))
 
- If EXACT-P is true, then ATTRIBUTES describes the whole
-attribute list. Otherwise, an ending wildcard is appended to the
-resulting string."
-  (if (or (null attributes) 
-	  (and (stringp attributes)
-	       (string= attributes "*")))
-    "\\([^>]*\\)"
-    (concat* (cl-loop with wildcard-attribute-name = "[^=]+"
-		      with wildcard-attribute-value = "[^\"]*"
-		      for a in (if (listp attributes) attributes (list attributes))
-		      collect (apply #'xml-attribute-regexp (if (listp a) a (list a "*"))))
-      :pre "[[:space:]]+" :in "[[:space:]]+" :suf (if exact-p "" "[^>]*")))) 
-;;(xml-attributes-regexp '(("qwe" "123222") "itemprop" "*"))
-;;(mapcar #'xml-attributes-regexp '("*" nil "qwe"))
-	     
 (cl-defun xml-node-regexp (node-name &optional attributes)
-  "Returns all xml nodes if N is nil. If N is negative, extract from end"
-  (let ((attribute-regexp (xml-attributes-regexp attributes)))
-    (concat "<" (format "\\(%s\\)" node-name) attribute-regexp ">"
-	    "\\([[:space:][:print:]]*?\\)"
-	    "</\\1>")))
-;;(xml-node-regexp "tr")
+  "Return an approximate regexp for NODE-NAME with ATTRIBUTES.
+Use `xml-extract-nodes' when nested nodes of the same name are possible."
+  (concat "<\\(" node-name "\\)"
+	  (xml-attributes-regexp attributes)
+	  ">"
+	  "\\([[:space:][:print:]]*?\\)"
+	  "</\\1>"))
 
-(cl-defun xml-extract-nodes (xml-string node-name &optional attributes n node-content-only)
-  "Returns all xml nodes if N is nil. If N is negative, extract from end"
-  (let ((node-regexp (xml-node-regexp node-name attributes))
-	(n (or n most-positive-fixnum)))
-    (string-matches-exact node-regexp xml-string :count (abs n) :num (if node-content-only 3 0) :from-end (< n 0))))
-;;(xml-extract-nodes xml-test-node "[^>[:space:]]*" "*" 1 t)
+(defun mb-xml--matching-close (xml name start)
+  "Return (CLOSE-BEGIN CLOSE-END) for NAME opened before START in XML."
+  (let ((regexp (format "</?%s\\(?:[[:space:]][^>]*\\)?>" (regexp-quote name)))
+	(depth 1)
+	close)
+    (while (and (cl-plusp depth) (string-match regexp xml start))
+      (setq start (match-end 0))
+      (if (eq (aref xml (1+ (match-beginning 0))) ?/)
+	  (progn
+	    (cl-decf depth)
+	    (when (zerop depth)
+	      (setq close (list (match-beginning 0) (match-end 0)))))
+	(unless (eq (aref xml (- (match-end 0) 2)) ?/)
+	  (cl-incf depth))))
+    close))
 
-(cl-defun xml-inner (xml &optional (node-name "[^>[:space:]]*"))
-  (string-match* (xml-node-regexp node-name "*") xml :num 3))
-;;(xml-inner xml-test-node)
+(cl-defun xml-extract-nodes
+    (xml-string node-name &optional attributes n node-content-only)
+  "Return matching NODE-NAME fragments from XML-STRING.
+ATTRIBUTES accepts names or (NAME VALUE) regexp pairs.  Return all matches
+when N is nil, the first N when positive, and matches from the end in reverse
+document order when negative.  Return only node contents when
+NODE-CONTENT-ONLY is non-nil."
+  (let ((opening-regexp
+	 "<\\([[:alpha:]_][[:alnum:]_.:-]*\\)\\(?:[[:space:]][^>]*\\)?>")
+	(position 0)
+	nodes)
+    (while (and (or (null n) (cl-minusp n) (< (length nodes) n))
+		(string-match opening-regexp xml-string position))
+      (let* ((opening-begin (match-beginning 0))
+	     (opening-end (match-end 0))
+	     (opening-tag (match-string 0 xml-string))
+	     (name (match-string 1 xml-string)))
+	(setq position opening-end)
+	(when (and (not (string-suffix-p "/>" opening-tag))
+		   (mb-xml--full-match-p node-name name)
+		   (mb-xml--attributes-match-p attributes opening-tag))
+	  (let ((close (mb-xml--matching-close xml-string name opening-end)))
+	    (when close
+	      (push (if node-content-only
+			(substring xml-string opening-end (cl-first close))
+		      (substring xml-string opening-begin (cl-second close)))
+		    nodes)
+	      (setq position (cl-second close)))))))
+    (setq nodes (nreverse nodes))
+    (if (and n (cl-minusp n))
+	(let ((reversed (reverse nodes)))
+	  (cl-subseq reversed 0 (min (abs n) (length reversed))))
+      nodes)))
 
-(cl-defun xml-inner-text (xml &optional (node-name "[^>[:space:]]*"))
-  "Same as `xml-inner' but discards child nodes"
+(cl-defun xml-inner (xml &optional (node-name "[^>[:space:]]+"))
+  "Return the contents of the first NODE-NAME fragment in XML."
+  (cl-first (xml-extract-nodes xml node-name nil 1 t)))
+
+(cl-defun xml-inner-text (xml &optional (node-name "[^>[:space:]]+"))
+  "Return NODE-NAME contents after discarding child nodes."
   (let ((string (xml-inner xml node-name)))
-    (while (string-match (xml-node-regexp "[^>[:space:]]*" "*") string)
-      (setf string (replace-match "" nil t string)))
-    string))
-;;(xml-inner-text xml-test-node)
+    (when string
+      (let ((children (xml-extract-nodes string "[^>[:space:]]+")))
+	(dolist (child children string)
+	  (setq string
+		(replace-regexp-in-string
+		 (regexp-quote child) "" string t t)))))))
 
-(defconst *xml-special-chars*
-  '(("quot" "\"")
-    ("amp" "&")))
+(cl-defun xml-decode-characters (string &optional _encoding)
+  "Decode XML entity and numeric character references in STRING."
+  (xml-substitute-special string))
 
-(require 'mb-locale)
-(cl-defun xml-decode-characters (string &optional (encoding *iso-latin1-encoding*))
-  (cl-loop for x in encoding
-	   for ascii-code = (fourth x)
-	   for xml-code = (format "&#%d;" ascii-code) ;
-	   for char = (first x)
-	   do (setq string (mb-string-replace string xml-code char))
-	   finally return string)
-
-  (cl-loop for x in *xml-special-chars*
-	   for xml-code = (format "&%s;" (first x))
-	   for char = (second x)
-	   do (setq string (mb-string-replace string xml-code char))
-	   finally return string))
-
-(cl-defun html-to-temp-buffer (html-converter html-string buffer-name &rest args)
-  "HTML-CONVERTER is a method taking one argument, an
-HTML-STRING, and returns a string to be output in a temp buffer
-named BUFFER-NAME. HTML-STRING is the HTML content of the file
-that wget just did dowdload."
+(cl-defun html-to-temp-buffer
+    (html-converter html-string buffer-name &rest args)
+  "Convert HTML-STRING with HTML-CONVERTER and display it in BUFFER-NAME.
+Pass ARGS to HTML-CONVERTER after HTML-STRING."
   (with-output-to-temp-buffer buffer-name
     (temp-buffer-resize-mode)
-    (princ (xml-decode-characters (apply html-converter html-string args)))))
+    (princ
+     (xml-decode-characters
+      (apply html-converter html-string args)))))
 
-(cl-defun html-to-temp-buffer-sentinel (temp-buffer-name html-string-converter &rest args)
-  "Creates a method that takes a string argument. The argument
- should be an HTML string and the resulting method will convert
- the string according to HTML-STRING-CONVERTER taking arguments
- ARGS, and send the result to a temporary buffer named
- TEMP-BUFFER-NAME."
-  (let ((html-string-converter html-string-converter)
-		(temp-buffer-name temp-buffer-name)
-		(args args))
-    #'(lambda (html-string)
-	(apply #'html-to-temp-buffer html-string-converter html-string temp-buffer-name args))))
-
+(cl-defun html-to-temp-buffer-sentinel
+    (temp-buffer-name html-string-converter &rest args)
+  "Return a callback displaying converted HTML in TEMP-BUFFER-NAME.
+HTML-STRING-CONVERTER receives the callback's HTML string followed by ARGS."
+  (lambda (html-string)
+    (apply #'html-to-temp-buffer
+	   html-string-converter html-string temp-buffer-name args)))
 
 (provide 'mb-utils-xml)
+
+;;; mb-utils-xml.el ends here

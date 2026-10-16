@@ -32,7 +32,8 @@
     "utils/test-mb-utils-sets.el"
     "utils/test-mb-utils-strings.el"
     "utils/test-mb-utils-time.el"
-    "utils/test-mb-utils-tree.el"))
+    "utils/test-mb-utils-tree.el"
+    "utils/test-mb-utils-xml.el"))
 
 (defun mb-tests-add-load-paths ()
   "Add maintained test directories to `load-path'."
