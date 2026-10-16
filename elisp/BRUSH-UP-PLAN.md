@@ -286,6 +286,8 @@ The first subset is intentionally conservative:
 * [`test-mb-ert.el`](./mode-extensions/test-mb-ert.el): nine ERT tests for test
   filename recognition, source/test name swapping, definition navigation, and
   ordered test discovery.
+* [`test-mb-python.el`](./mode-extensions/test-mb-python.el): three ERT tests
+  for idempotent local setup, expression bounds, and nested Python defun bounds.
 * [`test-mb-utils-file.el`](./utils/test-mb-utils-file.el): seven ERT tests for
   path construction, directory membership, readable-file lookup, filename
   transformations, parent directories, and recursive Scilab source copying.
@@ -372,8 +374,9 @@ physics, geometry, search, XML, anaphora, general, list, sequence, string,
 time, ISO-time, and table modules are independently loadable. Their validation
 comprises:
 
-* a clean `emacs -Q` load of all twenty-seven utility features and the ERT tooling;
-* 322 passing ERT tests from the batch entry point;
+* a clean `emacs -Q` load of all twenty-eight utility and mode-extension
+  features plus the ERT tooling;
+* 325 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -400,6 +403,15 @@ an external JavaScript runtime.
 string, buffer, sequence, or definition-navigation helpers. Its duplicate
 whole-project runner was consolidated, and the compatibility command
 `elisp-test-all` delegates to the maintained runner.
+
+[`mb-python.el`](./mode-extensions/mb-python.el) now loads independently with
+lexical binding and the built-in Python library as its only dependency. Its
+mode hook enables line numbers idempotently instead of toggling them each time.
+Expression bounds preserve point and include complete function calls and
+subscripts, while empty buffers signal an explicit error. Python-aware
+navigation replaces the generic startup-only `bod*` and `eod*` helpers so
+nested function bounds are selected correctly. Its three namespaced tests run
+in the maintained baseline without starting a Python process.
 
 [`mb-utils-file.el`](./utils/mb-utils-file.el) now uses built-in path and
 recursive file APIs instead of startup aliases and the shell-oriented
