@@ -9,5 +9,3 @@ gnome-terminal --tab -- bash -c "cd /home/mats/ada/node/admin-api; docker compos
 gnome-terminal --tab -- bash -c "cd $adadir/node/admin-web; sleep 1s; $npm start & echo 'Job finished. Shell remains open.'; exec bash"
 gnome-terminal --tab -- bash -c "cd $adadir/node/portal-web; $npm start & echo 'Job started in background. Use jobs/fg/bg commands to manage it.'; exec bash"
 gnome-terminal --tab -- bash -c "cd $adadir/java; /home/mats/git/utils/bin/notify-capture.sh & exec bash"
-
-
