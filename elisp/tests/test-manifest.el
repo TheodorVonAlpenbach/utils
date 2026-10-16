@@ -25,6 +25,7 @@
     "utils/test-mb-utils-io.el"
     "utils/test-mb-utils-iso-time.el"
     "utils/test-mb-utils-matrix.el"
+    "utils/test-mb-utils-physics.el"
     "utils/test-mb-utils-regexp.el"
     "utils/test-mb-utils-sets.el"
     "utils/test-mb-utils-strings.el"
