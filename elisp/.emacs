@@ -313,7 +313,7 @@ and running Git.")
 			    mb-octave
 			    mb-ruby
 			    mb-texinfo
-			    list-db
+			    ;list-db
 			    mb-indent
 			    quiz-park
 			    mb-js-mode

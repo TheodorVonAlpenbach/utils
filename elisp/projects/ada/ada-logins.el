@@ -59,6 +59,7 @@ INFIX.
 (define-key *ada-login-map* "e" #'ada-login-pupil)
 (define-key *ada-login-map* "l" #'ada-login-teacher)
 
+(require 'mb-evil-map)
 (define-key *clipboard-map* "a" *ada-login-map*)
 
 (provide 'ada-logins)

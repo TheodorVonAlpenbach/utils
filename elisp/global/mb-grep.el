@@ -1,5 +1,3 @@
-(require 'c++-include)
-
 (cl-defun mb-grep-filter-dirs (dirs match match-not)
   (let ((case-fold-search nil))
     (cl-remove-if (disjoin (if match
