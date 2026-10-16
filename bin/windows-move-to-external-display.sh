@@ -14,8 +14,10 @@ usage() {
 Usage: windows-move-to-external-display.sh [--list | --dry-run] [--monitor CONNECTOR]
 
 Move normal windows to the single active external monitor. If more than one
-external monitor is active, choose one with --monitor. LaptopTerminal windows
-stay on the built-in display. --list and --dry-run do not move any windows.
+external monitor is active, choose one with --monitor. Make that monitor primary
+and save the display configuration (accept GNOME's confirmation to keep it).
+The second terminal from setup-terminals.sh (LaptopTerminal) stays on the
+built-in display. --list and --dry-run do not change windows or display settings.
 EOF
 }
 
