@@ -1,0 +1,7 @@
+{
+  "chat.tools.terminal.autoApprove": {
+    "gdbus": true,
+    "gnome-terminal": true,
+    "gjs": true
+  }
+}
