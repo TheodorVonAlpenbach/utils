@@ -27,7 +27,7 @@ Backup/autosave files are not source and are outside the cleanup scope.
 | Lexical binding needs a careful migration | Only 10 tracked files have a first-line `lexical-binding: t` header. [`mb-lists.el`](./utils/mb-lists.el) returns lambdas referencing local bindings, for example in `explicit<`. | Test returned functions after their creator returns. Migrate one module at a time; preserve intentional dynamic variables with `defvar` or `defcustom`. |
 | Core helpers mix infrastructure with experiments | [`mb-utils-math.el`](./utils/mb-utils-math.el) includes experimental helpers after an initial `provide`. Load-time samples and Windows-only temporary paths have been removed from [`mb-utils-io.el`](./utils/mb-utils-io.el). | Separate demonstrations from reusable definitions and eliminate unintended load-time work. |
 | Global setup contains conflicting or machine-specific bindings | [`global-map.el`](./global/global-map.el) binds F12 twice and includes a hard-coded document compilation command. [`mb-org.el`](./mode-extensions/mb-org.el) assumes Evil and key-chord functionality in its mode hook. | Preserve useful commands, make optional integrations explicit, and move machine-specific behavior out of shared setup. |
-| Legacy API usage remains | [`php.el`](./c++/php.el) uses `defadvice`; [`qt-chess.el`](./c++/qt-chess.el) uses unprefixed `flet`. | If retained, replace with supported APIs after testing advice ordering and rebinding semantics. |
+| Legacy API usage remains | Archived [`php.el`](./archive/c++/php.el) uses `defadvice`; archived [`qt-chess.el`](./archive/c++/qt-chess.el) uses unprefixed `flet`. | Leave archived code unchanged unless it is restored to active use. |
 | Potential library-name collision | [`sql-mode.el`](./mode-extensions/sql-mode.el) contains personal extensions to built-in SQL mode. | Give the extension an unambiguous feature/file name and arrange setup after built-in SQL loads. |
 
 ### Files that fail the Emacs reader
@@ -40,7 +40,7 @@ byte-compilation or test results:
 | [`dict.el`](./dictionary/dict.el) | Line 1 | Stray escaping before the initial `require`; reader reports invalid syntax. |
 | [`azure-REST.el`](./div/azure-REST.el) | Form beginning at line 29; error at line 61 | An unfinished implementation includes PHP-like text inside the Lisp source. |
 | [`rotations.el`](./games/cube/rotations.el) | Line 68 | `#[...]` is read as a byte-code object, not an ordinary vector. |
-| [`demo.el`](./music-analyzer/demo.el) | Line 192 | Unexpected closing parenthesis. |
+| [`demo.el`](./archive/music-analyzer/demo.el) | Line 192 | Unexpected closing parenthesis in archived code. |
 | [`kommuner.el`](./quiz/kommuner.el) | Line 72 | Unexpected closing parenthesis. |
 
 Fix these promptly if they are retained and used; otherwise classify them as
@@ -54,8 +54,11 @@ also mean a utility now duplicates a standard function added in a later Emacs
 release; those cases are tracked in the
 [standard-library supersession register](#standard-library-supersession-register).
 
-* **Strong retirement candidates:** Internet Explorer Favorites management in
-  [`ie.el`](./browser/ie.el), which assumes `C:/Documents and Settings`; obsolete
+* **Archived code:** Internet Explorer Favorites management in
+  [`ie.el`](./archive/browser/ie.el), which assumes `C:/Documents and Settings`,
+  and the former browser, C++, and music-analyzer trees now live under
+  [`archive/`](./archive/). Do not brush these up unless they return to active
+  use. Other retirement candidates include obsolete
   machine profiles among the [local initialization files](./); abandoned
   alternatives in [chess/old](./games/chess/old/); and unfinished scratch code.
   Confirm usage and references before archiving or deleting.
@@ -70,7 +73,7 @@ release; those cases are tracked in the
   upstream freshness. Identify provenance, local patches, licenses, and current
   usage before choosing a maintained dependency, a documented vendor copy, or
   retirement. Keep this separate from first-party refactoring.
-* **Historical documentation:** [`browser/README.txt`](./browser/README.txt)
+* **Historical documentation:** [`browser/README.txt`](./archive/browser/README.txt)
   references Emacs 22.1, and the [Scilab notes](./external/scilab/readme.txt)
   describe a 2014 environment. Refresh retained instructions; label historical
   notes rather than treating them as current setup instructions.
@@ -170,8 +173,9 @@ separate pure transformations from I/O, then refactor. Use temporary databases
 and fake process/network boundaries for ordinary tests. Keep real-service tests
 explicitly opt-in; never make a test run modify production data.
 
-Treat [ADA](./projects/ada/), [music-analyzer](./music-analyzer/), and
-[Scilab](./external/scilab/) as separate larger projects if retained. Each gets
+Treat [ADA](./projects/ada/) and [Scilab](./external/scilab/) as separate
+larger projects if retained. The former music analyzer is now archived under
+[`archive/music-analyzer/`](./archive/music-analyzer/). Each active project gets
 its own bounded follow-up plan after its dependency and usage inventory.
 
 **Done when:** the selected tool's important workflow is tested, errors remain
@@ -243,9 +247,9 @@ profile.
 
 The first subset is intentionally conservative:
 
-* [`test-list-interval.el`](./test-list-interval.el): nine ERT tests for the
+* [`test-list-interval.el`](./prototypes/geometry/test-list-interval.el): nine ERT tests for the
   closed-interval helpers, including construction and accessors.
-* [`test-list-envelope.el`](./test-list-envelope.el): nine ERT tests for
+* [`test-list-envelope.el`](./prototypes/geometry/test-list-envelope.el): nine ERT tests for
   rectangle construction, validation, containment, overlap, intersection, and
   union.
 * [`test-mb-utils-io.el`](./utils/test-mb-utils-io.el): ten ERT tests for text
@@ -273,6 +277,9 @@ The first subset is intentionally conservative:
 * [`test-mb-utils-xml.el`](./utils/test-mb-utils-xml.el): seven ERT tests for
   attribute parsing and filtering, balanced nested-node extraction, directional
   limits, inner text, entity decoding, and temporary-buffer callbacks.
+* [`test-mb-table.el`](./utils/test-mb-table.el): seven ERT tests for
+  expression-aware row parsing, column widths, selected-region and paragraph
+  alignment, explicit offsets, and malformed tables.
 * [`test-mb-ert.el`](./mode-extensions/test-mb-ert.el): nine ERT tests for test
   filename recognition, source/test name swapping, definition navigation, and
   ordered test discovery.
@@ -303,14 +310,14 @@ The first subset is intentionally conservative:
   tests for ISO date, time, timezone and date-time formatting, numbered regexp
   captures, localized calendar names, and supported time designators.
 
-[`list-interval.el`](./list-interval.el) and
+[`list-interval.el`](./prototypes/geometry/list-interval.el) and
 [`mb-utils-sets.el`](./utils/mb-utils-sets.el) now declare their `cl-lib`
 dependency, use lexical binding, and load independently of [`.emacs`](./.emacs).
 Their test files require their subject libraries directly. The temporary
 `first` and `second` aliases originally supplied by the batch runner have
 therefore been removed.
 
-[`list-envelope.el`](./list-envelope.el) is also independently loadable. Its
+[`list-envelope.el`](./prototypes/geometry/list-envelope.el) is also independently loadable. Its
 indentation property is declared directly instead of calling the startup-only
 `cl-indent` helper, and its former dependencies on startup aliases have been
 replaced with built-in operations.
@@ -335,7 +342,7 @@ replaced with built-in operations.
 | `mb-utils-io` | [`mb-utils-io.el`](./utils/mb-utils-io.el) | Active shared utility; startup-coupled |
 | `mb-evil-map` | [`mb-evil-map.el`](./mode-extensions/mb-evil-map.el) | Active optional integration; global keymaps |
 | `mb-things` | [`mb-things.el`](./utils/mb-things.el) | Active shared utility; independently loadable |
-| `radio-playlists` | [`radio-playlists.el`](./browser/radio-playlists.el) | Usage decision needed; external programs/network |
+| `radio-playlists` | [`radio-playlists.el`](./archive/browser/radio-playlists.el) | Archived; external programs/network |
 | `mb-lisp` | [`mb-lisp.el`](./mode-extensions/mb-lisp.el) | Active mode extension |
 | `mb-python` | [`mb-python.el`](./mode-extensions/mb-python.el) | Active mode extension |
 | `mb-octave` | [`mb-octave.el`](./mode-extensions/mb-octave.el) | Usage decision needed; external Octave process |
@@ -359,11 +366,11 @@ also remain explicit decisions before retirement or compatibility work begins.
 The closed-interval, envelope, set-helper, file, I/O, tree, thing-at-point,
 economy, additional-math, general-math, combinatorics, buffer, regexp, matrix,
 physics, geometry, search, XML, anaphora, general, list, sequence, string,
-time, and ISO-time modules are independently loadable. Their validation
+time, ISO-time, and table modules are independently loadable. Their validation
 comprises:
 
-* a clean `emacs -Q` load of all twenty-five utility features and the ERT tooling;
-* 306 passing ERT tests from the batch entry point;
+* a clean `emacs -Q` load of all twenty-six utility features and the ERT tooling;
+* 313 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -558,6 +565,15 @@ negative limits without capture-number assumptions. Inner-text extraction
 discards child nodes, entity decoding delegates to the standard XML decoder,
 and callback closures use lexical binding. Its seven namespaced tests run in
 the maintained baseline.
+
+[`mb-table.el`](./utils/mb-table.el) now loads independently with lexical
+binding and built-in dependencies. Duplicate row-length implementations,
+interactive-only line motion, and cursor-printing helper side effects were
+removed. Rows are parsed as Emacs Lisp expressions, so compound expressions
+containing spaces remain single cells; tables with malformed expressions or
+uneven column counts signal explicit errors. Region, paragraph, and individual
+line alignment share one deterministic formatter. Its seven namespaced tests
+run in the maintained baseline.
 
 [`mb-things.el`](./utils/mb-things.el) now loads independently with lexical
 binding and built-in dependencies instead of pulling in the broad

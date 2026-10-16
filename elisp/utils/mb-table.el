@@ -1,107 +1,137 @@
-;;; Methods for producing nice looking text tables
+;;; mb-table.el --- Align tables of Emacs Lisp expressions -*- lexical-binding: t; -*-
+
+(require 'cl-lib)
+(require 'lisp-mode)
+
+;;; Code:
+
+(defun mb-table--goto-line (line)
+  "Move to one-based LINE and return point."
+  (unless (and (integerp line) (cl-plusp line))
+    (error "Line must be a positive integer: %S" line))
+  (goto-char (point-min))
+  (forward-line (1- line))
+  (point))
+
+(defun mb-table--line-items (line)
+  "Return the Emacs Lisp expressions on one-based LINE as strings."
+  (save-excursion
+    (mb-table--goto-line line)
+    (let ((end (line-end-position))
+          items)
+      (while (progn
+               (skip-chars-forward " \t" end)
+               (< (point) end))
+        (let* ((start (point))
+               (finish
+                (condition-case nil
+                    (scan-sexps start 1)
+                  (scan-error nil))))
+          (unless (and finish (<= finish end))
+            (error "Invalid expression on line %d at column %d"
+                   line (current-column)))
+          (push (buffer-substring-no-properties start finish) items)
+          (goto-char finish)))
+      (nreverse items))))
+
+(defun mb-table--column-widths (rows)
+  "Return maximum column widths for ROWS.
+Signal an error unless every row has the same number of columns."
+  (when rows
+    (let ((columns (length (cl-first rows))))
+      (dolist (row (cl-rest rows))
+        (unless (= (length row) columns)
+          (error "Table rows have different numbers of columns")))
+      (cl-loop for column below columns
+               collect
+               (cl-loop for row in rows
+                        maximize (length (nth column row)))))))
+
+(defun mb-table--offsets (widths)
+  "Return zero-based column starts for WIDTHS with two spaces between."
+  (cl-loop with offset = 0
+           for width in widths
+           collect offset
+           do (cl-incf offset (+ width 2))))
+
+(defun mb-table--format-row (items offsets)
+  "Return ITEMS aligned at OFFSETS."
+  (unless (= (length items) (length offsets))
+    (error "Number of items does not match offsets"))
+  (with-temp-buffer
+    (setq indent-tabs-mode nil)
+    (cl-loop for item in items
+             for offset in offsets
+             do (indent-to offset)
+             do (insert item))
+    (buffer-string)))
 
 (cl-defun table-clean (beg end)
-  "Assumes lines in region is a table and cleans that table."
+  "Align a table of Emacs Lisp expressions between BEG and END.
+Rows are lines and columns are expressions.  Separate columns by at least two
+spaces and preserve each expression's source text."
   (interactive "r")
-  (with-syntax-table emacs-lisp-mode-syntax-table
+  (let* ((beg-line (line-number-at-pos beg))
+         (end-line (line-number-at-pos (max beg (1- end))))
+         (rows
+          (with-syntax-table emacs-lisp-mode-syntax-table
+            (cl-loop for line from beg-line to end-line
+                     collect (mb-table--line-items line))))
+         (offsets (mb-table--offsets (mb-table--column-widths rows))))
     (save-excursion
-      (let* ((beg-line (point-2-line beg))
-	     (end-line (point-2-line end))
-	     (maxlengths (apply #'cl-mapcar #'max 
-				(table-collect-sexp-lengths
-				 beg-line end-line)))
-	     (offsets (cl-loop for y = 0 then (+ x y 2)
-			    for x in maxlengths
-			    collect y)))
-	(cl-loop for line from beg-line to end-line
-	      do (table-clean-line line offsets))))))
+      (cl-loop for line from beg-line to end-line
+               for row in rows
+               do (mb-table--goto-line line)
+               do (delete-region (line-beginning-position)
+                                 (line-end-position))
+               do (insert (mb-table--format-row row offsets))))))
 
 (cl-defun table-clean-paragraph ()
-  "Assumes lines in region is a table and cleans that table."
+  "Align the table in the paragraph at point."
   (interactive)
   (let ((bounds (bounds-of-thing-at-point 'paragraph)))
-    (table-clean (1+ (car bounds)) (1- (cdr bounds)))))
+    (unless bounds
+      (user-error "Point is not in a paragraph"))
+    (table-clean (car bounds) (cdr bounds))))
 
 (cl-defun goto-begin-sexp (&optional (n 1))
-  (interactive "p")
+  "Move to the beginning of the Nth following expression and return point."
   (forward-sexp n)
   (forward-sexp -1)
-  (princ (point)))
+  (point))
 
 (cl-defun table-clean-line (line offsets)
-  "Fills in or removes whitespace according to OFFSETS at LINE.
-OFFSETS is a list of integers."
-  (goto-line line)
-  (let ((point (point)))
-      (dolist (offset offsets)
-	(delete-char (- (point) (goto-begin-sexp)))
-	(insert-char ?\  (- offset (- (point) point)))
-	(forward-sexp 1)
-	(when (/= (point-2-line) line)
-	  (error "number of sexp in line %d doesn't match offsets argument")))))
+  "Align expressions on one-based LINE at zero-based OFFSETS."
+  (let ((items
+         (with-syntax-table emacs-lisp-mode-syntax-table
+           (mb-table--line-items line))))
+    (save-excursion
+      (mb-table--goto-line line)
+      (delete-region (line-beginning-position) (line-end-position))
+      (insert (mb-table--format-row items offsets)))))
 
 (cl-defun point-2-line (&optional (point (point)))
+  "Return the one-based line number containing POINT."
   (interactive "d")
-  (save-excursion
-    (goto-char point)
-    (beginning-of-line)
-    (1+ (count-lines 1 (point)))))
-;;(point-2-line)
+  (line-number-at-pos point))
 
 (cl-defun table-collect-sexp-lengths (start-line end-line)
-  "Assumes lines in region is a table and cleans that table. TODO:
-lines should be input instead."
-  (interactive "r")
-
-  (save-excursion
-    (goto-line start-line)
-    ;; start with point immediately behind first sexp on line
-    (forward-sexp 1)
+  "Return expression lengths for each line from START-LINE through END-LINE."
+  (unless (<= start-line end-line)
+    (error "Start line must not follow end line"))
+  (with-syntax-table emacs-lisp-mode-syntax-table
     (cl-loop for line from start-line to end-line
-	  collect (cl-loop for bounds = (bounds-of-thing-at-point 'sexp)
-			while (= (point-2-line) line)
-			collect (- (cdr bounds) (car bounds))
-			do (forward-sexp 1)))))
-
-(cl-defun table-collect-sexp-lengths (start-line end-line)
-  "Assumes lines in region is a table and cleans that table."
-  (interactive "r")
-  (goto-line start-line)
-  (backward-char 1)
-  (cl-loop for line from start-line to end-line
-	  collect (cl-loop for start = (progn (forward-whitespace 1)
-					   (point))
-			for end = (progn (forward-whitespace 1)
-					 (forward-whitespace -1)
-					 (point))
-			while (= (point-2-line) line)
-			collect (princ (- end start)))))
+             collect (mapcar #'length (mb-table--line-items line)))))
 
 (cl-defun table-item-lengths-line (line)
-  "Returns a ordered list of lengths of all non-whitespace items in
-LINE. TODO: fix if LINE is last."
-  (interactive "P")
-  (goto-line line)
-  (backward-char 1)
-  (princ (cl-loop for start = (progn (forward-whitespace 1)
-				  (point))
-	for end = (progn (forward-whitespace 1)
-			 (forward-whitespace -1)
-			 (point))
-	while (and (= (point-2-line) line))
-	collect (princ (- end start))
-	do (forward-whitespace 1))))
-
-(cl-defun table-item-lengths-line (line)
-  "Returns a ordered list of lengths of all non-whitespace items in
-LINE. TODO: fix if LINE is last."
-  (goto-line line)
-  (cl-loop while (and (re-search-forward "[^ \t\n]+" nil t)
-		   (= (point-2-line) line))
-	collect (length (match-string 0))))
+  "Return expression lengths on one-based LINE."
+  (cl-first (table-collect-sexp-lengths line line)))
 
 (cl-defun table-item-lengths-line* ()
+  "Display expression lengths on the current line."
   (interactive)
-  (princ (table-item-lengths-line (point-2-line))))
+  (message "%S" (table-item-lengths-line (point-2-line))))
 
 (provide 'mb-table)
+
+;;; mb-table.el ends here
