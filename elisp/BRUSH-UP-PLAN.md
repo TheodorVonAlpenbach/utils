@@ -288,6 +288,8 @@ The first subset is intentionally conservative:
   ordered test discovery.
 * [`test-mb-python.el`](./mode-extensions/test-mb-python.el): three ERT tests
   for idempotent local setup, expression bounds, and nested Python defun bounds.
+* [`test-mb-ruby.el`](./mode-extensions/test-mb-ruby.el): one ERT test for
+  buffer-local Ruby settings, idempotence, and global-state isolation.
 * [`test-mb-utils-file.el`](./utils/test-mb-utils-file.el): seven ERT tests for
   path construction, directory membership, readable-file lookup, filename
   transformations, parent directories, and recursive Scilab source copying.
@@ -374,9 +376,9 @@ physics, geometry, search, XML, anaphora, general, list, sequence, string,
 time, ISO-time, and table modules are independently loadable. Their validation
 comprises:
 
-* a clean `emacs -Q` load of all twenty-eight utility and mode-extension
+* a clean `emacs -Q` load of all twenty-nine utility and mode-extension
   features plus the ERT tooling;
-* 325 passing ERT tests from the batch entry point;
+* 326 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -412,6 +414,14 @@ subscripts, while empty buffers signal an explicit error. Python-aware
 navigation replaces the generic startup-only `bod*` and `eod*` helpers so
 nested function bounds are selected correctly. Its three namespaced tests run
 in the maintained baseline without starting a Python process.
+
+[`mb-ruby.el`](./mode-extensions/mb-ruby.el) now loads independently with
+lexical binding and the built-in Ruby mode as its only dependency. Its hook
+uses buffer-local settings instead of leaking `evil-symbol-word-search` into
+every buffer. The explicit underscore syntax-table mutation was removed
+because modern `ruby-mode` already assigns the requested symbol syntax. Its
+namespaced regression test also verifies repeated setup and global-state
+isolation.
 
 [`mb-utils-file.el`](./utils/mb-utils-file.el) now uses built-in path and
 recursive file APIs instead of startup aliases and the shell-oriented

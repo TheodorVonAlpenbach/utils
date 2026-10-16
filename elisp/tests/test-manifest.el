@@ -12,6 +12,7 @@
     "prototypes/geometry/test-list-envelope.el"
     "mode-extensions/test-mb-ert.el"
     "mode-extensions/test-mb-python.el"
+    "mode-extensions/test-mb-ruby.el"
     "utils/test-mb-anaphora.el"
     "utils/test-mb-combinatorics.el"
     "utils/test-mb-polynomials.el"
