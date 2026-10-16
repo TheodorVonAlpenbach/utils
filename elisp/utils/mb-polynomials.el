@@ -1,210 +1,332 @@
-;;;; Simple polynomial representation and manipulation A polynomial is
-;;;; represented as a list (a_0 a_1 ... a_N) where a_i, i in [0 N], is
-;;;; the i-th coefficient of the polynomial.
+;;; mb-polynomials.el --- Polynomial arithmetic and formatting -*- lexical-binding: t; -*-
 
-;;;; Also, polynomial fractions are represented as a pair of lists
-;;;; (numerator denomintator) where both elements are representations
-;;;; of polynomials as described above.
+;;; Commentary:
 
-(cl-defun horner (p x)
-  (cl-loop for ai in (reverse p)
-	   for sum = ai then (+ (* sum x) ai)
-	   finally (return sum)))
-;;(horner '(2 0 1) 3)
+;; Polynomials are represented by coefficient lists in ascending order:
+;; (A0 A1 ... AN) represents A0 + A1*x + ... + AN*x^N.
+;; Polynomial fractions are represented as (NUMERATOR DENOMINATOR).
 
-(cl-defun polynom-p (p)
-  (and (listp p)
-       (plusp (length p))
-       (numberp (first p))))
-;;(mapcar #'polynom-p '(nil () (1) (2 3) (a 1)))
+;;; Code:
 
-(cl-defun polynom-clean (p)
-  (let ((pos (position 0 p :test-not #'= :from-end t)))
-    (if pos
-      (subseq p 0 (1+ pos))
-      '())))
-;;(polynom-clean '(0))
+(require 'cl-lib)
 
-(cl-defun polynom-order (p)
-  (1- (length (polynom-clean p))))
-;;(polynom-order '(1 0 0))
+(defun polynom-p (polynomial)
+  "Return non-nil when POLYNOMIAL is a nonempty list of numbers."
+  (and (consp polynomial)
+       (proper-list-p polynomial)
+       (cl-every #'numberp polynomial)))
 
-(cl-defun polynom-align (&rest polynomials)
-  (pad-lists polynomials))
-;;(polynom-align '(1 2 3) '(1))
+(defun mb-polynomials--check (polynomial)
+  "Signal an error unless POLYNOMIAL is a valid polynomial."
+  (unless (polynom-p polynomial)
+    (signal 'wrong-type-argument (list 'polynom-p polynomial))))
 
-(cl-defun polynom-addition (&rest polynomials)
-  (apply #'cl-mapcar #'+ (pad-lists polynomials)))
-;;(polynom-addition '(1 2 1) '(1))
+(defun polynom-clean (polynomial)
+  "Remove trailing zero coefficients from POLYNOMIAL.
+Represent the zero polynomial canonically as (0)."
+  (mb-polynomials--check polynomial)
+  (let ((result (copy-sequence polynomial)))
+    (while (and (cdr result) (zerop (car (last result))))
+      (setq result (butlast result)))
+    result))
 
-(cl-defun polynom-scalar-multiplication (polynomial scalar)
-  "Multiply all coefficients in POLYNOMIAL with SCALAR"
-  (mapcar (bind #'* scalar) polynomial))
-;;(polynom-scalar-multiplication '(1 2 3) 123)
+(defun polynom-order (polynomial)
+  "Return the order of POLYNOMIAL."
+  (1- (length (polynom-clean polynomial))))
 
-(cl-defun polynom-subtraction (&rest polynomials)
-  (apply #'polynom-addition
-	 (first polynomials)
-	 (mapcar (bind #'polynom-scalar-multiplication -1) (rest polynomials))))
-;;(polynom-subtraction '(1 2 1) '(1))
+(defun horner (polynomial x)
+  "Evaluate POLYNOMIAL at X using Horner's method."
+  (mb-polynomials--check polynomial)
+  (cl-loop for coefficient in (reverse polynomial)
+           for sum = coefficient then (+ (* sum x) coefficient)
+           finally return sum))
 
-(cl-defun polynom-multiplication-1 (p q)
-  (cl-destructuring-bind (p q) (polynom-align p q)
-    (polynom-clean
+(defun polynom-align (&rest polynomials)
+  "Return POLYNOMIALS padded with trailing zero coefficients."
+  (dolist (polynomial polynomials)
+    (mb-polynomials--check polynomial))
+  (when polynomials
+    (let ((width (apply #'max (mapcar #'length polynomials))))
+      (mapcar (lambda (polynomial)
+                (append polynomial
+                        (make-list (- width (length polynomial)) 0)))
+              polynomials))))
+
+(defun polynom-addition (&rest polynomials)
+  "Return the sum of POLYNOMIALS."
+  (if polynomials
+      (polynom-clean
+       (apply #'cl-mapcar #'+ (apply #'polynom-align polynomials)))
+    '(0)))
+
+(defun polynom-scalar-multiplication (polynomial scalar)
+  "Multiply every coefficient in POLYNOMIAL by SCALAR."
+  (mb-polynomials--check polynomial)
+  (unless (numberp scalar)
+    (signal 'wrong-type-argument (list 'numberp scalar)))
+  (polynom-clean
+   (mapcar (lambda (coefficient) (* coefficient scalar)) polynomial)))
+
+(defun polynom-subtraction (&rest polynomials)
+  "Subtract each polynomial after the first from the first.
+With one argument, return that polynomial unchanged.  With no
+arguments, return the zero polynomial."
+  (pcase polynomials
+    ('nil '(0))
+    (`(,polynomial) (polynom-clean polynomial))
+    (`(,first . ,rest)
      (apply #'polynom-addition
-       (cl-loop for a in p
-		for order from 0
-		collect (append (make-list order 0)
-				(polynom-scalar-multiplication q a)))))))
+            first
+            (mapcar (lambda (polynomial)
+                      (polynom-scalar-multiplication polynomial -1))
+                    rest)))))
 
-(cl-defun polynom-multiplication (&rest polynomials)
-  (cl-reduce #'polynom-multiplication-1 polynomials :initial-value '(1)))
-;;(polynom-multiplication)
+(defun polynom-multiplication-1 (p q)
+  "Return the product of polynomials P and Q."
+  (mb-polynomials--check p)
+  (mb-polynomials--check q)
+  (let ((result (make-list (1- (+ (length p) (length q))) 0)))
+    (cl-loop for a in p
+             for i from 0
+             do (cl-loop for b in q
+                         for j from 0
+                         do (cl-incf (nth (+ i j) result) (* a b))))
+    (polynom-clean result)))
 
-(cl-defun polynom-expt (p exponent)
-  (cl-assert (not (minusp exponent)))
-  (apply #'polynom-multiplication (make-list exponent p)))
-;;(polynom-expt '(1 1) 0)
+(defun polynom-multiplication (&rest polynomials)
+  "Return the product of POLYNOMIALS."
+  (cl-reduce #'polynom-multiplication-1
+             polynomials
+             :initial-value '(1)))
 
-(cl-defun polynom-division-1 (num den)
-  (let ((d (- (polynom-order num) (polynom-order den)))
-	(num (polynom-clean num))
-	(den (polynom-clean den)))
-    (unless (minusp d)
-      (let* ((q (nconc (make-list d 0) (list (/ (float (last-elt num)) (last-elt den)))))
-	     (r (polynom-subtraction num (polynom-multiplication q den))))
-	(list q r)))))
-;;(polynom-division-1 '(0 -1 0) '(1 1))
+(defun polynom-expt (polynomial exponent)
+  "Raise POLYNOMIAL to the nonnegative integer EXPONENT."
+  (unless (and (integerp exponent) (>= exponent 0))
+    (error "Polynomial exponent must be a nonnegative integer: %S" exponent))
+  (mb-polynomials--check polynomial)
+  (cl-loop with result = '(1)
+           repeat exponent
+           do (setq result (polynom-multiplication-1 result polynomial))
+           finally return result))
 
-(cl-defun polynom-division (num den)
-  (cl-loop for num* = num then r
-	   for (q r) = (polynom-division-1 num* den)
-	   while q collect q into res
-	   finally return (mapcar #'polynom-clean (list (apply #'polynom-addition res) num* den))))
-;;(polynom-division '(0 0 1) '(1 1))
+(defun mb-polynomials--zero-p (polynomial)
+  "Return non-nil when POLYNOMIAL is the zero polynomial."
+  (equal (polynom-clean polynomial) '(0)))
 
-(cl-defun polynom-derivative (p)
-  (cl-loop for a in (rest p)
-	   for i from 1
-	   collect (* i a)))
-;;(polynom-derivative '(2 2 2))
+(defun mb-polynomials--divide-numbers (numerator denominator)
+  "Divide NUMERATOR by DENOMINATOR without truncating integer results."
+  (when (zerop denominator)
+    (error "Division by zero"))
+  (if (and (integerp numerator)
+           (integerp denominator)
+           (zerop (% numerator denominator)))
+      (/ numerator denominator)
+    (/ numerator (float denominator))))
 
-(cl-defun test-polynom-division (&optional (num '(0 0 1)) (den '(1 1)))
-  (cl-destructuring-bind (q rem den) (polynom-division num den)
-    (cl-mapcar #'= num (polynom-addition 
-		     (polynom-multiplication q den)
-		     rem))))
-;;(test-polynom-division)
+(defun polynom-division-1 (numerator denominator)
+  "Perform one long-division step on NUMERATOR and DENOMINATOR.
+Return (QUOTIENT-TERM REMAINDER), or nil when NUMERATOR has lower
+order than DENOMINATOR."
+  (let ((num (polynom-clean numerator))
+        (den (polynom-clean denominator)))
+    (when (mb-polynomials--zero-p den)
+      (error "Cannot divide by the zero polynomial"))
+    (let ((degree (- (polynom-order num) (polynom-order den))))
+      (unless (or (mb-polynomials--zero-p num)
+                  (< degree 0))
+        (let* ((coefficient
+                (mb-polynomials--divide-numbers
+                 (car (last num))
+                 (car (last den))))
+               (quotient-term
+                (append (make-list degree 0) (list coefficient)))
+               (remainder
+                (polynom-subtraction
+                 num
+                 (polynom-multiplication quotient-term den))))
+          ;; The leading terms cancel by construction.  Set the result
+          ;; explicitly to zero to avoid a floating-point residue.
+          (let ((leading-index (+ degree (polynom-order den))))
+            (when (< leading-index (length remainder))
+              (setf (nth leading-index remainder) 0)))
+          (list quotient-term (polynom-clean remainder)))))))
 
-(cl-defun pole-polynom (poles)
-  "Returns the polynomial defined by the POLES a1, a2, ... aN as
-\(x - a1)(x - a2)...(x - aN)"
-  (cl-reduce #' polynom-multiplication 
-	     (mapcar #'(lambda (pole) (list (- pole) 1)) poles)))
-;;(pole-polynom '(-1 1))
+(defun polynom-division (numerator denominator)
+  "Divide NUMERATOR by DENOMINATOR.
+Return (QUOTIENT REMAINDER DENOMINATOR), with all three
+polynomials in canonical form."
+  (let ((remainder (polynom-clean numerator))
+        (den (polynom-clean denominator))
+        (quotient '(0))
+        step)
+    (when (mb-polynomials--zero-p den)
+      (error "Cannot divide by the zero polynomial"))
+    (while (setq step (polynom-division-1 remainder den))
+      (setq quotient (polynom-addition quotient (cl-first step))
+            remainder (cl-second step)))
+    (list (polynom-clean quotient) remainder den)))
 
-(cl-defun print-number (x &optional (precision 2))
-  "Formats a general number. Integers are formatted as integers,
-and floats are formatted with PRECISION"
-  (if (floatp x)
-    (format "%.2f" x)
-    (number-to-string x)))
+(defun polynom-derivative (polynomial)
+  "Return the derivative of POLYNOMIAL."
+  (mb-polynomials--check polynomial)
+  (if (cdr polynomial)
+      (polynom-clean
+       (cl-loop for coefficient in (cdr polynomial)
+                for exponent from 1
+                collect (* exponent coefficient)))
+    '(0)))
 
-(cl-defun ppolynom (p &key (variable "x") (multiplication "") (exponent "^"))
-  (cl-flet ((pterm (i a symbol)
-	      (when (not (zerop a))
-		(let ((sa (if (= a 1) "" (concat (print-number a) multiplication))))
-		  (cl-case i
-		    (0 (format "%s" (print-number a)))
-		    (1 (format "%s%s" sa variable))
-		    (t (format "%s%s%s%d" sa variable exponent i)))))))
-    (concat* (cl-loop for i from 0 
-		      for a in p
-		      if (pterm i a variable) collect it)
-      :in " + ")))
-;;(ppolynom (list 1 1 pi) :multiplication "*" :exponent "**")
+(cl-defun test-polynom-division (&optional
+                                 (numerator '(0 0 1))
+                                 (denominator '(1 1)))
+  "Return coefficient comparisons verifying polynomial division."
+  (cl-destructuring-bind (quotient remainder divisor)
+      (polynom-division numerator denominator)
+    (cl-destructuring-bind (expected actual)
+        (polynom-align
+         numerator
+         (polynom-addition
+          (polynom-multiplication quotient divisor)
+          remainder))
+      (cl-mapcar #'= expected actual))))
 
-(defalias #'p* 'polynom-multiplication)
-(defalias #'p+ 'polynom-addition)
-(defalias #'p- 'polynom-subtraction)
-(defalias #'p^ 'polynom-expt)
+(defun pole-polynom (poles)
+  "Return the monic polynomial whose roots are POLES."
+  (cl-reduce #'polynom-multiplication
+             (mapcar (lambda (pole) (list (- pole) 1)) poles)
+             :initial-value '(1)))
 
-;;; Polynomial fractions
-(cl-defun fpolynom (numerator denomintator)
-  (list numerator denomintator))
+(cl-defun print-number (number &optional (precision 2))
+  "Format NUMBER, using PRECISION decimal places for floats."
+  (unless (and (integerp precision) (>= precision 0))
+    (error "Precision must be a nonnegative integer: %S" precision))
+  (if (floatp number)
+      (format (format "%%.%df" precision) number)
+    (number-to-string number)))
 
-(defsubst fp* (qp1 qp2) (cl-mapcar #'p* qp1 qp2))
-;(fp* (qpolynom '(1 1) '(1 1)) (fpolynom '(1 1) '(1 1)))
+(cl-defun ppolynom (polynomial
+                    &key
+                    (variable "x")
+                    (multiplication "")
+                    (exponent "^"))
+  "Format POLYNOMIAL as an algebraic expression.
+VARIABLE is the indeterminate name.  MULTIPLICATION is inserted
+between a displayed coefficient and VARIABLE, while EXPONENT is
+inserted before powers greater than one."
+  (setq polynomial (polynom-clean polynomial))
+  (let (terms)
+    (cl-loop for coefficient in polynomial
+             for degree from 0
+             unless (zerop coefficient)
+             do
+             (let* ((negative (< coefficient 0))
+                    (magnitude (abs coefficient))
+                    (body
+                     (cond
+                      ((zerop degree)
+                       (print-number magnitude))
+                      ((= magnitude 1)
+                       (if (= degree 1)
+                           variable
+                         (format "%s%s%d" variable exponent degree)))
+                      (t
+                       (format "%s%s%s%s"
+                               (print-number magnitude)
+                               multiplication
+                               variable
+                               (if (= degree 1)
+                                   ""
+                                 (format "%s%d" exponent degree)))))))
+               (push (cons negative body) terms)))
+    (setq terms (nreverse terms))
+    (if (null terms)
+        "0"
+      (concat
+       (if (caar terms) "-" "")
+       (cdar terms)
+       (mapconcat (lambda (term)
+                    (concat (if (car term) " - " " + ") (cdr term)))
+                  (cdr terms)
+                  "")))))
 
-(cl-defun polynom-expand (p order)
-  (let ((n (polynom-order p)))
-    (cl-assert (<= n order))
-    (append p (make-list (- order n) 0))))
-;;(polynom-expand '(1 1) 4)
+(defalias 'p* #'polynom-multiplication)
+(defalias 'p+ #'polynom-addition)
+(defalias 'p- #'polynom-subtraction)
+(defalias 'p^ #'polynom-expt)
 
-(cl-defun fp-expand (fp order)
-  (mapcar (bind #'polynom-expand order) fp))
-;;(fp-expand '((1 2 3 4) (1)) 4)
+(defun fpolynom (numerator denominator)
+  "Construct a polynomial fraction from NUMERATOR and DENOMINATOR."
+  (list numerator denominator))
 
-(cl-defun fp-order (fp)
-  (max (polynom-order (first fp)) (polynom-order (second fp))))
+(defun fp-p (fraction)
+  "Return non-nil when FRACTION is a valid polynomial fraction."
+  (and (proper-list-p fraction)
+       (= (length fraction) 2)
+       (polynom-p (cl-first fraction))
+       (polynom-p (cl-second fraction))
+       (not (mb-polynomials--zero-p (cl-second fraction)))))
 
-(cl-defun fp-p (fp)
-  (and (listp fp)
-       (= (length fp) 2) 
-       (polynom-p (first fp))
-       (polynom-p (second fp))))
+(defun fp* (fraction-1 fraction-2)
+  "Multiply polynomial fractions FRACTION-1 and FRACTION-2."
+  (unless (and (fp-p fraction-1) (fp-p fraction-2))
+    (error "Invalid polynomial fraction"))
+  (cl-mapcar #'polynom-multiplication fraction-1 fraction-2))
 
-(cl-defun pfp (fp &rest args)
-  "Prints a polynomial fraction. For ARGS, see `ppolynom'."
-  (if (fp-p fp)
-    (when (fp-p fp)
-      (apply #'format "(%s)/(%s)" 
-	     (cl-loop for p in fp
-		      collect (apply #'ppolynom p args))))
-    (apply #'ppolynom fp args)))
-;;(mapcar #'pfp '(((1 1) (1 2)) (1 2)))
+(defun polynom-expand (polynomial order)
+  "Pad POLYNOMIAL with zero coefficients through ORDER."
+  (unless (and (integerp order) (>= order 0))
+    (error "Polynomial order must be a nonnegative integer: %S" order))
+  (let* ((clean (polynom-clean polynomial))
+         (current-order (polynom-order clean)))
+    (when (> current-order order)
+      (error "Cannot expand order %d polynomial to order %d"
+             current-order order))
+    (append clean (make-list (- order current-order) 0))))
 
-(cl-defun polynom-value-old (p x)
-  (apply #'+
-    (cl-loop for coefficient in p
-	     for i from 0
-	     collect (* coefficient (expt x i)))))
+(defun fp-expand (fraction order)
+  "Pad both polynomials in FRACTION through ORDER."
+  (unless (fp-p fraction)
+    (error "Invalid polynomial fraction"))
+  (mapcar (lambda (polynomial)
+            (polynom-expand polynomial order))
+          fraction))
 
-(cl-defun expt-sequence (base order)
-  (cl-loop for i to order 
-	   for term = 1 then (* term base)
-	   collect term))
-;;(expt-sequence 2 10)
+(defun fp-order (fraction)
+  "Return the greatest order among the polynomials in FRACTION."
+  (unless (fp-p fraction)
+    (error "Invalid polynomial fraction"))
+  (max (polynom-order (cl-first fraction))
+       (polynom-order (cl-second fraction))))
 
-(require 'mb-utils-matrix)
-(cl-defun polynom-value (p x)
-  (scalar-product p (expt-sequence x (polynom-order p))))
-;;(with-complex (polynom-value '(1 1) '(0 1)))
+(defun pfp (fraction-or-polynomial &rest arguments)
+  "Format FRACTION-OR-POLYNOMIAL.
+Pass ARGUMENTS to `ppolynom'."
+  (if (fp-p fraction-or-polynomial)
+      (format "(%s)/(%s)"
+              (apply #'ppolynom (cl-first fraction-or-polynomial) arguments)
+              (apply #'ppolynom (cl-second fraction-or-polynomial) arguments))
+    (apply #'ppolynom fraction-or-polynomial arguments)))
 
-(cl-defun fp-value (fp x)
-  (if (fp-p fp)
-    (/ (polynom-value (first fp) x)
-       (polynom-value (second fp) x))
-    (polynom-value fp x)))
+(defun expt-sequence (base order)
+  "Return powers of BASE from zero through ORDER."
+  (unless (and (integerp order) (>= order 0))
+    (error "Order must be a nonnegative integer: %S" order))
+  (cl-loop repeat (1+ order)
+           for term = 1 then (* term base)
+           collect term))
 
-(cl-defun fp-value (fp x)
-  (if (fp-p fp)
-    (apply #'/ (mapcar (bind #'scalar-product (expt-sequence x (fp-order fp))) fp))
-    (polynom-value fp x)))
-;;(fp-value '((1 2 1) (1 -2 1)) 2)
+(defun polynom-value (polynomial x)
+  "Evaluate POLYNOMIAL at X."
+  (horner polynomial x))
 
-;; (cl-defun ewq (x y) (+ x y))
-
-;; (let ((fn1 'ewq)
-;;       (fn2 '-)
-;;       a b c)
-;;   (fset 'qwe fn1)
-;;   (setf a (qwe 2 2))
-;;   (fset 'qwe fn2)
-;;   (setf b (qwe 2 2))
-;;   (fset 'qwe fn1)
-;;   (setf c (qwe 2 2))
-;;   (list a b c))
+(defun fp-value (fraction-or-polynomial x)
+  "Evaluate FRACTION-OR-POLYNOMIAL at X."
+  (if (fp-p fraction-or-polynomial)
+      (mb-polynomials--divide-numbers
+       (polynom-value (cl-first fraction-or-polynomial) x)
+       (polynom-value (cl-second fraction-or-polynomial) x))
+    (polynom-value fraction-or-polynomial x)))
 
 (provide 'mb-polynomials)
+
+;;; mb-polynomials.el ends here

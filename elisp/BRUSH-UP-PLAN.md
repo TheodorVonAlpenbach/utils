@@ -280,6 +280,9 @@ The first subset is intentionally conservative:
 * [`test-mb-table.el`](./utils/test-mb-table.el): seven ERT tests for
   expression-aware row parsing, column widths, selected-region and paragraph
   alignment, explicit offsets, and malformed tables.
+* [`test-mb-polynomials.el`](./utils/test-mb-polynomials.el): nine ERT tests
+  for representation, arithmetic, long division, derivatives, evaluation,
+  formatting, expansion, and polynomial fractions.
 * [`test-mb-ert.el`](./mode-extensions/test-mb-ert.el): nine ERT tests for test
   filename recognition, source/test name swapping, definition navigation, and
   ordered test discovery.
@@ -369,8 +372,8 @@ physics, geometry, search, XML, anaphora, general, list, sequence, string,
 time, ISO-time, and table modules are independently loadable. Their validation
 comprises:
 
-* a clean `emacs -Q` load of all twenty-six utility features and the ERT tooling;
-* 313 passing ERT tests from the batch entry point;
+* a clean `emacs -Q` load of all twenty-seven utility features and the ERT tooling;
+* 322 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -574,6 +577,19 @@ containing spaces remain single cells; tables with malformed expressions or
 uneven column counts signal explicit errors. Region, paragraph, and individual
 line alignment share one deterministic formatter. Its seven namespaced tests
 run in the maintained baseline.
+
+[`mb-polynomials.el`](./utils/mb-polynomials.el) now loads independently with
+lexical binding and `cl-lib` as its only dependency. Startup aliases and the
+matrix dependency were removed; Horner evaluation now serves as the single
+evaluation implementation. The duplicate `fp-value` and obsolete
+`polynom-value-old` definitions were removed. Arithmetic now uses a consistent
+zero-polynomial representation, long division terminates for zero remainders
+and rejects zero divisors, polynomial predicates validate every coefficient,
+and fraction evaluation no longer truncates integer quotients. Expansion,
+float precision, negative-term formatting, and empty pole products were also
+repaired. Emacs has no standard polynomial-arithmetic API that replaces this
+module's retained functionality. Its nine namespaced tests run in the
+maintained baseline.
 
 [`mb-things.el`](./utils/mb-things.el) now loads independently with lexical
 binding and built-in dependencies instead of pulling in the broad

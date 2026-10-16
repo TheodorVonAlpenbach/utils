@@ -1,0 +1,91 @@
+;;; test-mb-polynomials.el --- Tests for mb-polynomials -*- lexical-binding: t; -*-
+
+(require 'ert)
+(require 'mb-polynomials)
+
+(ert-deftest mb-polynomials-representation ()
+  (should (polynom-p '(1 2 3)))
+  (should-not (polynom-p nil))
+  (should-not (polynom-p '(1 x)))
+  (should-not (polynom-p '(1 . 2)))
+  (should (equal (polynom-clean '(1 2 0 0)) '(1 2)))
+  (should (equal (polynom-clean '(0 0)) '(0)))
+  (should (= (polynom-order '(1 2 0)) 1))
+  (should-error (polynom-clean '(1 x))))
+
+(ert-deftest mb-polynomials-addition-and-subtraction ()
+  (should (equal (polynom-align '(1 2 3) '(4))
+                 '((1 2 3) (4 0 0))))
+  (should (equal (polynom-addition '(1 2 1) '(1)) '(2 2 1)))
+  (should (equal (polynom-addition) '(0)))
+  (should (equal (polynom-subtraction '(3 2) '(1 4)) '(2 -2)))
+  (should (equal (polynom-subtraction '(3 2)) '(3 2)))
+  (should (equal (polynom-subtraction) '(0))))
+
+(ert-deftest mb-polynomials-multiplication-and-powers ()
+  (should (equal (polynom-multiplication '(1 1) '(1 -1))
+                 '(1 0 -1)))
+  (should (equal (polynom-multiplication) '(1)))
+  (should (equal (polynom-expt '(1 1) 3) '(1 3 3 1)))
+  (should (equal (polynom-expt '(1 1) 0) '(1)))
+  (should (equal (pole-polynom nil) '(1)))
+  (should (equal (pole-polynom '(-1 1)) '(-1 0 1)))
+  (should-error (polynom-expt '(1 1) -1)))
+
+(ert-deftest mb-polynomials-division ()
+  (should (equal (polynom-division '(0 0 1) '(1 1))
+                 '((-1 1) (1) (1 1))))
+  (should (equal (polynom-division '(1 2) '(1 0 1))
+                 '((0) (1 2) (1 0 1))))
+  (should (equal (polynom-division '(0) '(1 1))
+                 '((0) (0) (1 1))))
+  (should (equal (test-polynom-division) '(t t t)))
+  (should-error (polynom-division '(1 2) '(0))))
+
+(ert-deftest mb-polynomials-derivative-and-evaluation ()
+  (should (equal (polynom-derivative '(2 2 2)) '(2 4)))
+  (should (equal (polynom-derivative '(4)) '(0)))
+  (should (= (horner '(2 0 1) 3) 11))
+  (should (= (polynom-value '(2 0 1) 3) 11))
+  (should (equal (expt-sequence 2 4) '(1 2 4 8 16)))
+  (should-error (expt-sequence 2 -1)))
+
+(ert-deftest mb-polynomials-formatting ()
+  (should (equal (print-number 3.14159) "3.14"))
+  (should (equal (print-number 3.14159 3) "3.142"))
+  (should (equal (ppolynom '(0)) "0"))
+  (should (equal (ppolynom '(1 -1 2)) "1 - x + 2x^2"))
+  (should (equal (ppolynom '(1 -1 2)
+                           :multiplication "*"
+                           :exponent "**")
+                 "1 - x + 2*x**2")))
+
+(ert-deftest mb-polynomials-fractions ()
+  (let ((fraction (fpolynom '(1 1) '(1 -1))))
+    (should (fp-p fraction))
+    (should (= (fp-order fraction) 1))
+    (should (equal (fp-expand fraction 3)
+                   '((1 1 0 0) (1 -1 0 0))))
+    (should (equal (pfp fraction :multiplication "*" :exponent "**")
+                   "(1 + x)/(1 - x)"))
+    (should (= (fp-value fraction 0) 1)))
+  (should (= (fp-value '((1) (2)) 0) 0.5))
+  (should-not (fp-p '((1) (0))))
+  (should-error (fp-expand '((1) (0)) 2)))
+
+(ert-deftest mb-polynomials-fraction-multiplication ()
+  (should
+   (equal
+    (fp* '((1 1) (1 -1))
+         '((1 -1) (1 1)))
+    '((1 0 -1) (1 0 -1))))
+  (should-error (fp* '((1) (0)) '((1) (1)))))
+
+(ert-deftest mb-polynomials-expansion-validation ()
+  (should (equal (polynom-expand '(1 2) 3) '(1 2 0 0)))
+  (should-error (polynom-expand '(1 2 3) 1))
+  (should-error (polynom-expand '(1) -1)))
+
+(provide 'test-mb-polynomials)
+
+;;; test-mb-polynomials.el ends here

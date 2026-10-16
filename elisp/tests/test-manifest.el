@@ -13,6 +13,7 @@
     "mode-extensions/test-mb-ert.el"
     "utils/test-mb-anaphora.el"
     "utils/test-mb-combinatorics.el"
+    "utils/test-mb-polynomials.el"
     "utils/test-mb-table.el"
     "utils/test-mb-math-functions.el"
     "utils/test-mb-utils-math.el"
