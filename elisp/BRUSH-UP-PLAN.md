@@ -637,6 +637,23 @@ Retirement itself belongs to
 [phase 5](#5-retire-confirmed-obsolete-code-and-document-the-remainder) and
 needs the usual usage check across callers first.
 
+### Retired unused compatibility modules
+
+`function-signature.el` was removed after
+confirming that it had no repository callers. Its reflection helpers are
+covered by standard Emacs APIs: `help-function-arglist` returns argument lists,
+`func-arity` returns minimum and maximum arity, and `interactive-form` returns
+an interactive declaration or nil.
+
+`split-sequence.el` was also removed after
+confirming that it had no repository callers. It split generic sequences at
+delimiter elements and supported start/end, count, reverse, predicate, and
+second-return-value contracts. There is no single built-in replacement:
+`split-string` covers ordinary string splitting, while the standard
+`seq-split` chunks a sequence by length and is **not** equivalent. Reintroduce
+the maintained GNU ELPA `split-sequence` package if that richer contract is
+needed again rather than restoring the old local copy.
+
 ### Behaviourally equivalent for observed uses
 
 These were compared against the standard function on the cases that matter and
