@@ -267,6 +267,9 @@ The first subset is intentionally conservative:
 * [`test-mb-utils-geometry.el`](./utils/test-mb-utils-geometry.el): seven ERT
   tests for one-dimensional objects, flexible and fixed-margin layouts,
   interspaces, affine transforms, extrema, and bounding boxes.
+* [`test-mb-utils-search.el`](./utils/test-mb-utils-search.el): four ERT tests
+  for searches in current, designated, and narrowed buffers, including point
+  and match-data preservation.
 * [`test-mb-ert.el`](./mode-extensions/test-mb-ert.el): nine ERT tests for test
   filename recognition, source/test name swapping, definition navigation, and
   ordered test discovery.
@@ -352,11 +355,11 @@ also remain explicit decisions before retirement or compatibility work begins.
 
 The closed-interval, envelope, set-helper, file, I/O, tree, thing-at-point,
 economy, additional-math, general-math, combinatorics, buffer, regexp, matrix,
-physics, geometry, anaphora, general, list, sequence, string, time, and
+physics, geometry, search, anaphora, general, list, sequence, string, time, and
 ISO-time modules are independently loadable. Their validation comprises:
 
-* a clean `emacs -Q` load of all twenty-three utility features and the ERT tooling;
-* 295 passing ERT tests from the batch entry point;
+* a clean `emacs -Q` load of all twenty-four utility features and the ERT tooling;
+* 299 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -535,6 +538,13 @@ The unfinished affine transform and non-working interval mutation were replaced 
 non-destructive transform and move operations. The duplicate broken `minmax`
 definition was removed, restoring bounding boxes used by the municipality
 quiz data. Its seven namespaced tests run in the maintained baseline.
+
+[`mb-utils-search.el`](./utils/mb-utils-search.el) now loads independently
+with lexical binding and no dependencies. Its sole public helper now searches
+the designated buffer rather than silently using the current one, preserves
+both point and match data, respects narrowing, and documents that it returns
+the match end position rather than a boolean. Its four namespaced tests run in
+the maintained baseline.
 
 [`mb-things.el`](./utils/mb-things.el) now loads independently with lexical
 binding and built-in dependencies instead of pulling in the broad

@@ -28,6 +28,7 @@
     "utils/test-mb-utils-matrix.el"
     "utils/test-mb-utils-physics.el"
     "utils/test-mb-utils-regexp.el"
+    "utils/test-mb-utils-search.el"
     "utils/test-mb-utils-sets.el"
     "utils/test-mb-utils-strings.el"
     "utils/test-mb-utils-time.el"
