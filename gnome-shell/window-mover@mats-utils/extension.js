@@ -6,6 +6,7 @@ import {Extension} from 'resource:///org/gnome/shell/extensions/extension.js';
 
 import {
     LAPTOP_TERMINAL_TITLE,
+    planPrimaryMonitor,
     planWindowMoves,
     resolveTarget,
 } from './planner.mjs';
@@ -140,17 +141,15 @@ export default class WindowMoverExtension extends Extension {
         this._titleWatchers.set(window, {title: titleId, unmanaged: unmanagedId});
     }
 
-    async _connectedMonitors() {
-        const replyType = new GLib.VariantType(
-            '(ua((ssss)a(siiddada{sv})a{sv})a(iiduba(ssss)a{sv})a{sv})');
+    async _callDisplayConfig(method, parameters, replyType) {
         // Mutter shares Shell's main loop, so a synchronous call would block its reply.
         const reply = await new Promise((resolve, reject) => {
             Gio.DBus.session.call(
                 DISPLAY_CONFIG_NAME,
                 DISPLAY_CONFIG_PATH,
                 DISPLAY_CONFIG_INTERFACE,
-                'GetCurrentState',
-                null,
+                method,
+                parameters,
                 replyType,
                 Gio.DBusCallFlags.NONE,
                 5000,
@@ -165,15 +164,45 @@ export default class WindowMoverExtension extends Extension {
         });
         if (!this._enabled)
             throw new Error('Window-mover extension was disabled during the request.');
-        const state = reply.recursiveUnpack();
+        return reply.recursiveUnpack();
+    }
+
+    async _displayState() {
+        return this._callDisplayConfig('GetCurrentState', null, new GLib.VariantType(
+            '(ua((ssss)a(siiddada{sv})a{sv})a(iiduba(ssss)a{sv})a{sv})'));
+    }
+
+    async _connectedMonitors(state = null) {
+        state ??= await this._displayState();
         const monitorManager = global.backend.get_monitor_manager();
 
         return state[1].map(([spec, _modes, properties]) => ({
             connector: spec[0],
             displayName: properties['display-name'] ?? spec[0],
             isBuiltin: properties['is-builtin'] === true,
+            isPrimary: state[2].some(logical =>
+                logical[4] && logical[5].some(candidate => candidate[0] === spec[0])),
             monitorIndex: monitorManager.get_monitor_for_connector(spec[0]),
         }));
+    }
+
+    async _applyPrimaryMonitor(configuration) {
+        const variantProperties = properties => Object.fromEntries(
+            Object.entries(properties).map(([key, value]) => [
+                key,
+                new GLib.Variant(key === 'underscanning' ? 'b'
+                    : key === 'monitors-for-lease' ? 'a(ssss)' : 'u', value),
+            ]));
+        const logicalMonitors = configuration.logicalMonitors.map(logical => [
+            ...logical.slice(0, 5),
+            logical[5].map(([connector, mode, properties]) => [
+                connector, mode, variantProperties(properties),
+            ]),
+        ]);
+        const parameters = new GLib.Variant(
+            '(uua(iiduba(ssa{sv}))a{sv})',
+            [configuration.serial, 2, logicalMonitors, variantProperties(configuration.properties)]);
+        await this._callDisplayConfig('ApplyMonitorsConfig', parameters, new GLib.VariantType('()'));
     }
 
     _windows() {
@@ -222,7 +251,8 @@ export default class WindowMoverExtension extends Extension {
 
         const lines = monitors.map(monitor =>
             `MONITOR ${monitor.connector} (${monitor.displayName}) ${monitor.isBuiltin ? 'built-in' : 'external'} ` +
-            `${monitor.monitorIndex < 0 ? 'inactive' : `logical ${monitor.monitorIndex}`}`);
+            `${monitor.monitorIndex < 0 ? 'inactive' : `logical ${monitor.monitorIndex}`}` +
+            `${monitor.isPrimary ? ' primary' : ''}`);
 
         const targetLabel = connector ? 'REQUESTED TARGET' : 'AUTOMATIC TARGET';
         if (targetIssue)
@@ -247,26 +277,44 @@ export default class WindowMoverExtension extends Extension {
     }
 
     async _moveWindows(connector, dryRun) {
-        const monitors = await this._connectedMonitors();
-        const target = resolveTarget(monitors, connector);
+        let state = await this._displayState();
+        let monitors = await this._connectedMonitors(state);
+        let target = resolveTarget(monitors, connector);
         if (target.monitorIndex === null)
             return ['No active external monitor; nothing changed.'];
 
-        const windows = this._windows();
-        if (windows.some(window => window.isLaptopTerminal) &&
-            target.laptopMonitorIndex === null) {
-            throw new Error('A LaptopTerminal window exists, but no built-in monitor is active.');
+        const windowPlan = () => {
+            const workArea = target.laptopMonitorIndex === null
+                ? null
+                : global.workspace_manager.get_active_workspace()
+                    .get_work_area_for_monitor(target.laptopMonitorIndex);
+            return planWindowMoves(this._windows(), target, workArea);
+        };
+        let plan = windowPlan();
+        const primaryConfiguration = planPrimaryMonitor(state, target.connector);
+        const lines = [];
+        if (primaryConfiguration) {
+            const selectedConnector = target.connector;
+            if (dryRun) {
+                lines.push(`Would make ${selectedConnector} the primary display (saved configuration).`);
+            } else {
+                await this._applyPrimaryMonitor(primaryConfiguration);
+                state = await this._displayState();
+                if (planPrimaryMonitor(state, selectedConnector))
+                    throw new Error(`Monitor "${selectedConnector}" did not become primary.`);
+
+                // Changing primary can change monitor indices and the panel's work area.
+                monitors = await this._connectedMonitors(state);
+                target = resolveTarget(monitors, selectedConnector);
+                plan = windowPlan();
+                lines.push(`Made ${selectedConnector} primary; accept GNOME's display confirmation to keep it.`);
+            }
+        }
+        if (plan.length === 0) {
+            lines.push('All windows are already in their requested positions.');
+            return lines;
         }
 
-        const workArea = target.laptopMonitorIndex === null
-            ? null
-            : global.workspace_manager.get_active_workspace()
-                .get_work_area_for_monitor(target.laptopMonitorIndex);
-        const plan = planWindowMoves(windows, target, workArea);
-        if (plan.length === 0)
-            return ['All windows are already in their requested positions.'];
-
-        const lines = [];
         for (const item of plan) {
             const destination = item.action === 'position'
                 ? `${this._monitorLabel(monitors, item.destinationMonitorIndex)} at ${item.position.x},${item.position.y}`

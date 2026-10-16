@@ -10,9 +10,19 @@ monitors are active, pass `--monitor CONNECTOR` (for example `DP-7`) to choose
 one. Mirrored connectors that represent the same logical monitor count as one
 destination. If no external monitor is active, a move is a no-op.
 
+Before moving windows, the helper makes the selected external monitor primary
+and requests a saved GNOME display configuration. Accept GNOME's display
+confirmation to keep the change; otherwise GNOME may revert it. Current
+positions, resolutions, refresh rates, scaling, rotation, mirroring, color
+settings, and leased monitors are preserved. Settings are not reapplied if
+the selected monitor is already primary. The preference is enforced when
+the helper runs, not continuously on hotplug.
+
 The laptop terminal is identified by the unique initial `LaptopTerminal` title
-set in `bin/setup-terminals.sh`. GNOME Shell remembers windows as they receive
-that title, so later shell-title changes do not change their identity. Such a
+set on the second terminal window in `bin/setup-terminals.sh`. All other normal
+windows, including the first terminal, go to the selected external monitor.
+GNOME Shell remembers windows as they receive that title, so later shell-title
+changes do not change their identity. Such a
 window stays on the built-in monitor and is placed at approximately 500,20
 within its work area. Windows already at their destination are left alone.
 Maximized state and workspace membership are not changed.
@@ -56,17 +66,23 @@ bin/windows-move-to-external-display.sh --monitor DP-7
 
 With no options, the helper moves windows when the target is unambiguous.
 `--list` prints active monitor mappings and normal windows. `--dry-run` prints
-the planned moves without changing any windows. `--monitor` is also accepted
+the planned moves without changing any windows. Neither inspection option
+changes display settings; `--list` marks the current primary and `--dry-run` reports a planned
+primary change even when no windows need moving. `--monitor` is also accepted
 with either inspection option. This helper does not launch terminals or
 browsers; `bin/setup-terminals.sh`, the two launcher scripts, and
 `bin/chrome-all.sh` retain their launch behavior.
 
 ## Checks
 
-The display-moving operation has not been exercised live; enabling the
-extension and moving existing windows are intentionally left to the user.
-Pure target-selection and movement planning tests can be run with:
+The primary-display change and window-moving operation have not been exercised
+live; reloading/enabling the extension, confirming the saved display change,
+and moving existing windows are intentionally left to the user. On Wayland,
+log out and back in to load updated extension code. Recreate the second terminal
+afterward so its title marker can be remembered.
+Target-selection, configuration planning, and mocked extension tests can be
+run with Node.js 22.15 or newer:
 
 ```sh
-node --test gnome-shell/window-mover@mats-utils/tests/planner.test.mjs
+node --test gnome-shell/window-mover@mats-utils/tests/*.test.mjs
 ```

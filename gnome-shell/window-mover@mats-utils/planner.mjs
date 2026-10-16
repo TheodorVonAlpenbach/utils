@@ -1,5 +1,44 @@
 export const LAPTOP_TERMINAL_TITLE = 'LaptopTerminal';
 
+export function planPrimaryMonitor(state, connector) {
+    const [serial, monitors, logicalMonitors, properties] = state;
+    const target = logicalMonitors.find(logical =>
+        logical[5].some(spec => spec[0] === connector));
+    if (!target)
+        throw new Error(`Monitor "${connector}" is not connected and active.`);
+    if (target[4])
+        return null;
+
+    const configuration = logicalMonitors.map(([x, y, scale, transform, , specs]) => [
+        x, y, scale, transform, specs.some(spec => spec[0] === connector),
+        specs.map(spec => {
+            const monitor = monitors.find(([candidate]) => candidate[0] === spec[0]);
+            const mode = monitor?.[1].find(candidate => candidate[6]['is-current']);
+            if (!mode)
+                throw new Error(`Cannot determine the current mode for monitor "${spec[0]}".`);
+
+            const current = monitor[2];
+            const settings = {};
+            if ('is-underscanning' in current)
+                settings.underscanning = current['is-underscanning'];
+            for (const key of ['color-mode', 'rgb-range']) {
+                if (key in current)
+                    settings[key] = current[key];
+            }
+            return [spec[0], mode[0], settings];
+        }),
+    ]);
+    const settings = {};
+    if (properties['supports-changing-layout-mode'] && 'layout-mode' in properties)
+        settings['layout-mode'] = properties['layout-mode'];
+    const leased = monitors.filter(monitor => monitor[2]['is-for-lease'])
+        .map(monitor => monitor[0]);
+    if (leased.length > 0)
+        settings['monitors-for-lease'] = leased;
+
+    return {serial, logicalMonitors: configuration, properties: settings};
+}
+
 export function resolveTarget(monitors, connector = '') {
     const active = monitors.filter(monitor => monitor.monitorIndex >= 0);
     const builtInIndices = [...new Set(active
