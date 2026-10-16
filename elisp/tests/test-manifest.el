@@ -13,6 +13,7 @@
     "mode-extensions/test-mb-ert.el"
     "mode-extensions/test-mb-python.el"
     "mode-extensions/test-mb-ruby.el"
+    "mode-extensions/test-mb-texinfo.el"
     "utils/test-mb-anaphora.el"
     "utils/test-mb-combinatorics.el"
     "utils/test-mb-polynomials.el"

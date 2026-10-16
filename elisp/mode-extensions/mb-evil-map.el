@@ -178,7 +178,7 @@
 				 (insert-symbol-sup2 (or n 1))))
   (define-key insert-map "3" #'(lambda (n) (interactive "P")
 				 (insert-symbol-sup3 (or n 1))))
-  (define-key insert-map "@" #'texinfo-insert-@var))
+  (define-key insert-map "@" #'mb-texinfo-insert-@var))
 
 (let ((big-insert-map (make-sparse-keymap)))
   (key-chord-define evil-normal-state-map "vI" big-insert-map)

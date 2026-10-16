@@ -51,4 +51,5 @@ If the JIRA-TAG subfolder does not exist, create it."
 		 "Task directory %s does not exist. Do you want to create one? "
 	       dir))
 	(make-directory dir t)
-	(find-file filename)))))
+	(with-current-buffer (find-file-noselect filename)
+	  (goto-char (point-max)))))))

@@ -290,6 +290,9 @@ The first subset is intentionally conservative:
   for idempotent local setup, expression bounds, and nested Python defun bounds.
 * [`test-mb-ruby.el`](./mode-extensions/test-mb-ruby.el): one ERT test for
   buffer-local Ruby settings, idempotence, and global-state isolation.
+* [`test-mb-texinfo.el`](./mode-extensions/test-mb-texinfo.el): five ERT tests
+  for command formatting and insertion, commented snippets, generated wrapper
+  commands, keymaps, and hook registration.
 * [`test-mb-utils-file.el`](./utils/test-mb-utils-file.el): seven ERT tests for
   path construction, directory membership, readable-file lookup, filename
   transformations, parent directories, and recursive Scilab source copying.
@@ -354,7 +357,7 @@ replaced with built-in operations.
 | `mb-python` | [`mb-python.el`](./mode-extensions/mb-python.el) | Active mode extension |
 | `mb-octave` | [`mb-octave.el`](./mode-extensions/mb-octave.el) | Usage decision needed; external Octave process |
 | `mb-ruby` | [`mb-ruby.el`](./mode-extensions/mb-ruby.el) | Usage decision needed |
-| `mb-texinfo` | [`mb-texinfo.el`](./mode-extensions/mb-texinfo.el) | Usage decision needed |
+| `mb-texinfo` | [`mb-texinfo.el`](./mode-extensions/mb-texinfo.el) | Active mode extension; independently loadable |
 | `list-db` | [`list-db.el`](./list-database/list-db.el) | Active shared application/library candidate |
 | `mb-indent` | [`mb-indent.el`](./global/mb-indent.el) | Active startup compatibility layer; global symbol properties |
 | `quiz-park` | [`quiz-park.el`](./quiz/quiz-park.el) | Usage decision needed; application |
@@ -376,9 +379,9 @@ physics, geometry, search, XML, anaphora, general, list, sequence, string,
 time, ISO-time, and table modules are independently loadable. Their validation
 comprises:
 
-* a clean `emacs -Q` load of all twenty-nine utility and mode-extension
+* a clean `emacs -Q` load of all thirty utility and mode-extension
   features plus the ERT tooling;
-* 326 passing ERT tests from the batch entry point;
+* 331 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -422,6 +425,19 @@ every buffer. The explicit underscore syntax-table mutation was removed
 because modern `ruby-mode` already assigns the requested symbol syntax. Its
 namespaced regression test also verifies repeated setup and global-state
 isolation.
+
+[`mb-texinfo.el`](./mode-extensions/mb-texinfo.el) now loads independently
+with lexical binding and built-in dependencies. The stale capitalized
+`Texinfo-mode-hook` was replaced with the real `texinfo-mode-hook`; entering
+Texinfo mode no longer requires Evil or key-chord, though their maps are still
+configured when available. Startup-only region, string, process, line-motion,
+and tag helpers were replaced with supported APIs. Personal wrapping commands
+now use `mb-texinfo-` names rather than shadowing Emacs's standard
+`texinfo-insert-@var`, `texinfo-insert-@code`, and related functions with
+narrower signatures. Commented environment snippets now honor their
+no-inner-space argument, process failures are surfaced, and the previously
+dormant test file has been expanded to five namespaced tests in the maintained
+baseline.
 
 [`mb-utils-file.el`](./utils/mb-utils-file.el) now uses built-in path and
 recursive file APIs instead of startup aliases and the shell-oriented
@@ -727,6 +743,7 @@ These look replaceable but are not, and the difference is easy to miss.
 | `leap-year-p` and `days-in-month` | `calendar-leap-year-p` and `calendar-last-day-of-month` | The local month argument is zero-based, whereas the calendar API uses months 1 through 12. |
 | `regexp-or` | `regexp-opt` | `regexp-or` combines raw regexp fragments such as `"a+"`; `regexp-opt` treats its input as literal strings and quotes regexp operators. |
 | `xml-extract-nodes` | `libxml-parse-html-region`, `libxml-parse-xml-region`, and DOM helpers | The standard parsers produce normalized node trees. Existing callers require original source fragments, regexp-valued attribute filters, and reverse extraction, so substitution would change their contract. |
+| `mb-texinfo-insert-@var` and related wrappers | `texinfo-insert-@var`, `texinfo-insert-@code`, and related commands | The personal commands wrap the active region or symbol at point and leave point inside empty braces. Standard Texinfo commands retain their broader optional argument signatures and are no longer shadowed. |
 
 ### Internal consolidations
 

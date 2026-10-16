@@ -41,14 +41,19 @@ fi
 
 adaTag=`adatagtemplate $1`
 targetPath="$HOME/ada-tasks/$adaTag"
+targetFile="$targetPath/README.org"
 
 if [ -n "$verbose" ]; then
     echo adaTag is \'$adaTag\'
     echo targetPath is \'$targetPath\'
+    echo targetFile is \'$targetFile\'
 fi
 
-# Create target directory
+[ -n "$verbose" ] && echo "Creating target directory"
 mkdir -p "$targetPath"
 
-# Create README if not already present
-[ -f "$targetPath/README" ] || touch "$targetPath/README"
+# Create README.org if not already present
+if [ ! -f "$targetFile" ]; then
+    [ -n "$verbose" ] && echo "Creating README.org"
+    echo -e "$adaTag\n" > "$targetFile"
+fi
