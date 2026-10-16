@@ -22,6 +22,7 @@
     "utils/test-mb-utils-economy.el"
     "utils/test-mb-utils-buffer.el"
     "utils/test-mb-utils-file.el"
+    "utils/test-mb-utils-geometry.el"
     "utils/test-mb-utils-io.el"
     "utils/test-mb-utils-iso-time.el"
     "utils/test-mb-utils-matrix.el"

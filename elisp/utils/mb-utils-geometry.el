@@ -1,53 +1,102 @@
+;;; mb-utils-geometry.el --- Small geometry and layout helpers -*- lexical-binding: t; -*-
+
+(require 'cl-lib)
+
+;;; Code:
+
 (cl-defun rest-space (n space &optional (world 1024))
+  "Return WORLD minus N objects' N+1 margins of size SPACE."
+  (unless (and (integerp n) (>= n 0))
+    (error "Object count must be a non-negative integer: %S" n))
   (- world (* (1+ n) space)))
 ;;(rest-space 3 10)
 
-;;(cl-defun make-1d (start length) (list :start start :length length))
-(cl-defun make-1d (start length) (list start length))
+(cl-defun make-1d (start length)
+  "Return a one-dimensional object beginning at START with LENGTH."
+  (list start length))
 
-;;(cl-defun 1d-start (1d) (getf res :start))
-(defalias '1d-start #'first)
-(defalias '1d-length #'second)
+(defsubst 1d-start (object)
+  "Return the start coordinate of one-dimensional OBJECT."
+  (cl-first object))
 
-(cl-defun 1d-align (objects &key (left-space nil) (right-space nil) (world 1024))
-  "Returns a list of 1Ds of equal length that fill out the space between the N spaces of length SPACE"
-  (let ((space (/ (- world (cl-reduce #'+ objects :key #'length)) (1+ (length objects)))))
-    (cl-loop for x in objects
-       for l = (1d-length x)
-       for start = space then (+ start space l)
-       collect (make-1d start l))))
+(defsubst 1d-length (object)
+  "Return the length of one-dimensional OBJECT."
+  (cl-second object))
+
+(cl-defun 1d-align (objects &key left-space right-space (world 1024))
+  "Distribute OBJECTS across WORLD while preserving their lengths.
+When LEFT-SPACE or RIGHT-SPACE is nil, distribute the corresponding
+margin together with the unspecified internal spaces."
+  (if (null objects)
+      nil
+    (let* ((count (length objects))
+	   (occupied (cl-reduce #'+ objects :key #'1d-length
+				:initial-value 0))
+	   (remaining (- world occupied))
+	   (fixed-left (or left-space 0))
+	   (fixed-right (or right-space 0))
+	   (flexible-gaps (+ (1- count)
+			     (if left-space 0 1)
+			     (if right-space 0 1)))
+	   (flexible-space (- remaining fixed-left fixed-right)))
+      (when (cl-minusp flexible-space)
+	(error "Objects and fixed margins exceed world length"))
+      (when (and (zerop flexible-gaps) (not (zerop flexible-space)))
+	(error "Specified margins do not fill world length"))
+      (let ((gap (if (zerop flexible-gaps)
+		     0
+		   (/ flexible-space (float flexible-gaps))))
+	    (start (or left-space nil)))
+	(unless start
+	  (setq start gap))
+	(cl-loop for object in objects
+		 for length = (1d-length object)
+		 collect (make-1d start length)
+		 do (setq start (+ start length gap)))))))
 ;;(1d-align '((0 10) (0 10)))
 
 (cl-defun 1d-interspaces (n space &optional (world 1024))
-  "Returns a list of 1Ds of equal length that fill out the space between the N spaces of length SPACE"
-  (let ((l (/ (rest-space n space world) n)))
-    (cl-loop for i below n
-       for sp = space then (+ sp space l)
-       collect (make-1d sp l))))
+  "Return N equal objects separated and surrounded by SPACE in WORLD."
+  (unless (and (integerp n) (cl-plusp n))
+    (error "Object count must be a positive integer: %S" n))
+  (let ((available (rest-space n space world)))
+    (when (cl-minusp available)
+      (error "Spaces exceed world length"))
+    (let ((length (/ available (float n))))
+      (cl-loop for index below n
+	       for start = space then (+ start space length)
+	       collect (make-1d start length)))))
 
-(cl-defun 1d-transform (x offset scale)
-  "Moves 1D object X OFFSET units"
-  (make-1d ))
+(cl-defun 1d-transform (object offset scale)
+  "Scale one-dimensional OBJECT by SCALE, then move it by OFFSET."
+  (when (cl-minusp scale)
+    (error "Scale must be non-negative: %S" scale))
+  (make-1d (+ offset (* scale (1d-start object)))
+	   (* scale (1d-length object))))
 
-(cl-defun 1d-move (x offset)
-  "Moves 1D object X OFFSET units"
-  (let ((res (copy-list x)))
-    (cl-incf (1d-start res) offset)
-    res))
-;;(1d-move (first (1d-interspaces 3 10)) 1)
-
+(cl-defun 1d-move (object offset)
+  "Return one-dimensional OBJECT moved by OFFSET."
+  (1d-transform object offset 1))
 
 (cl-defun minmax (numbers)
+  "Return the minimum and maximum values in NUMBERS."
+  (unless numbers
+    (error "Cannot find extrema of an empty sequence"))
   (list (cl-reduce #'min numbers)
 	(cl-reduce #'max numbers)))
-(cl-defun minmax (numbers)
-  (list (butlast (minimum numbers))
-	(butlast (minimum numbers :test #'>))))
 ;;(minmax '(1 3 2 4 0))
 
 (cl-defun bounding-box (points)
-  (list (minmax (mapcar #'first points))
-	(minmax (mapcar #'second points))))
+  "Return axis-aligned bounding intervals for two-dimensional POINTS."
+  (unless points
+    (error "Cannot bound an empty point set"))
+  (dolist (point points)
+    (unless (= (length point) 2)
+      (error "Not a two-dimensional point: %S" point)))
+  (list (minmax (mapcar #'cl-first points))
+	(minmax (mapcar #'cl-second points))))
 ;;(bounding-box '((0 0) (-1 3) (1 2)))
 
 (provide 'mb-utils-geometry)
+
+;;; mb-utils-geometry.el ends here
