@@ -286,6 +286,9 @@ The first subset is intentionally conservative:
 * [`test-mb-ert.el`](./mode-extensions/test-mb-ert.el): nine ERT tests for test
   filename recognition, source/test name swapping, definition navigation, and
   ordered test discovery.
+* [`test-mb-java-mode.el`](./mode-extensions/test-mb-java-mode.el): one ERT
+  test for feature publication, Java buffer settings, idempotence, and global
+  default isolation.
 * [`test-mb-js-mode.el`](./mode-extensions/test-mb-js-mode.el): five ERT tests
   for JavaScript buffer settings, Node REPL hook registration and buffer
   lookup, mocked evaluation, and explicit missing-package errors.
@@ -385,9 +388,9 @@ physics, geometry, search, XML, anaphora, general, list, sequence, string,
 time, ISO-time, and table modules are independently loadable. Their validation
 comprises:
 
-* a clean `emacs -Q` load of all thirty-two utility and mode-extension
+* a clean `emacs -Q` load of all thirty-three utility and mode-extension
   features plus the ERT tooling;
-* 341 passing ERT tests from the batch entry point;
+* 342 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -465,6 +468,15 @@ insertion now has explicit point behavior, arrival entries normalize trailing
 blank lines, and a supplied arrival time controls both the date and clock line
 instead of potentially mixing dates around midnight. Its five namespaced tests
 run without loading Evil or key-chord.
+
+[`mb-java-mode.el`](./mode-extensions/mb-java-mode.el) now loads independently
+with lexical binding and publishes its actual `mb-java-mode` feature. It
+previously provided `mb-js-mode`, which made `(require 'mb-java-mode)` fail and
+could falsely mark the JavaScript extension as loaded. The unsupported
+`java-indent-level` assignment was replaced with CC Mode's buffer-local
+`c-basic-offset`; line-number and electric-pair setup is now idempotent, and
+all personal indentation settings remain local to Java buffers. Its namespaced
+regression test also verifies that global defaults are unchanged.
 
 [`mb-utils-file.el`](./utils/mb-utils-file.el) now uses built-in path and
 recursive file APIs instead of startup aliases and the shell-oriented
