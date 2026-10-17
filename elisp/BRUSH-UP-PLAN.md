@@ -289,6 +289,9 @@ The first subset is intentionally conservative:
 * [`test-mb-js-mode.el`](./mode-extensions/test-mb-js-mode.el): five ERT tests
   for JavaScript buffer settings, Node REPL hook registration and buffer
   lookup, mocked evaluation, and explicit missing-package errors.
+* [`test-mb-org.el`](./mode-extensions/test-mb-org.el): five ERT tests for
+  timestamp formatting, date/time/fact insertion, arrival/departure entries,
+  keymaps, and hook registration.
 * [`test-mb-python.el`](./mode-extensions/test-mb-python.el): three ERT tests
   for idempotent local setup, expression bounds, and nested Python defun bounds.
 * [`test-mb-ruby.el`](./mode-extensions/test-mb-ruby.el): one ERT test for
@@ -367,7 +370,7 @@ replaced with built-in operations.
 | `mb-js-mode` | [`mb-js-mode.el`](./mode-extensions/mb-js-mode.el) | Active mode extension; optional Node.js evaluation |
 | `quiz` | [`quiz.el`](./quiz/quiz.el) | Usage decision needed; application |
 | `mb-ert` | [`mb-ert.el`](./mode-extensions/mb-ert.el) | Active developer tooling; refactor candidate |
-| `mb-org` | [`mb-org.el`](./mode-extensions/mb-org.el) | Active mode extension; assumes optional Evil/key-chord setup |
+| `mb-org` | [`mb-org.el`](./mode-extensions/mb-org.el) | Active mode extension; independently loadable |
 
 The classifications above describe evidence from startup, not confirmed personal
 usage. Static inspection cannot decide which optional integrations should remain
@@ -382,9 +385,9 @@ physics, geometry, search, XML, anaphora, general, list, sequence, string,
 time, ISO-time, and table modules are independently loadable. Their validation
 comprises:
 
-* a clean `emacs -Q` load of all thirty-one utility and mode-extension
+* a clean `emacs -Q` load of all thirty-two utility and mode-extension
   features plus the ERT tooling;
-* 336 passing ERT tests from the batch entry point;
+* 341 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -451,6 +454,17 @@ on `nodejs-repl-mode-hook` rather than the mode symbol itself, JavaScript
 settings are explicitly buffer-local and idempotent, and `js-eval-string`
 returns its result even when also displaying it. Its five namespaced tests mock
 the process boundary and do not start Node.js.
+
+[`mb-org.el`](./mode-extensions/mb-org.el) now loads independently with lexical
+binding and built-in dependencies. Its mode hook always restores graphical TAB
+to `org-cycle`, while Evil/key-chord setup is applied only when both optional
+facilities are available. Startup-only `iso-date`, `iso-time`, `now`,
+`add-etime-time`, `bol`, `eol`, and `eob` dependencies were replaced with
+built-in time formatting/arithmetic and direct buffer operations. Timestamp
+insertion now has explicit point behavior, arrival entries normalize trailing
+blank lines, and a supplied arrival time controls both the date and clock line
+instead of potentially mixing dates around midnight. Its five namespaced tests
+run without loading Evil or key-chord.
 
 [`mb-utils-file.el`](./utils/mb-utils-file.el) now uses built-in path and
 recursive file APIs instead of startup aliases and the shell-oriented
