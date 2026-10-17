@@ -286,6 +286,9 @@ The first subset is intentionally conservative:
 * [`test-mb-ert.el`](./mode-extensions/test-mb-ert.el): nine ERT tests for test
   filename recognition, source/test name swapping, definition navigation, and
   ordered test discovery.
+* [`test-mb-doc-view.el`](./mode-extensions/test-mb-doc-view.el): three ERT
+  tests for standard page-command preservation, whole-document navigation
+  order, and keybindings.
 * [`test-mb-java-mode.el`](./mode-extensions/test-mb-java-mode.el): one ERT
   test for feature publication, Java buffer settings, idempotence, and global
   default isolation.
@@ -388,9 +391,9 @@ physics, geometry, search, XML, anaphora, general, list, sequence, string,
 time, ISO-time, and table modules are independently loadable. Their validation
 comprises:
 
-* a clean `emacs -Q` load of all thirty-three utility and mode-extension
+* a clean `emacs -Q` load of all thirty-four utility and mode-extension
   features plus the ERT tooling;
-* 342 passing ERT tests from the batch entry point;
+* 345 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -477,6 +480,14 @@ could falsely mark the JavaScript extension as loaded. The unsupported
 `c-basic-offset`; line-number and electric-pair setup is now idempotent, and
 all personal indentation settings remain local to Java buffers. Its namespaced
 regression test also verifies that global defaults are unchanged.
+
+[`mb-doc-view.el`](./mode-extensions/mb-doc-view.el) now loads independently
+with lexical binding and explicit built-in dependencies. Its empty
+zero-argument `doc-view-goto-page` definition was removed because it shadowed
+Emacs's functional standard command, which requires a page argument. The two
+retained commands compose standard first/last-page navigation with image
+top/bottom movement, and their existing `C-M-<`/`C-M->` bindings are covered by
+three namespaced regression tests.
 
 [`mb-utils-file.el`](./utils/mb-utils-file.el) now uses built-in path and
 recursive file APIs instead of startup aliases and the shell-oriented
