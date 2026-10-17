@@ -11,6 +11,7 @@
   '("prototypes/geometry/test-list-interval.el"
     "prototypes/geometry/test-list-envelope.el"
     "mode-extensions/test-mb-ert.el"
+    "mode-extensions/test-mb-js-mode.el"
     "mode-extensions/test-mb-python.el"
     "mode-extensions/test-mb-ruby.el"
     "mode-extensions/test-mb-texinfo.el"

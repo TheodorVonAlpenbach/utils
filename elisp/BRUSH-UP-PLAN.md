@@ -286,6 +286,9 @@ The first subset is intentionally conservative:
 * [`test-mb-ert.el`](./mode-extensions/test-mb-ert.el): nine ERT tests for test
   filename recognition, source/test name swapping, definition navigation, and
   ordered test discovery.
+* [`test-mb-js-mode.el`](./mode-extensions/test-mb-js-mode.el): five ERT tests
+  for JavaScript buffer settings, Node REPL hook registration and buffer
+  lookup, mocked evaluation, and explicit missing-package errors.
 * [`test-mb-python.el`](./mode-extensions/test-mb-python.el): three ERT tests
   for idempotent local setup, expression bounds, and nested Python defun bounds.
 * [`test-mb-ruby.el`](./mode-extensions/test-mb-ruby.el): one ERT test for
@@ -361,7 +364,7 @@ replaced with built-in operations.
 | `list-db` | [`list-db.el`](./list-database/list-db.el) | Active shared application/library candidate |
 | `mb-indent` | [`mb-indent.el`](./global/mb-indent.el) | Active startup compatibility layer; global symbol properties |
 | `quiz-park` | [`quiz-park.el`](./quiz/quiz-park.el) | Usage decision needed; application |
-| `mb-js-mode` | [`mb-js-mode.el`](./mode-extensions/mb-js-mode.el) | Active mode extension candidate |
+| `mb-js-mode` | [`mb-js-mode.el`](./mode-extensions/mb-js-mode.el) | Active mode extension; optional Node.js evaluation |
 | `quiz` | [`quiz.el`](./quiz/quiz.el) | Usage decision needed; application |
 | `mb-ert` | [`mb-ert.el`](./mode-extensions/mb-ert.el) | Active developer tooling; refactor candidate |
 | `mb-org` | [`mb-org.el`](./mode-extensions/mb-org.el) | Active mode extension; assumes optional Evil/key-chord setup |
@@ -379,9 +382,9 @@ physics, geometry, search, XML, anaphora, general, list, sequence, string,
 time, ISO-time, and table modules are independently loadable. Their validation
 comprises:
 
-* a clean `emacs -Q` load of all thirty utility and mode-extension
+* a clean `emacs -Q` load of all thirty-one utility and mode-extension
   features plus the ERT tooling;
-* 331 passing ERT tests from the batch entry point;
+* 336 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -399,10 +402,8 @@ The maintained file list and load paths now live in
 [`test-manifest.el`](./tests/test-manifest.el). Both the batch entry point and
 the interactive `mb-ert-test-mb-elisp` command load that manifest. General test
 discovery recognizes every `test-*.el` file; inclusion in the clean baseline is
-a separate decision. For example,
-[`test-mb-js-mode.el`](./mode-extensions/test-mb-js-mode.el) is correctly
-recognized as a test file but remains outside the manifest because it invokes
-an external JavaScript runtime.
+a separate decision. External-service and process boundaries remain mocked in
+the maintained baseline.
 
 [`mb-ert.el`](./mode-extensions/mb-ert.el) no longer relies on startup-provided
 string, buffer, sequence, or definition-navigation helpers. Its duplicate
@@ -438,6 +439,18 @@ narrower signatures. Commented environment snippets now honor their
 no-inner-space argument, process failures are surfaced, and the previously
 dormant test file has been expanded to five namespaced tests in the maintained
 baseline.
+
+[`mb-js-mode.el`](./mode-extensions/mb-js-mode.el) now loads independently
+with lexical binding and built-in editing dependencies. The optional
+`nodejs-repl` package is loaded only when JavaScript evaluation is requested;
+its absence now produces an explicit user error without preventing ordinary
+JavaScript editing. Duplicate send implementations, manual process polling,
+prompt scraping, and startup-only buffer/string helpers were replaced with the
+package's synchronous execution API. The REPL setup function is now registered
+on `nodejs-repl-mode-hook` rather than the mode symbol itself, JavaScript
+settings are explicitly buffer-local and idempotent, and `js-eval-string`
+returns its result even when also displaying it. Its five namespaced tests mock
+the process boundary and do not start Node.js.
 
 [`mb-utils-file.el`](./utils/mb-utils-file.el) now uses built-in path and
 recursive file APIs instead of startup aliases and the shell-oriented
