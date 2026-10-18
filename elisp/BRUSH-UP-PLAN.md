@@ -289,6 +289,9 @@ The first subset is intentionally conservative:
 * [`test-mb-doc-view.el`](./mode-extensions/test-mb-doc-view.el): three ERT
   tests for standard page-command preservation, whole-document navigation
   order, and keybindings.
+* [`test-mb-emacs-lisp.el`](./mode-extensions/test-mb-emacs-lisp.el): five ERT
+  tests for optional keymaps, validated Common Lisp form rewriting,
+  definition navigation, forced movement, and missing definitions.
 * [`test-mb-java-mode.el`](./mode-extensions/test-mb-java-mode.el): one ERT
   test for feature publication, Java buffer settings, idempotence, and global
   default isolation.
@@ -391,9 +394,9 @@ physics, geometry, search, XML, anaphora, general, list, sequence, string,
 time, ISO-time, and table modules are independently loadable. Their validation
 comprises:
 
-* a clean `emacs -Q` load of all thirty-four utility and mode-extension
+* a clean `emacs -Q` load of all thirty-five utility and mode-extension
   features plus the ERT tooling;
-* 345 passing ERT tests from the batch entry point;
+* 350 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -488,6 +491,18 @@ Emacs's functional standard command, which requires a page argument. The two
 retained commands compose standard first/last-page navigation with image
 top/bottom movement, and their existing `C-M-<`/`C-M->` bindings are covered by
 three namespaced regression tests.
+
+[`mb-emacs-lisp.el`](./mode-extensions/mb-emacs-lisp.el) now loads
+independently with lexical binding and the maintained ERT helper as its only
+repository dependency. The unrelated ADA/MySQL map and Evil/key-chord binding
+are optional instead of blocking ordinary Emacs Lisp editing. Startup-only
+form, word, buffer, and definition helpers were replaced with syntax parsing
+and built-in defun motion. `cl-ify-form` and `cl-ify-defun` now avoid duplicate
+prefixes and reject heads that have no real `cl-lib` counterpart rather than
+silently creating invalid names such as `cl-defvar`. `elisp-goto-defun`
+preserves point when a definition is absent, quotes symbol names, and now
+honors its documented force-to-beginning flag. Its five namespaced tests run
+without the ADA or Evil integrations.
 
 [`mb-utils-file.el`](./utils/mb-utils-file.el) now uses built-in path and
 recursive file APIs instead of startup aliases and the shell-oriented

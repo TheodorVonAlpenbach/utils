@@ -11,6 +11,7 @@
   '("prototypes/geometry/test-list-interval.el"
     "prototypes/geometry/test-list-envelope.el"
     "mode-extensions/test-mb-doc-view.el"
+    "mode-extensions/test-mb-emacs-lisp.el"
     "mode-extensions/test-mb-ert.el"
     "mode-extensions/test-mb-java-mode.el"
     "mode-extensions/test-mb-js-mode.el"
