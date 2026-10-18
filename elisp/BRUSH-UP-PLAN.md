@@ -292,6 +292,9 @@ The first subset is intentionally conservative:
 * [`test-mb-emacs-lisp.el`](./mode-extensions/test-mb-emacs-lisp.el): five ERT
   tests for optional keymaps, validated Common Lisp form rewriting,
   definition navigation, forced movement, and missing definitions.
+* [`test-mb-json.el`](./mode-extensions/test-mb-json.el): five ERT tests for
+  outer JSON-string decoding, bare timestamp repair, pretty printing, Mongo
+  shell value conversion, and invalid input.
 * [`test-mb-java-mode.el`](./mode-extensions/test-mb-java-mode.el): one ERT
   test for feature publication, Java buffer settings, idempotence, and global
   default isolation.
@@ -394,9 +397,9 @@ physics, geometry, search, XML, anaphora, general, list, sequence, string,
 time, ISO-time, and table modules are independently loadable. Their validation
 comprises:
 
-* a clean `emacs -Q` load of all thirty-five utility and mode-extension
+* a clean `emacs -Q` load of all thirty-six utility and mode-extension
   features plus the ERT tooling;
-* 350 passing ERT tests from the batch entry point;
+* 355 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -503,6 +506,17 @@ silently creating invalid names such as `cl-defvar`. `elisp-goto-defun`
 preserves point when a definition is absent, quotes symbol names, and now
 honors its documented force-to-beginning flag. Its five namespaced tests run
 without the ADA or Evil integrations.
+
+[`mb-json.el`](./mode-extensions/mb-json.el) now loads independently with
+lexical binding and explicit built-in `cl-lib` and `json.el` dependencies.
+JSON strings containing serialized JSON are decoded with the standard parser
+rather than manual quote removal, and malformed decoded input is rejected
+before formatting. The local repairs for bare UTC timestamps and Mongo shell
+`ObjectId`/`ISODate` forms remain because built-in JSON formatting does not
+accept those nonstandard inputs. Bare timestamps are quoted only in value
+positions and existing JSON strings are left unchanged. Its five namespaced
+tests cover decoding, timestamp repair, formatting, Mongo conversion, and
+invalid input.
 
 [`mb-utils-file.el`](./utils/mb-utils-file.el) now uses built-in path and
 recursive file APIs instead of startup aliases and the shell-oriented
