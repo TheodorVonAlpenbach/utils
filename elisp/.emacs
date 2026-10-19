@@ -1,4 +1,4 @@
-; Redirected from one of the following
+;; Redirected from one of the following
 ;; c:/Users/Theodor/AppData/Roaming/.emacs
 ;; c:/Documents and Settings/matsb/Application Data/.emacs
 
@@ -307,7 +307,6 @@ and running Git.")
 			    mb-utils-io
 			    mb-evil-map
 			    mb-things
-			    radio-playlists
 			    mb-lisp
 			    mb-python
 			    mb-octave

@@ -1,5 +1,4 @@
 ;;; -*- lexical-binding: t; -*-
-(require 'mb-calendar)
 (require 'mb-utils-strings)
 
 (cl-defun insert-parentheses* (arg &key (left ?\() (right ?\))
