@@ -22,6 +22,14 @@ registerHooks({
                 }
                 export default {Variant, VariantType};
             `;
+        } else if (url === 'mock:gi://Meta') {
+            source = 'export default {WindowType: {NORMAL: 0}};';
+        } else if (url === 'mock:gi://Shell') {
+            source = `export default {WindowTracker: {
+                get_default: () => ({get_window_app: () => ({
+                    get_id: () => 'org.gnome.Terminal.desktop',
+                })}),
+            }};`;
         } else if (url.startsWith('mock:resource://')) {
             source = 'export class Extension {}';
         }
@@ -30,6 +38,161 @@ registerHooks({
 });
 
 const {default: WindowMoverExtension} = await import('../extension.js');
+
+function terminalWindow(title) {
+    let nextSignal = 1;
+    const signals = new Map();
+    return {
+        title,
+        get_title() { return this.title; },
+        get_window_type: () => 0,
+        is_override_redirect: () => false,
+        get_frame_rect: () => ({x: 30, y: 40, width: 800, height: 600}),
+        get_stable_sequence: () => 1,
+        get_monitor: () => 0,
+        connect(signal, callback) {
+            const id = nextSignal++;
+            signals.set(id, {signal, callback});
+            return id;
+        },
+        disconnect(id) { signals.delete(id); },
+        changeTitle(value) {
+            this.title = value;
+            for (const {signal, callback} of [...signals.values()]) {
+                if (signal === 'notify::title')
+                    callback();
+            }
+        },
+    };
+}
+
+test('acknowledges the terminal only after its unique marker is visible and retains identity', () => {
+    const extension = new WindowMoverExtension();
+    extension._taggedWindows = new WeakSet();
+    const first = terminalWindow('ordinary terminal');
+    const second = terminalWindow('launcher2.sh');
+    global.display = {list_all_windows: () => [first, second]};
+    assert.equal(extension._registerLaptopTerminal('LaptopTerminal-123'), false);
+    second.changeTitle('LaptopTerminal-123');
+    assert.equal(extension._registerLaptopTerminal('LaptopTerminal-123'), true);
+    second.changeTitle('top');
+    assert.deepEqual(extension._windows().map(window => window.isLaptopTerminal), [false, true]);
+    second.changeTitle('mats@laptop: ~/ada');
+    assert.equal(extension._windows()[1].isLaptopTerminal, true);
+});
+
+test('registration rejects invalid or ambiguous titles and does not tag other applications', () => {
+    const extension = new WindowMoverExtension();
+    extension._taggedWindows = new WeakSet();
+    extension._windows = () => [
+        {title: 'LaptopTerminal-123', appId: 'editor.desktop', window: {}},
+    ];
+    assert.throws(() => extension._registerLaptopTerminal(''), /unique LaptopTerminal title/);
+    assert.throws(() => extension._registerLaptopTerminal('LaptopTerminal'), /unique LaptopTerminal title/);
+    assert.equal(extension._registerLaptopTerminal('LaptopTerminal-123'), false);
+    extension._windows = () => [1, 2].map(() => ({
+        title: 'LaptopTerminal-123', appId: 'org.gnome.Terminal.desktop', window: {},
+    }));
+    assert.throws(() => extension._registerLaptopTerminal('LaptopTerminal-123'), /refusing to guess/);
+});
+
+test('registration D-Bus method returns a typed acknowledgement', async () => {
+    const extension = new WindowMoverExtension();
+    extension._taggedWindows = new WeakSet();
+    const window = {};
+    extension._windows = () => [{
+        title: 'LaptopTerminal-123', appId: 'org.gnome.Terminal.desktop', window,
+    }];
+    let reply;
+    await extension._handleMethod('RegisterLaptopTerminal', {
+        deep_unpack: () => ['LaptopTerminal-123'],
+    }, {
+        return_value(value) { reply = value; },
+        return_dbus_error(name, message) { assert.fail(`${name}: ${message}`); },
+    });
+    assert.equal(reply.type, '(b)');
+    assert.deepEqual(reply.value, [true]);
+    assert.equal(extension._taggedWindows.has(window), true);
+});
+
+test('title watcher still remembers a marker after tabs change the title', () => {
+    const extension = new WindowMoverExtension();
+    extension._taggedWindows = new WeakSet();
+    extension._titleWatchers = new Map();
+    const window = terminalWindow('ordinary shell');
+    extension._watchWindowTitle(window);
+    window.changeTitle('LaptopTerminal-123');
+    window.changeTitle('top');
+    assert.equal(extension._taggedWindows.has(window), true);
+    assert.equal(extension._titleWatchers.size, 0);
+});
+
+test('launch handshake moves only the second terminal before acknowledging registration', async () => {
+    const {extension, calls, moves} = setup({primary: true});
+    extension._taggedWindows = new WeakSet();
+    extension._windows = WindowMoverExtension.prototype._windows.bind(extension);
+    const first = terminalWindow('first terminal');
+    const second = terminalWindow('LaptopTerminal-123');
+    second.get_monitor = () => 1;
+    second.get_workspace = () => ({
+        get_work_area_for_monitor(index) {
+            assert.equal(index, 0);
+            return {x: 100, y: 50, width: 1920, height: 1080};
+        },
+    });
+    first.move_to_monitor = () => assert.fail('Must not move the first terminal');
+    second.move_to_monitor = index => moves.push(['monitor', index]);
+    second.move_frame = (_userOp, x, y) => moves.push(['frame', x, y]);
+    global.display = {list_all_windows: () => [first, second]};
+    await extension._handleMethod('RegisterAndPlaceLaptopTerminal', {
+        deep_unpack: () => ['LaptopTerminal-123'],
+    }, {
+        return_value(reply) {
+            assert.equal(reply.type, '(b)');
+            assert.deepEqual(reply.value, [true]);
+            assert.deepEqual(moves, [['monitor', 0], ['frame', 600, 70]]);
+        },
+        return_dbus_error(name, message) { assert.fail(`${name}: ${message}`); },
+    });
+    assert.deepEqual(calls.map(call => call.method), ['GetCurrentState']);
+    second.changeTitle('top');
+    assert.equal(extension._windows()[1].isLaptopTerminal, true);
+});
+
+test('launch placement works without external monitors and leaves an already positioned window alone', async () => {
+    const extension = new WindowMoverExtension();
+    extension._taggedWindows = new WeakSet();
+    const terminal = terminalWindow('LaptopTerminal-123');
+    terminal.get_frame_rect = () => ({x: 500, y: 20, width: 800, height: 600});
+    terminal.get_workspace = () => ({
+        get_work_area_for_monitor: () => ({x: 0, y: 0, width: 1920, height: 1080}),
+    });
+    terminal.move_to_monitor = () => assert.fail('Already on laptop');
+    terminal.move_frame = () => assert.fail('Already positioned');
+    global.display = {list_all_windows: () => [terminal]};
+    extension._connectedMonitors = async () => [
+        {connector: 'eDP-1', isBuiltin: true, monitorIndex: 0},
+    ];
+    assert.equal(await extension._registerAndPlaceLaptopTerminal('LaptopTerminal-123'), true);
+});
+
+test('launch placement waits for a title match and fails explicitly without a built-in display', async () => {
+    const extension = new WindowMoverExtension();
+    extension._taggedWindows = new WeakSet();
+    extension._windows = () => [];
+    extension._connectedMonitors = async () => {
+        assert.fail('Should not query displays before finding the terminal');
+    };
+    assert.equal(await extension._registerAndPlaceLaptopTerminal('LaptopTerminal-123'), false);
+    extension._windows = () => [{
+        title: 'LaptopTerminal-123', appId: 'org.gnome.Terminal.desktop', window: {},
+    }];
+    extension._connectedMonitors = async () => [
+        {connector: 'DP-7', isBuiltin: false, monitorIndex: 0},
+    ];
+    await assert.rejects(extension._registerAndPlaceLaptopTerminal('LaptopTerminal-123'),
+        /no built-in monitor is active/);
+});
 
 function setup({primary = false, windows = []} = {}) {
     const builtin = ['eDP-1', 'vendor', 'laptop', '1'];
@@ -85,6 +248,31 @@ function setup({primary = false, windows = []} = {}) {
     };
     return {extension, calls, moves};
 }
+
+test('registered second terminal moves to the laptop after its title changes; first moves external', async () => {
+    const {extension, moves} = setup({primary: true});
+    extension._taggedWindows = new WeakSet();
+    extension._windows = WindowMoverExtension.prototype._windows.bind(extension);
+    const first = terminalWindow('first terminal');
+    const second = terminalWindow('LaptopTerminal-123');
+    first.get_monitor = () => 0;
+    second.get_monitor = () => 1;
+    first.get_stable_sequence = () => 1;
+    second.get_stable_sequence = () => 2;
+    for (const [name, window] of [['first', first], ['second', second]]) {
+        window.move_to_monitor = index => moves.push([name, 'monitor', index]);
+        window.move_frame = (_userOp, x, y) => moves.push([name, 'frame', x, y]);
+    }
+    global.display = {list_all_windows: () => [first, second]};
+    assert.equal(extension._registerLaptopTerminal('LaptopTerminal-123'), true);
+    second.changeTitle('mats@laptop: ~/ada');
+    await extension._moveWindows('', false);
+    assert.deepEqual(moves, [
+        ['first', 'monitor', 1],
+        ['second', 'monitor', 0],
+        ['second', 'frame', 500, 20],
+    ]);
+});
 
 test('dry-run reports a primary change even with no windows and never applies settings', async () => {
     const {extension, calls, moves} = setup();

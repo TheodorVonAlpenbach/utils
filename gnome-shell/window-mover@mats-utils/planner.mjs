@@ -39,14 +39,21 @@ export function planPrimaryMonitor(state, connector) {
     return {serial, logicalMonitors: configuration, properties: settings};
 }
 
-export function resolveTarget(monitors, connector = '') {
-    const active = monitors.filter(monitor => monitor.monitorIndex >= 0);
-    const builtInIndices = [...new Set(active
-        .filter(monitor => monitor.isBuiltin)
+export function resolveLaptopMonitor(monitors) {
+    const builtInIndices = [...new Set(monitors
+        .filter(monitor => monitor.isBuiltin && monitor.monitorIndex >= 0)
         .map(monitor => monitor.monitorIndex))];
 
     if (builtInIndices.length > 1)
         throw new Error('More than one built-in logical monitor is active; refusing to guess the laptop display.');
+
+    return builtInIndices[0] ?? null;
+}
+
+export function resolveTarget(monitors, connector = '') {
+    const active = monitors.filter(monitor => monitor.monitorIndex >= 0);
+    const laptopMonitorIndex = resolveLaptopMonitor(active);
+    const builtInIndices = laptopMonitorIndex === null ? [] : [laptopMonitorIndex];
 
     const external = active.filter(monitor =>
         !monitor.isBuiltin && !builtInIndices.includes(monitor.monitorIndex));

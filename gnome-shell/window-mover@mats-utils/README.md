@@ -18,8 +18,19 @@ settings, and leased monitors are preserved. Settings are not reapplied if
 the selected monitor is already primary. The preference is enforced when
 the helper runs, not continuously on hotplug.
 
-The laptop terminal is identified by the unique initial `LaptopTerminal` title
-set on the second terminal window in `bin/setup-terminals.sh`. All other normal
+The second terminal in `bin/setup-terminals.sh` runs `bin/launcher2.sh`, which
+sets a unique `LaptopTerminal-PID` title and waits for the extension to
+identify and place the window on the built-in display before launching any tabs.
+This uses the dedicated `RegisterAndPlaceLaptopTerminal` D-Bus method; registration
+alone does not move windows. No separate run of the display-moving script is
+needed for initial terminal placement, and no other windows or display settings
+are changed by this method. A brief appearance on the primary display can still
+occur while GNOME creates the window, before the launcher runs.
+This avoids losing the
+initial title when shells or newly opened tabs immediately replace it. If
+registration/placement fails (including an inactive built-in display) or times
+out, the launcher reports an error and does not
+start its tabs/services. All other normal
 windows, including the first terminal, go to the selected external monitor.
 GNOME Shell remembers windows as they receive that title, so later shell-title
 changes do not change their identity. Such a
@@ -29,7 +40,9 @@ Maximized state and workspace membership are not changed.
 The remembered identity lasts only while the extension is enabled. If it is
 disabled and re-enabled after the terminal has changed its title, open the
 special terminal again through `setup-terminals.sh`. Existing terminals
-launched by the old setup script also need to be recreated.
+launched by the old setup script also need to be recreated. Do not rerun
+`launcher2.sh` in an existing populated terminal just to tag it: that also
+starts its service tabs again.
 
 ## Install and enable
 
@@ -79,9 +92,14 @@ The primary-display change and window-moving operation have not been exercised
 live; reloading/enabling the extension, confirming the saved display change,
 and moving existing windows are intentionally left to the user. On Wayland,
 log out and back in to load updated extension code. Recreate the second terminal
-afterward so its title marker can be remembered.
+afterward so the registration handshake runs. `--list` should show
+`[normal,LaptopTerminal]` (or `[minimized,LaptopTerminal]`) for that window
+even after changing tabs or shell titles. `--dry-run` should then target the
+built-in connector for that window and the external connector for the others.
 Target-selection, configuration planning, and mocked extension tests can be
-run with Node.js 22.15 or newer:
+run with Node.js 22.15 or newer and the util-linux `script` command (for the
+launcher's pseudo-terminal tests). These tests stub GNOME Terminal and D-Bus;
+they do not start real terminals or services or change desktop settings:
 
 ```sh
 node --test gnome-shell/window-mover@mats-utils/tests/*.test.mjs

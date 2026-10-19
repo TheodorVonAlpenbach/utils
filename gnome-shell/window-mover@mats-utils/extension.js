@@ -6,8 +6,10 @@ import {Extension} from 'resource:///org/gnome/shell/extensions/extension.js';
 
 import {
     LAPTOP_TERMINAL_TITLE,
+    laptopPosition,
     planPrimaryMonitor,
     planWindowMoves,
+    resolveLaptopMonitor,
     resolveTarget,
 } from './planner.mjs';
 
@@ -21,6 +23,14 @@ const DISPLAY_CONFIG_INTERFACE = 'org.gnome.Mutter.DisplayConfig';
 const DBUS_XML = `
 <node>
   <interface name="${INTERFACE_NAME}">
+    <method name="RegisterAndPlaceLaptopTerminal">
+      <arg name="title" type="s" direction="in"/>
+      <arg name="registered" type="b" direction="out"/>
+    </method>
+    <method name="RegisterLaptopTerminal">
+      <arg name="title" type="s" direction="in"/>
+      <arg name="registered" type="b" direction="out"/>
+    </method>
     <method name="ListWindows">
       <arg name="monitor_override" type="s" direction="in"/>
       <arg name="lines" type="as" direction="out"/>
@@ -94,6 +104,18 @@ export default class WindowMoverExtension extends Extension {
     async _handleMethod(methodName, parameters, invocation) {
         try {
             const args = parameters.deep_unpack();
+            if (methodName === 'RegisterAndPlaceLaptopTerminal') {
+                invocation.return_value(new GLib.Variant('(b)', [
+                    await this._registerAndPlaceLaptopTerminal(args[0]),
+                ]));
+                return;
+            }
+            if (methodName === 'RegisterLaptopTerminal') {
+                invocation.return_value(new GLib.Variant('(b)', [
+                    this._registerLaptopTerminal(args[0]),
+                ]));
+                return;
+            }
             let lines;
             if (methodName === 'ListWindows')
                 lines = await this._listWindows(args[0]);
@@ -108,6 +130,46 @@ export default class WindowMoverExtension extends Extension {
                 `${INTERFACE_NAME}.Error.Failed`,
                 error.message ?? String(error));
         }
+    }
+
+    async _registerAndPlaceLaptopTerminal(title) {
+        if (!this._registerLaptopTerminal(title))
+            return false;
+
+        const monitors = await this._connectedMonitors();
+        const laptopMonitorIndex = resolveLaptopMonitor(monitors);
+        if (laptopMonitorIndex === null)
+            throw new Error('Cannot place LaptopTerminal: no built-in monitor is active.');
+
+        const terminal = this._windows().find(window =>
+            window.title === title && window.appId === 'org.gnome.Terminal.desktop');
+        if (!terminal)
+            throw new Error('LaptopTerminal disappeared before it could be placed.');
+
+        const workArea = terminal.window.get_workspace()
+            .get_work_area_for_monitor(laptopMonitorIndex);
+        const position = laptopPosition(terminal.frame, workArea);
+        if (terminal.monitorIndex !== laptopMonitorIndex)
+            terminal.window.move_to_monitor(laptopMonitorIndex);
+        if (terminal.monitorIndex !== laptopMonitorIndex ||
+            terminal.frame.x !== position.x || terminal.frame.y !== position.y)
+            terminal.window.move_frame(true, position.x, position.y);
+        return true;
+    }
+
+    _registerLaptopTerminal(title) {
+        if (!new RegExp(`^${LAPTOP_TERMINAL_TITLE}-[0-9]+$`).test(title))
+            throw new Error('Expected a unique LaptopTerminal title from launcher2.sh.');
+
+        const matches = this._windows().filter(window =>
+            window.title === title && window.appId === 'org.gnome.Terminal.desktop');
+        if (matches.length > 1)
+            throw new Error(`More than one terminal has the title "${title}"; refusing to guess.`);
+        if (matches.length === 0)
+            return false;
+
+        this._taggedWindows.add(matches[0].window);
+        return true;
     }
 
     _watchWindowTitle(window) {

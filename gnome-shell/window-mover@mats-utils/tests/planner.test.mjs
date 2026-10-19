@@ -5,6 +5,7 @@ import {
     laptopPosition,
     planPrimaryMonitor,
     planWindowMoves,
+    resolveLaptopMonitor,
     resolveTarget,
 } from '../planner.mjs';
 
@@ -12,6 +13,19 @@ const monitors = [
     {connector: 'eDP-1', isBuiltin: true, monitorIndex: 0},
     {connector: 'DP-7', isBuiltin: false, monitorIndex: 1},
 ];
+
+test('resolves the active laptop independently of the number of external monitors', () => {
+    assert.equal(resolveLaptopMonitor([
+        ...monitors,
+        {connector: 'HDMI-1', isBuiltin: false, monitorIndex: 2},
+    ]), 0);
+    assert.equal(resolveLaptopMonitor([monitors[0]]), 0);
+    assert.equal(resolveLaptopMonitor([monitors[1]]), null);
+    assert.equal(resolveLaptopMonitor([{isBuiltin: true, monitorIndex: -1}]), null);
+    assert.throws(() => resolveLaptopMonitor([
+        monitors[0], {isBuiltin: true, monitorIndex: 2},
+    ]), /refusing to guess/);
+});
 
 function displayState() {
     const builtin = ['eDP-1', 'vendor', 'laptop', '1'];
