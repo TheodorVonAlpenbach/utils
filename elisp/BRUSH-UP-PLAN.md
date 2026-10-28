@@ -298,6 +298,9 @@ The first subset is intentionally conservative:
 * [`test-mb-lilypond.el`](./mode-extensions/test-mb-lilypond.el): four ERT
   tests for quoted compilation commands, source tracking, successful PDF
   display, and narrow optional LilyPond command integration.
+* [`test-mb-metafont.el`](./mode-extensions/test-mb-metafont.el): four ERT
+  tests for compilation-output parsing, process status, GF-to-DVI conversion,
+  and the compile-convert-display pipeline.
 * [`test-mb-java-mode.el`](./mode-extensions/test-mb-java-mode.el): one ERT
   test for feature publication, Java buffer settings, idempotence, and global
   default isolation.
@@ -400,9 +403,9 @@ physics, geometry, search, XML, anaphora, general, list, sequence, string,
 time, ISO-time, and table modules are independently loadable. Their validation
 comprises:
 
-* a clean `emacs -Q` load of all thirty-seven utility and mode-extension
+* a clean `emacs -Q` load of all thirty-eight utility and mode-extension
   features plus the ERT tooling;
-* 359 passing ERT tests from the batch entry point;
+* 363 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -532,6 +535,16 @@ implementation was replaced with narrow advice installed only after
 LilyPond mode loads; it changes the personal PDF `View` behavior and delegates
 all other commands unchanged. Its four namespaced tests mock compilation and
 display boundaries.
+
+[`mb-metafont.el`](./mode-extensions/mb-metafont.el) now loads independently
+with lexical binding and an explicit built-in `cl-lib` dependency. Compilation
+starts from an empty output buffer, checks the `mf` process status, and rejects
+missing or unrecognizable output instead of returning warning-shaped values or
+parsing stale text. GF-to-DVI conversion runs in the source directory, checks
+the converter status, and returns an absolute DVI filename. Buffer evaluation
+requires a visited file, preserves the historical quiet intermediate
+compilation, and refreshes an existing DVI buffer without killing it. Its four
+namespaced tests mock both external programs and display operations.
 
 [`mb-sh.el`](./mode-extensions/mb-sh.el) remains a usage-decision candidate.
 Its original commit explicitly described it as unfinished, its formatter body
