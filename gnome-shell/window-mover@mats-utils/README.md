@@ -37,9 +37,10 @@ changes do not change their identity. Such a
 window stays on the built-in monitor and is placed at approximately 500,20
 within its work area. Windows already at their destination are left alone.
 Maximized state and workspace membership are not changed.
-The remembered identity lasts only while the extension is enabled. If it is
-disabled and re-enabled after the terminal has changed its title, open the
-special terminal again through `setup-terminals.sh`. Existing terminals
+The remembered identity survives the extension being disabled and re-enabled,
+which GNOME Shell does on every screen lock and unlock. It is lost when GNOME
+Shell restarts (logout/login); then open the special terminal again through
+`setup-terminals.sh`. Existing terminals
 launched by the old setup script also need to be recreated. Do not rerun
 `launcher2.sh` in an existing populated terminal just to tag it: that also
 starts its service tabs again.

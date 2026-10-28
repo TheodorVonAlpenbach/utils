@@ -43,10 +43,18 @@ const DBUS_XML = `
   </interface>
 </node>`;
 
+// Module state survives disable()/enable(), which GNOME Shell runs on every screen
+// lock/unlock; per-instance state would forget the laptop terminal.
+const laptopTerminalSequences = new Set();
+export const rememberedLaptopTerminals = {
+    add: window => laptopTerminalSequences.add(window.get_stable_sequence()),
+    has: window => laptopTerminalSequences.has(window.get_stable_sequence()),
+};
+
 export default class WindowMoverExtension extends Extension {
     enable() {
         this._enabled = true;
-        this._taggedWindows = new WeakSet();
+        this._taggedWindows = rememberedLaptopTerminals;
         this._titleWatchers = new Map();
         this._windowCreatedId = global.display.connect('window-created',
             (_display, window) => this._watchWindowTitle(window));

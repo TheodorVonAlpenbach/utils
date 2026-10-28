@@ -81,6 +81,37 @@ test('acknowledges the terminal only after its unique marker is visible and reta
     assert.equal(extension._windows()[1].isLaptopTerminal, true);
 });
 
+test('remembers the registered terminal across disable/enable, as on screen lock', async () => {
+    const {default: Gio} = await import('gi://Gio');
+    Object.assign(Gio, {
+        BusType: {SESSION: 0},
+        BusNameOwnerFlags: {NONE: 0},
+        DBusNodeInfo: {new_for_xml: () => ({interfaces: [{}]})},
+        bus_get_sync: () => ({register_object: () => 1, unregister_object() {}}),
+        bus_own_name_on_connection: () => 1,
+        bus_unown_name() {},
+    });
+    const first = terminalWindow('ordinary terminal');
+    const second = terminalWindow('LaptopTerminal-456');
+    first.get_stable_sequence = () => 1001;
+    second.get_stable_sequence = () => 1002;
+    global.display = {
+        list_all_windows: () => [first, second],
+        connect: () => 1,
+        disconnect() {},
+    };
+    const before = new WindowMoverExtension();
+    before.enable();
+    assert.equal(before._registerLaptopTerminal('LaptopTerminal-456'), true);
+    second.changeTitle('mats@laptop: ~/ada');
+    before.disable();
+
+    const after = new WindowMoverExtension();
+    after.enable();
+    assert.deepEqual(after._windows().map(window => window.isLaptopTerminal), [false, true]);
+    after.disable();
+});
+
 test('registration rejects invalid or ambiguous titles and does not tag other applications', () => {
     const extension = new WindowMoverExtension();
     extension._taggedWindows = new WeakSet();
