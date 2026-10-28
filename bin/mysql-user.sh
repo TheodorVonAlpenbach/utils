@@ -44,10 +44,9 @@ while getopts "hv" arg; do
     esac
 done
 
-verbose=1
 vecho "Verbose mode is on"
 
-substring="${2:-}"
+substring="${1:-}"
 if [ -z "$substring" ]; then
     printUsage
     exit 0
@@ -116,5 +115,3 @@ if [ "$env" == "prod" ]; then
     password=$(op item get --vault "PU - Utviklere" --reveal "MySQL User - PU - Prod" --fields=password)
     mysql -h 127.0.0.1 -P 4306 -u skolenprod -p"$password" ada_prod -e "$sql" --batch --skip-column-names
 fi
-
-vecho $password
