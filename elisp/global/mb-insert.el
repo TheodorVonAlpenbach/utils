@@ -187,10 +187,14 @@ This function is obsolete. Use C-x 8 _ a instead."
   (interactive "P")
   (dotimes (i (or n 1)) (insert ?¯)))
 
-(cl-defun insert-symbol-bullet (n)
-  "Inserts N round filled bullets at point."
+(cl-defun insert-symbol-bullet (n &optional without-luft-p)
+  "Inserts N round filled bullets at point.
+
+By default, also ensure just one space to the right of bullet. This
+behaviour can be overriden by setting optional WITHOUT-LUFT-P to non-nil."
   (interactive "P")
-  (dotimes (i (or n 1)) (insert ?·)))
+  (dotimes (i (or n 1)) (insert ?·))
+  (just-one-space))
 
 (cl-defun insert-german-double-s (n)
   "Inserts German double s at point."

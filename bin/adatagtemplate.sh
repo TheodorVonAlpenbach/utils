@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Default tag
-adaTagTemplate="ADA-17000"
+adaTagTemplate="ADA-17100"
 lastMillenial=1$(( 10#${adaTagTemplate: -4:-3} - 1))000 # E.g. 15000
 lastMillenialLimit=$(( 10#${adaTagTemplate: -3} + 200 )) # E.g. ADA-16300 -> 500
 

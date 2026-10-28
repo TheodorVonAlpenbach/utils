@@ -127,8 +127,10 @@
 (define-key insert-map "<" 'insert-angle-brackets)
 (define-key insert-map "x" 'insert-xml-tag)
 (define-key insert-map "p" 'insert-post-scriptum)
+(define-key insert-map "b" 'insert-symbol-bullet)
 
-;; The following inserts are deprecated. Use standard C-x 8 ... instead
+;; There seems to be an error with insert-n! None of these works
+;; Use standard C-x 8 ... instead for now
 (define-key insert-map "1" (insert-n "¹"))
 (define-key insert-map "2" (insert-n "²"))
 (define-key insert-map "3" (insert-n "³"))
@@ -136,7 +138,6 @@
 (define-key insert-map "o" (insert-n "º"))
 (define-key insert-map "a" (insert-n "ª"))
 (define-key insert-map "m" (insert-n "¯"))
-(define-key insert-map "b" (insert-n "·"))
 (define-key insert-map "B" (insert-n "ß"))
 (define-key insert-map "c" (insert-n "ç"))
 

@@ -238,18 +238,18 @@ gapet opp i flaggstangen.
 Tok over 1093 etter Kyrre, og regjerte sammen med Toresfostre en stund
 (93-95).
 *** Konge :drill:
-SCHEDULED: <2025-05-07 Wed>
+SCHEDULED: <2026-10-30 Fri>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
 :ID:       e5ed843d-1246-48ab-927f-7da4a925dcac
-:DRILL_LAST_INTERVAL: 9.43
-:DRILL_REPEATS_SINCE_FAIL: 3
-:DRILL_TOTAL_REPEATS: 8
-:DRILL_FAILURE_COUNT: 3
-:DRILL_AVERAGE_QUALITY: 3.25
+:DRILL_LAST_INTERVAL: 4.0
+:DRILL_REPEATS_SINCE_FAIL: 2
+:DRILL_TOTAL_REPEATS: 10
+:DRILL_FAILURE_COUNT: 4
+:DRILL_AVERAGE_QUALITY: 3.2
 :DRILL_EASE: 2.46
-:DRILL_LAST_QUALITY: 5
-:DRILL_LAST_REVIEWED: [Y-04-28 Mon 12:%]
+:DRILL_LAST_QUALITY: 4
+:DRILL_LAST_REVIEWED: [Y-10-26 Mon 17:%]
 :END:
 Kong [Olav Magnusson||18] regjerte fra [1103] til [1115], før han døde,
 bare 16 år gammel.
@@ -257,11 +257,11 @@ bare 16 år gammel.
 Olav i salongen har tatt ned *tavlen* og lagt den på gulvet, hvor han nå
 sitter og bygger en BRIO *togbane*.
 **** Info
-Olav var sønn av kong Magnus Berrføtt, og ble tatt til konge sammen
+Olav (#18) var sønn av kong Magnus Berrføtt, og ble tatt til konge sammen
 med de eldre brødrene Øystein I Magnusson og Sigurd I Magnusson
 Jorsalfare. Siden han døde kun 16 år gammel og blir av den grunn flere
 steder ikke regnet med i den offisielle norske kongerekka, han har
-heller ikke fått noe nummer.
+heller ikke fått noe nummer (han skulle da ha blitt Olav 4).
 *** Konge :drill:
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
@@ -289,22 +289,22 @@ stygt lemlestet av Harald Gilles treller for at han aldri mer skulle
 kunne bekle kongeembetet: Den ene foten ble hugd av, øynene stukket ut
 og han ble kastrert.
 **** Memo
-Gardist Pål Magnus i vaktbua ser seg selv henge hjepeløst fra
-flaggstangen, og ringer desperat med den lille gardistbjellen sin for
-å tilkalle hjelp.
+Gardist Pål Magnus i vaktbua skal til å spise *eplet* han har fått.
+Men først *veier* han det. Og det for lett. Så ringer han frenetisk
+med den lille *gardistbjellen* sin for å få et nytt eple.
 *** Konge :drill:
-SCHEDULED: <2025-04-09 Wed>
+SCHEDULED: <2026-10-30 Fri>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
 :ID:       cc0ac5bb-d8f1-4017-b64c-e4a15618ac2a
-:DRILL_LAST_INTERVAL: 9.4841
-:DRILL_REPEATS_SINCE_FAIL: 3
-:DRILL_TOTAL_REPEATS: 8
-:DRILL_FAILURE_COUNT: 4
-:DRILL_AVERAGE_QUALITY: 2.875
-:DRILL_EASE: 2.32
+:DRILL_LAST_INTERVAL: 3.86
+:DRILL_REPEATS_SINCE_FAIL: 2
+:DRILL_TOTAL_REPEATS: 10
+:DRILL_FAILURE_COUNT: 5
+:DRILL_AVERAGE_QUALITY: 2.8
+:DRILL_EASE: 2.18
 :DRILL_LAST_QUALITY: 3
-:DRILL_LAST_REVIEWED: [Y-03-31 Mon 12:%]
+:DRILL_LAST_REVIEWED: [Y-10-26 Mon 17:%]
 :END:
 Kong [Harald 4 Magnusson Gille||22] regjerte fra [1130] til [1136]
 
@@ -314,9 +314,10 @@ Ragnvald (Ingesson) [Knaphövde].
 Drept av [Sigurd Slembe], som del av et kuppforsøk som til slutt
 mislyktes.
 **** Memo
-På slottsbalkongen kaller kong Harald med sin BJELLE på livvakt,
+På slottsbalkongen kaller kong Harald med sin *bjelle* på livvakt,
 Mathias Gillebo, utkledd som sankt Peter, for å få takk i
-himmelportens nøkkel (som han skal forsvare seg mot Sigurd med).
+himmelportens *nøkkel* (som han skal forsvare seg mot Sigurd med).
+Harald skyter Gillebo med en *hagle*.
 *** Konge :drill:
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
@@ -506,18 +507,18 @@ Gardist Pål-Magnus sover i en *sovepose* som er heist opp i
 *flaggstangen*. Soveposen er ubehagelig, da den er stappfull av
 *skålvekter*.
 *** Konge :drill:
-SCHEDULED: <2026-10-16 Fri>
+SCHEDULED: <2026-11-04 Wed>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
 :ID:       3ebd5d41-a984-4f15-a5e5-5c597a9f38ef
-:DRILL_LAST_INTERVAL: 4.14
-:DRILL_REPEATS_SINCE_FAIL: 2
-:DRILL_TOTAL_REPEATS: 8
+:DRILL_LAST_INTERVAL: 9.0252
+:DRILL_REPEATS_SINCE_FAIL: 3
+:DRILL_TOTAL_REPEATS: 9
 :DRILL_FAILURE_COUNT: 2
-:DRILL_AVERAGE_QUALITY: 3.25
+:DRILL_AVERAGE_QUALITY: 3.333
 :DRILL_EASE: 2.18
-:DRILL_LAST_QUALITY: 5
-:DRILL_LAST_REVIEWED: [Y-10-12 Mon 13:%]
+:DRILL_LAST_QUALITY: 4
+:DRILL_LAST_REVIEWED: [Y-10-26 Mon 17:%]
 :END:
 Kong [Håkon 6 Magnusson||36] regjerte fra [1355] til [1380]
 **** Memo
@@ -695,18 +696,18 @@ På datalabben sitter IT-sjef Frederik i drag med *kjole*. Derfor har
 han skrudd lyset, så ingen kan se ham. Men nå har noen tent et
 *stearinlys*, så Frederik forsøker å slukke det med en *vinkelmåler*.
 *** Konge :drill:
-SCHEDULED: <2025-04-21 Mon>
+SCHEDULED: <2026-11-13 Fri>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
 :ID:       e81f5de5-8b22-4c1a-84e7-edbd57a75bb1
-:DRILL_LAST_INTERVAL: 9.8277
-:DRILL_REPEATS_SINCE_FAIL: 3
-:DRILL_TOTAL_REPEATS: 6
+:DRILL_LAST_INTERVAL: 23.331
+:DRILL_REPEATS_SINCE_FAIL: 4
+:DRILL_TOTAL_REPEATS: 7
 :DRILL_FAILURE_COUNT: 2
-:DRILL_AVERAGE_QUALITY: 3.167
-:DRILL_EASE: 2.46
-:DRILL_LAST_QUALITY: 4
-:DRILL_LAST_REVIEWED: [Y-04-11 Fri 16:%]
+:DRILL_AVERAGE_QUALITY: 3.143
+:DRILL_EASE: 2.32
+:DRILL_LAST_QUALITY: 3
+:DRILL_LAST_REVIEWED: [Y-10-21 Wed 10:%]
 :END:
 Det andre norskdanske interregnum varte fra [1533] til [1537]
 
@@ -719,7 +720,7 @@ ble tvangsreformert og mistet siste rest av nasjonal selvstendighet.
 Perioden kalles også for [Grevefeiden], oppkalt etter grev
 [Christoffer] av [Oldenburg].
 **** Memo
-Christian 3 i kjelleren (interregum) med halo (han skulle jo vise seg
+Christian 3 i kjelleren (interregnum) med halo (han skulle jo vise seg
 å bli konge)
 *** Konge :drill:
 SCHEDULED: <2026-10-17 Sat>
@@ -749,18 +750,18 @@ Kong [Frederik 2||47] regjerte fra [1559] til [1588]
 Når havnesjefen (*svane*) kommer inn i datalabben, prøver Frederik
 Dahl å fange den med et *fiskegarn*.
 *** Konge :drill:
-SCHEDULED: <2025-04-23 Wed>
+SCHEDULED: <2026-11-27 Fri>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
 :ID:       9af7ac14-2f5d-4e6b-9836-c30040da6f1a
-:DRILL_LAST_INTERVAL: 11.592
-:DRILL_REPEATS_SINCE_FAIL: 3
-:DRILL_TOTAL_REPEATS: 8
+:DRILL_LAST_INTERVAL: 32.4576
+:DRILL_REPEATS_SINCE_FAIL: 4
+:DRILL_TOTAL_REPEATS: 9
 :DRILL_FAILURE_COUNT: 3
-:DRILL_AVERAGE_QUALITY: 3.625
+:DRILL_AVERAGE_QUALITY: 3.667
 :DRILL_EASE: 2.8
 :DRILL_LAST_QUALITY: 4
-:DRILL_LAST_REVIEWED: [Y-12-30 Mon 16:%]
+:DRILL_LAST_REVIEWED: [Y-10-26 Mon 17:%]
 :END:
 Kong [Christian 4||48] regjerte fra [1588] til [1648].
 
@@ -775,24 +776,28 @@ Oppkalt etter den norske stattholderen, Hannibal Sehested (1609-1666),
 som var kong Christian IVs svigersønn, og var den som hadde organisert
 den nyopprettede norske hæren. Ironisk nok kom han fra nettopp *Øsel*,
 som Dannmark måtte avse.
-**** Memo
-Thorn i ballsalen ringer med klokken: Dansen må ta pause. Det er klart
-for østersgilde!
 
 Torstensonska kriget: etter den svenske feltherren *Lennart
 Torstenson*; i Danmark kalles krigen Torstenssonfejden. På engelsk
 brukes betegnelsen «the Torstensson War».
+**** Memo
+Thorn i ballsalen ringer med *bjellen*: Dansen må ta pause. Det er
+klart for *østersgilde*!
+
+Merk at her har vi 2 x 48!
 *** Konge :drill:
-SCHEDULED: <2025-05-06 Tue>
+SCHEDULED: <2026-11-11 Wed>
+:PROPERTIES:
+:DRILL_CARD_TYPE: hide2cloze
 :ID:       efde6a14-c848-457b-9f1d-e68abddb2a9a
-:DRILL_LAST_INTERVAL: 7.979
-:DRILL_REPEATS_SINCE_FAIL: 3
-:DRILL_TOTAL_REPEATS: 5
+:DRILL_LAST_INTERVAL: 16.0139
+:DRILL_REPEATS_SINCE_FAIL: 4
+:DRILL_TOTAL_REPEATS: 6
 :DRILL_FAILURE_COUNT: 1
 :DRILL_AVERAGE_QUALITY: 3.0
-:DRILL_EASE: 2.08
+:DRILL_EASE: 1.94
 :DRILL_LAST_QUALITY: 3
-:DRILL_LAST_REVIEWED: [Y-12-30 Mon 16:%]
+:DRILL_LAST_REVIEWED: [Y-10-26 Mon 17:%]
 :END:
 Kong [Frederik 3||49] regjerte fra [1648] til [1670].
 
@@ -832,18 +837,18 @@ vinduet. De lander i en *hekk*.
 
 Pussig nok står han på en *tredemølle* når han gjør dette.
 *** Konge :drill:
-SCHEDULED: <2025-05-07 Wed>
+SCHEDULED: <2026-11-12 Thu>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
 :ID:       b8a51616-35e0-4f4a-a8b1-e745c3231927
-:DRILL_LAST_INTERVAL: 8.568
-:DRILL_REPEATS_SINCE_FAIL: 3
-:DRILL_TOTAL_REPEATS: 7
+:DRILL_LAST_INTERVAL: 17.196
+:DRILL_REPEATS_SINCE_FAIL: 4
+:DRILL_TOTAL_REPEATS: 8
 :DRILL_FAILURE_COUNT: 2
-:DRILL_AVERAGE_QUALITY: 2.857
-:DRILL_EASE: 2.08
+:DRILL_AVERAGE_QUALITY: 2.875
+:DRILL_EASE: 1.94
 :DRILL_LAST_QUALITY: 3
-:DRILL_LAST_REVIEWED: [Y-04-28 Mon 12:%]
+:DRILL_LAST_REVIEWED: [Y-10-26 Mon 17:%]
 :END:
 Kong [Frederik 4||51] regjerte fra [1699] til [1730]
 **** Memo
@@ -926,18 +931,18 @@ Kong [Frederik 6||55] regjerte fra [1808] til [1814]
 På datalabben dukker det opp en *elefant*. Frederik blir redd og
 prøver å slå den i hjel med en leketøys-*båt*.
 *** Konge :drill:
-SCHEDULED: <2025-01-09 Thu>
+SCHEDULED: <2026-11-15 Sun>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
 :ID:       b446d41f-ae83-4b09-ae9b-c84b0e7ce173
-:DRILL_LAST_INTERVAL: 9.6346
-:DRILL_REPEATS_SINCE_FAIL: 3
-:DRILL_TOTAL_REPEATS: 2
+:DRILL_LAST_INTERVAL: 24.5297
+:DRILL_REPEATS_SINCE_FAIL: 4
+:DRILL_TOTAL_REPEATS: 3
 :DRILL_FAILURE_COUNT: 0
-:DRILL_AVERAGE_QUALITY: 4.0
-:DRILL_EASE: 2.46
+:DRILL_AVERAGE_QUALITY: 4.333
+:DRILL_EASE: 2.56
 :DRILL_LAST_QUALITY: 5
-:DRILL_LAST_REVIEWED: [Y-12-30 Mon 16:%]
+:DRILL_LAST_REVIEWED: [Y-10-21 Wed 09:%]
 :END:
 Kong [Christian Frederik||56] regjerte fra [1814] til [1814]
 *** Konge :drill:
@@ -961,33 +966,33 @@ med. Men så ankommer et *tog* fult av salsadansere. Togdøren er så høy
 at Karl må sette en *stige* (tilsvarer Karl 13 av Sverige) opp til
 døren.
 *** Konge :drill:
-SCHEDULED: <2026-10-16 Fri>
+SCHEDULED: <2026-11-05 Thu>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
 :ID:       e9353541-4031-4f99-8ef4-7a57c617aeaa
-:DRILL_LAST_INTERVAL: 4.0
-:DRILL_REPEATS_SINCE_FAIL: 2
-:DRILL_TOTAL_REPEATS: 1
+:DRILL_LAST_INTERVAL: 10.0
+:DRILL_REPEATS_SINCE_FAIL: 3
+:DRILL_TOTAL_REPEATS: 2
 :DRILL_FAILURE_COUNT: 0
 :DRILL_AVERAGE_QUALITY: 4.0
 :DRILL_EASE: 2.5
 :DRILL_LAST_QUALITY: 4
-:DRILL_LAST_REVIEWED: [Y-10-12 Mon 13:%]
+:DRILL_LAST_REVIEWED: [Y-10-26 Mon 17:%]
 :END:
 Kong [Karl 3 Johan||58] regjerte fra [1818] til [1844]
 *** Konge :drill:
-SCHEDULED: <2025-05-08 Thu>
+SCHEDULED: <2026-11-19 Thu>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
 :ID:       87dd1911-9617-4f0e-ba33-9d4ab505b202
-:DRILL_LAST_INTERVAL: 9.8816
-:DRILL_REPEATS_SINCE_FAIL: 3
-:DRILL_TOTAL_REPEATS: 5
+:DRILL_LAST_INTERVAL: 24.2791
+:DRILL_REPEATS_SINCE_FAIL: 4
+:DRILL_TOTAL_REPEATS: 6
 :DRILL_FAILURE_COUNT: 1
-:DRILL_AVERAGE_QUALITY: 3.6
-:DRILL_EASE: 2.56
-:DRILL_LAST_QUALITY: 4
-:DRILL_LAST_REVIEWED: [Y-04-28 Mon 12:%]
+:DRILL_AVERAGE_QUALITY: 3.5
+:DRILL_EASE: 2.42
+:DRILL_LAST_QUALITY: 3
+:DRILL_LAST_REVIEWED: [Y-10-26 Mon 17:%]
 :END:
 Kong [Oscar 1||59] regjerte fra [1844] til [1859], sammen med sin
 dronning [Josefine].
