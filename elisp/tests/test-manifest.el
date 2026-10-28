@@ -18,6 +18,7 @@
     "mode-extensions/test-mb-json.el"
     "mode-extensions/test-mb-lilypond.el"
     "mode-extensions/test-mb-metafont.el"
+    "mode-extensions/test-mb-octave-insert.el"
     "mode-extensions/test-mb-org.el"
     "mode-extensions/test-mb-python.el"
     "mode-extensions/test-mb-ruby.el"

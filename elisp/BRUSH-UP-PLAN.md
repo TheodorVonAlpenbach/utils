@@ -301,6 +301,10 @@ The first subset is intentionally conservative:
 * [`test-mb-metafont.el`](./mode-extensions/test-mb-metafont.el): four ERT
   tests for compilation-output parsing, process status, GF-to-DVI conversion,
   and the compile-convert-display pipeline.
+* [`test-mb-octave-insert.el`](./mode-extensions/test-mb-octave-insert.el):
+  five ERT tests for insertion keymaps, function delegation, indented
+  control-flow skeletons, explicit unsupported commands, and documentation
+  template expansion.
 * [`test-mb-java-mode.el`](./mode-extensions/test-mb-java-mode.el): one ERT
   test for feature publication, Java buffer settings, idempotence, and global
   default isolation.
@@ -403,9 +407,9 @@ physics, geometry, search, XML, anaphora, general, list, sequence, string,
 time, ISO-time, and table modules are independently loadable. Their validation
 comprises:
 
-* a clean `emacs -Q` load of all thirty-eight utility and mode-extension
+* a clean `emacs -Q` load of all thirty-nine utility and mode-extension
   features plus the ERT tooling;
-* 363 passing ERT tests from the batch entry point;
+* 368 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -546,10 +550,27 @@ requires a visited file, preserves the historical quiet intermediate
 compilation, and refreshes an existing DVI buffer without killing it. Its four
 namespaced tests mock both external programs and display operations.
 
+[`mb-octave-insert.el`](./mode-extensions/mb-octave-insert.el) now loads
+independently with lexical binding and the built-in Octave mode. Its if/else
+and for-loop skeletons use ordinary indentation rather than Evil, track their
+editing position through indentation changes, and no longer contain the stray
+symbol that made for-loop insertion fail. Documentation templates are located
+relative to the library, use built-in date formatting, and derive the Octave
+function name from the visited `.m` filename instead of the removed
+`octave-defun-name` helper. The unfinished case command now reports an explicit
+user error. Its five namespaced tests do not start an Octave process.
+
 [`mb-sh.el`](./mode-extensions/mb-sh.el) remains a usage-decision candidate.
 Its original commit explicitly described it as unfinished, its formatter body
 was never implemented, and there are no repository callers. Modernizing it
 would require choosing new behavior rather than preserving existing behavior.
+
+[`mb-tex.el`](./mode-extensions/mb-tex.el) also remains a usage-decision
+candidate. It has no repository callers, requires an AUCTeX installation that
+is absent from the clean environment, overrides the package's
+`TeX-run-function`, and installs global `describe-mode` advice unrelated to
+TeX. Its current AUCTeX usage and desired PDF-viewing behavior should be
+confirmed before replacing that integration.
 
 [`mb-utils-file.el`](./utils/mb-utils-file.el) now uses built-in path and
 recursive file APIs instead of startup aliases and the shell-oriented
