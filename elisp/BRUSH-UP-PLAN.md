@@ -295,6 +295,9 @@ The first subset is intentionally conservative:
 * [`test-mb-json.el`](./mode-extensions/test-mb-json.el): five ERT tests for
   outer JSON-string decoding, bare timestamp repair, pretty printing, Mongo
   shell value conversion, and invalid input.
+* [`test-mb-lilypond.el`](./mode-extensions/test-mb-lilypond.el): four ERT
+  tests for quoted compilation commands, source tracking, successful PDF
+  display, and narrow optional LilyPond command integration.
 * [`test-mb-java-mode.el`](./mode-extensions/test-mb-java-mode.el): one ERT
   test for feature publication, Java buffer settings, idempotence, and global
   default isolation.
@@ -397,9 +400,9 @@ physics, geometry, search, XML, anaphora, general, list, sequence, string,
 time, ISO-time, and table modules are independently loadable. Their validation
 comprises:
 
-* a clean `emacs -Q` load of all thirty-six utility and mode-extension
+* a clean `emacs -Q` load of all thirty-seven utility and mode-extension
   features plus the ERT tooling;
-* 355 passing ERT tests from the batch entry point;
+* 359 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -517,6 +520,23 @@ accept those nonstandard inputs. Bare timestamps are quoted only in value
 positions and existing JSON strings are left unchanged. Its five namespaced
 tests cover decoding, timestamp repair, formatting, Mongo conversion, and
 invalid input.
+
+[`mb-lilypond.el`](./mode-extensions/mb-lilypond.el) now loads independently
+without the optional LilyPond Emacs mode. Compilation filenames are shell
+quoted and stored as buffer-local compilation state instead of being recovered
+by parsing a hard-coded `*compilation*` buffer. The finish hook acts only on
+successful LilyPond compilations with existing PDF output, refreshes an
+existing PDF buffer without killing it, and remains deterministic under
+concurrent compilation buffers. The copied upstream `LilyPond-command`
+implementation was replaced with narrow advice installed only after
+LilyPond mode loads; it changes the personal PDF `View` behavior and delegates
+all other commands unchanged. Its four namespaced tests mock compilation and
+display boundaries.
+
+[`mb-sh.el`](./mode-extensions/mb-sh.el) remains a usage-decision candidate.
+Its original commit explicitly described it as unfinished, its formatter body
+was never implemented, and there are no repository callers. Modernizing it
+would require choosing new behavior rather than preserving existing behavior.
 
 [`mb-utils-file.el`](./utils/mb-utils-file.el) now uses built-in path and
 recursive file APIs instead of startup aliases and the shell-oriented

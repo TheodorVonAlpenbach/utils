@@ -1,104 +1,56 @@
-(require 'LilyPond-mode)
+;;; mb-lilypond.el --- Personal LilyPond helpers -*- lexical-binding: t; -*-
 
-(cl-defun current-filename ()
-  (buffer-file-name (current-buffer)))
-;;(current-filename)
+;;; Code:
 
-(cl-defun mb-lilypond-compile (&optional (filename (current-filename)))
-  (compilation-start (format "lilypond %s" filename)))
+(require 'compile)
+(require 'subr-x)
 
-(push-unique #'mb-lilypond-compile-view-pdf compilation-finish-functions)
-;;(nilf compilation-finish-functions)
+(defvar-local mb-lilypond-source-file nil
+  "LilyPond source file associated with the current compilation buffer.")
 
-(cl-defun mb-lilypond-compilation-filename (&optional (buffer "*compilation*"))
-  (string-match* "^lilypond \\(.*\\)" (buffer-string* buffer) :num 1))
-;;(mb-lilypond-compilation-filename)
+(defun mb-lilypond-compile (&optional filename)
+  "Compile FILENAME with LilyPond and display its PDF on success.
+Interactively, compile the file visited by the current buffer."
+  (interactive)
+  (let ((source (or filename buffer-file-name)))
+    (unless source
+      (user-error "Current buffer is not visiting a file"))
+    (let ((compilation-buffer
+           (compilation-start
+            (format "lilypond %s" (shell-quote-argument source)))))
+      (with-current-buffer compilation-buffer
+        (setq-local mb-lilypond-source-file source))
+      compilation-buffer)))
 
-(cl-defun mb-lilypond-compile-view-pdf (compilation-buffer exit-status)
-  (let ((ly-filename (mb-lilypond-compilation-filename)))
-    (message "Made it: %s; %s; %s" 
-	     compilation-buffer (string-trim exit-status) ly-filename)
-    (when (string= (string-trim exit-status) "finished")
-      (let ((pdf-filename (file-name-change-extension ly-filename "pdf")))
-	(awhen (get-file-buffer pdf-filename)
-	  (kill-buffer it))
-	(find-file-other-window pdf-filename)))))
+(defun mb-lilypond-compile-view-pdf (compilation-buffer exit-status)
+  "Display the generated PDF after a successful LilyPond compilation.
+COMPILATION-BUFFER records the source file, and EXIT-STATUS is the
+status supplied by `compilation-finish-functions'."
+  (when (string= (string-trim exit-status) "finished")
+    (let ((source
+           (buffer-local-value 'mb-lilypond-source-file compilation-buffer)))
+      (when source
+        (let ((pdf-file
+               (file-name-with-extension
+                (file-name-sans-extension source) "pdf")))
+          (when (file-exists-p pdf-file)
+            (let ((pdf-buffer (find-file-other-window pdf-file)))
+              (with-current-buffer pdf-buffer
+                (revert-buffer t t)))))))))
 
-(cl-defun LilyPond-command (name file)
-  "Run command NAME on the file you get by calling FILE.
+(add-hook 'compilation-finish-functions #'mb-lilypond-compile-view-pdf)
 
-FILE is a function return a file name.  It has one optional argument,
-the extension to use on the file.
+(defun mb-lilypond--command-around (original name file)
+  "Use Emacs to view PDFs, otherwise call ORIGINAL with NAME and FILE."
+  (if (equal name "View")
+      (find-file
+       (file-name-with-extension
+        (file-name-sans-extension (funcall file)) "pdf"))
+    (funcall original name file)))
 
-Use the information in LilyPond-command-alist to determine how to run the
-command."
-
-  (let ((entry (assoc name LilyPond-command-alist)))
-    (if entry
-      (let ((command (LilyPond-command-expand (cadr entry)
-					      (apply file nil)))
-	    (jobs nil)
-	    (job-string "no jobs"))
-	(cond ((member name (list "View"))
-	       ;; simple implementation of View...
-	       (let ((pdf-path (concat (file-name-sans-extension (apply file nil)) ".pdf")))
-		 (find-file pdf-path)))
-	      ;; here is the old implementation
-	      ((member name (list "View" "ViewPS"))
-	       ;; is USR1 a right signal for viewps?
-	       (let ((buffer-xdvi (get-buffer-create (concat "*" name "*"))))
-		 ;; what if XEDITOR is set to gedit or so, should we steal it?
-		 (if (not (getenv "XEDITOR"))
-		   (setenv "XEDITOR" "emacsclient --no-wait +%l:%c %f"))
-		 (if LilyPond-kick-xdvi
-		   (let ((process-xdvi (get-buffer-process buffer-xdvi)))
-		     (if process-xdvi
-		       (signal-process (process-id process-xdvi) 'SIGUSR1)
-		       (LilyPond-shell-process name buffer-xdvi command)))
-		   (LilyPond-shell-process name buffer-xdvi command))))
-	      (t
-	       (if (string-equal name "Midi")
-		 (progn
-		   (setq command (concat LilyPond-midi-command " " (LilyPond-string-current-midi)))
-		   (if (LilyPond-kill-midi)
-		     (setq job-string nil)))) ; either stop or start playing
-	       (if (string-equal name "MidiAll")
-		 (progn
-		   (setq command (concat LilyPond-all-midi-command " " (LilyPond-string-all-midi)))
-		   (LilyPond-kill-midi))) ; stop and start playing
-	       (if (and (member name (list "Midi" "MidiAll")) job-string)
-		 (if (file-newer-than-file-p
-		      (LilyPond-get-master-file)
-		      (concat (substring (LilyPond-get-master-file) 0 -3) ".midi"))
-		   (if (y-or-n-p "Midi older than source. Reformat midi?")
-		     (progn
-		       (LilyPond-command-formatmidi)
-		       (while (LilyPond-running)
-			 (message "Starts playing midi once it is built.")
-			 (sit-for 0 100))))))
-	       (if (member name (list "LilyPond" "TeX" "2Midi" "2PS"
-				      "Book" "LaTeX"))
-		 (if (setq jobs (LilyPond-running))
-		   (progn
-		     (setq job-string "Process") ; could also suggest compiling after process has ended
-		     (while jobs
-		       (setq job-string (concat job-string " \"" (pop jobs) "\"")))
-		     (setq job-string (concat job-string " is already running; kill it to proceed "))
-		     (if (y-or-n-p job-string)
-		       (progn
-			 (setq job-string "no jobs")
-			 (LilyPond-kill-jobs)
-			 (while (LilyPond-running)
-			   (sit-for 0 100)))
-		       (setq job-string nil)))))
-
-	       (setq LilyPond-command-next
-		     (let* ((entry (assoc name LilyPond-command-alist))
-			    (next-command (nth 3 (cdr entry))))
-		       (or next-command
-			   LilyPond-command-default)))
-	       
-	       (if (string-equal job-string "no jobs")
-		 (LilyPond-compile-file command name))))))))
+(with-eval-after-load 'LilyPond-mode
+  (advice-add 'LilyPond-command :around #'mb-lilypond--command-around))
 
 (provide 'mb-lilypond)
+
+;;; mb-lilypond.el ends here

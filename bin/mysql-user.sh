@@ -47,7 +47,12 @@ done
 verbose=1
 vecho "Verbose mode is on"
 
-substring="$1"
+substring="${2:-}"
+if [ -z "$substring" ]; then
+    printUsage
+    exit 0
+fi
+
 vecho substring: $substring
 
 env="${2:-local}"
