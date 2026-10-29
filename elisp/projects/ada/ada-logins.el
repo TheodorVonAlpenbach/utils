@@ -1,3 +1,5 @@
+(require 'ada-mysql)
+
 (cl-defun ada-login-infix-1 (org-digit group-digit)
   (format "%s_%d"
     (if (= org-digit 9) "499" (format "50%d" org-digit))

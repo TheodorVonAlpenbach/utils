@@ -308,6 +308,10 @@ The first subset is intentionally conservative:
 * [`test-mb-octave-eval.el`](./mode-extensions/test-mb-octave-eval.el): six
   ERT tests for quoted source paths, expression parsing, process output,
   response timeouts, comment evaluation, and last-expression results.
+* [`test-mb-octave-matlab.el`](./mode-extensions/test-mb-octave-matlab.el):
+  eight ERT tests for chained assignments, default arguments, assertion and
+  test-block conversion, condensed colon expressions, and explicit directory
+  registration, plus integrated buffer transformations.
 * [`test-mb-java-mode.el`](./mode-extensions/test-mb-java-mode.el): one ERT
   test for feature publication, Java buffer settings, idempotence, and global
   default isolation.
@@ -410,9 +414,9 @@ physics, geometry, search, XML, anaphora, general, list, sequence, string,
 time, ISO-time, and table modules are independently loadable. Their validation
 comprises:
 
-* a clean `emacs -Q` load of all forty utility and mode-extension
+* a clean `emacs -Q` load of all forty-one utility and mode-extension
   features plus the ERT tooling;
-* 374 passing ERT tests from the batch entry point;
+* 382 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -576,6 +580,18 @@ The old prefix branches of `octave-eval-last-sexp` depended on the absent
 `octave-eval-print-last-sexp`; they now report that unsupported request
 explicitly instead of failing with an undefined-function error. Its six
 namespaced tests mock the inferior Octave boundary.
+
+[`mb-octave-matlab.el`](./mode-extensions/mb-octave-matlab.el) now loads
+independently with lexical binding and built-in dependencies. Machine-specific
+Octave/MATLAB roots are customizable, and corresponding directory registration
+is an explicit operation rather than a load-time mutation of global swap
+state. Startup-only string, list, buffer, region, and navigation aliases were
+replaced throughout the converter, and its duplicate `o2m-all` definition was
+removed. Condensed-colon conversion now rejects malformed input explicitly,
+and Octave assertions inside `%!test` blocks are actually converted instead of
+falling through as ordinary code. The dormant test file now has eight
+namespaced tests in the maintained baseline; filesystem synchronization and
+interactive documentation transfer remain outside those deterministic tests.
 
 [`mb-sh.el`](./mode-extensions/mb-sh.el) remains a usage-decision candidate.
 Its original commit explicitly described it as unfinished, its formatter body
