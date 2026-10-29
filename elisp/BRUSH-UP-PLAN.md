@@ -305,6 +305,9 @@ The first subset is intentionally conservative:
   five ERT tests for insertion keymaps, function delegation, indented
   control-flow skeletons, explicit unsupported commands, and documentation
   template expansion.
+* [`test-mb-octave-eval.el`](./mode-extensions/test-mb-octave-eval.el): six
+  ERT tests for quoted source paths, expression parsing, process output,
+  response timeouts, comment evaluation, and last-expression results.
 * [`test-mb-java-mode.el`](./mode-extensions/test-mb-java-mode.el): one ERT
   test for feature publication, Java buffer settings, idempotence, and global
   default isolation.
@@ -407,9 +410,9 @@ physics, geometry, search, XML, anaphora, general, list, sequence, string,
 time, ISO-time, and table modules are independently loadable. Their validation
 comprises:
 
-* a clean `emacs -Q` load of all thirty-nine utility and mode-extension
+* a clean `emacs -Q` load of all forty utility and mode-extension
   features plus the ERT tooling;
-* 368 passing ERT tests from the batch entry point;
+* 374 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -559,6 +562,20 @@ relative to the library, use built-in date formatting, and derive the Octave
 function name from the visited `.m` filename instead of the removed
 `octave-defun-name` helper. The unfinished case command now reports an explicit
 user error. Its five namespaced tests do not start an Octave process.
+
+[`mb-octave-eval.el`](./mode-extensions/mb-octave-eval.el) now loads
+independently with lexical binding and explicit built-in dependencies. Source
+commands quote filenames, require a visited file, and retain optional help
+integration when the main Octave extension supplies it. Expression extraction
+handles both ordinary code and commented test expressions without startup
+buffer helpers. Inferior-process evaluation resets output per submitted line,
+returns deterministic combined output, and has a configurable timeout instead
+of waiting forever. Current-line evaluation rejects empty comments and retains
+the debugger-facing last-expression variable through a compatibility alias.
+The old prefix branches of `octave-eval-last-sexp` depended on the absent
+`octave-eval-print-last-sexp`; they now report that unsupported request
+explicitly instead of failing with an undefined-function error. Its six
+namespaced tests mock the inferior Octave boundary.
 
 [`mb-sh.el`](./mode-extensions/mb-sh.el) remains a usage-decision candidate.
 Its original commit explicitly described it as unfinished, its formatter body
