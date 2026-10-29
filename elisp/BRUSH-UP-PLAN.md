@@ -872,6 +872,21 @@ second-return-value contracts. There is no single built-in replacement:
 the maintained GNU ELPA `split-sequence` package if that richer contract is
 needed again rather than restoring the old local copy.
 
+Three unreferenced mode-extension fragments were also retired after an explicit
+usage decision:
+
+* `mb-div-mode.el` contained only an unregistered PHP setup function, had no
+  feature publication or callers, and was originally incomplete. Restore PHP
+  settings through a normal `php-mode-hook` only if PHP editing becomes active
+  again.
+* `mb-key-chord.el` copied an old `key-chord` input-method implementation but
+  published no feature and had no callers. Use the maintained `key-chord`
+  package directly rather than reviving this private copy.
+* `mb-geben.el` targeted an old Geben/PHP debugger installation and hard-coded
+  obsolete Cygwin and Windows share paths. Reintroduce debugger integration as
+  a new optional module with configurable path mapping if that workflow is
+  needed again.
+
 ### Behaviourally equivalent for observed uses
 
 These were compared against the standard function on the cases that matter and
