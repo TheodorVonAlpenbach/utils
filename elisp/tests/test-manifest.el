@@ -24,6 +24,7 @@
     "mode-extensions/test-mb-org.el"
     "mode-extensions/test-mb-python.el"
     "mode-extensions/test-mb-ruby.el"
+    "mode-extensions/test-mb-sql.el"
     "mode-extensions/test-mb-texinfo.el"
     "utils/test-mb-anaphora.el"
     "utils/test-mb-combinatorics.el"

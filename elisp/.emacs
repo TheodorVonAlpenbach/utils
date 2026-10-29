@@ -273,6 +273,9 @@ and running Git.")
 ;;(length auto-mode-alist)
 ;;(copy 'mb-lisp-mode auto-mode-alist :key #'cdr :test #'neql)
 
+(autoload 'mb-sql-mode-setup "mb-sql")
+(add-hook 'sql-mode-hook #'mb-sql-mode-setup)
+
 ;; encoding: the following specifies encoding based on file path
 (setq file-coding-system-alist
       (append '(("\\.php\\'" utf-8 . utf-8)

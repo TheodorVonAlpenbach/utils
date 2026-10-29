@@ -28,7 +28,7 @@ Backup/autosave files are not source and are outside the cleanup scope.
 | Core helpers mix infrastructure with experiments | [`mb-utils-math.el`](./utils/mb-utils-math.el) includes experimental helpers after an initial `provide`. Load-time samples and Windows-only temporary paths have been removed from [`mb-utils-io.el`](./utils/mb-utils-io.el). | Separate demonstrations from reusable definitions and eliminate unintended load-time work. |
 | Global setup contains conflicting or machine-specific bindings | [`global-map.el`](./global/global-map.el) binds F12 twice and includes a hard-coded document compilation command. [`mb-org.el`](./mode-extensions/mb-org.el) assumes Evil and key-chord functionality in its mode hook. | Preserve useful commands, make optional integrations explicit, and move machine-specific behavior out of shared setup. |
 | Legacy API usage remains | Archived [`php.el`](./archive/c++/php.el) uses `defadvice`; archived [`qt-chess.el`](./archive/c++/qt-chess.el) uses unprefixed `flet`. | Leave archived code unchanged unless it is restored to active use. |
-| Potential library-name collision | [`sql-mode.el`](./mode-extensions/sql-mode.el) contains personal extensions to built-in SQL mode. | Give the extension an unambiguous feature/file name and arrange setup after built-in SQL loads. |
+| Potential library-name collision | Resolved: the former `sql-mode.el` personal extension is now [`mb-sql.el`](./mode-extensions/mb-sql.el), while Emacs's built-in SQL implementation remains `sql.el`. | Keep personal SQL commands namespaced and activate them lazily from `sql-mode-hook`. |
 
 ### Files that fail the Emacs reader
 
@@ -325,6 +325,9 @@ The first subset is intentionally conservative:
   for idempotent local setup, expression bounds, and nested Python defun bounds.
 * [`test-mb-ruby.el`](./mode-extensions/test-mb-ruby.el): one ERT test for
   buffer-local Ruby settings, idempotence, and global-state isolation.
+* [`test-mb-sql.el`](./mode-extensions/test-mb-sql.el): four ERT tests for
+  ordinary and comment-prefixed line evaluation, empty input, and buffer-local
+  key setup.
 * [`test-mb-texinfo.el`](./mode-extensions/test-mb-texinfo.el): five ERT tests
   for command formatting and insertion, commented snippets, generated wrapper
   commands, keymaps, and hook registration.
@@ -414,9 +417,9 @@ physics, geometry, search, XML, anaphora, general, list, sequence, string,
 time, ISO-time, and table modules are independently loadable. Their validation
 comprises:
 
-* a clean `emacs -Q` load of all forty-one utility and mode-extension
+* a clean `emacs -Q` load of all forty-two utility and mode-extension
   features plus the ERT tooling;
-* 382 passing ERT tests from the batch entry point;
+* 386 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -592,6 +595,17 @@ and Octave assertions inside `%!test` blocks are actually converted instead of
 falling through as ordinary code. The dormant test file now has eight
 namespaced tests in the maintained baseline; filesystem synchronization and
 interactive documentation transfer remain outside those deterministic tests.
+
+The former `sql-mode.el` personal extension is now
+[`mb-sql.el`](./mode-extensions/mb-sql.el), avoiding confusion with Emacs's
+built-in `sql.el`. It loads independently, publishes a namespaced feature and
+command, and no longer changes the global `split-width-threshold`. Startup
+registers only an autoloaded mode-hook function, so the extension and built-in
+SQL library load when SQL editing is first used. Leading SQL comment markers
+are removed without truncating string literals or trailing comments, empty
+expressions report a user error, and the command binding uses a per-buffer map
+copy rather than mutating the shared `sql-mode-map`. Its four namespaced tests
+mock the inferior SQL boundary.
 
 [`mb-sh.el`](./mode-extensions/mb-sh.el) remains a usage-decision candidate.
 Its original commit explicitly described it as unfinished, its formatter body
