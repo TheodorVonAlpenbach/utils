@@ -11,9 +11,10 @@
   "Tab width in backus-naur-mode")
 
 (defconst bn-assignment "::=")
-(defconst bn-lhs-token "[A-Za-z-]*")
+(defconst bn-lhs-token "[A-Za-z-]+")
 (defconst bn-left-nonterminal-definition
-  (format "<\\(%s\\)>\\s-*\\(%s\\)" bn-lhs-token bn-assignment)
+  (format "^\\s-*<\\(%s\\)>\\s-*\\(%s\\)"
+          bn-lhs-token bn-assignment)
   "The regular expression that marks the left side from the \
 definition of a rule" )
 ;  ^<\([A-Za-z-]*\)>\s-*\(::=\)
@@ -119,6 +120,8 @@ definition of a rule" )
   "Major mode for editing context-free grammars in Backus-Naur notation."
   (setq-local tab-width bn-tab-width)
   (setq-local indent-region-function #'bn-indent-region)
+  (setq-local beginning-of-defun-function #'bn-beginning-of-defun)
+  (setq-local end-of-defun-function #'bn-end-of-defun)
   (make-local-variable 'bn-comment-char)
   (setq-local imenu-create-index-function #'bn-imenu)
   (setq-local font-lock-defaults
@@ -279,61 +282,10 @@ definition of a rule" )
     (t (:weight bold :underline t)))
   "font used for the character that comments a line" )
 
-(cl-defun bn-indent-old ()
-  " The lines that contain a left nonterminal are indented from
-  0. These are the lines that match the regular expression
- `bn-left-nonterminal-definition'.
-The blank lines are cleared.
-The lines which contain a rule are indented with a tab."
-  (interactive)
-  (let (
-	;; initial point
-	(cc (current-column))
-	;; end of line
-	(eol (prog2
-		 (move-end-of-line nil)
-		 (current-column) ) )
-	;; beginning of text
-	(bot (prog2
-		 (move-beginning-of-line nil)
-		 (skip-chars-forward "[:blank:]")
-		 (current-column) ) ) )
-    (cond
-     ;; empty line
-     ((zerop eol)
-      t)
-     ;; lines with blanks
-     ((eq bot eol)
-      (move-beginning-of-line nil)
-      (just-one-space 0) )
-     ;; line containing a left nonterminal
-     ((save-excursion
-	(move-to-column eol)
-	(and (> (current-column) 3)
-	     (search-backward ":" (- (point) 1) t ) ) )
-      (move-beginning-of-line nil)
-      (just-one-space 0) )
-     ;; for the rest... add a tab at the beginning of the line
-     ( (save-excursion
-	 (move-beginning-of-line nil)
-	 (not (search-forward-regexp "\t[^[:blank:]]" (+ 2 (point) ) t ) ) )
-       (just-one-space 0)
-       (insert-char ?\t 1)
-       (skip-chars-forward "[:blank:]") ) )
-    ;; if the cursor was before the indetation inside the word, keep
-    ;; it on the same position; if the initial position of the cursor
-    ;; was before the word, move it at the beginning of the word
-    (move-to-column (+ (current-column)
-		       (max 0 (- cc bot) ) ) ) ) )
-
-(cl-defun bn-commented-line-p ()
-  "return t when the point is inside a commented line, and nil
-otherwise."
-  (equal
-   (save-excursion
-     (beginning-of-line)
-     (following-char) )
-   (elt bn-comment-char 0 ) ) )
+(defun bn-commented-line-p ()
+  "Return non-nil when point is on a commented line."
+  (eq (char-after (line-beginning-position))
+      (string-to-char bn-comment-char)))
 
 (cl-defun bn-lazy-font-lock ()
   "called after every buffer change to re-fontify the text."
@@ -465,24 +417,37 @@ before starting the new timer."
                  (when (derived-mode-p 'bn-mode)
                    (bn-lazy-font-lock)))))))))
 
-(cl-defun bn-beginning-of-defun ()
-  "jump at the beginning of a left nonterminal definition."
-  (search-backward-regexp bn-left-nonterminal-definition nil t) )
+(defun bn-beginning-of-defun (&optional arg)
+  "Move backward to the beginning of a BNF definition.
+With numeric ARG, repeat that many times."
+  (interactive "p")
+  (let ((count (or arg 1))
+        found)
+    (if (< count 0)
+        (bn-end-of-defun (- count))
+      (dotimes (_ count)
+        (setq found
+              (re-search-backward bn-left-nonterminal-definition nil t)))
+      (when found
+        (beginning-of-line))
+      found)))
 
-(cl-defun bn-end-of-defun ()
-  "jump at the end of a left nonterminal definition."
- (if (search-forward-regexp bn-left-nonterminal-definition nil t)
-      (beginning-of-line)
-   (bn-jump (point-max) ) )
-  (let ((repeat t))
-    (while repeat
-      (skip-chars-backward " \t\n")
-      (if (not (bn-commented-line-p) )
-	  (setq repeat nil)
-	(beginning-of-line) ) ) )
-  (skip-chars-forward " \t")
-  (and (not (eobp) )
-       (forward-char) ) )
+(defun bn-end-of-defun (&optional arg)
+  "Move forward to the end of a BNF definition.
+With numeric ARG, repeat that many times."
+  (interactive "p")
+  (let ((count (or arg 1))
+        found)
+    (if (< count 0)
+        (bn-beginning-of-defun (- count))
+      (dotimes (_ count)
+        (forward-line 1)
+        (setq found
+              (re-search-forward bn-left-nonterminal-definition nil t))
+        (if found
+            (beginning-of-line)
+          (goto-char (point-max)))))
+    found))
 
 (cl-defun bn-search ()
   "Rotate through uses of the left nonterminal at point.
@@ -568,13 +533,14 @@ strings"
       ""))
 
 ;;; indent
-(cl-defun bn-first-line-of-definition-p ()
-  ""
-  (string-match bn-left-nonterminal-definition
-                (substring-no-properties (bn--buffer-current-line))))
+(defun bn-first-line-of-definition-p ()
+  "Return non-nil when the current line starts a BNF definition."
+  (string-match-p bn-left-nonterminal-definition
+                  (bn--buffer-current-line)))
 
-(cl-defun bn-definition-start-line-p (line)
-  (string-match bn-left-nonterminal-definition line))
+(defun bn-definition-start-line-p (line)
+  "Return non-nil when LINE starts a BNF definition."
+  (string-match-p bn-left-nonterminal-definition line))
 
 (cl-defun bn-definition-start-lines (&optional _start)
   (cl-remove-if-not
@@ -582,39 +548,51 @@ strings"
    (string-lines
     (buffer-substring-no-properties (point-min) (point-max)))))
 
-(cl-defun bn-alignment-column (lines)
-  "Returns the first column that aligns all BNF definitions.
-Aligment is on assigment sign.
-Assumes one space from end of "
+(defun bn-alignment-column (lines)
+  "Return the assignment column needed to align BNF definition LINES."
   (if lines
       (apply #'max
              (mapcar (lambda (line)
                        (or (string-match bn-assignment line) 0))
                      lines))
     0))
-;;(string-match "::=" "af ::= adf")
-
-(cl-defun bn-indent-assigment-first-line (column)
-  "Indents current line?"
+(defun bn-indent-assignment-first-line (column)
+  "Align the assignment on the current definition line to COLUMN."
   (save-excursion
-    (move-end-of-line nil)
-    (re-search-backward bn-assignment nil t)
-    (let ((n (- column (current-column))))
-      (if (> n 0)
-	(insert (make-string n ? ))
-	(delete-char n)))))
+    (end-of-line)
+    (unless (re-search-backward bn-assignment (line-beginning-position) t)
+      (user-error "Current line has no BNF assignment"))
+    (let ((assignment-start (point)))
+      (skip-chars-backward " \t" (line-beginning-position))
+      (when (< column (current-column))
+        (user-error "Column %d would overlap the left nonterminal" column))
+      (delete-region (point) assignment-start)
+      (insert (make-string (- column (current-column)) ?\s)))))
 
-(cl-defun bn-indent-assigment-rest-lines (column)
+(defalias 'bn-indent-assigment-first-line
+  #'bn-indent-assignment-first-line)
+
+(defun bn-indent-assignment-rest-lines (column)
+  "Indent the current continuation line relative to COLUMN."
   (save-excursion
-    (move-beginning-of-line nil)
+    (beginning-of-line)
     (just-one-space (+ column (length bn-assignment)))))
 
-(cl-defun bn-indent-current-line (column)
+(defalias 'bn-indent-assigment-rest-lines
+  #'bn-indent-assignment-rest-lines)
+
+(defun bn-indent-current-line (column)
+  "Indent the current BNF line using assignment COLUMN."
   (save-excursion
-    (move-beginning-of-line nil)
-    (if (bn-first-line-of-definition-p)
-      (bn-indent-assigment-first-line column)
-      (bn-indent-assigment-rest-lines column))))
+    (beginning-of-line)
+    (cond
+     ((looking-at-p "[ \t]*$")
+      (delete-horizontal-space))
+     ((bn-commented-line-p))
+     ((bn-first-line-of-definition-p)
+      (bn-indent-assignment-first-line column))
+     (t
+      (bn-indent-assignment-rest-lines column)))))
 
 (cl-defun bn-indent-region (start end &optional column)
   (interactive "r\nP")
@@ -631,18 +609,25 @@ Assumes one space from end of "
             (forward-line 1)))
       (set-marker end-marker nil))))
 
-(cl-defun bn-goto-previous-assigment ()
-  (re-search-backward bn-assignment nil t)
-  (current-column))
+(defun bn-goto-previous-assignment ()
+  "Move to the previous BNF assignment and return its column."
+  (when (re-search-backward bn-assignment nil t)
+    (current-column)))
 
-(cl-defun bn-previous-assigment-column ()
+(defalias 'bn-goto-previous-assigment #'bn-goto-previous-assignment)
+
+(defun bn-previous-assignment-column ()
+  "Return the column of the previous BNF assignment, or nil."
   (save-excursion
-    (bn-goto-previous-assigment)))
+    (bn-goto-previous-assignment)))
+
+(defalias 'bn-previous-assigment-column
+  #'bn-previous-assignment-column)
 
 (cl-defun bn-indent ()
   "Indent to previous"
   (interactive)
-  (let ((column (bn-previous-assigment-column)))
+  (let ((column (bn-previous-assignment-column)))
     (unless column
       (user-error "No previous BNF assignment"))
     (bn-indent-region (line-beginning-position)

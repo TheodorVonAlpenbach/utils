@@ -180,6 +180,67 @@
       (should-error (bn-jump-to-definition-at-point)
                     :type 'user-error))))
 
+(ert-deftest backus-naur-mode-rejects-empty-nonterminals ()
+  (with-temp-buffer
+    (insert "<> ::= invalid\n"
+            "<valid> ::= 'x'\n")
+    (bn-mode)
+    (should (equal (mapcar #'caar bn-left-nonterminal-list)
+                   '("valid")))))
+
+(ert-deftest backus-naur-mode-preserves-blank-and-comment-lines ()
+  (with-temp-buffer
+    (insert "<long-name> ::= first\n"
+            "   \n"
+            "% comment\n"
+            "<a> ::= second\n")
+    (bn-mode)
+    (bn-indent-region (point-min) (point-max))
+    (should
+     (equal
+      (buffer-substring-no-properties (point-min) (point-max))
+      (concat "<long-name> ::= first\n"
+              "\n"
+              "% comment\n"
+              "<a>         ::= second\n")))))
+
+(ert-deftest backus-naur-mode-indentation-fails-without-corruption ()
+  (with-temp-buffer
+    (insert "<long-name> ::= value\n")
+    (bn-mode)
+    (let ((original (buffer-string)))
+      (should-error (bn-indent-assignment-first-line 2)
+                    :type 'user-error)
+      (should (equal (buffer-string) original))))
+  (with-temp-buffer
+    (insert "continuation\n")
+    (bn-mode)
+    (goto-char (point-max))
+    (should-error (bn-indent) :type 'user-error))
+  (should (eq (indirect-function 'bn-indent-assigment-first-line)
+              (symbol-function 'bn-indent-assignment-first-line)))
+  (should (eq (indirect-function 'bn-previous-assigment-column)
+              (symbol-function 'bn-previous-assignment-column))))
+
+(ert-deftest backus-naur-mode-moves-between-definitions ()
+  (with-temp-buffer
+    (insert "<first> ::= item\n"
+            "  continuation\n"
+            "% comment\n"
+            "<second> ::= 'x'\n")
+    (bn-mode)
+    (should (eq beginning-of-defun-function
+                #'bn-beginning-of-defun))
+    (should (eq end-of-defun-function #'bn-end-of-defun))
+    (goto-char (point-min))
+    (forward-line 1)
+    (should (bn-beginning-of-defun))
+    (should (= (point) (point-min)))
+    (bn-end-of-defun)
+    (should (= (line-number-at-pos) 4))
+    (bn-end-of-defun)
+    (should (= (point) (point-max)))))
+
 (provide 'test-backus-naur-mode)
 
 ;;; test-backus-naur-mode.el ends here

@@ -248,10 +248,11 @@ profile.
 The first subset is intentionally conservative:
 
 * [`test-backus-naur-mode.el`](./mode-extensions/test-backus-naur-mode.el):
-  eleven ERT tests for buffer-local mode setup, hooks, nonterminal indexing and
+  fifteen ERT tests for buffer-local mode setup, hooks, nonterminal indexing and
   links, comments, definition alignment, buffer-safe idle fontification,
   navigation-property refresh, isolated search overlays, static bindings, and
-  completion and point-based definition jumps.
+  completion and point-based definition jumps, plus parser, indentation, and
+  definition-motion boundaries.
 * [`test-list-interval.el`](./prototypes/geometry/test-list-interval.el): nine ERT tests for the
   closed-interval helpers, including construction and accessors.
 * [`test-list-envelope.el`](./prototypes/geometry/test-list-envelope.el): nine ERT tests for
@@ -435,7 +436,7 @@ comprises:
 
 * a clean `emacs -Q` load of all forty-six utility and mode-extension
   features plus the ERT tooling;
-* 418 passing ERT tests from the batch entry point;
+* 422 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -678,7 +679,17 @@ navigation. Mode hooks now follow the standard derived-mode lifecycle, and the
 completion command passes the required history symbol rather than the old
 history value. Font-lock keyword construction is isolated from mode setup and
 quotes the configured comment character. Eleven deterministic tests now cover
-the three BNF checkpoints.
+the first three BNF checkpoints.
+
+The fourth Backus-Naur checkpoint removes the dead original indentation
+implementation and tightens parser, motion, and alignment boundaries. Empty
+nonterminal names are rejected; blank and comment lines retain their intended
+layout; missing prior assignments report a user error; and explicit columns can
+no longer delete part of a left nonterminal. Correctly spelled assignment
+helpers retain aliases for their old misspellings. Definition motion now has
+standard optional-count signatures and is installed through
+`beginning-of-defun-function` and `end-of-defun-function`. Fifteen deterministic
+tests now cover the complete retained BNF mode behavior.
 
 The former `sql-mode.el` personal extension is now
 [`mb-sql.el`](./mode-extensions/mb-sql.el), avoiding confusion with Emacs's
