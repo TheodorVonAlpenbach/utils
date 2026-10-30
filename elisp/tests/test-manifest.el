@@ -5,7 +5,7 @@
    (directory-file-name (file-name-directory load-file-name))))
 
 (defconst mb-tests-load-directories
-  '("" "global" "mode-extensions" "prototypes/geometry" "utils"))
+  '("" "external" "global" "mode-extensions" "prototypes/geometry" "utils"))
 
 (defconst mb-tests-baseline-files
   '("prototypes/geometry/test-list-interval.el"
@@ -21,6 +21,7 @@
     "mode-extensions/test-mb-js-mode.el"
     "mode-extensions/test-mb-json.el"
     "mode-extensions/test-mb-lilypond.el"
+    "mode-extensions/test-mb-lisp.el"
     "mode-extensions/test-mb-metafont.el"
     "mode-extensions/test-mb-octave-eval.el"
     "mode-extensions/test-mb-octave-insert.el"

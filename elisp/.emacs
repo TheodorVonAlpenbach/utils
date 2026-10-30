@@ -327,6 +327,7 @@ and running Git.")
 	 do (require m))
 
 (mb-global-map-setup)
+(mb-lisp-setup)
 
 ;;;; local lisp (overrides defaults)
 (load-file +emacs-local+)

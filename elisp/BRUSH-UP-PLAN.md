@@ -316,6 +316,13 @@ The first subset is intentionally conservative:
 * [`test-mb-lilypond.el`](./mode-extensions/test-mb-lilypond.el): four ERT
   tests for quoted compilation commands, source tracking, successful PDF
   display, and narrow optional LilyPond command integration.
+* [`test-mb-lisp.el`](./mode-extensions/test-mb-lisp.el): twenty-four ERT
+  tests covering side-effect-free loading and idempotent activation, the
+  `forward-sentence` docstring restriction (including defuns without a
+  docstring), Common Lisp reader conversions, nested-vector helpers, buffer
+  package detection, symbol and form search, pathname mangling, REPL wait
+  timeouts, output collection and error detection, mode setup, and the REPL
+  keymap.
 * [`test-mb-metafont.el`](./mode-extensions/test-mb-metafont.el): four ERT
   tests for compilation-output parsing, process status, GF-to-DVI conversion,
   and the compile-convert-display pipeline.
@@ -420,7 +427,7 @@ replaced with built-in operations.
 | `mb-evil-map` | [`mb-evil-map.el`](./mode-extensions/mb-evil-map.el) | Active optional integration; independently loadable with deferred global keymaps |
 | `mb-things` | [`mb-things.el`](./utils/mb-things.el) | Active shared utility; independently loadable |
 | `radio-playlists` | [`radio-playlists.el`](./archive/browser/radio-playlists.el) | Archived; external programs/network |
-| `mb-lisp` | [`mb-lisp.el`](./mode-extensions/mb-lisp.el) | Active mode extension |
+| `mb-lisp` | [`mb-lisp.el`](./mode-extensions/mb-lisp.el) | Active mode extension; independently loadable with explicit activation |
 | `mb-python` | [`mb-python.el`](./mode-extensions/mb-python.el) | Active mode extension |
 | `mb-octave` | [`mb-octave.el`](./mode-extensions/mb-octave.el) | Active mode extension; independently loadable with mocked process tests |
 | `mb-ruby` | [`mb-ruby.el`](./mode-extensions/mb-ruby.el) | Active mode extension; independently loadable |
@@ -446,9 +453,9 @@ physics, geometry, search, XML, anaphora, general, list, sequence, string,
 time, ISO-time, and table modules are independently loadable. Their validation
 comprises:
 
-* a clean `emacs -Q` load of all forty-nine utility and mode-extension
+* a clean `emacs -Q` load of all fifty utility and mode-extension
   features plus the ERT tooling;
-* 439 passing ERT tests from the batch entry point;
+* 463 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -529,6 +536,42 @@ bindings, including the optional Lynx command, remain as symbolic bindings and
 therefore do not eagerly load their implementations. `gfind` arguments are now
 shell-quoted, and buffers without filenames no longer break extension
 selection. Four tests install bindings into isolated keymaps.
+
+[`mb-lisp.el`](./mode-extensions/mb-lisp.el) now loads independently with
+lexical binding and declares its comint, inferior-Lisp, CLHS, and personal
+utility dependencies instead of relying on startup aliases. The `first`,
+`rest`, `getf`, and `map` calls that only resolved through `.emacs` aliases
+were replaced with their `cl-lib` equivalents; the `map` calls in the
+nested-vector helpers had no definition at all and were therefore broken. Two
+top-level `setq-local` forms that leaked `paragraph-start` into whichever
+buffer loaded the library moved into the `mb-lisp-mode` body. Key bindings,
+the inferior-Lisp hook, and the `forward-sentence` advice now install through
+`mb-lisp-setup`, which startup calls explicitly and which `mb-lisp-teardown`
+reverses.
+
+Several defects were repaired. `restrict-to-lisp-doc` destructured the result
+of `lisp-doc-region` unconditionally, so `forward-sentence` signalled an error
+in any Lisp defun without a docstring; the advice now falls through to the
+original function. `search-symbol` called its argument as a function instead
+of using it. `repl-wait-for-output` ignored its timeout argument and always
+waited the global maximum, and `lisp-eval-expression-1` passed the result of
+`numberp` as a timeout rather than the number itself. `repl-with-buffer-package`
+used `prog2`, returning the first body form's value instead of the last, and
+did not restore the REPL package when the body signalled; it now uses
+`unwind-protect` with uninterned bindings. The obsolete millisecond argument
+to `sleep-for` and the obsolete `compilation-finish-function` variable were
+replaced, and `pdf-music` no longer calls `write-file` inside `with-temp-file`.
+
+Superseded duplicates were removed with evidence: the earlier `mb-previous-sexp`,
+`eread`, and `pdf-music` definitions were each immediately overwritten by a
+later definition in the same file, `lisp-eval-expression-old` had no callers,
+and `read-cl-expression` was an abandoned stub with an empty body. Inside the
+surviving `eread`, the `#(` branch was unreachable because the vector rewrite
+runs before the match, so removing it preserved behavior exactly. Anonymous
+REPL commands gained names, the REPL keymap is defined before the mode that
+documents it, and `+mb-lisp-repl-mode-map+` and `repl-wait-for-ouput` remain
+as compatibility aliases. Twenty-four tests cover the repaired behavior
+without starting an inferior Lisp process.
 
 [`mb-texinfo.el`](./mode-extensions/mb-texinfo.el) now loads independently
 with lexical binding and built-in dependencies. The stale capitalized
