@@ -79,6 +79,55 @@
     (should (mb-ert--goto-definition "third-macro"))
     (should (looking-at "(defmacro third-macro"))))
 
+(ert-deftest test-mb-ert-map-includes-region-command ()
+  (should (eq (lookup-key (mb-ert-map) "r") #'mb-ert-test-region)))
+
+(ert-deftest test-mb-ert-region-defuns ()
+  (with-temp-buffer
+    (emacs-lisp-mode)
+    (insert "(ert-deftest test-one () t)\n"
+            "(defun helper () nil)\n"
+            "(ert-deftest test-two () t)\n")
+    (let ((end (save-excursion
+                 (goto-char (point-min))
+                 (forward-line 2)
+                 (point))))
+      (should (equal (mb-ert--buffer-defuns (point-min) end)
+                     '(test-one))))))
+
+(ert-deftest test-mb-ert-test-symbol-selection ()
+  (let (selector)
+    (cl-letf (((symbol-function 'ert)
+               (lambda (value) (setq selector value))))
+      (should (mb-ert-test-symbols '(test-one test-one test-two)))
+      (should (equal selector '(member test-one test-two)))
+      (setq selector nil)
+      (mb-test-ert-symbols 'test-three)
+      (should (equal selector '(member test-three)))))
+  (should-error (mb-ert-test-symbols nil) :type 'user-error)
+  (should-error (mb-ert-test-symbols '(test-one "test-two"))
+                :type 'user-error))
+
+(ert-deftest test-mb-ert-region-command-selects-tests ()
+  (with-temp-buffer
+    (insert "(ert-deftest test-one () t)\n"
+            "(ert-deftest test-two () t)\n")
+    (let (symbols)
+      (cl-letf (((symbol-function 'mb-ert-test-symbols)
+                 (lambda (value) (setq symbols value))))
+        (mb-ert-test-region (point-min) (point-max)))
+      (should (equal symbols '(test-one test-two))))))
+
+(ert-deftest test-mb-ert-invalid-targets-report-user-errors ()
+  (with-temp-buffer
+    (emacs-lisp-mode)
+    (should-error (mb-ert-test-defun) :type 'user-error)
+    (should-error (mb-ert-test-buffer) :type 'user-error)
+    (should-error (mb-ert-get-test-filename (current-buffer))
+                  :type 'user-error))
+  (should-error (mb-eval/load "/path/that/does/not/exist.el")
+                :type 'user-error))
+
 (provide 'test-mb-ert)
 
 ;;; test-mb-ert.el ends here

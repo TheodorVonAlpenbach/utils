@@ -14,6 +14,7 @@
   (let ((ert-map (make-sparse-keymap)))
     (define-key ert-map "i" #'mb-ert-insert-skeleton)
     (define-key ert-map "f" #'mb-ert-test-defun)
+    (define-key ert-map "r" #'mb-ert-test-region)
     (define-key ert-map "b" #'mb-ert-test-buffer)
     (define-key ert-map "d" #'mb-ert-test-buffer-directory)
     (define-key ert-map "e" #'mb-ert-test-mb-elisp)
@@ -38,10 +39,12 @@ BUFFER is optional with the current buffer as default value."
   "Return the symbol defined by the top-level form at point."
   (save-excursion
     (beginning-of-defun)
-    (let ((form (read (current-buffer))))
-      (and (listp form)
-           (symbolp (cl-second form))
-           (cl-second form)))))
+    (condition-case nil
+        (let ((form (read (current-buffer))))
+          (and (listp form)
+               (symbolp (cl-second form))
+               (cl-second form)))
+      ((end-of-file invalid-read-syntax) nil))))
 
 (defun mb-ert--goto-definition (name)
   "Move to the definition of NAME in the current buffer."
@@ -53,6 +56,20 @@ BUFFER is optional with the current buffer as default value."
          nil t)
     (beginning-of-line)
     (point)))
+
+(defconst mb-ert--test-definition-regexp
+  "^[[:space:]]*([[:space:]]*ert-deftest[[:space:]]+"
+  "Regexp matching the start of an ERT test definition.")
+
+(defun mb-ert--buffer-defuns (beg end)
+  "Return ERT test symbols defined between BEG and END."
+  (save-excursion
+    (goto-char beg)
+    (cl-delete-duplicates
+     (cl-loop while (re-search-forward
+                     mb-ert--test-definition-regexp end t)
+              collect (read (current-buffer)))
+     :from-end t)))
 
 (cl-defun mb-ert-insert-skeleton
     (&optional (defun-name (symbol-name (mb-ert--defun-symbol-at-point))))
@@ -93,10 +110,14 @@ If such module does not exist, create one."
 The function assumes that if BUFFER-OR-FILENAME's path is
 \"path/filename.el\", then the associated test filename's path is
 \"path/test-filename.el\"."
-  (let* ((buffer (get-buffer buffer-or-filename))
+  (let* ((buffer (and (or (bufferp buffer-or-filename)
+                          (stringp buffer-or-filename))
+                      (get-buffer buffer-or-filename)))
          (filename (if buffer
                        (buffer-file-name buffer)
                      buffer-or-filename)))
+    (unless (stringp filename)
+      (user-error "Buffer is not visiting a file"))
     (if (mb-ert-test-filename-p filename)
      filename (mb-ert-swap-filename filename))))
 ;;(mb-ert-get-test-filename "~/mbe/ert/test-mymodule.el")
@@ -112,6 +133,8 @@ filename of BUFFER-OR-FILENAME."
 
 (cl-defun mb-ert-swap-file (&optional (filename (buffer-file-name)))
   "Return buffer containing the ERT brother of FILENAME"
+  (unless filename
+    (user-error "Current buffer is not visiting a file"))
   (let ((other-file (mb-ert-swap-filename filename)))
     (when other-file
       (find-file other-file))))
@@ -175,18 +198,17 @@ For more swap options, use `mb-ert-swap-defun-name'.
 (cl-defun mb-ert-forward-test ()
   "Move point to next ERT test in buffer.
 If no such test is found, it returns NIL."
-  (re-search-forward "^[[:space:]]*([[:space:]]*ert-deftest[[:space:]]*" nil t))
+  (re-search-forward mb-ert--test-definition-regexp nil t))
 
 (cl-defun mb-ert-file-defuns (test-filename)
   "Return a list of all ERT test function symbols in FILENAME."
   (unless (mb-ert-test-filename-p test-filename)
-    (error "Argument is not a path to an ERT test file."))
+    (user-error "Argument is not an ERT test filename"))
+  (unless (file-readable-p test-filename)
+    (user-error "ERT test file is not readable: %s" test-filename))
   (with-temp-buffer
     (insert-file-contents test-filename)
-    (cl-delete-duplicates
-     (cl-loop while (mb-ert-forward-test)
-	   collect (read (current-buffer)))
-     :from-end t)))
+    (mb-ert--buffer-defuns (point-min) (point-max))))
 ;;(mb-ert-file-defuns "~/projects/utils/elisp/mode-extensions/test-mb-texinfo.el")
 
 (cl-defun mb-ert-directory-defuns (directory)
@@ -223,9 +245,6 @@ file corresponds to an actual elisp file in DIRECTORY."
     res))
 ;;(mb-ert-files "." t)
 
-(cl-defun mb-test-ert-symbols (symbols)
-  (ert (cons 'member (if (listp symbols) symbols (list symbols)))))
-
 (cl-defun mb-eval/load (&optional (buffer-or-file (current-buffer)))
   "Evalute or load BUFFER-OR-FILE.
 If BUFFER-OR-FILE is a designator for an existing buffer, that
@@ -234,10 +253,18 @@ buffer, then the function will evaluate that buffer with
 `eval-buffer'. Else, if buffer-or-file is a path to an existing
 file, this file will be loaded, but not inserted to a new buffer
 in Emacs."
-  (let ((buffer (get-buffer buffer-or-file)))
-    (if buffer
-        (eval-buffer buffer)
-      (load buffer-or-file))))
+  (let ((buffer (and (or (bufferp buffer-or-file)
+                         (stringp buffer-or-file))
+                     (get-buffer buffer-or-file))))
+    (cond
+     (buffer
+      (eval-buffer buffer))
+     ((and (stringp buffer-or-file)
+           (file-readable-p buffer-or-file))
+      (load buffer-or-file nil nil t))
+     (t
+      (user-error "Not a readable file or live buffer: %S"
+                  buffer-or-file)))))
 ;;(mb-eval/load "/tmp/eval-load-test")
 ;;(mb-eval/load (current-buffer))
   
@@ -256,23 +283,31 @@ in Emacs."
   "Test all test functions designated by a symbol in SYMBOLS.
 This function does not evaluate neither the function nor its
 associated function."
-  (message "%S" (cons 'member symbols))
-  (ert (cons 'member symbols))
-    ;; just skip output from ert
-    t)
+  (let ((tests
+         (cl-delete-duplicates
+          (if (listp symbols) symbols (list symbols))
+          :from-end t)))
+    (unless (and tests (cl-every #'symbolp tests))
+      (user-error "No ERT test symbols were provided"))
+    (ert (cons 'member tests))
+    t))
+
+(defalias 'mb-test-ert-symbols #'mb-ert-test-symbols)
 
 (cl-defun mb-ert-test-defun ()
   "Perform ERT test of defun at point
 Does not support testing of defun when point is at its test function."
   (interactive)
   (let ((symbol (mb-ert--defun-symbol-at-point)))
-    (when symbol
-      (mb-ert-test-symbols
-       (list (mb-ert-swap-defun-symbol symbol :ert-soft))))))
+    (unless symbol
+      (user-error "Point is not inside a definition"))
+    (mb-ert-test-symbols
+     (list (mb-ert-swap-defun-symbol symbol :ert-soft)))))
 
-(cl-defun mb-ert-test-region (_beg _end)
+(cl-defun mb-ert-test-region (beg end)
+  "Run ERT tests defined between BEG and END."
   (interactive "r")
-  (error "Not implemented"))
+  (mb-ert-test-symbols (mb-ert--buffer-defuns beg end)))
 
 (cl-defun mb-ert-test-file (filename)
   "Test all functions in FILENAME.
@@ -290,7 +325,12 @@ the test."
 (cl-defun mb-ert-test-buffer (&optional (buffer (current-buffer)))
   "Run all ERT tests associated with defuns in BUFFER."
   (interactive)
-  (mb-ert-test-file (buffer-file-name buffer)))
+  (unless (buffer-live-p buffer)
+    (user-error "Not a live buffer: %S" buffer))
+  (let ((filename (buffer-file-name buffer)))
+    (unless filename
+      (user-error "Buffer is not visiting a file"))
+    (mb-ert-test-file filename)))
 ;;(mb-ert-test-buffer (get-buffer "mb-utils-div.el"))
 
 (cl-defun mb-ert-test-files (files)

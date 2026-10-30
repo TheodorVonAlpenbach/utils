@@ -293,9 +293,10 @@ The first subset is intentionally conservative:
 * [`test-mb-polynomials.el`](./utils/test-mb-polynomials.el): nine ERT tests
   for representation, arithmetic, long division, derivatives, evaluation,
   formatting, expansion, and polynomial fractions.
-* [`test-mb-ert.el`](./mode-extensions/test-mb-ert.el): nine ERT tests for test
-  filename recognition, source/test name swapping, definition navigation, and
-  ordered test discovery.
+* [`test-mb-ert.el`](./mode-extensions/test-mb-ert.el): fourteen ERT tests for
+  test filename recognition, source/test name swapping, definition navigation,
+  ordered and region test discovery, selector normalization, keymaps, and
+  invalid target reporting.
 * [`test-mb-doc-view.el`](./mode-extensions/test-mb-doc-view.el): three ERT
   tests for standard page-command preservation, whole-document navigation
   order, and keybindings.
@@ -422,7 +423,7 @@ replaced with built-in operations.
 | `quiz-park` | [`quiz-park.el`](./quiz/quiz-park.el) | Usage decision needed; application |
 | `mb-js-mode` | [`mb-js-mode.el`](./mode-extensions/mb-js-mode.el) | Active mode extension; optional Node.js evaluation |
 | `quiz` | [`quiz.el`](./quiz/quiz.el) | Usage decision needed; application |
-| `mb-ert` | [`mb-ert.el`](./mode-extensions/mb-ert.el) | Active developer tooling; refactor candidate |
+| `mb-ert` | [`mb-ert.el`](./mode-extensions/mb-ert.el) | Active developer tooling; independently loadable |
 | `mb-org` | [`mb-org.el`](./mode-extensions/mb-org.el) | Active mode extension; independently loadable |
 
 The classifications above describe evidence from startup, not confirmed personal
@@ -440,7 +441,7 @@ comprises:
 
 * a clean `emacs -Q` load of all forty-seven utility and mode-extension
   features plus the ERT tooling;
-* 426 passing ERT tests from the batch entry point;
+* 431 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -464,7 +465,12 @@ the maintained baseline.
 [`mb-ert.el`](./mode-extensions/mb-ert.el) no longer relies on startup-provided
 string, buffer, sequence, or definition-navigation helpers. Its duplicate
 whole-project runner was consolidated, and the compatibility command
-`elisp-test-all` delegates to the maintained runner.
+`elisp-test-all` delegates to the maintained runner. The remaining duplicate
+symbol runner now aliases the canonical implementation, region testing is
+implemented and exposed in the command map, selectors are deduplicated and
+validated, and unvisited buffers, unreadable files, empty definitions, and
+empty selections report explicit user errors. Fourteen tests cover discovery,
+navigation, command dispatch, and failure boundaries.
 
 [`mb-python.el`](./mode-extensions/mb-python.el) now loads independently with
 lexical binding and the built-in Python library as its only dependency. Its
