@@ -138,6 +138,48 @@
     (should-not (get-text-property (1- (point)) 'type))
     (should-error (bn-search) :type 'user-error)))
 
+(ert-deftest backus-naur-mode-exposes-named-key-commands ()
+  (should (eq (lookup-key bn-mode-map [tab]) #'bn-indent))
+  (should (eq (lookup-key bn-mode-map [home]) #'bn-beginning-or-line))
+  (should (eq (lookup-key bn-mode-map [end]) #'bn-end-or-line))
+  (should (eq (lookup-key bn-mode-map (kbd "C-x SPC"))
+              #'bn-jump-to-definition-at-point))
+  (should (eq (lookup-key bn-mode-map (kbd "C-;"))
+              #'bn-completing-search)))
+
+(ert-deftest backus-naur-mode-completion-jumps-to-definition ()
+  (with-temp-buffer
+    (insert "<expr> ::= term\n"
+            "<term> ::= 'x'\n")
+    (bn-mode)
+    (let* ((definitions (mapcar #'car bn-left-nonterminal-list))
+           (target (cdr (assoc-string "term" definitions)))
+           observed-history)
+      (cl-letf (((symbol-function 'completing-read)
+                 (lambda (_prompt collection _predicate _require-match
+                                  _initial-input history &rest _args)
+                   (should (equal collection definitions))
+                   (setq observed-history history)
+                   "term")))
+        (bn-completing-search))
+      (should (eq observed-history 'bn-search-history))
+      (should (= (point) target)))))
+
+(ert-deftest backus-naur-mode-jumps-from-right-nonterminal ()
+  (with-temp-buffer
+    (insert "<expr> ::= term\n"
+            "<term> ::= 'x'\n")
+    (bn-mode)
+    (let* ((definitions (mapcar #'car bn-left-nonterminal-list))
+           (target (cdr (assoc-string "term" definitions))))
+      (goto-char (point-min))
+      (search-forward "term" (line-end-position))
+      (backward-char)
+      (bn-jump-to-definition-at-point)
+      (should (= (point) target))
+      (should-error (bn-jump-to-definition-at-point)
+                    :type 'user-error))))
+
 (provide 'test-backus-naur-mode)
 
 ;;; test-backus-naur-mode.el ends here

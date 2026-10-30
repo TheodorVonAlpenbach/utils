@@ -248,9 +248,10 @@ profile.
 The first subset is intentionally conservative:
 
 * [`test-backus-naur-mode.el`](./mode-extensions/test-backus-naur-mode.el):
-  eight ERT tests for buffer-local mode setup, hooks, nonterminal indexing and
+  eleven ERT tests for buffer-local mode setup, hooks, nonterminal indexing and
   links, comments, definition alignment, buffer-safe idle fontification,
-  navigation-property refresh, and isolated search overlays.
+  navigation-property refresh, isolated search overlays, static bindings, and
+  completion and point-based definition jumps.
 * [`test-list-interval.el`](./prototypes/geometry/test-list-interval.el): nine ERT tests for the
   closed-interval helpers, including construction and accessors.
 * [`test-list-envelope.el`](./prototypes/geometry/test-list-envelope.el): nine ERT tests for
@@ -434,7 +435,7 @@ comprises:
 
 * a clean `emacs -Q` load of all forty-six utility and mode-extension
   features plus the ERT tooling;
-* 415 passing ERT tests from the batch entry point;
+* 418 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -669,7 +670,15 @@ those owned overlays. Refontification removes stale navigation properties,
 flushes font-lock state before rebuilding it, and uses the correct
 `font-lock-face` property when excluding optional references. Mouse navigation
 uses supported event handling, and invalid search locations report user errors.
-Eight deterministic tests now cover both BNF checkpoints.
+
+The third Backus-Naur checkpoint replaces the hand-built major-mode lifecycle
+with `define-derived-mode`, a static mode keymap, buffer-local state variables,
+and named commands for Home, End, completion, and point-based definition
+navigation. Mode hooks now follow the standard derived-mode lifecycle, and the
+completion command passes the required history symbol rather than the old
+history value. Font-lock keyword construction is isolated from mode setup and
+quotes the configured comment character. Eleven deterministic tests now cover
+the three BNF checkpoints.
 
 The former `sql-mode.el` personal extension is now
 [`mb-sql.el`](./mode-extensions/mb-sql.el), avoiding confusion with Emacs's

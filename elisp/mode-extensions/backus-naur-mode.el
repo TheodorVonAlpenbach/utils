@@ -10,11 +10,6 @@
 (defvar bn-tab-width 2
   "Tab width in backus-naur-mode")
 
-(defvar bn-left-nonterminal-definition-old
-  "^\\([A-Za-z-]*\\)\\(:\\)[ ]\\{0,3\\}$"
-  "The regular expression that marks the left side from the \
-definition of a rule" )
-
 (defconst bn-assignment "::=")
 (defconst bn-lhs-token "[A-Za-z-]*")
 (defconst bn-left-nonterminal-definition
@@ -23,151 +18,118 @@ definition of a rule" )
 definition of a rule" )
 ;  ^<\([A-Za-z-]*\)>\s-*\(::=\)
 
-(defvar imenu-create-index-function)
-(defvar imenu-use-markers)
+(defvar-local bn-left-nonterminal-list nil
+  "Left nonterminal definitions and their reference positions.")
 
-(defvar bn-left-nonterminal-list nil
-  "keeps the list of all the left nonterminals. this could be
-defined locally only, inside `bn-lazy-font-lock'. Used for
-imenu and completion-list .")
+(defvar-local bn-timer-var nil
+  "Pending refontification timer, or nil.")
 
-(defvar bn-timer-var nil
-  "non nil means that a fontification will follow")
+(defvar-local bn-search-history nil
+  "Completion history for `bn-completing-search'.")
 
-(defvar bn-search-history nil
-  "used by search-completion to keep the history of searched
-  strings" )
-
-(defvar bn-search-overlays nil
+(defvar-local bn-search-overlays nil
   "Overlays used by the active nonterminal search.")
-
-(defvar bn-mode-hook nil
-  "Hook run after entering `bn-mode'.")
 
 (defvar bn-comment-char "%"
   "a line which starts with this character is commented")
 
-(cl-defun bn-mode nil
-  "A major mode for well writing context-free grammars in
-Backus-Naur notation."
+(defvar bn-mode-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map [tab] #'bn-indent)
+    (define-key map [home] #'bn-beginning-or-line)
+    (define-key map [end] #'bn-end-or-line)
+    (define-key map (kbd "M-s") #'bn-search)
+    (define-key map (kbd "C-x SPC") #'bn-jump-to-definition-at-point)
+    (define-key map (kbd "C-;") #'bn-completing-search)
+    map)
+  "Keymap for `bn-mode'.")
+
+(defun bn--font-lock-keywords ()
+  "Return font-lock keywords for the current BNF buffer."
+  (list
+   (list bn-left-nonterminal-definition
+         '(1 'bn-left-nonterminal-definition-font)
+         '(2 'bn-left-nonterminal-definition-closure))
+   '("\\('\\)\\([[:graph:]]*\\)\\('\\)"
+     (1 'bn-terminal-closure)
+     (2 'bn-terminal-definition)
+     (3 'bn-terminal-closure))
+   '("\\(@\\)\\([[:graph:]]+\\)"
+     (1 'bn-terminal-closure)
+     (2 'bn-terminal-definition))
+   (list
+    (concat "[^[:graph:]]"
+            "\\([[]\\)"
+            "\\(.*\\)"
+            "[^[:graph:]]"
+            "\\([]]\\)")
+    '(1 'bn-optional-closure)
+    '(2 'bn-optional-definition)
+    '(3 'bn-optional-closure))
+   (list (concat "^\\(" (regexp-quote bn-comment-char) "\\)\\(.*\\)")
+         '(1 'bn-comment-sign)
+         '(2 'bn-commented-text))
+   '("|" (0 'bn-or))))
+
+(defun bn-beginning-or-line ()
+  "Move to the previous definition, or to the beginning of the line."
   (interactive)
-  'bn-mode
-  'fundamental-mode
-  '"Backus-Naur"
-  (kill-all-local-variables)
-  (setq major-mode 'bn-mode
-	mode-name "Backus-Naur" )
+(if (eq (char-before) ?\n)
+      (bn-beginning-of-defun)
+    (beginning-of-line)))
+
+(defun bn-end-or-line ()
+  "Move to the end of the definition, or to the end of the line."
+  (interactive)
+  (if (eq (char-after) ?\n)
+      (bn-end-of-defun)
+    (end-of-line)))
+
+(defun bn-jump-to-definition-at-point ()
+  "Jump from the right nonterminal at point to its definition."
+  (interactive)
+  (let ((type (get-text-property (point) 'type))
+        (nonterminal (get-text-property (point) 'nonterminal))
+        (position (get-text-property (point) 'position)))
+    (pcase type
+      ('right
+       (unless (integer-or-marker-p position)
+         (user-error "No definition for `%s'" nonterminal))
+       (bn-jump position)
+       (message "Jumped to `%s'" nonterminal))
+      ('left
+       (user-error "`%s' is already a definition" nonterminal))
+      (_
+       (user-error "Point is not on a nonterminal")))))
+
+(defun bn-completing-search ()
+  "Select and jump to a left nonterminal definition."
+  (interactive)
+  (let* ((definitions (mapcar #'car bn-left-nonterminal-list))
+         (name
+          (completing-read "Search left nonterminal: "
+                           definitions nil t nil
+                           'bn-search-history))
+         (position (cdr (assoc-string name definitions))))
+    (unless position
+      (user-error "No definition for `%s'" name))
+    (bn-jump position)))
+
+(define-derived-mode bn-mode fundamental-mode "Backus-Naur"
+  "Major mode for editing context-free grammars in Backus-Naur notation."
   (setq-local tab-width bn-tab-width)
   (setq-local indent-region-function #'bn-indent-region)
-  ;;(setq indent-region-function nil)
-
   (make-local-variable 'bn-comment-char)
-  (make-local-variable 'after-change-functions)
-  (make-local-variable 'bn-left-nonterminal-list)
-  (make-local-variable 'bn-search-overlays)
-
-  (make-local-variable 'imenu-create-index-function)
-  (setq imenu-create-index-function 'bn-imenu)
-
-  (make-local-variable 'imenu-generic-expression)
-  (setq imenu-generic-expression t)
-
-  (and t
-       (fboundp 'imenu-add-to-menubar)
-       (imenu-add-to-menubar "Index"))
-
-  (setq font-lock-defaults
-	(list
-	 (list
-	  (list
-	   bn-left-nonterminal-definition
-	   '(1 'bn-left-nonterminal-definition-font )
-	   '(2 'bn-left-nonterminal-definition-closure ) )
-	  '( "\\('\\)\\([[:graph:]]*\\)\\('\\)"
-	     (1 'bn-terminal-closure )
-	     (2 'bn-terminal-definition )
-	     (3 'bn-terminal-closure )
-	     )
-	  '( "\\(@\\)\\([[:graph:]]+\\)"
-	     (1 'bn-terminal-closure )
-	     (2 'bn-terminal-definition )
-	     )
-          (list
-	   (concat "[^[:graph:]]"
-		   "\\([[]\\)"
-		   "\\(.*\\)"
-		   "[^[:graph:]]"
-		   "\\([]]\\)")
-	   '(1 'bn-optional-closure )
-	   '(2 'bn-optional-definition )
-	   '(3 'bn-optional-closure ))
-          (list
-	   (concat "^" "\\(" bn-comment-char "\\)"
-                   "\\(.*\\)" )
-	   '(1 'bn-comment-sign )
-	   '(2 'bn-commented-text ) )
-	  (list
-	   "|"
-	   '(0 'bn-or ) ) )
-	 t ) )
-
+  (setq-local imenu-create-index-function #'bn-imenu)
+  (setq-local font-lock-defaults
+              (list (bn--font-lock-keywords) t))
   (bn-stop-timer)
   (bn-clear-search-overlays)
   (add-hook 'after-change-functions #'bn-change nil t)
   (add-hook 'kill-buffer-hook #'bn-stop-timer nil t)
-  (local-set-key [tab] 'bn-indent)
-  (local-set-key [home]
-		 (lambda nil (interactive)
-		   (if (equal (char-before) ?\n)
-		       (bn-beginning-of-defun)
-		     (beginning-of-line) ) ) )
-  (local-set-key [end]
-		 (lambda nil (interactive)
-		   (if (equal (char-after) ?\n)
-		       (bn-end-of-defun)
-		     (end-of-line) ) ) )
   (bn-lazy-font-lock)
-  (local-set-key "\M-s" 'bn-search )
-  (local-set-key (kbd "C-x SPC")
-		 (lambda ()
-		   "jump to the definition of the nonterminal under the cursor. "
-                   (interactive "")
-		   (let* ((type (get-text-property (point) 'type))
-			  (nonterminal
-			   (and type
-				(get-text-property (point) 'nonterminal) ) )
-			  (p
-			   (and nonterminal
-			    (get-text-property (point) 'position) ) ) )
-		     (cond
-		      ( (eq type 'right)
-			(and p
-			     (bn-jump p )
-			     '(recenter)
-			     (message "jump to `%s' %s" nonterminal p ) ) )
-		      ((eq type 'left)
-			   (error "`%s' is a left nonterminal\n" nonterminal ) ) ) ) ) )
-
-  (make-local-variable 'bn-search-history)
-
-  (local-set-key (kbd "C-;")
-                 (lambda nil
-                   "replaces isearch"
-                   (interactive)
-                   (let ((aa
-                          (completing-read
-                           "search left-nonterminal: "
-                           (mapcar 'caar bn-left-nonterminal-list )
-                           nil
-                           t
-                           nil
-                           bn-search-history
-                           nil
-                           nil ) ) )
-                     (and aa
-                          (bn-jump (cdr (assoc aa (mapcar 'car bn-left-nonterminal-list ) ) ) ) ) ) ) )
-  (run-mode-hooks 'bn-mode-hook)
-  )
+  (when (fboundp 'imenu-add-to-menubar)
+    (imenu-add-to-menubar "Index")))
 
 (defalias 'backus-naur-mode 'bn-mode)
 
