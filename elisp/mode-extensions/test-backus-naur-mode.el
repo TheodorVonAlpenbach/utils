@@ -85,6 +85,59 @@
         (should (eq cancelled-timer :timer))
         (should-not bn-timer-var)))))
 
+(ert-deftest backus-naur-mode-search-preserves-unrelated-overlays ()
+  (with-temp-buffer
+    (insert "<expr> ::= term expr\n"
+            "<term> ::= expr\n")
+    (bn-mode)
+    (goto-char (point-min))
+    (search-forward "expr")
+    (backward-char)
+    (let* ((positions (get-text-property (1- (point)) 'position))
+           (unrelated (make-overlay (point-min) (1+ (point-min))))
+           (keys '("n" "q")))
+      (overlay-put unrelated 'category 'unrelated)
+      (cl-letf (((symbol-function 'read-key-sequence)
+                 (lambda (&rest _args) (pop keys))))
+        (bn-search))
+      (should (= (point) (ring-ref positions -1)))
+      (should (overlay-buffer unrelated))
+      (should-not bn-search-overlays)
+      (delete-overlay unrelated))))
+
+(ert-deftest backus-naur-mode-search-cleans-up-on-quit ()
+  (with-temp-buffer
+    (insert "<expr> ::= expr\n")
+    (bn-mode)
+    (goto-char (point-min))
+    (search-forward "expr")
+    (backward-char)
+    (let ((unrelated (make-overlay (point-min) (1+ (point-min)))))
+      (cl-letf (((symbol-function 'read-key-sequence)
+                 (lambda (&rest _args) (signal 'quit nil))))
+        (should
+         (condition-case nil
+             (progn (bn-search) nil)
+           (quit t))))
+      (should (overlay-buffer unrelated))
+      (should-not bn-search-overlays)
+      (delete-overlay unrelated))))
+
+(ert-deftest backus-naur-mode-refreshes-navigation-properties ()
+  (with-temp-buffer
+    (insert "<expr> ::= term\n"
+            "<term> ::= 'x'\n")
+    (bn-mode)
+    (goto-char (point-min))
+    (search-forward "term" (line-end-position))
+    (should (eq (get-text-property (1- (point)) 'type) 'right))
+    (replace-match "nope")
+    (bn-lazy-font-lock)
+    (goto-char (point-min))
+    (search-forward "nope")
+    (should-not (get-text-property (1- (point)) 'type))
+    (should-error (bn-search) :type 'user-error)))
+
 (provide 'test-backus-naur-mode)
 
 ;;; test-backus-naur-mode.el ends here

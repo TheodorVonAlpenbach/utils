@@ -248,8 +248,9 @@ profile.
 The first subset is intentionally conservative:
 
 * [`test-backus-naur-mode.el`](./mode-extensions/test-backus-naur-mode.el):
-  five ERT tests for buffer-local mode setup, hooks, nonterminal indexing and
-  links, comments, definition alignment, and buffer-safe idle fontification.
+  eight ERT tests for buffer-local mode setup, hooks, nonterminal indexing and
+  links, comments, definition alignment, buffer-safe idle fontification,
+  navigation-property refresh, and isolated search overlays.
 * [`test-list-interval.el`](./prototypes/geometry/test-list-interval.el): nine ERT tests for the
   closed-interval helpers, including construction and accessors.
 * [`test-list-envelope.el`](./prototypes/geometry/test-list-envelope.el): nine ERT tests for
@@ -433,7 +434,7 @@ comprises:
 
 * a clean `emacs -Q` load of all forty-six utility and mode-extension
   features plus the ERT tooling;
-* 412 passing ERT tests from the batch entry point;
+* 415 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -658,9 +659,17 @@ fontification was replaced; and delayed refontification captures its originating
 buffer rather than whichever buffer is current when the timer fires. Generic
 buffer helper names and startup-only Common Lisp aliases were replaced, and
 region indentation now calculates its alignment column correctly while tracking
-an end marker as edits shift the buffer. Five deterministic tests cover this
-foundation. The interactive overlay rotation/search implementation remains for
-a separate BNF checkpoint.
+an end marker as edits shift the buffer.
+
+The second Backus-Naur checkpoint modernizes interactive nonterminal
+navigation. Search overlays are now owned and removed by the mode instead of
+deleting every overlay in the buffer, including overlays from unrelated
+packages. Normal completion, keyboard quit, and mode re-entry all clean up only
+those owned overlays. Refontification removes stale navigation properties,
+flushes font-lock state before rebuilding it, and uses the correct
+`font-lock-face` property when excluding optional references. Mouse navigation
+uses supported event handling, and invalid search locations report user errors.
+Eight deterministic tests now cover both BNF checkpoints.
 
 The former `sql-mode.el` personal extension is now
 [`mb-sql.el`](./mode-extensions/mb-sql.el), avoiding confusion with Emacs's

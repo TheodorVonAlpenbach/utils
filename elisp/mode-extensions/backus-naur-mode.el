@@ -38,6 +38,9 @@ imenu and completion-list .")
   "used by search-completion to keep the history of searched
   strings" )
 
+(defvar bn-search-overlays nil
+  "Overlays used by the active nonterminal search.")
+
 (defvar bn-mode-hook nil
   "Hook run after entering `bn-mode'.")
 
@@ -61,6 +64,7 @@ Backus-Naur notation."
   (make-local-variable 'bn-comment-char)
   (make-local-variable 'after-change-functions)
   (make-local-variable 'bn-left-nonterminal-list)
+  (make-local-variable 'bn-search-overlays)
 
   (make-local-variable 'imenu-create-index-function)
   (setq imenu-create-index-function 'bn-imenu)
@@ -108,7 +112,7 @@ Backus-Naur notation."
 	 t ) )
 
   (bn-stop-timer)
-  (remove-overlays)
+  (bn-clear-search-overlays)
   (add-hook 'after-change-functions #'bn-change nil t)
   (add-hook 'kill-buffer-hook #'bn-stop-timer nil t)
   (local-set-key [tab] 'bn-indent)
@@ -170,6 +174,20 @@ Backus-Naur notation."
 (cl-defun bn-jump (p)
   (push-mark)
   (goto-char p) )
+
+(defun bn-clear-search-overlays ()
+  "Delete overlays created by `bn-search' in the current buffer."
+  (mapc #'delete-overlay bn-search-overlays)
+  (setq bn-search-overlays nil))
+
+(defun bn-mouse-jump-to-definition (event)
+  "Jump to the nonterminal definition associated with mouse EVENT."
+  (interactive "e")
+  (mouse-set-point event)
+  (let ((position (get-text-property (point) 'position)))
+    (unless (integer-or-marker-p position)
+      (user-error "No nonterminal definition at mouse position"))
+    (bn-jump position)))
 
 (cl-defun bn-stop-timer ()
   "stop the timer for fontification"
@@ -367,28 +385,12 @@ otherwise."
 	  ;; called recursively. temporarly after-change-functions
 	  ;; must be nil.
 	  after-change-functions
-	  ;; changing the properties, one changes the modified status
-	  (buffer-modified-flag (buffer-modified-p) )
 	  ;; this is equalent in this case to setting
 	  ;; after-change-functions to nil. However, we keep both
-	  (inhibit-modification-hooks t)
-	  ;; make a temporary copy of the undo
-	  ;; list. add-text-properties adds information in the undo
-	  ;; list, even if in this case it shouldn't
-	  (ul buffer-undo-list) )
-      ;; we disable the undo information temporarly, because changing
-      ;; the fontification is added by default in the undo list.
-      (buffer-disable-undo)
+	  (inhibit-modification-hooks t))
+      (with-silent-modifications
       (define-key map-right-nonterminal [mouse-3]
-	(lambda (event) (interactive "e")
-	  "jump to a left terminal definition"
-	  (let ((p (get-text-property
-		    (cadr (cadr event) )
-		    'position) ) )
-	    (and p
-		 (bn-jump p )
-		 '(recenter)
-		 (message (format "%s" p ) ) ) ) ) )
+        #'bn-mouse-jump-to-definition)
       (define-key map-left-nonterminal "\M-s" 'bn-search )
       (goto-char (point-min) )
       ;; make the list of left nonterminals out
@@ -401,11 +403,13 @@ otherwise."
 		    (match-beginning 1) )
 	      list-of-left-nonterminals ) )
       ;; clean the previous fontification
-      (remove-text-properties
+      (remove-list-of-text-properties
        (point-min) (point-max)
-       '(mouse-face highlight font-lock-face keymap position) )
+       '(mouse-face font-lock-face keymap position help-echo
+         type nonterminal))
       (setq bn-left-nonterminal-list nil)
       ;; add first the fontification of font-lock
+      (font-lock-flush)
       (font-lock-ensure)
       ;; scan the buffer to find the positions where every
       ;; left-nonterminal appears in the rules
@@ -417,7 +421,7 @@ otherwise."
 		    (concat "[\t ]" "\\(" (car m) "\\)" "[\n .\t]") nil t)
 		   (goto-char (1- (point) ) ) )
 	    (setq make-fontification
-		  (not (eq (get-text-property (1- (point)) 'face)
+		  (not (eq (get-text-property (1- (point)) 'font-lock-face)
 			   'bn-optional-definition)))
 	    (and
 	     ;; if a right nonterminal is found, add it to the
@@ -479,12 +483,7 @@ otherwise."
 	    'nonterminal (car m)
 	    'type 'left
 	    'keymap map-left-nonterminal) )
-	  (push (cons m match-positions) bn-left-nonterminal-list ) ) )
-      ;; restore the undo, modified status
-      (restore-buffer-modified-p buffer-modified-flag)
-      (buffer-enable-undo)
-      (setq buffer-undo-list ul )
-      ) ) )
+	  (push (cons m match-positions) bn-left-nonterminal-list ) ) )) ) ))
 
 (cl-defun bn-change (&rest _change)
   "hook which is called after every buffer change. it starts a
@@ -524,86 +523,51 @@ before starting the new timer."
        (forward-char) ) )
 
 (cl-defun bn-search ()
-  "Search for the left nonterminal under the cursor"
+  "Rotate through uses of the left nonterminal at point.
+Press `n' and `p' to move between uses, and `q' to finish."
   (interactive)
-  (let* ((left-nonterminal (get-text-property (point) 'nonterminal ) )
-	 (left-nonterminal-positions
-	  (and left-nonterminal
-	       (get-text-property (point) 'position ) ) ) )
-    (cond
-     ;; a symbol accessed from nowhere
-     ( (and
-	(ring-p left-nonterminal-positions )
-	(ring-empty-p left-nonterminal-positions ) )
-       (message "`%s' is a start symbol" left-nonterminal ) )
-     ;; at cursor position there is a left nonterminal
-     ( (ring-p left-nonterminal-positions )
-       ;; fontify right nonterminals that match
-       (dolist (p (ring-elements left-nonterminal-positions ) )
-	 (let ((ov (make-overlay p (+ p (length left-nonterminal ) ) ) ) )
-	   (overlay-put ov 'face 'bn-search-rotate-face) ) )
-       ;; loop of input events
-       (let* (key
-	      (l t)
-	      (pos 0)
-	      (number-of-matches (ring-size left-nonterminal-positions ) )
-	      (many-matches (> number-of-matches 1 ) )
-	      (Mkeys (concat
-		      "\n"
-		      (if many-matches
-			  "`n' jump to the next match. `p' jump to the previous match. "
-			"" )
-		      "`q' interrupts search." ) )
-	      (M (concat
-		  (format "`%s'" left-nonterminal )
-		  (format " : `%s': " (reverse (ring-elements left-nonterminal-positions ) ) )
-		  Mkeys  ) ) )
-	 ;; jump to the first match
-	 (bn-jump (ring-ref left-nonterminal-positions pos) )
-	 '(recenter)
-	 (message (concat "Search for " M ) )
-	 (while l
-	   (setq key (read-key-sequence nil) )
-	   (cond
-	    ;; quit the search
-	    ( (and (stringp key)
-		   (string-equal key  "q" ) )
-	      (message "quit search." )
-	      (setq l nil ) )
-	    ;; searck for the next match
-	    ( (and (stringp key)
-		   many-matches
-		   (string-equal key  "n" ) )
-	      (setq pos (1- pos) )
-	      (goto-char (ring-ref left-nonterminal-positions pos) )
-	      (message M ) )
-	    ;; search for the previous match
-	    ( (and (stringp key)
-		   many-matches
-		   (string-equal key  "p" ) )
-	      (setq pos (1+ pos) )
-	      (goto-char (ring-ref left-nonterminal-positions pos ) )
-	      (message M ) )
-	    (t
-	     (message
-	      (concat (format "`%s'" (key-description key ) )
-		      " does not match. "
-		      Mkeys ) ) ) ) ) )
-       ;; removing overlays
-       (remove-overlays) )
-     ((listp left-nonterminal-positions )
-      (error "No left-nonterminal defintion at point" ))
-     (t
-      (error " `%s' : cannot loop for a right symbol. " left-nonterminal ) ) ) ) )
-
-'(cl-defun bn-imenu ()
-  (mapcar
-   (lambda (l)
-     (cons (caar l)
-	   (if (cadr l)
-	       (copy-marker (cadr l) )
-	     0) ) )
-   bn-left-nonterminal-list) )
+  (let* ((nonterminal (get-text-property (point) 'nonterminal))
+         (positions (and nonterminal
+                         (get-text-property (point) 'position))))
+    (unless (ring-p positions)
+      (user-error "Point is not on a left nonterminal definition"))
+    (if (ring-empty-p positions)
+        (message "`%s' is a start symbol" nonterminal)
+      (bn-clear-search-overlays)
+      (dolist (position (ring-elements positions))
+        (let ((overlay
+               (make-overlay position
+                             (+ position (length nonterminal)))))
+          (overlay-put overlay 'face 'bn-search-rotate-face)
+          (push overlay bn-search-overlays)))
+      (let* ((index 0)
+             (many-matches (> (ring-size positions) 1))
+             (instructions
+              (concat
+               (when many-matches
+                 "`n' next, `p' previous, ")
+               "`q' finish"))
+             key
+             done)
+        (unwind-protect
+            (progn
+              (bn-jump (ring-ref positions index))
+              (while (not done)
+                (message "Search for `%s': %s" nonterminal instructions)
+                (setq key (read-key-sequence nil))
+                (cond
+                 ((equal key "q")
+                  (setq done t))
+                 ((and many-matches (equal key "n"))
+                  (cl-decf index)
+                  (goto-char (ring-ref positions index)))
+                 ((and many-matches (equal key "p"))
+                  (cl-incf index)
+                  (goto-char (ring-ref positions index)))
+                 (t
+                  (message "`%s' does not match; %s"
+                           (key-description key) instructions)))))
+          (bn-clear-search-overlays))))))
 
 (cl-defun bn-imenu ()
   (mapcar
