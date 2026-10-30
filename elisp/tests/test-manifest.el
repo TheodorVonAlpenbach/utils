@@ -22,6 +22,7 @@
     "mode-extensions/test-mb-octave-insert.el"
     "mode-extensions/test-mb-octave-matlab.el"
     "mode-extensions/test-mb-octave.el"
+    "mode-extensions/test-octave-breakpoint.el"
     "mode-extensions/test-mb-org.el"
     "mode-extensions/test-mb-python.el"
     "mode-extensions/test-mb-ruby.el"

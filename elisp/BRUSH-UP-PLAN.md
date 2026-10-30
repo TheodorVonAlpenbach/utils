@@ -315,6 +315,10 @@ The first subset is intentionally conservative:
 * [`test-mb-octave.el`](./mode-extensions/test-mb-octave.el): seven ERT tests
   for buffer-local setup, mode-buffer discovery, function parsing, quoted test
   commands, directory runners, and Texinfo conversion.
+* [`test-octave-breakpoint.el`](./mode-extensions/test-octave-breakpoint.el):
+  seven ERT tests for buffer markers, function locations, dbstop parsing and
+  composition, buffer synchronization, temporary-breakpoint cleanup, and
+  navigation.
 * [`test-mb-java-mode.el`](./mode-extensions/test-mb-java-mode.el): one ERT
   test for feature publication, Java buffer settings, idempotence, and global
   default isolation.
@@ -420,9 +424,9 @@ physics, geometry, search, XML, anaphora, general, list, sequence, string,
 time, ISO-time, and table modules are independently loadable. Their validation
 comprises:
 
-* a clean `emacs -Q` load of all forty-three utility and mode-extension
+* a clean `emacs -Q` load of all forty-four utility and mode-extension
   features plus the ERT tooling;
-* 393 passing ERT tests from the batch entry point;
+* 400 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -611,6 +615,18 @@ replaced with supported APIs. Test paths and directory arguments are quoted,
 machine-specific test-directory bindings were removed, `@seealso` references
 preserve source order, and VC breakpoint checks no longer switch the selected
 buffer. Its seven namespaced tests mock process boundaries and do not start
+Octave.
+
+[`octave-breakpoint.el`](./mode-extensions/octave-breakpoint.el) now loads
+independently with lexical binding and explicit Octave dependencies.
+Startup-only anaphoric, buffer-navigation, list, string, and directory helpers
+were replaced with supported APIs, and the machine-specific source-directory
+exception was removed. Breakpoint scopes now reject unsupported values,
+malformed `dbstatus` responses fail explicitly, navigation reports empty
+buffers instead of dividing by zero, and temporary breakpoints are removed
+with `unwind-protect` even when the debug body fails. The corrected plural
+`octave-update-all-dbstops` name retains an alias for its old singular spelling.
+Its seven namespaced tests mock source and process boundaries and do not start
 Octave.
 
 The former `sql-mode.el` personal extension is now
