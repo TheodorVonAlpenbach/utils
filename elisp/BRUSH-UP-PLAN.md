@@ -319,6 +319,10 @@ The first subset is intentionally conservative:
   seven ERT tests for buffer markers, function locations, dbstop parsing and
   composition, buffer synchronization, temporary-breakpoint cleanup, and
   navigation.
+* [`test-octave-debug-mode.el`](./mode-extensions/test-octave-debug-mode.el):
+  seven ERT tests for independent keymaps, source markers, debugger protocol
+  parsing, cross-buffer exit, session startup, display refresh, and command
+  dispatch.
 * [`test-mb-java-mode.el`](./mode-extensions/test-mb-java-mode.el): one ERT
   test for feature publication, Java buffer settings, idempotence, and global
   default isolation.
@@ -424,9 +428,9 @@ physics, geometry, search, XML, anaphora, general, list, sequence, string,
 time, ISO-time, and table modules are independently loadable. Their validation
 comprises:
 
-* a clean `emacs -Q` load of all forty-four utility and mode-extension
+* a clean `emacs -Q` load of all forty-five utility and mode-extension
   features plus the ERT tooling;
-* 400 passing ERT tests from the batch entry point;
+* 407 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -628,6 +632,19 @@ with `unwind-protect` even when the debug body fails. The corrected plural
 `octave-update-all-dbstops` name retains an alias for its old singular spelling.
 Its seven namespaced tests mock source and process boundaries and do not start
 Octave.
+
+[`octave-debug-mode.el`](./mode-extensions/octave-debug-mode.el) now loads
+independently with lexical binding and no Evil dependency. Its minor-mode and
+prefix maps use ordinary sparse keymaps, while the main Octave extension can
+still install them into Evil when that optional package is present.
+Startup-only anaphoric, buffer, navigation, and string helpers were removed;
+the private `isdebugmode` Octave command was replaced with `dbstack`; and
+`dbwhere` responses are parsed and validated explicitly. Debug source lookup
+now uses xref instead of obsolete tags, marker state is buffer-local where
+appropriate, leaving a session clears all Octave debug modes without sending a
+spurious empty command, and rerunning an absent expression reports a user
+error. Its seven tests mock all process and breakpoint boundaries and do not
+start Octave.
 
 The former `sql-mode.el` personal extension is now
 [`mb-sql.el`](./mode-extensions/mb-sql.el), avoiding confusion with Emacs's
