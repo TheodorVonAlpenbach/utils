@@ -247,6 +247,9 @@ profile.
 
 The first subset is intentionally conservative:
 
+* [`test-backus-naur-mode.el`](./mode-extensions/test-backus-naur-mode.el):
+  five ERT tests for buffer-local mode setup, hooks, nonterminal indexing and
+  links, comments, definition alignment, and buffer-safe idle fontification.
 * [`test-list-interval.el`](./prototypes/geometry/test-list-interval.el): nine ERT tests for the
   closed-interval helpers, including construction and accessors.
 * [`test-list-envelope.el`](./prototypes/geometry/test-list-envelope.el): nine ERT tests for
@@ -428,9 +431,9 @@ physics, geometry, search, XML, anaphora, general, list, sequence, string,
 time, ISO-time, and table modules are independently loadable. Their validation
 comprises:
 
-* a clean `emacs -Q` load of all forty-five utility and mode-extension
+* a clean `emacs -Q` load of all forty-six utility and mode-extension
   features plus the ERT tooling;
-* 407 passing ERT tests from the batch entry point;
+* 412 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -645,6 +648,19 @@ appropriate, leaving a session clears all Octave debug modes without sending a
 spurious empty command, and rerunning an absent expression reports a user
 error. Its seven tests mock all process and breakpoint boundaries and do not
 start Octave.
+
+The first staged migration of
+[`backus-naur-mode.el`](./mode-extensions/backus-naur-mode.el) makes the legacy
+major mode independently loadable with lexical binding and explicit `cl-lib`,
+imenu, ring, and string dependencies. Mode state, indentation, hooks, and timer
+cleanup are buffer-local; the real mode hook now runs; obsolete whole-buffer
+fontification was replaced; and delayed refontification captures its originating
+buffer rather than whichever buffer is current when the timer fires. Generic
+buffer helper names and startup-only Common Lisp aliases were replaced, and
+region indentation now calculates its alignment column correctly while tracking
+an end marker as edits shift the buffer. Five deterministic tests cover this
+foundation. The interactive overlay rotation/search implementation remains for
+a separate BNF checkpoint.
 
 The former `sql-mode.el` personal extension is now
 [`mb-sql.el`](./mode-extensions/mb-sql.el), avoiding confusion with Emacs's

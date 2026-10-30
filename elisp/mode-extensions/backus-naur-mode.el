@@ -1,3 +1,12 @@
+;;; backus-naur-mode.el --- Edit Backus-Naur grammars -*- lexical-binding: t; -*-
+
+;;; Code:
+
+(require 'cl-lib)
+(require 'imenu)
+(require 'ring)
+(require 'subr-x)
+
 (defvar bn-tab-width 2
   "Tab width in backus-naur-mode")
 
@@ -29,10 +38,11 @@ imenu and completion-list .")
   "used by search-completion to keep the history of searched
   strings" )
 
+(defvar bn-mode-hook nil
+  "Hook run after entering `bn-mode'.")
+
 (defvar bn-comment-char "%"
   "a line which starts with this character is commented")
-
-(defvar after-change-functions nil )
 
 (cl-defun bn-mode nil
   "A major mode for well writing context-free grammars in
@@ -44,16 +54,13 @@ Backus-Naur notation."
   (kill-all-local-variables)
   (setq major-mode 'bn-mode
 	mode-name "Backus-Naur" )
-  (setq tab-width bn-tab-width)
-  (setq indent-region-function #'bn-indent-region)
+  (setq-local tab-width bn-tab-width)
+  (setq-local indent-region-function #'bn-indent-region)
   ;;(setq indent-region-function nil)
 
   (make-local-variable 'bn-comment-char)
-  (make-local-variable 'bn-overlays)
-  (make-local-variable 'bn-iterator)
   (make-local-variable 'after-change-functions)
   (make-local-variable 'bn-left-nonterminal-list)
-  (make-local-variable 'bn-rotate-around-left-nonterminal-match-ring)
 
   (make-local-variable 'imenu-create-index-function)
   (setq imenu-create-index-function 'bn-imenu)
@@ -102,7 +109,8 @@ Backus-Naur notation."
 
   (bn-stop-timer)
   (remove-overlays)
-  (setq after-change-functions (add-to-list 'after-change-functions 'bn-change) )
+  (add-hook 'after-change-functions #'bn-change nil t)
+  (add-hook 'kill-buffer-hook #'bn-stop-timer nil t)
   (local-set-key [tab] 'bn-indent)
   (local-set-key [home]
 		 (lambda nil (interactive)
@@ -154,6 +162,7 @@ Backus-Naur notation."
                            nil ) ) )
                      (and aa
                           (bn-jump (cdr (assoc aa (mapcar 'car bn-left-nonterminal-list ) ) ) ) ) ) ) )
+  (run-mode-hooks 'bn-mode-hook)
   )
 
 (defalias 'backus-naur-mode 'bn-mode)
@@ -351,6 +360,7 @@ otherwise."
   (bn-stop-timer)
   (save-excursion
     (let (list-of-left-nonterminals
+          make-fontification
 	  (map-right-nonterminal (make-sparse-keymap) )
 	  (map-left-nonterminal (make-sparse-keymap) )
 	  ;; font lock properties modify the buffer, so this hook is
@@ -396,7 +406,7 @@ otherwise."
        '(mouse-face highlight font-lock-face keymap position) )
       (setq bn-left-nonterminal-list nil)
       ;; add first the fontification of font-lock
-      (font-lock-fontify-buffer)
+      (font-lock-ensure)
       ;; scan the buffer to find the positions where every
       ;; left-nonterminal appears in the rules
       (dolist (m list-of-left-nonterminals)
@@ -476,7 +486,7 @@ otherwise."
       (setq buffer-undo-list ul )
       ) ) )
 
-(cl-defun bn-change (x y z)
+(cl-defun bn-change (&rest _change)
   "hook which is called after every buffer change. it starts a
 timer that fontify the current buffer, according to the rules
 defined in the grammar. if a previous timer is active, stop it
@@ -484,9 +494,15 @@ before starting the new timer."
   ;; clear the overlays from the previous search if any
   (bn-stop-timer)
   '(setq overriding-terminal-local-map nil)
-  (setq bn-timer-var
-	(run-with-idle-timer
-	 1 nil 'bn-lazy-font-lock) ) )
+  (let ((buffer (current-buffer)))
+    (setq bn-timer-var
+          (run-with-idle-timer
+           1 nil
+           (lambda ()
+             (when (buffer-live-p buffer)
+               (with-current-buffer buffer
+                 (when (derived-mode-p 'bn-mode)
+                   (bn-lazy-font-lock)))))))))
 
 (cl-defun bn-beginning-of-defun ()
   "jump at the beginning of a left nonterminal definition."
@@ -601,13 +617,13 @@ before starting the new timer."
 ;;; MB changes
 ;;; buffer utils
 
-(cl-defun buffer-lines (start end)
+(cl-defun bn--buffer-lines (start end)
   "Returns the lines between point START and END as a list of
 strings"
   (interactive "r")
   (string-lines (buffer-substring-no-properties start end)))
 
-(cl-defun point-beginning-of-line (point &optional (forward-line 0))
+(cl-defun bn--point-beginning-of-line (point &optional (forward-line 0))
   "Returns the point at the beginning of the line that includes POINT"
   (save-excursion
     (goto-char point)
@@ -615,34 +631,41 @@ strings"
     (forward-line forward-line)
     (point)))
 
-(cl-defun buffer-region-whole-lines (start end)
+(cl-defun bn--buffer-region-whole-lines (start end)
   (interactive "r") ;;just for debugging
-  (buffer-lines
-   (point-beginning-of-line start)
-   (point-beginning-of-line end 1)))
+  (bn--buffer-lines
+   (bn--point-beginning-of-line start)
+   (bn--point-beginning-of-line end 1)))
 
-(cl-defun buffer-current-line (&optional (point (point)))
-  (or (first (buffer-region-whole-lines point point))
+(cl-defun bn--buffer-current-line (&optional (point (point)))
+  (or (car (bn--buffer-region-whole-lines point point))
       ""))
 
 ;;; indent
 (cl-defun bn-first-line-of-definition-p ()
   ""
-  (string-match bn-left-nonterminal-definition (substring-no-properties (buffer-current-line))))
+  (string-match bn-left-nonterminal-definition
+                (substring-no-properties (bn--buffer-current-line))))
 
 (cl-defun bn-definition-start-line-p (line)
   (string-match bn-left-nonterminal-definition line))
 
-(cl-defun bn-definition-start-lines (star)
-  (copy-if #'bn-definition-start-line-p
-	   (string-lines (buffer-string-no-properties))))
+(cl-defun bn-definition-start-lines (&optional _start)
+  (cl-remove-if-not
+   #'bn-definition-start-line-p
+   (string-lines
+    (buffer-substring-no-properties (point-min) (point-max)))))
 
 (cl-defun bn-alignment-column (lines)
   "Returns the first column that aligns all BNF definitions.
 Aligment is on assigment sign.
 Assumes one space from end of "
-  (apply #'max (mapcar #'(lambda (x) (aif (string-match bn-assignment x) it 0))
-		       lines)))
+  (if lines
+      (apply #'max
+             (mapcar (lambda (line)
+                       (or (string-match bn-assignment line) 0))
+                     lines))
+    0))
 ;;(string-match "::=" "af ::= adf")
 
 (cl-defun bn-indent-assigment-first-line (column)
@@ -651,7 +674,7 @@ Assumes one space from end of "
     (move-end-of-line nil)
     (re-search-backward bn-assignment nil t)
     (let ((n (- column (current-column))))
-      (if (plusp n)
+      (if (> n 0)
 	(insert (make-string n ? ))
 	(delete-char n)))))
 
@@ -667,13 +690,20 @@ Assumes one space from end of "
       (bn-indent-assigment-first-line column)
       (bn-indent-assigment-rest-lines column))))
 
-(cl-defun bn-indent-region (start end &optional (column (buffer-region-whole-lines start end)))
+(cl-defun bn-indent-region (start end &optional column)
   (interactive "r\nP")
-  (save-excursion
-    (goto-char start)
-      (while (<= (point) end)
-	(bn-indent-current-line column)
-	(forward-line 1))))
+  (setq column
+        (or (and column (prefix-numeric-value column))
+            (bn-alignment-column
+             (bn--buffer-region-whole-lines start end))))
+  (let ((end-marker (copy-marker end t)))
+    (unwind-protect
+        (save-excursion
+          (goto-char start)
+          (while (< (point) end-marker)
+            (bn-indent-current-line column)
+            (forward-line 1)))
+      (set-marker end-marker nil))))
 
 (cl-defun bn-goto-previous-assigment ()
   (re-search-backward bn-assignment nil t)
@@ -686,6 +716,13 @@ Assumes one space from end of "
 (cl-defun bn-indent ()
   "Indent to previous"
   (interactive)
-  (bn-indent-region (point) (point) (bn-previous-assigment-column)))
+  (let ((column (bn-previous-assigment-column)))
+    (unless column
+      (user-error "No previous BNF assignment"))
+    (bn-indent-region (line-beginning-position)
+                      (line-end-position)
+                      column)))
 
 (provide 'backus-naur-mode)
+
+;;; backus-naur-mode.el ends here
