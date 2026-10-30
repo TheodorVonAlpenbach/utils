@@ -312,6 +312,9 @@ The first subset is intentionally conservative:
   eight ERT tests for chained assignments, default arguments, assertion and
   test-block conversion, condensed colon expressions, and explicit directory
   registration, plus integrated buffer transformations.
+* [`test-mb-octave.el`](./mode-extensions/test-mb-octave.el): seven ERT tests
+  for buffer-local setup, mode-buffer discovery, function parsing, quoted test
+  commands, directory runners, and Texinfo conversion.
 * [`test-mb-java-mode.el`](./mode-extensions/test-mb-java-mode.el): one ERT
   test for feature publication, Java buffer settings, idempotence, and global
   default isolation.
@@ -393,7 +396,7 @@ replaced with built-in operations.
 | `radio-playlists` | [`radio-playlists.el`](./archive/browser/radio-playlists.el) | Archived; external programs/network |
 | `mb-lisp` | [`mb-lisp.el`](./mode-extensions/mb-lisp.el) | Active mode extension |
 | `mb-python` | [`mb-python.el`](./mode-extensions/mb-python.el) | Active mode extension |
-| `mb-octave` | [`mb-octave.el`](./mode-extensions/mb-octave.el) | Usage decision needed; external Octave process |
+| `mb-octave` | [`mb-octave.el`](./mode-extensions/mb-octave.el) | Active mode extension; independently loadable with mocked process tests |
 | `mb-ruby` | [`mb-ruby.el`](./mode-extensions/mb-ruby.el) | Usage decision needed |
 | `mb-texinfo` | [`mb-texinfo.el`](./mode-extensions/mb-texinfo.el) | Active mode extension; independently loadable |
 | `list-db` | [`list-db.el`](./list-database/list-db.el) | Active shared application/library candidate |
@@ -417,9 +420,9 @@ physics, geometry, search, XML, anaphora, general, list, sequence, string,
 time, ISO-time, and table modules are independently loadable. Their validation
 comprises:
 
-* a clean `emacs -Q` load of all forty-two utility and mode-extension
+* a clean `emacs -Q` load of all forty-three utility and mode-extension
   features plus the ERT tooling;
-* 386 passing ERT tests from the batch entry point;
+* 393 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -595,6 +598,20 @@ and Octave assertions inside `%!test` blocks are actually converted instead of
 falling through as ordinary code. The dormant test file now has eight
 namespaced tests in the maintained baseline; filesystem synchronization and
 interactive documentation transfer remain outside those deterministic tests.
+
+[`mb-octave.el`](./mode-extensions/mb-octave.el) now loads independently with
+lexical binding and explicit built-in and repository dependencies. Evil,
+key-chord, breakpoint, and debugger maps are installed only when their
+facilities are available; loading Evil later retains the optional debugger
+integration. Octave buffer setup is idempotent and buffer-local, including
+syntax-table and keymap changes, and the stale
+`texinfo-insert-@var*` binding now targets the maintained namespaced command.
+Startup-only parsing, buffer, Info, paragraph, string, and Texinfo helpers were
+replaced with supported APIs. Test paths and directory arguments are quoted,
+machine-specific test-directory bindings were removed, `@seealso` references
+preserve source order, and VC breakpoint checks no longer switch the selected
+buffer. Its seven namespaced tests mock process boundaries and do not start
+Octave.
 
 The former `sql-mode.el` personal extension is now
 [`mb-sql.el`](./mode-extensions/mb-sql.el), avoiding confusion with Emacs's
