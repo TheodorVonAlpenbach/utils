@@ -15,6 +15,7 @@
     "mode-extensions/test-mb-doc-view.el"
     "mode-extensions/test-mb-emacs-lisp.el"
     "mode-extensions/test-mb-ert.el"
+    "mode-extensions/test-mb-evil-map.el"
     "mode-extensions/test-mb-java-mode.el"
     "mode-extensions/test-mb-js-mode.el"
     "mode-extensions/test-mb-json.el"

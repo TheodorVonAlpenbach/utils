@@ -297,6 +297,9 @@ The first subset is intentionally conservative:
   test filename recognition, source/test name swapping, definition navigation,
   ordered and region test discovery, selector normalization, keymaps, and
   invalid target reporting.
+* [`test-mb-evil-map.el`](./mode-extensions/test-mb-evil-map.el): four ERT
+  tests for clean loading without Evil, unavailable-package deferral, explicit
+  dependency validation, and mocked prefix-map installation.
 * [`test-mb-doc-view.el`](./mode-extensions/test-mb-doc-view.el): three ERT
   tests for standard page-command preservation, whole-document navigation
   order, and keybindings.
@@ -410,7 +413,7 @@ replaced with built-in operations.
 | --- | --- | --- |
 | `global-map` | [`global-map.el`](./global/global-map.el) | Active startup/keymap; global side effects |
 | `mb-utils-io` | [`mb-utils-io.el`](./utils/mb-utils-io.el) | Active shared utility; startup-coupled |
-| `mb-evil-map` | [`mb-evil-map.el`](./mode-extensions/mb-evil-map.el) | Active optional integration; global keymaps |
+| `mb-evil-map` | [`mb-evil-map.el`](./mode-extensions/mb-evil-map.el) | Active optional integration; independently loadable with deferred global keymaps |
 | `mb-things` | [`mb-things.el`](./utils/mb-things.el) | Active shared utility; independently loadable |
 | `radio-playlists` | [`radio-playlists.el`](./archive/browser/radio-playlists.el) | Archived; external programs/network |
 | `mb-lisp` | [`mb-lisp.el`](./mode-extensions/mb-lisp.el) | Active mode extension |
@@ -439,9 +442,9 @@ physics, geometry, search, XML, anaphora, general, list, sequence, string,
 time, ISO-time, and table modules are independently loadable. Their validation
 comprises:
 
-* a clean `emacs -Q` load of all forty-seven utility and mode-extension
+* a clean `emacs -Q` load of all forty-eight utility and mode-extension
   features plus the ERT tooling;
-* 431 passing ERT tests from the batch entry point;
+* 435 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -499,6 +502,16 @@ module declaratively registers personal macro specifications and intentionally
 sets `common-lisp-indent-function` as the global Lisp indentation default.
 Static `concat` and `format` metadata replaces mutation on every indentation
 request. Four deterministic tests cover metadata and resulting indentation.
+
+[`mb-evil-map.el`](./mode-extensions/mb-evil-map.el) now loads independently
+with lexical binding when Evil is absent. Global Evil and key-chord mutations
+are contained in `mb-evil-map-setup`; automatic activation first checks that
+Evil is installed, while explicit setup reports missing integrations instead
+of partially installing maps. Evaluation and clipboard prefix maps now have
+namespaced variables with aliases for their former star names. Optional and
+personal commands are declared without being eagerly loaded, and the existing
+bindings remain installed on configured Evil systems. Four deterministic tests
+mock the Evil/key-chord registration boundary.
 
 [`mb-texinfo.el`](./mode-extensions/mb-texinfo.el) now loads independently
 with lexical binding and built-in dependencies. The stale capitalized
