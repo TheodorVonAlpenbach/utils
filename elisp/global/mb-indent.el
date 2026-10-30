@@ -1,4 +1,10 @@
-;;;; Lisp indentation.
+;;; mb-indent.el --- Personal Lisp indentation metadata -*- lexical-binding: t; -*-
+
+;;; Commentary:
+
+;; Register indentation specifications used by personal macros and libraries.
+
+;;; Code:
 
 ;;;; The main idea is to let general-lisp-indent-function be the
 ;;;; indent function for all lisp modes. This function checks the
@@ -35,50 +41,28 @@
 ;;   c            d)
 ;;   d)         
 
-;;(require 'lisp-config)
+(require 'cl-lib)
 (require 'cl-indent)
 
-(load-library "cl-indent")
-;;(setq lisp-indent-function #'general-lisp-indent-function) probably bad new proposal
-(setq lisp-indent-function #'common-lisp-indent-function)
+(setq-default lisp-indent-function #'common-lisp-indent-function)
 
-(cl-defun get-indent-function (mode-or-fn)
-  "Probably bad new proposal"
-  (if (functionp mode-or-fn)
-    mode-or-fn
-    (cl-case mode-or-fn
-      (emacs-lisp-mode #'lisp-indent-function)
-      (t #'common-lisp-indent-function))))
-;;(mapcar #'get-indent-function '(if emacs-lisp-mode mb-lisp-mode dummy-mode))
-
-(cl-defun set-indent (symbol indent mode-or-fn)
-  "Probably bad new proposal"
-  "Sets indent of SYMBOL to INDENT. SYMBOL can also be a list of symbols."
-  (let ((indent-fn (get-indent-function mode-or-fn)))
-    (if (consp symbol)
-      (cl-loop for x in symbol collect (set-indent x indent mode-or-fn))
-      (put symbol indent-fn
-	   (if (symbolp indent)
-	     (get indent indent-fn)
-	     indent)))))
-
-(cl-defun set-indent (symbol indent)
+(defun set-indent (symbol indent)
   "Set the indentation of SYMBOL to INDENT.
 SYMBOL can be a symbol or a list of symbols. See function
 `lisp-indent-function' for possible INDENT values."
-  ""
   (let ((indent-fn 'common-lisp-indent-function))
     (if (consp symbol)
-      (cl-loop for x in symbol collect (set-indent x indent))
+        (mapcar (lambda (item) (set-indent item indent)) symbol)
       (put symbol indent-fn
 	   (if (symbolp indent)
-	     (get indent indent-fn)
-	     indent)))))
+               (get indent indent-fn)
+             indent)))))
 
 (put 'if 'lisp-indent-function 1)
 (put 'if 'common-lisp-indent-function-for-elisp 1)
 
-(cl-defun cl-indent (symbol indent)
+(defun cl-indent (symbol indent)
+  "Set Common Lisp indentation for SYMBOL to INDENT."
   (set-indent symbol indent))
 
 (cl-indent 'cl-indent 1)
@@ -88,6 +72,8 @@ SYMBOL can be a symbol or a list of symbols. See function
 
 (cl-indent '(aif anif>) 'prog1)
 (cl-indent '(hif) 'if)
+(cl-indent 'concat 'progn)
+(cl-indent 'format 'prog1)
 
 (cl-indent
     '(awhen read-string with-buffer with-point
@@ -134,8 +120,6 @@ SYMBOL can be a symbol or a list of symbols. See function
 (cl-indent 'awhile 'while)
 (cl-indent 'acond 'cond)
 (cl-indent '(define-condition do-tuples/c defgeneric) 'defun)
-(cl-indent '\ '/) ;this sets indent properly, but indent isn't applied anyway
-
 (cl-indent '(cl-ppcre:register-groups-bind period-bind)
   'destructuring-bind)
 
@@ -183,69 +167,6 @@ SYMBOL can be a symbol or a list of symbols. See function
 ;; cl-who
 (cl-indent '(:a :select :html :head :title :script :option) (make-list 20 2))
 
-;;;; The tricky loop indent
-(defconst +loop-keywords+
-  '(if unless while until always never thereis 
-    do collect append nconc sum count maximize minimize 
-    repeat return))
-
-(cl-defun loop-keyword-regexp (&optional (keywords +loop-keywords+))
-  (regexp-opt (mapcar #'symbol-name keywords)))
-;;(loop-keyword-regexp)
-
-(cl-defun common-lisp-loop-keyword-length (loop-start)
-  "Return the length of the preceding loop keyword.
-Stop looking before LOOP-START."
-  (save-excursion
-    (let ((length 0))
-      (while (and (zerop length)
-                 (> (point) loop-start))
-       (beginning-of-line)
-       
-;;       (when (looking-at "^\\s-*\\(loop\\s-*\\)?\\(:?\\sw+\\|;\\)")
-       (when (looking-at
-	      (format "^[[:space:]]*\\(loop[[:space:]]*\\)?\\(%s\\)"
-		(loop-keyword-regexp)))
-         (setq length (length (match-string 2))))
-       (forward-line -1))
-      length)))
-
-;;(setf lisp-loop-forms-indentation nil)
-(cl-defun common-lisp-loop-part-indentation (indent-point state)
-  "Compute the indentation of loop form constituents."
-  (let ((loop-indentation-old (save-excursion
-				(goto-char (elt state 1))
-				(current-column)))
-	(loop-indentation (column-at (elt state 1)))
-	(case-fold-search t))
-    (goto-char indent-point)
-    (beginning-of-line)
-    (list
-     (cond ((not (extended-loop-p (elt state 1)))
-	    (+ loop-indentation lisp-simple-loop-indentation))
-	   ;; check if line start with a loop keyword
-           ;; ((looking-at "^\\s-*\\(:?\\sw+\\|;\\)") this is wrong
-           ((looking-at (format "^[[:space:]]*%s" (loop-keyword-regexp)))
-            (+ loop-indentation lisp-loop-keyword-indentation))
-           (t
-	    (+ loop-indentation
-	       lisp-loop-keyword-indentation
-	       (or lisp-loop-forms-indentation
-		   (1+ (common-lisp-loop-keyword-length
-			(or (save-excursion
-			      (re-search-backward "(\\s-*loop" nil t))
-			    indent-point)))))))
-     ;; Tell the caller that the next line needs recomputation, even
-     ;; though it doesn't start a sexp.
-     loop-indentation)))
-
-(cl-defun mb-common-lisp-indent-function (indent-point state)
-  "Check to see what happens to loop if this"
-  ;; handle concat separately
-  (cl-indent 'concat (if (eql major-mode 'emacs-lisp-mode) 'progn 'prog1))
-  (cl-indent 'format (if (eql major-mode 'emacs-lisp-mode) 'prog1 'prog1))
-  (common-lisp-indent-function-1 indent-point state))
-
-(advice-add #'common-lisp-indent-function :override #'mb-common-lisp-indent-function)
-
 (provide 'mb-indent)
+
+;;; mb-indent.el ends here

@@ -253,6 +253,10 @@ The first subset is intentionally conservative:
   navigation-property refresh, isolated search overlays, static bindings, and
   completion and point-based definition jumps, plus parser, indentation, and
   definition-motion boundaries.
+* [`test-mb-indent.el`](./global/test-mb-indent.el): four ERT tests for single
+  and grouped indentation metadata, copied specifications, representative
+  retained forms, upstream loop indentation, the global default, and actual
+  Emacs Lisp indentation.
 * [`test-list-interval.el`](./prototypes/geometry/test-list-interval.el): nine ERT tests for the
   closed-interval helpers, including construction and accessors.
 * [`test-list-envelope.el`](./prototypes/geometry/test-list-envelope.el): nine ERT tests for
@@ -411,10 +415,10 @@ replaced with built-in operations.
 | `mb-lisp` | [`mb-lisp.el`](./mode-extensions/mb-lisp.el) | Active mode extension |
 | `mb-python` | [`mb-python.el`](./mode-extensions/mb-python.el) | Active mode extension |
 | `mb-octave` | [`mb-octave.el`](./mode-extensions/mb-octave.el) | Active mode extension; independently loadable with mocked process tests |
-| `mb-ruby` | [`mb-ruby.el`](./mode-extensions/mb-ruby.el) | Usage decision needed |
+| `mb-ruby` | [`mb-ruby.el`](./mode-extensions/mb-ruby.el) | Active mode extension; independently loadable |
 | `mb-texinfo` | [`mb-texinfo.el`](./mode-extensions/mb-texinfo.el) | Active mode extension; independently loadable |
 | `list-db` | [`list-db.el`](./list-database/list-db.el) | Active shared application/library candidate |
-| `mb-indent` | [`mb-indent.el`](./global/mb-indent.el) | Active startup compatibility layer; global symbol properties |
+| `mb-indent` | [`mb-indent.el`](./global/mb-indent.el) | Active indentation metadata; independently loadable with intentional global properties |
 | `quiz-park` | [`quiz-park.el`](./quiz/quiz-park.el) | Usage decision needed; application |
 | `mb-js-mode` | [`mb-js-mode.el`](./mode-extensions/mb-js-mode.el) | Active mode extension; optional Node.js evaluation |
 | `quiz` | [`quiz.el`](./quiz/quiz.el) | Usage decision needed; application |
@@ -434,9 +438,9 @@ physics, geometry, search, XML, anaphora, general, list, sequence, string,
 time, ISO-time, and table modules are independently loadable. Their validation
 comprises:
 
-* a clean `emacs -Q` load of all forty-six utility and mode-extension
+* a clean `emacs -Q` load of all forty-seven utility and mode-extension
   features plus the ERT tooling;
-* 422 passing ERT tests from the batch entry point;
+* 426 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -478,6 +482,17 @@ every buffer. The explicit underscore syntax-table mutation was removed
 because modern `ruby-mode` already assigns the requested symbol syntax. Its
 namespaced regression test also verifies repeated setup and global-state
 isolation.
+
+[`mb-indent.el`](./global/mb-indent.el) now loads independently with lexical
+binding and explicit `cl-lib` and `cl-indent` dependencies. The duplicate
+`set-indent` proposal, redundant `cl-indent` reload, dead scratch forms, and
+private override advice were removed. In particular, the copied loop indenter
+predated Emacs 30's corrected backquote handling and called obsolete private
+functions; loop indentation now remains with upstream `cl-indent`. The retained
+module declaratively registers personal macro specifications and intentionally
+sets `common-lisp-indent-function` as the global Lisp indentation default.
+Static `concat` and `format` metadata replaces mutation on every indentation
+request. Four deterministic tests cover metadata and resulting indentation.
 
 [`mb-texinfo.el`](./mode-extensions/mb-texinfo.el) now loads independently
 with lexical binding and built-in dependencies. The stale capitalized
