@@ -257,6 +257,10 @@ The first subset is intentionally conservative:
   and grouped indentation metadata, copied specifications, representative
   retained forms, upstream loop indentation, the global default, and actual
   Emacs Lisp indentation.
+* [`test-global-map.el`](./global/test-global-map.el): four ERT tests for
+  side-effect-free loading, explicit and repeated installation, namespaced
+  prefix maps and Unicode insertion, retained bindings, removed machine
+  shortcuts, and shell argument quoting.
 * [`test-list-interval.el`](./prototypes/geometry/test-list-interval.el): nine ERT tests for the
   closed-interval helpers, including construction and accessors.
 * [`test-list-envelope.el`](./prototypes/geometry/test-list-envelope.el): nine ERT tests for
@@ -411,7 +415,7 @@ replaced with built-in operations.
 
 | Eager feature | Current source | Initial classification |
 | --- | --- | --- |
-| `global-map` | [`global-map.el`](./global/global-map.el) | Active startup/keymap; global side effects |
+| `global-map` | [`global-map.el`](./global/global-map.el) | Active startup keymap; independently loadable with explicit activation |
 | `mb-utils-io` | [`mb-utils-io.el`](./utils/mb-utils-io.el) | Active shared utility; startup-coupled |
 | `mb-evil-map` | [`mb-evil-map.el`](./mode-extensions/mb-evil-map.el) | Active optional integration; independently loadable with deferred global keymaps |
 | `mb-things` | [`mb-things.el`](./utils/mb-things.el) | Active shared utility; independently loadable |
@@ -442,9 +446,9 @@ physics, geometry, search, XML, anaphora, general, list, sequence, string,
 time, ISO-time, and table modules are independently loadable. Their validation
 comprises:
 
-* a clean `emacs -Q` load of all forty-eight utility and mode-extension
+* a clean `emacs -Q` load of all forty-nine utility and mode-extension
   features plus the ERT tooling;
-* 435 passing ERT tests from the batch entry point;
+* 439 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -512,6 +516,19 @@ namespaced variables with aliases for their former star names. Optional and
 personal commands are declared without being eagerly loaded, and the existing
 bindings remain installed on configured Evil systems. Four deterministic tests
 mock the Evil/key-chord registration boundary.
+
+[`global-map.el`](./global/global-map.el) now loads independently with lexical
+binding and does not mutate global keys until `mb-global-map-setup` is called.
+Startup invokes that setup explicitly after loading its feature list. Prefix
+maps have namespaced variables with aliases for their former generic names,
+Unicode insertion no longer depends on macro expansion from `mb-insert`, and
+anonymous window, buffer, Lisp, and increment commands have named
+implementations. The duplicate F12 binding and its course-specific TeX
+filename were removed; no generic F12 replacement was selected. General
+bindings, including the optional Lynx command, remain as symbolic bindings and
+therefore do not eagerly load their implementations. `gfind` arguments are now
+shell-quoted, and buffers without filenames no longer break extension
+selection. Four tests install bindings into isolated keymaps.
 
 [`mb-texinfo.el`](./mode-extensions/mb-texinfo.el) now loads independently
 with lexical binding and built-in dependencies. The stale capitalized

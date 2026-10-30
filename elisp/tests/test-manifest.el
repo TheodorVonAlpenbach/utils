@@ -10,6 +10,7 @@
 (defconst mb-tests-baseline-files
   '("prototypes/geometry/test-list-interval.el"
     "prototypes/geometry/test-list-envelope.el"
+    "global/test-global-map.el"
     "global/test-mb-indent.el"
     "mode-extensions/test-backus-naur-mode.el"
     "mode-extensions/test-mb-doc-view.el"

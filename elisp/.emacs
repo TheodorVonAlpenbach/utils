@@ -326,6 +326,8 @@ and running Git.")
 	 do (message "Loading package %S..." m)
 	 do (require m))
 
+(mb-global-map-setup)
+
 ;;;; local lisp (overrides defaults)
 (load-file +emacs-local+)
 

@@ -1,190 +1,213 @@
-;; General loads
-;(require 'mb-vc)
-;(load "mb-vc.el")
+;;; global-map.el --- Personal global key bindings -*- lexical-binding: t; -*-
 
-(require 'mb-paragraph)
+;;; Code:
+
+(require 'cl-lib)
 (require 'info)
 
-;; Eval stuff
-(define-key lisp-mode-shared-map "\C-ce" 'eval-buffer)
-(define-key lisp-mode-shared-map "\C-cr" 'eval-region)
+(declare-function inc-thing-at-point "mb-things")
+(declare-function inferior-lisp nil)
+(declare-function inferior-lisp-program-with-lispinit nil)
+(declare-function mb-all-grep "mb-grep")
+(declare-function mb-cpp-grep "mb-grep")
+(declare-function mb-grep "mb-grep")
+(declare-function mb-h-grep "mb-grep")
+(declare-function print-notepad-buffer "mb-print")
+(declare-function print-notepad-file "mb-print")
+(declare-function print-notepad-region "mb-print")
 
-(define-key lisp-mode-shared-map "\C-c\C-c" 'comment-region)
+(defvar inferior-lisp-program)
 
-;; Print expression
-(define-key global-map "\C-c\C-p" 'print)
+(defvaralias 'print-map 'mb-global-print-map)
+(defvaralias 'insert-map 'mb-global-insert-map)
+(defvaralias 'greek-map 'mb-global-greek-map)
+(defvaralias 'find-map 'mb-global-find-map)
 
-;; Move point
-(define-key global-map "\M-n" 'forward-paragraph)
-(define-key Info-mode-map "\M-n" 'forward-paragraph) ;override
-(define-key global-map "\M-p" 'backward-paragraph)
+(defvar mb-global-print-map (make-sparse-keymap "Print")
+  "Prefix map for personal printing commands.")
 
-(define-key global-map [(meta control shift u)] 'up-list)
-(define-key global-map [(control meta backspace)] 'backward-kill-sexp)
+(defvar mb-global-insert-map (make-sparse-keymap "Insert")
+  "Prefix map for personal insertion commands.")
 
-;; Kill
-(define-key global-map [(meta U)] 'kill-paragraph)
-(define-key global-map [(control backspace)] 'backward-kill-paragraph)
+(defvar mb-global-greek-map (make-sparse-keymap "Greek")
+  "Prefix map for inserting Greek letters.")
 
-;; Sexp
-(require 'mb-sexp)
-(define-key global-map [(control meta shift l)] 'lift-sexp)
+(defvar mb-global-find-map (make-sparse-keymap "Find")
+  "Prefix map for personal search commands.")
 
-;; Indent
-(define-key global-map "\C-\M-m" #'back-to-indentation-and-indent)
+(defun mb-global-map-other-window-backward ()
+  "Select the preceding window."
+  (interactive)
+  (other-window -1))
 
-;; Mark commands
-(define-key global-map "\M-#" 'mark-whole-word)
+(defun mb-global-map-switch-to-other-buffer ()
+  "Switch to the most recently used other buffer."
+  (interactive)
+  (switch-to-buffer (other-buffer)))
 
-;; Transpose commands
-(define-key global-map [(meta T)] 'transpose-paragraphs)
-(define-key global-map [(meta control shift T)] 'transpose-sentences)
+(defun mb-global-map-run-inferior-lisp ()
+  "Start the configured inferior Lisp."
+  (interactive)
+  (inferior-lisp inferior-lisp-program))
 
-;; Case
-(define-key global-map "\M-\S-u" 'upcase-previous-word)
-(define-key global-map "\M-\S-l" 'downcase-previous-word)
-(define-key global-map "\M-\S-c" 'capitalize-previous-word)
+(defun mb-global-map-run-inferior-lisp-with-init ()
+  "Start the configured inferior Lisp with its initialization file."
+  (interactive)
+  (inferior-lisp (inferior-lisp-program-with-lispinit)))
 
-;; Fill
-(define-key global-map "\C-c\C-q" 'fill-region)
-(define-key global-map "\C-c\M-q" 'fill-region-as-paragraph)
+(defun mb-global-map-insert-command (string)
+  "Return an interactive command that inserts STRING."
+  (lambda ()
+    (interactive)
+    (insert string)))
 
-;; Global c++
-(define-key global-map "\C-c+" 'c++-mode)
-(define-key global-map "\C-cc" 'compile)
+(defun mb-global-map-increment-1 (count)
+  "Increment the thing at point by COUNT units."
+  (interactive "p")
+  (inc-thing-at-point count 1))
 
-;; Compile mode (make, grep, etc)
-(define-key global-map [(control c) (meta n)] 'next-error)
-(define-key global-map [(control c) (meta p)] 'previous-error)
-(define-key global-map [(control c) (meta <)] 'first-error)
+(defun mb-global-map-increment-2 (count)
+  "Increment the thing at point by COUNT larger units."
+  (interactive "p")
+  (inc-thing-at-point count 2))
 
-;; Buffer swaps
-(require 'smart-swap)
-(define-key global-map [(f11)] #'(lambda () (interactive) (switch-to-buffer (other-buffer))))
-(define-key global-map [(S-f11)] #'bury-buffer)
-(define-key global-map [(M-f11)] #'smart-swap)
-(define-key global-map [(control meta f11)] #'delete-window)
+(defun mb-global-map-increment-3 (count)
+  "Increment the thing at point by COUNT largest units."
+  (interactive "p")
+  (inc-thing-at-point count 3))
 
-(define-key global-map [(control tab)] #'other-window)
-(define-key global-map [(shift control tab)] #'(lambda () (interactive) (other-window -1)))
+(defun gfind-compile (pattern &optional file-extension level)
+  "Compile a gfind command for PATTERN, FILE-EXTENSION, and LEVEL."
+  (setq file-extension (or file-extension "")
+        level (or level 0))
+  (compile
+   (mapconcat #'shell-quote-argument
+              (list "gfind" "-u" (number-to-string level)
+                    pattern file-extension)
+              " ")))
 
-;; Misc use of define-key define-key global-map
-(define-key global-map [(shift f8)] 'goto-line)
-(define-key global-map [(f8)] 'shell)
-(define-key global-map [(f7)]
-  #'(lambda () (interactive) (inferior-lisp inferior-lisp-program)))
-(define-key global-map [(shift f7)]
-  #'(lambda () (interactive) (inferior-lisp (inferior-lisp-program-with-lispinit))))
-(define-key global-map [(f6)]
-  #'(lambda () (interactive) (lynx)))
-(define-key global-map [(shift f6)]
-  #'(lambda () (interactive) (ielm)))
-(define-key global-map [(f5)] 'load-file)
-(define-key global-map [(f3)] 'shrink-window)
-(define-key global-map [(f4)] 'enlarge-window)
-(define-key global-map [(shift f3)] 'shrink-window-horizontally)
-(define-key global-map [(shift f4)] 'enlarge-window-horizontally)
-(define-key global-map [(f1)] 'dic-lookup-at-point)
-(define-key global-map [(f12)] #'(lambda () (interactive) (switch-to-buffer-other-window "*scheme*") (other-window 1)))
-(define-key global-map [(f12)] #'(lambda () (interactive)
-				  (tex-compile default-directory 
-					       (concat "pdflatex \\\\nonstopmode\\\\input "
-						       "MUS3090-oppgave-370931.tex"))))
-(define-key global-map [(control f12)] #'(lambda () (interactive)
-				  (tex-compile default-directory 
-					       (concat "pdflatex \\\\input "
-						       "MUS3090-oppgave-370931.tex"))))
-
-
-
-(require 'mb-frames)
-(define-key global-map [(meta f3)] #'shrink-frame)
-(define-key global-map [(meta f4)] #'enlarge-frame)
-(define-key global-map [(shift meta f3)] #'shrink-frame-horizontally)
-(define-key global-map [(shift meta f4)] #'enlarge-frame-horizontally)
-
-
-;; Global prefix keys
-(require 'mb-print)
-(setq print-map (make-sparse-keymap "Print"))
-(define-key global-map "\C-cp" print-map)
-(define-key print-map "r" 'print-notepad-region)
-(define-key print-map "f" 'print-notepad-file)
-(define-key print-map "b" 'print-notepad-buffer)
-
-(require 'mb-insert)
-(setq insert-map (make-sparse-keymap "Insert"))
-(define-key global-map "\C-ci" insert-map)
-
-;; Delimiters
-(define-key insert-map "g" 'insert-guillemets)
-(define-key insert-map "q" 'insert-quotes)
-(define-key insert-map "\'" 'insert-single-quotes)
-(define-key insert-map "\"" 'insert-double-quotes)
-(define-key insert-map "*" 'insert-asterisks)
-(define-key insert-map "[" 'insert-square-brackets)
-(define-key insert-map "{" 'insert-curly-brackets)
-(define-key insert-map "<" 'insert-angle-brackets)
-(define-key insert-map "x" 'insert-xml-tag)
-(define-key insert-map "p" 'insert-post-scriptum)
-(define-key insert-map "b" 'insert-symbol-bullet)
-
-;; There seems to be an error with insert-n! None of these works
-;; Use standard C-x 8 ... instead for now
-(define-key insert-map "1" (insert-n "¹"))
-(define-key insert-map "2" (insert-n "²"))
-(define-key insert-map "3" (insert-n "³"))
-(define-key insert-map "0" (insert-n "°"))
-(define-key insert-map "o" (insert-n "º"))
-(define-key insert-map "a" (insert-n "ª"))
-(define-key insert-map "m" (insert-n "¯"))
-(define-key insert-map "B" (insert-n "ß"))
-(define-key insert-map "c" (insert-n "ç"))
-
-(define-key insert-map "s" 'insert-skip-quote)
-(define-key insert-map "u" 'insert-underline)
-(define-key insert-map "d" 'insert-date)
-(define-key insert-map "t" 'insert-time)
-(define-key insert-map "D" 'insert-date-and-time)
-(define-key insert-map "i" 'insert-todo-item)
-
-(define-key insert-map "e" 'insert-expression)
-
-;; Greek letters shortcut
-;; abcdefghijklmnopqrstuvwxyz
-;; αβψδεφγηιξκλμνοπ;ρστθωςχυζ
-;;   !    ! !      !   !!! 
-(setf greek-map (make-sparse-keymap "Greek"))
-(define-key global-map (kbd "C-x 8 g") greek-map)
-(cl-loop for lc across "ABCDEFGHIJKLMNOPRSTUVWXYZabcdefghijklmnoprstuvwxyz"
-      for gc across "ΑΒΨΔΕΦΓΗΙΞΚΛΜΝΟΠΡΣΤΘΩςΧΥΖαβψδεφγηιξκλμνοπρστθωςχυζ"
-      do (define-key greek-map (string lc) (insert-n (string gc))))
-
-(require 'mb-things)
-(define-key global-map [(control +)]  #'(lambda (n) (interactive "p") (inc-thing-at-point n 1)))
-(define-key global-map [(meta +)]  #'(lambda (n) (interactive "p") (inc-thing-at-point n 2)))
-(define-key global-map [(meta control +)]  #'(lambda (n) (interactive "p") (inc-thing-at-point n 3)))
-
-(require 'mb-grep)
-(setq find-map (make-sparse-keymap "Find"))
-(define-key global-map "\C-cf" find-map)
-(define-key find-map "g" 'mb-grep)
-(define-key find-map "h" 'mb-h-grep)
-(define-key find-map "c" 'mb-cpp-grep)
-(define-key find-map "a" 'mb-all-grep)
-
-(cl-defun gfind-compile (pattern &optional (file-extension "") (level 0))
-  (compile (format "gfind -u %d %s %s" level pattern file-extension)))
-;;(gfind-compile "defun")
-
-(cl-defun gfind (n)
+(defun gfind (level)
+  "Search for the symbol at point using gfind.
+With prefix LEVEL, limit the search to that directory depth."
   (interactive "P")
-  (gfind-compile
-     (or (symbol-at-point)
-	 (read-from-minibuffer "Find in files: "))
-     (file-name-extension buffer-file-name)
-     (or n 0)))
+  (let ((extension (and buffer-file-name
+                        (file-name-extension buffer-file-name))))
+    (gfind-compile
+     (or (thing-at-point 'symbol t)
+         (read-from-minibuffer "Find in files: "))
+     (or extension "")
+     (prefix-numeric-value (or level 0)))))
 
-(require 'mb-hexl)
+(defun mb-global-map--define-insertions ()
+  "Populate personal prefix maps."
+  (define-key mb-global-print-map "r" #'print-notepad-region)
+  (define-key mb-global-print-map "f" #'print-notepad-file)
+  (define-key mb-global-print-map "b" #'print-notepad-buffer)
+
+  (dolist (binding
+           '(("g" . insert-guillemets)
+             ("q" . insert-quotes)
+             ("'" . insert-single-quotes)
+             ("\"" . insert-double-quotes)
+             ("*" . insert-asterisks)
+             ("[" . insert-square-brackets)
+             ("{" . insert-curly-brackets)
+             ("<" . insert-angle-brackets)
+             ("x" . insert-xml-tag)
+             ("p" . insert-post-scriptum)
+             ("b" . insert-symbol-bullet)
+             ("s" . insert-skip-quote)
+             ("u" . insert-underline)
+             ("d" . insert-date)
+             ("t" . insert-time)
+             ("D" . insert-date-and-time)
+             ("i" . insert-todo-item)
+             ("e" . insert-expression)))
+    (define-key mb-global-insert-map (car binding) (cdr binding)))
+
+  (dolist (binding
+           '(("1" . "¹") ("2" . "²") ("3" . "³") ("0" . "°")
+             ("o" . "º") ("a" . "ª") ("m" . "¯") ("B" . "ß")
+             ("c" . "ç")))
+    (define-key mb-global-insert-map (car binding)
+                (mb-global-map-insert-command (cdr binding))))
+
+  (cl-loop for latin across
+           "ABCDEFGHIJKLMNOPRSTUVWXYZabcdefghijklmnoprstuvwxyz"
+           for greek across
+           "ΑΒΨΔΕΦΓΗΙΞΚΛΜΝΟΠΡΣΤΘΩςΧΥΖαβψδεφγηιξκλμνοπρστθωςχυζ"
+           do (define-key mb-global-greek-map (string latin)
+                          (mb-global-map-insert-command (string greek))))
+
+  (define-key mb-global-find-map "g" #'mb-grep)
+  (define-key mb-global-find-map "h" #'mb-h-grep)
+  (define-key mb-global-find-map "c" #'mb-cpp-grep)
+  (define-key mb-global-find-map "a" #'mb-all-grep))
+
+(defun mb-global-map-setup (&optional map)
+  "Install personal bindings in MAP, defaulting to `global-map'."
+  (interactive)
+  (let ((target (or map global-map)))
+    (mb-global-map--define-insertions)
+    (define-key lisp-mode-shared-map (kbd "C-c e") #'eval-buffer)
+    (define-key lisp-mode-shared-map (kbd "C-c r") #'eval-region)
+    (define-key lisp-mode-shared-map (kbd "C-c C-c") #'comment-region)
+    (define-key Info-mode-map (kbd "M-n") #'forward-paragraph)
+    (dolist (binding
+             `(("C-c C-p" . print)
+               ("M-n" . forward-paragraph)
+               ("M-p" . backward-paragraph)
+               ("C-M-S-u" . up-list)
+               ("C-M-<backspace>" . backward-kill-sexp)
+               ("M-U" . kill-paragraph)
+               ("C-<backspace>" . backward-kill-paragraph)
+               ("C-M-S-l" . lift-sexp)
+               ("C-M-m" . back-to-indentation-and-indent)
+               ("M-#" . mark-whole-word)
+               ("M-T" . transpose-paragraphs)
+               ("C-M-S-T" . transpose-sentences)
+               ("M-S-u" . upcase-previous-word)
+               ("M-S-l" . downcase-previous-word)
+               ("M-S-c" . capitalize-previous-word)
+               ("C-c C-q" . fill-region)
+               ("C-c M-q" . fill-region-as-paragraph)
+               ("C-c +" . c++-mode)
+               ("C-c c" . compile)
+               ("C-c M-n" . next-error)
+               ("C-c M-p" . previous-error)
+               ("C-c M-<" . first-error)
+               ("<f11>" . mb-global-map-switch-to-other-buffer)
+               ("S-<f11>" . bury-buffer)
+               ("M-<f11>" . smart-swap)
+               ("C-M-<f11>" . delete-window)
+               ("C-<tab>" . other-window)
+               ("C-S-<tab>" . mb-global-map-other-window-backward)
+               ("S-<f8>" . goto-line)
+               ("<f8>" . shell)
+               ("<f7>" . mb-global-map-run-inferior-lisp)
+               ("S-<f7>" . mb-global-map-run-inferior-lisp-with-init)
+               ("<f6>" . lynx)
+               ("S-<f6>" . ielm)
+               ("<f5>" . load-file)
+               ("<f3>" . shrink-window)
+               ("<f4>" . enlarge-window)
+               ("S-<f3>" . shrink-window-horizontally)
+               ("S-<f4>" . enlarge-window-horizontally)
+               ("<f1>" . dic-lookup-at-point)
+               ("M-<f3>" . shrink-frame)
+               ("M-<f4>" . enlarge-frame)
+               ("M-S-<f3>" . shrink-frame-horizontally)
+               ("M-S-<f4>" . enlarge-frame-horizontally)
+               ("C-c p" . ,mb-global-print-map)
+               ("C-c i" . ,mb-global-insert-map)
+               ("C-x 8 g" . ,mb-global-greek-map)
+               ("C-c f" . ,mb-global-find-map)
+               ("C-+" . mb-global-map-increment-1)
+               ("M-+" . mb-global-map-increment-2)
+               ("C-M-+" . mb-global-map-increment-3)))
+      (define-key target (kbd (car binding)) (cdr binding)))
+    target))
 
 (provide 'global-map)
+
+;;; global-map.el ends here
