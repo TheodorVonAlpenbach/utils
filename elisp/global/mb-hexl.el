@@ -1,119 +1,162 @@
+;;; mb-hexl.el --- Hexadecimal conversion helpers -*- lexical-binding: t; -*-
+
+;;; Code:
+
 (require 'hexl)
+(require 'subr-x)
 
-(defvar hex-to-int-list 
-  '((?0 . 0)
-    (?1 . 1)
-    (?2 . 2)
-    (?3 . 3)
-    (?4 . 4)
-    (?5 . 5)
-    (?6 . 6)
-    (?7 . 7)
-    (?8 . 8)
-    (?9 . 9)
-    (?a . 10)
-    (?b . 11)
-    (?c . 12)
-    (?d . 13)
-    (?e . 14)
-    (?f . 15)))
+(defconst hex-to-int-list
+  '((?0 . 0) (?1 . 1) (?2 . 2) (?3 . 3) (?4 . 4)
+    (?5 . 5) (?6 . 6) (?7 . 7) (?8 . 8) (?9 . 9)
+    (?a . 10) (?b . 11) (?c . 12)
+    (?d . 13) (?e . 14) (?f . 15))
+  "Compatibility table mapping lowercase hexadecimal digits to values.")
 
-(cl-defun hexl-char-to-int (char) "" (cdr (assoc char hex-to-int-list)))
-(cl-defun hexl-int-to-char (int) "" (car (rassoc char hex-to-int-list)))
+(defconst hexl-be-byte-map-list
+  '((0 . 7) (1 . 6) (2 . 5) (3 . 4)
+    (4 . 3) (5 . 2) (6 . 1) (7 . 0))
+  "Character index map for reversed big-endian display order.")
 
-(defvar hexl-be-byte-map-list
-  '((0 . 7) (1 . 6) (2 . 5) (3 . 4) (4 . 3) (5 . 2) (6 . 1) (7 . 0)))
+(defconst hexl-le-byte-map-list
+  '((0 . 1) (1 . 0) (2 . 3) (3 . 2)
+    (4 . 5) (5 . 4) (6 . 7) (7 . 6))
+  "Character index map for little-endian byte display order.")
 
-(defvar hexl-le-byte-map-list
-  '((0 . 1) (1 . 0) (2 . 3) (3 . 2) (4 . 5) (5 . 4) (6 . 7) (7 . 6)))
+(defun mb-hexl-character-to-integer (character)
+  "Return the integer represented by hexadecimal CHARACTER."
+  (unless (and (characterp character)
+               (string-match-p
+                "\\`[[:xdigit:]]\\'"
+                (char-to-string character)))
+    (user-error "Not a hexadecimal digit: %S" character))
+  (hexl-hex-string-to-integer (char-to-string character)))
 
-(cl-defun hexl-ith-char-be (s i) "returns char I of S in BE"
-  (aref s (cdr (assoc i hexl-be-byte-map-list))))
+(defalias 'hexl-char-to-int #'mb-hexl-character-to-integer)
 
-(cl-defun hexl-ith-char-be (s i) "returns char I of S in LE"
-  (aref s (cdr (assoc i hexl-le-byte-map-list))))
+(defun mb-hexl-integer-to-character (integer)
+  "Return the lowercase hexadecimal character for INTEGER."
+  (unless (and (integerp integer) (<= 0 integer) (< integer 16))
+    (user-error "Hexadecimal digit value must be between 0 and 15"))
+  (aref (format "%x" integer) 0))
 
-(cl-defun 2* (number) "Return NUMBER * 2. Should become macro" (* 2 number))
-(cl-defun 2+ (number) "Return NUMBER + 2. Should become macro" (+ 2 number))
+(defalias 'hexl-int-to-char #'mb-hexl-integer-to-character)
 
-(cl-defun hexl-to-int-byte (hex)
-  "Returns HEX, which must be a string of two characters, as int."
-  (+ (* 16 (hexl-char-to-int (aref hex 0)))
-     (hexl-char-to-int (aref hex 1))))
+(defun mb-hexl-indexed-character (string index index-map)
+  "Return character from STRING at INDEX translated by INDEX-MAP."
+  (unless (= (length string) 8)
+    (user-error "Indexed hexadecimal string must contain eight characters"))
+  (unless (and (integerp index) (<= 0 index) (< index 8))
+    (user-error "Character index must be between 0 and 7"))
+  (aref string (alist-get index index-map)))
 
-(cl-defun hexl-split-to-bytes (s) "Splits abcd to '((ab) (bc))."
-  (let ((bytes) (len (/ (length s) 2)))
-    (dotimes (i len bytes)
-      (setq bytes (cons (hexl-to-int-byte
-			 (substring s (2* i) (2+ (2* i)))) bytes)))))
+(defun mb-hexl-ith-character-big-endian (string index)
+  "Return INDEXed character of STRING in reversed big-endian order."
+  (mb-hexl-indexed-character string index hexl-be-byte-map-list))
 
-(cl-defun hexl-string-to-int (string endian)
-  "Converts little-endian 4 B hexadecimal integer string to int.
-Requires thus that string is 8 characters long
-Ex: \"abcd efgh\" equals integer badcfehg with base 16"
-  (let ((bytes (hexl-split-to-bytes (remove-spaces string))) (sum 0))
-    (if (string= endian "le") (setq bytes (reverse bytes)))
-    (dotimes (i (length bytes) sum)
-      (setq sum (+ sum (* (expt 256 i) (elt bytes i)))))))
+(defalias 'hexl-ith-char-be
+  #'mb-hexl-ith-character-big-endian)
 
-;(hexl-string-to-int  "0000 0030")
+(defun mb-hexl-ith-character-little-endian (string index)
+  "Return INDEXed character of STRING in little-endian byte order."
+  (mb-hexl-indexed-character string index hexl-le-byte-map-list))
 
-(cl-defun remove-spaces (string)
-  "Returns copy of STRING with space characters removed."
-  (remove 32 string))
+(defalias 'hexl-ith-char-le
+  #'mb-hexl-ith-character-little-endian)
 
-(cl-defun hexl-region-to-int-le (beg end)
-  "Interprets region as hexl-string and converts it to LE integer"
+(defun mb-hexl-byte-to-integer (hex)
+  "Return the integer represented by the two-character string HEX."
+  (unless (and (stringp hex)
+               (string-match-p "\\`[[:xdigit:]]\\{2\\}\\'" hex))
+    (user-error "Hexadecimal byte must contain exactly two digits"))
+  (hexl-hex-string-to-integer hex))
+
+(defalias 'hexl-to-int-byte #'mb-hexl-byte-to-integer)
+
+(defun mb-hexl-remove-whitespace (string)
+  "Return STRING without whitespace characters."
+  (replace-regexp-in-string "[[:space:]]+" "" string))
+
+(defalias 'remove-spaces #'mb-hexl-remove-whitespace)
+
+(defun mb-hexl-split-to-bytes (string)
+  "Convert hexadecimal STRING to a list of byte values."
+  (let ((hex (mb-hexl-remove-whitespace string)))
+    (unless (zerop (% (length hex) 2))
+      (user-error "Hexadecimal string must contain complete bytes"))
+    (let ((offset 0)
+          bytes)
+      (while (< offset (length hex))
+        (push
+         (mb-hexl-byte-to-integer
+          (substring hex offset (+ offset 2)))
+         bytes)
+        (setq offset (+ offset 2)))
+      (nreverse bytes))))
+
+(defalias 'hexl-split-to-bytes #'mb-hexl-split-to-bytes)
+
+(defun mb-hexl--little-endian-p (endian)
+  "Return non-nil when ENDIAN denotes little-endian order."
+  (cond
+   ((memq endian '(le :le little :little)) t)
+   ((member endian '("le" "little")) t)
+   ((or (null endian)
+        (memq endian '(be :be big :big))
+        (member endian '("be" "big")))
+    nil)
+   (t
+    (user-error "Unknown byte order: %S" endian))))
+
+(defun mb-hexl-string-to-integer (string &optional endian)
+  "Convert hexadecimal STRING to an integer using ENDIAN byte order.
+ENDIAN defaults to big-endian and accepts `be', `big', `le', and
+`little' as symbols, keywords, or strings."
+  (let ((bytes (mb-hexl-split-to-bytes string))
+        (little-endian (mb-hexl--little-endian-p endian))
+        (result 0))
+    (when little-endian
+      (setq bytes (reverse bytes)))
+    (dolist (byte bytes result)
+      (setq result (+ (* result 256) byte)))))
+
+(defalias 'hexl-string-to-int #'mb-hexl-string-to-integer)
+
+(defun mb-hexl-region-to-integer (beginning end endian)
+  "Interpret region from BEGINNING to END using ENDIAN byte order."
+  (let ((value
+         (mb-hexl-string-to-integer
+          (buffer-substring-no-properties beginning end)
+          endian)))
+    (message "%d" value)
+    value))
+
+(defun hexl-region-to-int-le (beginning end)
+  "Interpret the region as a little-endian hexadecimal integer."
   (interactive "r")
-  (let ((s (buffer-substring beg end)))
-    (message "%d" (hexl-string-to-int s "le"))))
+  (mb-hexl-region-to-integer beginning end :little))
 
-(cl-defun hexl-region-to-int-be (beg end)
-  "Interprets region as hexl-string and converts it to BE integer"
+(defun hexl-region-to-int-be (beginning end)
+  "Interpret the region as a big-endian hexadecimal integer."
   (interactive "r")
-  (let ((s (buffer-substring beg end)))
-    (message "%d" (hexl-string-to-int s "be"))))
+  (mb-hexl-region-to-integer beginning end :big))
 
-(define-key hexl-mode-map "\C-cl" 'hexl-region-to-int-le)
-(define-key hexl-mode-map "\C-cb" 'hexl-region-to-int-be)
+(defun mb-hexl-integer-to-string (integer)
+  "Return nonnegative INTEGER as a lowercase hexadecimal string."
+  (unless (and (integerp integer) (>= integer 0))
+    (user-error "Hexadecimal conversion requires a nonnegative integer"))
+  (format "%x" integer))
 
-;other stuff
+(defun hexl-int-to-hexl (integer)
+  "Display and return INTEGER as a lowercase hexadecimal string."
+  (interactive "nInteger: ")
+  (let ((hex (mb-hexl-integer-to-string integer)))
+    (message "%s" hex)
+    hex))
 
-(cl-defun mb-point () "" (interactive) (message "%d" (point)))
-(cl-defun mb-buffer-substring (beg end) "" (interactive "r") 
-  (message "%s" (buffer-substring beg end)))
-
-;;(hexl-string-to-int (remove 32 "0000 270a") "be")
-;;(hexl-string-to-int "4dd6" "le")
-
-;;(setq idar "idar")
-;;(append idar nil)
-
-(cl-defun hexl-int-to-hexl (int) "Converts int to hex string"
-  (interactive "ninteger: ")
-  (message "%x" int))
-
-(define-key hexl-mode-map "\C-t" 'hexl-int-to-hexl)
-
-;(hexl-int-to-hexl 100) => "64"
-;(hexl-int-to-hexl 10) => "a"
-    
-;(hexl-string-to-int-le "0000270a") => 7471104
-;(hexl-string-to-int-be "000389b4") => 231860
-;(hexl-string-to-int-be "0071")
-;(hexl-string-to-int-be "0077")
-;(hexl-string-to-int-be "0065")
-;(hexl-string-to-int-le "1a") => 161
-;(hexl-string-to-int-be "1a") => 26
-;(hexl-string-to-int-be "0001c4da") => 115930 (* 115930 2) => 231860
-
-;(debug-on-entry 'hexl-string-to-int-be)
-;(hexl-string-to-int-le "03000000") 3+0+0+0
-;(hexl-string-to-int-be "0100") 256 + 0
-;(hexl-split-to-bytes "0102")
-;(reverse (hexl-split-to-bytes "0102"))
-;(hexl-to-int-byte "01")
-;(hexl-char-to-int (aref "0a" 1))
-;(hexl-string-to-int "03 00 00 00" nil) 3+0+0+0
+(define-key hexl-mode-map (kbd "C-c l") #'hexl-region-to-int-le)
+(define-key hexl-mode-map (kbd "C-c b") #'hexl-region-to-int-be)
+(define-key hexl-mode-map (kbd "C-t") #'hexl-int-to-hexl)
 
 (provide 'mb-hexl)
+
+;;; mb-hexl.el ends here

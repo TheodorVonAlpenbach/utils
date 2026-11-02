@@ -17,6 +17,7 @@
   "global/test-mb-buffer.el"
   "global/test-mb-frames.el"
   "global/test-LS.el"
+  "global/test-mb-hexl.el"
     "global/test-mb-indent.el"
   "global/test-mb-insert.el"
   "global/test-mb-print.el"

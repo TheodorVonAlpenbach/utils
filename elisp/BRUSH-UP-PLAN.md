@@ -291,6 +291,10 @@ The first subset is intentionally conservative:
   ranges, day and item parsing, log-section errors, rounded daily hours,
   payment estimates, arrival and departure insertion, project lookup, buffer
   restrictions, and compatibility aliases.
+* [`test-mb-hexl.el`](./global/test-mb-hexl.el): thirteen ERT tests for
+  hexadecimal digits and bytes, indexed byte orders, whitespace and input
+  validation, big- and little-endian integers, region commands, integer
+  formatting, retained Hexl-mode bindings, and compatibility aliases.
 * [`test-list-interval.el`](./prototypes/geometry/test-list-interval.el): nine ERT tests for the
   closed-interval helpers, including construction and accessors.
 * [`test-list-envelope.el`](./prototypes/geometry/test-list-envelope.el): nine ERT tests for
@@ -493,9 +497,9 @@ physics, geometry, search, XML, anaphora, general, list, sequence, string,
 time, ISO-time, and table modules are independently loadable. Their validation
 comprises:
 
-* a clean `emacs -Q` load of all fifty-nine utility and mode-extension
+* a clean `emacs -Q` load of all sixty utility and mode-extension
   features plus the ERT tooling;
-* 572 passing ERT tests from the batch entry point;
+* 585 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -736,6 +740,22 @@ the complete work-log feature; its arrival and correctly spelled departure
 commands are autoloaded on first use, while the old `depature` spelling remains
 an alias. Twelve tests cover the retained behavior without touching real work
 logs or project directories.
+
+[`mb-hexl.el`](./global/mb-hexl.el) now loads independently with lexical
+binding and delegates validated hexadecimal parsing to Emacs's maintained
+`hexl-hex-string-to-integer`. The broken integer-to-digit implementation no
+longer references an unbound variable, uppercase input is accepted, and
+invalid digits, byte lengths, indices, byte orders, and negative integers
+produce explicit `user-error` failures.
+
+The duplicated `hexl-ith-char-be` definition has been separated into working
+big- and little-endian functions. Byte splitting now returns natural input
+order, with endian reversal handled explicitly by integer conversion. Region
+commands return their numeric result in addition to displaying it. Generic
+debug commands and the private `2*`/`2+` arithmetic helpers were removed as
+unreferenced obsolete code. Existing Hexl-mode bindings are deliberately
+preserved for the later binding review. Thirteen tests cover the retained
+conversion and compatibility surface.
 
 [`global-map.el`](./global/global-map.el) now loads independently with lexical
 binding and does not mutate global keys until `mb-global-map-setup` is called.
