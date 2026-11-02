@@ -266,6 +266,10 @@ The first subset is intentionally conservative:
   replacement errors, returned kill text, repeated commands, omission markers,
   restored Unicode symbols, bullet spacing, region prefixes, underlines,
   object insertion, provide forms, todo items, and alphabet ownership.
+* [`test-mb-print.el`](./global/test-mb-print.el): nine ERT tests for legacy
+  aliases, configured process invocation, missing files and programs, nonzero
+  process status, temporary-file cleanup on success and failure, and visited
+  versus unvisited buffer dispatch.
 * [`test-list-interval.el`](./prototypes/geometry/test-list-interval.el): nine ERT tests for the
   closed-interval helpers, including construction and accessors.
 * [`test-list-envelope.el`](./prototypes/geometry/test-list-envelope.el): nine ERT tests for
@@ -468,9 +472,9 @@ physics, geometry, search, XML, anaphora, general, list, sequence, string,
 time, ISO-time, and table modules are independently loadable. Their validation
 comprises:
 
-* a clean `emacs -Q` load of all fifty-three utility and mode-extension
+* a clean `emacs -Q` load of all fifty-four utility and mode-extension
   features plus the ERT tooling;
-* 509 passing ERT tests from the batch entry point;
+* 518 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -613,6 +617,21 @@ tested implementation remains in
 autoload every retained insertion command they expose, avoiding both eager
 loading and the startup-order failure that prompted this migration. Seventeen
 tests cover the repaired command contracts.
+
+[`mb-print.el`](./global/mb-print.el) now loads independently with lexical
+binding and provides namespaced commands with compatibility aliases for the
+three `print-notepad-*` names retained by the global map. The external program,
+arguments, and output buffer are customizable, while Notepad's `/p` convention
+remains the default. Missing or unreadable files, absent executables, and
+nonzero process statuses now produce explicit `user-error` failures.
+
+Region and non-file buffer printing use `make-temp-file` rather than a fixed
+relative `temp-print-notepad-buffer` name. `unwind-protect` removes the file
+after both successful and failed printing, avoiding collisions, stale files,
+and failures in read-only working directories. The feature is provided only
+after all definitions are loaded, and the global map autoloads the legacy
+commands on first use. Nine tests mock the external process boundary and
+verify dispatch and cleanup without invoking a printer.
 
 [`global-map.el`](./global/global-map.el) now loads independently with lexical
 binding and does not mutate global keys until `mb-global-map-setup` is called.

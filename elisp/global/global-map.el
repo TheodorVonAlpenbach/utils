@@ -7,6 +7,9 @@
 
 (autoload 'lift-sexp "mb-sexp" nil t)
 (autoload 'mark-whole-word "mb-paragraph" nil t)
+(autoload 'print-notepad-buffer "mb-print" nil t)
+(autoload 'print-notepad-file "mb-print" nil t)
+(autoload 'print-notepad-region "mb-print" nil t)
 (autoload 'insert-angle-brackets "mb-insert" nil t)
 (autoload 'insert-asterisks "mb-insert" nil t)
 (autoload 'insert-curly-brackets "mb-insert" nil t)
@@ -33,9 +36,6 @@
 (declare-function mb-cpp-grep "mb-grep")
 (declare-function mb-grep "mb-grep")
 (declare-function mb-h-grep "mb-grep")
-(declare-function print-notepad-buffer "mb-print")
-(declare-function print-notepad-file "mb-print")
-(declare-function print-notepad-region "mb-print")
 
 (defvar inferior-lisp-program)
 

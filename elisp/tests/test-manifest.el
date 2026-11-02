@@ -16,6 +16,7 @@
   "global/test-global-map.el"
     "global/test-mb-indent.el"
   "global/test-mb-insert.el"
+  "global/test-mb-print.el"
     "mode-extensions/test-backus-naur-mode.el"
     "mode-extensions/test-mb-doc-view.el"
     "mode-extensions/test-mb-emacs-lisp.el"
