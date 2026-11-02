@@ -1,272 +1,293 @@
-;;; -*- lexical-binding: t; -*-
-(require 'mb-utils-strings)
+;;; mb-insert.el --- Personal insertion commands -*- lexical-binding: t; coding: utf-8; -*-
 
-(cl-defun insert-parentheses* (arg &key (left ?\() (right ?\))
-				   (ensure-space :around))
-  "Extension of insert-parentheses. Enclose following ARG sexps in
-parentheses. Leave point after open-paren. A negative ARG encloses the
-preceding ARG sexps instead. No argument is equivalent to zero: just
-insert `()' and leave point between. If :ENSURE-SPACE is :AROUND :BEFORE
-or :AFTER this command also inserts a space before and after, before
-only, or left only depending on the surrounding characters. If
-:ENSURE-SPACE is :NONE, no such insertion is performed."
-  (unless arg (setq arg 0))
-  (cond ((> arg 0) (skip-chars-forward " \t"))
-	((< arg 0) (forward-sexp arg) (setq arg (- arg))))
-  (and (cl-member ensure-space '(:before :around) :test #'equal)
-       (not (bobp))
-       (memq (char-syntax (preceding-char)) '(?w ?_ ?\) ))
-       (insert " "))
+;;; Commentary:
+
+;; Commands for inserting dates, paired delimiters, repeated symbols, line
+;; prefixes, underlines, and provide forms.
+
+;;; Code:
+
+(require 'cl-lib)
+(require 'subr-x)
+(require 'mb-things)
+(require 'mb-utils-buffer)
+(require 'mb-utils-iso-time)
+
+(defvar mb-default-underline-pattern "="
+  "Pattern used by `insert-underline' when the requested pattern is empty.")
+
+(cl-defun insert-parentheses*
+    (arg &key (left ?\() (right ?\)) (ensure-space :around))
+  "Enclose ARG sexps between LEFT and RIGHT.
+Leave point after LEFT.  A negative ARG encloses preceding sexps; nil
+or zero inserts an empty pair.  ENSURE-SPACE may be `:around',
+`:before', `:after', or `:none'."
+  (setq arg (prefix-numeric-value (or arg 0)))
+  (cond
+   ((> arg 0)
+    (skip-chars-forward " \t"))
+   ((< arg 0)
+    (forward-sexp arg)
+    (setq arg (- arg))))
+  (when (and (memq ensure-space '(:before :around))
+             (not (bobp))
+             (memq (char-syntax (preceding-char)) '(?w ?_ ?\))))
+    (insert " "))
   (insert left)
   (save-excursion
-    (or (eq arg 0) (forward-sexp arg))
+    (unless (zerop arg)
+      (forward-sexp arg))
     (insert right)
-    (and (cl-member ensure-space '(:after :around))
-	 (not (eobp))
-	 (memq (char-syntax (following-char)) '(?w ?_ ?\( ))
-	 (insert " "))))
-;;(insert-parentheses* 1 :ensure-space :around)
+    (when (and (memq ensure-space '(:after :around))
+               (not (eobp))
+               (memq (char-syntax (following-char)) '(?w ?_ ?\()))
+      (insert " "))))
 
-(cl-defun insert-date (prefix)
-  "Inserts today's date string at point."
+(defun insert-date (prefix)
+  "Insert today's ISO date.
+With PREFIX, insert date and time; a numeric prefix of 3 includes
+seconds."
   (interactive "P")
   (insert
    (if prefix
-     (iso-date-and-time
-      :with-seconds (and (numberp prefix)
-			 (= prefix 3))) 
+       (iso-date-and-time
+        :with-seconds (and (numberp prefix) (= prefix 3)))
      (iso-date))))
-;;(insert-date 3)
 
-(cl-defun insert-time (prefix)
-  "Inserts today's date string at point."
+(defun insert-time (prefix)
+  "Insert the current ISO time.
+A numeric PREFIX of 3 includes seconds."
   (interactive "P")
-  (insert (iso-time :with-seconds (and (numberp prefix) 
-				       (= prefix 3)))))
+  (insert (iso-time :with-seconds
+                    (and (numberp prefix) (= prefix 3)))))
 
-(cl-defun insert-date-and-time (prefix)
-  "Inserts today's date string at point."
-  (interactive)
-  (insert (iso-date-and-time :with-seconds (and (numberp prefix) 
-						(= prefix 3)))))
+(defun insert-date-and-time (&optional prefix)
+  "Insert the current ISO date and time.
+A numeric PREFIX of 3 includes seconds."
+  (interactive "P")
+  (insert (iso-date-and-time
+           :with-seconds (and (numberp prefix) (= prefix 3)))))
 
-(cl-defun insert-full-date ()
-  "Inserts today's date string at point."
+(defun insert-full-date ()
+  "Insert today's full date."
   (interactive)
   (insert (full-date)))
 
-(cl-defun insert-todo-item ()
-  "Inserts a new item for a todo list."
+(defun insert-todo-item ()
+  "Insert a dated item at the beginning of the current line."
   (interactive)
-  (beginning-of-line 1)
-  (insertf "* %s \n" (short-date))
+  (beginning-of-line)
+  (insert (format "* %s \n" (short-date)))
   (end-of-line 0))
 
-(cl-defun iso-to-short-date-at-point ()
-  "Converts iso-date at point to short date."
+(defun iso-to-short-date-at-point ()
+  "Replace the ISO date at point with its short representation."
   (interactive)
-  (apply #'overwrite-region
-    (short-date (date-at-point t)) (thing-at-point-bounds-of-date t)))
+  (let ((date (date-at-point t))
+        (bounds (thing-at-point-bounds-of-date t)))
+    (unless (and date bounds)
+      (user-error "No ISO date at point"))
+    (overwrite-region (short-date date)
+                      (cl-first bounds) (cl-second bounds))))
 
-;; manipulation
-(cl-defun kill-sexp* (n)
-  "Kills sexp at point and returns it as a string. Probably better to
-use kill-ring directly, but not now."
-  (backward-kill-sexp n)
-  (first kill-ring))
-;;(get-text-property 0 1)
+(defun kill-sexp* (count)
+  "Kill COUNT sexps before point and return the killed text."
+  (backward-kill-sexp count)
+  (current-kill 0 t))
 
-(cl-defun insert-quotes (n)
-  "Inserts quotes \(`'\) at point. See `insert-parentheses' for N."
+(defun insert-quotes (count)
+  "Insert a backtick/apostrophe pair around COUNT sexps."
   (interactive "P")
-  (insert-parentheses* n :left ?\` :right ?\'))
+  (insert-parentheses* count :left ?` :right ?'))
 
-(cl-defun insert-single-quotes (n)
-  "Inserts pair of single quotes at point. See `insert-parentheses' for N."
+(defun insert-single-quotes (count)
+  "Insert single quotes around COUNT sexps."
   (interactive "P")
-  (insert-parentheses* n :left ?' :right ?'))
+  (insert-parentheses* count :left ?' :right ?'))
 
-(cl-defun insert-double-quotes (n)
-  "Inserts pair of double quotes at point. See `insert-parentheses' for N."
+(defun insert-double-quotes (count)
+  "Insert double quotes around COUNT sexps."
   (interactive "P")
-  (insert-parentheses* n :left ?\" :right ?\"))
+  (insert-parentheses* count :left ?\" :right ?\"))
 
-(cl-defun insert-asterisks (n)
-  "Inserts pair of asterisks at point. See `insert-parentheses' for N."
+(defun insert-asterisks (count)
+  "Insert asterisks around COUNT sexps."
   (interactive "P")
-  (insert-parentheses* n :left ?* :right ?*))
+  (insert-parentheses* count :left ?* :right ?*))
 
-(cl-defun insert-guillemets (n)
-  "Inserts «» at point. See `insert-parentheses' for N."
+(defun insert-guillemets (count)
+  "Insert guillemets around COUNT sexps."
   (interactive "P")
-  (insert-parentheses* n :left ?\« :right ?\»))
+  (insert-parentheses* count :left ?Â« :right ?Â»))
 
-(cl-defun insert-square-brackets (n)
-  "Inserts \[\] at point. See `insert-parentheses' for N."
+(defun insert-square-brackets (count)
+  "Insert square brackets around COUNT sexps."
   (interactive "P")
-  (insert-parentheses* n :left ?\[ :right ?\] :ensure-space :after))
+  (insert-parentheses* count :left ?\[ :right ?\] :ensure-space :after))
 
-(cl-defun insert-curly-brackets (n)
-  "Inserts \{\} at point. See `insert-parentheses' for N."
+(defun insert-curly-brackets (count)
+  "Insert curly brackets around COUNT sexps."
   (interactive "P")
-  (insert-parentheses* n :left ?{ :right ?}))
+  (insert-parentheses* count :left ?{ :right ?}))
 
-(cl-defun insert-angle-brackets (n)
-  "Inserts \<\> at point. See `insert-parentheses' for N."
+(defun insert-angle-brackets (count)
+  "Insert angle brackets around COUNT sexps."
   (interactive "P")
-  (insert-parentheses* n :left ?< :right ?>))
+  (insert-parentheses* count :left ?< :right ?>))
 
-(cl-defun insert-dollar-brackets (n)
-  "Inserts $$ at point. See `insert-parentheses' for N."
+(defun insert-dollar-brackets (count)
+  "Insert dollar signs around COUNT sexps."
   (interactive "P")
-  (insert-parentheses* n :left ?$ :right ?$))
+  (insert-parentheses* count :left ?$ :right ?$))
 
-(cl-defun insert-xml-tag (n tag)
-  "Inserts <TAG></TAG> around point."
+(defun insert-xml-tag (count tag)
+  "Insert <TAG></TAG> around COUNT sexps."
   (interactive "P\nsTag: ")
-  (insert-parentheses* n :left (format "<%s>" tag) :right (format "</%s>" tag)))
+  (insert-parentheses* count
+                       :left (format "<%s>" tag)
+                       :right (format "</%s>" tag)))
 
-(cl-defun insert-skip-quote (n)
-  "Inserts \[...\] at point. Used to show that a part of quoted text
-is skipped. See `insert-parentheses' for N."
-  (interactive "P")
-  (insert "[...]"))
+(defun mb-insert-repeat (string &optional count)
+  "Insert STRING COUNT times, defaulting to once."
+  (dotimes (_ (max 0 (or count 1)))
+    (insert string)))
 
-(cl-defun insert-post-scriptum ()
-  "Inserts post scriptum delimiters at point."
+(defun insert-skip-quote (&optional count)
+  "Insert COUNT omission markers, defaulting to one."
+  (interactive "p")
+  (mb-insert-repeat "[...]" count))
+
+(defun insert-post-scriptum ()
+  "Insert post scriptum and deinde scriptum delimiters."
   (interactive)
   (insert "\nP.S. \nD.S.")
   (backward-char 5))
 
-(defmacro insert-n (x)
-  "Should provide doc, but it is more difficult than you would think!
-X should evaluate to a string designator."
-  (with-gensyms (string-designator)
-    `(let ((,string-designator ,x))
-       (lambda (&optional n)
-	 (interactive "P")
-	 (cl-loop repeat (or n 1)
-	   do (insert (sstring ,string-designator)))))))
-;;(funcall (insert-n '¹) 2)
-;;(funcall (insert-n "qwe") 2)
+(defun insert-n (object)
+  "Return an interactive command that inserts OBJECT repeatedly.
+OBJECT is converted with `format' using the %s directive."
+  (let ((string (format "%s" object)))
+    (lambda (&optional count)
+      (interactive "p")
+      (mb-insert-repeat string count))))
 
-(cl-defun insert-symbol-sup1 (n)
-  "Inserts N superscript 1s (¹) at point."
-  (interactive "P")
-  (dotimes (i (or n 1)) (insert ?¹)))
+(defun insert-symbol-sup1 (&optional count)
+  "Insert COUNT superscript ones."
+  (interactive "p")
+  (mb-insert-repeat "Â¹" count))
 
-(cl-defun insert-symbol-sup2 (n)
-  "Inserts N superscript 2s (²) at point."
-  (interactive "P")
-  (dotimes (i (or n 1)) (insert ?²)))
+(defun insert-symbol-sup2 (&optional count)
+  "Insert COUNT superscript twos."
+  (interactive "p")
+  (mb-insert-repeat "Â²" count))
 
-(cl-defun insert-symbol-sup3 (n)
-  "Inserts N superscript 3s (³) at point."
-  (interactive "P")
-  (dotimes (i (or n 1)) (insert ?³)))
+(defun insert-symbol-sup3 (&optional count)
+  "Insert COUNT superscript threes."
+  (interactive "p")
+  (mb-insert-repeat "Â³" count))
 
-(cl-defun insert-symbol-deg (n)
-  "Inserts N degree signs (°) at point."
-  (interactive "P")
-  (dotimes (i (or n 1)) (insert ?°)))
+(defun insert-symbol-deg (&optional count)
+  "Insert COUNT degree signs."
+  (interactive "p")
+  (mb-insert-repeat "Â°" count))
 
-(cl-defun insert-symbol-ordm (n)
-  "Inserts N masculine ordinals (º) at point.
-This function is obsolete. Use C-x 8 _ o instead."
-  (interactive "P")
-  (dotimes (i (or n 1)) (insert ?º)))
+(defun insert-symbol-ordm (&optional count)
+  "Insert COUNT masculine ordinal indicators."
+  (interactive "p")
+  (mb-insert-repeat "Âº" count))
 
-(cl-defun insert-symbol-ordf (n)
-  "Inserts N feminine ordinals (ª) at point.
-This function is obsolete. Use C-x 8 _ a instead."
-  (interactive "P")
-  (dotimes (i (or n 1)) (insert ?ª)))
+(defun insert-symbol-ordf (&optional count)
+  "Insert COUNT feminine ordinal indicators."
+  (interactive "p")
+  (mb-insert-repeat "Âª" count))
 
-(cl-defun insert-symbol-macr (n)
-  "Inserts N spacing macrons at point."
-  (interactive "P")
-  (dotimes (i (or n 1)) (insert ?¯)))
+(defun insert-symbol-macr (&optional count)
+  "Insert COUNT spacing macrons."
+  (interactive "p")
+  (mb-insert-repeat "Â¯" count))
 
-(cl-defun insert-symbol-bullet (n &optional without-luft-p)
-  "Inserts N round filled bullets at point.
+(defun insert-symbol-bullet (&optional count without-space-p)
+  "Insert COUNT bullets.
+Unless WITHOUT-SPACE-P is non-nil, ensure one following space."
+  (interactive "p")
+  (mb-insert-repeat "Â·" count)
+  (unless without-space-p
+    (just-one-space)))
 
-By default, also ensure just one space to the right of bullet. This
-behaviour can be overriden by setting optional WITHOUT-LUFT-P to non-nil."
-  (interactive "P")
-  (dotimes (i (or n 1)) (insert ?·))
-  (just-one-space))
+(defun insert-german-double-s (&optional count)
+  "Insert COUNT German sharp-s characters."
+  (interactive "p")
+  (mb-insert-repeat "ÃŸ" count))
 
-(cl-defun insert-german-double-s (n)
-  "Inserts German double s at point."
-  (interactive "P")
-  (dotimes (i (or n 1)) (insert ?ß)))
+(defun insert-c-cedilla (&optional count)
+  "Insert COUNT lowercase c-cedilla characters."
+  (interactive "p")
+  (mb-insert-repeat "Ã§" count))
 
-(cl-defun insert-c-cedilla (n)
-  "Inserts c with cedilla (ç) at point."
-  (interactive "P")
-  (dotimes (i (or n 1)) (insert ?ç)))
+(defun insert-1/2 (&optional count)
+  "Insert COUNT one-half characters."
+  (interactive "p")
+  (mb-insert-repeat "Â½" count))
 
-(cl-defun insert-1/2 (n)
-  "Inserts c with cedilla (ç) at point."
-  (interactive "P")
-  (dotimes (i (or n 1)) (insert ?½)))
-
-
-(defvar mb-default-underline-pattern "=")
-
-(cl-defun insert-underline (pattern)
-  "Underlines the current line with a string of multiple concatenated
-PATTERNs. The underline is inserted imediately after current line and
-has the same length as current line."
-  (interactive "*sUnderline pattern: " )
-  (let ((len (last-column))
-	(line pattern))
-    (if (string= line "") (setq line mb-default-underline-pattern))
-    (while (< (length line) len)
+(defun insert-underline (pattern)
+  "Underline the current line using repetitions of PATTERN.
+An empty PATTERN uses `mb-default-underline-pattern'."
+  (interactive "*sUnderline pattern: ")
+  (let* ((length (last-column))
+         (unit (if (string-empty-p pattern)
+                   mb-default-underline-pattern
+                 pattern))
+         (line unit))
+    (while (< (length line) length)
       (setq line (concat line line)))
     (newline)
-    (insert (substring line 0 len))))
-;;(insert-underline "hallo paa do")
+    (insert (substring line 0 length))))
 
-(cl-defun insert-prefix-region (beg end &optional prefix)
-  "Inserts PREFIX at beginning of each line in region. Default is
-\"> \"."
-  (interactive "*r")
-  (while (re-search-forward "\n")))
+(defun insert-prefix-region (beg end &optional prefix)
+  "Insert PREFIX at the beginning of every line from BEG to END.
+PREFIX defaults to \"> \"."
+  (interactive "*r\nsPrefix: ")
+  (let ((text (if (or (null prefix) (string-empty-p prefix))
+                  "> "
+                prefix))
+        (end-marker (copy-marker end)))
+    (unwind-protect
+        (save-excursion
+          (goto-char beg)
+          (beginning-of-line)
+          (while (< (point) end-marker)
+            (insert text)
+            (forward-line 1)))
+      (set-marker end-marker nil))))
 
-(defmacro insert-object (obj)
-  `(insert (format "%s" ,obj)))
+(defun insert-object (object)
+  "Insert OBJECT using its %s representation."
+  (insert (format "%s" object)))
 
-(cl-defun ins (&rest objs)
-  (dolist (o objs) (insert-object o)))
+(defun ins (&rest objects)
+  "Insert each object in OBJECTS using `insert-object'."
+  (dolist (object objects)
+    (insert-object object)))
 
-(cl-defun insert-expression (expression)
-  "Inserts the evaluation of EXPRESSION at point."
+(defun insert-expression (expression)
+  "Insert the value of EXPRESSION at point."
   (interactive (list (eval-minibuffer "Insert expression: ")))
   (ins expression))
 
-(cl-defun insert-provide ()
+(defun insert-provide ()
+  "Append a provide form for the current file or buffer."
   (interactive)
-  (save-excursion
-    (eob)
-    (delete-blank-lines)
-    (insert (format "\n(provide '%s)"
-	      (file-name-sans-extension (buffer-name))))))
-;;(insert-provide)
-
-(cl-defun insert-alphabet (n)
-  "Insert the alphabet.
-With a prefix you can select another language than English.
-Absolut value of prefix defines the language. The sign defines
-the orientation: if it is negative, the alphabet is inserted
-horizontally. Else, it is interted vertically."
-  (interactive "p")
-  (let ((a (cl-case (abs n)
-	     (2 (concat (a-b ?A ?Z) '(?Æ ?Ø ?Å)))
-	     (3 (concat (a-b ?A ?Z) '(?Å ?Ä ?Ö)))
-	     (t (a-b ?A ?Z)))))
-    (insert (apply #'string (if (minusp n) a (infix-list ?\n a))))))
-;;(insert-alphabet -1)
+  (let ((feature
+         (file-name-sans-extension
+          (file-name-nondirectory
+           (or buffer-file-name (buffer-name))))))
+    (save-excursion
+      (goto-char (point-max))
+      (delete-blank-lines)
+      (unless (bolp)
+        (newline))
+      (insert (format "(provide '%s)\n" feature)))))
 
 (provide 'mb-insert)
 
+;;; mb-insert.el ends here

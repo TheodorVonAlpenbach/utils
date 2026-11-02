@@ -261,6 +261,11 @@ The first subset is intentionally conservative:
   side-effect-free loading, explicit and repeated installation, namespaced
   prefix maps and Unicode insertion, retained bindings, removed machine
   shortcuts, and shell argument quoting.
+* [`test-mb-insert.el`](./global/test-mb-insert.el): seventeen ERT tests for
+  paired delimiters and raw prefixes, deterministic date insertion, ISO-date
+  replacement errors, returned kill text, repeated commands, omission markers,
+  restored Unicode symbols, bullet spacing, region prefixes, underlines,
+  object insertion, provide forms, todo items, and alphabet ownership.
 * [`test-list-interval.el`](./prototypes/geometry/test-list-interval.el): nine ERT tests for the
   closed-interval helpers, including construction and accessors.
 * [`test-list-envelope.el`](./prototypes/geometry/test-list-envelope.el): nine ERT tests for
@@ -463,9 +468,9 @@ physics, geometry, search, XML, anaphora, general, list, sequence, string,
 time, ISO-time, and table modules are independently loadable. Their validation
 comprises:
 
-* a clean `emacs -Q` load of all fifty-two utility and mode-extension
+* a clean `emacs -Q` load of all fifty-three utility and mode-extension
   features plus the ERT tooling;
-* 492 passing ERT tests from the batch entry point;
+* 509 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -587,6 +592,27 @@ required. Eleven tests cover navigation, counting, lifting, definition
 discovery, compatibility names, and cross-buffer behavior. The global map now
 autoloads `lift-sexp` and `mark-whole-word`, so their retained symbolic
 bindings resolve on first use without eagerly loading either helper library.
+
+[`mb-insert.el`](./global/mb-insert.el) is now UTF-8, independently loadable,
+and strict-compilation clean with explicit date, thing-at-point, and buffer
+dependencies. Its Latin-1 character literals were converted without losing
+the intended guillemet, superscript, ordinal, degree, macron, bullet, sharp-s,
+c-cedilla, and fraction characters. Raw prefix arguments are normalized for
+paired delimiters; `insert-date-and-time` now accepts its interactive argument;
+`insert-skip-quote` honors its count; and `insert-symbol-bullet` honors its
+no-spacing option. ISO-date conversion reports a `user-error` when no date is
+present.
+
+The former `insert-n` macro is now a lexical command factory that evaluates
+its object once and accepts normalized repeat counts. `insert-prefix-region`,
+previously an empty loop that ignored all arguments, now prefixes every line
+in the region. Provide forms use the visited file name and end with a newline.
+The duplicate `insert-alphabet` was removed from this module: the maintained,
+tested implementation remains in
+[`mb-utils-buffer.el`](./utils/mb-utils-buffer.el). Global and Evil maps now
+autoload every retained insertion command they expose, avoiding both eager
+loading and the startup-order failure that prompted this migration. Seventeen
+tests cover the repaired command contracts.
 
 [`global-map.el`](./global/global-map.el) now loads independently with lexical
 binding and does not mutate global keys until `mb-global-map-setup` is called.
