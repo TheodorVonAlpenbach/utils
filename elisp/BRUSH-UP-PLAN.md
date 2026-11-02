@@ -283,6 +283,10 @@ The first subset is intentionally conservative:
   kill-ring mutation, ascending and descending character sorting,
   mode-sensitive indentation, exact window-size deltas, and compatibility
   aliases.
+* [`test-mb-frames.el`](./global/test-mb-frames.el): seven ERT tests for
+  vertical and horizontal resizing, raw prefix normalization, selected and
+  explicit frames, enlargement direction, invalid dimensions, interactive
+  compatibility aliases, and exact resize arguments.
 * [`test-list-interval.el`](./prototypes/geometry/test-list-interval.el): nine ERT tests for the
   closed-interval helpers, including construction and accessors.
 * [`test-list-envelope.el`](./prototypes/geometry/test-list-envelope.el): nine ERT tests for
@@ -485,9 +489,9 @@ physics, geometry, search, XML, anaphora, general, list, sequence, string,
 time, ISO-time, and table modules are independently loadable. Their validation
 comprises:
 
-* a clean `emacs -Q` load of all fifty-seven utility and mode-extension
+* a clean `emacs -Q` load of all fifty-eight utility and mode-extension
   features plus the ERT tooling;
-* 553 passing ERT tests from the batch entry point;
+* 560 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -698,6 +702,18 @@ selection. The globally bound `back-to-indentation-and-indent` command now
 autoloads the feature on first use instead of depending on undeclared startup
 loading. Nine tests cover the retained helpers; the only external caller of
 `set-window-size` remains in the archived browser tree.
+
+[`mb-frames.el`](./global/mb-frames.el) now loads independently with lexical
+binding and namespaced implementations behind its four retained interactive
+command names. Raw prefix arguments are normalized before arithmetic, so
+ordinary and `C-u` invocations behave consistently. Resizing now reads and
+writes the optional frame argument instead of always operating on the selected
+frame, and nonpositive resulting dimensions produce an explicit `user-error`.
+
+Vertical and horizontal enlargement share the same resize core by passing a
+negative shrink amount. All four public commands are autoloaded by the global
+map, including the two horizontal commands exposed as bindings. Seven tests
+mock the frame boundary, avoiding graphical-frame requirements in batch runs.
 
 [`global-map.el`](./global/global-map.el) now loads independently with lexical
 binding and does not mutate global keys until `mb-global-map-setup` is called.
