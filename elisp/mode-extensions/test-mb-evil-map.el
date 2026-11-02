@@ -36,6 +36,11 @@
   (cl-letf (((symbol-function 'featurep) (lambda (_feature) nil)))
     (should-error (mb-evil-map-setup) :type 'user-error)))
 
+(ert-deftest mb-evil-map-insert-command-repeats ()
+  (with-temp-buffer
+    (funcall (mb-evil-map-insert-command "ab") 3)
+    (should (string= (buffer-string) "ababab"))))
+
 (ert-deftest mb-evil-map-installs-prefix-maps ()
   (let ((evil-normal-state-map (make-sparse-keymap))
         (evil-insert-state-map (make-sparse-keymap))
@@ -55,9 +60,7 @@
                  (push (list map key definition) chords)))
               ((symbol-function 'evil-key-chord-define)
                (lambda (states map key definition &rest _bindings)
-                 (push (list states map key definition) chords)))
-              ((symbol-function 'insert-n)
-               (lambda (_string) #'ignore)))
+                 (push (list states map key definition) chords))))
       (mb-evil-map-setup))
     (should (= chord-mode-argument 1))
     (should

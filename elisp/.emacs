@@ -19,8 +19,8 @@
 ;;find . -type f -name "*.el" -exec sed -i 's/(reduce /(cl-reduce /g' {} +
 (setf x-select-enable-clipboard t)
 ;; Enable clipboard support using xclip
-(when (getenv "DISPLAY")
-  (require 'xclip)
+(when (and (getenv "DISPLAY")
+           (require 'xclip nil t))
   (xclip-mode 1))
 
 (require 'cl-lib)
@@ -522,6 +522,6 @@ loading of files."
 (require 'json-mode)
 (require 'markdown-mode)
 
-(require 'mozc)
+(require 'mozc nil t)
 ;;(setq default-input-method "japanese-mozc")
 ;;(setq ispell-dictionary "norsk")

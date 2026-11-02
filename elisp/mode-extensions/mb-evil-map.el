@@ -30,7 +30,6 @@
 (declare-function inc-thing-at-point nil)
 (declare-function insert-date nil)
 (declare-function insert-date-and-time nil)
-(declare-function insert-n nil)
 (declare-function insert-provide nil)
 (declare-function insert-symbol-bullet nil)
 (declare-function insert-symbol-deg nil)
@@ -79,6 +78,13 @@
 
 (defvar mb-evil-clipboard-map (make-sparse-keymap)
   "Prefix map for clipboard commands.")
+
+(defun mb-evil-map-insert-command (string)
+  "Return an interactive command that inserts STRING COUNT times."
+  (lambda (&optional count)
+    (interactive "p")
+    (dotimes (_ (or count 1))
+      (insert string))))
 
 (defun mb-evil-map-setup ()
   "Install personal Evil and key-chord bindings."
@@ -255,8 +261,8 @@
 				  (mb-undo-surround (or n 1))))
   (define-key insert-map "0" #'(lambda (n) (interactive "P")
 				 (insert-symbol-deg (or n 1))))
-  (define-key insert-map "1" (insert-n "¹"))
-  (define-key insert-map "4" (insert-n "AAA"))
+  (define-key insert-map "1" (mb-evil-map-insert-command "¹"))
+  (define-key insert-map "4" (mb-evil-map-insert-command "AAA"))
   (define-key insert-map "2" #'(lambda (n) (interactive "P")
 				 (insert-symbol-sup2 (or n 1))))
   (define-key insert-map "3" #'(lambda (n) (interactive "P")

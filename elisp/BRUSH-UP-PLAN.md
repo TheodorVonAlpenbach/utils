@@ -302,9 +302,14 @@ The first subset is intentionally conservative:
   test filename recognition, source/test name swapping, definition navigation,
   ordered and region test discovery, selector normalization, keymaps, and
   invalid target reporting.
-* [`test-mb-evil-map.el`](./mode-extensions/test-mb-evil-map.el): four ERT
+* [`test-mb-evil-map.el`](./mode-extensions/test-mb-evil-map.el): five ERT
   tests for clean loading without Evil, unavailable-package deferral, explicit
-  dependency validation, and mocked prefix-map installation.
+  dependency validation, repeated insertion commands, and mocked prefix-map
+  installation.
+* [`test-mb-paragraph.el`](./elisp/test-mb-paragraph.el): nine ERT tests for
+  standard sentence-command preservation, schedule paragraph parsing and
+  filling, ISO-date headings, buffer-local setup, marking commands, personal
+  sentence motion, and the legacy time-regexp alias.
 * [`test-mb-doc-view.el`](./mode-extensions/test-mb-doc-view.el): three ERT
   tests for standard page-command preservation, whole-document navigation
   order, and keybindings.
@@ -454,9 +459,9 @@ physics, geometry, search, XML, anaphora, general, list, sequence, string,
 time, ISO-time, and table modules are independently loadable. Their validation
 comprises:
 
-* a clean `emacs -Q` load of all fifty utility and mode-extension
+* a clean `emacs -Q` load of all fifty-one utility and mode-extension
   features plus the ERT tooling;
-* 471 passing ERT tests from the batch entry point;
+* 481 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -533,8 +538,32 @@ Evil is installed, while explicit setup reports missing integrations instead
 of partially installing maps. Evaluation and clipboard prefix maps now have
 namespaced variables with aliases for their former star names. Optional and
 personal commands are declared without being eagerly loaded, and the existing
-bindings remain installed on configured Evil systems. Four deterministic tests
-mock the Evil/key-chord registration boundary.
+bindings remain installed on configured Evil systems. The two repeated-text
+bindings now use a local command factory rather than expanding the unloaded
+`insert-n` macro; this removes a real startup-order failure. Five deterministic
+tests cover repeated insertion and mock the Evil/key-chord registration
+boundary.
+
+Full startup validation now loads [`.emacs`](./.emacs) in batch mode after
+the focused and baseline tests. The optional `xclip` and `mozc` integrations
+are required only when available, so their absence no longer prevents the
+rest of the configuration from loading. This check reproduced and now guards
+against the `insert-n` activation failure that independent library loading did
+not expose.
+
+[`mb-paragraph.el`](./elisp/mb-paragraph.el) is now the canonical paragraph
+library; [`global/mb-paragraph.el`](./global/mb-paragraph.el) is a compatibility
+loader for configurations whose load path still selects the old location.
+The canonical module has lexical binding and explicit utility dependencies.
+Duplicate `time-regexp` definitions were consolidated behind a namespaced
+constant with a compatibility alias. Schedule filling retains the caller's
+`fill-column`, supports hanging indentation, and no longer depends on startup
+aliases for string and list operations. The useful marking commands remain.
+The old copy's debug-printing replacement of Emacs's core `forward-sentence`
+was retired in favor of `mb-paragraph-forward-sentence`, which provides the
+personal single-spaced, case-sensitive behavior without globally replacing a
+built-in command. The unreferenced `2-` and `3-` helpers were retired. Nine
+tests cover the retained and repaired behavior.
 
 [`global-map.el`](./global/global-map.el) now loads independently with lexical
 binding and does not mutate global keys until `mb-global-map-setup` is called.

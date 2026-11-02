@@ -5,11 +5,13 @@
    (directory-file-name (file-name-directory load-file-name))))
 
 (defconst mb-tests-load-directories
-  '("" "external" "global" "mode-extensions" "prototypes/geometry" "utils"))
+  '("" "elisp" "external" "global" "mode-extensions"
+    "prototypes/geometry" "utils"))
 
 (defconst mb-tests-baseline-files
   '("prototypes/geometry/test-list-interval.el"
     "prototypes/geometry/test-list-envelope.el"
+    "elisp/test-mb-paragraph.el"
     "global/test-global-map.el"
     "global/test-mb-indent.el"
     "mode-extensions/test-backus-naur-mode.el"
