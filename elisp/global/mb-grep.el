@@ -1,195 +1,254 @@
-(require 'mb-utils-file)
-(require 'wget)
+;;; mb-grep.el --- Personal grep commands -*- lexical-binding: t; -*-
 
-(cl-defun mb-grep-filter-dirs (dirs match match-not)
+;;; Code:
+
+(require 'cl-lib)
+(require 'compile)
+(require 'subr-x)
+(require 'thingatpt)
+
+(defgroup mb-grep nil
+  "Personal grep commands."
+  :group 'grep)
+
+(defcustom mb-grep-program "grep"
+  "Program used by `mb-grep-basic'."
+  :type 'string)
+
+(defconst mb-grep-cpp-header-types '("h" "hh" "hpp" "hxx"))
+(defconst mb-grep-cpp-source-types '("c" "cc" "cpp" "cxx"))
+
+(defun mb-grep-filter-dirs (directories match match-not)
+  "Filter DIRECTORIES using MATCH and MATCH-NOT regexps.
+MATCH retains matching directories.  MATCH-NOT excludes matching
+directories.  Matching is case-sensitive."
   (let ((case-fold-search nil))
-    (cl-remove-if (disjoin (if match
-			     (complement (bind #'string-match match 1))
-			     #'never)
-			   (if match-not
-			     (bind #'string-match match-not 1)
-			     #'never))
-     dirs)))
-;;(mb-grep-filter-dirs '("abc" "bcd") "b" (regexp-or "i" "d"))
+    (cl-remove-if
+     (lambda (directory)
+       (or (and match (not (string-match-p match directory)))
+           (and match-not (string-match-p match-not directory))))
+     directories)))
 
-(cl-defun mb-grep-basic (&key (target (if (use-region-p)
-					(buffer-substring-no-properties
-					 (region-beginning) (region-end))
-					(thing-at-point 'symbol)))
-			   (directories
-			    (list (file-name-directory (buffer-file-name))))
-			   (types
-			    (list
-			     (or (file-name-extension (buffer-file-name))
-				 (file-name-nondirectory (buffer-file-name)))))
-			   (match nil)
-			   (match-not nil))
-  "Convenient grep according to file type."
-  (save-excursion
-    (when (stringp target)
-      (let ((globs (cl-loop for x in (listify types) collect
-			    (format "/%s%s" (if (eql (char x 0) ?.) "" "*") x))))
-	(compilation-start
-	 (format "grep -nHs -E '%s' %s"
-	   (substring-no-properties target)
-	   (concat* (mapcar #'file-relative-name
-		      (mb-grep-filter-dirs
-		       (combine (list directories globs)
-				:key #'concat)
-		       match match-not))
-	     :in " "))
-	 'grep-mode nil t)))))
-;;(mb-grep-basic :target "mb-grep-basic" :types '("el"))
+(defun mb-grep--brace-types (type)
+  "Expand a simple brace expression in TYPE."
+  (if (string-match "\\`\\(.*\\){\\([^{}]+\\)}\\(.*\\)\\'" type)
+      (let ((prefix (match-string 1 type))
+            (suffix (match-string 3 type)))
+        (mapcar (lambda (part) (concat prefix part suffix))
+                (split-string (match-string 2 type) "," t "[[:space:]]+")))
+    (list type)))
 
-(cl-defun finddirs (rootdir &optional depth)
-  "Return a list of all subdirectories under ROOTDIR.
-If optional arguement depth is a non-negative integer, the result
-is restricted to depth levels, just like unix utility find's
--maxdepth."
-  (mapcar #'file-name-as-directory
-    (split-string
-     (if (and (integerp depth) (not (minusp depth)))
-       (call-process* "find" rootdir "-type" "d" "-maxdepth" (sstring depth))
-       (call-process* "find" rootdir "-type" "d"))
-     "\n")))
-;;(finddirs (expand-directory-name +mb-lisp-dir+))
+(defun mb-grep--types (types)
+  "Return TYPES as a flat list of file patterns."
+  (mapcan #'mb-grep--brace-types
+          (cond ((null types) nil)
+                ((listp types) (copy-sequence types))
+                (t (list types)))))
 
-(cl-defun subdirs (rootdir &optional depth flatten-p)
-  "Return a tree of all directories under ROOTDIR.
-If optional argument DEPTH is a non-negative integer, the result
-is restricted to subdirectories DEPTH levels below rootdir. If
-optional argument FLATTEN-P is non-nil the result is flattened to
-a list.
+(defun mb-grep--type-regexp (type)
+  "Return a file-name regexp for TYPE."
+  (wildcard-to-regexp
+   (cond ((string-match-p "[][?*]" type) type)
+         ((string-prefix-p "." type) type)
+         (t (concat "*." type)))))
 
-Note! In this version the flatten-p mechanism is not implemented.
-The current implementation always returns a flattened list."
-  (cl-set-difference
-      (finddirs rootdir depth)
-      '("" ".." "../" "." "./")
-    :test #'string=))
-;;(subdirs (expand-directory-name +mb-lisp-dir+))
+(defun mb-grep--files (directories types)
+  "Return regular files directly in DIRECTORIES matching TYPES."
+  (let ((regexps (mapcar #'mb-grep--type-regexp (mb-grep--types types))))
+    (cl-loop for directory in directories
+             append
+             (cl-loop for file in
+                      (directory-files (expand-file-name directory) t
+                                       directory-files-no-dot-files-regexp t)
+                      for name = (file-name-nondirectory file)
+                      when (and (file-regular-p file)
+                                (or (null regexps)
+                                    (cl-some
+                                     (lambda (regexp)
+                                       (string-match-p regexp name))
+                                     regexps)))
+                      collect file))))
 
-(cl-defun mb-grep-dirs-1 (up maxdepth dir)
-  (subdirs (if (zerop up)
-	     dir
-	     (parent-directory (expand-directory-name dir) up))
-	   maxdepth))
-;;(mb-grep-dirs-1 1 0 "~/")
+(defun mb-grep-build-command (target directories &optional types match match-not)
+  "Build a grep command for TARGET in DIRECTORIES.
+TYPES is a file type, wildcard, brace expression, or list thereof.
+MATCH and MATCH-NOT filter directory names."
+  (unless (and (stringp target) (not (string-empty-p target)))
+    (user-error "Grep target must be a nonempty string"))
+  (let* ((filtered-directories
+          (mb-grep-filter-dirs directories match match-not))
+         (files (mb-grep--files filtered-directories types)))
+    (unless files
+      (user-error "No matching files to search"))
+    (mapconcat #'shell-quote-argument
+               (append (list mb-grep-program "-nHs" "-E" "--" target)
+                       files)
+               " ")))
 
-(cl-defun mb-grep-dirs (prefix &optional (dir "."))
-  "Return a list of directories according to prefix.
-If prefix is nil or zero, it returns all the subdirectories,
-recursively, in the current directory. If PREFIX is less than 10,
-it returns all subdirectories, recursively, below the PREFIXth
-superdirectory of the current directory. For higher values of
-PREFIX it splits prefix in to MAXDEPTH and UP, where MAXDEPTH is
-defined as (floor PREFIX 10), and UP is (mod PREFIX 10). The UP
-part defines the root directory for the search as described
-above. MAXDEPTH restricts the search to MAXDEPTH levels of
-subdirectories below the root directory, just like the -maxdepth
-option in the sh utility find.
+(cl-defun mb-grep-basic
+    (&key
+     (target (if (use-region-p)
+                 (buffer-substring-no-properties
+                  (region-beginning) (region-end))
+               (thing-at-point 'symbol t)))
+     (directories
+      (list (if buffer-file-name
+                (file-name-directory buffer-file-name)
+              default-directory)))
+     (types
+      (and buffer-file-name
+           (or (file-name-extension buffer-file-name)
+               (file-name-nondirectory buffer-file-name))))
+     match match-not)
+  "Run grep for TARGET in DIRECTORIES, restricted by TYPES.
+MATCH and MATCH-NOT filter directory names."
+  (unless (executable-find mb-grep-program)
+    (user-error "Grep program is not executable: %s" mb-grep-program))
+  (compilation-start
+   (mb-grep-build-command target directories types match match-not)
+   'grep-mode))
 
-With a prefix the roles of MAXDEPTH and UP is reversed, see the
-examples below.
+(defun mb-grep-find-directories (root-directory &optional max-depth)
+  "Return directories below ROOT-DIRECTORY through MAX-DEPTH.
+ROOT-DIRECTORY itself is depth zero.  A nil MAX-DEPTH means no
+depth limit.  Symbolic links to directories are not followed."
+  (when (and max-depth
+             (not (and (integerp max-depth) (>= max-depth 0))))
+    (user-error "Maximum depth must be a nonnegative integer or nil"))
+  (let ((root (file-name-as-directory (expand-file-name root-directory)))
+        result)
+    (unless (file-directory-p root)
+      (user-error "Not a directory: %s" root-directory))
+    (cl-labels
+        ((walk
+          (directory depth)
+          (push directory result)
+          (when (or (null max-depth) (< depth max-depth))
+            (dolist (entry
+                     (directory-files directory t
+                                      directory-files-no-dot-files-regexp t))
+              (when (and (file-directory-p entry)
+                         (not (file-symlink-p entry)))
+                (walk (file-name-as-directory entry) (1+ depth)))))))
+      (walk root 0))
+    (nreverse result)))
 
-Examples:
+(defalias 'finddirs #'mb-grep-find-directories)
+(defalias 'subdirs #'mb-grep-find-directories)
 
-PREFIX   DIRS
-nil      ./ and all its subdirectories
-0        ./ and all its subdirectories
-1        ../ and all its subdirectories
-2        ../../ and all its subdirectories
-...
-9        ../../../../../../../../../ and all its subdirectories
+(defun mb-grep--parent-directory (directory levels)
+  "Return the LEVELSth parent of DIRECTORY."
+  (let ((result (file-name-as-directory (expand-file-name directory))))
+    (dotimes (_ levels result)
+      (setq result
+            (file-name-directory (directory-file-name result))))))
 
-10       ../ only
-20       ../../ only
-11       ../ and its direct subdirectories only
-21       ../../ and its direct subdirectories only 
+(defun mb-grep-dirs-1 (up max-depth directory)
+  "Return directories UP levels above DIRECTORY through MAX-DEPTH."
+  (mb-grep-find-directories
+   (mb-grep--parent-directory directory up)
+   max-depth))
 
-35       ../../../ and its subdirectories at maximum five levels down      
+(defun mb-grep-dirs (prefix &optional directory)
+  "Return search directories selected by PREFIX from DIRECTORY.
+Nil and zero select DIRECTORY recursively.  Positive single-digit
+values select a parent recursively.  For larger positive values,
+the tens digit is the number of parent levels and the units digit
+is maximum depth.
 
-- or -0  ./ only
--1       ./ and its direct subdirectories only
--5       ./ and its subdirectories at maximum five levels down
--14      same as 41
--72      same as 27
-"
-  (if (equal prefix "-")
-    (mb-grep-dirs-1 0 0 dir)
-    (if (or (null prefix) (zerop prefix))
-      (mb-grep-dirs-1 0 nil dir)
-      (let (maxdepth up)
-	(if (minusp prefix)
-	  (if (> prefix -10)
-	    (setf up 0 maxdepth (abs prefix))
-	    (cl-multiple-value-setq (maxdepth up) (cl-floor (abs prefix) 10)))
-	  (if (< prefix 10)
-	    (setf up prefix maxdepth nil)
-	    (cl-multiple-value-setq (up maxdepth) (cl-floor prefix 10))))
-	(mb-grep-dirs-1 up maxdepth dir)))))
-;;(mb-grep-dirs 1)
+A bare minus prefix selects only DIRECTORY.  Other negative values
+reverse the two positive fields: -5 selects DIRECTORY through
+depth five, and -14 selects the fourth parent through depth one."
+  (setq directory (or directory "."))
+  (cond
+   ((or (eq prefix '-) (equal prefix "-"))
+    (mb-grep-dirs-1 0 0 directory))
+   (t
+    (let ((value (prefix-numeric-value (or prefix 0))))
+      (cond
+       ((zerop value)
+        (mb-grep-dirs-1 0 nil directory))
+       ((> value 0)
+        (if (< value 10)
+            (mb-grep-dirs-1 value nil directory)
+          (pcase-let ((`(,up ,max-depth) (cl-multiple-value-list
+                                          (cl-floor value 10))))
+            (mb-grep-dirs-1 up max-depth directory))))
+       ((> value -10)
+        (mb-grep-dirs-1 0 (- value) directory))
+       (t
+        (pcase-let ((`(,max-depth ,up) (cl-multiple-value-list
+                                        (cl-floor (- value) 10))))
+          (mb-grep-dirs-1 up max-depth directory))))))))
 
-(cl-defun mb-grep-interactive ()
-  "Convenient grep according to file type.
-See `mb-grep-dirs' for a description of possible prefixes."
+(defun mb-grep-interactive ()
+  "Prompt for a regexp and grep directories selected by the prefix."
   (interactive)
   (mb-grep-basic
-   :target (read-from-minibuffer "Grep string: ")
+   :target (read-from-minibuffer "Grep regexp: ")
    :directories (mb-grep-dirs current-prefix-arg)))
 
-(cl-defun mb-grep ()
-  "Convenient grep according to file type. 
-See `mb-grep-dirs' for a description of possible prefixes."
+(defun mb-grep ()
+  "Grep for the region or symbol using mode-appropriate file types."
   (interactive)
-  (cl-case major-mode
-    (emacs-lisp-mode (mb-elisp-grep))
-    (mbscilab-mode (mb-scilab-grep))
-    (t (mb-gen-grep))))
+  (pcase major-mode
+    ('emacs-lisp-mode (mb-elisp-grep))
+    ('mbscilab-mode (mb-scilab-grep))
+    (_ (mb-gen-grep))))
 
-(cl-defun mb-gen-grep ()
-  "Convenient grep according to file type."
-  (mb-grep-basic :directories (mb-grep-dirs (or current-prefix-arg 1))))
+(defun mb-gen-grep ()
+  "Grep files matching the current buffer's file type."
+  (interactive)
+  (mb-grep-basic :directories
+                 (mb-grep-dirs (or current-prefix-arg 1))))
 
-(cl-defun mb-elisp-grep ()
-  "Convenient grep for Emacs lisp mode."
-  (mb-grep-basic :directories (mb-grep-dirs (or current-prefix-arg 1))
-		 :types "el"
-		 :match-not "/old/"))
+(defun mb-elisp-grep ()
+  "Grep Emacs Lisp files, excluding directories named old."
+  (interactive)
+  (mb-grep-basic
+   :directories (mb-grep-dirs (or current-prefix-arg 1))
+   :types "el"
+   :match-not "/old/"))
 
-(cl-defun mb-scilab-grep ()
-  "Convenient grep for mbscilab mode."
-  (mb-grep-basic :directories (mb-grep-dirs (or current-prefix-arg 2))
-		 :types '("sci" "sce")
-		 :match-not (regexp-or "CVS" "etc" "help")))
+(defun mb-scilab-grep ()
+  "Grep Scilab source files."
+  (interactive)
+  (mb-grep-basic
+   :directories (mb-grep-dirs (or current-prefix-arg 2))
+   :types '("sci" "sce")
+   :match-not (regexp-opt '("CVS" "etc" "help"))))
 
-(cl-defun mb-js-grep ()
-  "Convenient grep on JS files."
+(defun mb-js-grep ()
+  "Grep JavaScript files."
   (interactive)
   (mb-grep-basic :types "js"))
 
-(cl-defun mb-c++-grep ()
-  "Convenient grep according to file type."
+(defun mb-h-grep ()
+  "Grep C and C++ header files."
   (interactive)
-  (mb-grep-basic :types "{h,cpp}"))
+  (mb-grep-basic :types mb-grep-cpp-header-types))
 
-(cl-defun mb-lisp-grep ()
-  "Convenient grep according to file type."
+(defun mb-cpp-grep ()
+  "Grep C and C++ source files."
   (interactive)
-  (let ((sexp (thing-at-point 'symbol)))
-    (setq grep-command 
-	  (cons (format "grep -n '%s' *.lsp ../utils/*.lsp" sexp)
-		(+ 9 (length sexp))))
-    (call-interactively 'grep)))
+  (mb-grep-basic :types mb-grep-cpp-source-types))
 
-(cl-defun clisp-grep ()
-  "Convenient grep according to file type."
+(defun mb-all-grep ()
+  "Grep all files."
   (interactive)
-  (let ((sexp (thing-at-point 'symbol)))
-    (setq grep-command 
-	  (cons (format "grep -n '%s' c:/unix/clisp/src/*.lisp" sexp)
-		(+ 9 (length sexp))))
-    (call-interactively 'grep)))
+  (mb-grep-basic :types nil))
+
+(defun mb-c++-grep ()
+  "Grep C and C++ source and header files."
+  (interactive)
+  (mb-grep-basic
+   :types (append mb-grep-cpp-header-types mb-grep-cpp-source-types)))
+
+(defun mb-lisp-grep ()
+  "Grep Common Lisp source files."
+  (interactive)
+  (mb-grep-basic :types '("lisp" "lsp" "cl")))
 
 (provide 'mb-grep)
 
+;;; mb-grep.el ends here

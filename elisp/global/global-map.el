@@ -28,14 +28,14 @@
 (autoload 'insert-todo-item "mb-insert" nil t)
 (autoload 'insert-underline "mb-insert" nil t)
 (autoload 'insert-xml-tag "mb-insert" nil t)
+(autoload 'mb-all-grep "mb-grep" nil t)
+(autoload 'mb-cpp-grep "mb-grep" nil t)
+(autoload 'mb-grep "mb-grep" nil t)
+(autoload 'mb-h-grep "mb-grep" nil t)
 
 (declare-function inc-thing-at-point "mb-things")
 (declare-function inferior-lisp nil)
 (declare-function inferior-lisp-program-with-lispinit nil)
-(declare-function mb-all-grep "mb-grep")
-(declare-function mb-cpp-grep "mb-grep")
-(declare-function mb-grep "mb-grep")
-(declare-function mb-h-grep "mb-grep")
 
 (defvar inferior-lisp-program)
 

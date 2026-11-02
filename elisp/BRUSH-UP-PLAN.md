@@ -270,6 +270,10 @@ The first subset is intentionally conservative:
   aliases, configured process invocation, missing files and programs, nonzero
   process status, temporary-file cleanup on success and failure, and visited
   versus unvisited buffer dispatch.
+* [`test-mb-grep.el`](./global/test-mb-grep.el): twelve ERT tests for directory
+  filtering and depth selection, raw prefix handling, file-type patterns,
+  shell argument quoting, explicit errors, compilation dispatch, mode
+  selection, compatibility aliases, and C/C++ command scopes.
 * [`test-list-interval.el`](./prototypes/geometry/test-list-interval.el): nine ERT tests for the
   closed-interval helpers, including construction and accessors.
 * [`test-list-envelope.el`](./prototypes/geometry/test-list-envelope.el): nine ERT tests for
@@ -472,9 +476,9 @@ physics, geometry, search, XML, anaphora, general, list, sequence, string,
 time, ISO-time, and table modules are independently loadable. Their validation
 comprises:
 
-* a clean `emacs -Q` load of all fifty-four utility and mode-extension
+* a clean `emacs -Q` load of all fifty-five utility and mode-extension
   features plus the ERT tooling;
-* 518 passing ERT tests from the batch entry point;
+* 530 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -632,6 +636,25 @@ and failures in read-only working directories. The feature is provided only
 after all definitions are loaded, and the global map autoloads the legacy
 commands on first use. Nine tests mock the external process boundary and
 verify dispatch and cleanup without invoking a printer.
+
+[`mb-grep.el`](./global/mb-grep.el) now loads independently with lexical
+binding and no longer depends on the eager startup environment, `wget`, the
+external `find` command, or general-purpose personal utility functions.
+Directory discovery is implemented directly with Emacs file APIs, excludes
+directory symlink traversal, validates depth values, and normalizes raw prefix
+arguments. The original positive and negative prefix scheme remains available,
+as do compatibility aliases for `finddirs` and `subdirs` and the compatibility
+command `mb-c++-grep`.
+
+Grep patterns and every selected filename are now shell-quoted independently.
+File extensions use exact `*.EXT` patterns rather than the former broad
+`*EXT` shell globs, while wildcard and simple brace patterns remain supported.
+Empty targets, empty file sets, and missing grep executables produce explicit
+`user-error` failures. The formerly bound but undefined `mb-h-grep`,
+`mb-cpp-grep`, and `mb-all-grep` commands now have implementations, and both
+the global and Evil maps autoload the grep commands they expose. The obsolete
+hard-coded `c:/unix/clisp/src/` search was retired. Twelve tests exercise the
+filesystem and command boundary without starting a real grep process.
 
 [`global-map.el`](./global/global-map.el) now loads independently with lexical
 binding and does not mutate global keys until `mb-global-map-setup` is called.

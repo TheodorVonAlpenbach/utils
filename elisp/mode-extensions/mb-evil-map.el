@@ -37,8 +37,6 @@
 (declare-function mb-eval-region nil)
 (declare-function mb-eval-region-from-point nil)
 (declare-function mb-eval-region-to-point nil)
-(declare-function mb-grep nil)
-(declare-function mb-grep-interactive nil)
 (declare-function mb-surround nil)
 (declare-function mb-texinfo-insert-@var nil)
 (declare-function mb-undo-surround nil)
@@ -62,6 +60,8 @@
 (autoload 'insert-symbol-sup2 "mb-insert" nil t)
 (autoload 'insert-symbol-sup3 "mb-insert" nil t)
 (autoload 'insert-time "mb-insert" nil t)
+(autoload 'mb-grep "mb-grep" nil t)
+(autoload 'mb-grep-interactive "mb-grep" nil t)
 
 (defvar evil-exchange-key)
 (defvar evil-exchange-cancel-key)
