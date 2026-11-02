@@ -1,106 +1,207 @@
-(require 'mb-utils-div)
+;;; mb-sexp.el --- S-expression and defining-form helpers -*- lexical-binding: t; -*-
 
-(cl-defun goto-first-sexp ()
-  "Go safely back to beginning of first sexp at point's level."
-  (interactive)				;or not?
-  (while (not (condition-case nil
-		    (forward-sexp -1)
-		(error t)))))
+;;; Commentary:
 
-(cl-defun count-sexps-current-level ()
-  "Counts number of sexps at current level \(at point\)"
-  (interactive)
-  (save-excursion
-    (goto-first-sexp)
-    ;; then go safe forward to the last sexp increasing count at each step
-    (let ((n 0))
-      (while (not (condition-case nil
-		      (forward-sexp 1)
-		    (error t)))
-	(cl-incf n))
-      (princ n))))
-;;(count-sexps sdfd)
+;; Navigation, counting, lifting, and definition discovery helpers.  Modern
+;; implementations use an mb-sexp- prefix; compatibility aliases retain the
+;; original public names used by existing configuration.
 
-(cl-defun count-sexps-region* (start end)
-  "Return the number of sexps between START and END."
-  (interactive "r")
-  (message "%d" (count-sexps-region start end)))
+;;; Code:
 
-;; Calling scan-sexps may have three different types of outcome
+(require 'cl-lib)
 
-;; 1. It returns an integer. This means that the scan was ok: it found
-;; a sexp to the right of POINT which ends at the integer it returned
-;; 2. It returns nil. This means that it did not find any sexps after
-;; POINT. Probably there is only whitespace or other non-sexp
-;; characters left in the buffer
-;; 3. It fails and returns a condition. This means that we are at the
-;; end of a sexp contained in another sexp
+(defvaralias '+defun-symbols+ 'mb-sexp-defining-forms)
+(defvaralias '+defun-regexp+ 'mb-sexp-defining-form-regexp)
 
-(cl-defun count-sexps-region (start end)
-  "Return the number of sexps between START and END."
-  (save-excursion
-    (save-restriction
-      (narrow-to-region start end)
-      (1- (cl-loop for p = (point-min) then (condition-case nil
-					     (scan-sexps p 1)
-					   (error nil))
-		while p count 1
-		do (goto-char p))))))
-
-(cl-defun lift-sexp (&optional (n 1))
-  "Replace sexp at the above level with the N next sexps. N must be
-positive or zero. If zero, it just removes the surrounding
-paranthesis."
-  (interactive "p")
-  (if (> n 0)
-    (kill-sexp n)
-    (progn
-      (goto-first-sexp)
-      (kill-sexp (count-sexps-current-level))))  
-  (backward-up-list 1)
-  (kill-sexp 1)
-  (yank 2))
-;;(a b (c d))
-
-(defconst +defun-symbols+
+(defconst mb-sexp-defining-forms
   '(defun cl-defun
     defmacro cl-defmacro
     defparameter defconstant
-    ert-deftest))
+    ert-deftest)
+  "Forms whose names are recognized by `mb-sexp-defun-symbol'.")
 
-(defconst +defun-regexp+
-  (regexp-opt (mapcar #'sstring +defun-symbols+)))
+(defconst mb-sexp-defining-form-regexp
+  (regexp-opt (mapcar #'symbol-name mb-sexp-defining-forms) 'symbols)
+  "Regexp matching a form in `mb-sexp-defining-forms'.")
 
-(cl-defun defun-symbol (&optional (point (point)) (defun-symbols +defun-symbols+))
-  "Returns the defun symbol at POINT."
-  (when (in-defun-p)
-    (save-excursion
-     (bod)
-     (forward-thing 'symbol 1)
-     (when (member (sexp-at-point) defun-symbols)
-       (forward-sexp 1)
-       (sexp-at-point)))))
-
-(cl-defun in-defun-p (&optional (point (point))
-				  (defun-regexp +defun-regexp+))
-  "Returns not nil if POINT is inside a defun form."
-  (awhen (thing-at-point 'defun)
-    (string-match* (format "\\_<%s" defun-regexp) (string-remove-props it))))
-
-(definteractive defun-symbol)
-
-(cl-defun defun-symbols (&optional (buffer (current-buffer)))
-  "Returns all the defun symbols in BUFFER."
-  (save-excursion
-    (goto-char (point-min))
-    (cl-loop for symbol = (defun-symbol)
-	  while (< (point) (point-max))
-	  when symbol collect symbol
-	  do (end-of-defun))))
-(definteractive defun-symbols)
-
-(cl-defun insert-defun-symbols ()
+(defun mb-sexp-goto-first ()
+  "Move to the beginning of the first sexp at point's current level.
+Return point."
   (interactive)
-  (insert (format "%S" (defun-symbols))))
+  (let (moved)
+    (while
+        (progn
+          (setq moved (point))
+          (and (condition-case nil
+                   (progn (forward-sexp -1) t)
+                 (scan-error nil))
+               (< (point) moved)))))
+  (point))
+
+(defalias 'goto-first-sexp #'mb-sexp-goto-first)
+
+(defun mb-sexp-count-current-level ()
+  "Return the number of sexps at point's current level."
+  (interactive)
+  (let ((count
+         (save-excursion
+           (mb-sexp-goto-first)
+           (let ((n 0))
+             (while (condition-case nil
+                        (progn (forward-sexp 1) t)
+                      (scan-error nil))
+               (cl-incf n))
+             n))))
+    (when (called-interactively-p 'interactive)
+      (message "%d" count))
+    count))
+
+(defalias 'count-sexps-current-level #'mb-sexp-count-current-level)
+
+(defun mb-sexp-count-region (start end)
+  "Return the number of complete sexps between START and END.
+Stop counting at the first malformed or incomplete sexp."
+  (save-excursion
+    (save-restriction
+      (narrow-to-region start end)
+      (goto-char (point-min))
+      (let ((count 0)
+            next)
+        (while
+            (progn
+              (skip-syntax-forward " >")
+              (and (< (point) (point-max))
+                   (setq next
+                         (condition-case nil
+                             (scan-sexps (point) 1)
+                           (scan-error nil)))))
+          (goto-char next)
+          (cl-incf count))
+        count))))
+
+(defalias 'count-sexps-region #'mb-sexp-count-region)
+
+(defun count-sexps-region* (start end)
+  "Display and return the number of sexps between START and END."
+  (interactive "r")
+  (let ((count (mb-sexp-count-region start end)))
+    (message "%d" count)
+    count))
+
+(defun mb-sexp--splice-parent ()
+  "Remove the delimiters around the list containing point."
+  (save-excursion
+    (backward-up-list 1)
+    (let ((opening (point))
+          (closing (scan-sexps (point) 1)))
+      (goto-char (1- closing))
+      (delete-char 1)
+      (goto-char opening)
+      (delete-char 1))))
+
+(defun mb-sexp-lift (&optional count)
+  "Raise COUNT sexps one level, defaulting to one.
+Positive COUNT delegates to the standard `raise-sexp'.  A zero COUNT
+retains the original command's special behavior of removing only the
+surrounding delimiters."
+  (interactive "p")
+  (setq count (or count 1))
+  (cond
+   ((< count 0)
+    (user-error "Count must be non-negative"))
+   ((zerop count)
+    (mb-sexp--splice-parent))
+   (t
+    (raise-sexp count))))
+
+(defalias 'lift-sexp #'mb-sexp-lift)
+
+(defun mb-sexp--definition-at (position defining-forms)
+  "Return the defining form and name enclosing POSITION.
+DEFINING-FORMS is the list of accepted form symbols.  Return nil when
+POSITION is not inside one of those forms."
+  (save-excursion
+    (goto-char position)
+    (when (looking-at-p "\\s(")
+      (forward-char 1))
+    (condition-case nil
+        (progn
+          (beginning-of-defun)
+          (let* ((start (point))
+                 (end (scan-sexps start 1)))
+            (when (and end (<= start position) (<= position end))
+              (forward-char 1)
+              (skip-syntax-forward " ")
+              (let ((form (read (current-buffer))))
+                (when (memq form defining-forms)
+                  (skip-syntax-forward " ")
+                  (list form (read (current-buffer))))))))
+      (error nil))))
+
+(defun mb-sexp-defun-symbol
+    (&optional position defining-forms)
+  "Return the name of the defining form enclosing POSITION.
+POSITION defaults to point and DEFINING-FORMS defaults to
+`mb-sexp-defining-forms'."
+  (cadr (mb-sexp--definition-at
+         (or position (point))
+         (or defining-forms mb-sexp-defining-forms))))
+
+(defalias 'defun-symbol #'mb-sexp-defun-symbol)
+
+(defun mb-sexp-in-defun-p
+    (&optional position defining-form-regexp)
+  "Return non-nil when POSITION is inside a recognized defining form.
+DEFINING-FORM-REGEXP can restrict the recognized form names."
+  (let* ((definition
+          (mb-sexp--definition-at
+           (or position (point)) mb-sexp-defining-forms))
+         (form (car definition)))
+    (and form
+         (or (null defining-form-regexp)
+             (string-match-p defining-form-regexp
+                             (symbol-name form))))))
+
+(defalias 'in-defun-p #'mb-sexp-in-defun-p)
+
+(defun mb-sexp-defun-symbols (&optional buffer)
+  "Return the names of recognized top-level definitions in BUFFER.
+BUFFER defaults to the current buffer."
+  (with-current-buffer (or buffer (current-buffer))
+    (save-excursion
+      (goto-char (point-min))
+      (let (symbols)
+        (while (re-search-forward
+                (concat "^\\s-*(" mb-sexp-defining-form-regexp)
+                nil t)
+          (let ((position (match-beginning 0)))
+            (unless (nth 8 (save-excursion (syntax-ppss position)))
+              (let ((symbol (mb-sexp-defun-symbol position)))
+                (when symbol
+                  (push symbol symbols))))))
+        (nreverse symbols)))))
+
+(defalias 'defun-symbols #'mb-sexp-defun-symbols)
+
+(defun defun-symbol* ()
+  "Display and return the recognized definition name at point."
+  (interactive)
+  (let ((symbol (mb-sexp-defun-symbol)))
+    (message "%S" symbol)
+    symbol))
+
+(defun defun-symbols* (&optional buffer)
+  "Display and return recognized definition names in BUFFER."
+  (interactive)
+  (let ((symbols (mb-sexp-defun-symbols buffer)))
+    (message "%S" symbols)
+    symbols))
+
+(defun insert-defun-symbols (&optional buffer)
+  "Insert the printed definition-name list for BUFFER at point."
+  (interactive)
+  (insert (format "%S" (mb-sexp-defun-symbols buffer))))
 
 (provide 'mb-sexp)
+
+;;; mb-sexp.el ends here

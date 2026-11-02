@@ -5,6 +5,9 @@
 (require 'cl-lib)
 (require 'info)
 
+(autoload 'lift-sexp "mb-sexp" nil t)
+(autoload 'mark-whole-word "mb-paragraph" nil t)
+
 (declare-function inc-thing-at-point "mb-things")
 (declare-function inferior-lisp nil)
 (declare-function inferior-lisp-program-with-lispinit nil)

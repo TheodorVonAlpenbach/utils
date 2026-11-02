@@ -310,6 +310,10 @@ The first subset is intentionally conservative:
   standard sentence-command preservation, schedule paragraph parsing and
   filling, ISO-date headings, buffer-local setup, marking commands, personal
   sentence motion, and the legacy time-regexp alias.
+* [`test-mb-sexp.el`](./elisp/test-mb-sexp.el): eleven ERT tests for
+  compatibility aliases, level and region counting, positive and zero lifting,
+  invalid counts, definition recognition at explicit positions, custom
+  defining forms, cross-buffer discovery, and symbol-list insertion.
 * [`test-mb-doc-view.el`](./mode-extensions/test-mb-doc-view.el): three ERT
   tests for standard page-command preservation, whole-document navigation
   order, and keybindings.
@@ -459,9 +463,9 @@ physics, geometry, search, XML, anaphora, general, list, sequence, string,
 time, ISO-time, and table modules are independently loadable. Their validation
 comprises:
 
-* a clean `emacs -Q` load of all fifty-one utility and mode-extension
+* a clean `emacs -Q` load of all fifty-two utility and mode-extension
   features plus the ERT tooling;
-* 481 passing ERT tests from the batch entry point;
+* 492 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -564,6 +568,25 @@ was retired in favor of `mb-paragraph-forward-sentence`, which provides the
 personal single-spaced, case-sensitive behavior without globally replacing a
 built-in command. The unreferenced `2-` and `3-` helpers were retired. Nine
 tests cover the retained and repaired behavior.
+
+[`mb-sexp.el`](./elisp/mb-sexp.el) now loads independently with lexical
+binding and no startup utility dependencies. Namespaced implementations back
+compatibility aliases for the original public commands. The old `lift-sexp`
+implementation duplicated Emacs's supported `raise-sexp` using fragile
+kill-ring indexing; positive counts now delegate upstream, while count zero
+retains the useful legacy operation of removing only the enclosing
+delimiters. Negative counts report a `user-error`.
+
+Sexp counting no longer prints from noninteractive helpers or risks looping
+when backward motion succeeds without changing point. Definition discovery
+now honors its previously ignored position, defining-form, and buffer
+arguments; ignores apparent definitions in comments and strings; and avoids
+match-data and point changes from `syntax-ppss`. The startup-only
+`definteractive` macro and obsolete text-property helper are no longer
+required. Eleven tests cover navigation, counting, lifting, definition
+discovery, compatibility names, and cross-buffer behavior. The global map now
+autoloads `lift-sexp` and `mark-whole-word`, so their retained symbolic
+bindings resolve on first use without eagerly loading either helper library.
 
 [`global-map.el`](./global/global-map.el) now loads independently with lexical
 binding and does not mutate global keys until `mb-global-map-setup` is called.
