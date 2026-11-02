@@ -32,6 +32,7 @@
 (autoload 'mb-cpp-grep "mb-grep" nil t)
 (autoload 'mb-grep "mb-grep" nil t)
 (autoload 'mb-h-grep "mb-grep" nil t)
+(autoload 'smart-swap "smart-swap" nil t)
 
 (declare-function inc-thing-at-point "mb-things")
 (declare-function inferior-lisp nil)

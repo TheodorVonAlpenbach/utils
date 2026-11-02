@@ -274,6 +274,10 @@ The first subset is intentionally conservative:
   filtering and depth selection, raw prefix handling, file-type patterns,
   shell argument quoting, explicit errors, compilation dispatch, mode
   selection, compatibility aliases, and C/C++ command scopes.
+* [`test-smart-swap.el`](./global/test-smart-swap.el): fourteen ERT tests for
+  extension, regexp, explicit-pair, version-directory, and ERT dispatch;
+  bidirectional targets, non-file buffers, missing files, invalid rules,
+  dispatch priority, and compatibility aliases.
 * [`test-list-interval.el`](./prototypes/geometry/test-list-interval.el): nine ERT tests for the
   closed-interval helpers, including construction and accessors.
 * [`test-list-envelope.el`](./prototypes/geometry/test-list-envelope.el): nine ERT tests for
@@ -476,9 +480,9 @@ physics, geometry, search, XML, anaphora, general, list, sequence, string,
 time, ISO-time, and table modules are independently loadable. Their validation
 comprises:
 
-* a clean `emacs -Q` load of all fifty-five utility and mode-extension
+* a clean `emacs -Q` load of all fifty-six utility and mode-extension
   features plus the ERT tooling;
-* 530 passing ERT tests from the batch entry point;
+* 544 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -655,6 +659,25 @@ Empty targets, empty file sets, and missing grep executables produce explicit
 the global and Evil maps autoload the grep commands they expose. The obsolete
 hard-coded `c:/unix/clisp/src/` search was retired. Twelve tests exercise the
 filesystem and command boundary without starting a real grep process.
+
+[`smart-swap.el`](./global/smart-swap.el) now loads independently with lexical
+binding and a deferred dependency on the ERT navigation feature. The formerly
+undefined `*simple-swaps*` startup dependency has a library-level default, so
+first use no longer depends on load order. Extension rules now derive and
+validate ordinary file targets directly instead of passing symbols to
+`apply`. Regexp targets work in non-file process buffers, explicit file pairs
+accept their optional directory, and version-directory swaps preserve the
+visited filename.
+
+Malformed rules and targets now produce explicit `user-error` failures.
+Legacy helper names remain as compatibility aliases to namespaced
+implementations, while the established `*smart-swaps*`, `*simple-swaps*`, and
+`*version-swaps*` customization variables remain compatible with tracked
+machine profiles and Octave/MATLAB registration. Global and Evil bindings now
+autoload `smart-swap` on first use. The unimplemented `:search` property is
+still retained but documented as ignored rather than silently presented as
+working. Fourteen tests cover each retained dispatch path without opening
+interactive file buffers.
 
 [`global-map.el`](./global/global-map.el) now loads independently with lexical
 binding and does not mutate global keys until `mb-global-map-setup` is called.

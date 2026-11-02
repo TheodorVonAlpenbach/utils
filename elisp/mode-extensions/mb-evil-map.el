@@ -43,7 +43,6 @@
 (declare-function reverse-sexps nil)
 (declare-function rotate-sexps nil)
 (declare-function rotate-windows nil)
-(declare-function smart-swap nil)
 (declare-function sp-backward-up-sexp "smartparens")
 (declare-function sp-down-sexp "smartparens")
 (declare-function sp-up-sexp "smartparens")
@@ -62,6 +61,7 @@
 (autoload 'insert-time "mb-insert" nil t)
 (autoload 'mb-grep "mb-grep" nil t)
 (autoload 'mb-grep-interactive "mb-grep" nil t)
+(autoload 'smart-swap "smart-swap" nil t)
 
 (defvar evil-exchange-key)
 (defvar evil-exchange-cancel-key)

@@ -18,6 +18,7 @@
   "global/test-mb-insert.el"
   "global/test-mb-print.el"
   "global/test-mb-grep.el"
+  "global/test-smart-swap.el"
     "mode-extensions/test-backus-naur-mode.el"
     "mode-extensions/test-mb-doc-view.el"
     "mode-extensions/test-mb-emacs-lisp.el"

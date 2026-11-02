@@ -1,4 +1,11 @@
-;;; Swap files. For older versions, see archive.
+;;; smart-swap.el --- Switch to related files -*- lexical-binding: t; -*-
+
+;;; Code:
+
+(require 'cl-lib)
+(require 'subr-x)
+
+(autoload 'mb-swap-ert-defun "mb-ert" nil t)
 
 (defvar *smart-swaps*
   '((tex pdf)
@@ -8,106 +15,185 @@
     (conf sh)
     (cpp h :search 1)
     (scss js)
-    ("Lilypond-compile" ("LilyPond started at .*\n\nlilypond \\(.*\\)$" 1)))
-  "TODO: enable :search")
+    ("Lilypond-compile"
+     ("LilyPond started at .*\n\nlilypond \\(.*\\)$" 1)))
+  "Pairs describing related file or buffer targets.
+A symbol denotes a file extension.  A string on the matching side
+is a regexp tested against the visited filename or buffer name.
+A target list has the form (REGEXP GROUP) and extracts a filename
+from the current buffer.  Additional pair properties are retained
+for compatibility but currently ignored.")
+
+(defvar *simple-swaps* nil
+  "Explicit file pairs used by `simple-swap'.
+Each entry is (FILE-1 FILE-2) or (FILE-1 FILE-2 DIRECTORY).")
 
 (defvar *version-swaps* nil
-  "A list on the same format as *smart-swaps*, except the elements are directories.
-When invoked, smart-swap will swap the current buffer with the
-file in the other swap directory.
+  "Directory pairs containing corresponding versions of files.")
 
-For example:
+(defun mb-smart-swap-substitute-extension (filename extension)
+  "Return FILENAME with its extension replaced by EXTENSION."
+  (unless filename
+    (user-error "Current buffer is not visiting a file"))
+  (concat (file-name-sans-extension filename)
+          "."
+          (if (symbolp extension)
+              (symbol-name extension)
+            extension)))
 
-\(push '(\"dir1/foo.txt\" \"dir
-\(find-file \"dir1/foo.txt\")
-\(smart-swap)
-;; smart swap will find and load 'dir2/foo.txt' into the current buffer
-\(smart-swap)
-;; smart swap will find and load 'dir1/foo.txt' into the current buffer
-")
+(defalias 'substitute-extension #'mb-smart-swap-substitute-extension)
 
-(require 'mb-ert)
-(cl-defun elisp-swap ()
-  "Swap an emacs lisp file with its associated test file."
-  (when (eql major-mode 'emacs-lisp-mode)
+(defun mb-smart-swap--buffer-text ()
+  "Return the current buffer contents without text properties."
+  (buffer-substring-no-properties (point-min) (point-max)))
+
+(defun mb-smart-swap--existing-file (filename)
+  "Expand FILENAME and return it when it exists."
+  (when filename
+    (let ((expanded (expand-file-name filename default-directory)))
+      (and (file-exists-p expanded) expanded))))
+
+(defun mb-smart-swap-expand-target (expression)
+  "Expand swap target EXPRESSION in the current buffer.
+Return nil when the target cannot be derived."
+  (cond
+   ((symbolp expression)
+    (mb-smart-swap-substitute-extension buffer-file-name expression))
+   ((stringp expression)
+    (expand-file-name expression default-directory))
+   ((and (listp expression)
+         (= (length expression) 2)
+         (stringp (car expression))
+         (natnump (cadr expression)))
+    (let ((text (mb-smart-swap--buffer-text)))
+      (save-match-data
+        (when (string-match (car expression) text)
+          (let ((match (match-string (cadr expression) text)))
+            (and match
+                 (expand-file-name match default-directory)))))))
+   (t
+    (user-error "Invalid smart-swap target: %S" expression))))
+
+(defalias 'expand-swap-target #'mb-smart-swap-expand-target)
+
+(defun mb-smart-swap-target (expression)
+  "Return the existing file named by target EXPRESSION."
+  (mb-smart-swap--existing-file
+   (mb-smart-swap-expand-target expression)))
+
+(defalias 'swap-target #'mb-smart-swap-target)
+
+(defun mb-smart-swap-match-current-buffer-p (expression)
+  "Return non-nil when EXPRESSION identifies the current buffer."
+  (cond
+   ((symbolp expression)
+    (and buffer-file-name
+         (equal (file-name-extension buffer-file-name)
+                (symbol-name expression))))
+   ((stringp expression)
+    (string-match-p expression
+                    (or buffer-file-name (buffer-name))))
+   ((consp expression)
+    (mb-smart-swap-match-current-buffer-p (car expression)))
+   (t
+    (user-error "Invalid smart-swap matcher: %S" expression))))
+
+(defalias 'match-current-buffer-p
+  #'mb-smart-swap-match-current-buffer-p)
+
+(defun mb-smart-swap-find-target (&optional swaps)
+  "Return the first existing target from SWAPS for the current buffer."
+  (cl-loop for entry in (or swaps *smart-swaps*)
+           thereis
+           (progn
+             (unless (and (listp entry) (>= (length entry) 2))
+               (user-error "Invalid smart-swap rule: %S" entry))
+             (let ((from (nth 0 entry))
+                   (to (nth 1 entry)))
+               (or (and (mb-smart-swap-match-current-buffer-p from)
+                        (mb-smart-swap-target to))
+                   (and (mb-smart-swap-match-current-buffer-p to)
+                        (mb-smart-swap-target from)))))))
+
+(defalias 'smart-swap-find-target #'mb-smart-swap-find-target)
+
+(defun regexp-swap (file-regexp)
+  "Visit the file extracted using FILE-REGEXP.
+FILE-REGEXP has the form (REGEXP GROUP)."
+  (when-let ((target (mb-smart-swap-target file-regexp)))
+    (find-file target)))
+
+(defun elisp-swap ()
+  "Swap an Emacs Lisp file with its associated ERT test file."
+  (when (derived-mode-p 'emacs-lisp-mode)
     (mb-swap-ert-defun)))
 
-(cl-defun regexp-swap (file-regexp)
-  (cl-destructuring-bind (regexp num) file-regexp
-    (awhen (string-match* regexp (buffer-string-no-properties) :num 1)
-      (find-file it))))
+(defun mb-smart-swap--buffer-directory ()
+  "Return the current buffer's directory."
+  (if buffer-file-name
+      (file-name-directory buffer-file-name)
+    default-directory))
 
-(cl-defun version-swap ()
-  (awhen (swap (buffer-directory) *version-swaps* :test #'file-equal-p)
-    (find-file (expand-file-name (buffer-file-name-nondirectory) it))))
+(defun mb-smart-swap--other-directory (directory swaps)
+  "Return the directory paired with DIRECTORY in SWAPS."
+  (cl-loop for entry in swaps
+           thereis
+           (progn
+             (unless (and (listp entry) (= (length entry) 2))
+               (user-error "Invalid version-swap rule: %S" entry))
+             (let ((first
+                    (file-name-as-directory
+                     (expand-file-name (nth 0 entry))))
+                   (second
+                    (file-name-as-directory
+                     (expand-file-name (nth 1 entry)))))
+               (cond ((file-equal-p directory first) second)
+                     ((file-equal-p directory second) first))))))
 
-(cl-defun substitute-extension (filename extension)
-  (format "%s.%s" (file-name-sans-extension filename) (sstring extension)))
-;;(substitute-extension (buffer-file-name) 'ly)
+(defun version-swap (&optional swaps)
+  "Visit the corresponding file in a directory pair from SWAPS."
+  (when buffer-file-name
+    (when-let ((directory
+                (mb-smart-swap--other-directory
+                 (mb-smart-swap--buffer-directory)
+                 (or swaps *version-swaps*))))
+      (find-file
+       (expand-file-name
+        (file-name-nondirectory buffer-file-name)
+        directory)))))
 
-(cl-defun expand-swap-target (expr)
-  (cond	((symbolp expr)
-	 (substitute-extension (buffer-file-name) expr))
-	((stringp expr)
-	 expr)
-	((consp expr)
-	 (string-match* (first expr) (buffer-string-no-properties) :num (second expr)))))
-;;(swap-target 'el)
-;;(swap-target '("filename='\\(.*\\)'" 1))
+(defun simple-swap-1 (file-1 file-2 &optional directory)
+  "Visit the counterpart of FILE-1 or FILE-2 in DIRECTORY."
+  (when buffer-file-name
+    (let* ((base (or directory (mb-smart-swap--buffer-directory)))
+           (first (expand-file-name file-1 base))
+           (second (expand-file-name file-2 base))
+           (current (expand-file-name buffer-file-name)))
+      (cond ((file-equal-p current first) (find-file second))
+            ((file-equal-p current second) (find-file first))))))
 
-(cl-defun smart-swap-find-file (filename-ending relative-target-directory)
-  (directory-files relative-target-directory t filename-ending))
-;;(smart-swap-find-file "swap.el$" "../global")
-
-(cl-defun swap-target (expr)
-  "Here I should allow for search"
-  (if (consp expr)
-    (awhen (expand-swap-target expr)
-      (when (file-exists-p it) it))
-    (apply #'smart-swap-find-file expr)))
-;;(length (directory-files "." t))
-
-(cl-defun match-current-buffer-p (expr)
-  (cond ((symbolp expr)
-	 (when (string= (file-name-extension (buffer-file-name))
-			(symbol-name expr))
-	   (buffer-file-name)))
-	((stringp expr)
-	 (when (string-match expr (buffer-file-name))
-	   (buffer-file-name)))
-	((consp expr)
-	 (match-current-buffer-p (car expr)))))
-
-(cl-defun smart-swap-find-target (&optional (swaps *smart-swaps*))
-  (cl-loop for (from to) in swaps
-	when (or (when (match-current-buffer-p from) (swap-target to))
-		 (when (match-current-buffer-p to) (swap-target from)))
-     return it))
-
-(cl-defun simple-swap-1 (f1 f2 &optional (dir (buffer-directory)))
-  "TODO: handle absolute file names"
-  (let ((bfn (buffer-file-name (current-buffer)))
-	(fn1 (expand-file-name f1 dir))
-	(fn2 (expand-file-name f2 dir)))
-    (if (string= fn1 bfn)
-     (find-file fn2)
-     (if (string= bfn fn2)
-       (find-file fn1)))))
-
-(cl-defun simple-swap (&optional (swaps *simple-swaps*))
+(defun simple-swap (&optional swaps)
+  "Visit the first explicit counterpart found in SWAPS."
   (interactive)
-  (cl-loop for (f1 f2 d) in swaps
-	thereis (simple-swap-1 f1 f2 d)))
-;;(simple-swap)
+  (cl-loop for entry in (or swaps *simple-swaps*)
+           unless (and (listp entry)
+                       (memq (length entry) '(2 3)))
+           do (user-error "Invalid simple-swap rule: %S" entry)
+           thereis (apply #'simple-swap-1 entry)))
 
-(cl-defun smart-swap (&optional (swaps *smart-swaps*))
-  "Swaps to file as defined in SWAPS"
+(defun smart-swap (&optional swaps)
+  "Visit a file related to the current buffer according to SWAPS."
   (interactive)
   (or (simple-swap)
       (elisp-swap)
       (version-swap)
-      (aif (smart-swap-find-target swaps)
-	(find-file it)
-	(message "Couldn't find swap target for current file"))))
+      (when-let ((target (mb-smart-swap-find-target
+                          (or swaps *smart-swaps*))))
+        (find-file target))
+      (progn
+        (message "Couldn't find swap target for current buffer")
+        nil)))
 
 (provide 'smart-swap)
+
+;;; smart-swap.el ends here
