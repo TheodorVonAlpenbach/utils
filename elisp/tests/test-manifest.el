@@ -14,6 +14,7 @@
     "elisp/test-mb-paragraph.el"
   "elisp/test-mb-sexp.el"
   "global/test-global-map.el"
+  "global/test-mb-buffer.el"
     "global/test-mb-indent.el"
   "global/test-mb-insert.el"
   "global/test-mb-print.el"

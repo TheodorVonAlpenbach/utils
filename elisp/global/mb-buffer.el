@@ -1,35 +1,71 @@
-(cl-defun back-to-indentation-and-indent ()
+;;; mb-buffer.el --- Small buffer and window commands -*- lexical-binding: t; -*-
+
+;;; Code:
+
+(defun mb-buffer-back-to-indentation-and-indent ()
+  "Normalize whitespace at indentation and indent the current line."
   (interactive)
   (back-to-indentation)
   (just-one-space)
-  (if (string= major-mode "text-mode")
-    (indent-relative)
+  (if (derived-mode-p 'text-mode)
+      (indent-relative)
     (indent-for-tab-command)))
 
-(cl-defun insert-at-point (text &optional (point (point)) (buffer (current-buffer)))
-  "Inserts TEXT at buffers POINT"
+(defalias 'back-to-indentation-and-indent
+  #'mb-buffer-back-to-indentation-and-indent)
+
+(defun mb-buffer-insert-at-point (text &optional point buffer)
+  "Insert TEXT at POINT in BUFFER.
+BUFFER defaults to the current buffer.  POINT defaults to that
+buffer's current point."
+  (with-current-buffer (or buffer (current-buffer))
+    (save-excursion
+      (goto-char (or point (point)))
+      (insert text))))
+
+(defalias 'insert-at-point #'mb-buffer-insert-at-point)
+
+(defun mb-buffer-replace-region (string beginning end)
+  "Replace text from BEGINNING through END with STRING.
+Point remains at the beginning of the replacement, and the kill
+ring is not modified."
+  (delete-region beginning end)
   (save-excursion
-    (set-buffer buffer)
-    (goto-char point)
-    (insert text)))
-;;(insert-at-point "qwe" 10 "*scratch*")
+    (goto-char beginning)
+    (insert string)))
 
-(cl-defun buffer-replace-region (string beg end)
-  "Replaces all content in region from point BEG to point END
-with STRING"
-  (kill-region beg end)
-  (insert-at-point string beg))
+(defalias 'buffer-replace-region #'mb-buffer-replace-region)
 
-(cl-defun sort-chars (beg end &optional reverse)
-  "Sort characters alphabetically in region."
-  (interactive "r")
-  (insert (cl-sort (delete-and-extract-region beg end) #'<)))
+(defun mb-buffer-sort-characters (beginning end &optional reverse)
+  "Sort characters between BEGINNING and END.
+With REVERSE non-nil, sort in descending order."
+  (interactive "r\nP")
+  (let* ((predicate (if reverse #'> #'<))
+         (characters
+          (sort (string-to-list
+                 (delete-and-extract-region beginning end))
+                predicate)))
+    (insert (apply #'string characters))))
 
-(cl-defun get-window-size (&optional side window)
-  (if side (window-width window) (window-height window)))
+(defalias 'sort-chars #'mb-buffer-sort-characters)
 
-(cl-defun set-window-size (arg &optional side)
-  (shrink-window (- (get-window-size side) arg) side))
-;;(set-window-size 12 t)
+(defun mb-buffer-window-size (&optional horizontal window)
+  "Return WINDOW's height, or width when HORIZONTAL is non-nil."
+  (if horizontal
+      (window-width window)
+    (window-height window)))
+
+(defalias 'get-window-size #'mb-buffer-window-size)
+
+(defun mb-buffer-set-window-size (size &optional horizontal)
+  "Resize the selected window to SIZE.
+Resize horizontally when HORIZONTAL is non-nil."
+  (shrink-window
+   (- (mb-buffer-window-size horizontal) size)
+   horizontal))
+
+(defalias 'set-window-size #'mb-buffer-set-window-size)
 
 (provide 'mb-buffer)
+
+;;; mb-buffer.el ends here

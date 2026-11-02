@@ -278,6 +278,11 @@ The first subset is intentionally conservative:
   extension, regexp, explicit-pair, version-directory, and ERT dispatch;
   bidirectional targets, non-file buffers, missing files, invalid rules,
   dispatch priority, and compatibility aliases.
+* [`test-mb-buffer.el`](./global/test-mb-buffer.el): nine ERT tests for
+  cross-buffer insertion and point preservation, region replacement without
+  kill-ring mutation, ascending and descending character sorting,
+  mode-sensitive indentation, exact window-size deltas, and compatibility
+  aliases.
 * [`test-list-interval.el`](./prototypes/geometry/test-list-interval.el): nine ERT tests for the
   closed-interval helpers, including construction and accessors.
 * [`test-list-envelope.el`](./prototypes/geometry/test-list-envelope.el): nine ERT tests for
@@ -480,9 +485,9 @@ physics, geometry, search, XML, anaphora, general, list, sequence, string,
 time, ISO-time, and table modules are independently loadable. Their validation
 comprises:
 
-* a clean `emacs -Q` load of all fifty-six utility and mode-extension
+* a clean `emacs -Q` load of all fifty-seven utility and mode-extension
   features plus the ERT tooling;
-* 544 passing ERT tests from the batch entry point;
+* 553 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -678,6 +683,21 @@ autoload `smart-swap` on first use. The unimplemented `:search` property is
 still retained but documented as ignored rather than silently presented as
 working. Fourteen tests cover each retained dispatch path without opening
 interactive file buffers.
+
+[`mb-buffer.el`](./global/mb-buffer.el) now loads independently with lexical
+binding and namespaced implementations behind its retained compatibility
+names. Cross-buffer insertion defaults to the target buffer's point rather
+than evaluating the default in the caller. Region replacement no longer uses
+`kill-region`, so a replacement does not unexpectedly overwrite the user's
+kill ring. Character sorting now honors its previously ignored reverse
+argument, and indentation dispatch uses `derived-mode-p` rather than comparing
+the `major-mode` symbol to a string.
+
+The window helpers retain their exact-size behavior with documented dimension
+selection. The globally bound `back-to-indentation-and-indent` command now
+autoloads the feature on first use instead of depending on undeclared startup
+loading. Nine tests cover the retained helpers; the only external caller of
+`set-window-size` remains in the archived browser tree.
 
 [`global-map.el`](./global/global-map.el) now loads independently with lexical
 binding and does not mutate global keys until `mb-global-map-setup` is called.

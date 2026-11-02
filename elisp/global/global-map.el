@@ -11,6 +11,7 @@
 (autoload 'print-notepad-file "mb-print" nil t)
 (autoload 'print-notepad-region "mb-print" nil t)
 (autoload 'insert-angle-brackets "mb-insert" nil t)
+(autoload 'back-to-indentation-and-indent "mb-buffer" nil t)
 (autoload 'insert-asterisks "mb-insert" nil t)
 (autoload 'insert-curly-brackets "mb-insert" nil t)
 (autoload 'insert-date "mb-insert" nil t)
