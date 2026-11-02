@@ -266,9 +266,10 @@ The first subset is intentionally conservative:
 * [`test-list-envelope.el`](./prototypes/geometry/test-list-envelope.el): nine ERT tests for
   rectangle construction, validation, containment, overlap, intersection, and
   union.
-* [`test-mb-utils-io.el`](./utils/test-mb-utils-io.el): ten ERT tests for text
-  and binary file I/O, temporary-file cleanup, directory binding, CSV parsing,
-  field iteration, and serialization.
+* [`test-mb-utils-io.el`](./utils/test-mb-utils-io.el): eighteen ERT tests for
+  text and binary file I/O, temporary-file cleanup, directory binding,
+  buffer-selection and point semantics, error restoration, multi-buffer
+  iteration, CSV parsing, field iteration, and serialization.
 * [`test-mb-utils-buffer.el`](./utils/test-mb-utils-buffer.el): fifteen ERT
   tests for buffer metadata, marks and regions, line navigation, editing,
   comments, word transformations, temporary files, save-as behavior, and the
@@ -423,7 +424,7 @@ replaced with built-in operations.
 | Eager feature | Current source | Initial classification |
 | --- | --- | --- |
 | `global-map` | [`global-map.el`](./global/global-map.el) | Active startup keymap; independently loadable with explicit activation |
-| `mb-utils-io` | [`mb-utils-io.el`](./utils/mb-utils-io.el) | Active shared utility; startup-coupled |
+| `mb-utils-io` | [`mb-utils-io.el`](./utils/mb-utils-io.el) | Active shared utility; independently loadable |
 | `mb-evil-map` | [`mb-evil-map.el`](./mode-extensions/mb-evil-map.el) | Active optional integration; independently loadable with deferred global keymaps |
 | `mb-things` | [`mb-things.el`](./utils/mb-things.el) | Active shared utility; independently loadable |
 | `radio-playlists` | [`radio-playlists.el`](./archive/browser/radio-playlists.el) | Archived; external programs/network |
@@ -455,7 +456,7 @@ comprises:
 
 * a clean `emacs -Q` load of all fifty utility and mode-extension
   features plus the ERT tooling;
-* 463 passing ERT tests from the batch entry point;
+* 471 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -467,7 +468,18 @@ quotes, and reports unterminated quoted fields. The simple string-separator
 behavior remains unchanged. The quote/escape state machine is isolated in a
 single-field reader, leaving `parse-csv-line` as a short collecting loop.
 Binary vector writing was also repaired and is covered by a range round-trip
-test.
+test. The legacy `with-buffer` and `with-buffer*` macros now expand to
+`with-current-buffer` rather than open-coding buffer restoration with
+`save-excursion`, `set-buffer`, and `unwind-protect`. Their established
+contract remains explicit: the caller's current buffer is restored on normal
+return and error, while point changes persist in the target buffer;
+`with-buffer` continues to interpret nil as the current buffer and
+`with-buffer*` retains its stricter nil error. `with-buffers` now uses an
+uninterned iteration variable instead of capturing callers' `x` bindings, and
+all four macros have inline indentation and Edebug declarations. Eight
+additional tests characterize buffer objects and names, nil and dead buffers,
+return values, persistent point movement, error restoration, hygienic
+iteration, and `with-point`.
 
 The maintained file list and load paths now live in
 [`test-manifest.el`](./tests/test-manifest.el). Both the batch entry point and

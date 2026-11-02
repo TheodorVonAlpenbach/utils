@@ -48,6 +48,109 @@
                    temporary-file-directory))
     (should (equal default-directory original))))
 
+(ert-deftest test-mb-utils-io-with-buffer-object ()
+  "Test return, current-buffer, and point semantics with a buffer object."
+  (let ((origin (current-buffer))
+        (target (generate-new-buffer " *mb-utils-io-buffer*")))
+    (unwind-protect
+        (progn
+          (with-current-buffer target
+            (insert "abc")
+            (goto-char 2))
+          (should (= (with-buffer target
+                       (goto-char 3)
+                       (point))
+                     3))
+          (should (eq (current-buffer) origin))
+          (should (= (with-current-buffer target (point)) 3)))
+      (kill-buffer target))))
+
+(ert-deftest test-mb-utils-io-with-buffer-name ()
+  "Test that `with-buffer' accepts a live buffer name."
+  (let ((target (generate-new-buffer " *mb-utils-io-name*")))
+    (unwind-protect
+        (should (eq (with-buffer (buffer-name target)
+                      (current-buffer))
+                    target))
+      (kill-buffer target))))
+
+(ert-deftest test-mb-utils-io-with-buffer-nil ()
+  "Test that nil means the current buffer for `with-buffer'."
+  (let ((origin (current-buffer))
+        (evaluations 0))
+    (should (eq (with-buffer (progn (cl-incf evaluations) nil)
+                  (current-buffer))
+                origin))
+    (should (= evaluations 1))))
+
+(ert-deftest test-mb-utils-io-with-buffer-restores-after-error ()
+  "Test restoration after an error while retaining target point changes."
+  (let ((origin (current-buffer))
+        (target (generate-new-buffer " *mb-utils-io-error*")))
+    (unwind-protect
+        (progn
+          (with-current-buffer target
+            (insert "abc")
+            (goto-char 2))
+          (should-error
+           (with-buffer target
+             (goto-char 3)
+             (error "Expected test error")))
+          (should (eq (current-buffer) origin))
+          (should (= (with-current-buffer target (point)) 3)))
+      (kill-buffer target))))
+
+(ert-deftest test-mb-utils-io-with-buffer-star ()
+  "Test the legacy strict-buffer variant and its nil behavior."
+  (let ((origin (current-buffer))
+        (target (generate-new-buffer " *mb-utils-io-star*")))
+    (unwind-protect
+        (progn
+          (should (eq (with-buffer* target (current-buffer)) target))
+          (should (eq (current-buffer) origin))
+          (should-error (with-buffer* nil t) :type 'wrong-type-argument))
+      (kill-buffer target))))
+
+(ert-deftest test-mb-utils-io-with-buffer-rejects-dead-buffer ()
+  "Test that both single-buffer macros reject a dead buffer."
+  (let ((target (generate-new-buffer " *mb-utils-io-dead*")))
+    (kill-buffer target)
+    (should-error (with-buffer target t) :type 'error)
+    (should-error (with-buffer* target t) :type 'error)))
+
+(ert-deftest test-mb-utils-io-with-buffers ()
+  "Test iteration order, return value, and hygienic expansion."
+  (let ((first (generate-new-buffer " *mb-utils-io-first*"))
+        (second (generate-new-buffer " *mb-utils-io-second*"))
+        (x 'outer)
+        visited)
+    (unwind-protect
+        (progn
+          (should-not
+           (with-buffers (list first second)
+             (should (eq x 'outer))
+             (push (current-buffer) visited)))
+          (should (equal (nreverse visited) (list first second)))
+          (should (eq x 'outer)))
+      (kill-buffer first)
+      (kill-buffer second))))
+
+(ert-deftest test-mb-utils-io-with-point ()
+  "Test temporary buffer selection and persistent point movement."
+  (let ((origin (current-buffer))
+        (target (generate-new-buffer " *mb-utils-io-point*")))
+    (unwind-protect
+        (progn
+          (with-current-buffer target
+            (insert "abcdef"))
+          (should (equal (with-point (4 target)
+                           (buffer-substring-no-properties
+                            (point) (point-max)))
+                         "def"))
+          (should (eq (current-buffer) origin))
+          (should (= (with-current-buffer target (point)) 4)))
+      (kill-buffer target))))
+
 (ert-deftest test-parse-csv-string-with-string-separator ()
   "Test simple separated text parsing."
   (should (equal (parse-csv-string "a;b\nc;d") '(("a" "b") ("c" "d"))))

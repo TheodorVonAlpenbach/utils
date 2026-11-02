@@ -77,40 +77,44 @@ default value of optional parameter BUFFER is the current buffer."
       (kill-region (point-min) old-end))))
 
 (defmacro with-buffer* (buffer &rest body)
-  "Same as with-buffer but allows changes of point."
-  (let ((current (gensym)))
-    `(let ((,current (current-buffer)))
-      (unwind-protect
-	(progn
-	  (set-buffer ,buffer)
-	  ,@body)
-	(set-buffer ,current)))))
-(def-edebug-spec with-buffer* t)
+  "Evaluate BODY in BUFFER and return the value of its last form.
+Restore the caller's current buffer afterwards, including when BODY
+signals an error.  Point changes in BUFFER persist."
+  (declare (indent 1) (debug t))
+  `(with-current-buffer ,buffer
+     ,@body))
 ;;(with-buffer* *lynx-buf* (goto-char 10))
 
 (defmacro with-buffer (buffer-or-name &rest body)
-  "Temporarily work with BUFFER-OR-NAME and evalue last form in BODY."
-  `(save-excursion
-     (set-buffer (or ,buffer-or-name (current-buffer)))
+  "Evaluate BODY in BUFFER-OR-NAME and return its last value.
+Nil means the current buffer.  Restore the caller's current buffer
+afterwards, including when BODY signals an error.  Point changes in
+the target buffer persist."
+  (declare (indent 1) (debug t))
+  `(with-current-buffer (or ,buffer-or-name (current-buffer))
      ,@body))
 ;;(with-buffer *lynx-buf* (goto-char 2))
-(def-edebug-spec with-buffer t)
 
 (defmacro with-buffers (buffers-or-names &rest body)
-  "Eval BODY in every buffer in the list BUFFERS-OR-NAMES."
-  `(cl-loop for x in ,buffers-or-names
-	 do (with-buffer x ,@body)))
+  "Evaluate BODY in every buffer in BUFFERS-OR-NAMES.
+Return nil, as for a `dolist' used only for side effects."
+  (declare (indent 1) (debug t))
+  (let ((buffer (cl-gensym "buffer")))
+    `(dolist (,buffer ,buffers-or-names)
+       (with-buffer ,buffer
+         ,@body))))
 ;;(with-buffer *lynx-buf* (goto-char 2))
-(def-edebug-spec with-buffers t)
 
 
 (cl-defmacro with-point ((point &optional buffer-or-name) &rest body)
-  "Temporarily work with BUFFER at POINT and evalue last form in BODY."
+  "Evaluate BODY at POINT in BUFFER-OR-NAME.
+Nil BUFFER-OR-NAME means the current buffer.  Point changes in the
+target buffer persist."
+  (declare (indent 1) (debug ((form &optional form) body)))
   `(with-buffer (or ,buffer-or-name (current-buffer))
      (goto-char ,point)
      ,@body))
 ;;(with-point (290 "mb-utils-io.el") (line-string))
-(def-edebug-spec with-point t)
 
 (defmacro with-file (file &rest body)
   "Insert FILE in a temporary buffer, evaluate body and save the
