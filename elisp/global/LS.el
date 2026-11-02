@@ -1,149 +1,183 @@
-(require 'mb-utils-strings)
-(require 'time)
+;;; LS.el --- Work-log parsing and insertion helpers -*- lexical-binding: t; -*-
 
-;;; LS formatter
-(cl-defun LS-fontify ()
+;;; Code:
+
+(require 'cl-lib)
+(require 'mb-utils-buffer)
+(require 'mb-utils-iso-time)
+(require 'mb-utils-strings)
+(require 'mb-utils-time)
+
+(autoload 'insert-date "mb-insert" nil t)
+(autoload 'insert-time "mb-insert" nil t)
+
+(defgroup ls nil
+  "Helpers for the personal work log."
+  :group 'org)
+
+(defcustom ls-notes-buffer-name "LS-notes.org"
+  "Name of the work-log buffer."
+  :type 'string)
+
+(defcustom ls-project-directory "~/systems"
+  "Directory containing project directories."
+  :type 'directory)
+
+(defun ls-fontify ()
+  "Fontify ISO time prefixes in the current buffer."
   (interactive)
   (font-lock-add-keywords
-   nil ;;i.e. only for the current buffer
-   (list (format "^%s" (iso-time-regexp))
-	 '(0 org-level-6))))
+   nil
+   `((,(concat "^" (iso-time-regexp)) (0 'org-level-6)))))
 
-;;; LS parser
-(cl-defun LS-buffer ()
-  (or (get-buffer "LS-notes.org")
-      (error "LS buffer is not loaded")))
+(defalias 'LS-fontify #'ls-fontify)
 
-(cl-defun LS-log-day-separator ()
-  (format "^\\*\\* %s"(iso-date-regexp)))
-(cl-defun LS-log-item-separator ()
-  (format "^%s" (iso-time-regexp)))
+(defun ls-buffer ()
+  "Return the work-log buffer or report that it is unavailable."
+  (or (get-buffer ls-notes-buffer-name)
+      (user-error "Work-log buffer is not loaded: %s"
+                  ls-notes-buffer-name)))
 
-(cl-defun time-within (x interval)
-  (and (time<= (first interval) x) (time< x (second interval))))
-;;(mapcar #'first (LS-log-days (LS-log-string)))
+(defalias 'LS-buffer #'ls-buffer)
 
-(cl-defun LS-estimate (&optional (from (monthstart)) (to (add-time from :month 1)) (rate 10) (sans-arbeidsgiveravgift .84) (sans-tax .6))
-  (* rate sans-arbeidsgiveravgift sans-tax (sum (mapcar #'second (LS-hours from to)))))
+(defun ls-log-day-separator ()
+  "Return the regexp introducing a work-log day."
+  (concat "^\\*\\* " (iso-date-regexp)))
 
-(cl-defun LS-log-items (day-log &optional (from (midnight (first day-log))) (to (now)))
-  (copy-if (bind #'time-within (list from to))
-	   (split-string-regexp-pairs (second day-log) (LS-log-item-separator)
-				      :trim ":* *")
-	   :key #'(lambda (x) (format "%sT%s" (first day-log) (first x)))))
-;;(LS-log-items (last-elt (LS-log-days (LS-log-string))) (midnight) "11:01")
+(defalias 'LS-log-day-separator #'ls-log-day-separator)
 
-(cl-defun LS-log-days (log-string &optional (from (monthstart)) (to (now)))
-  (copy-if (bind #'time-within (list from to))
-	   (split-string-regexp-pairs log-string (LS-log-day-separator)
-				      :trim "\\*+ *" :side :left)
-	   :key #'first))
-;;(mapcar #'first (LS-log-days (LS-log-string)))
+(defun ls-log-item-separator ()
+  "Return the regexp introducing a timed work-log item."
+  (concat "^" (iso-time-regexp)))
 
-(cl-defun LS-extract-hours-buffer ()
-  (LS-extract-hours (LS-log-string)))
-;;(LS-extract-hours-buffer)
+(defalias 'LS-log-item-separator #'ls-log-item-separator)
 
-(cl-defun LS-log-string (&optional (buffer (LS-buffer)))
-  (with-buffer buffer
+(defun ls-time-within-p (time interval)
+  "Return non-nil when TIME is within half-open INTERVAL."
+  (and (time<= (car interval) time)
+       (time< time (cadr interval))))
+
+(defalias 'time-within #'ls-time-within-p)
+
+(cl-defun ls-estimate
+    (&optional
+     (from (monthstart))
+     (to (add-time from :month 1))
+     (rate 10)
+     (employer-factor 0.84)
+     (tax-factor 0.6))
+  "Estimate net payment for work between FROM and TO.
+RATE is multiplied by logged hours, EMPLOYER-FACTOR, and
+TAX-FACTOR."
+  (* rate employer-factor tax-factor
+     (apply #'+ (mapcar #'cadr (ls-hours from to)))))
+
+(defalias 'LS-estimate #'ls-estimate)
+
+(cl-defun ls-log-items
+    (day-log
+     &optional
+     (from (midnight (car day-log)))
+     (to (now)))
+  "Return timed items from DAY-LOG within FROM and TO.
+DAY-LOG is a pair of an ISO date and its log text."
+  (cl-remove-if-not
+   (lambda (item)
+     (ls-time-within-p
+      (format "%sT%s" (car day-log) (car item))
+      (list from to)))
+   (split-string-regexp-pairs
+    (cadr day-log) (ls-log-item-separator) :trim ":* *")))
+
+(defalias 'LS-log-items #'ls-log-items)
+
+(cl-defun ls-log-days
+    (log-string &optional (from (monthstart)) (to (now)))
+  "Return day logs in LOG-STRING within FROM and TO."
+  (cl-remove-if-not
+   (lambda (day-log)
+     (ls-time-within-p (car day-log) (list from to)))
+   (split-string-regexp-pairs
+    log-string (ls-log-day-separator)
+    :trim "\\*+ *" :side :left)))
+
+(defalias 'LS-log-days #'ls-log-days)
+
+(defun ls-log-string (&optional buffer)
+  "Return the log section from BUFFER.
+BUFFER defaults to `ls-buffer'."
+  (with-current-buffer (or buffer (ls-buffer))
     (save-excursion
-      (let ((end (goto-char (point-max)))
-	    (beg (re-search-backward "^\\* Logg$")))
-	(buffer-substring-no-properties beg end)))))
-;;(LS-log-string)
+      (goto-char (point-max))
+      (unless (re-search-backward "^\\* Logg$" nil t)
+        (user-error "Work-log heading not found"))
+      (buffer-substring-no-properties (point) (point-max)))))
 
-;;; LS utilities
-(require 'mb-utils-time)
-(cl-defun LS-hours (&optional (from (monthstart)) (to (now)) (lunchtime 0.5))
-  (cl-loop for day-log in (LS-log-days (LS-log-string) from to)
-	for items = (LS-log-items day-log from to)
-	if items
-	collect (let ((hours (time- (first (last-elt items))
-				    (first (first items))
-				    :unit :hour)))
-		  (list (first day-log) (- (/ (round hours 0.25) 4.0) lunchtime)))))
-;;(pp (LS-hours (monthstart -1) (monthstart)))
-;;(pp (LS-hours (monthstart)))
-;;(let ((x (LS-hours (monthstart -1) (monthstart)))) (list x (sum (mapcar #'second x))))
+(defalias 'LS-log-string #'ls-log-string)
 
+(cl-defun ls-hours
+    (&optional (from (monthstart)) (to (now)) (lunchtime 0.5))
+  "Return logged hours by day between FROM and TO.
+Subtract LUNCHTIME from each nonempty day."
+  (cl-loop for day-log in (ls-log-days (ls-log-string) from to)
+           for items = (ls-log-items day-log from to)
+           when items
+           collect
+           (let* ((date (car day-log))
+                  (hours
+                   (time- (format "%sT%s" date (caar (last items)))
+                          (format "%sT%s" date (caar items))
+                          :hour)))
+             (list (car day-log)
+                   (- (/ (round hours 0.25) 4.0)
+                      lunchtime)))))
 
-;;; hack script for renaming
-;;"Hs5.4-Tz11/2-Cum15-Dir000/165-6-50x20.csv" (two directories)
-;; to
-;;"75/Hs5.4-Tz5.5-Cum15-Dir000/165-6-50x20.csv" (one directory)
+(defalias 'LS-hours #'ls-hours)
 
-;;(cl-defun pathcorr (&optional (root "~/projects/imms/data/amplitudes/75/"))
-(cl-defun newdirname (x y)
-  (cl-destructuring-bind (a b) (split-string x "z" )
-    (cl-destructuring-bind (c d) (split-string y "-C")
-      (format "%sz%SC%s" a (/ (float (string-to-number b)) (string-to-number c)) d))))
-;;(newdirname "Hs0.25-Tz11" "2-Cum33-Dir")
+(defun ls--ensure-notes-buffer ()
+  "Report an error unless the current buffer is the work log."
+  (unless (equal (buffer-name) ls-notes-buffer-name)
+    (user-error "Command is only valid in buffer %s"
+                ls-notes-buffer-name)))
 
-(cl-defun pathcorr (&key (root "~/tmp/") (log t) (execute nil))
-  "This could be a powerful operation, so set EXECUTE to NIL and check log output first"
-  (cl-loop for x in (directory-files root t "Hs")
-	do (cl-loop for old in (directory-files x t "Cum")
-		      for parts = (split-string old "/")
-		      for new = (concat* (rcons (butlast parts 2) (apply #'newdirname (last parts 2))) :in "/")
-		      if log do (princ (format "%s -> %s\n" old new))
-		      if execute do (rename-file old new))
-	if log do (princ (format "\tDeleting %s\n" x))
-	if execute do (delete-directory x)))
-;;(pathcorr :log t :execute t)
-;;(pathcorr :root "~/projects/imms/data/amplitudes/75/" :log t :execute nil)
-
-(cl-defun move-directories-lt (parent-dir dest-dir string &key (log t) (execute nil))
-  "Moves every directory DIR under PARENT-DIR to DEST-DIR iff DIR < string by string comparison.
-PARENT-DIR and DEST-DIR are full paths, while STRING should be
-compared to the relative directory names in PARENT-DIR"
-  (cl-loop for x in (directory-files parent-dir nil "Hs")
-	if (string< x string)
-	do (let ((target (expand-file-name x parent-dir))
-		 (dest (expand-file-name x dest-dir)))
-	     (when log (princ (format "%s -> %s\n" target dest)))
-	     (when execute (rename-file target dest)))))
-;;(move-directories-lt "/home/MBe/projects/imms/data/amplitudes/75" "~/tmp/75" "Hs1.75-Tz12.5Cum4-Dir090" :execute t)
-;;"Hs1.75-Tz12.5Cum4-Dir075" TODO: process this
-
-(awhen (get-buffer "LS-notes.org")
-  (with-buffer it
-    (setf fill-paragraph-function #'fill-time-paragraph)))
-
-(cl-defun ls-insert-arrival-time ()
+(defun ls-insert-arrival-time ()
+  "Append today's arrival entry to the work log."
   (interactive)
-  (if (string/= (buffer-name) "LS-notes.org")
-    (warn "Function ls-insert-arrival-time is only valid in buffer LS-notes.org.")
-    ;;else
-    (goto-char (point-max))
-    (just-one-blank-line)
-    (org-insert-heading)
-    (insert-date nil)
-    (insert-parentheses* nil)
-    (eol)
-    (insert "\n")
-    (insert-time nil)
-    (insert " Ankomst\n")))
+  (ls--ensure-notes-buffer)
+  (goto-char (point-max))
+  (just-one-blank-line)
+  (insert "** ")
+  (insert-date nil)
+  (insert "()\n")
+  (insert-time nil)
+  (insert " Ankomst\n"))
 
-(cl-defun ls-insert-depature-time ()
+(defun ls-insert-departure-time ()
+  "Append the current departure time to the work log."
   (interactive)
-  (if (string/= (buffer-name) "LS-notes.org")
-    (warn "Function ls-insert-arrival-time is only valid in buffer LS-notes.org.")
-    ;;else
-    (goto-char (point-max))
-    (just-one-blank-line)
-    (insert-time nil)
-    (insert " Hjem\n")))
+  (ls--ensure-notes-buffer)
+  (goto-char (point-max))
+  (just-one-blank-line)
+  (insert-time nil)
+  (insert " Hjem\n"))
 
-(cl-defun ls-project-number->tag (project-number)
-  "Convert integer PROJECT-NUMBER to corresponding project tag."
-  (insert-sequence (format "%05d" project-number) "_" :start1 2 :end1 2))
-;;(ls-project-number->tag 15010)
+(defalias 'ls-insert-depature-time #'ls-insert-departure-time)
 
-(cl-defun ls-project-name (project-number)
-  "Return the directory name under ~/systems containing PROJECT-NUMBER."
-  (cl-find (ls-project-number->tag project-number)
-	(directory-files "~/systems")
-	:test #'string-match*))
-;;(ls-project-name 14029)
+(defun ls-project-number->tag (project-number)
+  "Convert integer PROJECT-NUMBER to its underscore project tag."
+  (let ((number (format "%05d" project-number)))
+    (concat (substring number 0 2)
+            "_"
+            (substring number 2))))
+
+(defun ls-project-name (project-number)
+  "Return the project directory containing PROJECT-NUMBER."
+  (let ((tag (ls-project-number->tag project-number)))
+    (cl-find-if
+     (lambda (name) (string-match-p (regexp-quote tag) name))
+     (directory-files ls-project-directory nil
+                      directory-files-no-dot-files-regexp))))
 
 (provide 'LS)
+
+;;; LS.el ends here

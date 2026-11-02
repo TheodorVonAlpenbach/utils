@@ -287,6 +287,10 @@ The first subset is intentionally conservative:
   vertical and horizontal resizing, raw prefix normalization, selected and
   explicit frames, enlargement direction, invalid dimensions, interactive
   compatibility aliases, and exact resize arguments.
+* [`test-LS.el`](./global/test-LS.el): twelve ERT tests for half-open time
+  ranges, day and item parsing, log-section errors, rounded daily hours,
+  payment estimates, arrival and departure insertion, project lookup, buffer
+  restrictions, and compatibility aliases.
 * [`test-list-interval.el`](./prototypes/geometry/test-list-interval.el): nine ERT tests for the
   closed-interval helpers, including construction and accessors.
 * [`test-list-envelope.el`](./prototypes/geometry/test-list-envelope.el): nine ERT tests for
@@ -489,9 +493,9 @@ physics, geometry, search, XML, anaphora, general, list, sequence, string,
 time, ISO-time, and table modules are independently loadable. Their validation
 comprises:
 
-* a clean `emacs -Q` load of all fifty-eight utility and mode-extension
+* a clean `emacs -Q` load of all fifty-nine utility and mode-extension
   features plus the ERT tooling;
-* 560 passing ERT tests from the batch entry point;
+* 572 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -714,6 +718,24 @@ Vertical and horizontal enlargement share the same resize core by passing a
 negative shrink amount. All four public commands are autoloaded by the global
 map, including the two horizontal commands exposed as bindings. Seven tests
 mock the frame boundary, avoiding graphical-frame requirements in batch runs.
+
+[`LS.el`](./global/LS.el) now loads independently with lexical binding and
+explicit dependencies. Its retained work-log parsing, hour estimation,
+arrival/departure insertion, and project lookup helpers have namespaced
+implementations where legacy uppercase or misspelled entry points existed.
+Time ranges remain half-open. Daily hour calculations now combine item times
+with their day before parsing, and arrival entries explicitly create the
+level-two headings expected by the parser.
+
+The undefined `LS-extract-hours-buffer`, load-time mutation of a specifically
+named buffer, and unreferenced one-off directory migration and renaming scripts
+were removed. Project lookup has a configurable root and escapes the generated
+tag before regexp matching. Invalid buffers and missing log headings now
+produce `user-error`. The active Evil integration no longer eagerly requires
+the complete work-log feature; its arrival and correctly spelled departure
+commands are autoloaded on first use, while the old `depature` spelling remains
+an alias. Twelve tests cover the retained behavior without touching real work
+logs or project directories.
 
 [`global-map.el`](./global/global-map.el) now loads independently with lexical
 binding and does not mutate global keys until `mb-global-map-setup` is called.

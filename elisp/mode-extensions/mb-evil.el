@@ -194,7 +194,6 @@ A simple split consists of two windows only."
       (setf buffer-read-only t))))
 
 (require 'mb-emacs-lisp)
-(require 'LS)
 (require 'mb-utils-buffer)
 (require 'mb-metafont)
 
