@@ -5,10 +5,10 @@
 (declare-function quiz-fill-item "quiz-layout" (&optional justify))
 (declare-function quiz-insert-empty-question "quiz-edit" ())
 (declare-function quiz-mail-buffer "quiz" (refresh))
-(declare-function quiz-move-active-region-to-a "quiz" (beg end))
+(declare-function quiz-move-active-region-to-a "quiz-cleanup" (beg end))
 (declare-function quiz-summary-mail "quiz" (n))
 (declare-function quiz-summary-print "quiz" (n))
-(declare-function quiz-super-save "quiz" ())
+(declare-function quiz-super-save "quiz-cleanup" ())
 
 (defgroup quiz nil
   "Editing quiz files."

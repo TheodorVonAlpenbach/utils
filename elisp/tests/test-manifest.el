@@ -65,6 +65,7 @@
     "mode-extensions/test-mb-texinfo.el"
     "projects/ratings/test-glicko.el"
     "projects/ratings/test-rating-plot.el"
+    "quiz/test-quiz-cleanup.el"
     "quiz/test-quiz-config.el"
     "quiz/test-quiz-edit.el"
     "quiz/test-quiz-format.el"

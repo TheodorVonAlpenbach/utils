@@ -541,9 +541,9 @@ physics, geometry, search, XML, anaphora, general, list, sequence, string,
 time, ISO-time, and table modules are independently loadable. Their validation
 comprises:
 
-* a clean `emacs -Q` load of all ninety-four utility and mode-extension
+* a clean `emacs -Q` load of all ninety-five utility and mode-extension
   features plus the ERT tooling;
-* 775 passing ERT tests from the batch entry point;
+* 782 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -1124,6 +1124,16 @@ continuation lines retain the quiz hanging indent. The unrelated duplicate
 [`mb-paragraph.el`](./elisp/mb-paragraph.el), while an obsolete alias preserves
 older callers. Five tests cover digit-aware widths, configurable spacing,
 invalid positions, wrapping, and the compatibility alias.
+
+Active quiz cleanup commands now live in the independently loadable
+[`quiz-cleanup.el`](./quiz/quiz-cleanup.el). Mojibake repair uses literal
+replacement pairs, item removal is generic and preserves question separators,
+and moving selected question text into an answer now targets the answer text
+rather than relying on an old navigation side effect. `quiz-super-save` no
+longer depends on anaphoric variables or nonstandard region helpers and reports
+missing items explicitly. The unreferenced parser that called a nonexistent
+function was retired. Seven tests cover repair, item deletion, region movement,
+spacing, validation, and question/answer normalization.
 
 [`quiz-park.el`](./quiz/quiz-park.el) remains a legacy remote-deployment tool
 with machine-specific FTP behavior and is not being modernized or exercised as

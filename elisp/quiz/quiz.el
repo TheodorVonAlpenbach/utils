@@ -29,99 +29,8 @@
 (require 'quiz-config)
 (require 'quiz-edit)
 (require 'quiz-layout)
+(require 'quiz-cleanup)
 (require 'quiz-csv)
-;;;;;;;;;;;;;;;; UTILS ;;;;;;;;;;;;;;;;;;
-
-(cl-defun buffer-replace (string1 string2)
-  (save-excursion
-    (goto-char (point-min))
-    (while (re-search-forward string1 nil t)
-    (replace-match string2 t))))
-
-(cl-defun buffer-replace-multi (strings1 strings2)
-  (cl-loop for string1 in strings1
-	for string2 in strings2
-	do (buffer-replace string1 string2)))
-
-(cl-defun quiz-clean-up-mule-shit ()
-  (interactive)
-  (buffer-replace-multi
-   '("Ã¥" "Ã¸" "Â«" "Â»" "Ã¶" "Ã¦")
-   '("å" "ø" "«" "»" "ö" "æ")))
-
-;;;;;;;;;;;;;;; BASIC ;;;;;;;;;;;;;;
-
-(cl-defun quiz-parse-buffer (&optional (buffer (current-buffer)))
-  (let ((quiz-item-prefixes "QAE"))
-    (save-excursion
-      (goto-char (point-min))
-      (cl-loop for beg = (quiz-beginning-of-question)
-	    for end = (quiz-end-of-question 1)
-	    for item-string = (string-trim (buffer-substring-no-properties beg end))
-	    collect (quiz-parse-item item-string)
-	    until (not (quiz-forward-question 1))))))
-
-(defconst +quiz-ignore-chars-regexp+ "[^[:alnum:])»\"]")
-
-;;; Editing
-(cl-defun quiz-super-save ()
-  "Cleans Q, saves buffer and return to other window.
-TODO: factorize this and clean answer as well."
-  (interactive)
-  (awhen (marked-text-region)
-    (apply #'quiz-move-active-region-to-a it))
-  (quiz-beginning-of-item "Q")
-  (eol)
-  (quiz-end-of-item "Q")
-  ;; Remove junk at end
-  (while (looking-back +quiz-ignore-chars-regexp+)
-    (backward-delete-char 1))
-  ;; Add ? if necessary
-  (unless (looking-back "?")
-    (insert ??))
-  ;; Clean paragraph
-  (fill-paragraph)
-  (quiz-backward-item)
-  (forward-word 1)
-  (capitalize-word 1)
-  ;; Clean answer paragraph
-  (quiz-forward-item)
-  (capitalize-word 1)
-  (fill-paragraph)
-  (quiz-end-of-item "A")
-  (while (looking-back +quiz-ignore-chars-regexp+)
-      (backward-delete-char 1))
-  ;; Save and return to other buffer
-  (save-buffer)
-  (other-window 1))
-
-(cl-defun quiz-move-active-region-to-a (beg end)
-  (interactive "r")
-  (cl-assert (quiz-current-item-p :question))
-  (let ((s (string-trim (delete-and-extract-region beg end))))
-    (just-one-space)
-    (save-excursion
-      (quiz-forward-item)
-      (insert (string-trim* s "[^[:alnum:]()«»]")))))
-
-(cl-defun quiz-remove-A ()
-  "Removes next A item"
-  (interactive)
-  (when (re-search-forward "^A" nil t)
-    (beginning-of-line)
-    (set-mark-command nil)
-    (re-search-forward "^A.*\n\\([^QAS\n].*\n\\)*")
-    (kill-region (point) (mark))))
-
-(cl-defun quiz-remove-S ()
-  "Removes next S item"
-  (interactive)
-  (when (re-search-forward "^S" nil t)
-    (beginning-of-line)
-    (set-mark-command nil)
-    (re-search-forward "^S.*\n\\([^QAS\n].*\n\\)*")
-    (kill-region (point) (mark))
-    t))  
 
 (cl-defun add-iso-day (iso-date &optional n)
   "Returns a date that is ISO-DATE + N. Default value for N is 1. Both
@@ -129,20 +38,6 @@ string ISO-DATE and the returned string are in iso date format. TODO:
 why is this method but here?"
   (iso-date (add-time iso-date :day (or n 1))))
 ;;(add-iso-day "2004-03-23")
-
-(cl-defun quiz-remove-A-buffer ()
-  "Obsolete?"
-  (interactive)
-  (save-excursion
-    (goto-char (point-min))
-    (while (quiz-remove-A))))
-
-(cl-defun quiz-remove-S-buffer ()
-  "Obsolete?"
-  (interactive)
-  (save-excursion
-    (goto-char (point-min))
-    (while (quiz-remove-S))))
 
 (cl-defun quiz-question-to-string (&optional (delimiter ";"))
   "Converts current question to csv-string"
