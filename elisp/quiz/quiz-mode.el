@@ -59,6 +59,9 @@ Set this to nil to leave the current input method unchanged."
   (when quiz-mode-input-method
     (activate-input-method quiz-mode-input-method)))
 
+;;;###autoload
+(add-to-list 'auto-mode-alist '("\\.qz\\'" . quiz-mode))
+
 (provide 'quiz-mode)
 
 ;;; quiz-mode.el ends here

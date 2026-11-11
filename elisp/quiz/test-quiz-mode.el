@@ -54,6 +54,13 @@
      (equal activated-input-method
             "test-input-method"))))
 
+(ert-deftest quiz-mode-registers-qz-files ()
+  (should
+   (eq
+    (cdr (assoc "sample.qz" auto-mode-alist
+                #'string-match-p))
+    'quiz-mode)))
+
 (provide 'test-quiz-mode)
 
 ;;; test-quiz-mode.el ends here

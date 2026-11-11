@@ -524,7 +524,7 @@ replaced with built-in operations.
 | `mb-indent` | [`mb-indent.el`](./global/mb-indent.el) | Active indentation metadata; independently loadable with intentional global properties |
 | `quiz-park` | [`quiz-park.el`](./quiz/quiz-park.el) | Legacy remote administration; manual opt-in only |
 | `mb-js-mode` | [`mb-js-mode.el`](./mode-extensions/mb-js-mode.el) | Active mode extension; optional Node.js evaluation |
-| `quiz` | [`quiz.el`](./quiz/quiz.el) | Usage decision needed; application |
+| `quiz` | [`quiz.el`](./quiz/quiz.el) | Active maintained application; modular and independently loadable |
 | `mb-ert` | [`mb-ert.el`](./mode-extensions/mb-ert.el) | Active developer tooling; independently loadable |
 | `mb-org` | [`mb-org.el`](./mode-extensions/mb-org.el) | Active mode extension; independently loadable |
 
@@ -543,7 +543,7 @@ comprises:
 
 * a clean `emacs -Q` load of all ninety-eight utility and mode-extension
   features plus the ERT tooling;
-* 802 passing ERT tests from the batch entry point;
+* 803 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -1160,6 +1160,10 @@ names. [`quiz.el`](./quiz/quiz.el) is now a conventional lexical-binding entry
 point that loads the maintained quiz feature set without depending on broad
 utility modules. Seven tests cover parsing, whitespace, validation, regional
 and whole-buffer conversion, atomic failure, and the complete entry point.
+
+[`quiz-mode.el`](./quiz/quiz-mode.el) now owns the `.qz` file association
+instead of relying on the monolithic startup mode list. The startup entry was
+removed, and a focused test verifies automatic quiz-mode selection.
 
 [`quiz-park.el`](./quiz/quiz-park.el) remains a legacy remote-deployment tool
 with machine-specific FTP behavior. It is no longer loaded automatically by
