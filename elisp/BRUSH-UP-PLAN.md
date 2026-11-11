@@ -300,6 +300,11 @@ The first subset is intentionally conservative:
   explicit errors, literal and case-sensitive region replacements, changing
   replacement lengths, selected table columns, incomplete rows, consumer
   table shape, and compatibility aliases.
+* [`test-ld-identifier.el`](./list-database/test-ld-identifier.el): ten ERT
+  tests for identifier component types and lengths, leading nil components,
+  keyword selection, type detection, relative and global column construction,
+  mismatched tables, column-definition lookup, and the retained compatibility
+  predicate.
 * [`test-list-interval.el`](./prototypes/geometry/test-list-interval.el): nine ERT tests for the
   closed-interval helpers, including construction and accessors.
 * [`test-list-envelope.el`](./prototypes/geometry/test-list-envelope.el): nine ERT tests for
@@ -502,9 +507,9 @@ physics, geometry, search, XML, anaphora, general, list, sequence, string,
 time, ISO-time, and table modules are independently loadable. Their validation
 comprises:
 
-* a clean `emacs -Q` load of all sixty-one utility and mode-extension
+* a clean `emacs -Q` load of all sixty-two utility and mode-extension
   features plus the ERT tooling;
-* 597 passing ERT tests from the batch entry point;
+* 607 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -778,6 +783,22 @@ and character-code columns used by known consumers remain available. Cram's
 backend now declares its `mb-locale` dependency directly rather than relying
 on unrelated startup load order. Twelve tests include the three-character
 Cram-style custom table contract without loading a real quiz database.
+
+[`ld-identifier.el`](./list-database/ld-identifier.el) is the first
+independently loadable layer of the active list-database library. It now has
+lexical binding, declares the schema and column functions supplied by later
+layers, and uses `cl-lib` directly rather than startup aliases such as
+`member-if`, `awhen`, `first`, and `last-elt`.
+
+Identifier validation now documents and enforces the existing representation:
+missing components form a leading nil prefix, and nil cannot follow the first
+keyword. Database, table/schema, and column lengths are checked explicitly.
+Column identifiers can still be supplied as keywords or one-, two-, and
+three-component lists, with mismatched explicit table names returning nil.
+Ten tests establish this model before schema, table, and operation layers are
+modernized. Loading the complete `list-db` feature now progresses past this
+former `member-if` failure to the next independent blocker: a startup-only
+`cl-indent` call in `ld-database.el`.
 
 [`global-map.el`](./global/global-map.el) now loads independently with lexical
 binding and does not mutate global keys until `mb-global-map-setup` is called.

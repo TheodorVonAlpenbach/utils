@@ -1,69 +1,92 @@
-;;;; Identifiers are on the form (database-keyword &optional table-keyword column-keyword)
-;;;; For databases the following forms are allowed: (nil) (database-keyword)
-;;;; Tables (database-keyword table-keyword) (nil table-keyword)
-;;;; Columns (database-keyword table-keyword column-keyword) (nil table-keyword column-keyword) (nil nil column-keyword)
+;;; ld-identifier.el --- List database identifiers -*- lexical-binding: t; -*-
 
-(cl-defun keywordp-or-null (x)
-  (or (keywordp x) (null x)))
+;;; Commentary:
 
-(cl-defun ld-identifier-p (form &optional type)
-  "If this function returns true, FORM is interpreted as a an identifier.
-Identifers are used for databases, tables, schemas columns"
-  (and (consp form)
-       (cl-case type
-	 (:database (= (length form) 1))
-	 ((:table :schema) (= (length form) 2))
-	 (:column (= (length form) 3))
-	 (otherwise t))
-       (cl-every #'keywordp-or-null form)
-       (awhen (member-if #'keywordp form)
-	 (cl-every #'keywordp it))))
-;;(mapcar #'ld-identifier-p (list '(nil nil nil) '(nil nil :qwe) '(nil :ewq nil) '(nil :ewq :qwe) '(:top nil nil) '(:top nil :qwe) '(:top :ewq nil) '(:top :ewq :qwe)))
-;;(mapcar #'ld-identifier-p (list '(nil nil) '(nil :ewq) '(:top nil) '(:top :ewq)))
-;;(mapcar #'ld-identifier-p (list '(nil) '(:top) nil))
-;;(mapcar (bind #'ld-identifier-p '(:top :ewq :qwe) 1) '(:database :table :column))
-;;(ld-identifier-p '(round :rating))
+;; Identifiers have the form
+;; (DATABASE-KEYWORD &optional TABLE-KEYWORD COLUMN-KEYWORD).
+;; Missing leading components are represented by nil.
 
-(cl-defun ld-identifier-keyword (id &optional type)
-  (if type
-    (cl-case type
-      (:database (first id))
-      (:table (second id))
-      (:column (third id)))
-    (last-elt id)))
-;;(mapcar (bind #'ld-identifier-keyword '(:a :b :c) 1) '(:database :table :column))
-;;(mapcar #'ld-identifier-keyword '((:a :b :c) (:a :b) (:a)))
+;;; Code:
 
-(cl-defun ld-column-identifier-p (colid-designator schema-designator)
+(require 'cl-lib)
+
+(declare-function ld-column-identifier "ld-column")
+(declare-function ld-schema "ld-global")
+(declare-function ld-schema-column-definitions "ld-schema")
+(declare-function ld-schema-identifier "ld-schema")
+
+(defun ld-keyword-or-null-p (value)
+  "Return non-nil when VALUE is a keyword or nil."
+  (or (keywordp value) (null value)))
+
+(defalias 'keywordp-or-null #'ld-keyword-or-null-p)
+
+(defun ld-identifier-p (form &optional type)
+  "Return non-nil when FORM is a valid identifier of TYPE.
+TYPE may be `:database', `:table', `:schema', or `:column'.
+Identifier components may be omitted only as a leading nil
+prefix; nil cannot follow the first keyword."
+  (and
+   (consp form)
+   (pcase type
+     (:database (= (length form) 1))
+     ((or :table :schema) (= (length form) 2))
+     (:column (= (length form) 3))
+     (_ t))
+   (cl-every #'ld-keyword-or-null-p form)
+   (let ((keyword-tail (cl-member-if #'keywordp form)))
+     (or (null keyword-tail)
+         (cl-every #'keywordp keyword-tail)))))
+
+(defun ld-identifier-keyword (identifier &optional type)
+  "Return the keyword component of IDENTIFIER selected by TYPE.
+Without TYPE, return the last component."
+  (pcase type
+    (:database (car identifier))
+    (:table (cadr identifier))
+    (:column (cl-third identifier))
+    (_ (car (last identifier)))))
+
+(defun ld-column-identifier-p (column-designator schema-designator)
+  "Return the matching column definition, or nil.
+COLUMN-DESIGNATOR is interpreted relative to SCHEMA-DESIGNATOR."
   (let* ((schema (ld-schema schema-designator))
-	 (colid (ld-make-column-identifier colid-designator schema)))
-    (cl-find colid (ld-schema-column-definitions schema) :key #'ld-column-identifier :test #'equal)))
-;;(mapcar (compose #'null #'null (bind #'ld-column-identifier-p :users)) (list '(:name) :name '(:users :name) '(:maths :users :name) '(:nomaths :users :name)))
+         (identifier
+          (ld-make-column-identifier column-designator schema)))
+    (cl-find identifier
+             (ld-schema-column-definitions schema)
+             :key #'ld-column-identifier
+             :test #'equal)))
 
-(cl-defun ld-make-column-identifier (colid-designator schema-designator)
-  "COLID-DESIGNATOR is either a keyword or a list one, two or three keywords.
-In the case of a two keywords list, the butlast elements must
-match the identifer of schema-designator.
+(defun ld-make-column-identifier
+    (column-designator schema-designator)
+  "Return a global column identifier for COLUMN-DESIGNATOR.
+Interpret COLUMN-DESIGNATOR relative to SCHEMA-DESIGNATOR.  It
+may be a column keyword or a one-, two-, or three-component
+identifier.  Return nil when an explicitly named table does not
+match the schema."
+  (if (ld-identifier-p column-designator :column)
+      column-designator
+    (let ((table-identifier
+           (ld-schema-identifier (ld-schema schema-designator))))
+      (cond
+       ((keywordp column-designator)
+        (append table-identifier (list column-designator)))
+       ((ld-identifier-p column-designator :table)
+        (when (eq (cadr table-identifier)
+                  (car column-designator))
+          (cons (car table-identifier) column-designator)))
+       ((ld-identifier-p column-designator :database)
+        (append table-identifier column-designator))))))
 
-Or maybe we should rather then assume that it is indeed antoher
-schema, and use the database from schema-designator to globalize
-colid?"
-  (if (ld-identifier-p colid-designator :column)
-    colid-designator
-    (let ((tabid (ld-schema-identifier (ld-schema schema-designator))))
-      (cond ((keywordp colid-designator) (append tabid (list colid-designator)))
-
-	    ((ld-identifier-p colid-designator :table) ;hack: just detecting length 2
-	     (when (eql (second tabid) (first colid-designator))
-	       (cons (first tabid) colid-designator)))
-
-	    ((ld-identifier-p colid-designator :database)
-	     (append tabid colid-designator))))))
-;;(mapcar (bind #'ld-make-column-identifier :users) (list '(:qwe) :qwe '(:users :qwe) '(:maths :users :qwe) '(:nomaths :users :qwe)))
-
-(cl-defun ld-identifier-type-p (id)
-  (when (ld-identifier-p id)
-    (cl-case (length id) (1 :database) (2 :table) (3 :column))))
-;;(mapcar #'ld-identifier-type-p '((nil) (nil :ewq) (:foo :ewq :qwe)))
+(defun ld-identifier-type-p (identifier)
+  "Return the type keyword for IDENTIFIER, or nil."
+  (when (ld-identifier-p identifier)
+    (pcase (length identifier)
+      (1 :database)
+      (2 :table)
+      (3 :column))))
 
 (provide 'ld-identifier)
+
+;;; ld-identifier.el ends here
