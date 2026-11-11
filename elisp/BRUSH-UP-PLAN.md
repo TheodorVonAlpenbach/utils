@@ -541,9 +541,9 @@ physics, geometry, search, XML, anaphora, general, list, sequence, string,
 time, ISO-time, and table modules are independently loadable. Their validation
 comprises:
 
-* a clean `emacs -Q` load of all eighty-six utility and mode-extension
+* a clean `emacs -Q` load of all eighty-seven utility and mode-extension
   features plus the ERT tooling;
-* 732 passing ERT tests from the batch entry point;
+* 734 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -1054,6 +1054,13 @@ maximum as required by Glicko-1. The duplicate expected-score function remains
 only as an obsolete alias. Seven tests cover the published Glicko example,
 expectation symmetry, deviation restoration/capping, inactive players, both
 match shapes, defaults, and invalid input.
+
+[`list-db.el`](./list-database/list-db.el) is now a lexical-binding public
+entry point for the complete maintained list-database surface. In addition to
+the model and operations layers, it explicitly loads repository persistence,
+so callers no longer need an undocumented extra require before using save/load
+operations. Two tests verify the exported feature surface and a basic
+create/insert/select flow using only the public entry module.
 
 [`global-map.el`](./global/global-map.el) now loads independently with lexical
 binding and does not mutate global keys until `mb-global-map-setup` is called.

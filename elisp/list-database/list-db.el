@@ -1,9 +1,11 @@
-;;;; The purpose of this file is to collect all require's necessary for loading the library
+;;; list-db.el --- Public entry point for list databases -*- lexical-binding: t; -*-
 
-;;; Model
+;;; Code:
+
 (require 'ld-database)
-
-;;; Operations
 (require 'ld-operations)
+(require 'ld-repository)
 
 (provide 'list-db)
+
+;;; list-db.el ends here

@@ -27,6 +27,7 @@
   "list-database/test-ld-general.el"
   "list-database/test-ld-repository.el"
   "list-database/test-ld-consumers.el"
+  "list-database/test-list-db.el"
   "games/cram/test-cram-backend.el"
   "games/cram/test-cram-config.el"
   "games/cram/test-cram-db-ui.el"
