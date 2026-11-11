@@ -541,9 +541,9 @@ physics, geometry, search, XML, anaphora, general, list, sequence, string,
 time, ISO-time, and table modules are independently loadable. Their validation
 comprises:
 
-* a clean `emacs -Q` load of all eighty-four utility and mode-extension
+* a clean `emacs -Q` load of all eighty-five utility and mode-extension
   features plus the ERT tooling;
-* 717 passing ERT tests from the batch entry point;
+* 725 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -1025,6 +1025,24 @@ entry point is namespaced, with the old generic name retained as an obsolete
 alias; the former `maths-gnuplot` and `gnuplot-ratings` names are likewise
 retained as obsolete aliases. Six deterministic tests cover data and script generation and every
 process outcome without invoking external programs.
+
+[`cram-backend.el`](./games/cram/cram-backend.el) now reflects the active
+imported-question model rather than retaining a copied arithmetic-task
+generator that referenced columns and accessors absent from the Cram schema.
+The backend loads independently with explicit database, rating, locale,
+Levenshtein, string, and time dependencies. User/problem reports project the
+Glicko rating pair correctly; current-state management, match caching,
+quarantine selection, unused-problem preference, and history weighting use
+standard lexical code. Response alternatives, Norwegian transliteration,
+fuzzy matching, time-based scores, namespaced Glicko updates, persistence, and
+state reset are covered by eight focused tests. Broken old selection variants,
+the schema-incompatible generated-problem branch, and report stubs calling
+nonexistent APIs were retired.
+
+The unreferenced [`maths-categories.el`](./games/maths/maths-categories.el) and
+[`sm-2.el`](./games/cram/sm-2.el) remain experiments rather than maintained
+game dependencies. They are not added to the baseline merely to make their
+legacy demonstrations compile.
 
 [`global-map.el`](./global/global-map.el) now loads independently with lexical
 binding and does not mutate global keys until `mb-global-map-setup` is called.
