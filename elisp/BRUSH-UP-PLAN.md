@@ -314,10 +314,11 @@ The first subset is intentionally conservative:
   the configurable repository location, compatibility with the historical
   `*local-data-dir*`, the legacy repository variable name, placeholder
   database initialization, and operation defaults.
-* [`test-ld-operations.el`](./list-database/test-ld-operations.el): twelve ERT
+* [`test-ld-operations.el`](./list-database/test-ld-operations.el): fifteen ERT
   tests for row validation and insertion, column positions, generated and
   unique values, partial rows, row metadata, selection, sorting, projection,
-  formatting, deletion, and updates.
+  formatting, deletion, updates, and query macros expanded before database
+  initialization.
 * [`test-ld-general.el`](./list-database/test-ld-general.el): nine ERT tests
   for model-object types and identifiers, keyword and database components,
   current-database object resolution, parent identifiers and entities, and
@@ -535,7 +536,7 @@ comprises:
 
 * a clean `emacs -Q` load of all seventy-five utility and mode-extension
   features plus the ERT tooling;
-* 670 passing ERT tests from the batch entry point;
+* 673 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -912,10 +913,21 @@ demo and is not part of the test baseline.
 lexical binding and explicit Glicko/time dependencies. In particular,
 `*cram-last-update*` no longer assumes that another startup file happened to
 define `the-creation` first. Focused tests cover its rating, selection, cache,
-and timestamp defaults. Loading the full Cram backend now proceeds to a deeper
-query issue: `ld-select` still attempts to resolve schemas while macros are
-expanded, before the Cram database has been initialized. Runtime query
-expansion is the next concrete integration checkpoint.
+and timestamp defaults. Loading the full Cram backend exposed a deeper query
+issue: `ld-select` attempted to resolve schemas while macros were expanded,
+before the Cram database had been initialized.
+
+The `ld-select`, `ld-delete`, and `ld-update` macros in
+[`ld-operations.el`](./list-database/ld-operations.el) are now independent of
+database state during macro expansion. Generated row functions resolve column
+and metadata designators at query runtime, while ordinary lexical variables
+inside expressions remain lexical. Ordering and update column positions are
+likewise resolved only when the operation runs. Tests define query functions
+while the placeholder database is active, then execute them against a later
+database, covering metadata projection, lexical predicates, sorting, deletion,
+and updates. The complete Cram backend and UI now load under `emacs -Q`. The
+parallel Maths backend reaches its own next startup-order issue: a load-time
+call to the removed `first` alias.
 
 [`global-map.el`](./global/global-map.el) now loads independently with lexical
 binding and does not mutate global keys until `mb-global-map-setup` is called.

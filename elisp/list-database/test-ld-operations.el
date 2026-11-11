@@ -14,6 +14,22 @@
       (:name :type string :unique t)
       (:score :type integer)))))
 
+(defun ld-operations-test--runtime-query (minimum)
+  "Query the current people table using lexical MINIMUM."
+  (ld-select :people
+    :where (>= :score minimum)
+    :columns (:name ::updated)
+    :order-by :score
+    :order :descending))
+
+(defun ld-operations-test--runtime-delete (identifier)
+  "Delete IDENTIFIER from the current people table."
+  (ld-delete :people (= :id identifier)))
+
+(defun ld-operations-test--runtime-update (identifier score)
+  "Set IDENTIFIER's score to SCORE in the current people table."
+  (ld-update :people (= :id identifier) score (:score)))
+
 (ert-deftest ld-operations-validates-rows ()
   (let* ((table (ld-operations-test--table))
          (schema (ld-table-schema table)))
@@ -148,6 +164,46 @@
                            15
                            2)
               '(1 "Ada" 15
+                (:metadata :created "then" :updated "now")))))))
+
+(ert-deftest ld-operations-query-macros-resolve-schema-at-runtime ()
+  (let* ((table (ld-operations-test--table))
+         (*current-database*
+          (ld-create-database :test :tables (list table))))
+    (setf (ld-table-data table)
+          '((1 "Ada" 10
+             (:metadata :created "then" :updated "a"))
+            (2 "Bob" 30
+             (:metadata :created "then" :updated "b"))
+            (3 "Cyd" 20
+             (:metadata :created "then" :updated "c"))))
+    (should
+     (equal (ld-operations-test--runtime-query 15)
+            '(("Bob" "b") ("Cyd" "c"))))))
+
+(ert-deftest ld-operations-delete-macro-resolves-schema-at-runtime ()
+  (let* ((table (ld-operations-test--table))
+         (*current-database*
+          (ld-create-database :test :tables (list table))))
+    (setf (ld-table-data table)
+          '((1 "Ada" 10) (2 "Bob" 20)))
+    (ld-operations-test--runtime-delete 1)
+    (should (equal (ld-table-data table)
+                   '((2 "Bob" 20))))))
+
+(ert-deftest ld-operations-update-macro-resolves-schema-at-runtime ()
+  (let* ((table (ld-operations-test--table))
+         (*current-database*
+          (ld-create-database :test :tables (list table))))
+    (setf (ld-table-data table)
+          '((1 "Ada" 10
+             (:metadata :created "then" :updated "then"))))
+    (cl-letf (((symbol-function 'format-time-string)
+               (lambda (&rest _) "now"))
+              ((symbol-function 'message) #'ignore))
+      (should
+       (equal (ld-operations-test--runtime-update 1 40)
+              '(1 "Ada" 40
                 (:metadata :created "then" :updated "now")))))))
 
 (provide 'test-ld-operations)

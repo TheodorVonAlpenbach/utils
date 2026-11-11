@@ -287,49 +287,90 @@ Returns nil iif form is not a metadata identifier"
 ;;(ld-metadata-identifier ::created)
 
 ;;; Expressions
-(cl-defun ld-expression-rec (form schema row)
-  (unless (ld-schema-p schema)
-    (error "Schema is not valid: form = %S, schema = %S, row = %S" form schema row))
-  (cond 
-    ((ld-column-identifier-p form schema)
-     `(nth ,(ld-column-position (ld-make-column-identifier form schema) schema) ,row))
-    ((ld-metadata-identifier-p form)
-     `(ld-get-metadatum ,(ld-metadata-identifier form) (ld-row-metadata ,row))) 
-    ((atom form) form)
-    (t (mapcar #'(lambda (x) (ld-expression-rec x schema row)) form))))
+(defun ld-expression-value (form schema-designator row)
+  "Resolve FORM against SCHEMA-DESIGNATOR and ROW.
+Column designators return their row value, metadata designators
+return metadata, and unmatched keywords remain literal."
+  (if (ld-metadata-identifier-p form)
+      (ld-get-metadatum
+       (ld-metadata-identifier form)
+       (ld-row-metadata row))
+    (let ((schema (ld-schema schema-designator)))
+      (unless schema
+        (user-error "Schema does not exist: %S" schema-designator))
+      (if-let ((column (ld-find-column-definition form schema)))
+          (ld-row-value row column schema)
+        (if (keywordp form)
+            form
+          (user-error "Column does not exist: %S" form))))))
+
+(defun ld-expression-rec (form schema-designator row)
+  "Expand FORM into a row expression resolved at runtime.
+SCHEMA-DESIGNATOR and ROW are unevaluated forms inserted into the
+result."
+  (cond
+   ((or (keywordp form)
+        (ld-identifier-p form))
+    `(ld-expression-value
+      ',form ,schema-designator ,row))
+   ((atom form)
+    form)
+   ((eq (car form) 'quote)
+    form)
+   (t
+    (mapcar
+     (lambda (item)
+       (ld-expression-rec item schema-designator row))
+     form))))
 ;;(ld-expression (= ::created 1) :users)
 
-(defmacro ld-expression (expression schema)
-  "Better naming"
+(defmacro ld-expression (expression schema-designator)
+  "Return a row predicate for EXPRESSION and SCHEMA-DESIGNATOR.
+Column and metadata positions are resolved when the predicate is
+called, not while this macro is expanded."
   (let ((row (cl-gensym "row")))
     `(lambda (,row)
-       ,(ld-expression-rec expression (ld-schema schema) row))))
+       ,(ld-expression-rec expression schema-designator row))))
 ;;(ld-expression (= :id 1) :users)
 ;;(mapcar (ld-expression :test :users) (ld-table-data (ld-table :users)))
 ;;(ld-select :users)
 ;;(ld-expression (string= (:name) "Mats") :users)
 
-(defmacro ld-expressions (expressions schema)
-  ""
-  `(list ,@(mapcar #'(lambda (x) `(ld-expression ,x ,schema)) expressions)))
+(defmacro ld-expressions (expressions schema-designator)
+  "Return row functions for EXPRESSIONS in SCHEMA-DESIGNATOR."
+  `(list
+    ,@(mapcar
+       (lambda (expression)
+         `(ld-expression ,expression ,schema-designator))
+       expressions)))
 ;;(ld-expressions ((+ 1 (:id))) :users)
 ;;(mapcar (first (ld-expressions ((+ 1 (:id))) :users)) (ld-table-data (ld-table :users)))
 ;;(ld-expressions nil :users)
 ;;(ld-expressions (:rating :name) :users)
 ;;(cl-every #'functionp (ld-expressions (:rating :name) :users))
 
-(cl-defun ld-colexp (form schema-designator)
-  (ld-column-position (ld-make-column-identifier form schema-designator)
-		      schema-designator))
+(defun ld-colexp (form schema-designator)
+  "Return FORM's column position in SCHEMA-DESIGNATOR."
+  (let* ((schema (ld-schema schema-designator))
+         (identifier
+          (and schema
+               (ld-make-column-identifier form schema)))
+         (position
+          (and identifier
+               (ld-column-position identifier schema))))
+    (unless position
+      (user-error "Column does not exist: %S" form))
+    position))
 
-(defmacro ld-column-expression->number (form schema-designator list-p)
+(defun ld-column-expression->number (form schema-designator list-p)
+  "Resolve FORM to column positions in SCHEMA-DESIGNATOR.
+Return a list of positions when LIST-P is non-nil."
   (when form
     (if list-p
-        `(list
-          ,@(mapcar
-             (lambda (column)
-               (ld-colexp column schema-designator))
-             form))
+        (mapcar
+         (lambda (column)
+           (ld-colexp column schema-designator))
+         form)
       (ld-colexp form schema-designator))))
 ;;(ld-column-expression->number ((:id) (:id)) :users t)
 ;;(ld-column-expression->number (:maths :users :id) :users nil)
@@ -337,6 +378,8 @@ Returns nil iif form is not a metadata identifier"
 ;;;; Select
 (cl-defun ld-select-1 (table &key where columns column order order-by copy format)
   "Helper function for `ld-select'"
+  (unless table
+    (user-error "Table does not exist"))
   (let ((rows
          (cl-remove-if-not
           (or where #'always)
@@ -406,7 +449,7 @@ Keywords supported"
                  `(ld-expression ,column ,table-designator))
       :order-by ,(when order-by
                    `(ld-column-expression->number
-                     ,order-by ,table-designator nil))
+                     ',order-by ,table-designator nil))
       ,@remaining)))
 (put 'ld-select 'lisp-indent-function 'prog1)
 ;;(macroexpand '(ld-select :users))
@@ -456,7 +499,8 @@ But still I really don't understand the behaviour of values in a macro."
   `(ld-update-1 ,table-designator
 		(ld-expression ,where ,table-designator)
 		,vals
-		(ld-column-expression->number ,columns ,table-designator (listp ,vals))))
+		(ld-column-expression->number
+                 ',columns ,table-designator (listp ,vals))))
 ;;(ld-update :users (= :id 3) "Mats" (:name))
 ;;(ld-update :users (= :id 3) 1892.8716637254522 (:rating))
 ;;(ld-select :users :where (string= :name "Mats") :column :rating)
