@@ -24,6 +24,7 @@
 (require 'cl-lib)
 (require 'subr-x)
 (require 'quiz-format)
+(require 'quiz-navigation)
 (require 'quiz-csv)
 (require 'quiz-mode)
 ;;;;;;;;;;;;;;;; UTILS ;;;;;;;;;;;;;;;;;;
@@ -53,69 +54,10 @@
 (defconst *quiz-scratch-buffername* "scratch.qz")
 (defconst quiz-popup-buffer-size 12)
 
-;;;;;;;;;;;;;;;;;;;; quiz-navigation ;;;;;;;;;;;;;;;;;;;
-
-
-;;;   · q-file/q-buffer (quiz buffer or summary quiz buffer)
-;;;   · q-list (entire quiz-buffer or region of summary buffer)
-;;;   · q-question (entity containing at least a q-item, separated by at least
-;;;     one blank line)
-;;;   · q-item (either Q (mandatory), A, S by now; later I might add C
-;;;     for comment, T: for the durations of the validity)
-;;;     q-item <-- q-item-header q-item-header-space q-item-text
-;;;   · q-item-text (section after q-item-header)
-
-;;; q-list
-(cl-defun quiz-beginning-of-list ()
-  "Beginning of list is a header"
-  (goto-char (point-min)))
-
-(cl-defun quiz-end-of-list ()
-  "End of list is before next header or end of buffer."
-  (error "Not implemented"))
-
 (cl-defun quiz-list-set-numbers (&optional (base 1))
   (quiz-beginning-of-list)
   (while (quiz-question-set-numbers base)
     (cl-incf base)))
-
-;;; q-question
-(cl-defun quiz-forward-question (&optional (n 1))
-  "Moves cursor to the next q-question beginning."
-  (interactive "p")
-  (end-of-line)
-  (while (and (> n 0)
-	      (re-search-forward (quiz-item-start-regexp "Q" t) nil t))
-    (decf n))
-  (if (zerop n)
-    ;; if movement was actually performed, return point, else nil
-    (progn (beginning-of-line) (point))
-    (progn (goto-char (point-max)) nil)))
-
-(cl-defun quiz-backward-question (&optional (n 1))
-  (interactive "p")
-  (quiz-forward-question (-n)))
-
-(cl-defun quiz-beginning-of-question (&optional (n 1))
-  (next-line 1)
-  (if (re-search-backward "\n\n" nil t n)
-    (beginning-of-line 2)
-    (goto-char (point-min)))
-  (point))
-
-(cl-defun quiz-end-of-question (&optional (n 1))
-  (previous-line 0)
-  (if (re-search-forward "\n\n" nil t n)
-    (backward-char 2)
-    (progn (goto-char (point-max))
-	   (when (bolp)
-	     (backward-char 1))))
-  (point))
-
-(cl-defun quiz-goto-question (n)
-  "Starts at beginning of q-list and moves cursor to the beginning of
-the first q-question labeled N"
-  (error "Not implemented"))
 
 (cl-defun quiz-question-set-numbers (n)
   "Returns new point or nil if last question"
@@ -129,99 +71,11 @@ the first q-question labeled N"
       (setq point (quiz-forward-item)))
     point))
 
-;;; q-item
-(cl-defun quiz-item-beg-regexp (&optional (items-short quiz-item-prefixes))
-  (format "^[%s][0-9]+: " items-short))
-;;(quiz-item-beg-regexp)
-
-(cl-defun quiz-forward-item-1 (&optional (n 1) (items-short quiz-item-prefixes))
-  "TODO: finish n < 0"
-  (error "Who is invoking!?")
-  (cond
-   ((> n 0)
-    (beginning-of-line 2)
-    (forward-char 1)
-    (while (and (> n 0)
-		(re-search-forward (quiz-item-start-regexp items-short) nil t))
-      (decf n))
-    (beginning-of-line)
-    (re-search-backward "\\S-"))
-   ((< n 0))))
-
-(cl-defun quiz-forward-item (&optional (items-short quiz-item-prefixes))
-  (re-search-forward (quiz-item-start-regexp items-short t) nil t))
-
-(cl-defun quiz-backward-item (&optional (items-short quiz-item-prefixes))
-  (re-search-backward (quiz-item-start-regexp items-short nil) nil nil))
-
-(cl-defun quiz-beginning-of-item (&optional (items-short quiz-item-prefixes))
-  "Move point to beginning of current item."
-  (interactive)
-  (end-of-line)
-  (quiz-backward-item items-short))
-;;
-
-(cl-defun quiz-end-of-item (&optional (items-short quiz-item-prefixes))
-  ""
-  (quiz-current-item-region-end items-short))
-
-(cl-defun quiz-beginning-of-item-text
-    (&optional (items-short quiz-item-prefixes))
-  (quiz-beginning-of-item items-short)
-  (re-search-forward (quiz-item-beg-regexp)))
-
 (cl-defun quiz-item-set-number (n)
   (quiz-beginning-of-item)
   (forward-char 1)
   (kill-word 1)
   (insert (number-to-string n)))
-
-(cl-defun quiz-item-insert ()
-  (error "Not implemented"))
-;;;;;;;;
-
-(cl-defun quiz-current-item-region-start
-    (&optional (items-short quiz-item-prefixes))
-  (save-excursion
-    (end-of-line)
-    (re-search-backward (quiz-item-start-regexp items-short t) nil t)))
-
-(cl-defun quiz-current-item-region-end-old
-    (&optional (items-short quiz-item-prefixes))
-  (save-excursion
-    (if (re-search-backward (quiz-item-start-regexp items-short nil) nil t)
-      (re-search-forward (quiz-item-start-regexp quiz-item-prefixes t) nil t)
-      (point-max))))
-
-(cl-defun quiz-current-item-region-end
-    (&optional (items-short quiz-item-prefixes))
-  (re-search-forward (quiz-item-start-regexp quiz-item-prefixes t) nil t)
-  (eol :offset -1))
-
-(cl-defun quiz-goto-question-end ()
-  "Moves point to end of current question section."
-  (re-search-forward "\n\\s-*$" nil t 1))
-
-(cl-defun quiz-question-end (&optional (point (point)))
-  (quiz-save-excursion point
-    (quiz-goto-question-end)))
-
-(cl-defun quiz-beginning-of-item-1 (position &optional (item ""))
-  "Leaps to beginning of the given ITEM text in the current question
-section. Returns the result position or nil if ITEM does not exists in
-the current q-question. If POSITION is nil point is set at beginning
-of the given ITEM text. Else if POSITION is :NUMBER, point is set at
-first item number char. Else point is set at beginning of ITEM. If
-ITEM is not given or \"\", the item at point is used."
-  (interactive "P")
-  (error "Who is using this!?")
-  (and (quiz-goto-item-start item)
-       (if (not position) 
-	 (forward-char (quiz-hanging-column))
-	 (and (eq position :number)
-	      (< (point) (point-max))
-	      (forward-char 1)))))
-;;(quiz-beginning-of-item :number)
 
 ;;; Insert
 (cl-defun quiz-insert-empty-question ()

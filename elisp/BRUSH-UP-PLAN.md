@@ -541,9 +541,9 @@ physics, geometry, search, XML, anaphora, general, list, sequence, string,
 time, ISO-time, and table modules are independently loadable. Their validation
 comprises:
 
-* a clean `emacs -Q` load of all ninety utility and mode-extension
+* a clean `emacs -Q` load of all ninety-one utility and mode-extension
   features plus the ERT tooling;
-* 749 passing ERT tests from the batch entry point;
+* 756 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -1088,6 +1088,15 @@ live in the independently loadable [`quiz-mode.el`](./quiz/quiz-mode.el).
 commands and local filling behavior, highlights all eight supported item types,
 and makes automatic input-method activation customizable. Four tests cover
 highlighting, derived-mode state, key bindings, and input-method setup.
+
+Question and item movement now lives in the independently loadable
+[`quiz-navigation.el`](./quiz/quiz-navigation.el). It replaces deprecated line
+movement and external decrement helpers, implements list ends and numbered
+question lookup, supports symmetric positive and negative question movement,
+and returns consistent text boundaries without trailing separators. Four
+unreferenced error-only navigation stubs were retired. Seven tests cover list,
+question, and item movement, text regions, numbered lookup, and position-based
+question boundaries.
 
 [`quiz-park.el`](./quiz/quiz-park.el) remains a legacy remote-deployment tool
 with machine-specific FTP behavior and is not being modernized or exercised as

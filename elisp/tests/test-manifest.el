@@ -67,6 +67,7 @@
     "projects/ratings/test-rating-plot.el"
     "quiz/test-quiz-format.el"
     "quiz/test-quiz-mode.el"
+    "quiz/test-quiz-navigation.el"
     "quiz/test-quiz-csv.el"
     "utils/test-mb-anaphora.el"
     "utils/test-mb-combinatorics.el"
