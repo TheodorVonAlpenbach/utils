@@ -25,6 +25,7 @@
 (require 'subr-x)
 (require 'quiz-format)
 (require 'quiz-csv)
+(require 'quiz-mode)
 ;;;;;;;;;;;;;;;; UTILS ;;;;;;;;;;;;;;;;;;
 
 (cl-defun buffer-replace (string1 string2)
@@ -265,64 +266,6 @@ ITEM is not given or \"\", the item at point is used."
     (quiz-insert-question-base question answer source point)))
 ;;(quiz-insert-question "qwe" "ewq" "")
 
-
-;;;; Quiz mode and GUI
-
-(cl-defun quiz-mode () "Major mode for editing .qz files.
- \\{quiz-mode-map}
- \\<quiz-mode-map>"
-       (interactive)
-       (text-mode)
-       (kill-all-local-variables)
-       (use-local-map quiz-mode-map)
-       (setq local-abbrev-table text-mode-abbrev-table)
-       (setq major-mode 'quiz-mode)
-       (setq mode-name "Quiz mode")
-       (setq buffer-offer-save t)	;but why?
-       (set (make-local-variable 'font-lock-defaults) '(quiz-font-lock-keywords))
-       (set (make-local-variable 'fill-paragraph-function) #'quiz-fill-item)
-       (activate-input-method 'norwegian-keyboard)
-;;       (add-hook 'quiz-mode-hook)
-       (run-hooks 'text-mode-hook 'quiz-mode-hook))
-
-(defconst quiz-font-lock-keywords
-  (purecopy
-   (list (list "Q[1-9][0-9]*:" 0 font-lock-function-name-face 'append)
-	 (list "A[1-9][0-9]*:" 0 font-lock-variable-name-face 'append)
-	 (list "S[1-9][0-9]*:" 0 font-lock-type-face 'append)
-	 (list "C[1-9][0-9]*:" 0 font-lock-builtin-face 'append)
-	 (list "E[1-9][0-9]*:" 0 font-lock-constant-face 'append))) ;;font-lock-constant-face
-  "Additional expressions to highlight in Lynx mode.")
-
-;;(defconst quiz-mode-map global-map)
-(defconst quiz-mode-map
-  (let ((map (make-sparse-keymap))
-	(local-prefix-map (make-sparse-keymap))
-	(summary-map (make-sparse-keymap))
-	(insert-map (make-sparse-keymap))
-	(edit-map (make-sparse-keymap)))
-
-    ;; maps
-    (define-key map "\C-\\" local-prefix-map) ;disables #'toggle-input-method (some MULE shit)
-    (define-key local-prefix-map "s" summary-map)
-    (define-key local-prefix-map "i" insert-map)
-    (define-key local-prefix-map "e" edit-map)
-
-    (define-key local-prefix-map "m" #'quiz-mail-buffer)
-    (define-key local-prefix-map "\C-\\" #'quiz-super-save)
-
-    ;; insert map
-    (define-key insert-map "e" #'quiz-insert-empty-question)
-
-    ;; summary map
-    (define-key summary-map "m" #'quiz-summary-mail)
-    (define-key summary-map "p" #'quiz-summary-print)
-
-    ;; edit map
-    (define-key edit-map "m" #'quiz-move-active-region-to-a)
-
-    ;; other keys
-    (setq quiz-mode-map map)) "Keymap used in quiz mode.")
 
 ;;; Queries
 (cl-defun quiz-current-item ()

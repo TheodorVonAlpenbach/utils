@@ -541,9 +541,9 @@ physics, geometry, search, XML, anaphora, general, list, sequence, string,
 time, ISO-time, and table modules are independently loadable. Their validation
 comprises:
 
-* a clean `emacs -Q` load of all eighty-nine utility and mode-extension
+* a clean `emacs -Q` load of all ninety utility and mode-extension
   features plus the ERT tooling;
-* 745 passing ERT tests from the batch entry point;
+* 749 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -1081,6 +1081,13 @@ formatting, convenience formatters, validation, and navigation regexps.
 The integrating editor is now explicitly UTF-8 rather than implicit Latin-1;
 its Norwegian text and mojibake-repair mappings retain their original
 characters during the conversion.
+
+The quiz editor's keymap, font-lock rules, and major-mode initialization now
+live in the independently loadable [`quiz-mode.el`](./quiz/quiz-mode.el).
+`quiz-mode` is a conventional `text-mode` derivative, preserves the existing
+commands and local filling behavior, highlights all eight supported item types,
+and makes automatic input-method activation customizable. Four tests cover
+highlighting, derived-mode state, key bindings, and input-method setup.
 
 [`quiz-park.el`](./quiz/quiz-park.el) remains a legacy remote-deployment tool
 with machine-specific FTP behavior and is not being modernized or exercised as
