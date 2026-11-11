@@ -383,27 +383,23 @@ slottsveggen med en *medisinflaske* på hodet. Han har tatt av seg
 *hanskene* for å få bedre tak på *sverdet* sitt, som han skal
 gjennomføre bushido med.
 *** Konge :drill:
-SCHEDULED: <2026-10-16 Fri>
+SCHEDULED: <2026-11-15 Sun>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
 :ID:       b34fb133-c5c3-4ee3-afa2-c3d3ada8a28c
-:DRILL_LAST_INTERVAL: 4.14
+:DRILL_LAST_INTERVAL: 3.995
 :DRILL_REPEATS_SINCE_FAIL: 2
-:DRILL_TOTAL_REPEATS: 2
-:DRILL_FAILURE_COUNT: 1
-:DRILL_AVERAGE_QUALITY: 3.5
-:DRILL_EASE: 2.6
-:DRILL_LAST_QUALITY: 5
-:DRILL_LAST_REVIEWED: [Y-10-12 Mon 13:%]
+:DRILL_TOTAL_REPEATS: 4
+:DRILL_FAILURE_COUNT: 2
+:DRILL_AVERAGE_QUALITY: 3.0
+:DRILL_EASE: 2.46
+:DRILL_LAST_QUALITY: 3
+:DRILL_LAST_REVIEWED: [Y-11-11 Wed 16:%]
 :END:
 Kong [Sverre Sigurdsson||28] regjerte fra [1177] til [1202]
-*** Konge :drill:
-:PROPERTIES:
-:ID:       e3303213-c228-4bb4-9e92-e7d4d29342eb
-:END:
 **** Memo
 Sverre Hjelm har fått *briller*. Men han liker dem ikke, så han setter
-dem på en *hund* som står og lytter på en *radio*.
+dem på en *hunden* Nipper som står og lytter på en *radio*.
 **** Info
 Sverre erklærte seg åpenbart som konge i 1177. Det var vel ingen konge
 som døde det året.
@@ -488,18 +484,18 @@ På WC står Haakon på kne med *hagehansker*, *pil og bue*, klar til å
 skyte den første vannrotten som dukker opp. Som agn har han lagt en
 *mobiltelefon* ned i klosettet.
 *** Konge :drill:
-SCHEDULED: <2026-10-16 Fri>
+SCHEDULED: <2026-11-22 Sun>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
 :ID:       77d3f4c2-5de1-48ab-8b70-42c523494728
-:DRILL_LAST_INTERVAL: 4.135
-:DRILL_REPEATS_SINCE_FAIL: 2
-:DRILL_TOTAL_REPEATS: 9
+:DRILL_LAST_INTERVAL: 10.5856
+:DRILL_REPEATS_SINCE_FAIL: 3
+:DRILL_TOTAL_REPEATS: 10
 :DRILL_FAILURE_COUNT: 3
-:DRILL_AVERAGE_QUALITY: 3.444
+:DRILL_AVERAGE_QUALITY: 3.5
 :DRILL_EASE: 2.56
-:DRILL_LAST_QUALITY: 5
-:DRILL_LAST_REVIEWED: [Y-10-12 Mon 13:%]
+:DRILL_LAST_QUALITY: 4
+:DRILL_LAST_REVIEWED: [Y-11-11 Wed 16:%]
 :END:
 Kong [Magnus 7 Eriksson||35] regjerte fra [1319] til [1355]
 **** Memo
@@ -641,23 +637,24 @@ da ser han at alle gjestene har lagt seg til å sove på *solsenger*!
 :END:
 Det første nordiske [interregnum] varte fra [1481] til [1483]
 *** Konge :drill:
-SCHEDULED: <2026-10-16 Fri>
+SCHEDULED: <2026-11-15 Sun>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
 :ID:       5cf814f1-3a43-4671-8da3-9bdd28816426
 :DRILL_LAST_INTERVAL: 4.0
 :DRILL_REPEATS_SINCE_FAIL: 2
-:DRILL_TOTAL_REPEATS: 8
-:DRILL_FAILURE_COUNT: 2
-:DRILL_AVERAGE_QUALITY: 2.875
+:DRILL_TOTAL_REPEATS: 10
+:DRILL_FAILURE_COUNT: 3
+:DRILL_AVERAGE_QUALITY: 2.9
 :DRILL_EASE: 1.94
 :DRILL_LAST_QUALITY: 4
-:DRILL_LAST_REVIEWED: [Y-10-12 Mon 13:%]
+:DRILL_LAST_REVIEWED: [Y-11-11 Wed 16:%]
 :END:
 Kong [Hans||43] regjerte fra [1483] til [1513]
 **** Memo
-Borchgrevink er ikke invitert til ballet, men prøver å snike seg inn
-via en *stige*
+Kong *Hans* Borchgrevink er *ikke* invitert av kong Christian til
+ballet, men prøver å snike seg inn via en *stige*, akkurat som hine
+dager i Roma.
 *** Konge :drill:
 SCHEDULED: <2026-10-18 Sun>
 :PROPERTIES:
@@ -906,25 +903,26 @@ Hans livlege i årene 1769-1772 var [Struensee||Johan Friedrich], som
 delvis grunnet kongens sinnsykdom og sitt forhold til dronning
 [Caroline Mathilde] fikk den reelle makten i landet.
 **** Memo
-Christian er blitt gal, og har fått båret inn en stor flaggstang i
-salen. Under flagget står han forvirret og blåser såpebobler.
+Christian er blitt gal, og har fått båret inn en stor *flaggstang* i
+salen, og alle gjestene flykter i skrekk. Under flagget står han
+tilbake alene og forvirret... og blåser *såpebobler*!
 
 Mens de plukket tyttebær i skogen, hørte de på den nyskrevne
 Jupiter-symfonien. Den likte de så godt, at det ble så som så med
 selve krigføringen.
 *** Konge :drill:
-SCHEDULED: <2026-10-16 Fri>
+SCHEDULED: <2026-11-15 Sun>
 :PROPERTIES:
 :DRILL_CARD_TYPE: hide2cloze
 :ID:       5f30b32a-3d5a-4d88-a1dd-9c6b442ee30d
 :DRILL_LAST_INTERVAL: 4.14
 :DRILL_REPEATS_SINCE_FAIL: 2
-:DRILL_TOTAL_REPEATS: 2
-:DRILL_FAILURE_COUNT: 1
-:DRILL_AVERAGE_QUALITY: 3.5
+:DRILL_TOTAL_REPEATS: 4
+:DRILL_FAILURE_COUNT: 2
+:DRILL_AVERAGE_QUALITY: 3.25
 :DRILL_EASE: 2.6
-:DRILL_LAST_QUALITY: 5
-:DRILL_LAST_REVIEWED: [Y-10-12 Mon 14:%]
+:DRILL_LAST_QUALITY: 4
+:DRILL_LAST_REVIEWED: [Y-11-11 Wed 16:%]
 :END:
 Kong [Frederik 6||55] regjerte fra [1808] til [1814]
 **** Memo
