@@ -5,7 +5,8 @@
    (directory-file-name (file-name-directory load-file-name))))
 
 (defconst mb-tests-load-directories
-  '("" "elisp" "external" "global" "list-database" "mode-extensions"
+  '("" "elisp" "external" "games/cram" "games/maths" "global"
+    "list-database" "mode-extensions"
     "prototypes/geometry" "utils"))
 
 (defconst mb-tests-baseline-files
@@ -25,6 +26,7 @@
   "list-database/test-ld-operations.el"
   "list-database/test-ld-general.el"
   "list-database/test-ld-repository.el"
+  "list-database/test-ld-consumers.el"
     "global/test-mb-indent.el"
   "global/test-mb-insert.el"
   "global/test-mb-print.el"

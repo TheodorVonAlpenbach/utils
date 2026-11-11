@@ -1,9 +1,10 @@
+;;; maths-db.el --- Maths list-database definition -*- lexical-binding: t; -*-
+
+;;; Code:
+
 (require 'ld-database)
 (require 'ld-operations)
 (require 'ld-repository)
-
-;;;; The DB is stored under
-;;;; "/home/eier/data/ld"
 
 (defconst *maths-db-schema-definitions*
   '((:tasks "Tasks"
@@ -33,33 +34,26 @@
       (:user-RD :type float)          ;d.o. user RD
       (:task-rating :type float)      ;task rating right before match
       (:task-RD :type float))))       ;d.o. task RD
-  "TODO: this is a constant, but should eventually become a variable
-Note that this is a PLIST format of coldefs. Hence PLIST-P must be set to t in `ld-make-schema'")
-
-;;(first (fourth (second (first (fourth *maths-db*)))))
-;;(ld-table-column-definitions (ld-table :users))
-
-(cl-defun maths-update-schema (keyword)
-  (setf (ld-table-schema (ld-find-table (list +maths-db-keyword+ keyword) *maths-db*))
-	(ld-schemadef->schema (cl-find keyword *maths-db-schema-definitions*
-				    :key #'first))))
-;;(maths-update-schema :users)
+  "Compact schema definitions for the Maths database.")
 
 (defconst +maths-db-keyword+ :maths)
 
-;;(require 'ld-repository)
-(cl-defun maths-init-database ()
-  "TODO: this is a constant, but should eventually become a variable"
-  (setf *current-database*
-	(or (ld-load-database +maths-db-keyword+)
-	    (ld-create-database +maths-db-keyword+ 
-				:schemas (mapcar (bind #'ld-schemadef->schema +maths-db-keyword+)
-						 *maths-db-schema-definitions*)))))
-;;(maths-init-database)
-;;(setf *dbcopy* (copy-tree *current-database*))
-;;(setf *current-database* (copy-tree *dbcopy*))
-;;(ld-replace-table '(:maths :tasks) (ld-table-add-column :tasks '(:level :type integer) :colpos 2))
-;;(ld-table :tasks)
-;;(cl-loop for task in (maths-db-tasks) do (setf (maths-task-level task) (maths-estimate-level task)))
+(defun maths-create-database ()
+  "Create a new empty Maths database."
+  (ld-create-database
+   +maths-db-keyword+
+   :schemas
+   (mapcar
+    (lambda (definition)
+      (ld-schemadef->schema definition +maths-db-keyword+))
+    *maths-db-schema-definitions*)))
+
+(defun maths-init-database ()
+  "Load or create the Maths database and make it current."
+  (setq *current-database*
+        (or (ld-load-database +maths-db-keyword+)
+            (maths-create-database))))
 
 (provide 'maths-db)
+
+;;; maths-db.el ends here

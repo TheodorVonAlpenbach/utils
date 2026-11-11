@@ -326,6 +326,9 @@ The first subset is intentionally conservative:
   tests for repository naming and paths, dated backups, complete printing,
   missing tables, table persistence, database round trips, and empty
   databases.
+* [`test-ld-consumers.el`](./list-database/test-ld-consumers.el): six ERT
+  tests for Cram and Maths schema construction and their persisted/fresh
+  database initialization paths.
 * [`test-list-interval.el`](./prototypes/geometry/test-list-interval.el): nine ERT tests for the
   closed-interval helpers, including construction and accessors.
 * [`test-list-envelope.el`](./prototypes/geometry/test-list-envelope.el): nine ERT tests for
@@ -528,9 +531,9 @@ physics, geometry, search, XML, anaphora, general, list, sequence, string,
 time, ISO-time, and table modules are independently loadable. Their validation
 comprises:
 
-* a clean `emacs -Q` load of all seventy-two utility and mode-extension
+* a clean `emacs -Q` load of all seventy-four utility and mode-extension
   features plus the ERT tooling;
-* 661 passing ERT tests from the batch entry point;
+* 667 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -891,6 +894,17 @@ metadata, so empty databases persist correctly. Loads validate table and
 database shapes, missing tables report `user-error`, and a missing database
 still returns nil for the established create-on-first-use flow. Nine tests use
 temporary repositories to verify the complete on-disk round trip.
+
+The active Cram and Maths database definitions in
+[`cram-db.el`](./games/cram/cram-db.el) and
+[`maths-db.el`](./games/maths/maths-db.el) now load independently with lexical
+binding. Their fresh-database paths no longer call the removed `bind` helper;
+instead each module exposes a pure database constructor used by its
+initializer. Tests verify all schema/table identifiers and both the persisted
+and first-use initialization paths. The two unused schema-migration functions,
+which referenced never-defined `*cram-db*` and `*maths-db*` variables, were
+retired. The old `list-database/ld-tests.el` remains an unmaintained interactive
+demo and is not part of the test baseline.
 
 [`global-map.el`](./global/global-map.el) now loads independently with lexical
 binding and does not mutate global keys until `mb-global-map-setup` is called.

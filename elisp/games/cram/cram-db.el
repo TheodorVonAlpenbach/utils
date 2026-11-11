@@ -1,9 +1,10 @@
+;;; cram-db.el --- Cram list-database definition -*- lexical-binding: t; -*-
+
+;;; Code:
+
 (require 'ld-database)
 (require 'ld-operations)
 (require 'ld-repository)
-
-;;;; The DB is stored under
-;;;; "/home/eier/data/ld"
 
 (defconst +cram-db-schema-definitions+
   '((:problem "Problems"
@@ -52,39 +53,28 @@
       (:user-rating :type (number number))
       (:problem-rating :type (number number)))))
 
-  "TODO: this is a constant, but should eventually become a variable
-Note that this is a PLIST format of coldefs. Hence PLIST-P must be set to t in `ld-make-schema'")
-
-;;(first (fourth (second (first (fourth *cram-db*)))))
-;;(ld-table-column-definitions (ld-table :users))
-;; match-rating
-
-(cl-defun cram-update-schema (keyword)
-  "Not used. Need to rename (table column) and add (table column)"
-  (setf (ld-table-schema
-	 (ld-find-table (list +cram-db-keyword+ keyword) *cram-db*))
-	(ld-schemadef->schema (cl-find keyword +cram-db-schema-definitions+
-				    :key #'first))))
-;;(cram-update-schema :user)
+  "Compact schema definitions for the Cram database.")
 
 (defconst +cram-db-keyword+ :cram)
 
-;;(require 'ld-repository)
-(cl-defun cram-init-database (&optional force)
-  "TODO: this is a constant, but should eventually become a variable"
+(defun cram-create-database ()
+  "Create a new empty Cram database."
+  (ld-create-database
+   +cram-db-keyword+
+   :schemas
+   (mapcar
+    (lambda (definition)
+      (ld-schemadef->schema definition +cram-db-keyword+))
+    +cram-db-schema-definitions+)))
+
+(defun cram-init-database (&optional force)
+  "Load or create the Cram database and make it current.
+Pass FORCE to `ld-set-database'."
   (ld-set-database
    (or (ld-load-database +cram-db-keyword+)
-       (ld-create-database +cram-db-keyword+ 
-	 :schemas (mapcar (bind #'ld-schemadef->schema +cram-db-keyword+)
-		    +cram-db-schema-definitions+)))
+       (cram-create-database))
    force))
-;;(cram-init-database)
-;;(setf *current-database* nil)
-;;(setf *dbcopy* (copy-tree *current-database*))
-;;(setf *current-database* (copy-tree *dbcopy*))
-;;(ld-replace-table '(:cram :match) (ld-table-add-column :match '(:score :type number) :colpos 4) :value .5)
-;;(ld-table-add-column :match '(:score :type number) :colpos 4)
-;;(ld-table :match)
-;;(cl-loop for task in (cram-db-tasks) do (setf (cram-task-level task) (cram-estimate-level task)))(provide 'cram-db)
 
 (provide 'cram-db)
+
+;;; cram-db.el ends here
