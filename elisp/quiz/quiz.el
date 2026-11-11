@@ -25,6 +25,7 @@
 (require 'subr-x)
 (require 'quiz-format)
 (require 'quiz-navigation)
+(require 'quiz-edit)
 (require 'quiz-csv)
 (require 'quiz-mode)
 ;;;;;;;;;;;;;;;; UTILS ;;;;;;;;;;;;;;;;;;
@@ -54,83 +55,6 @@
 (defconst *quiz-scratch-buffername* "scratch.qz")
 (defconst quiz-popup-buffer-size 12)
 
-(cl-defun quiz-list-set-numbers (&optional (base 1))
-  (quiz-beginning-of-list)
-  (while (quiz-question-set-numbers base)
-    (cl-incf base)))
-
-(cl-defun quiz-question-set-numbers (n)
-  "Returns new point or nil if last question"
-  (quiz-beginning-of-question 1)
-  (let* ((point (point))
-	 (end-point (quiz-end-of-question)))
-    (quiz-beginning-of-question)
-    (while (and point
-		(< point end-point))
-      (quiz-item-set-number n)
-      (setq point (quiz-forward-item)))
-    point))
-
-(cl-defun quiz-item-set-number (n)
-  (quiz-beginning-of-item)
-  (forward-char 1)
-  (kill-word 1)
-  (insert (number-to-string n)))
-
-;;; Insert
-(cl-defun quiz-insert-empty-question ()
-  (interactive)
-  ;; (quiz-insert-question "" "" "" (current-buffer))
-  (quiz-insert-question-pugg)
-  (quiz-forward-item))
-
-(cl-defun quiz-insert-question-pugg (&optional (point (point)))
-  "TODO: get behaviour from #'LYNX-INSERT-REGION-IN-QUIZ-OUTLINE"
-  (goto-char point)
-    (let ((n (quiz-read-n-prev-question)))
-      (delete-blank-lines)
-      (unless (<= n 1) (newline))
-      (insert (quiz-item-q n ""))
-      (insert (quiz-item-a n ""))
-      (insert (quiz-item-c n ""))
-      (insert (quiz-item-e n ""))
-      (insert (quiz-item-t n ""))
-      (insert (quiz-item-d n "")))
-    (newline)
-    (point))
-
-(cl-defun quiz-insert-question-base (question answer source
-				     &optional (point (point)))
-  "TODO: get behaviour from #'LYNX-INSERT-REGION-IN-QUIZ-OUTLINE"
-  (goto-char point)
-    (let ((n (quiz-read-n-prev-question)))
-      (delete-blank-lines)
-      (unless (<= n 1) (newline))
-      (insert (quiz-item-q n question))
-      (insert (quiz-item-a n answer))
-      (insert (quiz-item-s n source)))
-    (newline)
-    (point))
-
-(cl-defun quiz-insert-question
-    (question answer source
-     &optional (buffer (quiz-get-buffer)) (point (point-max)))
-  "TODO: get behaviour from #'LYNX-INSERT-REGION-IN-QUIZ-OUTLINE"
-  (with-buffer buffer
-    (quiz-insert-question-base question answer source point)))
-;;(quiz-insert-question "qwe" "ewq" "")
-
-
-;;; Queries
-(cl-defun quiz-current-item ()
-  (save-excursion
-    (quiz-beginning-of-item)
-    (first (cl-find (buffer-substring* :start (point) :length 1)
-		 quiz-item-types :key #'second :test #'string=))))
-
-(cl-defun quiz-current-item-p (item)
-  (eql (quiz-current-item) item))
-
 (cl-defun quiz-get-buffer
     (&optional (buffer-name (format "mq-%s.qz" (iso-date))))
   "Returns the standard quiz buffer. If the underlying file does not
@@ -142,23 +66,7 @@ other local variables are set."
 	  (quiz-mode))
 	buffer)))
 
-(cl-defun quiz-read-n-prev-question (&optional (point (point)))
-  (interactive)
-  (aif (quiz-current-item-number) (1+ it) 1))
-
 (defconst quiz-hanging-space 1)
-
-(cl-defun quiz-current-item-number
-    (&optional (point (point)) (items quiz-item-prefixes))
-  (save-excursion
-    (goto-char point)
-    (end-of-line)
-    (if (re-search-backward (format "^[%s]\\([0-9]+\\):" items) nil t)
-      (string-to-integer (match-string 1))
-      ;; point is in front of first item if there is any
-      (if (re-search-forward (format "^[%s]\\([0-9]+\\):" items) nil t)
-	(string-to-integer (match-string 1))))))
-;;(quiz-current-item-number)
 
 (cl-defun quiz-paragraph-indent
     (&optional (point (point)) (items quiz-item-prefixes))
@@ -366,35 +274,6 @@ respectively are to be included for each question record."
     (insert body)))
 ;;(quiz-mail-buffer 1)
 ;;(concat* (second (assoc quiz-default-mail-group quiz-mail-groups)) :in ", ")
-
-(cl-defmacro quiz-save-excursion (point &rest body)
-  "What is the point of this?"
-  `(save-excursion
-     ,@body))
-
-(cl-defun quiz-question-set-number-1 (n)
-  "Sets item numbers of current question to N. Destructive verson of
-quiz-question-set-number."
-  (error "Under construction!")
-  (dolist (item (split-string quiz-item-prefixes ""))
-    (quiz-beginning-of-item :number item)
-    (kill-word 1)
-    (insert-string n)))
-
-(cl-defun quiz-question-set-number (n &optional (point (point)))
-  "Sets item numbers of question at POINT to N. Assumption: POINT is
-at the beginning of the q-question."
-  (quiz-save-excursion point
-    (quiz-question-set-number-1 n)))
-
-(cl-defun quiz-reset-question-numbers ()
-  (interactive)
-  (save-excursion
-    (goto-char (point-min))
-    (let ((n 1))
-      (while (re-search-forward (quiz-item-start-regexp "Q" t) nil t)
-	(quiz-question-set-number-1 n)
-	(cl-incf n)))))
 
 (cl-defun quiz-summary-edit-question-1
     (number &optional (date (midnight)) (path *quiz-dir*))

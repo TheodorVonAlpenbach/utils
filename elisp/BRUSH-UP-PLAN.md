@@ -541,9 +541,9 @@ physics, geometry, search, XML, anaphora, general, list, sequence, string,
 time, ISO-time, and table modules are independently loadable. Their validation
 comprises:
 
-* a clean `emacs -Q` load of all ninety-one utility and mode-extension
+* a clean `emacs -Q` load of all ninety-two utility and mode-extension
   features plus the ERT tooling;
-* 756 passing ERT tests from the batch entry point;
+* 764 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -1097,6 +1097,16 @@ and returns consistent text boundaries without trailing separators. Four
 unreferenced error-only navigation stubs were retired. Seven tests cover list,
 question, and item movement, text regions, numbered lookup, and position-based
 question boundaries.
+
+Structural quiz editing now lives in the independently loadable
+[`quiz-edit.el`](./quiz/quiz-edit.el). It consolidates item inspection,
+question-number calculation, item/question renumbering, whole-buffer
+renumbering, and question/template insertion. Renumbering no longer mutates the
+kill ring, and the previously error-only reset implementation now works through
+the shared path. Insertion validates fields, maintains blank-line separators,
+computes numbering inside the target buffer, and retains compatibility aliases
+for older callers. Eight tests cover item lookup, numbering, renumbering,
+insertion, return positions, and the extended template.
 
 [`quiz-park.el`](./quiz/quiz-park.el) remains a legacy remote-deployment tool
 with machine-specific FTP behavior and is not being modernized or exercised as

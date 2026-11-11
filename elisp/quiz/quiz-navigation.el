@@ -4,7 +4,7 @@
 
 (require 'quiz-format)
 
-(defconst quiz-navigation--question-regexp
+(defconst quiz-question-start-regexp
   "^Q[0-9]+: "
   "Regexp matching the beginning of a quiz question.")
 
@@ -43,7 +43,7 @@ when there are too few remaining questions."
         (end-of-line)
         (while (and (> remaining 0)
                     (re-search-forward
-                     quiz-navigation--question-regexp nil t))
+                     quiz-question-start-regexp nil t))
           (setq found (match-beginning 0)
                 remaining (1- remaining)))
         (if (zerop remaining)
@@ -69,7 +69,7 @@ buffer when there are too few preceding questions."
         (beginning-of-line)
         (while (and (> remaining 0)
                     (re-search-backward
-                     quiz-navigation--question-regexp nil t))
+                     quiz-question-start-regexp nil t))
           (setq found (match-beginning 0)
                 remaining (1- remaining)))
         (if (zerop remaining)
@@ -85,12 +85,12 @@ beginnings."
          (quiz-navigation--positive-count count))
         found)
     (beginning-of-line)
-    (when (looking-at quiz-navigation--question-regexp)
+    (when (looking-at quiz-question-start-regexp)
       (setq found (point)
             remaining (1- remaining)))
     (while (and (> remaining 0)
                 (re-search-backward
-                 quiz-navigation--question-regexp nil t))
+                 quiz-question-start-regexp nil t))
       (setq found (match-beginning 0)
             remaining (1- remaining)))
     (goto-char (or found (point-min)))))
@@ -109,7 +109,7 @@ character."
       (setq remaining (1- remaining)))
     (forward-line 1)
     (if (re-search-forward
-         quiz-navigation--question-regexp nil t)
+         quiz-question-start-regexp nil t)
         (goto-char (match-beginning 0))
       (goto-char (point-max)))
     (skip-chars-backward " \t\r\n")
