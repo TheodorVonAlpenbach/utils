@@ -7,7 +7,7 @@
 (require 'quiz-format)
 (require 'quiz-navigation)
 
-(declare-function quiz-get-buffer "quiz" (&optional buffer-name))
+(declare-function quiz-get-buffer "quiz-config" (&optional buffer-name))
 
 (defun quiz-edit--positive-number (number)
   "Return NUMBER after requiring a positive integer."

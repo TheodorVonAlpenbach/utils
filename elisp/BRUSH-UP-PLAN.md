@@ -541,9 +541,9 @@ physics, geometry, search, XML, anaphora, general, list, sequence, string,
 time, ISO-time, and table modules are independently loadable. Their validation
 comprises:
 
-* a clean `emacs -Q` load of all ninety-two utility and mode-extension
+* a clean `emacs -Q` load of all ninety-three utility and mode-extension
   features plus the ERT tooling;
-* 764 passing ERT tests from the batch entry point;
+* 770 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -1107,6 +1107,14 @@ the shared path. Insertion validates fields, maintains blank-line separators,
 computes numbering inside the target buffer, and retains compatibility aliases
 for older callers. Eight tests cover item lookup, numbering, renumbering,
 insertion, return positions, and the extended template.
+
+Quiz paths and buffer lookup now live in the independently loadable
+[`quiz-config.el`](./quiz/quiz-config.el). Portable customizable directories
+replace the startup-defined `+home-dir+` dependency and starred constants.
+Dated paths use built-in time handling, file paths are expanded consistently,
+and visited files enter `quiz-mode`; obsolete aliases preserve older archived
+callers. Six tests cover path construction, dated filenames, current-date
+defaults, buffer reuse, file visitation, mode setup, and legacy aliases.
 
 [`quiz-park.el`](./quiz/quiz-park.el) remains a legacy remote-deployment tool
 with machine-specific FTP behavior and is not being modernized or exercised as

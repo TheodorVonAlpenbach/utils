@@ -25,9 +25,10 @@
 (require 'subr-x)
 (require 'quiz-format)
 (require 'quiz-navigation)
+(require 'quiz-mode)
+(require 'quiz-config)
 (require 'quiz-edit)
 (require 'quiz-csv)
-(require 'quiz-mode)
 ;;;;;;;;;;;;;;;; UTILS ;;;;;;;;;;;;;;;;;;
 
 (cl-defun buffer-replace (string1 string2)
@@ -48,23 +49,6 @@
    '("å" "ø" "«" "»" "ö" "æ")))
 
 ;;;;;;;;;;;;;;; BASIC ;;;;;;;;;;;;;;
-
-(defconst *quiz-buffer* "*quiz*" "")
-(defconst *quiz-dir* (concat +home-dir+ "projects/quiz/") "")
-(defconst *quiz-without-source-dir* (concat *quiz-dir* "without-source/") "")
-(defconst *quiz-scratch-buffername* "scratch.qz")
-(defconst quiz-popup-buffer-size 12)
-
-(cl-defun quiz-get-buffer
-    (&optional (buffer-name (format "mq-%s.qz" (iso-date))))
-  "Returns the standard quiz buffer. If the underlying file does not
-exist, it is created, and the buffers mode is set to TEXT-MODE and
-other local variables are set."
-  (or (get-buffer buffer-name)
-      (let ((buffer (find-file-noselect (concat *quiz-dir* buffer-name))))
-	(with-buffer (buffer-name buffer)
-	  (quiz-mode))
-	buffer)))
 
 (defconst quiz-hanging-space 1)
 
@@ -180,10 +164,6 @@ why is this method but here?"
     (goto-char (point-min))
     (while (quiz-remove-S))))
 
-(cl-defun quiz-get-file (&optional (date (midnight)) (path *quiz-dir*))
-  (format "%smq-%s.qz" path (iso-date (parse-time date))))
-;;(quiz-get-file "2005-02-22")
-
 (cl-defun quiz-question-to-string (&optional (delimiter ";"))
   "Converts current question to csv-string"
   (save-excursion
@@ -210,7 +190,7 @@ respectively are to be included for each question record."
       (kill-region (point-min) (point-max))
       (cl-loop for iso-d = iso-from then (iso-date (add-time iso-d :day 1))
 	    for filename = (format "mq-%s" iso-d)
-	    for path = (format "%s%s.qz" *quiz-dir* filename)
+	    for path = (quiz-file-path (format "%s.qz" filename))
 	    until (string= iso-d iso-to)
 	    if (file-exists-p path) do 
 	    (insert filename)
@@ -276,7 +256,7 @@ respectively are to be included for each question record."
 ;;(concat* (second (assoc quiz-default-mail-group quiz-mail-groups)) :in ", ")
 
 (cl-defun quiz-summary-edit-question-1
-    (number &optional (date (midnight)) (path *quiz-dir*))
+    (number &optional (date (midnight)) (path quiz-directory))
   "Opens the file with the requested question defined by NUMBER and
 DATE. TODO: coordinate this with goto methods, ie. goto-Q etc."
   (interactive "P")
@@ -285,7 +265,7 @@ DATE. TODO: coordinate this with goto methods, ie. goto-Q etc."
   (re-search-forward (format "Q%d: " number)))
 ;;(quiz-summary-edit-question 2 "2005-02-21")
 
-(cl-defun quiz-summary-edit-question (&optional (path *quiz-dir*))
+(cl-defun quiz-summary-edit-question (&optional (path quiz-directory))
   "Opens the file with the requested question defined by number and date."
   (interactive)
   (let (n iso-date) 
