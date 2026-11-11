@@ -541,9 +541,9 @@ physics, geometry, search, XML, anaphora, general, list, sequence, string,
 time, ISO-time, and table modules are independently loadable. Their validation
 comprises:
 
-* a clean `emacs -Q` load of all eighty-seven utility and mode-extension
+* a clean `emacs -Q` load of all eighty-eight utility and mode-extension
   features plus the ERT tooling;
-* 734 passing ERT tests from the batch entry point;
+* 740 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -1061,6 +1061,19 @@ the model and operations layers, it explicitly loads repository persistence,
 so callers no longer need an undocumented extra require before using save/load
 operations. Two tests verify the exported feature surface and a basic
 create/insert/select flow using only the public entry module.
+
+[`quiz-csv.el`](./quiz/quiz-csv.el), loaded by the core quiz editor, now has a
+portable customizable export directory instead of an obsolete Windows profile
+path. It loads independently, accepts buffer objects or names, reports missing
+buffers explicitly, parses question blocks and item text without startup
+helpers, and emits correctly quoted semicolon-separated fields. Export creates
+the selected destination directory only when the user invokes saving and
+returns the written path. Six tests cover collection, multiline parsing,
+escaping, source omission, portable paths, and file output.
+
+[`quiz-park.el`](./quiz/quiz-park.el) remains a legacy remote-deployment tool
+with machine-specific FTP behavior and is not being modernized or exercised as
+part of the maintained baseline without an explicit usage decision.
 
 [`global-map.el`](./global/global-map.el) now loads independently with lexical
 binding and does not mutate global keys until `mb-global-map-setup` is called.
