@@ -28,6 +28,7 @@
   "list-database/test-ld-repository.el"
   "list-database/test-ld-consumers.el"
   "games/cram/test-cram-config.el"
+  "games/cram/test-cram-db-ui.el"
   "games/maths/test-maths-backend.el"
   "games/maths/test-maths-db-ui.el"
     "global/test-mb-indent.el"

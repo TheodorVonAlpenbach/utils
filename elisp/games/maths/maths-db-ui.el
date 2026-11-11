@@ -15,7 +15,7 @@
 (defun maths-db-insert-user (name age rating RD)
   "Insert and return a user with NAME, AGE, RATING, and RD."
   (ld-insert :users (list name age rating RD)
-	     :columns (list :name :age :rating :RD)))
+             :columns (list :name :age :rating :RD)))
 
 (defun maths-db-get-user (user-designator)
   "Resolve USER-DESIGNATOR to a user row.

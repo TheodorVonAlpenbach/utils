@@ -541,9 +541,9 @@ physics, geometry, search, XML, anaphora, general, list, sequence, string,
 time, ISO-time, and table modules are independently loadable. Their validation
 comprises:
 
-* a clean `emacs -Q` load of all seventy-nine utility and mode-extension
+* a clean `emacs -Q` load of all eighty utility and mode-extension
   features plus the ERT tooling;
-* 687 passing ERT tests from the batch entry point;
+* 694 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -959,6 +959,20 @@ with nil on an empty database instead of recurring forever after exhausting
 its widening search. The unused `maths-db-rating-history` stub was retired
 because it referenced the nonexistent `maths-get-matches`, `user-p`,
 multi-argument `ld-metadata`, and `ld-column` APIs.
+
+[`cram-common.el`](./games/cram/cram-common.el) and
+[`cram-db-ui.el`](./games/cram/cram-db-ui.el) now provide the equivalent
+independently loadable Cram record and database-access layers. Record accessors
+no longer alias startup-only ordinal helpers, and the obsolete eager
+macro-expansion workaround has been removed from the backend. User and problem
+resolution, latest-row lookup, exclusions, history projection, insertion, and
+match updates have focused coverage. The latest-problem operation now resolves
+the problem referenced by the latest match instead of returning the match row
+itself, invalid user designators return nil, random selection handles empty
+databases, and the backend's existing `:rating` call no longer signals an
+unknown-keyword error. The unused old random-selection and rating-history
+stubs were retired; the latter referenced nonexistent predicates and metadata
+APIs.
 
 [`global-map.el`](./global/global-map.el) now loads independently with lexical
 binding and does not mutate global keys until `mb-global-map-setup` is called.

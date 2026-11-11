@@ -1,8 +1,7 @@
 (require 'cram-config)
 (require 'mb-locale)
 
-(let ((macroexp--pending-eager-loads '(skip)))
-  (require 'cram-db-ui))
+(require 'cram-db-ui)
 (require 'glicko)
 
 (cl-defun cram-list-user-ratings (&optional (buffer-name "*User Ratings*"))
