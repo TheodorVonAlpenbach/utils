@@ -1,4 +1,15 @@
+;;; maths-config.el --- Configuration for Maths -*- lexical-binding: t; -*-
+
+;;; Code:
+
+(require 'glicko)
+
 (defconst +maths-buffer+ "Matematikkspill for Ludvik")
+
+(defconst +maths-default-rating+ (car +glicko-init-rating+))
+(defconst +maths-default-RD+ (cadr +glicko-init-rating+))
+(defconst +maths-default-user-name+ "Mats")
+(defconst +maths-default-rating-window+ 200)
 
 (defvar *maths-auto-continue* nil)
 
@@ -7,10 +18,10 @@
     (:substraction (2 3) nil)
     (:division (2 3))
     (:multiplication (2 3)))
-  "List of possible task operators to be asked about. Each task
-type is entered as a pair \(TYPE \(FROM-LEVEL UPTO-LEVEL\) ALLOW-NEGATIVE-RESULT-P\), where
-TYPE denotes the task type and the pair a closed integer interval
-that specifies the possible levels for that TYPE.")
+  "Possible task operators and their level ranges.
+Each entry has the form (TYPE (FROM-LEVEL UPTO-LEVEL)
+ALLOW-NEGATIVE-RESULT-P).")
 
 (provide 'maths-config)
 
+;;; maths-config.el ends here

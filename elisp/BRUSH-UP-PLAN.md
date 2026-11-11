@@ -332,6 +332,10 @@ The first subset is intentionally conservative:
   database initialization paths.
 * [`test-cram-config.el`](./games/cram/test-cram-config.el): three ERT tests
   for Cram's rating, selection, cache, and timestamp defaults.
+* [`test-maths-backend.el`](./games/maths/test-maths-backend.el): eight ERT
+  tests for Maths defaults and record accessors, arithmetic generation,
+  level estimation, scoring, namespaced rating calculations, and ranked
+  result ranges.
 * [`test-list-interval.el`](./prototypes/geometry/test-list-interval.el): nine ERT tests for the
   closed-interval helpers, including construction and accessors.
 * [`test-list-envelope.el`](./prototypes/geometry/test-list-envelope.el): nine ERT tests for
@@ -534,9 +538,9 @@ physics, geometry, search, XML, anaphora, general, list, sequence, string,
 time, ISO-time, and table modules are independently loadable. Their validation
 comprises:
 
-* a clean `emacs -Q` load of all seventy-five utility and mode-extension
+* a clean `emacs -Q` load of all seventy-eight utility and mode-extension
   features plus the ERT tooling;
-* 673 passing ERT tests from the batch entry point;
+* 681 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -925,9 +929,23 @@ inside expressions remain lexical. Ordering and update column positions are
 likewise resolved only when the operation runs. Tests define query functions
 while the placeholder database is active, then execute them against a later
 database, covering metadata projection, lexical predicates, sorting, deletion,
-and updates. The complete Cram backend and UI now load under `emacs -Q`. The
-parallel Maths backend reaches its own next startup-order issue: a load-time
-call to the removed `first` alias.
+and updates. The complete Cram backend and UI now load under `emacs -Q`. At
+that point, the parallel Maths backend reached its own load-time call to the
+removed `first` alias.
+
+The Maths configuration, record accessors, and active backend in
+[`maths-config.el`](./games/maths/maths-config.el),
+[`maths-common.el`](./games/maths/maths-common.el), and
+[`maths-backend.el`](./games/maths/maths-backend.el) now load independently
+with lexical binding and strict compilation. Rating defaults moved to
+configuration, record aliases use maintained accessors, and obsolete ordinal,
+anaphoric, boolean, list-tail, and reset helpers were removed. The backend no
+longer needs its eager-macroexpansion workaround. Maths-specific rating,
+comparison, and extraction helpers were namespaced so loading Maths cannot
+replace Cram implementations with the same global names. Compilation also
+exposed and fixed an invalid `maths-current-task` call, an ignored generated
+rating-deviation argument, and the nonexistent `maths-db-ratings` call. The
+complete Maths module now loads under `emacs -Q`.
 
 [`global-map.el`](./global/global-map.el) now loads independently with lexical
 binding and does not mutate global keys until `mb-global-map-setup` is called.
