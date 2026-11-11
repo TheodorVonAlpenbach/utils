@@ -10,7 +10,7 @@
 (require 'mb-utils-strings)
 (require 'mb-utils-time)
 
-(declare-function gnuplot-ratings "maths-plot")
+(declare-function rating-plot-history "rating-plot")
 
 (defun maths-operator-string (operator)
   "Return OPERATOR's printable name."
@@ -243,8 +243,8 @@ LEVEL is retained for compatibility."
 (defun maths-plot-user-ratings ()
   "Plot the current user's ratings."
   (interactive)
-  (require 'maths-plot)
-  (gnuplot-ratings
+  (require 'rating-plot)
+  (rating-plot-history
    (maths-db-user-ratings (maths-current-user))))
 
 (defun maths--make-mode-map ()

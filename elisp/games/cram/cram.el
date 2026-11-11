@@ -13,7 +13,7 @@
 (require 'mb-utils-time)
 
 (declare-function evil-emacs-state "evil")
-(declare-function gnuplot-ratings "maths-plot")
+(declare-function rating-plot-history "rating-plot")
 
 (defun cram--use-emacs-state ()
   "Enter Evil's Emacs state when Evil is available."
@@ -311,8 +311,8 @@ ANSWER and ALTERNATIVES describe the accepted solution."
 (defun cram-plot-user-ratings ()
   "Plot the current user's ratings."
   (interactive)
-  (require 'maths-plot)
-  (gnuplot-ratings
+  (require 'rating-plot)
+  (rating-plot-history
    (cram-db-user-ratings (cram-current-user))))
 
 (defun cram--make-answer-mode-map ()
