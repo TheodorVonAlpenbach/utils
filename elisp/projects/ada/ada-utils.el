@@ -42,14 +42,18 @@ TEMPLATE-NUMBER  Conversions
   "Opens ~/ada-tasks/JIRA-TAG/README.md.
 If the JIRA-TAG subfolder does not exist, create it."
   (interactive "nJIRA tag suffix: ")
-  (let* ((dir (expand-file-name (ada-jira-tag jira-tag-suffix) "~/ada-tasks"))
+  (let* ((tag (ada-jira-tag jira-tag-suffix))
+	 (dir (expand-file-name tag "~/ada-tasks"))
 	 (filename (expand-file-name "README.org" dir)))
-    (if (file-directory-p dir)
-      (find-file filename)
-      (when (yes-or-no-p
-	     (format
-		 "Task directory %s does not exist. Do you want to create one? "
-	       dir))
-	(make-directory dir t)
-	(with-current-buffer (find-file-noselect filename)
-	  (goto-char (point-max)))))))
+    (if (and (not (file-directory-p dir))
+	     (yes-or-no-p
+	      (format
+		  "Task directory %s does not exist. Do you want to create one? "
+		dir)))
+      (make-directory dir t)
+      (if (file-exists-p filename)
+	(find-file filename)
+	(with-current-buffer (find-file filename)
+	  (insert tag))))))
+
+(provide 'ada-utils)
