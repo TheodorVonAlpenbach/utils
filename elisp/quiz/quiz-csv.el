@@ -3,6 +3,7 @@
 ;;; Code:
 
 (require 'subr-x)
+(require 'quiz-format)
 
 (defgroup quiz-csv nil
   "CSV export for quiz buffers."
@@ -45,7 +46,8 @@
    #'quiz-trim-q-item-string
    (split-string
     question-string
-    "^[QACS][0-9]+:[ \t]*"
+    (format "^[%s][0-9]+:[ \t]*"
+            (regexp-quote quiz-item-prefixes))
     t)))
 
 (defun quiz-collect-qs (buffer-designator)

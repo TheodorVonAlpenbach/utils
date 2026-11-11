@@ -541,9 +541,9 @@ physics, geometry, search, XML, anaphora, general, list, sequence, string,
 time, ISO-time, and table modules are independently loadable. Their validation
 comprises:
 
-* a clean `emacs -Q` load of all eighty-eight utility and mode-extension
+* a clean `emacs -Q` load of all eighty-nine utility and mode-extension
   features plus the ERT tooling;
-* 740 passing ERT tests from the batch entry point;
+* 745 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -1070,6 +1070,17 @@ helpers, and emits correctly quoted semicolon-separated fields. Export creates
 the selected destination directory only when the user invokes saving and
 returns the written path. Six tests cover collection, multiline parsing,
 escaping, source omission, portable paths, and file output.
+
+Quiz item types and pure formatting now live in the independently loadable
+[`quiz-format.el`](./quiz/quiz-format.el). The core editor and CSV exporter
+share its complete item vocabulary instead of maintaining separate definitions.
+Formatting validates item types, positive item numbers, and text values; modern
+names replace the old starred variables and ambiguous formatter while obsolete
+aliases preserve external callers. Five tests cover the vocabulary, generic
+formatting, convenience formatters, validation, and navigation regexps.
+The integrating editor is now explicitly UTF-8 rather than implicit Latin-1;
+its Norwegian text and mojibake-repair mappings retain their original
+characters during the conversion.
 
 [`quiz-park.el`](./quiz/quiz-park.el) remains a legacy remote-deployment tool
 with machine-specific FTP behavior and is not being modernized or exercised as

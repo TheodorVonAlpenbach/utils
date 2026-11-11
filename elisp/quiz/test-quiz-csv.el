@@ -28,8 +28,8 @@
   (should
    (equal
     (quiz-parse-q
-     "Q1: A long\n  question\nA1: Answer\nS1: Source")
-    '("A long question" "Answer" "Source"))))
+     "Q1: A long\n  question\nA1: Answer\nE1: Extra\nS1: Source")
+    '("A long question" "Answer" "Extra" "Source"))))
 
 (ert-deftest quiz-csv-converts-and-escapes-fields ()
   (quiz-csv-test--with-buffer

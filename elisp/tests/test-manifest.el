@@ -65,6 +65,7 @@
     "mode-extensions/test-mb-texinfo.el"
     "projects/ratings/test-glicko.el"
     "projects/ratings/test-rating-plot.el"
+    "quiz/test-quiz-format.el"
     "quiz/test-quiz-csv.el"
     "utils/test-mb-anaphora.el"
     "utils/test-mb-combinatorics.el"

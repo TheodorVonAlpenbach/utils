@@ -1,3 +1,5 @@
+;;; quiz.el --- Edit legacy quiz files -*- coding: utf-8; -*-
+
 ;;; TODO
 ;;; * this file should only contain settings and mappings, maybe also other
 ;;;   methods that do not belong to other files
@@ -11,14 +13,17 @@
 ;;; * make a re-number-items method (sometimes a q-question must be deleted, and
 ;;;   then...)
 ;;; * base methods on "objects": 
-;;;   � q-file/q-buffer (quiz buffer or summary quiz buffer)
-;;;   � q-list (entire quiz-buffer or region of summary buffer)
-;;;   � q-question (entity containing at least a q-item)
-;;;   � q-item (either Q, A, S by now; later I might add C for comment, T: for
+;;;   · q-file/q-buffer (quiz buffer or summary quiz buffer)
+;;;   · q-list (entire quiz-buffer or region of summary buffer)
+;;;   · q-question (entity containing at least a q-item)
+;;;   · q-item (either Q, A, S by now; later I might add C for comment, T: for
 ;;;     the durations of the validity)
 
 ;; see legenda.txt for categories
 
+(require 'cl-lib)
+(require 'subr-x)
+(require 'quiz-format)
 (require 'quiz-csv)
 ;;;;;;;;;;;;;;;; UTILS ;;;;;;;;;;;;;;;;;;
 
@@ -36,8 +41,8 @@
 (cl-defun quiz-clean-up-mule-shit ()
   (interactive)
   (buffer-replace-multi
-   '("å" "ø" "«" "»" "ö" "æ") 
-   '("�" "�" "�" "�" "�" "�")))
+   '("Ã¥" "Ã¸" "Â«" "Â»" "Ã¶" "Ã¦")
+   '("å" "ø" "«" "»" "ö" "æ")))
 
 ;;;;;;;;;;;;;;; BASIC ;;;;;;;;;;;;;;
 
@@ -47,72 +52,17 @@
 (defconst *quiz-scratch-buffername* "scratch.qz")
 (defconst quiz-popup-buffer-size 12)
 
-(defconst *quiz-items-long*
-  '((:question "Q")
-    (:answer "A")
-    (:source "S")
-    (:comment "C") 
-    (:extra "E") 
-    (:theme "T") 
-    (:difficulty "D")
-    (:alternatives "X")))
-
-(defconst *quiz-items-short*
-  (apply #'concat (mapcar #'second *quiz-items-long*))) ; ==> "QASCDE"
-
-(cl-defun quiz-set-vars (&optional (items-long *quiz-items-long*))
-  "TODO: Disallow Q0000 etc as label format. Currently, this method is obsolete"
-  (setq *quiz-items-short* (apply #'concat (mapcar #'second items-long))))
-
-(cl-defun quiz-item-prefix (item) (second (assoc item *quiz-items-long*)))
-;;(quiz-item-prefix :answer)
-
-(cl-defun quiz-item (item n &optional (string ""))
-  (format "%s%d: %s\n" (quiz-item-prefix item) n string))
-;;(quiz-item :question 1 "What's the capital of Transylvania?")
-
-;;short-cuts
-(cl-defun quiz-item-q (n &optional (string ""))
-  (quiz-item :question n string))
-(cl-defun quiz-item-a (n &optional (string ""))
-  (quiz-item :answer n string))
-(cl-defun quiz-item-s (n &optional (string ""))
-  (quiz-item :source n string))
-(cl-defun quiz-item-c (n &optional (string ""))
-  (quiz-item :comment n string))
-(cl-defun quiz-item-t (n &optional (string ""))
-  (quiz-item :theme n string))
-(cl-defun quiz-item-d (n &optional (string ""))
-  (quiz-item :difficulty n string))
-(cl-defun quiz-item-e (n &optional (string ""))
-  (quiz-item :extra n string))
-(cl-defun quiz-item-x (n &optional (string ""))
-  (quiz-item :alternatives n string))
-;;(quiz-item-x 10 "qwe\n")
-
-(cl-defun quiz-regexp-item-start
-    (&optional (items-short *quiz-items-short*) (forward t))
-  "Returns a regular expression that matches the beginning of a
-q-item. If FORWARD is nil it returns instead an expression that
-matches the end of a q-item. ITEMS specifies which types of q-items
-that are recognized."
-  (if forward 
-    (format "^[%s][0-9]+: " items-short)
-    (format "\n*[%s][0-9]+: " items-short)))
-;;(quiz-regexp-item-start :forward nil)
-
-
 ;;;;;;;;;;;;;;;;;;;; quiz-navigation ;;;;;;;;;;;;;;;;;;;
 
 
-;;;   � q-file/q-buffer (quiz buffer or summary quiz buffer)
-;;;   � q-list (entire quiz-buffer or region of summary buffer)
-;;;   � q-question (entity containing at least a q-item, separated by at least
+;;;   · q-file/q-buffer (quiz buffer or summary quiz buffer)
+;;;   · q-list (entire quiz-buffer or region of summary buffer)
+;;;   · q-question (entity containing at least a q-item, separated by at least
 ;;;     one blank line)
-;;;   � q-item (either Q (mandatory), A, S by now; later I might add C
+;;;   · q-item (either Q (mandatory), A, S by now; later I might add C
 ;;;     for comment, T: for the durations of the validity)
 ;;;     q-item <-- q-item-header q-item-header-space q-item-text
-;;;   � q-item-text (section after q-item-header)
+;;;   · q-item-text (section after q-item-header)
 
 ;;; q-list
 (cl-defun quiz-beginning-of-list ()
@@ -134,7 +84,7 @@ that are recognized."
   (interactive "p")
   (end-of-line)
   (while (and (> n 0)
-	      (re-search-forward (quiz-regexp-item-start "Q" t) nil t))
+	      (re-search-forward (quiz-item-start-regexp "Q" t) nil t))
     (decf n))
   (if (zerop n)
     ;; if movement was actually performed, return point, else nil
@@ -179,11 +129,11 @@ the first q-question labeled N"
     point))
 
 ;;; q-item
-(cl-defun quiz-item-beg-regexp (&optional (items-short *quiz-items-short*)) 
+(cl-defun quiz-item-beg-regexp (&optional (items-short quiz-item-prefixes))
   (format "^[%s][0-9]+: " items-short))
 ;;(quiz-item-beg-regexp)
 
-(cl-defun quiz-forward-item-1 (&optional (n 1) (items-short *quiz-items-short*))
+(cl-defun quiz-forward-item-1 (&optional (n 1) (items-short quiz-item-prefixes))
   "TODO: finish n < 0"
   (error "Who is invoking!?")
   (cond
@@ -191,31 +141,31 @@ the first q-question labeled N"
     (beginning-of-line 2)
     (forward-char 1)
     (while (and (> n 0)
-		(re-search-forward (quiz-regexp-item-start items-short) nil t))
+		(re-search-forward (quiz-item-start-regexp items-short) nil t))
       (decf n))
     (beginning-of-line)
     (re-search-backward "\\S-"))
    ((< n 0))))
 
-(cl-defun quiz-forward-item (&optional (items-short *quiz-items-short*))
-  (re-search-forward (quiz-regexp-item-start items-short t) nil t))
+(cl-defun quiz-forward-item (&optional (items-short quiz-item-prefixes))
+  (re-search-forward (quiz-item-start-regexp items-short t) nil t))
 
-(cl-defun quiz-backward-item (&optional (items-short *quiz-items-short*))
-  (re-search-backward (quiz-regexp-item-start items-short nil) nil nil))
+(cl-defun quiz-backward-item (&optional (items-short quiz-item-prefixes))
+  (re-search-backward (quiz-item-start-regexp items-short nil) nil nil))
 
-(cl-defun quiz-beginning-of-item (&optional (items-short *quiz-items-short*))
+(cl-defun quiz-beginning-of-item (&optional (items-short quiz-item-prefixes))
   "Move point to beginning of current item."
   (interactive)
   (end-of-line)
   (quiz-backward-item items-short))
 ;;
 
-(cl-defun quiz-end-of-item (&optional (items-short *quiz-items-short*))
+(cl-defun quiz-end-of-item (&optional (items-short quiz-item-prefixes))
   ""
   (quiz-current-item-region-end items-short))
 
 (cl-defun quiz-beginning-of-item-text
-    (&optional (items-short *quiz-items-short*))
+    (&optional (items-short quiz-item-prefixes))
   (quiz-beginning-of-item items-short)
   (re-search-forward (quiz-item-beg-regexp)))
 
@@ -230,21 +180,21 @@ the first q-question labeled N"
 ;;;;;;;;
 
 (cl-defun quiz-current-item-region-start
-    (&optional (items-short *quiz-items-short*))
+    (&optional (items-short quiz-item-prefixes))
   (save-excursion
     (end-of-line)
-    (re-search-backward (quiz-regexp-item-start items-short t) nil t)))
+    (re-search-backward (quiz-item-start-regexp items-short t) nil t)))
 
 (cl-defun quiz-current-item-region-end-old
-    (&optional (items-short *quiz-items-short*))
+    (&optional (items-short quiz-item-prefixes))
   (save-excursion
-    (if (re-search-backward (quiz-regexp-item-start items-short nil) nil t)
-      (re-search-forward (quiz-regexp-item-start *quiz-items-short* t) nil t)
+    (if (re-search-backward (quiz-item-start-regexp items-short nil) nil t)
+      (re-search-forward (quiz-item-start-regexp quiz-item-prefixes t) nil t)
       (point-max))))
 
 (cl-defun quiz-current-item-region-end
-    (&optional (items-short *quiz-items-short*))
-  (re-search-forward (quiz-regexp-item-start *quiz-items-short* t) nil t)
+    (&optional (items-short quiz-item-prefixes))
+  (re-search-forward (quiz-item-start-regexp quiz-item-prefixes t) nil t)
   (eol :offset -1))
 
 (cl-defun quiz-goto-question-end ()
@@ -379,7 +329,7 @@ ITEM is not given or \"\", the item at point is used."
   (save-excursion
     (quiz-beginning-of-item)
     (first (cl-find (buffer-substring* :start (point) :length 1)
-		 *quiz-items-long* :key #'second :test #'string=))))
+		 quiz-item-types :key #'second :test #'string=))))
 
 (cl-defun quiz-current-item-p (item)
   (eql (quiz-current-item) item))
@@ -402,7 +352,7 @@ other local variables are set."
 (defconst quiz-hanging-space 1)
 
 (cl-defun quiz-current-item-number
-    (&optional (point (point)) (items *quiz-items-short*))
+    (&optional (point (point)) (items quiz-item-prefixes))
   (save-excursion
     (goto-char point)
     (end-of-line)
@@ -414,12 +364,12 @@ other local variables are set."
 ;;(quiz-current-item-number)
 
 (cl-defun quiz-paragraph-indent
-    (&optional (point (point)) (items *quiz-items-short*))
+    (&optional (point (point)) (items quiz-item-prefixes))
   "3 or 4"
   (+ 2 (if (< (quiz-current-item-number point) 10)
 	 1 2)))
 
-(cl-defun quiz-hanging-column (&optional (point (point)) (items *quiz-items-short*))
+(cl-defun quiz-hanging-column (&optional (point (point)) (items quiz-item-prefixes))
   "4 or 5"
   (+ quiz-hanging-space (quiz-paragraph-indent point)))
 
@@ -433,7 +383,7 @@ other local variables are set."
 				justify))))
 
 (cl-defun quiz-parse-buffer (&optional (buffer (current-buffer)))
-  (let ((*quiz-items-short* "QAE"))
+  (let ((quiz-item-prefixes "QAE"))
     (save-excursion
       (goto-char (point-min))
       (cl-loop for beg = (quiz-beginning-of-question)
@@ -442,7 +392,7 @@ other local variables are set."
 	    collect (quiz-parse-item item-string)
 	    until (not (quiz-forward-question 1))))))
 
-(defconst +quiz-ignore-chars-regexp+ "[^[:alnum:])�\"]")
+(defconst +quiz-ignore-chars-regexp+ "[^[:alnum:])»\"]")
 
 ;;; Editing
 (cl-defun quiz-super-save ()
@@ -483,7 +433,7 @@ TODO: factorize this and clean answer as well."
     (just-one-space)
     (save-excursion
       (quiz-forward-item)
-      (insert (string-trim* s "[^[:alnum:]()��]")))))
+      (insert (string-trim* s "[^[:alnum:]()«»]")))))
 
 (cl-defun quiz-remove-A ()
   "Removes next A item"
@@ -541,7 +491,7 @@ why is this method but here?"
 
 (cl-defun quiz-compile (&key (iso-from (iso-date))
 			   (iso-to (add-iso-day iso-from))
-			   (items *quiz-items-short*))
+			   (items quiz-item-prefixes))
   "Generates all quiz available in the interval [ISO-FROM ISO-TO).
 Optional argument controls if the answers and source field
 respectively are to be included for each question record."
@@ -629,7 +579,7 @@ respectively are to be included for each question record."
   "Sets item numbers of current question to N. Destructive verson of
 quiz-question-set-number."
   (error "Under construction!")
-  (dolist (item (split-string *quiz-items-short* ""))
+  (dolist (item (split-string quiz-item-prefixes ""))
     (quiz-beginning-of-item :number item)
     (kill-word 1)
     (insert-string n)))
@@ -645,7 +595,7 @@ at the beginning of the q-question."
   (save-excursion
     (goto-char (point-min))
     (let ((n 1))
-      (while (re-search-forward (quiz-regexp-item-start "Q" t) nil t)
+      (while (re-search-forward (quiz-item-start-regexp "Q" t) nil t)
 	(quiz-question-set-number-1 n)
 	(cl-incf n)))))
 
@@ -665,7 +615,7 @@ DATE. TODO: coordinate this with goto methods, ie. goto-Q etc."
   (let (n iso-date) 
     (save-excursion
       (end-of-line)
-      (re-search-backward (format "[%s]\\([0-9]+\\)" *quiz-items-short*))
+      (re-search-backward (format "[%s]\\([0-9]+\\)" quiz-item-prefixes))
       (setq n (string-to-integer (match-string 1)))
       (re-search-backward (format "mq-\\(%s\\)" *iso-date*))
       (setq iso-date (match-string 1))
