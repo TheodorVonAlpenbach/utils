@@ -322,6 +322,10 @@ The first subset is intentionally conservative:
   for model-object types and identifiers, keyword and database components,
   current-database object resolution, parent identifiers and entities, and
   warning messages.
+* [`test-ld-repository.el`](./list-database/test-ld-repository.el): nine ERT
+  tests for repository naming and paths, dated backups, complete printing,
+  missing tables, table persistence, database round trips, and empty
+  databases.
 * [`test-list-interval.el`](./prototypes/geometry/test-list-interval.el): nine ERT tests for the
   closed-interval helpers, including construction and accessors.
 * [`test-list-envelope.el`](./prototypes/geometry/test-list-envelope.el): nine ERT tests for
@@ -524,9 +528,9 @@ physics, geometry, search, XML, anaphora, general, list, sequence, string,
 time, ISO-time, and table modules are independently loadable. Their validation
 comprises:
 
-* a clean `emacs -Q` load of all seventy-one utility and mode-extension
+* a clean `emacs -Q` load of all seventy-two utility and mode-extension
   features plus the ERT tooling;
-* 652 passing ERT tests from the batch entry point;
+* 661 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -875,6 +879,18 @@ unmatched identifiers return nil, malformed designators report `user-error`,
 and warning messages receive their prefix before display. The persistence
 module now loads directly; strict compilation identifies its own lexical
 binding and anaphoric-macro cleanup as the next checkpoint.
+
+[`ld-repository.el`](./list-database/ld-repository.el) now loads independently
+with lexical binding and standard path/file APIs while preserving the existing
+directory names, `.eld` table files, and `metadata.eld` database files.
+Repository paths no longer depend on `concat-directories`, dated backups no
+longer depend on the ISO utility layer, and reads no longer depend on the
+`with-file` macro. Table designators such as `:people` now work for save/path
+operations as documented. Saving creates the database directory before writing
+metadata, so empty databases persist correctly. Loads validate table and
+database shapes, missing tables report `user-error`, and a missing database
+still returns nil for the established create-on-first-use flow. Nine tests use
+temporary repositories to verify the complete on-disk round trip.
 
 [`global-map.el`](./global/global-map.el) now loads independently with lexical
 binding and does not mutate global keys until `mb-global-map-setup` is called.

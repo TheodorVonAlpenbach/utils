@@ -1,96 +1,134 @@
+;;; ld-repository.el --- Persistence for list databases -*- lexical-binding: t; -*-
+
+;;; Code:
+
+(require 'cl-lib)
+(require 'pp)
 (require 'ld-general)
 (require 'ld-utils)
 
-(defconst +ld-file-extension+ ".eld")
-(defconst +ld-database-metadata-filename+ "metadata.eld")
+(defconst +ld-file-extension+ ".eld"
+  "Filename extension for persisted list-database tables.")
 
-(cl-defun ld-database-directory-name-1 (db)
-  (aif (ld-keyword db) 
-    (keyword->filename it)
+(defconst +ld-database-metadata-filename+ "metadata.eld"
+  "Filename containing a persisted database's metadata.")
+
+(defun ld-database-directory-name-1 (database)
+  "Return DATABASE's base repository directory name."
+  (if-let ((keyword (ld-keyword database)))
+      (keyword->filename keyword)
     "free-tables"))
 
-(cl-defun ld-database-directory-name (db &optional backup)
-  (format "%s%s%s"
-    (if backup "." "")
-    (ld-database-directory-name-1 db)
-    (cl-case backup
-      ((nil) "")
-      (:iso-date (format "-%s" (iso-date-and-time :simple-p t)))
-      (otherwise
-       (if (stringp backup)
-	 backup
-	 (error "BACKUP must be either nil, keyword, or a string."))))))
-;;(ld-database-directory-name :maths :iso-date)
+(defun ld-database-directory-name (database &optional backup)
+  "Return DATABASE's repository directory name.
+When BACKUP is `:iso-date', use a hidden directory suffixed with
+the current compact ISO date and time.  A string BACKUP is used
+as the suffix directly."
+  (concat
+   (when backup ".")
+   (ld-database-directory-name-1 database)
+   (pcase backup
+     ('nil "")
+     (:iso-date
+      (format "-%s" (format-time-string "%Y%m%dT%H%M")))
+     ((pred stringp) backup)
+     (_ (user-error "Invalid backup designator: %S" backup)))))
 
-(cl-defun ld-database-repository (db &optional backup)
-  "TODO. free-tables should be in a constant"
-  (concat-directories +ld-repository+
-		      (ld-database-directory-name db backup)))
-;;(cl-loop for x in (list *current-database* nil '(:dyne)) collect (ld-database-repository x :iso-date))
+(defun ld-database-repository (database &optional backup)
+  "Return the repository directory for DATABASE and BACKUP."
+  (expand-file-name
+   (ld-database-directory-name database backup)
+   ld-repository-directory))
 
-(cl-defun ld-database-file (db &optional backup)
-  "TODO. free-tables should be in a constant"
-  (concat-directories (ld-database-repository db backup)
-		      +ld-database-metadata-filename+))
-;;(cl-loop for x in (list *current-database* nil '(:dyne)) collect (ld-database-file x :iso-date))
+(defun ld-database-file (database &optional backup)
+  "Return DATABASE's metadata filename for BACKUP."
+  (expand-file-name
+   +ld-database-metadata-filename+
+   (ld-database-repository database backup)))
 
-(cl-defun ld-table-filename (table)
-  (concat (keyword->filename (ld-keyword table)) +ld-file-extension+))
-;;(ld-table-filename emps)
+(defun ld-table-filename (table)
+  "Return TABLE's persisted filename."
+  (concat (keyword->filename (ld-keyword table))
+          +ld-file-extension+))
 
-(cl-defun ld-table-file (table &optional backup)
-  (concat-directories
-   (ld-database-repository (ld-parent-id table) backup)
-   (ld-table-filename table)))
-;;(ld-table-file '(:milodyne :employee) :iso-date)
+(defun ld-table-file (table &optional backup)
+  "Return TABLE's persisted filename for BACKUP."
+  (let ((target (or (ld-table table) table)))
+    (expand-file-name
+     (ld-table-filename target)
+     (ld-database-repository (ld-parent-id target) backup))))
 
-;;; Write
-(cl-defun print-all (tree &optional (stream nil) (print-function #'pp))
-  "Prints TREE without any abbrevations (like ...).
-Optional PRINT-FUNCTION should be a core print function, default is PP."
+(defun print-all (tree &optional stream print-function)
+  "Print TREE without abbreviation to STREAM.
+PRINT-FUNCTION defaults to `pp'."
   (let ((print-level nil)
-	(print-length nil))
-    ;; now all of TREE will be printed
-    (funcall print-function tree stream)))
+        (print-length nil))
+    (funcall (or print-function #'pp) tree stream)))
 
-(cl-defun ld-save-table (table &optional backup)
-  (let* ((path (ld-table-file table backup))
-	 (dirpath (file-name-directory path)))
-    (unless (file-exists-p dirpath)
-      (make-directory dirpath t)
-      (string-to-file "" path))
-    (with-temp-file path
-      (print-all table (current-buffer)))))
-;;(ld-save-table :problem :iso-date)
+(defun ld-save-table (table &optional backup)
+  "Persist TABLE, optionally in a BACKUP repository.
+Return the written filename."
+  (let ((target (ld-table table)))
+    (unless target
+      (user-error "Table does not exist: %S" table))
+    (let ((path (ld-table-file target backup)))
+      (make-directory (file-name-directory path) t)
+      (with-temp-file path
+        (print-all target (current-buffer)))
+      path)))
 
-(cl-defun ld-save-database (db &optional backup)
-  ;; First, save metadata
-  (cl-loop for table in (ld-database-tables db)
-	do (ld-save-table table backup))
-  (with-temp-file (ld-database-file db backup)
-    (print-all (ld-clone-database db nil) (current-buffer)))
-  (message "%d tables saved" (length (ld-database-tables db))))
-;;(ld-save-database *current-database*)
+(defun ld-save-database (database &optional backup)
+  "Persist DATABASE and all its tables.
+BACKUP selects an alternate repository directory.  Return the
+metadata filename."
+  (unless (ld-database-p database)
+    (user-error "Not a database: %S" database))
+  (let ((directory (ld-database-repository database backup))
+        (metadata-file (ld-database-file database backup)))
+    (make-directory directory t)
+    (dolist (table (ld-database-tables database))
+      (ld-save-table table backup))
+    (with-temp-file metadata-file
+      (print-all (ld-clone-database database nil)
+                 (current-buffer)))
+    (message "%d tables saved"
+             (length (ld-database-tables database)))
+    metadata-file))
 
-;;; Read
-(cl-defun ld-load-table (table-id)
-  (let ((path (ld-table-file table-id)))
-    (if (file-exists-p path)
-      (with-file path
-	(read (current-buffer)))
-      (error "Could not load table %S" table-id))))
-;;(ld-load-table '(nil :employee))
+(defun ld-repository-read (file)
+  "Read and return the first Lisp object in FILE."
+  (with-temp-buffer
+    (insert-file-contents file)
+    (goto-char (point-min))
+    (read (current-buffer))))
 
-(cl-defun ld-load-database (keyword)
+(defun ld-load-table (table-identifier)
+  "Load TABLE-IDENTIFIER from the repository."
+  (let ((path (ld-table-file table-identifier)))
+    (unless (file-readable-p path)
+      (user-error "Could not load table %S" table-identifier))
+    (let ((table (ld-repository-read path)))
+      (unless (ld-table-p table)
+        (error "Invalid table data in %s" path))
+      table)))
+
+(defun ld-load-database (keyword)
+  "Load the database identified by KEYWORD.
+Return nil when no persisted database exists."
+  (unless (keywordp keyword)
+    (user-error "Not a database keyword: %S" keyword))
   (let ((path (ld-database-file (list keyword))))
-    (when (file-exists-p path)
-      (let* ((db (with-file path
-		   (read (current-buffer))))
-	     (tables (cl-loop for table in (ld-database-tables db)
-			   collect (ld-load-table (ld-table-identifier table)))))
-	(setf (ld-database-tables db) tables)
-	db))))
-;;(ld-load-database :deebee)
-;;(ld-load-database :maths)
+    (when (file-readable-p path)
+      (let ((database (ld-repository-read path)))
+        (unless (ld-database-p database)
+          (error "Invalid database metadata in %s" path))
+        (setf (ld-database-tables database)
+              (mapcar
+               (lambda (table)
+                 (ld-load-table (ld-table-identifier table)))
+               (ld-database-tables database)))
+        database))))
 
 (provide 'ld-repository)
+
+;;; ld-repository.el ends here
