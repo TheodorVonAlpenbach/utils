@@ -33,9 +33,6 @@
 (defvar schedule-hanging-column 7
   "Column at which schedule paragraph text begins.")
 
-(defconst quiz-hanging-space 1
-  "Legacy extra indentation used by quiz paragraphs.")
-
 (defconst mb-paragraph-sentence-end
   "[.?!:][]\"')}]*\\([ \t\n]+[A-W]\\)"
   "Regexp used by `mb-paragraph-forward-sentence'.")

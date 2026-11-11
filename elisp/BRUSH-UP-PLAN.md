@@ -541,9 +541,9 @@ physics, geometry, search, XML, anaphora, general, list, sequence, string,
 time, ISO-time, and table modules are independently loadable. Their validation
 comprises:
 
-* a clean `emacs -Q` load of all ninety-three utility and mode-extension
+* a clean `emacs -Q` load of all ninety-four utility and mode-extension
   features plus the ERT tooling;
-* 770 passing ERT tests from the batch entry point;
+* 775 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -1115,6 +1115,15 @@ Dated paths use built-in time handling, file paths are expanded consistently,
 and visited files enter `quiz-mode`; obsolete aliases preserve older archived
 callers. Six tests cover path construction, dated filenames, current-date
 defaults, buffer reuse, file visitation, mode setup, and legacy aliases.
+
+Quiz paragraph indentation and filling now live in the independently loadable
+[`quiz-layout.el`](./quiz/quiz-layout.el). Header widths account for item
+numbers of any length, filling reports non-item positions explicitly, and
+continuation lines retain the quiz hanging indent. The unrelated duplicate
+`quiz-hanging-space` definition was removed from
+[`mb-paragraph.el`](./elisp/mb-paragraph.el), while an obsolete alias preserves
+older callers. Five tests cover digit-aware widths, configurable spacing,
+invalid positions, wrapping, and the compatibility alias.
 
 [`quiz-park.el`](./quiz/quiz-park.el) remains a legacy remote-deployment tool
 with machine-specific FTP behavior and is not being modernized or exercised as

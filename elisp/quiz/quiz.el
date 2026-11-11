@@ -28,6 +28,7 @@
 (require 'quiz-mode)
 (require 'quiz-config)
 (require 'quiz-edit)
+(require 'quiz-layout)
 (require 'quiz-csv)
 ;;;;;;;;;;;;;;;; UTILS ;;;;;;;;;;;;;;;;;;
 
@@ -49,27 +50,6 @@
    '("å" "ø" "«" "»" "ö" "æ")))
 
 ;;;;;;;;;;;;;;; BASIC ;;;;;;;;;;;;;;
-
-(defconst quiz-hanging-space 1)
-
-(cl-defun quiz-paragraph-indent
-    (&optional (point (point)) (items quiz-item-prefixes))
-  "3 or 4"
-  (+ 2 (if (< (quiz-current-item-number point) 10)
-	 1 2)))
-
-(cl-defun quiz-hanging-column (&optional (point (point)) (items quiz-item-prefixes))
-  "4 or 5"
-  (+ quiz-hanging-space (quiz-paragraph-indent point)))
-
-(cl-defun quiz-fill-item (&optional justify)
-  "Fills schedule paragraphs. Too macroish implemented."
-  (interactive "P")
-  (save-excursion
-    (let ((fill-prefix (make-string (quiz-hanging-column) 32)))
-      (fill-region-as-paragraph (quiz-current-item-region-start)
-				(quiz-current-item-region-end) 
-				justify))))
 
 (cl-defun quiz-parse-buffer (&optional (buffer (current-buffer)))
   (let ((quiz-item-prefixes "QAE"))

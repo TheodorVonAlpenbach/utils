@@ -68,6 +68,7 @@
     "quiz/test-quiz-config.el"
     "quiz/test-quiz-edit.el"
     "quiz/test-quiz-format.el"
+    "quiz/test-quiz-layout.el"
     "quiz/test-quiz-mode.el"
     "quiz/test-quiz-navigation.el"
     "quiz/test-quiz-csv.el"
