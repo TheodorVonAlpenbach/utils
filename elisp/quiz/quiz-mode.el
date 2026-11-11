@@ -6,8 +6,8 @@
 (declare-function quiz-insert-empty-question "quiz-edit" ())
 (declare-function quiz-mail-buffer "quiz" (refresh))
 (declare-function quiz-move-active-region-to-a "quiz-cleanup" (beg end))
-(declare-function quiz-summary-mail "quiz" (n))
-(declare-function quiz-summary-print "quiz" (n))
+(declare-function quiz-summary-mail "quiz-summary" (days))
+(declare-function quiz-summary-print "quiz-summary" (days))
 (declare-function quiz-super-save "quiz-cleanup" ())
 
 (defgroup quiz nil

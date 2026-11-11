@@ -31,71 +31,7 @@
 (require 'quiz-layout)
 (require 'quiz-cleanup)
 (require 'quiz-csv)
-
-(cl-defun add-iso-day (iso-date &optional n)
-  "Returns a date that is ISO-DATE + N. Default value for N is 1. Both
-string ISO-DATE and the returned string are in iso date format. TODO:
-why is this method but here?"
-  (iso-date (add-time iso-date :day (or n 1))))
-;;(add-iso-day "2004-03-23")
-
-(cl-defun quiz-question-to-string (&optional (delimiter ";"))
-  "Converts current question to csv-string"
-  (save-excursion
-    (let* ((q-a (quiz-beginning-of-item "Q"))
-	   (q-b (quiz-end-of-item "Q"))
-	   (a-a (quiz-beginning-of-item "A"))
-	   (a-b (quiz-end-of-item "A")))
-      (region-to-string :start q-a :end q-b))))
-;;(quiz-question-to-string)
-
-(cl-defun quiz-compile (&key (iso-from (iso-date))
-			   (iso-to (add-iso-day iso-from))
-			   (items quiz-item-prefixes))
-  "Generates all quiz available in the interval [ISO-FROM ISO-TO).
-Optional argument controls if the answers and source field
-respectively are to be included for each question record."
-  (unless (not-empty items)
-    (error "Items string cannot be empty!"))
-  (let* ((buffer-name (if (string= iso-to (add-iso-day iso-from))
-			(format "mq-%s-%s" iso-from items)
-			(format "mq-%s-to-%s-%s" iso-from iso-to items)))
-	 (buffer (get-buffer-create buffer-name)))
-    (with-buffer buffer
-      (kill-region (point-min) (point-max))
-      (cl-loop for iso-d = iso-from then (iso-date (add-time iso-d :day 1))
-	    for filename = (format "mq-%s" iso-d)
-	    for path = (quiz-file-path (format "%s.qz" filename))
-	    until (string= iso-d iso-to)
-	    if (file-exists-p path) do 
-	    (insert filename)
-	    (insert-underline "=")
-	    (newline 2)
-	    (insert-file path)
-	    (goto-char (point-max))
-	    (delete-blank-lines)
-	    (newline 2))
-      (delete-blank-lines)
-      (goto-char (point-min))
-      (and (not (cl-find ?Q items)) (quiz-remove-Q-buffer))
-      (and (not (cl-find ?A items)) (quiz-remove-A-buffer))
-      (and (not (cl-find ?S items)) (quiz-remove-S-buffer))
-      (quiz-mode))
-    (switch-to-buffer buffer)
-    (set (make-local-variable 'fill-paragraph-function) #'quiz-fill-item)))
-
-(cl-defun quiz-summary (n items)
-  (quiz-compile :iso-from (add-iso-day (iso-date) (- 1 n))
-		:iso-to (add-iso-day (iso-date))
-		:items items))
-
-(cl-defun quiz-summary-print (n)
-  (interactive "P")
-  (quiz-summary (or n 14) "QA"))
-
-(cl-defun quiz-summary-mail (n)
-  (interactive "P")
-  (quiz-summary (or n 7) "QS"))
+(require 'quiz-summary)
 
 ;;; Mail functionality
 (defconst quiz-default-mail-group "Hovedstyret av 1914")
@@ -129,28 +65,6 @@ respectively are to be included for each question record."
     (insert body)))
 ;;(quiz-mail-buffer 1)
 ;;(concat* (second (assoc quiz-default-mail-group quiz-mail-groups)) :in ", ")
-
-(cl-defun quiz-summary-edit-question-1
-    (number &optional (date (midnight)) (path quiz-directory))
-  "Opens the file with the requested question defined by NUMBER and
-DATE. TODO: coordinate this with goto methods, ie. goto-Q etc."
-  (interactive "P")
-  (find-file (quiz-get-file date path))
-  (goto-char (point-min))
-  (re-search-forward (format "Q%d: " number)))
-;;(quiz-summary-edit-question 2 "2005-02-21")
-
-(cl-defun quiz-summary-edit-question (&optional (path quiz-directory))
-  "Opens the file with the requested question defined by number and date."
-  (interactive)
-  (let (n iso-date) 
-    (save-excursion
-      (end-of-line)
-      (re-search-backward (format "[%s]\\([0-9]+\\)" quiz-item-prefixes))
-      (setq n (string-to-integer (match-string 1)))
-      (re-search-backward (format "mq-\\(%s\\)" *iso-date*))
-      (setq iso-date (match-string 1))
-      (quiz-summary-edit-question-1 n iso-date path))))
 
 (require 'mb-utils-buffer)
 
