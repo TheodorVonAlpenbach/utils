@@ -662,8 +662,6 @@ If region is not active this function is equivalent with
   (let ((*sexp-statt-word* t))
     (reverse-words n)))
 
-(defalias 'reverse-lines #'reverse-region)
-
 (cl-defun toggle-window-split ()
   "Toggle between horizontal and vertical split of two windows.
 Copied from http://stackoverflow.com/questions/14881020/\

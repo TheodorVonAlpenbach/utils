@@ -71,9 +71,6 @@ STRING is not an integer, otherwise returns the resulting integer."
   "Common Lisp CHAR"
   `(aref ,string ,index))
 
-(cl-defun string-to-character-list (string) (cl-coerce string 'list))
-;;(string-to-character-list "abc")
-
 (cl-defun copy-case (string pattern)
   "Returns copy of STRING that has similar case as PATTERN: If PATTERN
 starts with two upper case characters, the entire result is upcased. If
@@ -92,10 +89,6 @@ result is capitalized. Else the entire result is downcased."
     (string string)
     (sequence (elt string 0))
     (otherwise (error "unknown string format"))))
-
-(cl-defun blanks (n &optional (char 32))
-  "Return a string made up of N copies of CHAR."
-  (make-string n char))
 
 (cl-defun empty-string-p (string)
   (and (stringp string)
@@ -412,10 +405,6 @@ arguments DELIMITER, LAST-DELIMITER, and PAIR-DELIMITER.
 	 :in delimiter
 	 :suf (concat last-delimiter (last-elt list))))))
 ;;(andcat '("Peter" "Paul" "Mary"))
-
-(cl-defun lines-to-string (lines)
-  (concat* lines :in "\n"))
-;;(lines-to-string '("first" "next" "last"))
 
 (cl-defun quote-word () "Quotes closest word before point"
   (interactive "*")
@@ -747,10 +736,10 @@ See also `group-consequtive-integers'."
 
 (cl-defun string-head (string &optional (n 1))
   (let ((lines (string-lines string)))
-    (lines-to-string (cl-subseq lines 0 (min n (length lines))))))
+    (string-join (cl-subseq lines 0 (min n (length lines))) "\n")))
 
 (cl-defun string-tail (string &optional (n 1))
-  (lines-to-string (last (string-lines string) n)))
+  (string-join (last (string-lines string) n) "\n"))
 ;;(string-tail "qwe\nqwe2\nqwe3")
 
 (cl-defun alliterate-word (word)

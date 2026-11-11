@@ -108,10 +108,6 @@
     (should (equal (first-elt word) (first-elt aword)))
     (should (equal (last-elt word) (last-elt aword)))))
 
-(ert-deftest mb-utils-strings-blanks ()
-  "Test of `blanks'"
-  (should (equal (blanks 3) "   ")))
-
 (ert-deftest mb-utils-strings-blank-p ()
   "Test of `blank-p'"
   (should (equal (blank-p "") t))
@@ -235,7 +231,6 @@
 (ert-deftest mb-utils-strings-basic-conversions ()
   (should (equal (pure-string "text") "text"))
   (should (eql (pure-string [?a ?b]) ?a))
-  (should (equal (blanks 3 ?-) "---"))
   (should (equal (copy-case "example" "X") "Example")))
 
 (ert-deftest mb-utils-strings-string-match-end-start ()

@@ -508,21 +508,18 @@ replaced with built-in operations.
 6. opening configured favorite files and loading additional packages such as
    `org-drill` and `flx-ido`.
 
-| Eager feature | Current source | Initial classification |
+| Eager feature | Current source | Current classification |
 | --- | --- | --- |
 | `global-map` | [`global-map.el`](./global/global-map.el) | Active startup keymap; independently loadable with explicit activation |
 | `mb-utils-io` | [`mb-utils-io.el`](./utils/mb-utils-io.el) | Active shared utility; independently loadable |
 | `mb-evil-map` | [`mb-evil-map.el`](./mode-extensions/mb-evil-map.el) | Active optional integration; independently loadable with deferred global keymaps |
 | `mb-things` | [`mb-things.el`](./utils/mb-things.el) | Active shared utility; independently loadable |
-| `radio-playlists` | [`radio-playlists.el`](./archive/browser/radio-playlists.el) | Archived; external programs/network |
 | `mb-lisp` | [`mb-lisp.el`](./mode-extensions/mb-lisp.el) | Active mode extension; independently loadable with explicit activation |
-| `mb-python` | [`mb-python.el`](./mode-extensions/mb-python.el) | Active mode extension |
+| `mb-python` | [`mb-python.el`](./mode-extensions/mb-python.el) | Active mode extension; independently loadable |
 | `mb-octave` | [`mb-octave.el`](./mode-extensions/mb-octave.el) | Active mode extension; independently loadable with mocked process tests |
 | `mb-ruby` | [`mb-ruby.el`](./mode-extensions/mb-ruby.el) | Active mode extension; independently loadable |
 | `mb-texinfo` | [`mb-texinfo.el`](./mode-extensions/mb-texinfo.el) | Active mode extension; independently loadable |
-| `list-db` | [`list-db.el`](./list-database/list-db.el) | Active shared application/library candidate |
 | `mb-indent` | [`mb-indent.el`](./global/mb-indent.el) | Active indentation metadata; independently loadable with intentional global properties |
-| `quiz-park` | [`quiz-park.el`](./quiz/quiz-park.el) | Legacy remote administration; manual opt-in only |
 | `mb-js-mode` | [`mb-js-mode.el`](./mode-extensions/mb-js-mode.el) | Active mode extension; optional Node.js evaluation |
 | `quiz` | [`quiz.el`](./quiz/quiz.el) | Active maintained application; modular and independently loadable |
 | `mb-ert` | [`mb-ert.el`](./mode-extensions/mb-ert.el) | Active developer tooling; independently loadable |
@@ -543,7 +540,7 @@ comprises:
 
 * a clean `emacs -Q` load of all ninety-eight utility and mode-extension
   features plus the ERT tooling;
-* 803 passing ERT tests from the batch entry point;
+* 802 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -1727,6 +1724,12 @@ usage decision:
   a new optional module with configurable path mapping if that workflow is
   needed again.
 
+Four unused compatibility wrappers were retired after a repository-wide caller
+check. `string-to-character-list` duplicated `string-to-list`, `blanks`
+duplicated `make-string`, and `reverse-lines` was only an alias for
+`reverse-region`. The internal `lines-to-string` helper was replaced with
+`string-join` in `string-head` and `string-tail`.
+
 ### Behaviourally equivalent for observed uses
 
 These were compared against the standard function on the cases that matter and
@@ -1734,10 +1737,7 @@ matched. They are safe retirement candidates once callers are checked.
 
 | Local | Standard | Note |
 | --- | --- | --- |
-| `string-to-character-list` | `string-to-list` | Identical. |
-| `lines-to-string` | `string-join` with `"\n"` | Identical for string lists. |
 | `empty-string-p` | `string-empty-p` | Both return nil for nil input. |
-| `blanks` | `make-string`, or `string-pad` | Already a thin `make-string` wrapper. |
 | `string-fill-paragraph` | `string-fill` | Standard takes an explicit width. |
 | `string-trim*` and its side variants | `string-trim`, `string-trim-left`, `string-trim-right` | Standard also accepts trim regexps; the `:left`/`:right`/`:both` dispatch is the only extra. |
 | `string-remove-props` | `substring-no-properties` | Already self-declared obsolete. Differs only in stripping destructively in place rather than copying. |
@@ -1751,7 +1751,6 @@ matched. They are safe retirement candidates once callers are checked.
 | `string-to-bytes` | `string-to-list` | The local wrapper now delegates directly to the standard function. |
 | `int-to-hex` | `format` with `%x` | The helper only adds optional zero-padding. |
 | `current-year` | `format-time-string` with `%Y`, or `decoded-time-year` | The local helper now uses the standard decoded-time accessor. |
-| `reverse-lines` | `reverse-region` | The local name is only an alias for the standard operation. |
 | `buffer-string*` | `buffer-substring-no-properties` from `point-min` to `point-max` | The local helper only adds an optional buffer argument. |
 | `*empty-regexp*` | `regexp-unmatchable` | The local constant now uses the standard value; its former `"\\`\\`"` value incorrectly matched the empty string at the start of input. |
 | `xml-decode-characters` | `xml-substitute-special` | The local wrapper now delegates to the standard XML entity and numeric-character-reference decoder; its obsolete locale-table argument is retained only for call compatibility. |
