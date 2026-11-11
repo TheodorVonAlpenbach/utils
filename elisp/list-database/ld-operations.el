@@ -1,6 +1,13 @@
+;;; ld-operations.el --- Operations on list databases -*- lexical-binding: t; -*-
+
+;;; Code:
+
+(require 'cl-lib)
+(require 'subr-x)
 (require 'ld-global)
 (require 'ld-general)
 (require 'ld-metadata)
+(require 'ld-utils)
 
 (cl-defun ld-sort-predicate (order column-definition)
   "ORDER is either :desc or :asc"
@@ -8,20 +15,25 @@
 		      (string (list #'string> #'string<))
 		      (t (list #'> #'<)))))
     (cl-ecase order
-      ((:desc :descending) (first order-pair))
-      ((:asc :ascending nil) (second order-pair)))))
+      ((:desc :descending) (car order-pair))
+      ((:asc :ascending nil) (cadr order-pair)))))
 
 (cl-defun default-identifier-scope (column-keyword schema verify-column-p)
   "Returns the column in SCHEMA that matches COLUMN-KEYWORD. If
 VERIFY-COLUMN-P is true, it also checks for ambiguity."
   (cl-flet ((exists-p (keyword coldefs)
 		      (cl-member keyword coldefs :key #'ld-column-keyword))) 
-    (aif (exists-p column-keyword (ld-schema-column-definitions schema))
-      (if (and verify-column-p
-	       (exists-p column-keyword (rest it)))
-	(error "Ambiguous column keyword")
-	(list (ld-schema-identifier schema) column-keyword))
-      (error "No matching column found in schema"))))
+    (let ((matches
+           (exists-p
+            column-keyword
+            (ld-schema-column-definitions schema))))
+      (if matches
+          (if (and verify-column-p
+                   (exists-p column-keyword (cdr matches)))
+              (user-error "Ambiguous column keyword: %S" column-keyword)
+            (list (ld-schema-identifier schema) column-keyword))
+        (user-error "No matching column found in schema: %S"
+                    column-keyword)))))
 ;;(default-identifier-scope '(:company :id) (ld-table-schema emps) t)
 ;;(mapcar #'ld-column-keyword (ld-table-column-definitions emps))
 
@@ -40,12 +52,18 @@ VERIFY-COLUMN-P is true, it also checks for ambiguity."
   (if (listp identifier) 
     (cl-case (length identifier)
       (0 (error "column identifier cannot be an empty list"))
-      (1 (default-identifier-scope (first identifier) schema verify-p))
-      (2 (aif (ld-schema-find-column-definition identifier schema :global-identifier-p global-identifier-p :verify-p verify-p)
-	   (ld-column-identifier it)
-	   (error "Could not find a matching column definition in %S for indentifier %S" 
-		  (ld-schema-identifier schema)
-		  identifier)))
+      (1 (default-identifier-scope (car identifier) schema verify-p))
+      (2 (let ((column
+                (ld-schema-find-column-definition
+                 identifier schema
+                 :global-identifier-p global-identifier-p
+                 :verify-p verify-p)))
+           (if column
+               (ld-column-identifier column)
+             (user-error
+              "Could not find a matching column in %S for identifier %S"
+              (ld-schema-identifier schema)
+              identifier))))
       (t (error "Too many elements in column identifier")))
     (if allow-single-keyword-p
       (default-identifier-scope identifier schema verify-p)
@@ -75,93 +93,138 @@ VERIFY-COLUMN-P is true, it also checks for ambiguity."
 ;;;; Operations
 
 ;;; Insert
-(cl-defun ld-check-row (row schema)
-  (let ((coldefs (ld-schema-column-definitions schema))) 
+(defun ld-check-row (row schema)
+  "Return non-nil when ROW conforms to SCHEMA."
+  (let ((coldefs (ld-schema-column-definitions schema)))
     (and (= (length row) (length coldefs))
 	 (cl-every #'ld-check-type row coldefs))))
 
-(cl-defun ld-check-rows (rows schema)
-  (cl-every (bind #'ld-check-row schema) rows))
+(defun ld-check-rows (rows schema)
+  "Return non-nil when every row in ROWS conforms to SCHEMA."
+  (cl-every (lambda (row) (ld-check-row row schema)) rows))
 
 ;;; insert
-(cl-defun ld-insert-row-list (table rows)
+(defun ld-insert-row-list (table rows)
+  "Prepend ROWS to TABLE's data and return the resulting data."
   (when *ld-check-data-p*
     (unless (ld-check-rows rows (ld-table-schema table))
-      (error "Bad data")))
-  (push-list rows (ld-table-data table)))
+      (user-error "Rows do not conform to the table schema")))
+  (setf (ld-table-data table)
+        (append rows (ld-table-data table))))
 
-(cl-defun ld-insert-row (table &rest rows)
-  (ld-insert-row-list rows))
+(defun ld-insert-row (table &rest rows)
+  "Prepend ROWS to TABLE's data."
+  (ld-insert-row-list table rows))
 
-(cl-defun ld-column-position (column-designator &optional schema-designator)
-  (cond ((integerp column-designator) column-designator)
-	((ld-identifier-p column-designator :column)
-	 (position column-designator 
-		   (ld-schema-column-definitions
-		    (ld-schema (or schema-designator column-designator)))
-		   :key #'ld-column-identifier
-		   :test #'equal))
-	((ld-column-p column-designator)
-	 (ld-column-position (ld-column-identifier column-designator)
-			     schema-designator))
-	(t (error "Argument %S is not a column-designator" column-designator))))
+(defun ld-column-position (column-designator &optional schema-designator)
+  "Return COLUMN-DESIGNATOR's zero-based position.
+Resolve the column in SCHEMA-DESIGNATOR when supplied.  Return nil
+when a valid identifier does not occur in the schema."
+  (cond
+   ((integerp column-designator)
+    column-designator)
+   ((ld-column-p column-designator)
+    (ld-column-position
+     (ld-column-identifier column-designator)
+     (or schema-designator
+         (ld-column-identifier column-designator))))
+   ((ld-identifier-p column-designator :column)
+    (when-let ((schema
+                (ld-schema (or schema-designator column-designator))))
+      (cl-position
+       column-designator
+       (ld-schema-column-definitions schema)
+       :key #'ld-column-identifier
+       :test #'equal)))
+   (t
+    (user-error "Not a column designator: %S" column-designator))))
 ;;(ld-column-position '(:maths :tasks :id) :tasks)
 
-(cl-defun ld-row-value (row column-designator)
-  (elt row (ld-column-position column-designator)))
+(defun ld-row-value (row column-designator &optional schema-designator)
+  "Return ROW's value for COLUMN-DESIGNATOR."
+  (let ((position
+         (ld-column-position column-designator schema-designator)))
+    (unless position
+      (user-error "Column is not present in the schema: %S"
+                  column-designator))
+    (elt row position)))
 
-(cl-defun ld-autogenerate (coldef &optional (table (ld-table coldef)))
-  (aif (first (ld-table-data table))
-    (+ (ld-row-value it coldef) *ld-autogenerate-increment*)
-    *ld-autogenerate-base*))
+(defun ld-autogenerate (column-definition &optional table)
+  "Return the next automatic value for COLUMN-DEFINITION in TABLE."
+  (let ((target (or table (ld-table column-definition))))
+    (if-let ((row (car (ld-table-data target))))
+        (+ (ld-row-value row column-definition target)
+           *ld-autogenerate-increment*)
+      *ld-autogenerate-base*)))
 ;;(ld-autogenerate (first (ld-table-column-definitions (ld-table :users))))
 
-(cl-defun ld-value-exists-p (value table coldef)
-  "Checks if VALUE is present in column defined by COLDEF in TABLE"
-  (cl-find value (mapcar (bind #'elt (ld-column-position coldef table)) 
-		      (ld-table-data table))
-	:test (ld-column-comparator coldef)))
+(defun ld-value-exists-p (value table column-definition)
+  "Return non-nil when VALUE occurs in COLUMN-DEFINITION of TABLE."
+  (let ((position (ld-column-position column-definition table))
+        (test (ld-column-comparator column-definition)))
+    (cl-some
+     (lambda (row)
+       (funcall test value (elt row position)))
+     (ld-table-data table))))
 
-(cl-defun ld-violating-uniqueness-p (value table coldef)
-  "Returns non-nil (in fact a message) iff COLDEF has property
-:unique and VALUE is present in the TABLE's column that
-correpsonds to coldef"
-  (when (and (ld-column-property-p :unique coldef)
-	     (ld-value-exists-p value table coldef))
-    (ld-warning "Value %S is already present in table" value)))
+(defun ld-violating-uniqueness-p (value table column-definition)
+  "Return non-nil when VALUE violates COLUMN-DEFINITION in TABLE."
+  (and (ld-column-property-p :unique column-definition)
+       (ld-value-exists-p value table column-definition)))
 
-(cl-defun ld-compile-new-row (table values columns)
-  "This function only works with full rows.
-It autogenerates values if this is specified and checks for the property unique"
-  (let ((specfied-coldefs (ld-column-designators->coldefs columns table)))
-
-    (cl-assert (cl-notany (bind #'ld-column-property-p :autogenerate 1) specfied-coldefs)
-	       t "You cannot specify columns that are set to be autogenerated")
-
-    (cl-loop for coldef in (ld-table-column-definitions table)
-	     for autogenerated-p = (ld-column-property-p :autogenerate coldef)
-	     for value = (if autogenerated-p 
-			   (ld-autogenerate coldef table)
-			   (when (or (null columns) 
-				     (cl-member (ld-column-identifier coldef)
-					 specfied-coldefs
-				       :key #'ld-column-identifier
-				       :test #'equal))
-			     (pop values)))
-	     ;; check for uniqueness
-	     if (ld-violating-uniqueness-p value table coldef) return nil
-	     collect value)))
+(defun ld-compile-new-row (table values columns)
+  "Build a row for TABLE from VALUES assigned to COLUMNS.
+Autogenerated columns must not be specified explicitly."
+  (let* ((column-definitions (ld-table-column-definitions table))
+         (specified
+          (if columns
+              (ld-column-designators->coldefs columns table)
+            (cl-remove-if
+             (lambda (column)
+               (ld-column-property-p :autogenerate column))
+             column-definitions))))
+    (when (memq nil specified)
+      (user-error "One or more columns do not exist"))
+    (when (cl-some
+           (lambda (column)
+             (ld-column-property-p :autogenerate column))
+           specified)
+      (user-error "Autogenerated columns cannot be specified"))
+    (unless (= (length values) (length specified))
+      (user-error "Expected %d values, received %d"
+                  (length specified) (length values)))
+    (let ((assignments (cl-mapcar #'cons specified values)))
+      (mapcar
+       (lambda (column)
+         (let ((value
+                (if (ld-column-property-p :autogenerate column)
+                    (ld-autogenerate column table)
+                  (cdr (assq column assignments)))))
+           (when (ld-violating-uniqueness-p value table column)
+             (user-error "Value %S is already present in column %S"
+                         value (ld-column-keyword column)))
+           value))
+       column-definitions))))
 ;;(ld-compile-new-row (ld-table :users) '("Ludvik" "7" 1500 350) nil)
 
-(cl-defun ld-create-metadata (&optional (dttm (iso-date-and-time :with-seconds t)))
-  (list :metadata :created dttm :updated dttm))
+(defun ld-create-metadata (&optional date-time)
+  "Create row metadata using DATE-TIME or the current time."
+  (let ((timestamp
+         (or date-time
+             (format-time-string "%Y-%m-%dT%H:%M:%S%z"))))
+    (list :metadata :created timestamp :updated timestamp)))
 
 (cl-defun ld-insert (tab values &key columns)
+  "Insert VALUES into TAB and return the new row.
+COLUMNS optionally identifies the supplied values."
   (let ((table (ld-table tab)))
-    (awhen (ld-compile-new-row table values columns)
-      (let ((row (append it (list (ld-create-metadata)))))
-	(push row (ld-table-data table))
-	row))))
+    (unless table
+      (user-error "Table does not exist: %S" tab))
+    (let ((row
+           (append (ld-compile-new-row table values columns)
+                   (list (ld-create-metadata)))))
+      (push row (ld-table-data table))
+      row)))
 ;;(ld-insert :users '("Mats" "42" 1500 350))
 ;;(ld-insert :users '("Ludvik" "7" 1500 350))
 ;;(ld-table-data (ld-table :users))
@@ -173,34 +236,30 @@ It autogenerates values if this is specified and checks for the property unique"
 	      (cl-destructuring-bind (tab col) tabcol
 		(ld-create-table
 		 (ld-table-schema tab) 
-		 (cl-sort (copy-list (ld-table-data tab))
+		 (cl-sort (copy-sequence (ld-table-data tab))
 		   #'< :key (ld-mapper tab col :allow-single-keyword-p t))))))
     (let* ((tabs (mapcar #'tabsort (list table-column1 table-column2)))
-	   (tab1 (first tabs))
-	   (tab2 (second tabs))
+	   (tab1 (car tabs))
+	   (tab2 (cadr tabs))
 	   (rows1 (ld-table-data tab1))
 	   (rows2 (ld-table-data tab2))
-	   (mapper1 (ld-mapper tab1 (second table-column1)
+	   (mapper1 (ld-mapper tab1 (cadr table-column1)
 			       :allow-single-keyword-p t))
-	   (mapper2 (ld-mapper tab2 (second table-column2)
+	   (mapper2 (ld-mapper tab2 (cadr table-column2)
 			       :allow-single-keyword-p t))
-	   (empty-row1 (make-list (length (ld-table-column-definitions tab1))
-				  nil))
-	   (empty-row2 (make-list (length (ld-table-column-definitions tab2))
-				  nil))
 	   res)
       (while (or rows1 rows2)
-	(let ((f1 (and rows1 (funcall mapper1 (first rows1))))
-	      (f2 (and rows2 (funcall mapper2 (first rows2)))))
+	(let ((f1 (and rows1 (funcall mapper1 (car rows1))))
+	      (f2 (and rows2 (funcall mapper2 (car rows2)))))
 	  (if (or (and f1 (not f2)) (< f1 f2))
 	    (push (append (pop rows1) nil) res)
 	    (if (or (and (not f1) f2) (> f1 f2))
 	      (push (append nil (pop rows2)) res)
 	      ;; else they are equal
 	      (progn 
-		(push (append (first rows1) (first rows2)) res)
-		(let ((s1 (funcall mapper1 (second rows1)))
-		      (s2 (funcall mapper2 (second rows2))))
+		(push (append (car rows1) (car rows2)) res)
+		(let ((s1 (funcall mapper1 (cadr rows1)))
+		      (s2 (funcall mapper2 (cadr rows2))))
 		  (if (and s1 (= f1 s1) (or (not s2) (/= f2 s2)))
 		    (pop rows1)
 		    (if (and s1 (/= f1 s1) s2 (= f2 s2))
@@ -211,12 +270,14 @@ It autogenerates values if this is specified and checks for the property unique"
 ;;(ld-join `(,emps :company-id) `(,comps :id))
 
 (cl-defun ld-joined-p (table)
-  (eql (first table) :joined))
+  (eql (car table) :joined))
 
 (cl-defun ld-metadata-identifier-p (form)
   "Metadata column identifier starts with ::, e.g. ::created"
-  (and (keywordp form)
-       (= (char (symbol-name form) 1) ?:)))
+  (when (keywordp form)
+    (let ((name (symbol-name form)))
+      (and (> (length name) 1)
+           (= (aref name 1) ?:)))))
 
 (cl-defun ld-metadata-identifier (form)
   "Metadata column identifier starts with ::, e.g. ::created
@@ -240,8 +301,9 @@ Returns nil iif form is not a metadata identifier"
 
 (defmacro ld-expression (expression schema)
   "Better naming"
-  (with-gensyms (gx)
-    `(lambda (,gx) ,(ld-expression-rec expression (ld-schema schema) gx))))
+  (let ((row (cl-gensym "row")))
+    `(lambda (,row)
+       ,(ld-expression-rec expression (ld-schema schema) row))))
 ;;(ld-expression (= :id 1) :users)
 ;;(mapcar (ld-expression :test :users) (ld-table-data (ld-table :users)))
 ;;(ld-select :users)
@@ -263,39 +325,62 @@ Returns nil iif form is not a metadata identifier"
 (defmacro ld-column-expression->number (form schema-designator list-p)
   (when form
     (if list-p
-      `(list ,@(mapcar (bind #'ld-colexp schema-designator) form))
-    (ld-colexp form schema-designator))))
+        `(list
+          ,@(mapcar
+             (lambda (column)
+               (ld-colexp column schema-designator))
+             form))
+      (ld-colexp form schema-designator))))
 ;;(ld-column-expression->number ((:id) (:id)) :users t)
 ;;(ld-column-expression->number (:maths :users :id) :users nil)
 
 ;;;; Select
 (cl-defun ld-select-1 (table &key where columns column order order-by copy format)
   "Helper function for `ld-select'"
-  (let* ((rows (copy-if (or where #'always) (ld-table-data table))))
-    (cl-flet ((colpos (column) (ld-column-position column table-designator)))
-      (when (or order order-by)
-	(let* ((schema (ld-table-schema table)))
-	  (setf rows
-		(sort* (copy-list rows)
-		       (ld-sort-predicate
-			order (nth order-by
-				   (ld-schema-column-definitions schema)))
-		       :key (let
-				((col (or order-by
-					  (ld-colexp
-					   (ld-primary-key (ld-schema schema))
-					   schema))))
-			      #'(lambda (row) (elt row col)))))))
-      (when columns
-        (setf rows (project-sequence rows columns)))
-      (when column
-	(if columns
-	  (ld-warning
-	   "Both keyword argument :columns and :column specified. Discards the latter.")
-	  (setf rows (project-sequence rows column))))
-      (if format
-	(concat* rows :key #'(lambda (x) (apply #'format format x)))
-	(if copy (copy-tree rows) rows)))))
+  (let ((rows
+         (cl-remove-if-not
+          (or where #'always)
+          (ld-table-data table))))
+    (when (or order order-by)
+      (let* ((schema (ld-table-schema table))
+             (position
+              (or order-by
+                  (ld-column-position (ld-primary-key schema) schema)))
+             (column-definition
+              (nth position
+                   (ld-schema-column-definitions schema))))
+        (unless column-definition
+          (user-error "Cannot determine a column to sort by"))
+        (setq rows
+              (cl-sort
+               (copy-sequence rows)
+               (ld-sort-predicate order column-definition)
+               :key (lambda (row) (elt row position))))))
+    (when columns
+      (setq rows
+            (mapcar
+             (lambda (row)
+               (mapcar
+                (lambda (expression)
+                  (funcall expression row))
+                columns))
+             rows)))
+    (when column
+      (if columns
+          (ld-warning
+           "Both :columns and :column were specified; ignoring :column")
+        (setq rows
+              (mapcar
+               (lambda (row) (funcall column row))
+               rows))))
+    (if format
+        (mapconcat
+         (lambda (row)
+           (if (listp row)
+               (apply #'format format row)
+             (format format row)))
+         rows "")
+      (if copy (copy-tree rows) rows))))
 ;;(ld-select :users :columns (:name))
 ;;(ld-select-1 (ld-table :users))
 
@@ -303,22 +388,27 @@ Returns nil iif form is not a metadata identifier"
   "Select rows from the table specified by TABLE-DESIGNATOR.
 
 Keywords supported"
-  `(ld-select-1
-    (ld-table ,table-designator)
-    :where (and ',(getf args :where)
-		(ld-expression ,(popf args :where)
-			       ,table-designator))
-    :columns (ld-expressions ,(popf args :columns)
-			     ,table-designator)
-    :column (and ',(getf args :column)
-		 (ld-expression ,(popf args :column)
-				,table-designator))
-    :order-by (and ',(getf args :order-by)
-		   (ld-column-expression->number
-		    ,(popf args :order-by)
-		    ,table-designator nil))
-    ,@args))
-(cl-indent 'ld-select 'prog1)
+  (let ((where (plist-get args :where))
+        (columns (plist-get args :columns))
+        (column (plist-get args :column))
+        (order-by (plist-get args :order-by))
+        (remaining
+         (cl-loop for (key value) on args by #'cddr
+                  unless (memq key
+                               '(:where :columns :column :order-by))
+                  append (list key value))))
+    `(ld-select-1
+      (ld-table ,table-designator)
+      :where ,(when where
+                `(ld-expression ,where ,table-designator))
+      :columns (ld-expressions ,columns ,table-designator)
+      :column ,(when column
+                 `(ld-expression ,column ,table-designator))
+      :order-by ,(when order-by
+                   `(ld-column-expression->number
+                     ,order-by ,table-designator nil))
+      ,@remaining)))
+(put 'ld-select 'lisp-indent-function 'prog1)
 ;;(macroexpand '(ld-select :users))
 ;;(ld-select :users :columns ((funcall (lambda (x) (* 2 x)) (:id)) (:name)) :format "doubled id is %s, and name his name shall be called %s")
 ;;(ld-select :users :columns (:rating))
@@ -338,21 +428,23 @@ Keywords supported"
 ;;; Update
 (cl-defun ld-update-1 (table-designator where-function values columns)
   "Skipping properties for now"
-  (cl-assert (= (length (listify values)) (length (listify columns)))
+  (let ((value-list (if (listp values) values (list values)))
+        (column-list (if (listp columns) columns (list columns))))
+  (cl-assert (= (length value-list) (length column-list))
 	     t "The number of values and the number columns are not the same")
   (let* ((table (ld-table table-designator))
-	 (rows (copy-if where-function (ld-table-data table))))
+	 (rows (cl-remove-if-not where-function (ld-table-data table))))
     (cl-case (length rows)
       (0 (ld-warning "No single row was selected in :where expression."))
-      (1 (let ((row (first rows)))
-	   (ld-set-metadatum (iso-date-and-time :with-seconds t)
-			     :updated (ld-row-metadata (first rows)))
-	   (cl-loop for value in (listify values)
-		    for colfun in (listify columns)
+      (1 (let ((row (car rows)))
+	   (ld-set-metadatum (format-time-string "%Y-%m-%dT%H:%M:%S%z")
+			     :updated (ld-row-metadata (car rows)))
+	   (cl-loop for value in value-list
+		    for colfun in column-list
 		    do (setf (nth colfun row) value)
 		    do (message "Updated column no %d with %S" colfun value)
 		    finally return row)))
-      (t (ld-warning "Skipping update since multiple rows were selected in :where expression.")))))
+      (t (ld-warning "Skipping update since multiple rows were selected in :where expression."))))))
 
 (defmacro ld-update (table-designator where vals columns)
   "For some very strange reason, this macro fails if VALS is renamed to VALUES.
@@ -370,3 +462,5 @@ But still I really don't understand the behaviour of values in a macro."
 ;;(ld-select :users :where (string= :name "Mats") :column :rating)
 
 (provide 'ld-operations)
+
+;;; ld-operations.el ends here
