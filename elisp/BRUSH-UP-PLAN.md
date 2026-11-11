@@ -541,9 +541,9 @@ physics, geometry, search, XML, anaphora, general, list, sequence, string,
 time, ISO-time, and table modules are independently loadable. Their validation
 comprises:
 
-* a clean `emacs -Q` load of all ninety-six utility and mode-extension
+* a clean `emacs -Q` load of all ninety-seven utility and mode-extension
   features plus the ERT tooling;
-* 789 passing ERT tests from the batch entry point;
+* 795 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -1143,6 +1143,14 @@ prefix arguments, and resolves source questions without startup date regexps.
 The unused broken question-to-string helper was retired. Seven tests cover date
 arithmetic, validation, aggregation, filtering, requested ranges, prefix
 arguments, and source lookup.
+
+Quiz message composition now lives in the independently loadable
+[`quiz-mail.el`](./quiz/quiz-mail.el). Recipient groups are customizable,
+addresses are parsed and validated with Emacs's mail library, missing or empty
+groups fail explicitly, and composition uses the standard Message API rather
+than an implicit Gnus helper. Optional external address refresh is retained
+when available and otherwise reports an explicit error. Six tests cover
+address parsing, validation, group resolution, composition, and refresh.
 
 [`quiz-park.el`](./quiz/quiz-park.el) remains a legacy remote-deployment tool
 with machine-specific FTP behavior and is not being modernized or exercised as

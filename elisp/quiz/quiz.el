@@ -32,39 +32,7 @@
 (require 'quiz-cleanup)
 (require 'quiz-csv)
 (require 'quiz-summary)
-
-;;; Mail functionality
-(defconst quiz-default-mail-group "Hovedstyret av 1914")
-(defconst quiz-mail-groups
-  (list (list "Hovedstyret av 1914"
-	      (list "Tore van Dahl <toredah@student.matnat.uio.no>"
-		    "Per Stovne <perstovne@hotmail.com>"
-		    "Truls Flatberg <Truls.Flatberg@sintef.no>"
-		    "Ole Martin Halck <omhalck@online.no>"
-		    "Truls Flatberg <trulsf@ifi.uio.no>"
-		    "Thomas Bergkirk <thomas.bergkirk@rubicontv.no>"))))
-
-(cl-defun purify-address (address)
-  (string-match* "<?\\([^ >]*@[^ >]*\\)>?" address 1))
-
-(cl-defun quiz-mail-buffer (refresh)
-  "Sends current quiz buffer as mail to recipients"
-  (interactive "P")
-  (if refresh (mb-refresh-addresses))
-  (let* ((group quiz-default-mail-group)
-	 (to (concat* (second (assoc group quiz-mail-groups))
-	       :in ", "
-	       :key #'purify-address))
-	 (subject (buffer-name))
-	 (body (buffer-string)))
-    (gnus-msg-mail "" subject)
-    (auto-fill-mode -1)
-    (message-goto-to)
-    (insert to)
-    (message-goto-body)
-    (insert body)))
-;;(quiz-mail-buffer 1)
-;;(concat* (second (assoc quiz-default-mail-group quiz-mail-groups)) :in ", ")
+(require 'quiz-mail)
 
 (require 'mb-utils-buffer)
 

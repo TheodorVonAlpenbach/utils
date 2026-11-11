@@ -70,6 +70,7 @@
     "quiz/test-quiz-edit.el"
     "quiz/test-quiz-format.el"
     "quiz/test-quiz-layout.el"
+    "quiz/test-quiz-mail.el"
     "quiz/test-quiz-mode.el"
     "quiz/test-quiz-navigation.el"
     "quiz/test-quiz-summary.el"
