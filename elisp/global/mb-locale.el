@@ -1,67 +1,22 @@
-(cl-defun map-string-region (from to beg end)
-  (interactive "*r")
-  (save-excursion
-    (save-restriction
-      (narrow-to-region beg end)
-      (goto-char (point-min))
-      (while (search-forward from end t)
-	(replace-match to t nil)))))
-;;(map-string-region "ø" "oe" 1 10)
+;;; mb-locale.el --- Latin-1 transliteration helpers -*- lexical-binding: t; -*-
 
-(cl-defun map-strings-region (beg end &optional
-				  (map *iso-latin1-encoding*)
-				  (from-column 0) (to-column 1))
-  (interactive "*r")
-  (let ((case-fold-search nil))
-   (dolist (curr (project-sequence map (list from-column to-column)))
-     (awhen (first curr)
-       (map-string-region it (second curr) beg (min end (point-max)))))))
-;;(map-strings-region 1 100 *iso-latin1-encoding* 4 0)
-;;(map-strings-region (point-min) (point-max) *iso-latin1-encoding* 4 0)
+;;; Code:
 
-(cl-defun replace-iso-latin1-with-7bit-region (beg end) (interactive "*r")
-  (map-strings-region beg end map-string-iso-latin1-to-7bit))
-
-(cl-defun replace-iso-latin1-with-7bit-region (beg end)
-  (interactive "*r")
-  (save-excursion
-    (save-restriction
-      (narrow-to-region beg end)
-      (let ((table replace-iso-latin1-with-7bit-table))
-        (while table
-          (let ((current (car table)))
-            (goto-char (point-min))
-            (while (search-forward (car current) nil t)
-              (replace-match (car (cdr current)) t nil)))
-          (setq table (cdr table)))))))
-
-(cl-defun iso-latin1-2-7bit-char (iso-latin-char &optional check-error-p encoding)
-  (let ((string (char-to-string iso-latin-char)))
-    (aif (assoc string (or encoding *iso-latin1-encoding*))
-      (second it)
-      (if check-error-p
-	(error "Unknown ISO-LATIN-STRING %c." iso-latin-char)
-	string))))
-;;(mapcar #'iso-latin1-2-7bit-char (list ?æ ?a))
-
-(cl-defun iso-latin1-2-7bit (iso-latin-string &optional encoding)
-  (cl-loop for c across iso-latin-string
-	   concat (iso-latin1-2-7bit-char c)))
-;;(iso-latin1-2-7bit "ææ")
+(require 'cl-lib)
+(require 'subr-x)
 
 (defconst *iso-latin1-encoding*
-  '((" " " " "%20" -1)
-    ("\\[" "[" "%5B" -1)
-    ("\\]" "]" "%5D" -1)
-    ("'" "'" "%20" 39)
-    ("'" "'" "%20" 39 "ÃÂ´")
-    ("+" "+" "%20" 192)
+  '((" " " " "%20" 32)
+    ("[" "[" "%5B" 91)
+    ("]" "]" "%5D" 93)
+    ("'" "'" "%27" 39)
+    ("+" "+" "%2B" 43)
     ("À" "A" "%C0" 192)
     ("Á" "A" "%C1" 193)
     ("Â" "A" "%C2" 194)
     ("Ã" "A" "%C3" 195)
     ("Ä" "Ae" "%C4" 196)
-    ("Å" "Aa" "%C5" 197 "Ã")
+    ("Å" "Aa" "%C5" 197)
     ("Æ" "Ae" "%C6" 198)
     ("Ç" "C" "%C7" 199)
     ("È" "E" "%C8" 200)
@@ -80,7 +35,7 @@
     ("Õ" "O" "%D5" 213)
     ("Ö" "Oe" "%D6" 214)
     ("×" "x" "%D7" 215)
-    ("Ø" "Oe" "%D8" 216 "ÃÂ")
+    ("Ø" "Oe" "%D8" 216)
     ("Ù" "U" "%D9" 217)
     ("Ú" "U" "%DA" 218)
     ("Û" "U" "%DB" 219)
@@ -93,13 +48,11 @@
     ("â" "a" "%E2" 226)
     ("ã" "a" "%E3" 227)
     ("ä" "ae" "%E4" 228)
-    ("å" "aa" "%E5" 229 "Ã¥")
-    ("å" "aa" "%E5" 229 "ÃÂ¥")
-    ("æ" "ae" "%E6" 230 "Ã¦")
-    ("æ" "ae" "%E6" 230 "ÃÂ¦")
+    ("å" "aa" "%E5" 229)
+    ("æ" "ae" "%E6" 230)
     ("ç" "c" "%E7" 231)
     ("è" "e" "%E8" 232)
-    ("é" "e" "%E9" 233 "ÃÂ©")
+    ("é" "e" "%E9" 233)
     ("ê" "e" "%EA" 234)
     ("ë" "e" "%EB" 235)
     ("ì" "i" "%EC" 236)
@@ -112,18 +65,91 @@
     ("ó" "o" "%F3" 243)
     ("ô" "o" "%F4" 244)
     ("õ" "o" "%F5" 245)
-    ("ö" "oe" "%F6" 246 "Ã¶")
-    ("÷" "%" "%F7" 247)
-    ("ø" "oe" "%F8" 248 "Ã¸")
-    ("ø" "oe" "%F8" 248 "ÃÂ¸")
+    ("ö" "oe" "%F6" 246)
+    ("÷" "/" "%F7" 247)
+    ("ø" "oe" "%F8" 248)
     ("ù" "u" "%F9" 249)
     ("ú" "u" "%FA" 250)
     ("û" "u" "%FB" 251)
-    ("ü" "ue" "%FC" 252 "ÃÂ¼")
+    ("ü" "ue" "%FC" 252)
     ("ý" "y" "%FD" 253)
     ("þ" "th" "%FE" 254)
-    ("ÿ" "y" "%FF" 255)
-    ("..." "..." nil nil "Ã¢ÂÂ¦")
-    ("..." "..." nil nil "â¦")))
+    ("ÿ" "y" "%FF" 255))
+  "Latin-1 mappings.
+Columns contain the source string, ASCII transliteration,
+percent-encoded byte, and character code.")
+
+(defun mb-locale-map-string-region (from to beginning end)
+  "Replace literal FROM with TO between BEGINNING and END."
+  (unless (and (stringp from) (not (string-empty-p from)))
+    (user-error "Replacement source must be a nonempty string"))
+  (let ((case-fold-search nil)
+        (end-marker (copy-marker end t)))
+    (unwind-protect
+        (save-excursion
+          (goto-char beginning)
+          (while (search-forward from end-marker t)
+            (replace-match to t t)))
+      (set-marker end-marker nil))))
+
+(defalias 'map-string-region #'mb-locale-map-string-region)
+
+(cl-defun mb-locale-map-strings-region
+    (beginning end
+     &optional
+     (map *iso-latin1-encoding*)
+     (from-column 0)
+     (to-column 1))
+  "Apply MAP replacements between BEGINNING and END.
+FROM-COLUMN and TO-COLUMN select source and replacement values
+from each mapping row."
+  (dolist (row map)
+    (let ((from (nth from-column row))
+          (to (nth to-column row)))
+      (when (and from to)
+        (mb-locale-map-string-region from to beginning end)))))
+
+(defalias 'map-strings-region #'mb-locale-map-strings-region)
+
+(defun mb-locale-replace-iso-latin1-region (beginning end)
+  "Transliterate Latin-1 characters between BEGINNING and END."
+  (interactive "*r")
+  (mb-locale-map-strings-region beginning end))
+
+(defalias 'replace-iso-latin1-with-7bit-region
+  #'mb-locale-replace-iso-latin1-region)
+
+(defun mb-locale--encoding-entry (character encoding)
+  "Return CHARACTER's row in ENCODING."
+  (assoc (char-to-string character) encoding))
+
+(defun mb-locale-character-to-ascii
+    (character &optional check-error-p encoding)
+  "Transliterate CHARACTER using ENCODING.
+ENCODING defaults to `*iso-latin1-encoding*'.  Return unchanged
+characters as one-character strings.  With CHECK-ERROR-P non-nil,
+report an error when CHARACTER has no mapping."
+  (unless (characterp character)
+    (user-error "Expected a character: %S" character))
+  (let* ((table (or encoding *iso-latin1-encoding*))
+         (entry (mb-locale--encoding-entry character table)))
+    (cond (entry (cadr entry))
+          (check-error-p
+           (user-error "No transliteration for character: %c" character))
+          (t (char-to-string character)))))
+
+(defalias 'iso-latin1-2-7bit-char
+  #'mb-locale-character-to-ascii)
+
+(defun mb-locale-string-to-ascii (string &optional encoding)
+  "Transliterate STRING using ENCODING."
+  (mapconcat
+   (lambda (character)
+     (mb-locale-character-to-ascii character nil encoding))
+   string ""))
+
+(defalias 'iso-latin1-2-7bit #'mb-locale-string-to-ascii)
 
 (provide 'mb-locale)
+
+;;; mb-locale.el ends here

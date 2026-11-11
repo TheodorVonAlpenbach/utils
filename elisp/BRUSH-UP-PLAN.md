@@ -295,6 +295,11 @@ The first subset is intentionally conservative:
   hexadecimal digits and bytes, indexed byte orders, whitespace and input
   validation, big- and little-endian integers, region commands, integer
   formatting, retained Hexl-mode bindings, and compatibility aliases.
+* [`test-mb-locale.el`](./global/test-mb-locale.el): twelve ERT tests for
+  default and caller-supplied transliteration tables, unmapped characters,
+  explicit errors, literal and case-sensitive region replacements, changing
+  replacement lengths, selected table columns, incomplete rows, consumer
+  table shape, and compatibility aliases.
 * [`test-list-interval.el`](./prototypes/geometry/test-list-interval.el): nine ERT tests for the
   closed-interval helpers, including construction and accessors.
 * [`test-list-envelope.el`](./prototypes/geometry/test-list-envelope.el): nine ERT tests for
@@ -497,9 +502,9 @@ physics, geometry, search, XML, anaphora, general, list, sequence, string,
 time, ISO-time, and table modules are independently loadable. Their validation
 comprises:
 
-* a clean `emacs -Q` load of all sixty utility and mode-extension
+* a clean `emacs -Q` load of all sixty-one utility and mode-extension
   features plus the ERT tooling;
-* 585 passing ERT tests from the batch entry point;
+* 597 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -756,6 +761,23 @@ debug commands and the private `2*`/`2+` arithmetic helpers were removed as
 unreferenced obsolete code. Existing Hexl-mode bindings are deliberately
 preserved for the later binding review. Thirteen tests cover the retained
 conversion and compatibility surface.
+
+[`mb-locale.el`](./global/mb-locale.el) now loads independently with lexical
+binding and a corrected four-column Latin-1 mapping table. Duplicate region
+command definitions and references to nonexistent mapping variables were
+removed. Literal region replacement is case-sensitive and tracks its end with
+a marker, so expanding transliterations do not truncate later replacements.
+Caller-selected source and destination columns remain supported for the
+inactive Gnus and archived browser consumers.
+
+String transliteration now passes the caller's encoding table through to each
+character conversion instead of silently using the global table. Unmapped
+characters remain unchanged unless explicit checking is requested. Duplicate
+and mojibake fallback rows were removed, while the source, ASCII, percent-byte,
+and character-code columns used by known consumers remain available. Cram's
+backend now declares its `mb-locale` dependency directly rather than relying
+on unrelated startup load order. Twelve tests include the three-character
+Cram-style custom table contract without loading a real quiz database.
 
 [`global-map.el`](./global/global-map.el) now loads independently with lexical
 binding and does not mutate global keys until `mb-global-map-setup` is called.

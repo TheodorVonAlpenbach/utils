@@ -1,4 +1,5 @@
 (require 'cram-config)
+(require 'mb-locale)
 
 (let ((macroexp--pending-eager-loads '(skip)))
   (require 'cram-db-ui))
