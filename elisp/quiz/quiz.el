@@ -1,28 +1,12 @@
-;;; quiz.el --- Edit legacy quiz files -*- coding: utf-8; -*-
+;;; quiz.el --- Quiz editor entry point -*- lexical-binding: t; coding: utf-8; -*-
 
-;;; TODO
-;;; * this file should only contain settings and mappings, maybe also other
-;;;   methods that do not belong to other files
-;;; * this file should control including the other quiz lisp files (with
-;;;   'require etc)
+;;; Commentary:
 
-;;; o mail function (with mail list)
-;;; o fix fill prefix thing (maybe the best thing is to provide a quiz mode)
-;;; o coloring (set appropriate faces)
+;; Load the maintained quiz editor, formatting, navigation, persistence,
+;; import, summary, cleanup, and mail-composition features.
 
-;;; * make a re-number-items method (sometimes a q-question must be deleted, and
-;;;   then...)
-;;; * base methods on "objects": 
-;;;   · q-file/q-buffer (quiz buffer or summary quiz buffer)
-;;;   · q-list (entire quiz-buffer or region of summary buffer)
-;;;   · q-question (entity containing at least a q-item)
-;;;   · q-item (either Q, A, S by now; later I might add C for comment, T: for
-;;;     the durations of the validity)
+;;; Code:
 
-;; see legenda.txt for categories
-
-(require 'cl-lib)
-(require 'subr-x)
 (require 'quiz-format)
 (require 'quiz-navigation)
 (require 'quiz-mode)
@@ -33,37 +17,8 @@
 (require 'quiz-csv)
 (require 'quiz-summary)
 (require 'quiz-mail)
-
-(require 'mb-utils-buffer)
-
-(cl-defun quiz-convert-aftenposten-nyhetsquiz-question-to-qz-question
-    (beg end n &optional s)
-  "STRING is aftenposten question string. Returns a string question in
-qz format. The question is numbered N."
-  (let* ((string (buffer-substring beg end))
-	 (q (string-match* "^[0-9]+\\.\\s-*\\(.*\\)$" string 1))
-	 (a (string-match* "^Riktig svar:\\s-*\\(.*\\)$" string 1))
-	 s)
-    (kill-region beg end)
-    (goto-char beg)
-    (insert (quiz-item-q n q))
-    (insert (quiz-item-a n a))
-    (when s (insert (quiz-item-s n s)))))
-
-(cl-defun quiz-convert-aftenposten-nyhetsquiz-to-qz-file ()
-  (interactive)
-  (let ((n 0)) 
-    (buffer-do-regions beg end ("\\(.*\n.*\n\\)\\s-*\n" 1)
-      ;;(message (buffer-substring beg (+ beg 20)))
-      (quiz-convert-aftenposten-nyhetsquiz-question-to-qz-question
-       beg end (cl-incf n)))))
+(require 'quiz-import)
 
 (provide 'quiz)
 
-;; For referering til IDLs hjemmesider:
-;; http://www.mylder.no/idl/views/640&ref0=291
-
-;; Kirkeinndelinger og rettslige inndelinger:
-;; http://www.ssb.no/aarbok/tab/t-000010-001.html
-
-;; http://www.kongehuset.no/ 
+;;; quiz.el ends here

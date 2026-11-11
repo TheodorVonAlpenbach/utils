@@ -69,6 +69,7 @@
     "quiz/test-quiz-config.el"
     "quiz/test-quiz-edit.el"
     "quiz/test-quiz-format.el"
+    "quiz/test-quiz-import.el"
     "quiz/test-quiz-layout.el"
     "quiz/test-quiz-mail.el"
     "quiz/test-quiz-mode.el"

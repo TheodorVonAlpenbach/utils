@@ -541,9 +541,9 @@ physics, geometry, search, XML, anaphora, general, list, sequence, string,
 time, ISO-time, and table modules are independently loadable. Their validation
 comprises:
 
-* a clean `emacs -Q` load of all ninety-seven utility and mode-extension
+* a clean `emacs -Q` load of all ninety-eight utility and mode-extension
   features plus the ERT tooling;
-* 795 passing ERT tests from the batch entry point;
+* 802 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -1151,6 +1151,15 @@ groups fail explicitly, and composition uses the standard Message API rather
 than an implicit Gnus helper. Optional external address refresh is retained
 when available and otherwise reports an explicit error. Six tests cover
 address parsing, validation, group resolution, composition, and refresh.
+
+Pasted Aftenposten quiz conversion now lives in the independently loadable
+[`quiz-import.el`](./quiz/quiz-import.el). It parses with built-in string
+operations, validates every question before changing the buffer, supports
+optional source fields, and retains obsolete aliases for the old long command
+names. [`quiz.el`](./quiz/quiz.el) is now a conventional lexical-binding entry
+point that loads the maintained quiz feature set without depending on broad
+utility modules. Seven tests cover parsing, whitespace, validation, regional
+and whole-buffer conversion, atomic failure, and the complete entry point.
 
 [`quiz-park.el`](./quiz/quiz-park.el) remains a legacy remote-deployment tool
 with machine-specific FTP behavior and is not being modernized or exercised as
