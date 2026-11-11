@@ -541,9 +541,9 @@ physics, geometry, search, XML, anaphora, general, list, sequence, string,
 time, ISO-time, and table modules are independently loadable. Their validation
 comprises:
 
-* a clean `emacs -Q` load of all eighty-five utility and mode-extension
+* a clean `emacs -Q` load of all eighty-six utility and mode-extension
   features plus the ERT tooling;
-* 725 passing ERT tests from the batch entry point;
+* 732 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -1043,6 +1043,17 @@ The unreferenced [`maths-categories.el`](./games/maths/maths-categories.el) and
 [`sm-2.el`](./games/cram/sm-2.el) remain experiments rather than maintained
 game dependencies. They are not added to the baseline merely to make their
 legacy demonstrations compile.
+
+[`glicko.el`](./projects/ratings/glicko.el), the shared rating engine for Maths
+and Cram, now loads independently without the broad general-math dependency or
+load-time sample calculations. It uses `float-pi`, validates player, opponent,
+score, elapsed-time, and list-shape inputs, accepts both the established
+single-match shorthand and explicit match lists, and handles inactive periods
+without matches. Restored rating deviation is now capped at the configured
+maximum as required by Glicko-1. The duplicate expected-score function remains
+only as an obsolete alias. Seven tests cover the published Glicko example,
+expectation symmetry, deviation restoration/capping, inactive players, both
+match shapes, defaults, and invalid input.
 
 [`global-map.el`](./global/global-map.el) now loads independently with lexical
 binding and does not mutate global keys until `mb-global-map-setup` is called.

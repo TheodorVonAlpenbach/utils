@@ -62,6 +62,7 @@
     "mode-extensions/test-mb-ruby.el"
     "mode-extensions/test-mb-sql.el"
     "mode-extensions/test-mb-texinfo.el"
+    "projects/ratings/test-glicko.el"
     "projects/ratings/test-rating-plot.el"
     "utils/test-mb-anaphora.el"
     "utils/test-mb-combinatorics.el"
