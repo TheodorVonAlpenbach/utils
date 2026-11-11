@@ -541,9 +541,9 @@ physics, geometry, search, XML, anaphora, general, list, sequence, string,
 time, ISO-time, and table modules are independently loadable. Their validation
 comprises:
 
-* a clean `emacs -Q` load of all eighty-one utility and mode-extension
+* a clean `emacs -Q` load of all eighty-two utility and mode-extension
   features plus the ERT tooling;
-* 699 passing ERT tests from the batch entry point;
+* 705 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -986,6 +986,20 @@ string and sequence APIs. Five focused tests cover row conversion, insertion,
 updates that preserve ratings, and the plant/bird formatting helpers. A
 temporary database also imports all four retained CSV files successfully,
 producing 394 problems.
+
+The interactive Cram entry module in
+[`cram.el`](./games/cram/cram.el) now loads independently with lexical binding
+and explicit backend, formatting, time, URL, and standard-library
+dependencies. Judgement and keymap helpers are Cram-namespaced, so loading the
+parallel Maths UI can no longer replace them. Startup-only anaphoric, numeric,
+tree, list-column, path, and line-reading helpers were replaced with standard
+forms or small local helpers. Evil integration is optional, response characters
+use lexical closures, user registration checks uniqueness before insertion, and
+mode-line changes are buffer-local. Existing entry commands, filters, aliases,
+and key bindings remain available; optional unimplemented commands remain
+symbolic bindings rather than load-time dependencies. Six tests cover problem
+and judgement formatting, response parsing, keymap insertion, and all quiz
+entry filters.
 
 [`global-map.el`](./global/global-map.el) now loads independently with lexical
 binding and does not mutate global keys until `mb-global-map-setup` is called.

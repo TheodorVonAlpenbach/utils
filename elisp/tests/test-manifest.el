@@ -5,7 +5,7 @@
    (directory-file-name (file-name-directory load-file-name))))
 
 (defconst mb-tests-load-directories
-  '("" "elisp" "external" "games/cram" "games/maths" "global"
+  '("" "download" "elisp" "external" "games/cram" "games/maths" "global"
     "list-database" "mode-extensions"
     "projects/ratings" "prototypes/geometry" "utils"))
 
@@ -30,6 +30,7 @@
   "games/cram/test-cram-config.el"
   "games/cram/test-cram-db-ui.el"
   "games/cram/test-cram-import.el"
+  "games/cram/test-cram.el"
   "games/maths/test-maths-backend.el"
   "games/maths/test-maths-db-ui.el"
     "global/test-mb-indent.el"
