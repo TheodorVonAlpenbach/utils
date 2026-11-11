@@ -541,9 +541,9 @@ physics, geometry, search, XML, anaphora, general, list, sequence, string,
 time, ISO-time, and table modules are independently loadable. Their validation
 comprises:
 
-* a clean `emacs -Q` load of all eighty-three utility and mode-extension
+* a clean `emacs -Q` load of all eighty-four utility and mode-extension
   features plus the ERT tooling;
-* 711 passing ERT tests from the batch entry point;
+* 717 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -1013,6 +1013,17 @@ and checks name uniqueness before insertion, plotting loads lazily, and
 mode-line changes are buffer-local. The `maths` command and existing key
 bindings remain available. Six tests cover task and judgement formatting,
 answer parsing, keymap insertion, and complete command orchestration.
+
+[`maths-plot.el`](./games/maths/maths-plot.el), shared by the Maths and Cram
+rating commands, now loads independently and uses one coherent temporary path
+for its data, script, and PDF output. Rating data is reversed without mutating
+the caller, and both scalar Maths ratings and Cram Glicko rating/deviation pairs
+are supported. Gnuplot now writes PDF directly instead of invoking an unquoted
+`ps2pdf` shell pipeline. Missing executables, unsuccessful process exits, and
+missing output files produce explicit user errors. The polynomial plotting
+entry point is namespaced, with the old generic name retained as an obsolete
+alias. Six deterministic tests cover data and script generation and every
+process outcome without invoking external programs.
 
 [`global-map.el`](./global/global-map.el) now loads independently with lexical
 binding and does not mutate global keys until `mb-global-map-setup` is called.
