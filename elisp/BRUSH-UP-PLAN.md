@@ -305,6 +305,11 @@ The first subset is intentionally conservative:
   keyword selection, type detection, relative and global column construction,
   mismatched tables, column-definition lookup, and the retained compatibility
   predicate.
+* [`test-ld-model.el`](./list-database/test-ld-model.el): nineteen ERT tests
+  for column construction, properties and comparators; schema creation,
+  insertion, joining, and lookup; table resolution, cloning, row-column
+  insertion, and derived columns; and database creation, switching, cloning,
+  lookup, replacement, and column renaming.
 * [`test-list-interval.el`](./prototypes/geometry/test-list-interval.el): nine ERT tests for the
   closed-interval helpers, including construction and accessors.
 * [`test-list-envelope.el`](./prototypes/geometry/test-list-envelope.el): nine ERT tests for
@@ -507,9 +512,9 @@ physics, geometry, search, XML, anaphora, general, list, sequence, string,
 time, ISO-time, and table modules are independently loadable. Their validation
 comprises:
 
-* a clean `emacs -Q` load of all sixty-two utility and mode-extension
+* a clean `emacs -Q` load of all sixty-six utility and mode-extension
   features plus the ERT tooling;
-* 607 passing ERT tests from the batch entry point;
+* 626 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -799,6 +804,28 @@ Ten tests establish this model before schema, table, and operation layers are
 modernized. Loading the complete `list-db` feature now progresses past this
 former `member-if` failure to the next independent blocker: a startup-only
 `cl-indent` call in `ld-database.el`.
+
+The list-database model layer in [`ld-column.el`](./list-database/ld-column.el),
+[`ld-schema.el`](./list-database/ld-schema.el),
+[`ld-table.el`](./list-database/ld-table.el), and
+[`ld-database.el`](./list-database/ld-database.el) now loads independently with
+lexical binding and explicit `cl-lib` dependencies. Generic ordinal aliases,
+`find-if`, `position`, `bind`, `compose`, `concat*`, `keyword-name`,
+`list-insert`, and `transpose` startup dependencies were replaced with standard
+accessors and direct list operations. Mutable schema, table, and database
+accessors now declare generalized-variable setters for downstream operations
+and persistence code.
+
+Column property-list specifications now handle the documented `:primary-key`
+and `:unique` flags. Schema insertion validates its position, schema joining
+uses the actual schema-column accessor rather than the undefined
+`ld-column-definitions`, and table column insertion validates rectangular rows.
+Unsupported clone levels, absent tables, absent columns, and malformed
+positions produce explicit `user-error` failures. The old load-time
+`cl-indent` call was replaced by direct indentation metadata. Nineteen tests
+cover the complete in-memory model without touching persistence. Loading the
+top-level `list-db` feature now reaches the next layer, where `ld-global.el`
+still assumes the startup-only `*local-data-dir*`.
 
 [`global-map.el`](./global/global-map.el) now loads independently with lexical
 binding and does not mutate global keys until `mb-global-map-setup` is called.

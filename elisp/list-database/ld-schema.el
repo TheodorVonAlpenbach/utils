@@ -1,90 +1,142 @@
-;;;; The table schema is a list on the following form
-;;;; (:schema table-identifier table-name column-definition1 column-definition2 ... )
+;;; ld-schema.el --- List database schemas -*- lexical-binding: t; -*-
 
+;;; Code:
+
+(require 'cl-lib)
+(require 'gv)
+(require 'subr-x)
 (require 'ld-identifier)
 (require 'ld-column)
 
-(defalias 'ld-schema-identifier #'second)
-(defalias 'ld-schema-name #'third)
-(defalias 'ld-schema-column-definitions #'fourth)
+(declare-function ld-schema "ld-table")
 
-(cl-defun ld-make-empty-schema (keyword name parent-keyword &optional raw-column-definitions)
-  (let ((id (list parent-keyword keyword)))
-    (cl-assert (ld-identifier-p id))
-    (list :schema id name raw-column-definitions)))
-;;(make-employees)
+(defalias 'ld-schema-identifier #'cadr)
+(defalias 'ld-schema-name #'cl-third)
+(defalias 'ld-schema-column-definitions #'cl-fourth)
 
-(cl-defun ld-insert-column (schema keyword &key pos name type properties)
-  "If TYPE is nil: no particular type. Otherwise use the type symbols in elisp."
-  (list-insert (ld-make-column (append (ld-schema-identifier schema) (list keyword))
-			       :name name :type type :properties properties)
-	       (or pos (length (ld-schema-column-definitions schema)))
-	       (ld-schema-column-definitions schema)))
-;;(ld-create-database :qwe :schemas (mapcar (bind #'ld-schemadef->schema :qwe) *maths-db-schema-definitions*))
+(gv-define-setter ld-schema-column-definitions
+    (value schema)
+  `(setf (cl-fourth ,schema) ,value))
 
-(cl-defun ld-add-columns (schema columns)
-  "Each column in the list COLUMNS is a list with a mandatory
-keyword as first elements. The rest of the list is a plist with
-some subset of the properties :name :type :primary-key."
-  (cl-loop for col in columns do (apply #'ld-insert-column schema col)))
+(defun ld-make-empty-schema
+    (keyword name parent-keyword &optional column-definitions)
+  "Create an empty schema named NAME for KEYWORD.
+PARENT-KEYWORD identifies its database.  COLUMN-DEFINITIONS are
+stored without conversion."
+  (let ((identifier (list parent-keyword keyword)))
+    (cl-assert (ld-identifier-p identifier :schema))
+    (list :schema identifier name column-definitions)))
 
-(cl-defun ld-make-schema (keyword &key (name (keyword-name keyword)) column-definitions (plist-p t) parent-keyword)
-  "If PLIST-P is nil the COLUMN-DEFINITIONS are inserted into schema as is. Else, they are processed with"
+(cl-defun ld-insert-column
+    (schema keyword
+     &key position pos name type properties primary-key unique
+     &allow-other-keys)
+  "Insert a column into SCHEMA and return its definition.
+KEYWORD identifies the column.  POSITION selects its zero-based
+position; POS is retained as a compatibility synonym."
+  (let* ((columns (ld-schema-column-definitions schema))
+         (index (or position pos (length columns))))
+    (unless (and (integerp index)
+                 (<= 0 index)
+                 (<= index (length columns)))
+      (user-error "Column position is outside the schema: %S" index))
+    (let ((column
+           (ld-make-column
+            (append (ld-schema-identifier schema) (list keyword))
+            :name name :type type :properties properties
+            :primary-key primary-key :unique unique)))
+      (setf (ld-schema-column-definitions schema)
+            (append (cl-subseq columns 0 index)
+                    (list column)
+                    (nthcdr index columns)))
+      column)))
+
+(defun ld-add-columns (schema columns)
+  "Add column specifications in COLUMNS to SCHEMA."
+  (dolist (column columns schema)
+    (apply #'ld-insert-column schema column)))
+
+(cl-defun ld-make-schema
+    (keyword
+     &key
+     (name (substring (symbol-name keyword) 1))
+     column-definitions
+     (plist-p t)
+     parent-keyword)
+  "Create a schema identified by KEYWORD.
+Process COLUMN-DEFINITIONS as property lists when PLIST-P is
+non-nil; otherwise retain them as column definitions."
   (if plist-p
-    ;; first make an empty schema
-    (let ((schema (ld-make-empty-schema keyword name parent-keyword)))
-      ;; then add and process the columns specs
-      (ld-add-columns schema column-definitions)
-      schema)
-    (ld-make-empty-schema keyword name parent-keyword column-definitions)))
-;;(ld-make-schema :company :name "MB_COMPANY" :parent-keyword :mydb)
+      (let ((schema
+             (ld-make-empty-schema keyword name parent-keyword)))
+        (ld-add-columns schema column-definitions))
+    (ld-make-empty-schema
+     keyword name parent-keyword column-definitions)))
 
-(cl-defun ld-schemadef->schema (schemadef parent-keyword)
-  "Short cut definition of a schema. See `*maths-db*' for an example.
-The schema is set up like a skeleton of lists which resembles the
-schema structure. This skeleton is here straightforward converted
-to a legal scheme structure."
-  (cl-destructuring-bind (keyword name coldefs) schemadef
-    (ld-make-schema keyword :name name :column-definitions coldefs :plist-p t :parent-keyword parent-keyword)))
-;;(maths-make-schema (first *maths-db-schema-definitions*))
-;;(ld-create-database :maths :schemas (mapcar #'ld-schemadef->schema *maths-db-schema-definitions*))
+(defun ld-schemadef->schema (schema-definition parent-keyword)
+  "Convert compact SCHEMA-DEFINITION under PARENT-KEYWORD."
+  (cl-destructuring-bind (keyword name columns) schema-definition
+    (ld-make-schema
+     keyword
+     :name name
+     :column-definitions columns
+     :parent-keyword parent-keyword)))
 
-(cl-defun ld-join-schemas (&rest schemas)
-  (and schemas
-       (ld-make-schema
-	(make-keyword (concat* (mapcar (compose #'downcase
-						#'keyword-name
-						#'ld-schema-identifier)
-				 schemas)
-			       :in "-and-" :pre "join-of-"))
-	:column-definitions (apply #'append
-			      (mapcar #'ld-column-definitions schemas))
-	:plist-p nil)))
-;;(ld-join-schemas (ld-schema emps)(ld-schema comps))
+(defun ld-join-schemas (&rest schemas)
+  "Return a schema containing the columns of SCHEMAS."
+  (when schemas
+    (let ((name
+           (mapconcat
+            (lambda (schema)
+              (downcase
+               (substring
+                (symbol-name
+                 (ld-identifier-keyword
+                  (ld-schema-identifier schema)
+                  :table))
+                1)))
+            schemas
+            "-and-")))
+      (ld-make-schema
+       (intern (concat ":join-of-" name))
+       :column-definitions
+       (apply #'append
+              (mapcar #'ld-schema-column-definitions schemas))
+       :plist-p nil))))
 
-(cl-defun ld-schema-p (obj)
-  (and (consp obj) (eql (first obj) :schema)))
-;;(ld-schema-p (ld-table-schema (first (ld-database-tables *current-database*))))
+(defun ld-schema-p (object)
+  "Return non-nil when OBJECT is a schema."
+  (and (consp object) (eq (car object) :schema)))
 
-(cl-defun ld-find-column-definition (column-designator schema-designator)
-  (cl-assert (not (null schema-designator)) t "schema-designator was nil!")
-  (cond ((ld-column-p column-designator)
-	 column-designator)
+(defun ld-find-column-definition
+    (column-designator schema-designator)
+  "Return COLUMN-DESIGNATOR's definition in SCHEMA-DESIGNATOR."
+  (unless schema-designator
+    (user-error "Schema designator cannot be nil"))
+  (cond
+   ((ld-column-p column-designator)
+    column-designator)
+   ((ld-identifier-p column-designator :column)
+    (cl-find
+     column-designator
+     (ld-schema-column-definitions (ld-schema schema-designator))
+     :key #'ld-column-identifier
+     :test #'equal))
+   ((or (keywordp column-designator)
+        (ld-identifier-p column-designator))
+    (when-let ((identifier
+                (ld-make-column-identifier
+                 column-designator schema-designator)))
+      (ld-find-column-definition identifier schema-designator)))))
 
-	((ld-identifier-p column-designator :column)
-	 (cl-find column-designator (ld-schema-column-definitions (ld-schema schema-designator))
-	       :key #'ld-column-identifier
-	       :test #'equal))
-
-	((or (keywordp column-designator)
-	     (ld-identifier-p column-designator))
-	 (ld-find-column-definition
-	  (ld-make-column-identifier column-designator schema-designator)
-	  schema-designator))))
-;;(ld-find-column-definition :name (ld-table :users))
-
-(cl-defun ld-column-designators->coldefs (column-designators schema-designator)
-  (mapcar (bind #'ld-find-column-definition schema-designator) column-designators))
-;;(ld-column-designators->coldefs '(:name :rating) (ld-table :users))
+(defun ld-column-designators->coldefs
+    (column-designators schema-designator)
+  "Resolve COLUMN-DESIGNATORS in SCHEMA-DESIGNATOR."
+  (mapcar
+   (lambda (column)
+     (ld-find-column-definition column schema-designator))
+   column-designators))
 
 (provide 'ld-schema)
+
+;;; ld-schema.el ends here
