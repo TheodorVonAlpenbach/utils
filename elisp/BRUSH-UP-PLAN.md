@@ -541,9 +541,9 @@ physics, geometry, search, XML, anaphora, general, list, sequence, string,
 time, ISO-time, and table modules are independently loadable. Their validation
 comprises:
 
-* a clean `emacs -Q` load of all eighty utility and mode-extension
+* a clean `emacs -Q` load of all eighty-one utility and mode-extension
   features plus the ERT tooling;
-* 694 passing ERT tests from the batch entry point;
+* 699 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -973,6 +973,19 @@ databases, and the backend's existing `:rating` call no longer signals an
 unknown-keyword error. The unused old random-selection and rating-history
 stubs were retired; the latter referenced nonexistent predicates and metadata
 APIs.
+
+[`cram-import.el`](./games/cram/cram-import.el) now loads independently with
+lexical binding and explicit configuration, database, CSV, and string
+dependencies. CSV rows are validated against the existing seven-column format,
+empty fields become nil, and the legacy difficulty field is explicitly replaced
+by the default Glicko rating. Existing source identifiers are detected before
+insertion and their descriptive fields are updated; previously the importer
+expected a uniqueness violation to return nil, although `ld-insert` correctly
+signals an error. Formatting helpers are Cram-namespaced and use maintained
+string and sequence APIs. Five focused tests cover row conversion, insertion,
+updates that preserve ratings, and the plant/bird formatting helpers. A
+temporary database also imports all four retained CSV files successfully,
+producing 394 problems.
 
 [`global-map.el`](./global/global-map.el) now loads independently with lexical
 binding and does not mutate global keys until `mb-global-map-setup` is called.
