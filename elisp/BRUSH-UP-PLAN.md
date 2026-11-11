@@ -318,6 +318,10 @@ The first subset is intentionally conservative:
   tests for row validation and insertion, column positions, generated and
   unique values, partial rows, row metadata, selection, sorting, projection,
   formatting, deletion, and updates.
+* [`test-ld-general.el`](./list-database/test-ld-general.el): nine ERT tests
+  for model-object types and identifiers, keyword and database components,
+  current-database object resolution, parent identifiers and entities, and
+  warning messages.
 * [`test-list-interval.el`](./prototypes/geometry/test-list-interval.el): nine ERT tests for the
   closed-interval helpers, including construction and accessors.
 * [`test-list-envelope.el`](./prototypes/geometry/test-list-envelope.el): nine ERT tests for
@@ -520,9 +524,9 @@ physics, geometry, search, XML, anaphora, general, list, sequence, string,
 time, ISO-time, and table modules are independently loadable. Their validation
 comprises:
 
-* a clean `emacs -Q` load of all seventy utility and mode-extension
+* a clean `emacs -Q` load of all seventy-one utility and mode-extension
   features plus the ERT tooling;
-* 643 passing ERT tests from the batch entry point;
+* 652 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -860,6 +864,17 @@ focused regression coverage. The top-level `list-db` feature now loads
 successfully under `emacs -Q`. Loading persistence directly exposes
 `ld-general.el` as the next independently loadable compatibility layer before
 `ld-repository.el` itself.
+
+[`ld-general.el`](./list-database/ld-general.el) now has explicit model
+dependencies and loads independently under `emacs -Q`. Entity type,
+identifier, keyword, database, parent, and generic object resolution now have
+documented behavior. In particular, the broken database-identifier path—where
+`ld-object` passed an identifier to `ld-database`, which had no identifier
+branch—now resolves consistently against `*current-database*`. Valid but
+unmatched identifiers return nil, malformed designators report `user-error`,
+and warning messages receive their prefix before display. The persistence
+module now loads directly; strict compilation identifies its own lexical
+binding and anaphoric-macro cleanup as the next checkpoint.
 
 [`global-map.el`](./global/global-map.el) now loads independently with lexical
 binding and does not mutate global keys until `mb-global-map-setup` is called.

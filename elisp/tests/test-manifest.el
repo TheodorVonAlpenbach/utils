@@ -23,6 +23,7 @@
   "list-database/test-ld-model.el"
   "list-database/test-ld-global.el"
   "list-database/test-ld-operations.el"
+  "list-database/test-ld-general.el"
     "global/test-mb-indent.el"
   "global/test-mb-insert.el"
   "global/test-mb-print.el"
