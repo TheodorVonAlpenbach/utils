@@ -522,7 +522,7 @@ replaced with built-in operations.
 | `mb-texinfo` | [`mb-texinfo.el`](./mode-extensions/mb-texinfo.el) | Active mode extension; independently loadable |
 | `list-db` | [`list-db.el`](./list-database/list-db.el) | Active shared application/library candidate |
 | `mb-indent` | [`mb-indent.el`](./global/mb-indent.el) | Active indentation metadata; independently loadable with intentional global properties |
-| `quiz-park` | [`quiz-park.el`](./quiz/quiz-park.el) | Usage decision needed; application |
+| `quiz-park` | [`quiz-park.el`](./quiz/quiz-park.el) | Legacy remote administration; manual opt-in only |
 | `mb-js-mode` | [`mb-js-mode.el`](./mode-extensions/mb-js-mode.el) | Active mode extension; optional Node.js evaluation |
 | `quiz` | [`quiz.el`](./quiz/quiz.el) | Usage decision needed; application |
 | `mb-ert` | [`mb-ert.el`](./mode-extensions/mb-ert.el) | Active developer tooling; independently loadable |
@@ -1162,8 +1162,14 @@ utility modules. Seven tests cover parsing, whitespace, validation, regional
 and whole-buffer conversion, atomic failure, and the complete entry point.
 
 [`quiz-park.el`](./quiz/quiz-park.el) remains a legacy remote-deployment tool
-with machine-specific FTP behavior and is not being modernized or exercised as
-part of the maintained baseline without an explicit usage decision.
+with machine-specific FTP behavior. It is no longer loaded automatically by
+`.emacs`; the file remains available for explicit manual loading but is not
+modernized or exercised as part of the maintained baseline.
+
+[`generated-questions.el`](./quiz/generated-questions.el) and
+[`physics.el`](./quiz/physics.el) remain unreferenced question-generation
+experiments with broad legacy utility dependencies. They are not promoted into
+the maintained quiz baseline implicitly.
 
 [`global-map.el`](./global/global-map.el) now loads independently with lexical
 binding and does not mutate global keys until `mb-global-map-setup` is called.

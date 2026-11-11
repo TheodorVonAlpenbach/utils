@@ -317,7 +317,6 @@ and running Git.")
 			    mb-texinfo
 			    ;list-db
 			    mb-indent
-			    quiz-park
 			    mb-js-mode
 			    quiz
 			    mb-ert
