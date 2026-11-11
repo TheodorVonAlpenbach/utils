@@ -310,6 +310,10 @@ The first subset is intentionally conservative:
   insertion, joining, and lookup; table resolution, cloning, row-column
   insertion, and derived columns; and database creation, switching, cloning,
   lookup, replacement, and column renaming.
+* [`test-ld-global.el`](./list-database/test-ld-global.el): five ERT tests for
+  the configurable repository location, compatibility with the historical
+  `*local-data-dir*`, the legacy repository variable name, placeholder
+  database initialization, and operation defaults.
 * [`test-list-interval.el`](./prototypes/geometry/test-list-interval.el): nine ERT tests for the
   closed-interval helpers, including construction and accessors.
 * [`test-list-envelope.el`](./prototypes/geometry/test-list-envelope.el): nine ERT tests for
@@ -512,9 +516,9 @@ physics, geometry, search, XML, anaphora, general, list, sequence, string,
 time, ISO-time, and table modules are independently loadable. Their validation
 comprises:
 
-* a clean `emacs -Q` load of all sixty-six utility and mode-extension
+* a clean `emacs -Q` load of all sixty-seven utility and mode-extension
   features plus the ERT tooling;
-* 626 passing ERT tests from the batch entry point;
+* 631 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -823,9 +827,18 @@ uses the actual schema-column accessor rather than the undefined
 Unsupported clone levels, absent tables, absent columns, and malformed
 positions produce explicit `user-error` failures. The old load-time
 `cl-indent` call was replaced by direct indentation metadata. Nineteen tests
-cover the complete in-memory model without touching persistence. Loading the
-top-level `list-db` feature now reaches the next layer, where `ld-global.el`
-still assumes the startup-only `*local-data-dir*`.
+cover the complete in-memory model without touching persistence. That work
+exposed the next startup-order assumption in `ld-global.el`.
+
+[`ld-global.el`](./list-database/ld-global.el) now loads independently and
+owns documented list-database configuration. Its repository directory is
+customizable, continues to use `*local-data-dir*` when normal startup defines
+that historical variable, and otherwise falls back safely below
+`user-emacs-directory`. The old `+ld-repository+` name remains as a variable
+alias for persistence consumers. The current placeholder database and data
+validation/autogeneration defaults are documented and initialized without
+external startup state. Loading `list-db` now reaches the obsolete load-time
+`cl-indent` call in `ld-operations.el`.
 
 [`global-map.el`](./global/global-map.el) now loads independently with lexical
 binding and does not mutate global keys until `mb-global-map-setup` is called.

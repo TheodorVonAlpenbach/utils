@@ -1,30 +1,49 @@
-;;;; DB constructed entirely of lists
-(defconst +ld-repository+ (expand-file-name "ld" *local-data-dir*))
+;;; ld-global.el --- Shared list-database configuration and state -*- lexical-binding: t; -*-
 
-(defvar *current-database* ;;(nilf *current-database*)
-  (ld-create-database :empty-db :name "A dummy and emtpy database")
-  "The object that is currently used as the source for
-operations. Many operations are not dependant on this varialbe.
-For instance, if emps is a variable holding a table with
-keyword :employees, the following two select operations are
-equivalent 
+(require 'ld-database)
 
-\(ld-select emps :where (cl-oddp :id)\) ;returns every record with odd column id
- <==>
-\(ld-select :employee :where (cl-oddp :id)\) ;returns every record with odd column id
+(defgroup list-database nil
+  "Databases represented by Emacs Lisp lists."
+  :group 'applications)
 
-given that emps is a table with keyword :employee in
-*current-database*.
+(defun ld-default-repository-directory ()
+  "Return the default directory for persisted list databases.
 
-\(The stuff in the next paragraph is not yet implemented)
-You could refer to other databases as well
-\(ld-select (:sweden :employee) :where (cl-oddp :id)\) ;returns every record with odd column id
-")
+Use the historical `*local-data-dir*' base when it is available.
+Otherwise place the repository below `user-emacs-directory'."
+  (expand-file-name
+   "ld"
+   (if (boundp '*local-data-dir*)
+       (symbol-value '*local-data-dir*)
+     user-emacs-directory)))
 
-(defvar *ld-check-data-p* t
-  "Global variable to do some data checks")
+(defvaralias '+ld-repository+ 'ld-repository-directory)
 
-(defvar *ld-autogenerate-base* 1)
-(defvar *ld-autogenerate-increment* 1)
+(defcustom ld-repository-directory
+  (ld-default-repository-directory)
+  "Directory containing persisted list databases."
+  :type 'directory
+  :group 'list-database)
+
+(defvar *current-database*
+  (ld-create-database :empty-db :name "An empty placeholder database")
+  "Database used by operations whose database argument is omitted.")
+
+(defcustom *ld-check-data-p* t
+  "Whether insertion operations validate data against their schema."
+  :type 'boolean
+  :group 'list-database)
+
+(defcustom *ld-autogenerate-base* 1
+  "First automatically generated numeric value for an empty table."
+  :type 'integer
+  :group 'list-database)
+
+(defcustom *ld-autogenerate-increment* 1
+  "Increment used for automatically generated numeric values."
+  :type 'integer
+  :group 'list-database)
 
 (provide 'ld-global)
+
+;;; ld-global.el ends here

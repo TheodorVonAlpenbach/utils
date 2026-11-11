@@ -21,6 +21,7 @@
   "global/test-mb-locale.el"
   "list-database/test-ld-identifier.el"
   "list-database/test-ld-model.el"
+  "list-database/test-ld-global.el"
     "global/test-mb-indent.el"
   "global/test-mb-insert.el"
   "global/test-mb-print.el"
