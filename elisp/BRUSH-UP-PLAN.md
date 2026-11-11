@@ -329,6 +329,8 @@ The first subset is intentionally conservative:
 * [`test-ld-consumers.el`](./list-database/test-ld-consumers.el): six ERT
   tests for Cram and Maths schema construction and their persisted/fresh
   database initialization paths.
+* [`test-cram-config.el`](./games/cram/test-cram-config.el): three ERT tests
+  for Cram's rating, selection, cache, and timestamp defaults.
 * [`test-list-interval.el`](./prototypes/geometry/test-list-interval.el): nine ERT tests for the
   closed-interval helpers, including construction and accessors.
 * [`test-list-envelope.el`](./prototypes/geometry/test-list-envelope.el): nine ERT tests for
@@ -531,9 +533,9 @@ physics, geometry, search, XML, anaphora, general, list, sequence, string,
 time, ISO-time, and table modules are independently loadable. Their validation
 comprises:
 
-* a clean `emacs -Q` load of all seventy-four utility and mode-extension
+* a clean `emacs -Q` load of all seventy-five utility and mode-extension
   features plus the ERT tooling;
-* 667 passing ERT tests from the batch entry point;
+* 670 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -905,6 +907,15 @@ and first-use initialization paths. The two unused schema-migration functions,
 which referenced never-defined `*cram-db*` and `*maths-db*` variables, were
 retired. The old `list-database/ld-tests.el` remains an unmaintained interactive
 demo and is not part of the test baseline.
+
+[`cram-config.el`](./games/cram/cram-config.el) now loads independently with
+lexical binding and explicit Glicko/time dependencies. In particular,
+`*cram-last-update*` no longer assumes that another startup file happened to
+define `the-creation` first. Focused tests cover its rating, selection, cache,
+and timestamp defaults. Loading the full Cram backend now proceeds to a deeper
+query issue: `ld-select` still attempts to resolve schemas while macros are
+expanded, before the Cram database has been initialized. Runtime query
+expansion is the next concrete integration checkpoint.
 
 [`global-map.el`](./global/global-map.el) now loads independently with lexical
 binding and does not mutate global keys until `mb-global-map-setup` is called.

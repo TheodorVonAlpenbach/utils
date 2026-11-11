@@ -1,3 +1,10 @@
+;;; cram-config.el --- Configuration for Cram -*- lexical-binding: t; -*-
+
+;;; Code:
+
+(require 'glicko)
+(require 'mb-utils-time)
+
 (defconst +cram-buffer+ "Cramming Tool De Luxe")
 
 (defvar *cram-auto-continue* nil)
@@ -7,7 +14,6 @@
 encounter the same problem again")
 ;;(setf *cram-same-problem-limit* 1)
 
-(require 'glicko)
 (defconst +cram-default-rating+ +glicko-init-rating+)
 (defconst +cram-default-user-name+ "Mats")
 (defconst +cram-default-rating-window+ 200)
@@ -20,3 +26,4 @@ encounter the same problem again")
 
 (provide 'cram-config)
 
+;;; cram-config.el ends here

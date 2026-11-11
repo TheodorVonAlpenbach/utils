@@ -7,7 +7,7 @@
 (defconst mb-tests-load-directories
   '("" "elisp" "external" "games/cram" "games/maths" "global"
     "list-database" "mode-extensions"
-    "prototypes/geometry" "utils"))
+    "projects/ratings" "prototypes/geometry" "utils"))
 
 (defconst mb-tests-baseline-files
   '("prototypes/geometry/test-list-interval.el"
@@ -27,6 +27,7 @@
   "list-database/test-ld-general.el"
   "list-database/test-ld-repository.el"
   "list-database/test-ld-consumers.el"
+  "games/cram/test-cram-config.el"
     "global/test-mb-indent.el"
   "global/test-mb-insert.el"
   "global/test-mb-print.el"
