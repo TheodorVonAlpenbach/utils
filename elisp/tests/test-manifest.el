@@ -29,6 +29,7 @@
   "list-database/test-ld-consumers.el"
   "games/cram/test-cram-config.el"
   "games/maths/test-maths-backend.el"
+  "games/maths/test-maths-db-ui.el"
     "global/test-mb-indent.el"
   "global/test-mb-insert.el"
   "global/test-mb-print.el"

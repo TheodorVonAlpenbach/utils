@@ -336,6 +336,9 @@ The first subset is intentionally conservative:
   tests for Maths defaults and record accessors, arithmetic generation,
   level estimation, scoring, namespaced rating calculations, and ranked
   result ranges.
+* [`test-maths-db-ui.el`](./games/maths/test-maths-db-ui.el): six ERT tests
+  for Maths user/task lookup, filtering and insertion, random task selection,
+  rating queries, and match recording with rating updates.
 * [`test-list-interval.el`](./prototypes/geometry/test-list-interval.el): nine ERT tests for the
   closed-interval helpers, including construction and accessors.
 * [`test-list-envelope.el`](./prototypes/geometry/test-list-envelope.el): nine ERT tests for
@@ -538,9 +541,9 @@ physics, geometry, search, XML, anaphora, general, list, sequence, string,
 time, ISO-time, and table modules are independently loadable. Their validation
 comprises:
 
-* a clean `emacs -Q` load of all seventy-eight utility and mode-extension
+* a clean `emacs -Q` load of all seventy-nine utility and mode-extension
   features plus the ERT tooling;
-* 681 passing ERT tests from the batch entry point;
+* 687 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -946,6 +949,16 @@ replace Cram implementations with the same global names. Compilation also
 exposed and fixed an invalid `maths-current-task` call, an ignored generated
 rating-deviation argument, and the nonexistent `maths-db-ratings` call. The
 complete Maths module now loads under `emacs -Q`.
+
+[`maths-db-ui.el`](./games/maths/maths-db-ui.el) now provides an independently
+loadable, strictly compiled database access layer without the obsolete
+macro-expansion warning/workaround. User and task dispatch uses standard
+predicates and accessors; latest-user lookup, exclusions, ratings, insertion,
+and match updates have focused coverage. Random task selection now terminates
+with nil on an empty database instead of recurring forever after exhausting
+its widening search. The unused `maths-db-rating-history` stub was retired
+because it referenced the nonexistent `maths-get-matches`, `user-p`,
+multi-argument `ld-metadata`, and `ld-column` APIs.
 
 [`global-map.el`](./global/global-map.el) now loads independently with lexical
 binding and does not mutate global keys until `mb-global-map-setup` is called.
