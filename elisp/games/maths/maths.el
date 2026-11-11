@@ -1,263 +1,333 @@
+;;; maths.el --- Interactive Maths game interface -*- lexical-binding: t; -*-
+
+;;; Code:
+
+(require 'cl-lib)
+(require 'thingatpt)
+(require 'maths-backend)
 (require 'maths-config)
 (require 'maths-common)
+(require 'mb-utils-strings)
+(require 'mb-utils-time)
 
-(cl-defun maths-operator-string (operator)
+(declare-function gnuplot-ratings "maths-plot")
+
+(defun maths-operator-string (operator)
+  "Return OPERATOR's printable name."
   (symbol-name operator))
-;;(mapcar #'maths-operator-string '(:addition :substraction :multiplication :division))
 
-(cl-defun maths-format-task (operation arguments &optional solution)
-  (format "%d %s %d = %s" 
-    (first arguments)
-    (maths-operator-string (maths-operator operation))
-    (second arguments)
-    (or solution "")))
-;;(maths-format-task :addition '(1 1) 2)
+(defun maths-format-task (operation arguments &optional solution)
+  "Format a Maths task from OPERATION, ARGUMENTS, and SOLUTION."
+  (format "%d %s %d = %s"
+          (car arguments)
+          (maths-operator-string (maths-operator operation))
+          (cadr arguments)
+          (or solution "")))
 
-(cl-defun maths-format-match (user task)
+(defun maths-format-match (user task)
+  "Format USER and TASK for presentation."
   (concat
-   (format "Your rating: %d (RD = %d)\n" (maths-user-rating user) (maths-user-RD user))
-   (format "Task rating: %d (RD = %d)\n" (maths-task-rating task) (maths-task-RD task))
+   (format "Your rating: %d (RD = %d)\n"
+           (maths-user-rating user)
+           (maths-user-RD user))
+   (format "Task rating: %d (RD = %d)\n"
+           (maths-task-rating task)
+           (maths-task-RD task))
    "\n"
    (format "Problem #%d:\n" (maths-task-id task))
-   (maths-format-task (maths-task-operation task) (maths-task-arguments task))))
+   (maths-format-task
+    (maths-task-operation task)
+    (maths-task-arguments task))))
 
 (cl-defun maths-new (&optional (level 1))
-  "Inserts new match, and starts the clocks"
-  (let ((user (or (maths-current-user)
-		  (maths-register-new-user))))
-    (erase-buffer)
-    (insert (maths-format-match user (maths-draw-task :rating (maths-user-rating user))))
-    (time-set-reference)))
+  "Draw and display a new task.
+LEVEL is retained for compatibility."
+  (ignore level)
+  (if-let ((user (or (maths-current-user)
+                     (maths-register-new-user))))
+      (if-let ((task
+                (maths-draw-task
+                 :rating (maths-user-rating user))))
+          (progn
+            (erase-buffer)
+            (insert (maths-format-match user task))
+            (time-set-reference))
+        (message "Could not draw a Maths task"))
+    (message "No Maths user is selected")))
 
-(cl-defun maths-read-answer ()
-  "Parses the submitted answer"
-  (save-excursion
-    (backward-char 1)
-    (number-at-point)))
+(defun maths-read-answer ()
+  "Return the number at point as the submitted answer."
+  (number-at-point))
 
-(cl-defun short-judgement (score answer solution &optional (correct-color "ForestGreen") (error-color "red"))
+(cl-defun maths-short-judgement
+    (score answer solution
+           &optional
+           (correct-color "ForestGreen")
+           (error-color "red"))
+  "Format a short judgement for SCORE, ANSWER, and SOLUTION."
   (if (= answer solution)
-    (format "%s Your score was %.2f" (propertize "Correct!" 'face (list :foreground correct-color :weight 'bold)) score)
-    (format "%s Correct answer is %S" (propertize "Incorrect!" 'face (list :foreground error-color :weight 'bold)) solution)))
+      (format
+       "%s Your score was %.2f"
+       (propertize
+        "Correct!" 'face
+        (list :foreground correct-color :weight 'bold))
+       score)
+    (format
+     "%s Correct answer is %S"
+     (propertize
+      "Incorrect!" 'face
+      (list :foreground error-color :weight 'bold))
+     solution)))
 
-(cl-defun long-judgement (answer time solution score old-ratings new-ratings)
-  (let ((diff-ratings (maptree* #'- new-ratings old-ratings)))
-    (cl-destructuring-bind ((user-rating user-RD) (task-rating task-RD))
-	(maptree #'round new-ratings)
-      (cl-destructuring-bind ((user-rating-diff user-RD-diff) (task-rating-diff task-RD-diff))
-	  (maptree #'round diff-ratings)
-	(concat "\n\n"
-		(short-judgement score answer solution) "\n"
-		(format "Time spent: %.1f seconds\n" (/ time 1000.0))
-		"\n"
-		(format "Your new rating is %d (%d)\n" user-rating user-rating-diff)
-		(format "Your new RD is %d (%d)\n" user-RD user-RD-diff)
-		(format "Task's new rating is %d (%d)\n" task-rating task-rating-diff)
-		(format "Task' new RD is %d (%d)\n" task-RD task-RD-diff))))))
+(defun maths--rating-differences (new-ratings old-ratings)
+  "Subtract OLD-RATINGS from NEW-RATINGS componentwise."
+  (cl-mapcar
+   (lambda (new old)
+     (cl-mapcar #'- new old))
+   new-ratings old-ratings))
 
-(cl-defun maths-submit ()
-  "It's a bit confusing with task-entry in DB, task as is, and
-the *maths-current-task* which is yet another structure."
+(defun maths-long-judgement
+    (answer time solution score old-ratings new-ratings)
+  "Format a detailed judgement and rating change summary."
+  (let ((differences
+         (maths--rating-differences new-ratings old-ratings)))
+    (cl-destructuring-bind
+        ((user-rating user-RD) (task-rating task-RD))
+        (mapcar
+         (lambda (rating) (mapcar #'round rating))
+         new-ratings)
+      (cl-destructuring-bind
+          ((user-rating-diff user-RD-diff)
+           (task-rating-diff task-RD-diff))
+          (mapcar
+           (lambda (rating) (mapcar #'round rating))
+           differences)
+        (concat
+         "\n\n"
+         (maths-short-judgement score answer solution)
+         "\n"
+         (format "Time spent: %.1f seconds\n" (/ time 1000.0))
+         "\n"
+         (format "Your new rating is %d (%d)\n"
+                 user-rating user-rating-diff)
+         (format "Your new RD is %d (%d)\n"
+                 user-RD user-RD-diff)
+         (format "Task's new rating is %d (%d)\n"
+                 task-rating task-rating-diff)
+         (format "Task's new RD is %d (%d)\n"
+                 task-RD task-RD-diff))))))
+
+(defun maths-submit ()
+  "Submit the current answer and display its judgement."
   (let* ((time (time-elapsed nil))
-	 (answer (maths-read-answer))
-	 (old-ratings (maths-current-ratings)) ;current ratings will become the old
-	 (score (maths-report-answer answer time))
-	 (solution (maths-task-solution (maths-current-task)))
-	 (new-ratings (maths-current-ratings)))
-    (if (and (maths-auto-continue-p) (not current-prefix-arg))
-      (progn (message (short-judgement score answer solution))
-	     (maths-new))
-      (insert (long-judgement answer time solution score old-ratings new-ratings)))))
+         (answer (maths-read-answer))
+         (old-ratings (maths-current-ratings))
+         (score (maths-report-answer answer time))
+         (solution
+          (maths-task-solution (maths-current-task)))
+         (new-ratings (maths-current-ratings)))
+    (if (and (maths-auto-continue-p)
+             (not current-prefix-arg))
+        (progn
+          (message
+           "%s"
+           (maths-short-judgement score answer solution))
+          (maths-new))
+      (insert
+       (maths-long-judgement
+        answer time solution score old-ratings new-ratings)))))
 
-(cl-defun maths-answer-submitted-p ()
-  (string-match "Spent" (buffer-string)))
+(defun maths-answer-submitted-p ()
+  "Return non-nil when the current buffer contains a judgement."
+  (string-match-p "Time spent:" (buffer-string)))
 
-;;; Interactive functions
-(cl-defun maths-enter ()
+;;; Interactive commands
+
+(defun maths-enter ()
+  "Submit the current answer or draw the next task."
   (interactive)
   (if (maths-answer-submitted-p)
-    (maths-new)
+      (maths-new)
     (maths-submit)))
 
-(cl-defun maths-register-new-user ()
+(defun maths-register-new-user ()
+  "Prompt for and register a new Maths user."
   (interactive)
   (let ((user-name (read-from-minibuffer "New user name: "))
-	(age (string-to-number (read-from-minibuffer "Age: "))))
-    (cl-assert (and (integerp age) (plusp age)) t "Illegal age")
-    (when (yes-or-no-p (format "Are you sure that you want to register a new user with name '%s'? " user-name))
-      (aif (maths-add-user user-name age)
-	(prog1 it
-	  (maths-set-current-user it)
-	  (message "User %s registered" user-name))
-	(message "Couldn't register user since user name '%s' is already registered" user-name)))))
-;;(maths-register-new-user)
+        (age
+         (string-to-number
+          (read-from-minibuffer "Age: "))))
+    (unless (> age 0)
+      (user-error "Age must be a positive number"))
+    (when
+        (yes-or-no-p
+         (format
+          "Are you sure that you want to register a new user named %S? "
+          user-name))
+      (if (maths-db-get-user user-name)
+          (progn
+            (message "User name %S is already registered" user-name)
+            nil)
+        (let ((user (maths-add-user user-name age)))
+          (maths-set-current-user user)
+          (message "User %s registered" user-name)
+          user)))))
 
-(cl-defun maths-change-user ()
+(defun maths-change-user ()
+  "Prompt for a different current user."
   (interactive)
-  (let ((others (maths-db-user-names :sans (maths-user-name (maths-current-user)))))
+  (let ((others
+         (maths-db-user-names
+          :sans (maths-user-name (maths-current-user)))))
     (if others
-      (awhen (completing-read "Change user to: " others)
-	(maths-set-current-user it)
-	(maths-new))
-      (message "There are currently no other users but you!"))))
+        (let ((selected
+               (completing-read
+                "Change user to: " others nil t)))
+          (maths-set-current-user selected)
+          (maths-new))
+      (message "There are currently no other users"))))
 
-(cl-defun maths-toggle-auto-continue ()
+(defun maths-toggle-auto-continue ()
+  "Toggle automatic continuation after an answer."
   (interactive)
-  (setf *maths-auto-continue* (not *maths-auto-continue*)))
-;;(maths-toggle-auto-continue)
+  (setq *maths-auto-continue* (not *maths-auto-continue*)))
 
-(cl-defun maths-auto-continue-p ()
+(defun maths-auto-continue-p ()
+  "Return non-nil when automatic continuation is enabled."
   *maths-auto-continue*)
 
-;;; tab format. TODO move this somewhere else
-(cl-defun tab-column-type (column)
-  (cond
-    ((cl-every #'integerp column) 'integer)
-    ((and (cl-every #'numberp column)
-	  (some #'floatp column)) 'float)
-    ((cl-every #'stringp column) 'string)))
-;;(tab-column-type '("qe" "qe"))
+(defun maths--map-table-column (function column table)
+  "Apply FUNCTION to COLUMN in each row of TABLE."
+  (mapcar
+   (lambda (row)
+     (let ((copy (copy-sequence row)))
+       (setf (nth column copy)
+             (funcall function (nth column copy)))
+       copy))
+   table))
 
-(cl-defun tab-column-width (column &optional (type (tab-column-type column)))
-  (let ((c (cl-case type 
-	     (string column)
-	     (integer (mapcar #'number-to-string column)))))
-    (apply #'max (mapcar #'length c))))
-;;(tab-column-width '(1 123))
-
-(cl-defun tab-flag (width &optional type)
-  (format "%%%s%ds" (if (eql type 'integer) "" "-") width))
-
-(cl-defun tab-control-string (widths &key (type 'string) (separator " "))
-  (let ((types (if (atom type) (make-list (length widths) type) type)))
-    (concat* (cl-mapcar #'tab-flag widths types) :in separator)))
-;;(tab-control-string '(4 5 1) :type '(integer integer string))
-
-(cl-defun tab-format (string-table &key header (column-separator " ") (underline-char ?=))
-  (let ((first-row (first string-table)))
-    (when header
-      (cl-assert (and (= (length first-row) (length header))
-		   (eql (tab-column-type header) 'string))))
-    (let* ((columns (transpose string-table))
-	   (types (mapcar #'tab-column-type columns))
-	   (cwidths (cl-mapcar #'tab-column-width columns types))
-	   (hwidths (and header (mapcar #'length header)))
-	   (widths (if header (cl-mapcar #'max cwidths hwidths) cwidths))
-	   (header (if header (concat (apply #'format (tab-control-string widths :separator column-separator) header) "\n") "")))
-      (concat* string-table
-	:pre (if underline-char (format "%s%s\n" header (make-string (length header) underline-char)) header)
-	:key #'(lambda (x) (apply #'format (tab-control-string widths :type types :separator column-separator) x))
-	:in "\n"))))
-;;(insert (tab-format '(("foo" 1 "bar") ("qwe" 1233456 "qwebar")) :header '("qwe" "ewq" "qwebar")))
-;;(tab-format '((1 "bar") (1233456 "qwebar")) :header '("numb" "string2") :column-separator "|")
-
-(cl-defun maths-list-task-ratings (&optional (buffer-name "*Task Ratings*"))
-  "Prints a table of all tasks with their corresponding rating."
+(cl-defun maths-list-task-ratings
+    (&optional (buffer-name "*Task Ratings*"))
+  "Display task ratings in BUFFER-NAME."
   (interactive)
   (with-output-to-temp-buffer buffer-name
-    (princ (tab-format
-	    (mapcol (bind #'apply #'maths-format-task 1)
-		    1 (maths-db-task-ratings))
-	    :header '("ID" "Task" "Rating" "RD" "Updated")
-	    :column-separator " | "))
+    (princ
+     (tab-format
+      (maths--map-table-column
+       (lambda (task)
+         (apply #'maths-format-task task))
+       1 (maths-db-task-ratings))
+      :header '("ID" "Task" "Rating" "RD" "Updated")
+      :column-separator " | "))
     (switch-to-buffer-other-window buffer-name)))
 
-(cl-defun maths-quit ()
+(defun maths-quit ()
+  "Save Maths and close its main buffer."
   (interactive)
   (maths-save)
   (kill-buffer +maths-buffer+))
 
-(cl-defun unsuppress-keymap (map keys)
-  (cl-loop for char across keys
-	   for key = (char-to-string char)
-	   do (define-key map key (let ((char char))
-				    #'(lambda () 
-					(interactive)
-					(insert char))))))
-;;(unsuppress-keymap maths-mode-map "0123456789")
+(defun maths--unsuppress-keymap (map keys)
+  "Bind each character in KEYS to self-insertion in MAP."
+  (cl-loop
+   for character across keys
+   for key = (char-to-string character)
+   do
+   (define-key
+    map key
+    (let ((character character))
+      (lambda ()
+        (interactive)
+        (insert character))))))
 
-(cl-defun maths-plot-user-ratings ()
+(defun maths-plot-user-ratings ()
+  "Plot the current user's ratings."
   (interactive)
-  (gnuplot-ratings (maths-db-user-ratings (maths-current-user))))
+  (require 'maths-plot)
+  (gnuplot-ratings
+   (maths-db-user-ratings (maths-current-user))))
 
-(cl-defun maths-mode-map ()
+(defun maths--make-mode-map ()
+  "Create the keymap for `maths-mode'."
   (let ((map (make-keymap))
-	(list-map (make-sparse-keymap))
-	(user-map (make-sparse-keymap)))
-
+        (list-map (make-sparse-keymap))
+        (user-map (make-sparse-keymap)))
     (suppress-keymap map)
-    (unsuppress-keymap map "+-0123456789")
+    (maths--unsuppress-keymap map "+-0123456789")
 
-    ;; Lists
     (define-key map "l" list-map)
-    (define-key list-map "r" 'maths-list-user-ratings)
-    (define-key list-map "R" 'maths-list-task-ratings)    
-    (define-key list-map "p" 'maths-plot-user-ratings)
+    (define-key list-map "r" #'maths-list-user-ratings)
+    (define-key list-map "R" #'maths-list-task-ratings)
+    (define-key list-map "p" #'maths-plot-user-ratings)
     (define-key list-map "P" 'maths-plot-task-ratings)
 
-    ;; User
     (define-key map "u" user-map)
-    (define-key user-map "n" 'maths-register-new-user)
-    (define-key user-map "c" 'maths-change-user)    
+    (define-key user-map "n" #'maths-register-new-user)
+    (define-key user-map "c" #'maths-change-user)
     (define-key user-map "d" 'maths-delete-user)
     (define-key user-map "s" 'maths-show-user-settings)
 
-    (define-key map "n" 'maths-enter)
-
-    (define-key map "a" 'maths-toggle-auto-continue)
+    (define-key map "n" #'maths-enter)
+    (define-key map "a" #'maths-toggle-auto-continue)
     (define-key map "?" 'maths-help)
     (define-key map "h" 'maths-help)
-    (define-key map "q" 'maths-quit)
-
-    (define-key map [return] 'maths-enter)
-    (define-key map [kp-enter] 'maths-enter)
-    (define-key map [backspace] 'delete-backward-char)
-    (define-key map [delete] 'delete-forward-char)
+    (define-key map "q" #'maths-quit)
+    (define-key map [return] #'maths-enter)
+    (define-key map [kp-enter] #'maths-enter)
+    (define-key map [backspace] #'delete-backward-char)
+    (define-key map [delete] #'delete-forward-char)
     map))
 
-(defvar maths-mode-map ;;(nilf maths-mode-map)
-  (maths-mode-map)
-  "Keymap containing maths commands.")
-;;(setf maths-mode-map (maths-mode-map))
+(defvar maths-mode-map
+  (maths--make-mode-map)
+  "Keymap for `maths-mode'.")
 
 ;;; Mode line
-(cl-defun maths-mode-line-user-description ()
-  "Adopted the design from `Info-mode' (`Info-set-mode-line')."
-  '(:eval (let ((user (maths-current-user)))
-	    (format " [%s (R:%d RD:%d)]" 
-	      (maths-user-name user)
-	      (maths-user-rating user)
-	      (maths-user-RD user)))))
-;;(maths-mode-line-user-description)
 
-(cl-defun maths-mode-line ()
-  "Adopted the design from `Info-mode' (`Info-set-mode-line')."
-  (let* ((line (copy-tree mode-line-format)))
-    (list-insert (maths-mode-line-user-description)
-		 (1+ (position 'mode-line-buffer-identification line))
-		 line)
-    line))
+(defun maths-mode-line-user-description ()
+  "Return a dynamic mode-line description of the current user."
+  '(:eval
+    (when-let ((user (maths-current-user)))
+      (format " [%s (R:%d RD:%d)]"
+              (maths-user-name user)
+              (maths-user-rating user)
+              (maths-user-RD user)))))
 
-(cl-defun maths-set-mode-line ()
-  "Adopted the design from `Info-mode' (`Info-set-mode-line')."
-  (setf mode-line-format (maths-mode-line)))
+(defun maths-mode-line ()
+  "Return `mode-line-format' with Maths user information."
+  (let* ((line (copy-tree mode-line-format))
+         (index
+          (1+ (or
+               (cl-position
+                'mode-line-buffer-identification line)
+               0))))
+    (append
+     (cl-subseq line 0 (min index (length line)))
+     (list (maths-mode-line-user-description))
+     (nthcdr index line))))
+
+(defun maths-set-mode-line ()
+  "Install Maths user information in the current mode line."
+  (setq-local mode-line-format (maths-mode-line)))
 
 (define-derived-mode maths-mode special-mode "Maths"
-   "Maths mode
+  "Major mode for the Maths game.
 \\{maths-mode-map}"
-   (setf buffer-read-only nil)
-   (maths-set-mode-line))
+  (setq buffer-read-only nil)
+  (maths-set-mode-line))
 
-(cl-defun maths-init ()
-  (maths-init-database)
-  (require 'maths-backend))
+(defun maths-init ()
+  "Initialize the Maths database."
+  (maths-init-database))
 
 (cl-defun maths (&optional (level 1))
+  "Start a Maths session at LEVEL."
   (interactive)
   (maths-init)
   (switch-to-buffer +maths-buffer+)
   (maths-mode)
   (maths-new level))
-;;(maths)
 
 (provide 'maths)
+
+;;; maths.el ends here

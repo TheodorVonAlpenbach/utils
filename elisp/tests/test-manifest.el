@@ -33,6 +33,7 @@
   "games/cram/test-cram.el"
   "games/maths/test-maths-backend.el"
   "games/maths/test-maths-db-ui.el"
+  "games/maths/test-maths.el"
     "global/test-mb-indent.el"
   "global/test-mb-insert.el"
   "global/test-mb-print.el"

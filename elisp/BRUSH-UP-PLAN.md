@@ -541,9 +541,9 @@ physics, geometry, search, XML, anaphora, general, list, sequence, string,
 time, ISO-time, and table modules are independently loadable. Their validation
 comprises:
 
-* a clean `emacs -Q` load of all eighty-two utility and mode-extension
+* a clean `emacs -Q` load of all eighty-three utility and mode-extension
   features plus the ERT tooling;
-* 705 passing ERT tests from the batch entry point;
+* 711 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -1000,6 +1000,19 @@ and key bindings remain available; optional unimplemented commands remain
 symbolic bindings rather than load-time dependencies. Six tests cover problem
 and judgement formatting, response parsing, keymap insertion, and all quiz
 entry filters.
+
+The parallel Maths entry module in
+[`maths.el`](./games/maths/maths.el) now follows the same independently
+loadable UI boundary. Its judgement, rating-difference, column-mapping, and
+keymap helpers are Maths-namespaced, while the duplicate global table-formatting
+implementation was retired in favor of the maintained shared utility.
+Startup-only ordinal, anaphoric, numeric, tree, and list-column helpers were
+replaced with standard forms or small local helpers. New-task handling reports
+missing users/tasks instead of dereferencing nil, registration validates age
+and checks name uniqueness before insertion, plotting loads lazily, and
+mode-line changes are buffer-local. The `maths` command and existing key
+bindings remain available. Six tests cover task and judgement formatting,
+answer parsing, keymap insertion, and complete command orchestration.
 
 [`global-map.el`](./global/global-map.el) now loads independently with lexical
 binding and does not mutate global keys until `mb-global-map-setup` is called.
