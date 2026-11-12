@@ -568,14 +568,6 @@ If PROPER-P is non-nil, exclude N itself."
 	   sum (* (expt root i) coefficient)))
 ;;(calculate-n-ary 128 (list 0 0 64))
 
-(cl-defun int-to-hex (n &optional (length nil))
-  (let ((format-string
-	 (if length 
-	   (concat "%" (format "0%dx" length))
-	   "%x")))
-    (format format-string n)))
-;;(int-to-hex 10 10) ==> "000000000a"
-
 (cl-defun int-to-bin-array (n)
   (let ((res ()))
     (while (> n 0)

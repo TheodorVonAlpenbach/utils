@@ -1724,7 +1724,7 @@ usage decision:
   a new optional module with configurable path mapping if that workflow is
   needed again.
 
-Eighteen compatibility wrappers and constants were retired after
+Nineteen compatibility wrappers and constants were retired after
 repository-wide caller checks. `string-to-character-list` duplicated
 `string-to-list`, `blanks` duplicated `make-string`, and `reverse-lines` was
 only an alias for `reverse-region`. `buffer-string*` only wrapped
@@ -1737,6 +1737,7 @@ removed in favor of `regexp-unmatchable`. The internal XML display path now
 uses `xml-substitute-special` directly instead of the
 `xml-decode-characters` wrapper. The unused `parse-ms` conversion wrapper was
 removed in favor of `seconds-to-time` with seconds expressed as a float.
+The sole internal use of `int-to-hex` now uses `format` directly.
 
 ### Behaviourally equivalent for observed uses
 
@@ -1754,7 +1755,6 @@ matched. They are safe retirement candidates once callers are checked.
 | `yearweek-number` and `week-number` | `format-time-string` with `%G` and `%V` | Results agree at tested ISO-year boundaries after repairing exact first-Monday handling. |
 | `bytes-to-string` | `unibyte-string` | The local wrapper now delegates to the standard constructor and genuinely returns a unibyte string for bytes above 127. |
 | `string-to-bytes` | `string-to-list` | The local wrapper now delegates directly to the standard function. |
-| `int-to-hex` | `format` with `%x` | The helper only adds optional zero-padding. |
 | `current-year` | `format-time-string` with `%Y`, or `decoded-time-year` | Retained because it makes three date-helper signatures express intent rather than decoded-time representation. |
 
 ### Differ in edge cases — do not substitute blindly

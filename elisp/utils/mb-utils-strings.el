@@ -887,7 +887,7 @@ Default language is :en. Other supported languages are: :no"
 
 (defun uint8sequence-to-hex-string (uint8sequence)
   (cl-loop for uint8 in (cl-coerce uint8sequence 'list)
-	   concat (int-to-hex uint8)))
+	   concat (format "%x" uint8)))
 ;;(uint8array-to-hex-string [105 177 111 68 136 211 131 162 203 198 86 151])
 
 (defun uint8array-string-to-hex-string (uint8array-string)
