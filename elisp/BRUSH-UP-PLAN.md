@@ -540,7 +540,7 @@ comprises:
 
 * a clean `emacs -Q` load of all ninety-eight utility and mode-extension
   features plus the ERT tooling;
-* 800 passing ERT tests from the batch entry point;
+* 801 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -1727,8 +1727,7 @@ usage decision:
 Seventeen compatibility wrappers and constants were retired after
 repository-wide caller checks. `string-to-character-list` duplicated
 `string-to-list`, `blanks` duplicated `make-string`, and `reverse-lines` was
-only an alias for
-`reverse-region`, and `buffer-string*` only wrapped
+only an alias for `reverse-region`. `buffer-string*` only wrapped
 `buffer-substring-no-properties`. The internal `lines-to-string` helper was
 replaced with `string-join` in `string-head` and `string-tail`. The unused
 `string-fill-paragraph` wrapper was removed in favor of the standard
@@ -1756,7 +1755,7 @@ matched. They are safe retirement candidates once callers are checked.
 | `bytes-to-string` | `unibyte-string` | The local wrapper now delegates to the standard constructor and genuinely returns a unibyte string for bytes above 127. |
 | `string-to-bytes` | `string-to-list` | The local wrapper now delegates directly to the standard function. |
 | `int-to-hex` | `format` with `%x` | The helper only adds optional zero-padding. |
-| `current-year` | `format-time-string` with `%Y`, or `decoded-time-year` | The local helper now uses the standard decoded-time accessor. |
+| `current-year` | `format-time-string` with `%Y`, or `decoded-time-year` | Retained because it makes three date-helper signatures express intent rather than decoded-time representation. |
 
 ### Differ in edge cases — do not substitute blindly
 

@@ -137,6 +137,14 @@
   (should (equal (jstime 0 2000) '(2000 0 0 0 0 0)))
   (should (equal (jstime (* 60 60 24 59) 2000) '(2000 1 28 0 0 0))))
 
+(ert-deftest mb-utils-math-current-year-defaults ()
+  (cl-letf (((symbol-function 'decode-time)
+	     (lambda (&rest _) '(0 0 0 1 1 2024 1 nil 3600))))
+    (should (= (days-after-year 2020)
+	       (days-after-year 2020 2024)))
+    (should (= (days-in-month 1) 29))
+    (should (equal (div-day-month 59) '(1 28)))))
+
 (ert-deftest mb-utils-math-unimplemented-functions-error ()
   (should-error (list-move 'a '(a) nil) :type 'error)
   (should-error (swimming-relative-distances) :type 'error))

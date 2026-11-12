@@ -1000,7 +1000,9 @@ either 0 or 1)"
 	   sum (days-in-year y)))
 ;;(days-between-years 1970 1971)
 
-(cl-defun current-year () (decoded-time-year (decode-time)))
+(cl-defun current-year ()
+  "Return the current calendar year."
+  (decoded-time-year (decode-time)))
 
 (cl-defun days-after-year (&optional (year1 1970) (year2 (current-year)))
   (sum (mapcar #'days-in-year (a-b year1 year2))))
