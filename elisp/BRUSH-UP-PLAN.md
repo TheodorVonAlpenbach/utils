@@ -540,7 +540,7 @@ comprises:
 
 * a clean `emacs -Q` load of all ninety-eight utility and mode-extension
   features plus the ERT tooling;
-* 801 passing ERT tests from the batch entry point;
+* 800 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -1724,17 +1724,19 @@ usage decision:
   a new optional module with configurable path mapping if that workflow is
   needed again.
 
-Sixteen compatibility wrappers and constants were retired after
+Seventeen compatibility wrappers and constants were retired after
 repository-wide caller checks. `string-to-character-list` duplicated
-`string-to-list`, `blanks`
-duplicated `make-string`, `reverse-lines` was only an alias for
+`string-to-list`, `blanks` duplicated `make-string`, and `reverse-lines` was
+only an alias for
 `reverse-region`, and `buffer-string*` only wrapped
 `buffer-substring-no-properties`. The internal `lines-to-string` helper was
 replaced with `string-join` in `string-head` and `string-tail`. The unused
 `string-fill-paragraph` wrapper was removed in favor of the standard
 `string-fill`. The nine `dtime-*` aliases were replaced internally with the
 standard `decoded-time-*` accessors. The unused `*empty-regexp*` constant was
-removed in favor of `regexp-unmatchable`.
+removed in favor of `regexp-unmatchable`. The internal XML display path now
+uses `xml-substitute-special` directly instead of the
+`xml-decode-characters` wrapper.
 
 ### Behaviourally equivalent for observed uses
 
@@ -1755,7 +1757,6 @@ matched. They are safe retirement candidates once callers are checked.
 | `string-to-bytes` | `string-to-list` | The local wrapper now delegates directly to the standard function. |
 | `int-to-hex` | `format` with `%x` | The helper only adds optional zero-padding. |
 | `current-year` | `format-time-string` with `%Y`, or `decoded-time-year` | The local helper now uses the standard decoded-time accessor. |
-| `xml-decode-characters` | `xml-substitute-special` | The local wrapper now delegates to the standard XML entity and numeric-character-reference decoder; its obsolete locale-table argument is retained only for call compatibility. |
 
 ### Differ in edge cases — do not substitute blindly
 

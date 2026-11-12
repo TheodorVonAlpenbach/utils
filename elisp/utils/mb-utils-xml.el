@@ -160,10 +160,6 @@ NODE-CONTENT-ONLY is non-nil."
 		(replace-regexp-in-string
 		 (regexp-quote child) "" string t t)))))))
 
-(cl-defun xml-decode-characters (string &optional _encoding)
-  "Decode XML entity and numeric character references in STRING."
-  (xml-substitute-special string))
-
 (cl-defun html-to-temp-buffer
     (html-converter html-string buffer-name &rest args)
   "Convert HTML-STRING with HTML-CONVERTER and display it in BUFFER-NAME.
@@ -171,7 +167,7 @@ Pass ARGS to HTML-CONVERTER after HTML-STRING."
   (with-output-to-temp-buffer buffer-name
     (temp-buffer-resize-mode)
     (princ
-     (xml-decode-characters
+     (xml-substitute-special
       (apply html-converter html-string args)))))
 
 (cl-defun html-to-temp-buffer-sentinel

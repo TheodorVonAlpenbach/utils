@@ -49,11 +49,6 @@
 		 "Some inner text"))
   (should-not (xml-inner "<x>missing close")))
 
-(ert-deftest mb-utils-xml-decode-characters ()
-  (should (equal (xml-decode-characters
-		  "&lt;&gt;&amp;&quot;&apos;&#248;&#xF8;")
-		 "<>&\"'øø")))
-
 (ert-deftest mb-utils-xml-temp-buffer-sentinel ()
   (let ((buffer-name " *mb-utils-xml-output*"))
     (unwind-protect
@@ -63,9 +58,9 @@
 	    buffer-name
 	    (lambda (html suffix) (concat html suffix))
 	    "!")
-	   "&quot;text&quot;")
+	   "&quot;text&quot;&#248;&#xF8;")
 	  (should (equal (with-current-buffer buffer-name (buffer-string))
-			 "\"text\"!\n")))
+			 "\"text\"øø!\n")))
       (when (get-buffer buffer-name)
 	(kill-buffer buffer-name)))))
 
