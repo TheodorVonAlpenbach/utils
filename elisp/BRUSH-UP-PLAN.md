@@ -40,7 +40,6 @@ byte-compilation or test results:
 | [`dict.el`](./dictionary/dict.el) | Line 1 | Stray escaping before the initial `require`; reader reports invalid syntax. |
 | [`azure-REST.el`](./div/azure-REST.el) | Form beginning at line 29; error at line 61 | An unfinished implementation includes PHP-like text inside the Lisp source. |
 | [`demo.el`](./archive/music-analyzer/demo.el) | Line 192 | Unexpected closing parenthesis in archived code. |
-| [`kommuner.el`](./quiz/kommuner.el) | Line 72 | Unexpected closing parenthesis. |
 
 Fix these promptly if they are retained and used; otherwise classify them as
 experiments or archive candidates. Do not spend substantial effort repairing
@@ -51,6 +50,12 @@ unfinished experiment. It now reads and loads independently, declares its
 utility dependencies, avoids load-time scratch evaluation, and signals clearly
 from its unimplemented TikZ entry point. It is not part of the maintained test
 manifest.
+
+[`kommuner.el`](./quiz/kommuner.el) is likewise retained as an explicitly
+unfinished experiment, not as part of the maintained quiz application. Its
+reader error and startup-era aliases have been repaired, its dependencies are
+declared, and unfinished polygon operations now signal explicit errors. Its
+machine-specific source-data path and geometry behavior remain experimental.
 
 ### Old or potentially obsolete code
 
