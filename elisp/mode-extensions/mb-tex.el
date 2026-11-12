@@ -38,13 +38,6 @@ operated on a region, use its region PDF instead of the master."
 	  (message "Sentinel called too early!")
 	(mb-tex--display-pdf pdf-path))))))
 
-(cl-defun mode-help-follow-mode-advice ()
-  (save-excursion
-    (other-window 1)
-    (re-search-forward ":override advice: " nil t)
-    (forward-char 1)
-    (push-button)))
-
 (defun mb-tex-setup ()
   "Activate personal AUCTeX and RefTeX configuration."
   (setq TeX-auto-save t
@@ -54,8 +47,7 @@ operated on a region, use its region PDF instead of the master."
 	reftex-insert-label-flags '("s" "sfte"))
   (setq-default TeX-master nil)
   (add-hook 'LaTeX-mode-hook #'turn-on-reftex)
-  (cl-pushnew mb-tex--viewer-expansion TeX-expand-list :test #'equal)
-  (advice-add #'describe-mode :after #'mode-help-follow-mode-advice))
+  (cl-pushnew mb-tex--viewer-expansion TeX-expand-list :test #'equal))
 
 (provide 'mb-tex)
 

@@ -1458,14 +1458,15 @@ implementation, and two uncalled deprecated helpers have been retired. Two
 focused tests verify that loading the extension preserves the upstream runner
 and that master-file prefixes remain portable. Loading the library is now
 side-effect free; startup calls the idempotent `mb-tex-setup` function
-explicitly to activate AUCTeX defaults, RefTeX, PDF viewer expansion, and the
-existing global `describe-mode` advice. Four focused tests cover the load and
-setup boundaries. PDF helpers are now namespaced, and region viewing uses
+explicitly to activate AUCTeX defaults, RefTeX, and PDF viewer expansion. Four
+focused tests cover the load and setup boundaries. PDF helpers are now
+namespaced, and region viewing uses
 AUCTeX's `TeX-current-process-region-p` and `TeX-region-file` APIs instead of a
 fixed-depth backtrace inspection. Six focused tests cover loading, setup,
 master paths, and mocked master/region PDF display without opening real files
 or windows. A seventh test verifies the display boundary with a disposable PDF
-path. The unrelated advice behavior remains for a later checkpoint.
+path. The unrelated global `describe-mode` advice has been retired; TeX setup
+no longer changes help behavior throughout Emacs.
 
 [`mb-utils-file.el`](./utils/mb-utils-file.el) now uses built-in path and
 recursive file APIs instead of startup aliases and the shell-oriented

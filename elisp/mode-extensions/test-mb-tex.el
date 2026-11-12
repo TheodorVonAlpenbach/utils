@@ -31,9 +31,7 @@
   (should (equal mb-tex-test--latex-mode-hook-after-load
 		 mb-tex-test--latex-mode-hook-before-load))
   (should (equal mb-tex-test--expand-list-after-load
-		 mb-tex-test--expand-list-before-load))
-  (should-not
-   (advice-member-p #'mode-help-follow-mode-advice #'describe-mode)))
+		 mb-tex-test--expand-list-before-load)))
 
 (ert-deftest mb-tex-preserves-auctex-run-function ()
   (should (eq (symbol-function 'TeX-run-function)
@@ -95,7 +93,6 @@
   (remove-hook 'LaTeX-mode-hook #'turn-on-reftex)
   (setq TeX-expand-list
 	(cl-delete mb-tex--viewer-expansion TeX-expand-list :test #'equal))
-  (advice-remove #'describe-mode #'mode-help-follow-mode-advice)
   (mb-tex-setup)
   (mb-tex-setup)
   (should TeX-auto-save)
@@ -106,9 +103,7 @@
   (should (memq #'turn-on-reftex LaTeX-mode-hook))
   (should (= (cl-count mb-tex--viewer-expansion TeX-expand-list
 		       :test #'equal)
-	     1))
-  (should
-   (advice-member-p #'mode-help-follow-mode-advice #'describe-mode)))
+	     1)))
 
 (provide 'test-mb-tex)
 
