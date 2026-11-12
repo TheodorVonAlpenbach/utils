@@ -948,16 +948,9 @@ either 0 or 1)"
   (error "swimming-relative-distances is not implemented"))
 ;;(swimming-relative-distances 'crawl 50)
 
-;;; div js dates (TODO move this later)
-;; This buffer is for notes you don't want to save, and for Lisp evaluation.
-;; If you want to create a file, visit that file with C-x C-f,
-;; then enter the text in that file's own buffer.
-
-;;;;
 (cl-defun div-sec-min (seconds) (cl-floor seconds 60.0))
 (cl-defun div-min-hour (minutes) (cl-floor minutes 60.0))
 (cl-defun div-hour-day (hours) (cl-floor hours 24.0))
-;;(div-sec-min 72)
 
 (cl-defun leap-year-p (year)
   (and (modp year 0 4)
@@ -991,7 +984,6 @@ either 0 or 1)"
 	   do (cl-decf remaining year-length)
 	      (cl-incf year)
 	   finally return (list year remaining)))
-;;(div-day-year 3000)
 
 (cl-defun days-in-month (month &optional (year (current-year)))
   (if (and (= month 1) (leap-year-p year))
@@ -1010,6 +1002,9 @@ either 0 or 1)"
 ;;(div-day-month 31)
 
 (cl-defun jstime (seconds &optional (unix-base-year 1970))
+  "Convert SECONDS to a legacy zero-based date/time tuple.
+The result is (YEAR MONTH DAY HOUR MINUTE SECOND), with zero-based
+MONTH and DAY values.  UNIX-BASE-YEAR controls the epoch year."
   (let* ((minutes (div-sec-min seconds))
 	 (hours (div-min-hour (cl-first minutes)))
 	 (days (div-hour-day (cl-first hours)))
@@ -1018,8 +1013,6 @@ either 0 or 1)"
     (mapcar #'round
 	    (list (cl-first years) (cl-first months) (cl-second months)
 		  (cl-second days) (cl-second hours) (cl-second minutes)))))
-;;(jstime 1199290500)
-;;(cl-floor 1199290500 60.0)
 
 (cl-defun linear-function-slope-point (slope x)
   "Returns a linear function with SLOPE going through point X.
