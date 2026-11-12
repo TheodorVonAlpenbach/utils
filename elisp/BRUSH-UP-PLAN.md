@@ -519,6 +519,7 @@ replaced with built-in operations.
 | `mb-octave` | [`mb-octave.el`](./mode-extensions/mb-octave.el) | Active mode extension; independently loadable with mocked process tests |
 | `mb-ruby` | [`mb-ruby.el`](./mode-extensions/mb-ruby.el) | Active mode extension; independently loadable |
 | `mb-texinfo` | [`mb-texinfo.el`](./mode-extensions/mb-texinfo.el) | Active mode extension; independently loadable |
+| `mb-tex` | [`mb-tex.el`](./mode-extensions/mb-tex.el) | Active AUCTeX integration; lexical binding and explicit dependencies |
 | `mb-indent` | [`mb-indent.el`](./global/mb-indent.el) | Active indentation metadata; independently loadable with intentional global properties |
 | `mb-js-mode` | [`mb-js-mode.el`](./mode-extensions/mb-js-mode.el) | Active mode extension; optional Node.js evaluation |
 | `quiz` | [`quiz.el`](./quiz/quiz.el) | Active maintained application; modular and independently loadable |
@@ -540,7 +541,7 @@ comprises:
 
 * a clean `emacs -Q` load of all ninety-eight utility and mode-extension
   features plus the ERT tooling;
-* 802 passing ERT tests from the batch entry point;
+* 804 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -1449,12 +1450,14 @@ Its original commit explicitly described it as unfinished, its formatter body
 was never implemented, and there are no repository callers. Modernizing it
 would require choosing new behavior rather than preserving existing behavior.
 
-[`mb-tex.el`](./mode-extensions/mb-tex.el) also remains a usage-decision
-candidate. It has no repository callers, requires an AUCTeX installation that
-is absent from the clean environment, overrides the package's
-`TeX-run-function`, and installs global `describe-mode` advice unrelated to
-TeX. Its current AUCTeX usage and desired PDF-viewing behavior should be
-confirmed before replacing that integration.
+[`mb-tex.el`](./mode-extensions/mb-tex.el) is loaded explicitly by startup and
+uses the installed AUCTeX integration. It now has lexical binding and explicit
+`cl-lib`, AUCTeX, and RefTeX dependencies. Its outdated copy of
+`TeX-run-function` has been removed in favor of AUCTeX's maintained
+implementation, and two uncalled deprecated helpers have been retired. Two
+focused tests verify that loading the extension preserves the upstream runner
+and that master-file prefixes remain portable. PDF viewing and the unrelated
+global `describe-mode` advice remain for a later behavioral checkpoint.
 
 [`mb-utils-file.el`](./utils/mb-utils-file.el) now uses built-in path and
 recursive file APIs instead of startup aliases and the shell-oriented

@@ -1,7 +1,9 @@
-(load "auctex.el" nil t t)
-;;(load "preview-latex.el" nil t t)
-(require 'latex)
+;;; mb-tex.el --- Personal AUCTeX extensions -*- lexical-binding: t; -*-
 
+;;; Code:
+
+(require 'cl-lib)
+(require 'latex)
 (require 'reftex)
 
 ;;; LaTeX
@@ -35,7 +37,7 @@ at work."
     (let* ((master-prefix (master-prefix))
 	   (tex-path (concat master-prefix ".tex"))
 	   (pdf-path (concat master-prefix ".pdf")))
-      (if (eql (second (backtrace-frame 19)) 'TeX-command-run-all-region)
+      (if (eql (cadr (backtrace-frame 19)) 'TeX-command-run-all-region)
 	(when (file-exists-p "_region.pdf_")
 	  (switch-to-buffer-other-window (find-file-noselect "_region.pdf_" t))
 	  (revert-buffer t t t))
@@ -49,27 +51,6 @@ at work."
 (cl-pushnew '("%V" (lambda () "open-my-pdf")) TeX-expand-list :test #'equal)
 ;;(nilf TeX-expand-list)
 
-;; NB! Make this an ...
-(cl-defun TeX-run-function (_name command _file)
-  "Execute Lisp function or function call given as the string COMMAND.
-Parameters NAME and FILE are ignored."
-  (let ((fun (car (read-from-string command))))
-    (if (functionp fun) (funcall fun file) (eval fun))))
-
-(cl-defun mb-open-pdf (fn)
-  "First version of 'open pdf'"
-  (warn "This function is deprecated")
-  (find-file-other-window (format "%s.pdf" fn) t))
-
-(cl-defun mb-describe-mode (&optional buffer)
-  (interactive "@")
-  (describe-mode buffer)
-  (save-excursion
-    (other-window 1)
-    (re-search-forward ":override advice: ")
-    (forward-char 1)
-    (push-button)))
-
 (cl-defun mode-help-follow-mode-advice ()
   (save-excursion
     (other-window 1)
@@ -81,3 +62,5 @@ Parameters NAME and FILE are ignored."
 ;;(advice-remove #'describe-mode #'mode-help-follow-mode-advice)
 
 (provide 'mb-tex)
+
+;;; mb-tex.el ends here
