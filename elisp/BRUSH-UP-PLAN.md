@@ -568,7 +568,7 @@ comprises:
 
 * a clean `emacs -Q` load of all ninety-eight utility and mode-extension
   features plus the ERT tooling;
-* 808 passing ERT tests from the batch entry point;
+* 807 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -1245,8 +1245,8 @@ and `read-cl-expression` was an abandoned stub with an empty body. Inside the
 surviving `eread`, the `#(` branch was unreachable because the vector rewrite
 runs before the match, so removing it preserved behavior exactly. Anonymous
 REPL commands gained names, the REPL keymap is defined before the mode that
-documents it, and `+mb-lisp-repl-mode-map+` and `repl-wait-for-ouput` remain
-as compatibility aliases. Twenty-four tests cover the repaired behavior
+documents it, and `+mb-lisp-repl-mode-map+` remains as a compatibility alias.
+Twenty-three tests cover the repaired behavior
 without starting an inferior Lisp process.
 
 [`mb-texinfo.el`](./mode-extensions/mb-texinfo.el) now loads independently
@@ -1764,7 +1764,7 @@ usage decision:
   shell formatting as a new module with an explicit contract and tests rather
   than restoring the incomplete implementation.
 
-Twenty compatibility wrappers and constants were retired after
+Twenty-five compatibility wrappers and constants were retired after
 repository-wide caller checks. `string-to-character-list` duplicated
 `string-to-list`, `blanks` duplicated `make-string`, and `reverse-lines` was
 only an alias for `reverse-region`. `buffer-string*` only wrapped
@@ -1779,6 +1779,10 @@ uses `xml-substitute-special` directly instead of the
 removed in favor of `seconds-to-time` with seconds expressed as a float.
 The sole internal use of `int-to-hex` now uses `format` directly.
 The internal `etime<` wrapper was replaced with `time-less-p`.
+The unused deprecated `split-string-at-pos`, `subseq*`, `remf*`, and
+`nminimums` names were removed in favor of `split-at-position`, `cl-subseq`,
+`mremf`, and `minimums`. The uncalled misspelled `repl-wait-for-ouput`
+compatibility alias was also removed.
 
 ### Behaviourally equivalent for observed uses
 

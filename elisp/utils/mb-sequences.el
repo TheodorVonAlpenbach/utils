@@ -239,13 +239,6 @@ Keywords supported: :test :key"
                   (push element minima))))
     (nreverse minima)))
 
-(cl-defun nminimums (cl-seq cl-pred &rest cl-keys)
-  "Compatibility alias for `minimums'.
-CL-SEQ is not modified.
-\n(fn SEQ PREDICATE [KEYWORD VALUE]...)"
-  (apply #'minimums cl-seq cl-pred cl-keys))
-(make-obsolete 'nminimums 'minimums "2026-10-14")
-
 (cl-defun minimum (cl-seq &key (test #'<) key (start 0) end from-end)
   "Find the minimum of SEQ.
 The returned object is the value triple (ELEMENT POSITION VALUE)
@@ -293,13 +286,6 @@ respectively.
 \nKeywords supported:  :test :key :start :end :from-end
 \n(fn SEQ [KEYWORD VALUE]...)"
   (cl-third (apply #'minimum sequence args)))
-
-(cl-defun subseq* (seq &optional (start 0) (end nil))
-  "Return the subsequence of SEQ from START to END.
-This compatibility function is obsolete; use `cl-subseq' instead."
-  (unless (null seq)
-    (cl-subseq seq start end)))
-(make-obsolete 'subseq* 'cl-subseq "2026-10-14")
 
 (defun mb-sequences--pairs (list)
   "Return the consecutive overlapping pairs of LIST.

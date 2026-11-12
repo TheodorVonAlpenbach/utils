@@ -47,11 +47,6 @@ corresponding TAG was found and removed.
     place))
 ;;(let ((p '(:where 123 :columns 321))) (list (mremf p :where :columns :fitna) p))
 
-(cl-defun remf* (&rest args)
-  (warn "This function has been deprecated. Use mremf instead.")
-  (apply #'mremf args))
-;;(remf* '(:where 123 :columns 321 :qwe) :where :columns :fitna)
-
 (cl-defun mapprop (proplist propnames)
   (mapcar (lambda (property) (plist-get proplist property)) propnames))
 ;;(mapprop '(:a 1 :b 2) '(:a :a :b))

@@ -190,10 +190,6 @@ The original ignored MAX-MILLISECONDS and always waited the global time."
         (*repl-last-output-time* nil))
     (should (equal (repl-wait-for-output 1) '("done")))))
 
-(ert-deftest test-mb-lisp-repl-wait-for-output-alias ()
-  "The misspelled original name still works."
-  (should (eq (symbol-function 'repl-wait-for-ouput) #'repl-wait-for-output)))
-
 ;;; Output collection
 
 (ert-deftest test-mb-lisp-process-output ()

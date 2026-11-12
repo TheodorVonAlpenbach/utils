@@ -113,12 +113,7 @@ match."
   (let ((pos (string-match regexp string start)))
     (if pos (match-end 0) nil)))
 
-(cl-defun split-string-at-pos (string &rest positions)
-  (warn "split-string-at-pos is deprecated.
-Use `split-at-position' instead. Called from %s"
-	(cl-second (backtrace-frame 6)))
-  (apply #'split-at-position string positions))
-;;(length (split-string-at-pos "qweqweqwe" 1))
+
 
 (cl-defun split-string-by-length (string n &key (from-end nil))
   "Splits STRING to substrings of length N.

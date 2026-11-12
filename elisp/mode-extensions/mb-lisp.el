@@ -157,9 +157,6 @@ Return `*repl-output*'."
   *repl-output*)
 ;;(repl-wait-for-output)
 
-(defalias 'repl-wait-for-ouput #'repl-wait-for-output
-  "Compatibility alias for the misspelled original name.")
-
 (defun lisp-eval-expression-1 (expression-string &optional waiting-for-result)
   "Send EXPRESSION-STRING to the inferior Lisp process and return the result.
 When WAITING-FOR-RESULT is a number, wait at most that many milliseconds;
