@@ -8,8 +8,6 @@
 
 ;; General regexps
 (defconst *natural-number-regexp* "[123456789][0123456789]*")
-(defconst *empty-regexp* regexp-unmatchable
-  "Matches absolutely nothing.")
 
 (cl-defun regexp-or (&rest strings)
   "Return a regexp matching any raw regexp in STRINGS."

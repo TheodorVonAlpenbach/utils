@@ -6,9 +6,7 @@
 (ert-deftest mb-utils-regexp-constants ()
   (should (string-match-p (concat "\\`" *natural-number-regexp* "\\'") "1"))
   (should (string-match-p (concat "\\`" *natural-number-regexp* "\\'") "123"))
-  (should-not (string-match-p *natural-number-regexp* "0"))
-  (should-not (string-match-p *empty-regexp* ""))
-  (should-not (string-match-p *empty-regexp* "anything")))
+  (should-not (string-match-p *natural-number-regexp* "0")))
 
 (ert-deftest mb-utils-regexp-or ()
   (let ((regexp (concat "\\`" (regexp-or "a+" "b?") "\\'")))
