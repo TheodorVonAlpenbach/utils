@@ -1724,7 +1724,7 @@ usage decision:
   a new optional module with configurable path mapping if that workflow is
   needed again.
 
-Seventeen compatibility wrappers and constants were retired after
+Eighteen compatibility wrappers and constants were retired after
 repository-wide caller checks. `string-to-character-list` duplicated
 `string-to-list`, `blanks` duplicated `make-string`, and `reverse-lines` was
 only an alias for `reverse-region`. `buffer-string*` only wrapped
@@ -1735,7 +1735,8 @@ replaced with `string-join` in `string-head` and `string-tail`. The unused
 standard `decoded-time-*` accessors. The unused `*empty-regexp*` constant was
 removed in favor of `regexp-unmatchable`. The internal XML display path now
 uses `xml-substitute-special` directly instead of the
-`xml-decode-characters` wrapper.
+`xml-decode-characters` wrapper. The unused `parse-ms` conversion wrapper was
+removed in favor of `seconds-to-time` with seconds expressed as a float.
 
 ### Behaviourally equivalent for observed uses
 
@@ -1749,7 +1750,6 @@ matched. They are safe retirement candidates once callers are checked.
 | `string-remove-props` | `substring-no-properties` | Already self-declared obsolete. Differs only in stripping destructively in place rather than copying. |
 | `etime<` | `time-less-p` | The local wrapper now delegates to the standard predicate, which also supports integer and tick/frequency timestamps. |
 | `diff-current-time-msec` | `time-subtract` plus `float-time` | The standard operations preserve timestamp representation independence; multiply the result by 1000 for milliseconds. |
-| `parse-ms` | `seconds-to-time` | Divide milliseconds by 1000.0 before calling the standard function. |
 | `unix-time` and `ms-unix-time` | `float-time` | The local versions additionally accept the broader `parse-time` designators. |
 | `yearweek-number` and `week-number` | `format-time-string` with `%G` and `%V` | Results agree at tested ISO-year boundaries after repairing exact first-Monday handling. |
 | `bytes-to-string` | `unibyte-string` | The local wrapper now delegates to the standard constructor and genuinely returns a unibyte string for bytes above 127. |

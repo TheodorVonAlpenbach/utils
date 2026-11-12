@@ -444,7 +444,6 @@
     (should (equal (getenv "TZ") original))))
 
 (ert-deftest mb-utils-time-millisecond-conversions ()
-  (should (time-equal-p (parse-ms 1500) (seconds-to-time 1.5)))
   (should (= (ms-unix-time "1970-01-01T00:00:01Z") 1000.0))
   (should (equal (with-timezone "GMT"
 		   (parse-ms-unix-time 1500))

@@ -247,11 +247,6 @@ Argument may be a time objects itself or a string."
     (otherwise (error "%S is not a legal time designator" time-designator))))
 ;;(mapcar #'parse-time (list 1527598870.823139 "2005-01-18 09:15" '2014-04-02))
 
-(cl-defun parse-ms (ms)
-  "Converts an integer representing unix milliseconds to new time object."
-  (parse-time (/ (cl-coerce ms 'float) 1000)))
-;;(iso-dttm (parse-ms 1643018173697))
-
 ;;; Notion of time extension: time extension atoms are time points
 ;;; (points in timespace) or time intervals (intervals with time point
 ;;; limits). A time extension is a time extension atom or a list of
