@@ -490,15 +490,10 @@ day of the week."
   etime)
 ;;(iso-dttm (minutestart (parse-time "1972-01-06T08:15:17")))
 
-;; Other utils
-(cl-defun etime< (encoded-time1 encoded-time2)
-  "Returns non-nil iff ENCODED-TIME1 comes before ENCODED-TIME2."
-  (time-less-p encoded-time1 encoded-time2))
-
 (cl-defun time< (time-designator1 time-designator2)
   "Returns non-nil iff TIME1 comes before TIME2."
-  (etime< (parse-time time-designator1)
-	  (parse-time time-designator2)))
+  (time-less-p (parse-time time-designator1)
+	       (parse-time time-designator2)))
 
 (cl-defun time<= (time-designator1 time-designator2)
   "Returns non-nil iff TIME1 comes before TIME2."
@@ -604,7 +599,7 @@ optional parameter ETIME, is `(now)'."
 
 ;;; Period queries
 (cl-defun within-period-p (time period) 
-  (within time period :test #'etime<))
+  (within time period :test #'time-less-p))
 ;;(within-period-p (now) (period :from (midnight) :to (next-midnight)))
 ;;(setf debug-on-error t)
 ;;(debug-on-entry 'within-period-p)
@@ -726,9 +721,9 @@ This function is mainly a helper for `week-number'"
 	      (list y (round (1+ (time- (weekstart etime) (first-week-start y)
 					:week))))))
     (let ((year (etime-year etime)))
-      (if (etime< etime (first-week-start year))
+      (if (time-less-p etime (first-week-start year))
 	(weekno (1- year) etime)
-	(if (not (etime< etime (first-week-start (1+ year))))
+	(if (not (time-less-p etime (first-week-start (1+ year))))
 	  (weekno (1+ year) etime)
 	  (weekno year etime))))))
 ;;(mapcar (compose #'yearweek-number #'parse-time) '(1972-01-01 1972-01-06 2001-12-31 2008-12-29))

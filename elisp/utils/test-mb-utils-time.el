@@ -222,11 +222,6 @@
   (should-not (time< '2018-05-28T00:00EST '2018-05-28T00:00EST))
   (should-not (time< '2018-05-28T00:00:01Z '2018-05-28T00:00:01Z)))
 
-(ert-deftest mb-utils-time-encoded-less-p-representations ()
-  (should (etime< 0 1))
-  (should (etime< '(0 . 1) '(1 . 1)))
-  (should-not (etime< (time-convert 1 'list) 1)))
-
 (ert-deftest mb-utils-time-less-or-equal-p ()
 "Test of `time<='"
   (should (time<= '2018-05-28T00:00CET '2018-05-28T00:00Z))

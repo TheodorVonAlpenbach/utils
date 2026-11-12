@@ -568,7 +568,7 @@ comprises:
 
 * a clean `emacs -Q` load of all ninety-eight utility and mode-extension
   features plus the ERT tooling;
-* 809 passing ERT tests from the batch entry point;
+* 808 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -1764,7 +1764,7 @@ usage decision:
   shell formatting as a new module with an explicit contract and tests rather
   than restoring the incomplete implementation.
 
-Nineteen compatibility wrappers and constants were retired after
+Twenty compatibility wrappers and constants were retired after
 repository-wide caller checks. `string-to-character-list` duplicated
 `string-to-list`, `blanks` duplicated `make-string`, and `reverse-lines` was
 only an alias for `reverse-region`. `buffer-string*` only wrapped
@@ -1778,6 +1778,7 @@ uses `xml-substitute-special` directly instead of the
 `xml-decode-characters` wrapper. The unused `parse-ms` conversion wrapper was
 removed in favor of `seconds-to-time` with seconds expressed as a float.
 The sole internal use of `int-to-hex` now uses `format` directly.
+The internal `etime<` wrapper was replaced with `time-less-p`.
 
 ### Behaviourally equivalent for observed uses
 
@@ -1789,7 +1790,6 @@ matched. They are safe retirement candidates once callers are checked.
 | `empty-string-p` | `string-empty-p` | Both return nil for nil input. |
 | `string-trim*` and its side variants | `string-trim`, `string-trim-left`, `string-trim-right` | Standard also accepts trim regexps; the `:left`/`:right`/`:both` dispatch is the only extra. |
 | `string-remove-props` | `substring-no-properties` | Already self-declared obsolete. Differs only in stripping destructively in place rather than copying. |
-| `etime<` | `time-less-p` | The local wrapper now delegates to the standard predicate, which also supports integer and tick/frequency timestamps. |
 | `diff-current-time-msec` | `time-subtract` plus `float-time` | The standard operations preserve timestamp representation independence; multiply the result by 1000 for milliseconds. |
 | `unix-time` and `ms-unix-time` | `float-time` | The local versions additionally accept the broader `parse-time` designators. |
 | `yearweek-number` and `week-number` | `format-time-string` with `%G` and `%V` | Results agree at tested ISO-year boundaries after repairing exact first-Monday handling. |
