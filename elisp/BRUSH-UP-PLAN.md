@@ -568,7 +568,7 @@ comprises:
 
 * a clean `emacs -Q` load of all ninety-eight utility and mode-extension
   features plus the ERT tooling;
-* 807 passing ERT tests from the batch entry point;
+* 808 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -1586,8 +1586,10 @@ unfinished functions now signal explicit not-implemented errors. Repairs cover
 integer rounding, free variables, cycle scoring, Haversine latitude handling,
 annual interest, byte truncation/endianness/width, signed-byte boundaries,
 four-part date decomposition, and configurable epoch years. The former
-probabilistic test now uses deterministic weighted-selection boundaries. Its
-20 namespaced tests run in the maintained baseline.
+probabilistic test now uses deterministic weighted-selection boundaries. The
+obsolete fixnum-overflow product fallback has been removed now that Emacs uses
+arbitrary-precision integers. Its 23 namespaced tests run in the maintained
+baseline.
 
 [`mb-combinatorics.el`](./utils/mb-combinatorics.el) now loads independently
 with lexical binding and supported Common Lisp accessors. The obsolete
@@ -1765,7 +1767,7 @@ usage decision:
   shell formatting as a new module with an explicit contract and tests rather
   than restoring the incomplete implementation.
 
-Twenty-six compatibility wrappers and constants were retired after
+Twenty-eight compatibility wrappers and constants were retired after
 repository-wide caller checks. `string-to-character-list` duplicated
 `string-to-list`, `blanks` duplicated `make-string`, and `reverse-lines` was
 only an alias for `reverse-region`. `buffer-string*` only wrapped
@@ -1786,6 +1788,8 @@ The unused deprecated `split-string-at-pos`, `subseq*`, `remf*`, and
 compatibility alias was also removed.
 The unused `pure-string` helper was removed because its behavior did not match
 its formatting-removal docstring and no production code depended on it.
+The internal `product-safe` and `product-safe-list` fallback functions were
+removed because modern integer multiplication preserves exact bignums.
 
 ### Behaviourally equivalent for observed uses
 
@@ -1820,7 +1824,6 @@ These look replaceable but are not, and the difference is easy to miss.
 | `parse-time` | `date-to-time`, `seconds-to-time`, and `encode-time` | The local dispatcher accepts strings, symbols, numbers, decoded times, and encoded times; no single standard function has that combined contract. |
 | `time` and `time-val` | `benchmark-run` and `benchmark-call` | Standard benchmarking reports elapsed/GC timing, while the local macros evaluate once, preserve the expression value, and report milliseconds. |
 | `sum` and `product` | `seq-reduce` or `cl-reduce` | The local helpers retain richer keyword forwarding (`sum`) and key/initial-value defaults (`product`), so callers need checking before replacement. |
-| `product-safe` and `product-safe-list` | ordinary integer multiplication | They detect fixnum overflow and switch to floats, but modern Emacs has arbitrary-precision integers. Keeping the old fallback can unnecessarily lose precision; retire only after checking callers that may expect floats. |
 | `jstime` | `seconds-to-time` plus `decode-time` | The standard pair handles Unix timestamps directly. The local result instead uses zero-based month and day-within-month fields and supports a custom base year. |
 | `leap-year-p` and `days-in-month` | `calendar-leap-year-p` and `calendar-last-day-of-month` | The local month argument is zero-based, whereas the calendar API uses months 1 through 12. |
 | `regexp-or` | `regexp-opt` | `regexp-or` combines raw regexp fragments such as `"a+"`; `regexp-opt` treats its input as literal strings and quotes regexp operators. |

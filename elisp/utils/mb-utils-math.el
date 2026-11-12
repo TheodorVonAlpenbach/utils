@@ -100,27 +100,9 @@ For the key arguments, see `cumsum-list'."
   (cl-reduce #'* sequence :key key :initial-value initial-value))
 ;;(product '(1 2 3) :initial-value 2)
 
-(cl-defun product-safe-list (list &key (initial-value 1))
-  "Return the product of LIST's elements,
-converting to float if the product is large for an integer."
-  (cl-loop with res = initial-value
-	   for (first . rest) on list
-	   for y = first then (* first res)
-	   if (< y res) return (product list
-				 :key #'float :initial-value initial-value)
-	   else do (setf res y)
-	   finally return res))
-;;(product-safe-list (list 1 2 3))
-
-(cl-defun product-safe (sequence &rest args)
-  "Return the product of SEQUENCE's elements,
-converting to float if the product is large for an integer."
-  (apply #'product-safe-list (cl-coerce sequence 'list) args))
-;;(product-safe (make-list 19 10))
-
 (cl-defun product* (sequence &key (method :auto) (initial-value 1))
   (cl-case method
-    (:auto (product-safe sequence :initial-value initial-value))
+    (:auto (product sequence :initial-value initial-value))
     (:float (product sequence :key #'float :initial-value initial-value))
     (:integer (product sequence :initial-value initial-value))
     (t (error "Unknown method %S" method))))

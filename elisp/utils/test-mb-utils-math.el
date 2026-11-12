@@ -41,6 +41,13 @@
  (should (equal (cumsum (1-n 3) :key #'* :initial-value 1) '(1 2 6)))
  (should (equal (cumsum (cl-coerce (0-n 3) 'vector)) [0 1 3])))
 
+(ert-deftest mb-utils-math-product-methods ()
+  (let ((factors (make-list 30 10)))
+    (should (equal (product* factors) (expt 10 30)))
+    (should (integerp (product* factors :method :integer)))
+    (should (floatp (product* factors :method :float)))
+    (should-error (product* factors :method :unknown))))
+
 (ert-deftest mb-utils-math-sum ()
   "Test of `sum'"
   (should (equal (sum '(1 2 3 4) :start 1 :initial-value 1) 10))
