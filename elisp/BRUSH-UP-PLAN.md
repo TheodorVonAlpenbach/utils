@@ -1445,11 +1445,6 @@ expressions report a user error, and the command binding uses a per-buffer map
 copy rather than mutating the shared `sql-mode-map`. Its four namespaced tests
 mock the inferior SQL boundary.
 
-[`mb-sh.el`](./mode-extensions/mb-sh.el) remains a usage-decision candidate.
-Its original commit explicitly described it as unfinished, its formatter body
-was never implemented, and there are no repository callers. Modernizing it
-would require choosing new behavior rather than preserving existing behavior.
-
 [`mb-tex.el`](./mode-extensions/mb-tex.el) is loaded explicitly by startup and
 uses the installed AUCTeX integration. It now has lexical binding and explicit
 `cl-lib`, AUCTeX, and RefTeX dependencies. Its outdated copy of
@@ -1737,6 +1732,10 @@ usage decision:
   obsolete Cygwin and Windows share paths. Reintroduce debugger integration as
   a new optional module with configurable path mapping if that workflow is
   needed again.
+* `mb-sh.el` contained unfinished echo-paragraph navigation and an empty
+  formatter body, with no hooks, bindings, or repository callers. Reintroduce
+  shell formatting as a new module with an explicit contract and tests rather
+  than restoring the incomplete implementation.
 
 Nineteen compatibility wrappers and constants were retired after
 repository-wide caller checks. `string-to-character-list` duplicated
