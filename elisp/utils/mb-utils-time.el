@@ -435,17 +435,11 @@ If UNIVERSAL-P is not nil, return the `next-midnight' in UTC."
   (add-etime-time (yearstart etime) :second -1))
 ;;(iso-dttm (yearend (parse-time "1972-01-06")))
 
-(cl-defun monthstart (&optional etime old-etime)
+(cl-defun monthstart (&optional etime)
   "Return encoded time of the start of the month ETIME is in.
-ETIME must be an encoded time object; nil means the current time.
-For compatibility, an integer ETIME is treated as a month offset
-from OLD-ETIME, or from the current time when OLD-ETIME is nil."
-  (if (integerp etime)
-    ;; Old version (MONTHSTART OFFSET ETIME) is now deprecated
-    (progn (warn "This way of calling monthstart is deprecated!")
-	   (add-etime-date (monthstart (or old-etime (now))) :month etime))
-    (--time-encode (without-tz-modification (dtime (decode-time etime))
-		     (append '(0 0 0 1) (cl-subseq dtime 4))))))
+ETIME must be an encoded time object; nil means the current time."
+  (--time-encode (without-tz-modification (dtime (decode-time etime))
+		   (append '(0 0 0 1) (cl-subseq dtime 4)))))
 ;;(iso-dttm (monthstart (parse-time "1972-01-06")))
 ;;(iso-dttm (--time-encode (clean-dtime (decode-time (parse-time "1972-01-06")))))
 ;;(iso-dttm (monthstart (parse-time "2018-03-31")))

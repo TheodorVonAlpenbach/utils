@@ -83,13 +83,6 @@ result is capitalized. Else the entire result is downcased."
       (capitalize string))
     (downcase string)))
 
-(cl-defun pure-string (string)
-  "Removes formatting from STRING and returns result."
-  (cl-typecase string
-    (string string)
-    (sequence (elt string 0))
-    (otherwise (error "unknown string format"))))
-
 (cl-defun empty-string-p (string)
   (and (stringp string)
        (string-empty-p string)))

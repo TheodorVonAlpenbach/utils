@@ -229,8 +229,6 @@
   (should (eql 1 1)))
 
 (ert-deftest mb-utils-strings-basic-conversions ()
-  (should (equal (pure-string "text") "text"))
-  (should (eql (pure-string [?a ?b]) ?a))
   (should (equal (copy-case "example" "X") "Example")))
 
 (ert-deftest mb-utils-strings-string-match-end-start ()

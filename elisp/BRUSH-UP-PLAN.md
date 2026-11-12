@@ -1563,7 +1563,7 @@ were removed, as was a shadowed `substring-intv` implementation. Repairs cover
 its count variables, positional accessors, custom fill character, string
 preservation, match starting position, replacement formatting, and error
 messages. Loading the library no longer installs global quote-word keybindings;
-those commands remain available for explicit configuration. Its 29 namespaced
+those commands remain available for explicit configuration. Its 28 namespaced
 tests now run in the maintained baseline.
 
 [`mb-utils-time.el`](./utils/mb-utils-time.el) now loads independently with
@@ -1575,7 +1575,8 @@ comparison accepts every supported timestamp representation, and temporary
 timezone changes are restored even when their body signals. Repairs cover
 invalid-designator errors, four-part hours/minutes/seconds conversion, exact
 rounding boundaries, and ISO weeks beginning in the following calendar year.
-Its 42 namespaced tests now run in the maintained baseline.
+The uncalled deprecated month-offset convention for `monthstart` has been
+removed. Its 40 namespaced tests now run in the maintained baseline.
 
 [`mb-utils-math.el`](./utils/mb-utils-math.el) is now UTF-8 with lexical
 binding and explicit list, sequence, anaphora, prime-data, general-utility, and
@@ -1764,7 +1765,7 @@ usage decision:
   shell formatting as a new module with an explicit contract and tests rather
   than restoring the incomplete implementation.
 
-Twenty-five compatibility wrappers and constants were retired after
+Twenty-six compatibility wrappers and constants were retired after
 repository-wide caller checks. `string-to-character-list` duplicated
 `string-to-list`, `blanks` duplicated `make-string`, and `reverse-lines` was
 only an alias for `reverse-region`. `buffer-string*` only wrapped
@@ -1783,6 +1784,8 @@ The unused deprecated `split-string-at-pos`, `subseq*`, `remf*`, and
 `nminimums` names were removed in favor of `split-at-position`, `cl-subseq`,
 `mremf`, and `minimums`. The uncalled misspelled `repl-wait-for-ouput`
 compatibility alias was also removed.
+The unused `pure-string` helper was removed because its behavior did not match
+its formatting-removal docstring and no production code depended on it.
 
 ### Behaviourally equivalent for observed uses
 
@@ -1812,7 +1815,6 @@ These look replaceable but are not, and the difference is easy to miss.
 | `substring*` | `substring` | Standard `substring` already supports negative indices, so that is no longer a reason to keep this. They diverge only out of range: `substring*` wraps via `mod` and silently returns a value where `substring` signals `args-out-of-range`. Decide whether that masking is wanted before retiring. |
 | `blank-p` | `string-blank-p` | `blank-p` returns a boolean; `string-blank-p` returns a match position. Interchangeable in conditionals, not under `equal`. |
 | `constantly` | `always` | `always` only covers the constantly-`t` case; `constantly` builds a closure returning any value. |
-| `pure-string` | `substring-no-properties` | Despite its docstring, `pure-string` does not strip text properties: its string branch returns the argument unchanged. Its other branch unwraps a non-string sequence to its first element, which is unrelated to formatting. |
 | `add-etime-date` | `decoded-time-add` | Both add calendar fields, but invalid dates differ: adding one month to 2019-01-31 normalizes to March 3 locally and clamps to February 28 in `decoded-time-add`. DST handling also needs comparison before substitution. |
 | `now` | `current-time` | With no arguments both represent the current instant, but `now` round-trips through decoded time and discards subsecond precision. It also retains a deprecated keyword-adjustment interface. |
 | `parse-time` | `date-to-time`, `seconds-to-time`, and `encode-time` | The local dispatcher accepts strings, symbols, numbers, decoded times, and encoded times; no single standard function has that combined contract. |
