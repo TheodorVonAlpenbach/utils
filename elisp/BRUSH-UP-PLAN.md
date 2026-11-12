@@ -541,7 +541,7 @@ comprises:
 
 * a clean `emacs -Q` load of all ninety-eight utility and mode-extension
   features plus the ERT tooling;
-* 804 passing ERT tests from the batch entry point;
+* 806 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -1456,8 +1456,12 @@ uses the installed AUCTeX integration. It now has lexical binding and explicit
 `TeX-run-function` has been removed in favor of AUCTeX's maintained
 implementation, and two uncalled deprecated helpers have been retired. Two
 focused tests verify that loading the extension preserves the upstream runner
-and that master-file prefixes remain portable. PDF viewing and the unrelated
-global `describe-mode` advice remain for a later behavioral checkpoint.
+and that master-file prefixes remain portable. Loading the library is now
+side-effect free; startup calls the idempotent `mb-tex-setup` function
+explicitly to activate AUCTeX defaults, RefTeX, PDF viewer expansion, and the
+existing global `describe-mode` advice. Four focused tests cover the load and
+setup boundaries. PDF viewing and the unrelated advice behavior remain for a
+later behavioral checkpoint.
 
 [`mb-utils-file.el`](./utils/mb-utils-file.el) now uses built-in path and
 recursive file APIs instead of startup aliases and the shell-oriented

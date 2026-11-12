@@ -6,19 +6,8 @@
 (require 'latex)
 (require 'reftex)
 
-;;; LaTeX
-(setq TeX-auto-save t)
-(setq TeX-parse-self t)
-(setq-default TeX-master nil)
-
-;;; AUCTeX
-(setq TeX-electric-math '(?$ . ?$))
-
-;; reftex
-(add-hook 'LaTeX-mode-hook 'turn-on-reftex)   ; with AUCTeX LaTeX mode
-;;(add-hook 'latex-mode-hook 'turn-on-reftex)   ; with Emacs latex mode
-(setf reftex-plug-into-AUCTeX t)
-(setf reftex-insert-label-flags '("s" "sfte"))
+(defconst mb-tex--viewer-expansion
+  '("%V" (lambda () "open-my-pdf")))
 
 (cl-defun master-prefix  ()
   (expand-file-name
@@ -47,10 +36,6 @@ at work."
 	    (switch-to-buffer-other-window (find-file-noselect pdf-path t))
 	    (revert-buffer t t t)))))))
 
-;;; Add this viewer to TeX-expand-list. (Check if lambda is necessary.)
-(cl-pushnew '("%V" (lambda () "open-my-pdf")) TeX-expand-list :test #'equal)
-;;(nilf TeX-expand-list)
-
 (cl-defun mode-help-follow-mode-advice ()
   (save-excursion
     (other-window 1)
@@ -58,8 +43,17 @@ at work."
     (forward-char 1)
     (push-button)))
 
-(advice-add #'describe-mode :after #'mode-help-follow-mode-advice)
-;;(advice-remove #'describe-mode #'mode-help-follow-mode-advice)
+(defun mb-tex-setup ()
+  "Activate personal AUCTeX and RefTeX configuration."
+  (setq TeX-auto-save t
+	TeX-parse-self t
+	TeX-electric-math '(?$ . ?$)
+	reftex-plug-into-AUCTeX t
+	reftex-insert-label-flags '("s" "sfte"))
+  (setq-default TeX-master nil)
+  (add-hook 'LaTeX-mode-hook #'turn-on-reftex)
+  (cl-pushnew mb-tex--viewer-expansion TeX-expand-list :test #'equal)
+  (advice-add #'describe-mode :after #'mode-help-follow-mode-advice))
 
 (provide 'mb-tex)
 

@@ -501,6 +501,7 @@ loading of files."
 (setf calendar-week-start-day 1)
 ;;(require 'pcvs)
 (require 'mb-tex)
+(mb-tex-setup)
 (require 'mb-octave)
 ;;(cvs-change-cvsroot ":ext:mbe@192.168.0.17:/ls/silver/repository")
 
