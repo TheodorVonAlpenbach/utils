@@ -1724,11 +1724,14 @@ usage decision:
   a new optional module with configurable path mapping if that workflow is
   needed again.
 
-Four unused compatibility wrappers were retired after a repository-wide caller
-check. `string-to-character-list` duplicated `string-to-list`, `blanks`
-duplicated `make-string`, and `reverse-lines` was only an alias for
-`reverse-region`. The internal `lines-to-string` helper was replaced with
-`string-join` in `string-head` and `string-tail`.
+Six unused compatibility wrappers were retired after repository-wide caller
+checks. `string-to-character-list` duplicated `string-to-list`, `blanks`
+duplicated `make-string`, `reverse-lines` was only an alias for
+`reverse-region`, and `buffer-string*` only wrapped
+`buffer-substring-no-properties`. The internal `lines-to-string` helper was
+replaced with `string-join` in `string-head` and `string-tail`. The unused
+`string-fill-paragraph` wrapper was removed in favor of the standard
+`string-fill`.
 
 ### Behaviourally equivalent for observed uses
 
@@ -1738,7 +1741,6 @@ matched. They are safe retirement candidates once callers are checked.
 | Local | Standard | Note |
 | --- | --- | --- |
 | `empty-string-p` | `string-empty-p` | Both return nil for nil input. |
-| `string-fill-paragraph` | `string-fill` | Standard takes an explicit width. |
 | `string-trim*` and its side variants | `string-trim`, `string-trim-left`, `string-trim-right` | Standard also accepts trim regexps; the `:left`/`:right`/`:both` dispatch is the only extra. |
 | `string-remove-props` | `substring-no-properties` | Already self-declared obsolete. Differs only in stripping destructively in place rather than copying. |
 | `dtime-second` through `dtime-time-zone` | `decoded-time-second` through `decoded-time-zone` | The public local names now alias the standard decoded-time accessors. |
@@ -1751,7 +1753,6 @@ matched. They are safe retirement candidates once callers are checked.
 | `string-to-bytes` | `string-to-list` | The local wrapper now delegates directly to the standard function. |
 | `int-to-hex` | `format` with `%x` | The helper only adds optional zero-padding. |
 | `current-year` | `format-time-string` with `%Y`, or `decoded-time-year` | The local helper now uses the standard decoded-time accessor. |
-| `buffer-string*` | `buffer-substring-no-properties` from `point-min` to `point-max` | The local helper only adds an optional buffer argument. |
 | `*empty-regexp*` | `regexp-unmatchable` | The local constant now uses the standard value; its former `"\\`\\`"` value incorrectly matched the empty string at the start of input. |
 | `xml-decode-characters` | `xml-substitute-special` | The local wrapper now delegates to the standard XML entity and numeric-character-reference decoder; its obsolete locale-table argument is retained only for call compatibility. |
 

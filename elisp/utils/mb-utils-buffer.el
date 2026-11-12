@@ -325,11 +325,6 @@ end of buffer if not already present."
     (save-excursion (region-lines (bob) (eob)))))
 ;;(buffer-lines)
 
-(cl-defun buffer-string* (&optional (buffer (current-buffer)))
-  (with-current-buffer buffer
-    (buffer-substring-no-properties (point-min) (point-max))))
-;;(buffer-lines)
-
 ;;; Paragraph stuff
 (defsubst bop ()
   "Move POINT to beginning of paragraph and return its value"

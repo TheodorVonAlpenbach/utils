@@ -84,7 +84,6 @@
     (goto-char 2)
     (should (equal (buffer-region) '(1 4)))
     (should (equal (buffer-lines) '("a" "b")))
-    (should (equal (buffer-string*) "a\nb"))
     (should (= (point) 2))))
 
 (ert-deftest mb-utils-buffer-line-operations ()

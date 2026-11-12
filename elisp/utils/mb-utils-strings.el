@@ -533,16 +533,6 @@ consider `buffer-substring-no-properties'"
   (message "This method is obsolete. Use `substring-no-properties' instead")
   (set-text-properties 0 (length string) nil string) string)
 
-(cl-defun string-fill-paragraph (string)
-  "Modyfies STRING as if it were a substring in a text buffer and
-one applied `fill-paragraph' to it"
-  (string-trim (with-temp-buffer
-		 (text-mode)
-		 (insert string)
-		 (fill-paragraph nil)
-		 (buffer-string))))
-;;(string-fill-paragraph "asdf\n                 asdf\nesf")
-
 (cl-defun substring* (string &optional (start 0) (end nil))
   "Same as SUBSTRING but takes negative limit arguments (meaning from end)"
   (let ((n (length string)))
