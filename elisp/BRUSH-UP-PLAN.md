@@ -540,7 +540,7 @@ comprises:
 
 * a clean `emacs -Q` load of all ninety-eight utility and mode-extension
   features plus the ERT tooling;
-* 802 passing ERT tests from the batch entry point;
+* 801 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -1724,14 +1724,15 @@ usage decision:
   a new optional module with configurable path mapping if that workflow is
   needed again.
 
-Six unused compatibility wrappers were retired after repository-wide caller
+Fifteen compatibility wrappers were retired after repository-wide caller
 checks. `string-to-character-list` duplicated `string-to-list`, `blanks`
 duplicated `make-string`, `reverse-lines` was only an alias for
 `reverse-region`, and `buffer-string*` only wrapped
 `buffer-substring-no-properties`. The internal `lines-to-string` helper was
 replaced with `string-join` in `string-head` and `string-tail`. The unused
 `string-fill-paragraph` wrapper was removed in favor of the standard
-`string-fill`.
+`string-fill`. The nine `dtime-*` aliases were replaced internally with the
+standard `decoded-time-*` accessors.
 
 ### Behaviourally equivalent for observed uses
 
@@ -1743,7 +1744,6 @@ matched. They are safe retirement candidates once callers are checked.
 | `empty-string-p` | `string-empty-p` | Both return nil for nil input. |
 | `string-trim*` and its side variants | `string-trim`, `string-trim-left`, `string-trim-right` | Standard also accepts trim regexps; the `:left`/`:right`/`:both` dispatch is the only extra. |
 | `string-remove-props` | `substring-no-properties` | Already self-declared obsolete. Differs only in stripping destructively in place rather than copying. |
-| `dtime-second` through `dtime-time-zone` | `decoded-time-second` through `decoded-time-zone` | The public local names now alias the standard decoded-time accessors. |
 | `etime<` | `time-less-p` | The local wrapper now delegates to the standard predicate, which also supports integer and tick/frequency timestamps. |
 | `diff-current-time-msec` | `time-subtract` plus `float-time` | The standard operations preserve timestamp representation independence; multiply the result by 1000 for milliseconds. |
 | `parse-ms` | `seconds-to-time` | Divide milliseconds by 1000.0 before calling the standard function. |

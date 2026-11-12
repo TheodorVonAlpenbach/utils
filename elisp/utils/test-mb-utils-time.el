@@ -210,17 +210,6 @@
 		     (parse-time '(0 0 0 6 1 2018 6 nil 3600))
 		     '(23120 880))))
 
-(ert-deftest mb-utils-time-decoded-accessors ()
-  (let ((decoded '(17 15 8 6 1 1972 4 nil 3600)))
-    (should (equal (mapcar (lambda (accessor)
-			    (funcall accessor decoded))
-			  '(dtime-second dtime-minute dtime-hour
-			    dtime-day dtime-month dtime-year
-			    dtime-day-of-week
-			    dtime-daylight-saving-time-p
-			    dtime-time-zone))
-		   '(17 15 8 6 1 1972 4 nil 3600)))))
-
 (ert-deftest mb-utils-time-invalid-designator ()
   (should-error (parse-time [1 2]) :type 'error))
 

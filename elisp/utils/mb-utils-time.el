@@ -42,25 +42,15 @@
 ;;;; See also http://tycho.usno.navy.mil/leapsec.html
 ;;;; You can check if leap seconds are supported by invoking the method leap-seconds-supported-p
 
-(defalias 'dtime-second #'decoded-time-second)
-(defalias 'dtime-minute #'decoded-time-minute)
-(defalias 'dtime-hour #'decoded-time-hour)
-(defalias 'dtime-day #'decoded-time-day)
-(defalias 'dtime-month #'decoded-time-month)
-(defalias 'dtime-year #'decoded-time-year)
-(defalias 'dtime-day-of-week #'decoded-time-weekday) ;; 0 is Sunday.
-(defalias 'dtime-daylight-saving-time-p #'decoded-time-dst)
-(defalias 'dtime-time-zone #'decoded-time-zone)
-
-(cl-defun etime-second (x) (dtime-second (decode-time x)))
-(cl-defun etime-minute (x) (dtime-minute (decode-time x)))
-(cl-defun etime-hour (x) (dtime-hour (decode-time x)))
-(cl-defun etime-day (x) (dtime-day (decode-time x)))
-(cl-defun etime-month (x) (dtime-month (decode-time x)))
-(cl-defun etime-year (x) (dtime-year (decode-time x)))
-(cl-defun etime-day-of-week (x) (dtime-day-of-week (decode-time x)))
-(cl-defun etime-daylight-saving-time-p (x) (dtime-daylight-saving-time-p (decode-time x)))
-(cl-defun etime-time-zone (x) (dtime-time-zone (decode-time x)))
+(cl-defun etime-second (x) (decoded-time-second (decode-time x)))
+(cl-defun etime-minute (x) (decoded-time-minute (decode-time x)))
+(cl-defun etime-hour (x) (decoded-time-hour (decode-time x)))
+(cl-defun etime-day (x) (decoded-time-day (decode-time x)))
+(cl-defun etime-month (x) (decoded-time-month (decode-time x)))
+(cl-defun etime-year (x) (decoded-time-year (decode-time x)))
+(cl-defun etime-day-of-week (x) (decoded-time-weekday (decode-time x)))
+(cl-defun etime-daylight-saving-time-p (x) (decoded-time-dst (decode-time x)))
+(cl-defun etime-time-zone (x) (decoded-time-zone (decode-time x)))
 
 (defmacro with-timezone (timezone-name &rest body)
   "Temporarily set local timezone to TIMEZONE-NAME and evaluate BODY."
@@ -86,7 +76,7 @@
   "Apply `encode-time' on DTIME. If UNIVERSAL-P is not nil, discard
 time zone offset in DTIME."
   (if universal-p
-    (time-add (apply #'encode-time dtime) (list 0 (dtime-time-zone dtime)))
+    (time-add (apply #'encode-time dtime) (list 0 (decoded-time-zone dtime)))
     (apply #'encode-time dtime)))
 ;;(--time-encode (decode-time) t)
 
@@ -103,8 +93,8 @@ boundary.  BODY should not modify DTIME destructively."
     `(let* ((,dtime ,expr)
 	    (,gdtime-res (clean-dtime (progn ,@body))))
        (--add-dtime ,gdtime-res
-		    :second (- (dtime-time-zone ,dtime)
-			       (dtime-time-zone ,gdtime-res))))))
+		    :second (- (decoded-time-zone ,dtime)
+			       (decoded-time-zone ,gdtime-res))))))
 (def-edebug-spec without-tz-modification body)
 
 (cl-defun --add-ddate (dtime &key (year 0) (month 0) (week 0) (day 0))
@@ -112,9 +102,9 @@ boundary.  BODY should not modify DTIME destructively."
   ;; weeks, and days should not be affected by change in daylight
   ;; saving time status.
   (without-tz-modification (dtime dtime)
-    (let ((d (+ (+ day (* 7 week)) (dtime-day dtime)))
-	  (m (+ month (dtime-month dtime)))
-	  (y (+ year (dtime-year dtime))))
+    (let ((d (+ (+ day (* 7 week)) (decoded-time-day dtime)))
+	  (m (+ month (decoded-time-month dtime)))
+	  (y (+ year (decoded-time-year dtime))))
       (replace-sequence dtime (list d m y) 3 6))))
 ;;(--add-ddate (decode-time (parse-time "2018-03-25T12:00")) :day -1)
 
@@ -481,7 +471,7 @@ day of the week."
   (let ((dtime (decode-time etime)))
     (midnight (--time-encode
 		(--add-ddate dtime
-			     :day (- (mod (- (dtime-day-of-week dtime)
+			     :day (- (mod (- (decoded-time-weekday dtime)
 					     (weekday-number start-weekday))
 					  7)))))))
 ;;(iso-dttm (weekstart (now) :sunday))
