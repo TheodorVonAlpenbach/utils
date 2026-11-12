@@ -37,7 +37,6 @@ byte-compilation or test results:
 
 | File | Location | Observed problem |
 | --- | --- | --- |
-| [`dict.el`](./dictionary/dict.el) | Line 1 | Stray escaping before the initial `require`; reader reports invalid syntax. |
 | [`demo.el`](./archive/music-analyzer/demo.el) | Line 192 | Unexpected closing parenthesis in archived code. |
 
 Fix these promptly if they are retained and used; otherwise classify them as
@@ -60,6 +59,20 @@ The unreferenced `div/azure-REST.el` experiment has been retired. It mixed
 unfinished Emacs Lisp and PHP, targeted a 2015 Azure API, and contained an
 embedded storage key. Git history remains available if any signing ideas need
 to be recovered, but the credential must not be reused.
+
+The 25-year-old web-dictionary integration (`dictionary/dict.el` and
+`dictionary/dic-map.el`) has also been retired, together with its broken global
+F1 binding. It depended on Lynx screen scraping, obsolete HTTP endpoints, a
+machine-local proxy database, and load-time persistence hooks. The separate
+phone and district utilities remain untouched, as does the archived Lynx code.
+
+A future replacement may turn current multilingual RSS or Atom news items into
+provisional quiz material. Keep that feature separate from the retired code:
+fetch feeds explicitly, represent articles as neutral records containing
+language, headline, summary, source URL, and publication time, and require
+review before passing generated questions through the maintained quiz import
+boundary. Reading can use EWW, a normal browser, or an optional feed package;
+loading the module must not fetch feeds or write quiz data.
 
 ### Old or potentially obsolete code
 

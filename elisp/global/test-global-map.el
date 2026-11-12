@@ -23,6 +23,7 @@
                 #'mb-global-map-switch-to-other-buffer))
     (should (eq (lookup-key map (kbd "C-+"))
                 #'mb-global-map-increment-1))
+    (should-not (lookup-key map (kbd "<f1>")))
     (should-not (lookup-key map (kbd "<f12>")))
     (should (eq (lookup-key lisp-mode-shared-map (kbd "C-c e"))
                 #'eval-buffer))

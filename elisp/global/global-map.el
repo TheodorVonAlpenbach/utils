@@ -220,7 +220,6 @@ With prefix LEVEL, limit the search to that directory depth."
                ("<f4>" . enlarge-window)
                ("S-<f3>" . shrink-window-horizontally)
                ("S-<f4>" . enlarge-window-horizontally)
-               ("<f1>" . dic-lookup-at-point)
                ("M-<f3>" . shrink-frame)
                ("M-<f4>" . enlarge-frame)
                ("M-S-<f3>" . shrink-frame-horizontally)
