@@ -541,7 +541,7 @@ comprises:
 
 * a clean `emacs -Q` load of all ninety-eight utility and mode-extension
   features plus the ERT tooling;
-* 806 passing ERT tests from the batch entry point;
+* 809 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -1460,8 +1460,12 @@ and that master-file prefixes remain portable. Loading the library is now
 side-effect free; startup calls the idempotent `mb-tex-setup` function
 explicitly to activate AUCTeX defaults, RefTeX, PDF viewer expansion, and the
 existing global `describe-mode` advice. Four focused tests cover the load and
-setup boundaries. PDF viewing and the unrelated advice behavior remain for a
-later behavioral checkpoint.
+setup boundaries. PDF helpers are now namespaced, and region viewing uses
+AUCTeX's `TeX-current-process-region-p` and `TeX-region-file` APIs instead of a
+fixed-depth backtrace inspection. Six focused tests cover loading, setup,
+master paths, and mocked master/region PDF display without opening real files
+or windows. A seventh test verifies the display boundary with a disposable PDF
+path. The unrelated advice behavior remains for a later checkpoint.
 
 [`mb-utils-file.el`](./utils/mb-utils-file.el) now uses built-in path and
 recursive file APIs instead of startup aliases and the shell-oriented

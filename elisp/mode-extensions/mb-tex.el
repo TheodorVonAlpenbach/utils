@@ -7,34 +7,36 @@
 (require 'reftex)
 
 (defconst mb-tex--viewer-expansion
-  '("%V" (lambda () "open-my-pdf")))
+  '("%V" (lambda () "mb-tex-open-pdf")))
 
-(cl-defun master-prefix  ()
+(defun mb-tex-master-prefix ()
+  "Return the absolute path of the current TeX master without extension."
   (expand-file-name
    (file-name-sans-extension (TeX-master-file))
    (TeX-master-directory)))
-;;(master-prefix)
 
-(cl-defun open-my-pdf (&optional x)
-  "Find master file and view the corresponding PDF file in a buffer.
-Need to include this function in some view parameter. Check this
-at work."
-  (if (and x (file-exists-p (concat x ".pdf")))
-    (progn (switch-to-buffer-other-window
-	    (find-file-noselect (concat x ".pdf") t))
-	   (revert-buffer t t t))
-    (let* ((master-prefix (master-prefix))
+(defun mb-tex--display-pdf (path)
+  "Display and refresh the PDF at PATH when it exists."
+  (when (file-exists-p path)
+    (switch-to-buffer-other-window (find-file-noselect path t))
+    (revert-buffer t t t)))
+
+(defun mb-tex-open-pdf (&optional prefix)
+  "Display the PDF for PREFIX, the active region, or the TeX master.
+PREFIX is an extensionless path.  When the last AUCTeX command
+operated on a region, use its region PDF instead of the master."
+  (cond
+   (prefix
+    (mb-tex--display-pdf (concat prefix ".pdf")))
+   (TeX-current-process-region-p
+    (mb-tex--display-pdf (TeX-region-file "pdf")))
+   (t
+    (let* ((master-prefix (mb-tex-master-prefix))
 	   (tex-path (concat master-prefix ".tex"))
 	   (pdf-path (concat master-prefix ".pdf")))
-      (if (eql (cadr (backtrace-frame 19)) 'TeX-command-run-all-region)
-	(when (file-exists-p "_region.pdf_")
-	  (switch-to-buffer-other-window (find-file-noselect "_region.pdf_" t))
-	  (revert-buffer t t t))
-	(if (file-newer-than-file-p tex-path pdf-path)
+      (if (file-newer-than-file-p tex-path pdf-path)
 	  (message "Sentinel called too early!")
-	  (when (file-exists-p pdf-path)
-	    (switch-to-buffer-other-window (find-file-noselect pdf-path t))
-	    (revert-buffer t t t)))))))
+	(mb-tex--display-pdf pdf-path))))))
 
 (cl-defun mode-help-follow-mode-advice ()
   (save-excursion
