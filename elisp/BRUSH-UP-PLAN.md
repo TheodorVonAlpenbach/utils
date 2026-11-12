@@ -38,7 +38,6 @@ byte-compilation or test results:
 | File | Location | Observed problem |
 | --- | --- | --- |
 | [`dict.el`](./dictionary/dict.el) | Line 1 | Stray escaping before the initial `require`; reader reports invalid syntax. |
-| [`azure-REST.el`](./div/azure-REST.el) | Form beginning at line 29; error at line 61 | An unfinished implementation includes PHP-like text inside the Lisp source. |
 | [`demo.el`](./archive/music-analyzer/demo.el) | Line 192 | Unexpected closing parenthesis in archived code. |
 
 Fix these promptly if they are retained and used; otherwise classify them as
@@ -56,6 +55,11 @@ unfinished experiment, not as part of the maintained quiz application. Its
 reader error and startup-era aliases have been repaired, its dependencies are
 declared, and unfinished polygon operations now signal explicit errors. Its
 machine-specific source-data path and geometry behavior remain experimental.
+
+The unreferenced `div/azure-REST.el` experiment has been retired. It mixed
+unfinished Emacs Lisp and PHP, targeted a 2015 Azure API, and contained an
+embedded storage key. Git history remains available if any signing ideas need
+to be recovered, but the credential must not be reused.
 
 ### Old or potentially obsolete code
 
