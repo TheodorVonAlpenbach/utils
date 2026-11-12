@@ -39,13 +39,18 @@ byte-compilation or test results:
 | --- | --- | --- |
 | [`dict.el`](./dictionary/dict.el) | Line 1 | Stray escaping before the initial `require`; reader reports invalid syntax. |
 | [`azure-REST.el`](./div/azure-REST.el) | Form beginning at line 29; error at line 61 | An unfinished implementation includes PHP-like text inside the Lisp source. |
-| [`rotations.el`](./games/cube/rotations.el) | Line 68 | `#[...]` is read as a byte-code object, not an ordinary vector. |
 | [`demo.el`](./archive/music-analyzer/demo.el) | Line 192 | Unexpected closing parenthesis in archived code. |
 | [`kommuner.el`](./quiz/kommuner.el) | Line 72 | Unexpected closing parenthesis. |
 
 Fix these promptly if they are retained and used; otherwise classify them as
 experiments or archive candidates. Do not spend substantial effort repairing
 abandoned features merely to make a whole-tree scan green.
+
+[`rotations.el`](./games/cube/rotations.el) is retained as an explicitly
+unfinished experiment. It now reads and loads independently, declares its
+utility dependencies, avoids load-time scratch evaluation, and signals clearly
+from its unimplemented TikZ entry point. It is not part of the maintained test
+manifest.
 
 ### Old or potentially obsolete code
 

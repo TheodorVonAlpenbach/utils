@@ -1,3 +1,20 @@
+;;; rotations.el --- Experimental Rubik's Cube permutations -*- lexical-binding: t; -*-
+
+;;; Commentary:
+
+;; An unfinished exploration of Rubik's Cube edge permutations and their
+;; projection onto face segments.  This is retained as an experiment rather
+;; than maintained cube infrastructure.  `tikz-arrow-points' remains
+;; intentionally unimplemented.
+
+;;; Code:
+
+(require 'cl-lib)
+(require 'mb-lists)
+(require 'mb-sequences)
+(require 'mb-utils-div)
+(require 'mb-utils-math)
+
 ;;; Side colors are numbered 0..11 starting from lower left. Faces are
 ;;; numbered 0..8, also starting from lower left:
 ;;;
@@ -8,16 +25,16 @@
 ;;;     0  1  2
 
 (cl-defun perm-swap (x &rest swaps)
-  "Swap the Ith and Jth elements in X, where each SWAP = (I J)" 
+  "Swap the Ith and Jth elements in X, where each SWAP = (I J)."
   (cl-loop for (i j) in swaps
-	do (rotatef (nth i x) (nth j x)))
+	do (cl-rotatef (nth i x) (nth j x)))
   x)
 ;;(perm-swap (0-n 12) '(2 4) '(2 4))
 
 (cl-defun perm-rot3 (x rot3)
-  "Rotate the Ith, Jth, Kth elements in X, where rot3 = (I J K)" 
+  "Rotate the Ith, Jth, and Kth elements in X, where ROT3 = (I J K)."
   (cl-destructuring-bind (i j k) rot3
-    (rotatef (nth i x) (nth j x) (nth k x))
+    (cl-rotatef (nth i x) (nth j x) (nth k x))
     x))
 ;;(perm-rot3 (0-n 12) '(4 7 10))
 
@@ -65,17 +82,18 @@
 ;; ... and so on
 
 (cl-defun edge2face (edge)
-  (aref #[0 1 2 2 3 4 4 5 6 6 7 0] edge))
+  (aref [0 1 2 2 3 4 4 5 6 6 7 0] edge))
 ;;(mapcar #'edge2face (0-n 12))
 
 (cl-defun set-equal-p (numbers1 numbers2)
   "Not in use here anymore."
-  (equal (sort* (copy-list numbers1) #'<) (sort* (copy-list numbers2) #'<)))
+  (equal (cl-sort (copy-sequence numbers1) #'<)
+         (cl-sort (copy-sequence numbers2) #'<)))
 ;;(set-equal-p '(0 2) '(2 0))
 
 (cl-defun perm2face-segments-raw (perm)
   "Return a list consisting of all 2-rotations in PERM."
-  (remove-duplicates
+  (cl-remove-duplicates
       (cl-loop for p in perm for i from 0 if (/= p i)
 	    collect (maptree #'edge2face (list i p)))
     :test #'equal))
@@ -84,17 +102,19 @@
 (cl-defun perm2face-segments (perm)
   "Return two lists consisting of ONE-WAY and TWO-WAY segments, respectively."
   (let ((p (partition (perm2face-segments-raw perm)
-		      :key #'(lambda (x) (cl-sort (copy-list x) #'<))
+		      :key #'(lambda (x) (cl-sort (copy-sequence x) #'<))
 		      :test #'equal)))
     (cl-loop for x in p
-	  if (= (length x) 1) collect (first x) into one-way
-	  if (= (length x) 2) collect (first x) into two-way
+	  if (= (length x) 1) collect (car x) into one-way
+	  if (= (length x) 2) collect (car x) into two-way
 	  finally return (list one-way two-way))))
 ;;(perm2face-segments (pll-E))
 ;;(perm2face-segments (pll-Aa))
 
-(partition '((2 0) (0 2)) :key #'(lambda (x) (sort* (copy x) #'<)))
+(cl-defun tikz-arrow-points (_perm)
+  "Signal that TikZ arrow point generation is not implemented."
+  (error "TikZ arrow point generation is not implemented"))
 
+(provide 'rotations)
 
-(cl-defun tikz-arrow-points (perm)
-  )
+;;; rotations.el ends here
