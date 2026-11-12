@@ -3,7 +3,7 @@
 (require 'ert)
 (require 'mb-utils-tree)
 
-(ert-deftest test-copy-tree ()
+(ert-deftest mb-utils-tree-copy-tree ()
   "Test that the built-in `copy-tree' does not share list structure."
   (should-not (copy-tree nil))
   (should (= (copy-tree 1) 1))
@@ -15,7 +15,7 @@
     (setcar (car tree) 2)
     (should-not (equal tree copy))))
 
-(ert-deftest test-relations-tree-round-trip ()
+(ert-deftest mb-utils-tree-relations-round-trip ()
   "Test conversion between relations and trees."
   (let* ((relations '((a b) (a c) (c d) (b e)))
          (tree (car (relations->tree relations))))
@@ -27,11 +27,11 @@
                             :key (lambda (relation)
                                    (format "%S" relation)))))))
 
-(ert-deftest test-tree->relations ()
+(ert-deftest mb-utils-tree-tree-to-relations ()
   "Test of `tree->relations'"
  (should (equal (tree->relations nil) nil)))
 
-(ert-deftest test-find-subtree ()
+(ert-deftest mb-utils-tree-find-subtree ()
   "Test of `find-subtree'"
   (should (equal (find-subtree 'f '((a (b (c (d))))
 				    (e (f (g (h))))))
@@ -45,7 +45,17 @@
                   :filter :prune :from-end t)
                  '((e (f (g (h))))))))
 
-(ert-deftest test-tree-leaves ()
+(ert-deftest mb-utils-tree-copy-subtree ()
+  (let ((trees '((a (b (f (d))))
+		 (e (f (g (h)))))))
+    (should (equal (copy-subtree 'f trees)
+		   '((f (d)) (f (g (h))))))
+    (should (equal (copy-subtree 'f trees :from-end t)
+		   '((f (g (h))) (f (d)))))
+    (should-error (copy-subtree 'f trees :filter :invalid)
+		  :type 'error)))
+
+(ert-deftest mb-utils-tree-leaves ()
   "Test of `tree-leaves'"
   (should (equal (tree-leaves '()) nil))
   (should (equal (tree-leaves '(a)) '(a)))
@@ -54,7 +64,7 @@
   (should (equal (tree-leaves '(a (b) (c))) '(b c)))
   (should (equal (tree-leaves '(a (c (d (f))) (b (e)))) '(f e))))
 
-(ert-deftest test-tree-member ()
+(ert-deftest mb-utils-tree-member ()
   "Test of `tree-member'"
   (should (equal (tree-member 'a ()) nil))
   (should (equal (tree-member 'a '(a)) '(a)))

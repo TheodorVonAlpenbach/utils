@@ -23,7 +23,7 @@ Backup/autosave files are not source and are outside the cleanup scope.
 | Initialization and libraries are coupled | [`.emacs`](./.emacs) defines global Common Lisp aliases, assembles broad load paths, eagerly loads many features, and opens files. Libraries such as [`mb-lists.el`](./utils/mb-lists.el) use those aliases without declaring them. | Establish independent library loading before simplifying startup. Remove aliases only after migrating their callers. |
 | Repeated definitions hide earlier implementations | The reader scan found 37 repeated top-level function/macro definitions. Examples include `nor` in [`mb-utils-div.el`](./utils/mb-utils-div.el) and `set-indent` in [`mb-indent.el`](./global/mb-indent.el). The duplicate `parse-csv-string` in [`mb-utils-io.el`](./utils/mb-utils-io.el) has since been consolidated. | Compare implementations and call sites, test the intended contract, and retain one implementation. Do not assume the earlier version is expendable. |
 | Existing tests are a useful but inconsistent starting point | [`test-mb-utils-strings.el`](./utils/test-mb-utils-strings.el) declares its library dependency; [`test-mb-sequences.el`](./utils/test-mb-sequences.el) does not. [`test-mb-utils-file.el`](./utils/test-mb-utils-file.el) assumes a particular home-directory layout. | Make tests independent of a populated interactive session and the developer's machine. |
-| Test discovery and execution need consolidation | [`mb-ert.el`](./mode-extensions/mb-ert.el) formerly excluded `mb-js-mode` filenames, repeated a runner definition, and ran only already-loaded tests. Discovery and the maintained manifest are now separate, though both [`ert-mb-utils-tree.el`](./utils/ert-mb-utils-tree.el) and [`test-mb-utils-tree.el`](./utils/test-mb-utils-tree.el) still need review. | Continue adding safe tests to the explicit manifest while keeping external-service/process tests opt-in. |
+| Test discovery and execution need consolidation | [`mb-ert.el`](./mode-extensions/mb-ert.el) formerly excluded `mb-js-mode` filenames, repeated a runner definition, and ran only already-loaded tests. Discovery and the maintained manifest are now separate, and the duplicate tree test file has been removed. | Continue adding safe tests to the explicit manifest while keeping external-service/process tests opt-in. |
 | Lexical binding needs a careful migration | Only 10 tracked files have a first-line `lexical-binding: t` header. [`mb-lists.el`](./utils/mb-lists.el) returns lambdas referencing local bindings, for example in `explicit<`. | Test returned functions after their creator returns. Migrate one module at a time; preserve intentional dynamic variables with `defvar` or `defcustom`. |
 | Core helpers mix infrastructure with experiments | [`mb-utils-math.el`](./utils/mb-utils-math.el) includes experimental helpers after an initial `provide`. Load-time samples and Windows-only temporary paths have been removed from [`mb-utils-io.el`](./utils/mb-utils-io.el). | Separate demonstrations from reusable definitions and eliminate unintended load-time work. |
 | Global setup contains conflicting or machine-specific bindings | [`global-map.el`](./global/global-map.el) binds F12 twice and includes a hard-coded document compilation command. [`mb-org.el`](./mode-extensions/mb-org.el) assumes Evil and key-chord functionality in its mode hook. | Preserve useful commands, make optional integrations explicit, and move machine-specific behavior out of shared setup. |
@@ -460,7 +460,7 @@ The first subset is intentionally conservative:
   transformations, parent directories, and recursive Scilab source copying.
 * [`test-mb-utils-sets.el`](./utils/test-mb-utils-sets.el): three ERT tests for
   open/closed interval boundaries, one-dimensional spheres, and set equality.
-* [`test-mb-utils-tree.el`](./utils/test-mb-utils-tree.el): six ERT tests for
+* [`test-mb-utils-tree.el`](./utils/test-mb-utils-tree.el): seven ERT tests for
   relation conversion, subtree filtering, leaf and member traversal, and
   independent tree copying.
 * [`test-mb-things.el`](./utils/test-mb-things.el): six ERT tests for generated
@@ -540,7 +540,7 @@ comprises:
 
 * a clean `emacs -Q` load of all ninety-eight utility and mode-extension
   features plus the ERT tooling;
-* 801 passing ERT tests from the batch entry point;
+* 802 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -1467,8 +1467,10 @@ directories rather than assuming that the home directory is under `/home`.
 declares its built-in dependencies. Its narrower redefinition of Emacs's
 `copy-tree` has been removed, and startup-provided `flatten` and `aif` helpers
 have been replaced with built-in operations. The maintained tests characterize
-the existing subtree-filter result shapes and verify relation conversion and
-copy independence. The older duplicate `ert-mb-utils-tree.el` test file has been removed.
+the existing subtree-filter result shapes, multi-match copy order and invalid
+filters, relation conversion, and copy independence. The tests now use
+module-namespaced ERT symbols, and the older duplicate
+`ert-mb-utils-tree.el` test file has been removed.
 
 [`mb-sequences.el`](./utils/mb-sequences.el) now loads without the startup
 environment and uses `cl-lib` directly. Its public helper names remain
