@@ -1675,8 +1675,11 @@ constants were refreshed, escape velocity now honors the supplied body mass,
 and meter-to-parsec now performs the conversion its name promises; the inverse
 is available as `parsec-to-meter`. Constant-acceleration velocity consistently
 uses the supplied acceleration, and unknown alcohol symbols signal an error
-instead of recursing indefinitely. Its six namespaced tests run in the
-maintained baseline.
+instead of recursing indefinitely. Physical constants and conversion factors
+are now documented, parsecs and thermochemical calories use their exact
+definitions, and constant-acceleration helpers use standard gravity by default.
+Impossible acceleration and alcohol inputs are rejected explicitly. Its six
+namespaced tests run in the maintained baseline.
 
 [`mb-utils-geometry.el`](./utils/mb-utils-geometry.el) now loads independently
 with lexical binding and `cl-lib` as its only dependency. Its one-dimensional
