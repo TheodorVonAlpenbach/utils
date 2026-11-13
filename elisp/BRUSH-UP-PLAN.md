@@ -501,7 +501,7 @@ The first subset is intentionally conservative:
 * [`test-mb-math-functions.el`](./utils/test-mb-math-functions.el): six ERT
   tests for degree and hyperbolic functions, finite and infinite series,
   special functions, polynomial roots, and numerical root solvers.
-* [`test-mb-lists.el`](./utils/test-mb-lists.el): thirty ERT tests for
+* [`test-mb-lists.el`](./utils/test-mb-lists.el): thirty-one ERT tests for
   list generation, grouping, products, ordering, partitioning, repetition
   detection, rotation, interleaved unzipping, padding, sorted structures, and
   list transformations.
@@ -571,7 +571,7 @@ comprises:
 
 * a clean `emacs -Q` load of all ninety-eight utility and mode-extension
   features plus the ERT tooling;
-* 809 passing ERT tests from the batch entry point;
+* 810 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -1546,6 +1546,9 @@ self-pair after applying its mapping function. Consecutive tuple generation
 now rejects zero, negative, and non-integer widths instead of returning
 meaningless empty tuples. Power-set index generation rejects negative and
 non-integer set sizes instead of recursing without a valid base case.
+`butlast*` now preserves standard `butlast` behavior for nonnegative counts;
+its negative extension retains a bounded prefix without modulo wraparound or
+division by zero on empty input.
 
 The widely used `aif`, `awhen`, `acond`, and `asetf` macros now live in the
 small standalone [`mb-anaphora.el`](./utils/mb-anaphora.el) module rather than

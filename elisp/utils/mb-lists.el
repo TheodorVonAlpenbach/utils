@@ -495,8 +495,14 @@ Optional LENGTH defines length of substituted sublist."
 ;;(let ((qwe '(a b c d)) (ewq '(x y))) (list-substitute-list '(x y) 1 qwe 1) (list qwe ewq))
 
 (cl-defun butlast* (list &optional n)
-  "Same as `butlast' but accepts negative argument, meaning counting from start."
-  (butlast list (mod (or n 1) (length list))))
+  "Return LIST without its last N elements.
+As with `butlast', N defaults to one.  A negative N instead returns
+the first -N elements, clamped to the length of LIST."
+  (let ((count (or n 1)))
+    (cl-check-type count integer)
+    (if (< count 0)
+	(cl-subseq list 0 (min (- count) (length list)))
+      (butlast list count))))
 ;;(butlast* '(a b c d e) -2)
 
 (cl-defun nsplit-nth (n list)

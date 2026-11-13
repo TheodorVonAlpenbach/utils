@@ -240,6 +240,18 @@
    (should (equal (mrotate-list (list 'a 'b 'c 'd) 0 2 3)
                   '(c b d a))))
 
+(ert-deftest mb-lists-butlast ()
+  (should-not (butlast* nil))
+  (should (equal (butlast* '(a b c)) '(a b)))
+  (should (equal (butlast* '(a b c) 0) '(a b c)))
+  (should (equal (butlast* '(a b c) 3) nil))
+  (should (equal (butlast* '(a b c) 4) nil))
+  (should (equal (butlast* '(a b c) -1) '(a)))
+  (should (equal (butlast* '(a b c) -3) '(a b c)))
+  (should (equal (butlast* '(a b c) -4) '(a b c)))
+  (should-error (butlast* '(a b c) 1.0)
+                :type 'wrong-type-argument))
+
 (ert-deftest mb-lists-unzip ()
    (should (equal (unzip (0-n 6)) '((0 2 4) (1 3 5))))
    (should (equal (unzip (0-n 9) 3)
