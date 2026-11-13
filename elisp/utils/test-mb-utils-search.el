@@ -8,6 +8,7 @@
     (insert "alpha beta gamma")
     (goto-char 4)
     (should (= (exists-match-p "beta") 11))
+    (should (= (exists-match-p "\\`") 1))
     (should (= (point) 4))
     (should-not (exists-match-p "delta"))))
 
@@ -21,6 +22,7 @@
 	      (insert "target")
 	      (goto-char 3))
 	    (should (= (exists-match-p "target" buffer) 7))
+	    (should (= (exists-match-p "target" (buffer-name buffer)) 7))
 	    (should (= (with-current-buffer buffer (point)) 3))
 	    (should-not (exists-match-p "target")))
 	(kill-buffer buffer)))))
@@ -38,9 +40,9 @@
     (string-match "\\(old\\)" "old")
     (let ((before (match-data)))
       (should (exists-match-p "target"))
-      (should (equal (match-data) before))))
-  (with-temp-buffer
-    (should-error (exists-match-p "["))))
+      (should (equal (match-data) before))
+      (should-error (exists-match-p "["))
+      (should (equal (match-data) before)))))
 
 (provide 'test-mb-utils-search)
 

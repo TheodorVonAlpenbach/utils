@@ -1697,8 +1697,10 @@ in the maintained baseline.
 with lexical binding and no dependencies. Its sole public helper now searches
 the designated buffer rather than silently using the current one, preserves
 both point and match data, respects narrowing, and documents that it returns
-the match end position rather than a boolean. Its four namespaced tests run in
-the maintained baseline.
+the match end position rather than a boolean. Its buffer-or-name contract,
+zero-width matches, and state preservation on regexp errors are now
+characterized explicitly. Its four namespaced tests run in the maintained
+baseline.
 
 [`mb-utils-xml.el`](./utils/mb-utils-xml.el) now loads independently with
 lexical binding and supported dependencies. Attribute parsing accepts quoted,
