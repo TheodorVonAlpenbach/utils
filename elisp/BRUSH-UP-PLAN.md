@@ -499,9 +499,10 @@ The first subset is intentionally conservative:
 * [`test-mb-math-functions.el`](./utils/test-mb-math-functions.el): six ERT
   tests for degree and hyperbolic functions, finite and infinite series,
   special functions, polynomial roots, and numerical root solvers.
-* [`test-mb-lists.el`](./utils/test-mb-lists.el): twenty-nine ERT tests for
+* [`test-mb-lists.el`](./utils/test-mb-lists.el): thirty ERT tests for
   list generation, grouping, products, ordering, partitioning, repetition
-  detection, rotation, padding, sorted structures, and list transformations.
+  detection, rotation, interleaved unzipping, padding, sorted structures, and
+  list transformations.
 * [`test-mb-sequences.el`](./utils/test-mb-sequences.el): twelve ERT tests for
   sequence type preservation, selection, splitting, drawing, positions,
   minima, projection, centering, insertion, and replacement.
@@ -568,7 +569,7 @@ comprises:
 
 * a clean `emacs -Q` load of all ninety-eight utility and mode-extension
   features plus the ERT tooling;
-* 807 passing ERT tests from the batch entry point;
+* 808 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -1534,7 +1535,9 @@ sorted insertion, and closure behavior. A small private list coercion helper
 duplicates `listify` from `mb-utils-div`. It remains private rather than making
 the lower-level list module depend on the broad general utility collection;
 both copies should move to a small shared primitive module when that collection
-is split further.
+is split further. The destructive `nunzip` and copying `unzip` contracts are
+now explicit and tested for uneven columns, input preservation, cons-cell
+reuse, and invalid widths.
 
 The widely used `aif`, `awhen`, `acond`, and `asetf` macros now live in the
 small standalone [`mb-anaphora.el`](./utils/mb-anaphora.el) module rather than

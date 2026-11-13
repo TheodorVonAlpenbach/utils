@@ -172,8 +172,12 @@ ELEMENTS are exactly the elements in LIST that evaluates to K."
 ;;(butlast (zip '(0 2 4) '(1 3 3)))
 
 (cl-defun nunzip (list &optional (n 2))
-  "Destructive version of `ZIP'
-TODO: something is wrong, see test below."
+  "Destructively split LIST into N interleaved lists.
+The result contains exactly N lists.  When the length of LIST is not
+divisible by N, the earlier result lists contain the extra elements.
+Use `unzip' to preserve LIST."
+  (unless (and (integerp n) (> n 0))
+    (user-error "Unzip width must be a positive integer: %S" n))
   (cl-loop with heads = (cl-loop for i below n collect (nthcdr i list))
 	with pointers = (cl-copy-list heads)
 	while (cl-first pointers)
@@ -184,7 +188,9 @@ TODO: something is wrong, see test below."
 	finally return heads))
 ;;(nunzip (0-n 10) 2)
 
-(cl-defun unzip (list &optional (n 2)) (nunzip (cl-copy-list list) n))
+(cl-defun unzip (list &optional (n 2))
+  "Split LIST into N interleaved lists without modifying LIST."
+  (nunzip (cl-copy-list list) n))
 ;;(unzip (0-n 10) 3)
 
 (cl-defun repeat-elements (x &optional n)
