@@ -39,7 +39,14 @@
                  '((0) (1 2) (1 0 1))))
   (should (equal (polynom-division '(0) '(1 1))
                  '((0) (0) (1 1))))
-  (should (equal (test-polynom-division) '(t t t)))
+  (cl-destructuring-bind (quotient remainder denominator)
+      (polynom-division '(1 0 0 1) '(1 1))
+    (should
+     (equal
+      (polynom-addition
+       (polynom-multiplication quotient denominator)
+       remainder)
+      '(1 0 0 1))))
   (should-error (polynom-division '(1 2) '(0))))
 
 (ert-deftest mb-polynomials-derivative-and-evaluation ()
@@ -48,6 +55,8 @@
   (should (= (horner '(2 0 1) 3) 11))
   (should (= (polynom-value '(2 0 1) 3) 11))
   (should (equal (expt-sequence 2 4) '(1 2 4 8 16)))
+  (should-error (horner '(1 2) "3"))
+  (should-error (expt-sequence "2" 4))
   (should-error (expt-sequence 2 -1)))
 
 (ert-deftest mb-polynomials-formatting ()
@@ -58,7 +67,9 @@
   (should (equal (ppolynom '(1 -1 2)
                            :multiplication "*"
                            :exponent "**")
-                 "1 - x + 2*x**2")))
+                 "1 - x + 2*x**2"))
+  (should-error (print-number 'not-a-number))
+  (should-error (ppolynom '(1 2) :variable 'x)))
 
 (ert-deftest mb-polynomials-fractions ()
   (let ((fraction (fpolynom '(1 1) '(1 -1))))
@@ -70,7 +81,10 @@
                    "(1 + x)/(1 - x)"))
     (should (= (fp-value fraction 0) 1)))
   (should (= (fp-value '((1) (2)) 0) 0.5))
+  (should (equal (fpolynom '(1 0) '(2 0)) '((1) (2))))
   (should-not (fp-p '((1) (0))))
+  (should-error (fpolynom '(1 bad) '(1)))
+  (should-error (fpolynom '(1) '(0)))
   (should-error (fp-expand '((1) (0)) 2)))
 
 (ert-deftest mb-polynomials-fraction-multiplication ()
@@ -83,6 +97,7 @@
 
 (ert-deftest mb-polynomials-expansion-validation ()
   (should (equal (polynom-expand '(1 2) 3) '(1 2 0 0)))
+  (should-error (pole-polynom '(1 bad)))
   (should-error (polynom-expand '(1 2 3) 1))
   (should-error (polynom-expand '(1) -1)))
 

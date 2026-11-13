@@ -37,6 +37,8 @@ Represent the zero polynomial canonically as (0)."
 (defun horner (polynomial x)
   "Evaluate POLYNOMIAL at X using Horner's method."
   (mb-polynomials--check polynomial)
+  (unless (numberp x)
+    (signal 'wrong-type-argument (list 'numberp x)))
   (cl-loop for coefficient in (reverse polynomial)
            for sum = coefficient then (+ (* sum x) coefficient)
            finally return sum))
@@ -68,7 +70,7 @@ Represent the zero polynomial canonically as (0)."
    (mapcar (lambda (coefficient) (* coefficient scalar)) polynomial)))
 
 (defun polynom-subtraction (&rest polynomials)
-  "Subtract each polynomial after the first from the first.
+  "Subtract each element of POLYNOMIALS after the first from the first.
 With one argument, return that polynomial unchanged.  With no
 arguments, return the zero polynomial."
   (pcase polynomials
@@ -176,28 +178,21 @@ polynomials in canonical form."
                 collect (* exponent coefficient)))
     '(0)))
 
-(cl-defun test-polynom-division (&optional
-                                 (numerator '(0 0 1))
-                                 (denominator '(1 1)))
-  "Return coefficient comparisons verifying polynomial division."
-  (cl-destructuring-bind (quotient remainder divisor)
-      (polynom-division numerator denominator)
-    (cl-destructuring-bind (expected actual)
-        (polynom-align
-         numerator
-         (polynom-addition
-          (polynom-multiplication quotient divisor)
-          remainder))
-      (cl-mapcar #'= expected actual))))
-
 (defun pole-polynom (poles)
   "Return the monic polynomial whose roots are POLES."
+  (unless (proper-list-p poles)
+    (signal 'wrong-type-argument (list 'listp poles)))
+  (dolist (pole poles)
+    (unless (numberp pole)
+      (signal 'wrong-type-argument (list 'numberp pole))))
   (cl-reduce #'polynom-multiplication
              (mapcar (lambda (pole) (list (- pole) 1)) poles)
              :initial-value '(1)))
 
 (cl-defun print-number (number &optional (precision 2))
   "Format NUMBER, using PRECISION decimal places for floats."
+  (unless (numberp number)
+    (signal 'wrong-type-argument (list 'numberp number)))
   (unless (and (integerp precision) (>= precision 0))
     (error "Precision must be a nonnegative integer: %S" precision))
   (if (floatp number)
@@ -213,6 +208,8 @@ polynomials in canonical form."
 VARIABLE is the indeterminate name.  MULTIPLICATION is inserted
 between a displayed coefficient and VARIABLE, while EXPONENT is
 inserted before powers greater than one."
+  (dolist (string (list variable multiplication exponent))
+    (cl-check-type string string))
   (setq polynomial (polynom-clean polynomial))
   (let (terms)
     (cl-loop for coefficient in polynomial
@@ -255,8 +252,16 @@ inserted before powers greater than one."
 (defalias 'p^ #'polynom-expt)
 
 (defun fpolynom (numerator denominator)
-  "Construct a polynomial fraction from NUMERATOR and DENOMINATOR."
-  (list numerator denominator))
+  "Construct a canonical polynomial fraction from NUMERATOR and DENOMINATOR.
+Signal an error when either argument is not a polynomial or DENOMINATOR
+is the zero polynomial."
+  (mb-polynomials--check numerator)
+  (mb-polynomials--check denominator)
+  (let ((numerator (polynom-clean numerator))
+	(denominator (polynom-clean denominator)))
+    (when (mb-polynomials--zero-p denominator)
+      (error "Polynomial fraction denominator cannot be zero"))
+    (list numerator denominator)))
 
 (defun fp-p (fraction)
   "Return non-nil when FRACTION is a valid polynomial fraction."
@@ -309,6 +314,8 @@ Pass ARGUMENTS to `ppolynom'."
 
 (defun expt-sequence (base order)
   "Return powers of BASE from zero through ORDER."
+  (unless (numberp base)
+    (signal 'wrong-type-argument (list 'numberp base)))
   (unless (and (integerp order) (>= order 0))
     (error "Order must be a nonnegative integer: %S" order))
   (cl-loop repeat (1+ order)

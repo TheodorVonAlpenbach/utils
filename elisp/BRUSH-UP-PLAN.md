@@ -1735,8 +1735,11 @@ and rejects zero divisors, polynomial predicates validate every coefficient,
 and fraction evaluation no longer truncates integer quotients. Expansion,
 float precision, negative-term formatting, and empty pole products were also
 repaired. Emacs has no standard polynomial-arithmetic API that replaces this
-module's retained functionality. Its nine namespaced tests run in the
-maintained baseline.
+module's retained functionality. Polynomial-fraction construction now validates
+and canonicalizes both parts, evaluator and formatter boundaries reject
+non-numeric or non-string inputs explicitly, and the production-only division
+test helper has been retired in favor of a direct ERT identity check. Its nine
+namespaced tests run in the maintained baseline.
 
 [`mb-things.el`](./utils/mb-things.el) now loads independently with lexical
 binding and built-in dependencies instead of pulling in the broad
