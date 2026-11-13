@@ -232,15 +232,24 @@ INFIX as a constant sexp."
 ;;(twins (+ 1 2))
 
 (cl-defun pairs (list &key (key #'identity) (flank-p nil))
-  "Returns the elements in list as consecutive pairs.
-I.e. for list \(x11 x2 x3 ... xn-1 xn\), it returns the list
-\((x1 x2) (x2 x3) ... (xn-1 xn)\) See also `tuples' for a more
-generalized version. If flank-p is non-nil the result is
-`flank'ed with pairs of its first and last element."
-  (let ((res (cl-loop for (x y) on (mapcar key list) while y collect (list x y))))
-    (if flank-p
-      (nflank (twins (caar res)) res (twins (cadar (last res))))
-      res)))
+  "Return adjacent pairs from LIST after applying KEY.
+For (X1 X2 ... XN), return ((X1 X2) ... (XN-1 XN)).
+When FLANK-P is non-nil, also include self-pairs for the first and
+last elements.  A flanked singleton produces one self-pair, while
+an empty list always produces nil.  See also `tuples'."
+  (let* ((values (mapcar key list))
+	 (res
+	  (cl-loop for (x y) on values
+		   while y
+		   collect (list x y))))
+    (cond
+     ((or (not flank-p) (null values)) res)
+     ((null (cdr values)) (list (twins (car values))))
+     (t
+      (nflank
+       (twins (car values))
+       res
+       (twins (car (last values))))))))
 ;;(pairs '(1 2 3 4 5) :key #'1+ :flank-p t)
 
 (cl-defun tuples (list n)
