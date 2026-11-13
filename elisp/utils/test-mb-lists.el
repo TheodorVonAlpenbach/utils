@@ -52,7 +52,11 @@
   (should (equal (repeat-elements (0-n 3)) '(0 0 1 1 2 2)))
   (should (equal (repeat-elements (0-n 3) 2) '(0 0 1 1 2 2)))
   (should (equal (repeat-elements (0-n 3) 1) '(0 1 2)))
-  (should (equal (repeat-elements (0-n 3) 0) nil)))
+  (should (equal (repeat-elements (0-n 3) 0) nil))
+  (should-not (repeat-elements nil 3))
+  (should-error (repeat-elements '(a b) -1) :type 'user-error)
+  (should-error (repeat-elements '(a b) 1.0)
+                :type 'wrong-type-argument))
 
 (ert-deftest mb-lists-zip ()
   "Test of `zip'"

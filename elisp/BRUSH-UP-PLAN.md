@@ -1555,6 +1555,8 @@ traversal.
 List expansion and resizing now reject negative and non-integer counts,
 handle zero without arithmetic errors, and report attempts to grow an empty
 list explicitly rather than dividing by zero.
+Element repetition likewise accepts only nonnegative integer counts, retaining
+zero as the explicit empty-result case.
 
 The widely used `aif`, `awhen`, `acond`, and `asetf` macros now live in the
 small standalone [`mb-anaphora.el`](./utils/mb-anaphora.el) module rather than

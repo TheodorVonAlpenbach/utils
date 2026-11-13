@@ -194,8 +194,14 @@ Use `unzip' to preserve LIST."
 ;;(unzip (0-n 10) 3)
 
 (cl-defun repeat-elements (x &optional n)
-  (let ((copies (make-list (or n 2) x)))
-    (and copies (apply #'zip copies))))
+  "Return the elements of list X repeated N times consecutively.
+N defaults to two and must be a nonnegative integer."
+  (let ((count (or n 2)))
+    (cl-check-type count integer)
+    (unless (>= count 0)
+      (user-error "Repetition count must be nonnegative: %S" count))
+    (let ((copies (make-list count x)))
+      (and copies (apply #'zip copies)))))
 ;;(repeat-elements (0-n 3) 2)
 
 (cl-defun infix-list (list infix &optional infix-is-function-p) 
