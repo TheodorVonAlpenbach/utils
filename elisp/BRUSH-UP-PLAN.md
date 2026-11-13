@@ -487,8 +487,9 @@ The first subset is intentionally conservative:
 * [`test-mb-utils-file.el`](./utils/test-mb-utils-file.el): seven ERT tests for
   path construction, directory membership, readable-file lookup, filename
   transformations, parent directories, and recursive Scilab source copying.
-* [`test-mb-utils-sets.el`](./utils/test-mb-utils-sets.el): three ERT tests for
-  open/closed interval boundaries, one-dimensional spheres, and set equality.
+* [`test-mb-utils-sets.el`](./utils/test-mb-utils-sets.el): four ERT tests for
+  open/closed and degenerate interval boundaries, custom orderings,
+  one-dimensional spheres, and set equality.
 * [`test-mb-utils-tree.el`](./utils/test-mb-utils-tree.el): seven ERT tests for
   relation conversion, subtree filtering, leaf and member traversal, and
   independent tree copying.
@@ -517,7 +518,9 @@ The first subset is intentionally conservative:
 dependency, use lexical binding, and load independently of [`.emacs`](./.emacs).
 Their test files require their subject libraries directly. The temporary
 `first` and `second` aliases originally supplied by the batch runner have
-therefore been removed.
+therefore been removed. The set module documents all public interval helpers,
+supports custom orderings and degenerate intervals explicitly, and rejects
+negative or nonnumeric one-dimensional sphere radii.
 
 [`list-envelope.el`](./prototypes/geometry/list-envelope.el) is also independently loadable. Its
 indentation property is declared directly instead of calling the startup-only
@@ -571,7 +574,7 @@ comprises:
 
 * a clean `emacs -Q` load of all ninety-eight utility and mode-extension
   features plus the ERT tooling;
-* 815 passing ERT tests from the batch entry point;
+* 816 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
