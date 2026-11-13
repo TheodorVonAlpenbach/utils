@@ -1783,7 +1783,7 @@ usage decision:
   shell formatting as a new module with an explicit contract and tests rather
   than restoring the incomplete implementation.
 
-Thirty compatibility wrappers, constants, and unusable stubs were retired after
+Thirty-two compatibility wrappers, constants, and unusable stubs were retired after
 repository-wide caller checks. `string-to-character-list` duplicated
 `string-to-list`, `blanks` duplicated `make-string`, and `reverse-lines` was
 only an alias for `reverse-region`. `buffer-string*` only wrapped
@@ -1809,6 +1809,10 @@ removed because modern integer multiplication preserves exact bignums.
 The uncalled `list-move` and `swimming-relative-distances` stubs were removed
 because they had no implementation and their only tests asserted that they
 failed.
+The uncalled `nsplit-nth` helper and its non-ERT `test-nsplit-nth` companion
+were removed because first-position removal did not mutate the caller while
+later positions did, and invalid indices produced misleading results.
+`draw-nth` remains the maintained destructive remove-and-return operation.
 
 ### Behaviourally equivalent for observed uses
 

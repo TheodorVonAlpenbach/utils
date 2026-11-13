@@ -505,24 +505,6 @@ the first -N elements, clamped to the length of LIST."
       (butlast list count))))
 ;;(butlast* '(a b c d e) -2)
 
-(cl-defun nsplit-nth (n list)
-  "Returns Nth element in LIST and the remainder of LIST. Destructive.
-TODO: this looks like draw. Check out and clean up if necessary"
-  (if (zerop n)
-    (list (cl-first list) (setf list (cl-rest list)))
-    (let* ((prev (nthcdr (1- n) list))
-	   (element (cl-second prev)))
-      (setf (cdr prev) (cddr prev))
-      (list element list))))
-;;(let ((l (list 0 1 2 3))) (values (nsplit-nth 1 l) l))
-
-(cl-defun test-nsplit-nth (&optional (n 3))
-  (let ((list (0-n n)))
-    (cl-loop for i below n
-	  collect (let ((list* (cl-copy-list list)))
-		    (list (nsplit-nth i list*) list*)))))
-;;(test-split-nth) => (((0 (1 2)) (0 1 2)) ((1 (0 2)) (0 2)) ((2 (0 1)) (0 1)))
-
 (cl-defun filter-duplicates (list1 list2 &key (test #'eql) (start 0) end)
   "Removes all elements from row and fasit that are equal and is
 in the same position."
