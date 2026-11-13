@@ -429,11 +429,6 @@ to get return value, default nil."
  `(dolist (,line (string-lines ,string) ,result) ,@body))
 ;;(dolines (l (buffer-string)) )
 
-(cl-defun group-list (source &optional (n 2))
-  "Obsolete.  See `cut'"
-  (ignore source n)
-  (error "Obsolete, use cut instead"))
-
 (cl-defun rmapcar (fn &rest args)
   "A recursive generalization of `mapcar*'"
   (if (cl-some #'atom args)

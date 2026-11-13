@@ -1794,7 +1794,7 @@ usage decision:
   shell formatting as a new module with an explicit contract and tests rather
   than restoring the incomplete implementation.
 
-Thirty-two compatibility wrappers, constants, and unusable stubs were retired after
+Thirty-three compatibility wrappers, constants, and unusable stubs were retired after
 repository-wide caller checks. `string-to-character-list` duplicated
 `string-to-list`, `blanks` duplicated `make-string`, and `reverse-lines` was
 only an alias for `reverse-region`. `buffer-string*` only wrapped
@@ -1824,6 +1824,8 @@ The uncalled `nsplit-nth` helper and its non-ERT `test-nsplit-nth` companion
 were removed because first-position removal did not mutate the caller while
 later positions did, and invalid indices produced misleading results.
 `draw-nth` remains the maintained destructive remove-and-return operation.
+The uncalled obsolete `group-list` wrapper was removed because it always
+signalled an error; `cut` remains its supported replacement.
 
 ### Behaviourally equivalent for observed uses
 
