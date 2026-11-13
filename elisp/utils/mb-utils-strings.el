@@ -109,9 +109,12 @@ match."
 
 
 (cl-defun split-string-by-length (string n &key (from-end nil))
-  "Splits STRING to substrings of length N.
+  "Split STRING into substrings of length N.
 Only the length of the last substring (or the first substring, if
-from-end is t) is less than (or equal to) N."
+FROM-END is non-nil) may be shorter than N."
+  (cl-check-type n integer)
+  (unless (> n 0)
+    (user-error "Substring length must be positive: %S" n))
   (let ((split-positions (a-b (if from-end (mod (length string) n) n)
 			      (length string) n)))
     (remove "" (apply #'split-at-position string split-positions))))

@@ -571,7 +571,7 @@ comprises:
 
 * a clean `emacs -Q` load of all ninety-eight utility and mode-extension
   features plus the ERT tooling;
-* 813 passing ERT tests from the batch entry point;
+* 814 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -1898,3 +1898,6 @@ in million and billion values, avoids rounding billion quotients, and forwards
 custom short and long separators through recursive formatting.
 Numeric ordinal suffixes now require positive integers, preventing values such
 as `1.0` from being silently rendered as `1th`.
+Fixed-width string splitting now rejects nonpositive and non-integer widths
+before its modulo and range calculations, preventing zero-width
+nontermination.

@@ -25,6 +25,18 @@
   (should (equal (string-tail "line1\nline2\nline3\nline4" 2) "line3\nline4"))
   (should (equal (string-tail "line1\nline2\nline3\nline4" 0) "")))
 
+(ert-deftest mb-utils-strings-split-string-by-length ()
+  (should (equal (split-string-by-length "abcdefg" 3)
+                 '("abc" "def" "g")))
+  (should (equal (split-string-by-length "abcdefg" 3 :from-end t)
+                 '("a" "bcd" "efg")))
+  (should (equal (split-string-by-length "abc" 5) '("abc")))
+  (should-not (split-string-by-length "" 3))
+  (should-error (split-string-by-length "abc" 0) :type 'user-error)
+  (should-error (split-string-by-length "abc" -1) :type 'user-error)
+  (should-error (split-string-by-length "abc" 2.0)
+                :type 'wrong-type-argument))
+
 (ert-deftest mb-utils-strings-string-match ()
 "Test of `string-match*'"
  (should (equal (string-match* "\\(e\\)" "sdkjhalkqweee " :num '(0 1 10)) '("e" "e" nil))))
