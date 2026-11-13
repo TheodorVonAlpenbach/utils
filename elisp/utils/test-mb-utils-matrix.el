@@ -9,7 +9,11 @@
   (should (equal (vec-constant 2 7) '(7 7)))
   (should (equal (vec-a-b -1 2) '(-1 0 1 2)))
   (should (equal (vec-0-n-1 4) '(0 1 2 3)))
-  (should (equal (vec-unit 2 4 5) '(0 0 5 0))))
+  (should (equal (vec-unit 2 4 5) '(0 0 5 0)))
+  (should-error (vec-constant -1))
+  (should-error (vec-0-n-1 -1))
+  (should-error (vec-unit -1 3))
+  (should-error (vec-unit 3 3)))
 
 (ert-deftest mb-utils-matrix-random-vector-seeding ()
   (let (random-seeds random-star-seeds)
@@ -23,7 +27,8 @@
 		 1)))
       (should (equal (vec-random 3 0 10 t t) '(1 1 1))))
     (should (equal random-seeds '(t)))
-    (should (equal random-star-seeds '(nil nil nil)))))
+    (should (equal random-star-seeds '(nil nil nil))))
+  (should-error (vec-random -1)))
 
 (ert-deftest mb-utils-matrix-vector-arithmetic ()
   (should (equal (vec-add '(1 2) '(3 4)) '(4 6)))
@@ -32,7 +37,9 @@
   (should (equal (vec-scalar-mult '(1 2 3) 3) '(3 6 9)))
   (should (= (vec-sum nil) 0))
   (should (= (scalar-product '(1 2 3) '(4 5 6)) 32))
-  (should-error (vec-add '(1 2) '(3))))
+  (should-error (vec-add '(1 2) '(3)))
+  (should-error (vec-add))
+  (should-error (scalar-product)))
 
 (ert-deftest mb-utils-matrix-vector-geometry ()
   (should (= (vec-sqr '(3 4)) 25))
@@ -76,7 +83,10 @@
   (should (equal (mat-constant 2 3 7) '((7 7) (7 7) (7 7))))
   (should (equal (mat-diagonal '(2 3)) '((2 0) (0 3))))
   (should (equal (mat-identity 3)
-		 '((1 0 0) (0 1 0) (0 0 1)))))
+		 '((1 0 0) (0 1 0) (0 0 1))))
+  (should-error (mat-constant -1 2))
+  (should-error (mat-constant 2 -1))
+  (should-error (mat-identity -1)))
 
 (ert-deftest mb-utils-matrix-matrix-arithmetic ()
   (should (equal (mat-scalar-mult '((1 2) (3 4)) 2)
@@ -87,7 +97,8 @@
 		 '((4 3) (2 1))))
   (should (equal (hadamard-product '((1 2) (3 4)) '((2 3) (4 5)))
 		 '((2 6) (12 20))))
-  (should-error (mat-add '((1 2)) '((1) (2)))))
+  (should-error (mat-add '((1 2)) '((1) (2))))
+  (should-error (hadamard-product)))
 
 (ert-deftest mb-utils-matrix-multiplication ()
   (should (equal (mat-mat-mult '((1 2)) '((3 4) (5 6)))
@@ -95,14 +106,17 @@
   (should (equal (mat-mat-mult*
 		  '((1 2)) '((1 0) (0 1)) '((3) (4)))
 		 '((11))))
-  (should-error (mat-mat-mult '((1 2)) '((1 2)))))
+  (should-error (mat-mat-mult '((1 2)) '((1 2))))
+  (should-error (mat-mat-mult*)))
 
 (ert-deftest mb-utils-matrix-permutations ()
   (should (equal (mat-permutation '(0 2 1))
 		 '((1 0 0) (0 0 1) (0 1 0))))
   (should (equal (mat-permutation-row-switch 3 0 2)
 		 '((0 0 1) (0 1 0) (1 0 0))))
-  (should-error (mat-permutation '(0 0 1))))
+  (should-error (mat-permutation '(0 0 1)))
+  (should-error (mat-permutation-row-switch 3 -1 2))
+  (should-error (mat-permutation-row-switch 3 0 3)))
 
 (provide 'test-mb-utils-matrix)
 

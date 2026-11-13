@@ -1663,8 +1663,11 @@ validate their dimensions instead of silently truncating through `cl-mapcar`.
 Repairs cover seeded vector generation, vector-by-matrix orientation, the
 missing square root in the Frobenius norm, zero-vector pseudoinverses,
 unsupported general matrix pseudoinverses, obsolete `pi`, stable angle
-clamping, and the previously non-working permutation row switch. Its eleven
-namespaced tests run in the maintained baseline.
+clamping, and the previously non-working permutation row switch. Public
+operations now document their dimensions and orientation, constructors reject
+negative sizes and invalid indices, and variadic arithmetic rejects missing
+operands explicitly. The unused `mat-test` fixture has been retired. Its
+eleven namespaced tests run in the maintained baseline.
 
 [`mb-utils-physics.el`](./utils/mb-utils-physics.el) now loads independently
 with lexical binding and `cl-lib` as its only dependency. Its physical
