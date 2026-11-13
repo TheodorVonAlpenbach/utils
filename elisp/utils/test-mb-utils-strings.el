@@ -200,9 +200,26 @@
   "Test of `integer-to-literary-string'"
   (should
    (equal
-    (mapcar #'integer-to-literary-string (list 21 80 82 99 100 100003))
-    '("twenty-one" "eighty" "eighty-two" "ninety-nine"
-      "one hundred" "one hundred thousand three"))))
+    (mapcar
+     #'integer-to-literary-string
+     (list -2 0 21 80 82 99 100 100003 1001001 1234567
+	   1600000000))
+    '("minus two" "zero" "twenty-one" "eighty" "eighty-two"
+      "ninety-nine" "one hundred" "one hundred thousand three"
+      "one million one thousand one"
+      "one million two hundred thirty-four thousand five hundred sixty-seven"
+      "one billion six hundred million")))
+  (should
+   (equal
+    (integer-to-literary-string
+     1234
+     :short-separator "_"
+     :long-separator "/")
+    "one/thousand/two/hundred/thirty_four"))
+  (should-error (integer-to-literary-string 1.0)
+                :type 'wrong-type-argument)
+  (should-error (integer-to-literary-string 1000000000000)
+                :type 'user-error))
 
 (ert-deftest mb-utils-strings-string-case ()
   "Test of `string-case'"

@@ -1893,3 +1893,6 @@ Catalan, and Stirling-number helpers.
 English number formatting now spells `twelfth`, `fortieth`, and `eighty`
 correctly and produces scale ordinals such as `one hundredth`, `one
 thousandth`, and `one millionth` instead of returning nil.
+Cardinal formatting now handles negative values, retains every scale component
+in million and billion values, avoids rounding billion quotients, and forwards
+custom short and long separators through recursive formatting.

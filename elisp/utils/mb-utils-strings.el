@@ -595,52 +595,74 @@ Return the empty string when N is zero or negative."
 					  ordinal-p
 					  (short-separator "-")
 					  (long-separator " "))
-  (cond (ordinal-p 
-	 (integer-to-ordinal-string n))
-	((< n 0) 
-	 (format "minus %d" (integer-to-literary-string (- n))))
-	((< n 20)
-	 (cl-case n
-	   (0 "zero") (1 "one") (2 "two") (3 "three") (4 "four") (5 "five")
-	   (6 "six") (7 "seven") (8 "eight") (9 "nine") (10 "ten") (11 "eleven")
-	   (12 "twelve") (13 "thirteen") (14 "fourteen") (15 "fifteen")
-	   (16 "sixteen")  (17 "seventeen")  (18 "eighteen")  (19 "nineteen") 
-	   (100 "hundred") (1000 "thousand") (1000000 "million")
-	   (1000000000 "billion")))
-	((< n 100)
-	 (format "%s%s"
-	   (cl-case (interval-floor n 10)
-	     (20 "twenty") (30 "thirty") (40 "forty") (50 "fifty")
-	     (60 "sixty") (70 "seventy") (80 "eighty") (90 "ninety"))
-	   (if (zerop (mod n 10))
-	     ""
-	     (concat short-separator (integer-to-literary-string (mod n 10))))))
-	((< n 1000)
-	 (format "%s hundred%s"
-	   (integer-to-literary-string (/ n 100))
-	   (if (zerop (mod n 100))
-	     ""
-	     (concat long-separator (integer-to-literary-string (mod n 100))))))
-	((< n 1000000)
-	 (format "%s thousand%s"
-	   (integer-to-literary-string (/ n 1000))
-	   (if (zerop (mod n 1000))
-	     ""
-	     (concat long-separator (integer-to-literary-string (mod n 1000))))))
-	((< n (expt 10 9))
-	 (format "%s million%s"
-	   (integer-to-literary-string (/ n 1000000))
-	   (if (zerop (mod n 1000))
-	     ""
-	     (concat long-separator (integer-to-literary-string (mod n 1000))))))
-	((< n (expt 10 12))
-	 (format "%s billion%s"
-	   (integer-to-literary-string (round (/ n 1000000000.0)))
-	   (if (zerop (mod n 1000))
-	     ""
-	     (concat long-separator
-		     (integer-to-literary-string (mod n 1000))))))
-	(t (error "Number %d is not supported" n))))
+  "Return integer N written in English.
+SHORT-SEPARATOR joins tens and units.  LONG-SEPARATOR joins scale
+components.  Values whose magnitude reaches one trillion are not
+supported."
+  (cl-check-type n integer)
+  (cond
+   (ordinal-p
+    (integer-to-ordinal-string n))
+   ((< n 0)
+    (concat
+     "minus "
+     (integer-to-literary-string
+      (- n)
+      :short-separator short-separator
+      :long-separator long-separator)))
+   ((< n 20)
+    (aref
+     ["zero" "one" "two" "three" "four" "five" "six" "seven"
+	     "eight" "nine" "ten" "eleven" "twelve" "thirteen"
+	     "fourteen" "fifteen" "sixteen" "seventeen" "eighteen"
+	     "nineteen"]
+     n))
+   ((< n 100)
+    (let ((remainder (mod n 10)))
+      (concat
+       (cl-case (- n remainder)
+	 (20 "twenty") (30 "thirty") (40 "forty") (50 "fifty")
+	 (60 "sixty") (70 "seventy") (80 "eighty") (90 "ninety"))
+       (if (zerop remainder)
+	   ""
+	 (concat
+	  short-separator
+	  (integer-to-literary-string
+	   remainder
+	   :short-separator short-separator
+	   :long-separator long-separator))))))
+   ((< n 1000000000000)
+    (let* ((scale
+	    (cond
+	     ((>= n 1000000000) 1000000000)
+	     ((>= n 1000000) 1000000)
+	     ((>= n 1000) 1000)
+	     (t 100)))
+	   (scale-name
+	    (cl-case scale
+	      (100 "hundred")
+	      (1000 "thousand")
+	      (1000000 "million")
+	      (1000000000 "billion")))
+	   (quotient (/ n scale))
+	   (remainder (mod n scale)))
+      (concat
+       (integer-to-literary-string
+	quotient
+	:short-separator short-separator
+	:long-separator long-separator)
+       long-separator
+       scale-name
+       (if (zerop remainder)
+	   ""
+	 (concat
+	  long-separator
+	  (integer-to-literary-string
+	   remainder
+	   :short-separator short-separator
+	   :long-separator long-separator))))))
+   (t
+    (user-error "Number %d is not supported" n))))
 
 (defconst +password-special-characters+
   " !\"#$%&'()*+,-./:;<=>?@[\]^_`{|}~"
