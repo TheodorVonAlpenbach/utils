@@ -1,9 +1,18 @@
 ;;; mb-things.el --- Editable things at point -*- lexical-binding: t; coding: utf-8; -*-
 
+;;; Commentary:
+
+;; Define `thing-at-point' recognizers and increment dates, clocks, numbers, and
+;; cyclic names such as weekdays and months.
+
+;;; Code:
+
 (require 'cl-lib)
 (require 'thingatpt)
 
 (defmacro defthing (name regexp)
+  "Define NAME as a thing recognized by REGEXP.
+Generate movement, bounds, predicate, and `thing-at-point' functions."
   (let* ((symbol (if (and (consp name) (eq (cl-first name) 'quote))
                      (cl-second name)
                    name))
@@ -12,7 +21,7 @@
 	 (as-list-p (gensym))
 	 (point (gensym))
 	 (sname (symbol-name symbol))
-	 (name-regxp (intern (concat "*" sname "-regexp*"))) ;now obsolete?
+	 (name-regxp (intern (concat "*" sname "-regexp*")))
 	 (thing-at-point-bounds-of-name (intern (concat "thing-at-point-bounds-of-" sname)))
 	 (forward-name (intern (concat "forward-" sname)))
 	 (backward-name (intern (concat "backward-" sname)))
@@ -56,18 +65,19 @@ This function is generated with macro `defthing' in module
 	 ,(format "Move forward across %s things.
 With negative N, move backward." sname)
 	 (interactive "p")
+	 (cl-check-type ,n integer)
 	 (unless (= ,n 0)
 	   (let ((,point (point))
 		 (,bounds (,thing-at-point-bounds-of-name)))
 	     (if (> ,n 0)
 	       ;; forward
-	       (if (and ,bounds 
+	       (if (and ,bounds
 			(< ,point (cl-rest ,bounds)))
 		 (progn (goto-char (cl-rest ,bounds))
 			(re-search-forward ,name-regxp nil (- ,n 1)))
 		 (re-search-forward ,name-regxp nil t ,n))
 	       ;; backward
-	       (if (and ,bounds 
+	       (if (and ,bounds
 			(< (cl-first ,bounds) ,point))
 		 (progn (goto-char (cl-first ,bounds))
 			(re-search-backward ,name-regxp nil t (- (abs ,n) 1)))
@@ -79,7 +89,7 @@ With negative N, move forward." sname)
 	 (interactive "p")
 	 (,forward-name (- ,n)))
 
-       (cl-defun ,name-at-point (&optional no-properties) 
+       (cl-defun ,name-at-point (&optional no-properties)
 	 ,(format "Return the %s at point." sname)
 	 (thing-at-point ',symbol no-properties))
 
@@ -105,6 +115,13 @@ With negative N, move forward." sname)
    "\\|24:00\\(?::00\\(?:\\.0+\\)?\\)?"
    "\\)"
    "\\(?:Z\\|[+-]\\(?:[01][0-9]\\|2[0-3]\\)\\(?::?[0-5][0-9]\\)?\\)?\\b"))
+
+(defconst mb-things--clock-parts-regexp
+  (concat
+   "\\`\\([0-9][0-9]\\):\\([0-9][0-9]\\)"
+   "\\(?::\\([0-9][0-9]\\)\\(?:\\.\\([0-9]+\\)\\)?\\)?"
+   "\\(Z\\|[+-][0-9][0-9]\\(?::?[0-9][0-9]\\)?\\)?\\'")
+  "Regexp capturing the components of a validated ISO clock string.")
 
 (defun mb-things--string (value)
   "Return VALUE as a string."
@@ -133,8 +150,8 @@ With negative N, move forward." sname)
      ("january" "february" "march" "april" "may" "june" "july" "august" "september" "october" "november" "december"))
     (måned
      ("januar" "februar" "mars" "april" "mai" "juni" "juli" "august" "september" "oktober" "november" "desember")))
-  "Note that if a cyclic element is contained in another the former
-must be a member of a cycle preceding the cycle of the latter.")
+  "Cycles used by `inc-cyclic'.
+When one element contains another, put the shorter element's cycle first.")
 
 ;; Define cyclic things for each list element in *CYCLIC-THINGS*
 ;; Can't do this in a loop because the macro must take a symbol directly
@@ -161,16 +178,19 @@ must be a member of a cycle preceding the cycle of the latter.")
 (cl-defun replace-thing-at-point (new thing)
   "Replace THING at point with NEW."
   (let* ((bounds (or (bounds-of-thing-at-point thing)
-		     (bounds-of-thing-at-point 'sexp)))
+		     (bounds-of-thing-at-point 'sexp))))
+    (unless bounds
+      (error "No %s or expression at point" thing))
+    (let* (
 	 (offset (- (point) (cl-first bounds)))
-        (text (mb-things--string new)))
-    (delete-region (cl-first bounds) (cl-rest bounds))
-    (insert text)
-    (goto-char (+ (cl-first bounds) (min offset (length text))))))
-;;(definteractive number-at-point)
+	 (text (mb-things--string new)))
+      (delete-region (cl-first bounds) (cl-rest bounds))
+      (insert text)
+      (goto-char (+ (cl-first bounds) (min offset (length text)))))))
 
 (cl-defun inc-thing-at-point (n level)
-  "LEVEL 1, 2, 3 correspond to day, month, year respectively."
+  "Increment the recognized thing at point N times according to LEVEL.
+For dates, numeric levels 1, 2, and 3 select day, month, and year."
   (let ((date (date-at-point t))
        (time (time-at-point t))
        (number (number-at-point))
@@ -196,22 +216,28 @@ must be a member of a cycle preceding the cycle of the latter.")
       (goto-char (cl-rest (bounds-of-thing-at-point 'sexp)))
       (forward-sexp 1)
       (when (date-at-point)
-	 (replace-thing-at-point (inc-date (thing-at-point 'date) n level) 'date))))  
+	 (replace-thing-at-point
+	  (inc-date (thing-at-point 'date) n level)
+	  'date))))
 
-    ((list-at-point t)) ; TODO
+    (t (error "No incrementable thing recognized")))))
 
-    ((word-at-point t))
-
-    (t (error "No thing recognized")))))
 (cl-defun inc-date (date n level)
-  "LEVEL 1, 2, 3 correspond to day, month, year respectively."
+  "Increment ISO DATE by N units selected by LEVEL.
+Levels 1, 2, and 3 select day, month, and year respectively."
   (unless (string-match
            (concat "\\`" mb-things--iso-date-regexp "\\'")
            date)
     (error "Invalid ISO date: %S" date))
+  (cl-check-type n integer)
   (let ((year (string-to-number (substring date 0 4)))
         (month (string-to-number (substring date 5 7)))
         (day (string-to-number (substring date 8 10))))
+    (unless (equal
+	     (format-time-string "%Y-%m-%d"
+				 (encode-time 0 0 12 day month year))
+	     date)
+      (error "Invalid calendar date: %S" date))
     (pcase level
       (1 (cl-incf day n))
       (2 (cl-incf month n))
@@ -219,47 +245,76 @@ must be a member of a cycle preceding the cycle of the latter.")
       (_ (error "Level %S is not implemented!" level)))
     (format-time-string "%Y-%m-%d"
                         (encode-time 0 0 12 day month year))))
-;;(inc-date "2001-10-20" 1 1)
+
+(defun mb-things--clock-components (time)
+  "Return parsed components of validated ISO clock string TIME."
+  (unless (and (stringp time)
+	       (string-match-p
+		(concat "\\`" mb-things--iso-time-regexp "\\'")
+		time)
+	       (string-match mb-things--clock-parts-regexp time))
+    (error "Invalid ISO time: %S" time))
+  (let ((fraction (match-string 4 time)))
+    (list (string-to-number (match-string 1 time))
+	  (string-to-number (match-string 2 time))
+	  (+ (string-to-number (or (match-string 3 time) "0"))
+	     (if fraction
+		 (string-to-number (concat "0." fraction))
+	       0))
+	  fraction
+	  (match-string 5 time)
+	  (not (null (match-string 3 time))))))
 
 (cl-defun parse-clock (clock-string)
   "Parse CLOCK-STRING and return the time object for date 1970-01-01."
-  (let ((parts (parse-time-string clock-string)))
-    (encode-time (or (nth 0 parts) 0)
-                 (or (nth 1 parts) 0)
-                 (or (nth 2 parts) 0)
-                 1 1 1970)))
-;;(parse-clock "09:45")
+  (cl-destructuring-bind (hour minute second _fraction zone _seconds-p)
+      (mb-things--clock-components clock-string)
+    (encode-time second minute hour 1 1 1970
+		 (cond
+		  ((equal zone "Z") 0)
+		  (zone (nth 8 (parse-time-string clock-string)))
+		  (t nil)))))
 
 (defun mb-things--clock-seconds (time)
   "Return seconds since midnight represented by TIME."
-  (let ((parts (decode-time (parse-clock time))))
-    (+ (nth 0 parts)
-       (* 60 (nth 1 parts))
-       (* 3600 (nth 2 parts)))))
+  (cl-destructuring-bind (hour minute second _fraction _zone _seconds-p)
+      (mb-things--clock-components time)
+    (+ second (* 60 minute) (* 3600 hour))))
 
 (cl-defun inc-clock (time n level)
   "Increment clock string TIME N times according to LEVEL.
 Numeric levels 1, 2, and 3 increment minutes, hours, and seconds.
 A level of the form (UNIT QUANTITY) rounds in the direction of
 QUANTITY and advances to the Nth boundary."
-  (let* ((seconds (mb-things--clock-seconds time))
-         (with-seconds (or (string-match-p ":[0-9][0-9]:" time)
-                           (and (listp level)
-                                (eq (cl-first level) :second))))
+  (cl-check-type n integer)
+  (cl-destructuring-bind (_hour _minute _second fraction zone seconds-p)
+      (mb-things--clock-components time)
+    (let* ((seconds (mb-things--clock-seconds time))
+         (with-seconds (or seconds-p
+			   (equal level 3)
+			   (and (listp level)
+				(eq (cl-first level) :second))))
          result)
     (if (listp level)
         (progn
-          (cl-assert (not (< n 0)) t "N cannot be negative")
+          (unless (and (proper-list-p level) (= (length level) 2))
+	    (error "Boundary level must be (UNIT QUANTITY): %S" level))
+	  (unless (cl-plusp n)
+	    (error "Boundary increment count must be positive: %S" n))
           (cl-destructuring-bind (unit quantity) level
+	    (unless (and (integerp quantity) (not (zerop quantity)))
+	      (error "Boundary quantity must be a nonzero integer: %S"
+		     quantity))
             (let* ((unit-details
                   (pcase unit
-                      (:hour (list 3600 0 (/ seconds 3600)))
+                      (:hour (list 3600 0 (floor seconds 3600)))
                       (:minute (list 60
-                                     (* (/ seconds 3600) 3600)
-                                     (% (/ seconds 60) 60)))
+                                     (* (floor seconds 3600) 3600)
+                                     (mod (floor seconds 60) 60)))
                       (:second (list 1
-                                     (* (/ seconds 60) 60)
-                                     (% seconds 60)))
+                                     (* (floor seconds 60) 60)
+                                     (- seconds
+					(* (floor seconds 60) 60))))
                       (_ (error "Level unit %S is not implemented!" unit))))
                    (unit-seconds (nth 0 unit-details))
                    (higher-units (nth 1 unit-details))
@@ -282,29 +337,50 @@ QUANTITY and advances to the Nth boundary."
                     (3 1)
                     (_ (error "Level %S is not implemented!" level)))))))
     (setq result (mod result (* 24 60 60)))
-    (if (or with-seconds (equal level 3))
-        (format "%02d:%02d:%02d"
-                (/ result 3600) (% (/ result 60) 60) (% result 60))
-      (format "%02d:%02d" (/ result 3600) (% (/ result 60) 60)))))
-;;(inc-clock "08:15:01" 1 3)
-;;(inc-clock "08:15" 1 3)
- 
+    (let* ((whole (floor result))
+	   (suffix (or zone ""))
+	   (fraction-suffix
+	    (if (and fraction (not (listp level)))
+		(concat "." fraction)
+	      "")))
+      (if with-seconds
+	  (format "%02d:%02d:%02d%s%s"
+		  (/ whole 3600)
+		  (% (/ whole 60) 60)
+		  (% whole 60)
+		  fraction-suffix
+		  suffix)
+	(format "%02d:%02d%s"
+		(/ whole 3600)
+		(% (/ whole 60) 60)
+		suffix))))))
+
 (cl-defun inc-number (x n level)
   "Alter X N times according to LEVEL.
-LEVEL 1, return N + X
-LEVEL 2, add N to first digit in X
-LEVEL 3, return x ^ (2 ^ N)
-"
-  (let ((res 
-	 (cl-case level
+At level 1, return N + X.  At level 2, add N to the first
+significant digit of X.  At level 3, return X raised to 2 raised
+to N."
+  (cl-check-type x number)
+  (cl-check-type n integer)
+  (let ((res
+	 (pcase level
 	   (1 (+ n x))
-	   (2 (+ x (* n (expt 10 (floor (log x 10))))))
-	   (3 (expt x (expt 2.0 n))))))
+	   (2 (let* ((sign (if (< x 0) -1 1))
+		     (magnitude (abs x))
+		     (place (if (zerop magnitude)
+				1
+			      (expt 10 (floor (log magnitude 10))))))
+		(+ x (* sign n place))))
+	   (3 (expt x (expt 2.0 n)))
+	   (_ (error "Level %S is not implemented!" level)))))
     (if (integerp x) (round res) res)))
-;;(inc-number 10 -1 3)
 
 (cl-defun inc-cyclic (string n level &optional thing)
+  "Increment cyclic STRING by N positions.
+LEVEL is accepted for compatibility and ignored.  THING may supply
+the cycle explicitly."
   (ignore level)
+  (cl-check-type n integer)
   (let* ((cycle-list (or thing
                          (cl-second (assoc (cycle-type string)
                                            *cyclic-things*))))

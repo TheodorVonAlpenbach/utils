@@ -1747,7 +1747,13 @@ binding and built-in dependencies instead of pulling in the broad
 string operations are local and covered directly. Obsolete commented
 templates and the non-working weekday/date helper were removed, the original
 Latin-1 source was converted to UTF-8 without changing its Norwegian names,
-and generated thing functions now compile without warnings.
+and generated thing functions now compile without warnings. Date increments
+now reject impossible calendar dates; clock increments validate their syntax
+and boundary steps while preserving timezone and fractional-second suffixes.
+Number increments handle zero and negative leading digits, and unsupported
+words or lists now signal errors instead of succeeding without a change. The
+generated API and increment behavior are covered by six namespaced tests in
+the maintained baseline.
 
 [`mb-utils-economy.el`](./utils/mb-utils-economy.el) now loads independently
 with lexical binding and `cl-lib` as its only dependency. A large anonymous
