@@ -106,23 +106,21 @@ executed. No validation checks in this version."
       (buffer-substring-no-properties (point) (point-max)))))
 
 (cl-defun buffer-line-point (line)
-  "Returns point at beginning of the current buffer's n'th LINE.
-  If LINE is negative, it is interpreted as the n'th last LINE in
-  buffer. For large buffers this is also a faster way to identify
-  the point. Note that 0 returns beginning of first line, -1
-  means beginning of last line. 
-
-  TODO: some magic with trailing newline. Also it is a bit
-  clumsily written, why do I have to use beginning of line?"
+  "Return the beginning of the current buffer's LINE.
+LINE is zero-based from the start.  Negative values count backward,
+with -1 denoting the last content line regardless of whether the
+buffer ends with a newline."
   (save-excursion
-    (cond ((< line 0) 
-	       (goto-char (point-max))
-	       (forward-line line)
-	       (beginning-of-line))
-	  (t
-	   (goto-char (point-min))
-	   (forward-line line)
-	   (beginning-of-line)))
+    (if (< line 0)
+	(progn
+	  (goto-char (point-max))
+	  (unless (bobp)
+	    (if (bolp)
+		(forward-line -1)
+	      (beginning-of-line))
+	    (forward-line (1+ line))))
+      (goto-char (point-min))
+      (forward-line line))
     (point)))
 ;;(buffer-line-point 1)
 
@@ -131,8 +129,7 @@ executed. No validation checks in this version."
   If PARAGRAPH is negative, it is interpreted as the n'th last PARAGRAPH in
   buffer. For large buffers this is also a faster way to identify
   the point. Note that 0 returns beginning of first paragraph, -1
-  means beginning of last paragraph.
-TODO: some magic with trailing newline."
+  means beginning of last paragraph."
   (save-excursion
     (if (< paragraph 0)
 	(progn

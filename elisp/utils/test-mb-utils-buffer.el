@@ -52,9 +52,14 @@
     (should (= (buffer-line-point 0) 1))
     (should (= (buffer-line-point 1) 6))
     (should (= (buffer-line-point -1) 10))
+    (should (= (buffer-line-point -2) 6))
     (should (= (point) 3))
     (should (equal (buffer-tail 2) "one\ntwo\n"))
     (should (equal (buffer-substring* :start 1 :end 5) "zero")))
+  (with-temp-buffer
+    (insert "zero\none\ntwo")
+    (should (= (buffer-line-point -1) 10))
+    (should (= (buffer-line-point -2) 6)))
   (with-temp-buffer
     (insert "first\n\nsecond\n\nthird")
     (goto-char 3)

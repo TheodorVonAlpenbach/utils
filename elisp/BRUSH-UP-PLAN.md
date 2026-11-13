@@ -378,7 +378,8 @@ The first subset is intentionally conservative:
 * [`test-mb-utils-buffer.el`](./utils/test-mb-utils-buffer.el): fifteen ERT
   tests for buffer metadata, marks and regions, line navigation, editing,
   comments, word transformations, temporary files, save-as behavior, and the
-  kill ring.
+  kill ring. Negative line indexing treats the last content line consistently
+  whether or not the buffer ends with a newline.
 * [`test-mb-utils-regexp.el`](./utils/test-mb-utils-regexp.el): seven ERT
   tests for alternatives, integer alternatives, adjacent grouping, string
   factoring, unmatchable expressions, and exact finite-set complements.
