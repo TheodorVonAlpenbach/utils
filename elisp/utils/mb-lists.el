@@ -285,10 +285,12 @@ length of LIST."
 ;;(power-set '(a b c))
 
 (cl-defun cut (list &optional (n 2) (include-remainer nil))
-  "Cuts LIST into sublists of length N while preserving order.
+  "Cut LIST into sublists of length N while preserving order.
 If INCLUDE-REMAINER is nil and last element in the result list
 has length shorter than N, this last element is discarded."
-  (cl-assert (cl-plusp n)) ;; otherwise we'll fall into an infinite loop
+  (cl-check-type n integer)
+  (unless (> n 0)
+    (user-error "Cut width must be positive: %S" n))
   (cl-loop for tail on list by (lambda (items) (nthcdr n items))
            collect (cl-subseq tail 0 (min n (length tail))) into result
            finally return

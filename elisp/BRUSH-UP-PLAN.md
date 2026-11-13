@@ -1549,6 +1549,9 @@ non-integer set sizes instead of recursing without a valid base case.
 `butlast*` now preserves standard `butlast` behavior for nonnegative counts;
 its negative extension retains a bounded prefix without modulo wraparound or
 division by zero on empty input.
+Fixed-width list cutting now rejects nonpositive and non-integer widths
+explicitly rather than exposing an internal assertion or failing during list
+traversal.
 
 The widely used `aif`, `awhen`, `acond`, and `asetf` macros now live in the
 small standalone [`mb-anaphora.el`](./utils/mb-anaphora.el) module rather than
