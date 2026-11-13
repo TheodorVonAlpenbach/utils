@@ -1557,6 +1557,9 @@ handle zero without arithmetic errors, and report attempts to grow an empty
 list explicitly rather than dividing by zero.
 Element repetition likewise accepts only nonnegative integer counts, retaining
 zero as the explicit empty-result case.
+Single-list padding now documents its minimum-width semantics and rejects
+negative or non-integer widths even when the input already exceeds the
+requested size.
 
 The widely used `aif`, `awhen`, `acond`, and `asetf` macros now live in the
 small standalone [`mb-anaphora.el`](./utils/mb-anaphora.el) module rather than

@@ -175,7 +175,13 @@
 (ert-deftest mb-lists-pad-list ()
   "Test of `pad-list'"
   (should (equal (pad-list '(a b c) 5 'd t) '(a b c d d)))
-  (should (equal (pad-list '(a b c) 5 'd) '(d d a b c))))
+  (should (equal (pad-list '(a b c) 5 'd) '(d d a b c)))
+  (should (equal (pad-list '(a b c) 2 'd) '(a b c)))
+  (should (equal (pad-list '(a b c) 0 'd) '(a b c)))
+  (should (equal (pad-list nil 2 'd) '(d d)))
+  (should-error (pad-list '(a b c) -1 'd) :type 'user-error)
+  (should-error (pad-list '(a b c) 2.0 'd)
+                :type 'wrong-type-argument))
 
 (ert-deftest mb-lists-explicit-order ()
    (should (l-explicit*< 'a 'c '(a b c)))

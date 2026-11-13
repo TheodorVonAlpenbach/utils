@@ -563,6 +563,12 @@ TODO: turn this into sequence<"
 ;;(list> '(1 2 3 5) '(1 2 3 3 3))
 
 (defun pad-list (list n pad-value &optional to-right-p)
+  "Pad LIST with PAD-VALUE until it contains at least N elements.
+When TO-RIGHT-P is non-nil, append padding; otherwise prepend it.
+Return LIST unchanged when it already contains at least N elements."
+  (cl-check-type n integer)
+  (unless (>= n 0)
+    (user-error "Minimum list length must be nonnegative: %S" n))
   (let ((length (length list)))
     (if (< length n)
       (if to-right-p
