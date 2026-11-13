@@ -8,7 +8,11 @@
     (should (= (1d-start object) 10))
     (should (= (1d-length object) 20)))
   (should (= (rest-space 3 10 100) 60))
-  (should-error (rest-space -1 10 100)))
+  (should-error (make-1d 0 -1))
+  (should-error (1d-start '(0 1 2)))
+  (should-error (rest-space -1 10 100))
+  (should-error (rest-space 1 -1 100))
+  (should-error (rest-space 1 10 -1)))
 
 (ert-deftest mb-utils-geometry-align-evenly ()
   (should (equal (1d-align '((99 10) (42 20)) :world 90)
@@ -23,6 +27,8 @@
 		 '((10 20))))
   (should (equal (1d-align '((0 20)) :right-space 10 :world 100)
 		 '((70.0 20))))
+  (should-error (1d-align '((0 -1)) :world 100))
+  (should-error (1d-align '((0 20)) :left-space -1 :world 100))
   (should-error
    (1d-align '((0 60)) :left-space 10 :right-space 20 :world 100))
   (should-error
@@ -32,6 +38,7 @@
   (should (equal (1d-interspaces 3 10 100)
 		 '((10 20.0) (40.0 20.0) (70.0 20.0))))
   (should-error (1d-interspaces 0 10 100))
+  (should-error (1d-interspaces 2 -1 100))
   (should-error (1d-interspaces 2 40 100)))
 
 (ert-deftest mb-utils-geometry-transform-and-move ()
@@ -39,19 +46,23 @@
     (should (equal (1d-transform object 5 2) '(25 40)))
     (should (equal (1d-move object -3) '(7 20)))
     (should (equal object '(10 20))))
-  (should-error (1d-transform '(10 20) 0 -1)))
+  (should (equal (1d-transform '(10 20) 5 0) '(5 0)))
+  (should-error (1d-transform '(10 20) 0 -1))
+  (should-error (1d-transform '(10 20) 0 "2")))
 
 (ert-deftest mb-utils-geometry-minmax ()
   (should (equal (minmax '(1 3 2 4 0)) '(0 4)))
   (should (equal (minmax '(2.5 -1.0 8)) '(-1.0 8)))
-  (should-error (minmax nil)))
+  (should-error (minmax nil))
+  (should-error (minmax '(1 "2"))))
 
 (ert-deftest mb-utils-geometry-bounding-box ()
   (should (equal (bounding-box '((0 0) (-1 3) (1 2)))
 		 '((-1 1) (0 3))))
   (should (equal (bounding-box '((2 4))) '((2 2) (4 4))))
   (should-error (bounding-box nil))
-  (should-error (bounding-box '((1 2 3)))))
+  (should-error (bounding-box '((1 2 3))))
+  (should-error (bounding-box '((0 symbol)))))
 
 (provide 'test-mb-utils-geometry)
 

@@ -1688,7 +1688,10 @@ left and right margins, and interspace layouts preserve the full world length.
 The unfinished affine transform and non-working interval mutation were replaced by
 non-destructive transform and move operations. The duplicate broken `minmax`
 definition was removed, restoring bounding boxes used by the municipality
-quiz data. Its seven namespaced tests run in the maintained baseline.
+quiz data. One-dimensional objects, margins, world lengths, transforms,
+extrema, and point coordinates now reject malformed or non-real inputs while
+preserving zero-length and zero-scale geometry. Its seven namespaced tests run
+in the maintained baseline.
 
 [`mb-utils-search.el`](./utils/mb-utils-search.el) now loads independently
 with lexical binding and no dependencies. Its sole public helper now searches
