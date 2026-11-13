@@ -26,7 +26,10 @@
     (table-clean (point-min) (point-max))
     (should
      (equal (buffer-string)
-            "alpha  (beta gamma)  3\nx      y             444\n"))))
+            "alpha  (beta gamma)  3\nx      y             444\n"))
+    (let ((before (buffer-string)))
+      (table-clean (point-min) (point-min))
+      (should (equal (buffer-string) before)))))
 
 (ert-deftest mb-table-clean-selected-lines ()
   (with-temp-buffer
@@ -67,6 +70,16 @@
   (with-temp-buffer
     (should-error (table-clean-line 1 '(0))))
   (with-temp-buffer
+    (insert "long value")
+    (should-error (table-clean-line 1 '(0 2)))
+    (should-error (table-clean-line 1 '(0 -1)))
+    (should (equal (buffer-string) "long value")))
+  (with-temp-buffer
+    (insert "a 1\nb 2")
+    (should-error (table-item-lengths-line 10)))
+  (with-temp-buffer
+    (insert "a 1")
+    (should-error (table-clean (point-max) (point-min)))
     (should-error (table-collect-sexp-lengths 2 1))))
 
 (provide 'test-mb-table)

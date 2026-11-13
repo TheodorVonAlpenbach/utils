@@ -10,7 +10,8 @@
   (unless (and (integerp line) (cl-plusp line))
     (error "Line must be a positive integer: %S" line))
   (goto-char (point-min))
-  (forward-line (1- line))
+  (unless (zerop (forward-line (1- line)))
+    (error "Line %d is outside the accessible buffer" line))
   (point))
 
 (defun mb-table--line-items (line)
@@ -48,7 +49,7 @@ Signal an error unless every row has the same number of columns."
                         maximize (length (nth column row)))))))
 
 (defun mb-table--offsets (widths)
-  "Return zero-based column starts for WIDTHS with two spaces between."
+  "Return zero-based starting columns for WIDTHS with two spaces between."
   (cl-loop with offset = 0
            for width in widths
            collect offset
@@ -62,6 +63,10 @@ Signal an error unless every row has the same number of columns."
     (setq indent-tabs-mode nil)
     (cl-loop for item in items
              for offset in offsets
+             do (unless (and (integerp offset) (>= offset 0))
+                  (error "Offset must be a non-negative integer: %S" offset))
+             do (when (> (current-column) offset)
+                  (error "Offset %d overlaps the preceding item" offset))
              do (indent-to offset)
              do (insert item))
     (buffer-string)))
@@ -71,20 +76,27 @@ Signal an error unless every row has the same number of columns."
 Rows are lines and columns are expressions.  Separate columns by at least two
 spaces and preserve each expression's source text."
   (interactive "r")
-  (let* ((beg-line (line-number-at-pos beg))
-         (end-line (line-number-at-pos (max beg (1- end))))
-         (rows
-          (with-syntax-table emacs-lisp-mode-syntax-table
-            (cl-loop for line from beg-line to end-line
-                     collect (mb-table--line-items line))))
-         (offsets (mb-table--offsets (mb-table--column-widths rows))))
-    (save-excursion
-      (cl-loop for line from beg-line to end-line
-               for row in rows
-               do (mb-table--goto-line line)
-               do (delete-region (line-beginning-position)
-                                 (line-end-position))
-               do (insert (mb-table--format-row row offsets))))))
+  (unless (and (integer-or-marker-p beg) (integer-or-marker-p end))
+    (error "Region bounds must be buffer positions"))
+  (when (> beg end)
+    (error "Region beginning must not follow its end"))
+  (unless (and (<= (point-min) beg) (<= end (point-max)))
+    (error "Region is outside the accessible buffer"))
+  (unless (= beg end)
+    (let* ((beg-line (line-number-at-pos beg))
+	   (end-line (line-number-at-pos (max beg (1- end))))
+	   (rows
+	    (with-syntax-table emacs-lisp-mode-syntax-table
+	      (cl-loop for line from beg-line to end-line
+		       collect (mb-table--line-items line))))
+	   (offsets (mb-table--offsets (mb-table--column-widths rows))))
+      (save-excursion
+	(cl-loop for line from beg-line to end-line
+		 for row in rows
+		 do (mb-table--goto-line line)
+		 do (delete-region (line-beginning-position)
+				   (line-end-position))
+		 do (insert (mb-table--format-row row offsets)))))))
 
 (cl-defun table-clean-paragraph ()
   "Align the table in the paragraph at point."
@@ -94,21 +106,16 @@ spaces and preserve each expression's source text."
       (user-error "Point is not in a paragraph"))
     (table-clean (car bounds) (cdr bounds))))
 
-(cl-defun goto-begin-sexp (&optional (n 1))
-  "Move to the beginning of the Nth following expression and return point."
-  (forward-sexp n)
-  (forward-sexp -1)
-  (point))
-
 (cl-defun table-clean-line (line offsets)
   "Align expressions on one-based LINE at zero-based OFFSETS."
-  (let ((items
-         (with-syntax-table emacs-lisp-mode-syntax-table
-           (mb-table--line-items line))))
+  (let* ((items
+	  (with-syntax-table emacs-lisp-mode-syntax-table
+	    (mb-table--line-items line)))
+	 (formatted (mb-table--format-row items offsets)))
     (save-excursion
       (mb-table--goto-line line)
       (delete-region (line-beginning-position) (line-end-position))
-      (insert (mb-table--format-row items offsets)))))
+      (insert formatted))))
 
 (cl-defun point-2-line (&optional (point (point)))
   "Return the one-based line number containing POINT."
@@ -126,11 +133,6 @@ spaces and preserve each expression's source text."
 (cl-defun table-item-lengths-line (line)
   "Return expression lengths on one-based LINE."
   (cl-first (table-collect-sexp-lengths line line)))
-
-(cl-defun table-item-lengths-line* ()
-  "Display expression lengths on the current line."
-  (interactive)
-  (message "%S" (table-item-lengths-line (point-2-line))))
 
 (provide 'mb-table)
 

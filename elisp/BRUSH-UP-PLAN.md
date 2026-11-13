@@ -1719,8 +1719,11 @@ interactive-only line motion, and cursor-printing helper side effects were
 removed. Rows are parsed as Emacs Lisp expressions, so compound expressions
 containing spaces remain single cells; tables with malformed expressions or
 uneven column counts signal explicit errors. Region, paragraph, and individual
-line alignment share one deterministic formatter. Its seven namespaced tests
-run in the maintained baseline.
+line alignment share one deterministic formatter. Invalid line numbers,
+reversed regions, and overlapping or negative offsets now signal explicit
+errors without rewriting the buffer. The unused `goto-begin-sexp` movement
+helper and message-only length wrapper were retired. Its seven namespaced
+tests run in the maintained baseline.
 
 [`mb-polynomials.el`](./utils/mb-polynomials.el) now loads independently with
 lexical binding and `cl-lib` as its only dependency. Startup aliases and the
