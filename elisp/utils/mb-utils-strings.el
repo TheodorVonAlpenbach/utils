@@ -536,12 +536,14 @@ Return the empty string when N is zero or negative."
 ;;(mapcar (bind #'multiply-string "qwe" 1) (a-b -1 3))
 
 (cl-defun integer-to-ordinal (n)
-  (if (<= n 0)
-    (error "Integer must be positive")
-    (if (< 3 (mod n 100) 21)
-      (format "%dth" n)
-      (format "%d%s" n (cl-case (mod n 10) 
-			 (1 "st") (2 "nd") (3 "rd") (t "th"))))))
+  "Return positive integer N with its English ordinal suffix."
+  (cl-check-type n integer)
+  (unless (> n 0)
+    (user-error "Integer must be positive: %S" n))
+  (if (< 3 (mod n 100) 21)
+    (format "%dth" n)
+    (format "%d%s" n (cl-case (mod n 10)
+		       (1 "st") (2 "nd") (3 "rd") (t "th")))))
 
 (cl-defun integer-to-ordinal-string (n)
   "Return the positive integer N written as an English ordinal."

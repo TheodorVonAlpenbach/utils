@@ -1896,3 +1896,5 @@ thousandth`, and `one millionth` instead of returning nil.
 Cardinal formatting now handles negative values, retains every scale component
 in million and billion values, avoids rounding billion quotients, and forwards
 custom short and long separators through recursive formatting.
+Numeric ordinal suffixes now require positive integers, preventing values such
+as `1.0` from being silently rendered as `1th`.

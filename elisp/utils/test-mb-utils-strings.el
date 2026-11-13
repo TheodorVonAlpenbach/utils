@@ -185,9 +185,16 @@
    (equal
     (mapcar #'integer-to-ordinal
       '(1 2 3 4 9 10 11 12 13 14
-	20 21 22 23 24 100003))
+	20 21 22 23 24
+	111 112 113 121 122 123
+	1001 1011 100003))
     '("1st" "2nd" "3rd" "4th" "9th" "10th" "11th" "12th" "13th" "14th"
-      "20th" "21st" "22nd" "23rd" "24th" "100003rd") )))
+      "20th" "21st" "22nd" "23rd" "24th"
+      "111th" "112th" "113th" "121st" "122nd" "123rd"
+      "1001st" "1011th" "100003rd")))
+  (should-error (integer-to-ordinal 0) :type 'user-error)
+  (should-error (integer-to-ordinal 1.0)
+                :type 'wrong-type-argument))
 
 (ert-deftest mb-utils-strings-string-replace-f ()
   "Test of `string-replace-f'"
