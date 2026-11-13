@@ -716,13 +716,24 @@ sequence it will be coerced into a vector"
 ;;(make-keyword "qwe")
 
 (cl-defun numcond-transform-clauses (clauses gx gy)
-  "TODO: handle t and otherwise like in `cond'"
-  `(cond ,@(mapcar #'(lambda (x)
-		       `((,(cl-first x) ,gx ,gy) ,@(cl-rest x)))
-		       clauses)))
+  "Transform numeric conditional CLAUSES using operands GX and GY."
+  `(cond
+    ,@(mapcar
+       (lambda (clause)
+	 (let ((predicate (cl-first clause)))
+	   `(,(if (memq predicate '(t otherwise))
+		  t
+		`(,predicate ,gx ,gy))
+	     ,@(cl-rest clause))))
+       clauses)))
 ;;(pp (macroexpand '(numcond (3 3) ((= 'eq)))))
 
 (cl-defmacro numcond (arg &rest clauses)
+  "Compare numeric ARG using CLAUSES.
+ARG may be a number, which is compared with zero, or a two-element
+form whose values are compared with each other.  Each clause begins
+with a binary predicate followed by its body.  `t' and `otherwise'
+introduce fallback clauses as in `cond'."
   (declare (indent 1))
   (when (atom arg)
     (setf arg (list arg 0)))

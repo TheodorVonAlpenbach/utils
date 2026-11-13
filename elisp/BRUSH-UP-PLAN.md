@@ -571,7 +571,7 @@ comprises:
 
 * a clean `emacs -Q` load of all ninety-eight utility and mode-extension
   features plus the ERT tooling;
-* 811 passing ERT tests from the batch entry point;
+* 812 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -1581,7 +1581,8 @@ and function argument inspection under lexical binding.
 Default handling in `pop-until` and removal of nil-valued properties in
 `plist-pop` are also covered. `position-num` is retained as a semantic slicing
 helper: unlike `cl-position`, it returns the sequence length when no element
-matches, yielding a valid exclusive end position.
+matches, yielding a valid exclusive end position. `numcond` now supports `t`
+and `otherwise` fallback clauses while evaluating both numeric operands once.
 
 [`mb-utils-strings.el`](./utils/mb-utils-strings.el) now loads independently
 with lexical binding and explicit list, sequence, math, set, and general

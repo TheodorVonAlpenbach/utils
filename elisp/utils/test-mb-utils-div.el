@@ -198,6 +198,27 @@
   (should (= (position-num 'a '(a b a) :start 1) 2))
   (should (= (position-num 'a '(a b a) :start 1 :end 2) 3)))
 
+(ert-deftest mb-utils-div-numcond ()
+  (should (eq (numcond 2 (= :zero) (> :positive) (< :negative))
+              :positive))
+  (should (eq (numcond -2 (= :zero) (> :positive) (< :negative))
+              :negative))
+  (should (eq (numcond (2 2) (= :equal) (t :different))
+              :equal))
+  (should (eq (numcond (1 2) (= :equal) (t :different))
+              :different))
+  (should (eq (numcond (1 2) (= :equal) (otherwise :different))
+              :different))
+  (let ((evaluations 0))
+    (should
+     (eq
+      (numcond ((progn (cl-incf evaluations) 3)
+                (progn (cl-incf evaluations) 2))
+        (> :greater)
+        (otherwise :not-greater))
+      :greater))
+    (should (= evaluations 2))))
+
 (provide 'test-mb-utils-div)
 
 ;;; test-mb-utils-div.el ends here
