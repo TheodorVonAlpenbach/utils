@@ -7,7 +7,8 @@
 ;;; Code:
 
 ;; General regexps
-(defconst *natural-number-regexp* "[123456789][0123456789]*")
+(defconst *natural-number-regexp* "[123456789][0123456789]*"
+  "Regexp matching a positive decimal integer without leading zeroes.")
 
 (cl-defun regexp-or (&rest strings)
   "Return a regexp matching any raw regexp in STRINGS."
@@ -17,8 +18,10 @@
 ;;(regexp-or "abc" "def")
 
 (cl-defun regexp-or-integers (&rest ints)
-  "Return a regexp matching any integer in INTS."
-  (apply #'regexp-or (mapcar #'number-to-string ints)))
+  "Return an optimized regexp matching any integer in INTS literally."
+  (dolist (integer ints)
+    (cl-check-type integer integer))
+  (regexp-opt (mapcar #'number-to-string ints)))
 ;;(apply #'regexp-or-integers (a-b 1 3))
 
 (cl-defun factor-list (list less-than &key (key #'identity))
@@ -32,7 +35,9 @@
 ;;(factor-list '("ab" "b" "ac") #'string< :key (lambda (s) (aref s 0)))
 
 (cl-defun group-adjacent (list &key (test #'eql) (key #'identity))
-  "(0 0 1 2 2 2 3 3) -> ((0 0) (1) (2 2 2) (3 3))"
+  "Group adjacent elements of LIST with equal keys.
+TEST compares values produced by KEY.  Group and element order are
+preserved."
   (if (null list)
       list
     (cl-loop with current = (funcall key (cl-first list))
@@ -48,7 +53,8 @@
 ;;(group-adjacent '("") :key #'first-elt :test #'=)
 
 (cl-defun factor-strings (strings)
-  "{aa ab b ba} -> {a{a b} b{nil a}}"
+  "Group nonempty STRINGS by first character and return their suffixes.
+Empty strings and empty suffixes are omitted."
   (mapcar (lambda (group)
 	    (list (aref (cl-first group) 0)
 		  (remove-empty-strings
@@ -60,6 +66,7 @@
 ;;(factor-strings '("ee" "d1" "d3" "4d" "ef" "ag5"))
 
 (cl-defun remove-empty-strings (strings)
+  "Return STRINGS without empty string elements."
   (cl-remove-if #'string-empty-p strings))
 
 (defconst mb-regexp--any-character "\\(?:.\\|\n\\)")
@@ -111,6 +118,9 @@
 
 (cl-defun mb-regexp-not-strings (strings)
   "Return an anchored regexp matching every string except STRINGS."
+  (cl-check-type strings list)
+  (dolist (string strings)
+    (cl-check-type string string))
   (concat "\\`"
 	  (mb-regexp--trie-complement
 	   (mb-regexp--string-trie (cl-remove-duplicates strings :test #'equal)))

@@ -17,11 +17,14 @@
   (should-not (string-match-p (regexp-or) "")))
 
 (ert-deftest mb-utils-regexp-or-integers ()
-  (let ((regexp (concat "\\`" (regexp-or-integers 1 12 300) "\\'")))
-    (dolist (string '("1" "12" "300"))
+  (let ((regexp (concat "\\`" (regexp-or-integers -1 1 12 300) "\\'")))
+    (dolist (string '("-1" "1" "12" "300"))
       (should (string-match-p regexp string)))
     (dolist (string '("" "2" "120"))
-      (should-not (string-match-p regexp string)))))
+      (should-not (string-match-p regexp string))))
+  (should (string-match (regexp-or-integers 1 12) "12"))
+  (should (equal (match-string 0 "12") "12"))
+  (should-not (string-match-p (regexp-or-integers) "")))
 
 (ert-deftest mb-utils-regexp-group-adjacent ()
   (should (equal (group-adjacent '(0 0 1 2 2 2 3 3))
@@ -40,8 +43,10 @@
     (should (equal input '("ba" "aa" "ab" "bb")))))
 
 (ert-deftest mb-utils-regexp-factor-strings ()
-  (should (equal (factor-strings '("ab" "b" "ac" ""))
-		 '((?a ("b" "c")) (?b nil))))
+  (let ((input '("ab" "b" "ac" "")))
+    (should (equal (factor-strings input)
+		   '((?a ("b" "c")) (?b nil))))
+    (should (equal input '("ab" "b" "ac" ""))))
   (should-not (factor-strings '("" "")))
   (should (equal (remove-empty-strings '("" "a" "" "b"))
 		 '("a" "b"))))
@@ -63,6 +68,17 @@
 			 "duplicate-more"))
 	(unless (member string blocked)
 	  (should (string-match-p regexp string)))))))
+
+(ert-deftest mb-utils-regexp-input-validation ()
+  (should-error (regexp-or-integers 1 2.0)
+                :type 'wrong-type-argument)
+  (should-error (mb-regexp-not-strings "blocked")
+                :type 'wrong-type-argument)
+  (should-error (mb-regexp-not-strings '("valid" 1))
+                :type 'wrong-type-argument)
+  (let ((regexp (mb-regexp-not-strings '("blocked\nvalue"))))
+    (should-not (string-match-p regexp "blocked\nvalue"))
+    (should (string-match-p regexp "blocked\nother"))))
 
 (provide 'test-mb-utils-regexp)
 

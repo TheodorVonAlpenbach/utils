@@ -381,9 +381,10 @@ The first subset is intentionally conservative:
   kill ring. Negative line indexing treats the last content line consistently
   whether or not the buffer ends with a newline. Relative point conversion
   supports bounded negative positions without wrapping invalid positions.
-* [`test-mb-utils-regexp.el`](./utils/test-mb-utils-regexp.el): seven ERT
+* [`test-mb-utils-regexp.el`](./utils/test-mb-utils-regexp.el): eight ERT
   tests for alternatives, integer alternatives, adjacent grouping, string
-  factoring, unmatchable expressions, and exact finite-set complements.
+  factoring, input validation, unmatchable expressions, and exact finite-set
+  complements.
 * [`test-mb-utils-matrix.el`](./utils/test-mb-utils-matrix.el): eleven ERT
   tests for vector generation and arithmetic, geometric operations, matrix
   dimensions and products, norms, pseudoinverses, and permutations.
@@ -574,7 +575,7 @@ comprises:
 
 * a clean `emacs -Q` load of all ninety-eight utility and mode-extension
   features plus the ERT tooling;
-* 816 passing ERT tests from the batch entry point;
+* 817 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -1651,7 +1652,10 @@ regexp, and the grouping helpers no longer depend on removed `sort*`,
 `remove*`, or startup accessor aliases. `mb-regexp-not-strings` now constructs
 an anchored trie-complement regexp that rejects exactly the supplied finite
 set, including empty strings, prefixes, duplicates, newlines, and regexp
-metacharacters. Its seven namespaced tests run in the maintained baseline.
+metacharacters. Integer alternatives now use `regexp-opt` for literal
+longest-match behavior and reject non-integers. Finite-set complements likewise
+reject non-list and non-string inputs explicitly. Its eight namespaced tests
+run in the maintained baseline.
 
 [`mb-utils-matrix.el`](./utils/mb-utils-matrix.el) now loads independently
 with lexical binding and explicit dependencies. Vector and matrix operations
