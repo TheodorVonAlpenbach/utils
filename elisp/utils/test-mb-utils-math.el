@@ -152,9 +152,7 @@
     (should (= (days-in-month 1) 29))
     (should (equal (div-day-month 59) '(1 28)))))
 
-(ert-deftest mb-utils-math-unimplemented-functions-error ()
-  (should-error (list-move 'a '(a) nil) :type 'error)
-  (should-error (swimming-relative-distances) :type 'error))
+
 
 (provide 'test-mb-utils-math)
 

@@ -568,7 +568,7 @@ comprises:
 
 * a clean `emacs -Q` load of all ninety-eight utility and mode-extension
   features plus the ERT tooling;
-* 808 passing ERT tests from the batch entry point;
+* 807 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -1588,7 +1588,9 @@ annual interest, byte truncation/endianness/width, signed-byte boundaries,
 four-part date decomposition, and configurable epoch years. The former
 probabilistic test now uses deterministic weighted-selection boundaries. The
 obsolete fixnum-overflow product fallback has been removed now that Emacs uses
-arbitrary-precision integers. Its 23 namespaced tests run in the maintained
+arbitrary-precision integers. Two uncalled functions that only signalled
+not-implemented errors, `list-move` and `swimming-relative-distances`, have
+also been retired. Its 22 namespaced tests run in the maintained
 baseline.
 
 [`mb-combinatorics.el`](./utils/mb-combinatorics.el) now loads independently
@@ -1767,7 +1769,7 @@ usage decision:
   shell formatting as a new module with an explicit contract and tests rather
   than restoring the incomplete implementation.
 
-Twenty-eight compatibility wrappers and constants were retired after
+Thirty compatibility wrappers, constants, and unusable stubs were retired after
 repository-wide caller checks. `string-to-character-list` duplicated
 `string-to-list`, `blanks` duplicated `make-string`, and `reverse-lines` was
 only an alias for `reverse-region`. `buffer-string*` only wrapped
@@ -1790,6 +1792,9 @@ The unused `pure-string` helper was removed because its behavior did not match
 its formatting-removal docstring and no production code depended on it.
 The internal `product-safe` and `product-safe-list` fallback functions were
 removed because modern integer multiplication preserves exact bignums.
+The uncalled `list-move` and `swimming-relative-distances` stubs were removed
+because they had no implementation and their only tests asserted that they
+failed.
 
 ### Behaviourally equivalent for observed uses
 
@@ -1800,7 +1805,6 @@ matched. They are safe retirement candidates once callers are checked.
 | --- | --- | --- |
 | `empty-string-p` | `string-empty-p` | Both return nil for nil input. |
 | `string-trim*` and its side variants | `string-trim`, `string-trim-left`, `string-trim-right` | Standard also accepts trim regexps; the `:left`/`:right`/`:both` dispatch is the only extra. |
-| `string-remove-props` | `substring-no-properties` | Already self-declared obsolete. Differs only in stripping destructively in place rather than copying. |
 | `diff-current-time-msec` | `time-subtract` plus `float-time` | The standard operations preserve timestamp representation independence; multiply the result by 1000 for milliseconds. |
 | `unix-time` and `ms-unix-time` | `float-time` | The local versions additionally accept the broader `parse-time` designators. |
 | `yearweek-number` and `week-number` | `format-time-string` with `%G` and `%V` | Results agree at tested ISO-year boundaries after repairing exact first-Monday handling. |
@@ -1817,6 +1821,7 @@ These look replaceable but are not, and the difference is easy to miss.
 | `listify` | `ensure-list` | **Interpreted lambdas**: `(lambda () nil)` is itself a list, so `ensure-list` returns it unwrapped while `listify` wraps it. **Vectors**: `listify` coerces element-wise to `(1 2)`; `ensure-list` wraps to `([1 2])`. Byte-compiled lambdas happen to agree. |
 | `flatten` | `flatten-tree` | Agree on full flattening, including nil removal, but `flatten` takes a `LEVELS` argument for partial flattening that has no standard equivalent. |
 | `substring*` | `substring` | Standard `substring` already supports negative indices, so that is no longer a reason to keep this. They diverge only out of range: `substring*` wraps via `mod` and silently returns a value where `substring` signals `args-out-of-range`. Decide whether that masking is wanted before retiring. |
+| `string-remove-props` | `substring-no-properties` | The local helper strips properties destructively rather than returning a copy. It remains in active LilyPond code and encoding-sensitive archived browser code, so retain it until those callers can be migrated deliberately. |
 | `blank-p` | `string-blank-p` | `blank-p` returns a boolean; `string-blank-p` returns a match position. Interchangeable in conditionals, not under `equal`. |
 | `constantly` | `always` | `always` only covers the constantly-`t` case; `constantly` builds a closure returning any value. |
 | `add-etime-date` | `decoded-time-add` | Both add calendar fields, but invalid dates differ: adding one month to 2019-01-31 normalizes to March 3 locally and clamps to February 28 in `decoded-time-add`. DST handling also needs comparison before substitution. |

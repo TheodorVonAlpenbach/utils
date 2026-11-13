@@ -290,11 +290,6 @@ way. Assumes that LISTS is sorted by the length of its elements (lists)."
     rest))
 ;;(let ((list '(a b c d a))) (list (extract 'a list) list))
 
-(cl-defun list-move (x list-from list-to &key (test #'eq) (key #'identity))
-  "Not implemented"
-  (ignore x list-from list-to test key)
-  (error "list-move is not implemented"))
-
 (cl-defun partition-from-ordering (list &key (test #'<) (key #'identity))
   "Returns a partition of set LIST corresponding to the
 equivalence relation based on the strict ordering TEST on LIST
@@ -934,19 +929,6 @@ either 0 or 1)"
 	      for i below years
 	      sum (naaverdi-annual premium market-interest i))))
 ;;(obligation-value 1000 .06 5 0.04)
-
-;; swimming!
-(defconst swimming-records
-  '((46.91 crawl)
-    (49.82 butterfly)
-    (51.94 backstroke)
-    (58.46 breaststroke)))
-
-(cl-defun swimming-relative-distances
-    (&optional (style-symbol 'crawl) (distance 100))
-  (ignore style-symbol distance)
-  (error "swimming-relative-distances is not implemented"))
-;;(swimming-relative-distances 'crawl 50)
 
 (cl-defun div-sec-min (seconds) (cl-floor seconds 60.0))
 (cl-defun div-min-hour (minutes) (cl-floor minutes 60.0))
