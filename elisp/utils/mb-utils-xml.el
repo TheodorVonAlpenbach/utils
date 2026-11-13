@@ -6,6 +6,14 @@
 
 ;;; Code:
 
+(defconst mb-xml--tag-tail-regexp
+  "\\(?:[[:space:]]+\\(?:[^>\"']\\|\"[^\"]*\"\\|'[^']*'\\)*\\)?/?>"
+  "Regexp matching the attribute and closing portion of an XML tag.")
+
+(defun mb-xml--self-closing-tag-p (tag)
+  "Return non-nil when TAG is self-closing."
+  (string-match-p "/[[:space:]]*>\\'" tag))
+
 (cl-defun xml-attribute-regexp (name &optional value)
   "Return a regexp matching attribute NAME and optional VALUE.
 NAME and VALUE are raw regexps.  The string `*' matches any name or value."
@@ -98,18 +106,20 @@ Use `xml-extract-nodes' when nested nodes of the same name are possible."
 
 (defun mb-xml--matching-close (xml name start)
   "Return (CLOSE-BEGIN CLOSE-END) for NAME opened before START in XML."
-  (let ((regexp (format "</?%s\\(?:[[:space:]][^>]*\\)?>" (regexp-quote name)))
+  (let ((regexp (concat "</?" (regexp-quote name)
+			mb-xml--tag-tail-regexp))
 	(depth 1)
 	close)
     (while (and (cl-plusp depth) (string-match regexp xml start))
-      (setq start (match-end 0))
-      (if (eq (aref xml (1+ (match-beginning 0))) ?/)
+      (let ((tag (match-string 0 xml)))
+	(setq start (match-end 0))
+	(if (eq (aref tag 1) ?/)
 	  (progn
 	    (cl-decf depth)
 	    (when (zerop depth)
 	      (setq close (list (match-beginning 0) (match-end 0)))))
-	(unless (eq (aref xml (- (match-end 0) 2)) ?/)
-	  (cl-incf depth))))
+	  (unless (mb-xml--self-closing-tag-p tag)
+	    (cl-incf depth)))))
     close))
 
 (cl-defun xml-extract-nodes
@@ -119,8 +129,12 @@ ATTRIBUTES accepts names or (NAME VALUE) regexp pairs.  Return all matches
 when N is nil, the first N when positive, and matches from the end in reverse
 document order when negative.  Return only node contents when
 NODE-CONTENT-ONLY is non-nil."
+  (cl-check-type xml-string string)
+  (cl-check-type node-name string)
+  (cl-check-type n (or null integer))
   (let ((opening-regexp
-	 "<\\([[:alpha:]_][[:alnum:]_.:-]*\\)\\(?:[[:space:]][^>]*\\)?>")
+	 (concat "<\\([[:alpha:]_][[:alnum:]_.:-]*\\)"
+		 mb-xml--tag-tail-regexp))
 	(position 0)
 	nodes)
     (while (and (or (null n) (cl-minusp n) (< (length nodes) n))
@@ -130,16 +144,17 @@ NODE-CONTENT-ONLY is non-nil."
 	     (opening-tag (match-string 0 xml-string))
 	     (name (match-string 1 xml-string)))
 	(setq position opening-end)
-	(when (and (not (string-suffix-p "/>" opening-tag))
-		   (mb-xml--full-match-p node-name name)
+	(when (and (mb-xml--full-match-p node-name name)
 		   (mb-xml--attributes-match-p attributes opening-tag))
-	  (let ((close (mb-xml--matching-close xml-string name opening-end)))
-	    (when close
-	      (push (if node-content-only
-			(substring xml-string opening-end (cl-first close))
-		      (substring xml-string opening-begin (cl-second close)))
-		    nodes)
-	      (setq position (cl-second close)))))))
+	  (if (mb-xml--self-closing-tag-p opening-tag)
+	      (push (if node-content-only "" opening-tag) nodes)
+	    (let ((close (mb-xml--matching-close xml-string name opening-end)))
+	      (when close
+		(push (if node-content-only
+			  (substring xml-string opening-end (cl-first close))
+			(substring xml-string opening-begin (cl-second close)))
+		      nodes)
+		(setq position (cl-second close))))))))
     (setq nodes (nreverse nodes))
     (if (and n (cl-minusp n))
 	(let ((reversed (reverse nodes)))
@@ -151,7 +166,7 @@ NODE-CONTENT-ONLY is non-nil."
   (cl-first (xml-extract-nodes xml node-name nil 1 t)))
 
 (cl-defun xml-inner-text (xml &optional (node-name "[^>[:space:]]+"))
-  "Return NODE-NAME contents after discarding child nodes."
+  "Return XML's first NODE-NAME contents after discarding child nodes."
   (let ((string (xml-inner xml node-name)))
     (when string
       (let ((children (xml-extract-nodes string "[^>[:space:]]+")))

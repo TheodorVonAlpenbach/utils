@@ -575,7 +575,7 @@ comprises:
 
 * a clean `emacs -Q` load of all ninety-eight utility and mode-extension
   features plus the ERT tooling;
-* 817 passing ERT tests from the batch entry point;
+* 818 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -1708,8 +1708,10 @@ single-quoted, unquoted, and boolean attributes in any order. Raw-fragment
 extraction now balances nested nodes of the same name and handles positive and
 negative limits without capture-number assumptions. Inner-text extraction
 discards child nodes, entity decoding delegates to the standard XML decoder,
-and callback closures use lexical binding. Its seven namespaced tests run in
-the maintained baseline.
+and callback closures use lexical binding. Tag scanning is now quote-aware,
+self-closing nodes participate in extraction and inner-text cleanup, and
+limits reject non-integers explicitly. Its seven namespaced tests run in the
+maintained baseline.
 
 [`mb-table.el`](./utils/mb-table.el) now loads independently with lexical
 binding and built-in dependencies. Duplicate row-length implementations,

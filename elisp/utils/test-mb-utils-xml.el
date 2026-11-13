@@ -40,13 +40,30 @@
 		   '("<x>1</x>" "<x>2</x>")))
     (should (equal (xml-extract-nodes xml "x" nil -2)
 		   '("<x>3</x>" "<x>2</x>")))
-    (should-not (xml-extract-nodes xml "x" nil 0))))
+    (should-not (xml-extract-nodes xml "x" nil 0)))
+  (should-error (xml-extract-nodes "<x/>" "x" nil 1.5))
+  (should-error (xml-extract-nodes 1 "x"))
+  (should-error (xml-extract-nodes "<x/>" nil)))
+
+(ert-deftest mb-utils-xml-self-closing-and-quoted-delimiters ()
+  (let ((xml
+	 "<x title=\"a>b\">A<br data-note='c>d'/>B<x>C</x>D</x><x/>"))
+    (should
+     (equal (xml-extract-nodes xml "x")
+	    '("<x title=\"a>b\">A<br data-note='c>d'/>B<x>C</x>D</x>"
+	      "<x/>")))
+    (should
+     (equal (xml-extract-nodes xml "x" '(("title" "a>b")))
+	    '("<x title=\"a>b\">A<br data-note='c>d'/>B<x>C</x>D</x>")))
+    (should (equal (xml-extract-nodes "<x/>" "x" nil nil t) '("")))
+    (should (equal (xml-inner-text xml "x") "ABD"))))
 
 (ert-deftest mb-utils-xml-inner-content ()
   (should (equal (xml-inner mb-utils-xml-test-node) 
 		 "<a name=\"6159\"></a>Some inner text<a></a>"))
   (should (equal (xml-inner-text mb-utils-xml-test-node)
 		 "Some inner text"))
+  (should (equal (xml-inner-text "<x>A<br/>B</x>") "AB"))
   (should-not (xml-inner "<x>missing close")))
 
 (ert-deftest mb-utils-xml-temp-buffer-sentinel ()
