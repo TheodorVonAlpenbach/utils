@@ -528,7 +528,9 @@ consider `buffer-substring-no-properties'"
 (def-edebug-spec with-lines ((gate symbolp form) body))
 
 (cl-defun multiply-string (s n)
-  "TODO: Not too efficient"
+  "Return string S repeated N times.
+Return the empty string when N is zero or negative."
+  (cl-check-type n integer)
   (if (< n 1)
     "" (apply #'concat (make-list n s))))
 ;;(mapcar (bind #'multiply-string "qwe" 1) (a-b -1 3))

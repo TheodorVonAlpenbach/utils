@@ -571,7 +571,7 @@ comprises:
 
 * a clean `emacs -Q` load of all ninety-eight utility and mode-extension
   features plus the ERT tooling;
-* 812 passing ERT tests from the batch entry point;
+* 813 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -1883,7 +1883,8 @@ overlapping responsibilities have been consolidated:
 
 ### Still first-party
 
-No standard equivalent found: `multiply-string` (string repetition),
+No standard equivalent found: `multiply-string` (string repetition, including
+the empty result used by music-formatting callers for nonpositive counts),
 `not-empty`, `concat*` and `andcat` (keyword-driven joining beyond
 `string-join`), the `split-string-*` family, and the BSG, UUID, alphabet,
 tab-formatting, literary-number, factorial, derangement, Fibonacci, binomial,

@@ -231,6 +231,15 @@
 (ert-deftest mb-utils-strings-basic-conversions ()
   (should (equal (copy-case "example" "X") "Example")))
 
+(ert-deftest mb-utils-strings-multiply-string ()
+  (should (equal (multiply-string "ab" 3) "ababab"))
+  (should (equal (multiply-string "ab" 1) "ab"))
+  (should (equal (multiply-string "ab" 0) ""))
+  (should (equal (multiply-string "ab" -1) ""))
+  (should (equal (multiply-string "" 3) ""))
+  (should-error (multiply-string "ab" 2.0)
+                :type 'wrong-type-argument))
+
 (ert-deftest mb-utils-strings-string-match-end-start ()
   (should (= (string-match-end "a" "a--a" 1) 4))
   (should-not (string-match-end "z" "a--a" 1)))
