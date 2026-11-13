@@ -499,10 +499,9 @@ the list ((fn1 arg1 arg2 ...) (fn2 arg1 arg2 ...) ...)"
 (cl-defun not-null (x) (not (null x)))
 
 (cl-defun position-num (cl-item cl-seq &rest cl-keys)
-  "Same as `POSITION', but returns always a number, even if CL-ITEM is
-not found. Instead of returning nil, the length of CL-SEQ is returned.
-It is useful in connection with functions like `SUBSEQ', `SUBSTRING',
-etc. NB! Check if obsolete!"
+  "Return CL-ITEM's position in CL-SEQ, or its length when absent.
+CL-KEYS are forwarded to `cl-position'.  Returning the sequence
+length makes the result directly usable as an exclusive end position."
   (or (apply #'cl-position cl-item cl-seq cl-keys)
       (length cl-seq)))
 

@@ -191,6 +191,13 @@
     (should (equal (push-unique 'a (cl-first container)) '(a b)))
     (should (equal container '((a b))))))
 
+(ert-deftest mb-utils-div-position-num ()
+  (should (= (position-num 'b '(a b c)) 1))
+  (should (= (position-num 'x '(a b c)) 3))
+  (should (= (position-num 2 '((1 a) (2 b) (3 c)) :key #'car) 1))
+  (should (= (position-num 'a '(a b a) :start 1) 2))
+  (should (= (position-num 'a '(a b a) :start 1 :end 2) 3)))
+
 (provide 'test-mb-utils-div)
 
 ;;; test-mb-utils-div.el ends here

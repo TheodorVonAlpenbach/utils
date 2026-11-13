@@ -571,7 +571,7 @@ comprises:
 
 * a clean `emacs -Q` load of all ninety-eight utility and mode-extension
   features plus the ERT tooling;
-* 810 passing ERT tests from the batch entry point;
+* 811 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -1579,7 +1579,9 @@ baseline. Repairs cover zero-position binding in `bind*`, lexical closures in
 `listify`, numeric strings in `iintern`, generalized places in `push-unique`,
 and function argument inspection under lexical binding.
 Default handling in `pop-until` and removal of nil-valued properties in
-`plist-pop` are also covered.
+`plist-pop` are also covered. `position-num` is retained as a semantic slicing
+helper: unlike `cl-position`, it returns the sequence length when no element
+matches, yielding a valid exclusive end position.
 
 [`mb-utils-strings.el`](./utils/mb-utils-strings.el) now loads independently
 with lexical binding and explicit list, sequence, math, set, and general
