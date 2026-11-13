@@ -165,12 +165,19 @@
     (mapcar #'integer-to-ordinal-string
       '(1 2 3 4 9
 	10 11 12 13 14
-	20 21 22 23 24
+	20 21 22 23 24 40
+	100 112 120 1000 1000000
 	100003))
     '("first" "second" "third" "fourth" "ninth"
-      "tenth" "eleventh" "twelveth" "thirteenth" "fourteenth"
+      "tenth" "eleventh" "twelfth" "thirteenth" "fourteenth"
       "twentieth" "twenty-first" "twenty-second" "twenty-third" "twenty-fourth"
-      "one hundred thousand third"))))
+      "fortieth"
+      "one hundredth" "one hundred twelfth" "one hundred twentieth"
+      "one thousandth" "one millionth"
+      "one hundred thousand third")))
+  (should-error (integer-to-ordinal-string 0) :type 'user-error)
+  (should-error (integer-to-ordinal-string 1.0)
+                :type 'wrong-type-argument))
 
 (ert-deftest mb-utils-strings-integer-to-ordinal ()
   "Test of `integer-to-ordinal'"
@@ -193,8 +200,9 @@
   "Test of `integer-to-literary-string'"
   (should
    (equal
-    (mapcar #'integer-to-literary-string (list 21 99 100 100003))
-    '("twenty-one" "ninety-nine" "one hundred" "one hundred thousand three"))))
+    (mapcar #'integer-to-literary-string (list 21 80 82 99 100 100003))
+    '("twenty-one" "eighty" "eighty-two" "ninety-nine"
+      "one hundred" "one hundred thousand three"))))
 
 (ert-deftest mb-utils-strings-string-case ()
   "Test of `string-case'"

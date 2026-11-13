@@ -544,23 +544,51 @@ Return the empty string when N is zero or negative."
 			 (1 "st") (2 "nd") (3 "rd") (t "th"))))))
 
 (cl-defun integer-to-ordinal-string (n)
-  (if (<= n 0)
-    (error "Integer must be positive")
-    (cl-case n 
-      (1 "first") (2 "second") (3 "third") (4 "fourth") (5 "fifth")
-      (6 "sixth") (7 "seventh") (8 "eighth") (9 "ninth")
-      (20 "twentieth") (30 "thirtieth") (40 "fourtieth") (50 "fiftieth")
-      (60 "sixtieth") (70 "seventieth") (80 "eightieth") (90 "ninetieth")
-      (t (cond ((< 9 (mod n 100) 20)
-		(format "%sth" (integer-to-literary-string n)))
-	       ((< 20 (mod n 100) 100)
-		(format "%s-%s" 
-		  (integer-to-literary-string (interval-floor n 10))
-		  (integer-to-ordinal-string (mod n 10))))
-	       ((< 0 (mod n 10) 6)
-		(format "%s %s" 
-		  (integer-to-literary-string (interval-floor n 10))
-		  (integer-to-ordinal-string (mod n 10)))))))))
+  "Return the positive integer N written as an English ordinal."
+  (cl-check-type n integer)
+  (unless (> n 0)
+    (user-error "Integer must be positive: %S" n))
+  (cond
+   ((< n 20)
+    (aref
+     [nil "first" "second" "third" "fourth" "fifth" "sixth"
+	  "seventh" "eighth" "ninth" "tenth" "eleventh" "twelfth"
+	  "thirteenth" "fourteenth" "fifteenth" "sixteenth"
+	  "seventeenth" "eighteenth" "nineteenth"]
+     n))
+   ((< n 100)
+    (let ((remainder (mod n 10)))
+      (if (zerop remainder)
+	  (cl-case n
+	    (20 "twentieth") (30 "thirtieth") (40 "fortieth")
+	    (50 "fiftieth") (60 "sixtieth") (70 "seventieth")
+	    (80 "eightieth") (90 "ninetieth"))
+	(format "%s-%s"
+		(integer-to-literary-string (- n remainder))
+		(integer-to-ordinal-string remainder)))))
+   (t
+    (let* ((scale
+	    (cond
+	     ((>= n 1000000000) 1000000000)
+	     ((>= n 1000000) 1000000)
+	     ((>= n 1000) 1000)
+	     (t 100)))
+	   (scale-name
+	    (cl-case scale
+	      (100 "hundred")
+	      (1000 "thousand")
+	      (1000000 "million")
+	      (1000000000 "billion")))
+	   (quotient (/ n scale))
+	   (remainder (mod n scale)))
+      (if (zerop remainder)
+	  (format "%s %sth"
+		  (integer-to-literary-string quotient)
+		  scale-name)
+	(format "%s %s %s"
+		(integer-to-literary-string quotient)
+		scale-name
+		(integer-to-ordinal-string remainder)))))))
 ;;(mapcar #'integer-to-ordinal-string '(14 20 21 100003))
 
 (cl-defun integer-to-literary-string (n &key
@@ -583,7 +611,7 @@ Return the empty string when N is zero or negative."
 	 (format "%s%s"
 	   (cl-case (interval-floor n 10)
 	     (20 "twenty") (30 "thirty") (40 "forty") (50 "fifty")
-	     (60 "sixty") (70 "seventy") (80 "eigthy") (90 "ninety"))
+	     (60 "sixty") (70 "seventy") (80 "eighty") (90 "ninety"))
 	   (if (zerop (mod n 10))
 	     ""
 	     (concat short-separator (integer-to-literary-string (mod n 10))))))

@@ -1889,3 +1889,7 @@ the empty result used by music-formatting callers for nonpositive counts),
 `string-join`), the `split-string-*` family, and the BSG, UUID, alphabet,
 tab-formatting, literary-number, factorial, derangement, Fibonacci, binomial,
 Catalan, and Stirling-number helpers.
+
+English number formatting now spells `twelfth`, `fortieth`, and `eighty`
+correctly and produces scale ordinals such as `one hundredth`, `one
+thousandth`, and `one millionth` instead of returning nil.
