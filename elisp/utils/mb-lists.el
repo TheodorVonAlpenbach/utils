@@ -253,10 +253,13 @@ an empty list always produces nil.  See also `tuples'."
 ;;(pairs '(1 2 3 4 5) :key #'1+ :flank-p t)
 
 (cl-defun tuples (list n)
-  "Returns the elements in list as consecutive tuples.
-I.e. for list \(x11 x2 x3 x4 ... xn-2 xn-1 xn\), with N = 3, 
-it returns the list \((x1 x2 x3) (x2 x3 x4) ... (xn-2 xn-1 xn)\)
-TODO: implement a mapping key, see `pairs' (when needed)"
+  "Return consecutive tuples of width N from LIST.
+For LIST (X1 X2 X3 X4 ...) and N equal to 3, return
+((X1 X2 X3) (X2 X3 X4) ...).  Return nil when N exceeds the
+length of LIST."
+  (cl-check-type n integer)
+  (unless (> n 0)
+    (user-error "Tuple width must be positive: %S" n))
   (cl-loop for h on list
 	for i from (- (length list) n) downto 0
 	collect (butlast h i)))

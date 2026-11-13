@@ -190,8 +190,13 @@
                   '((1 1) (1 2) (2 3) (3 3))))
    (should (equal (pairs '(1 2) :key #'1+ :flank-p t)
                   '((2 2) (2 3) (3 3))))
+   (should (equal (tuples '(a b c) 1) '((a) (b) (c))))
    (should (equal (tuples '(a b c d e) 3)
                   '((a b c) (b c d) (c d e))))
+   (should-not (tuples '(a b c) 4))
+   (should-error (tuples '(a b c) 0) :type 'user-error)
+   (should-error (tuples '(a b c) -1) :type 'user-error)
+   (should-error (tuples '(a b c) 1.0) :type 'wrong-type-argument)
    (should (equal (power-set-indices 2) '(nil (0) (1) (1 0))))
    (should (equal (power-set '(a b)) '(nil (a) (b) (b a)))))
 
