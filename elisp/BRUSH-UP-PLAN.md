@@ -375,11 +375,12 @@ The first subset is intentionally conservative:
   text and binary file I/O, temporary-file cleanup, directory binding,
   buffer-selection and point semantics, error restoration, multi-buffer
   iteration, CSV parsing, field iteration, and serialization.
-* [`test-mb-utils-buffer.el`](./utils/test-mb-utils-buffer.el): fifteen ERT
+* [`test-mb-utils-buffer.el`](./utils/test-mb-utils-buffer.el): sixteen ERT
   tests for buffer metadata, marks and regions, line navigation, editing,
   comments, word transformations, temporary files, save-as behavior, and the
   kill ring. Negative line indexing treats the last content line consistently
-  whether or not the buffer ends with a newline.
+  whether or not the buffer ends with a newline. Relative point conversion
+  supports bounded negative positions without wrapping invalid positions.
 * [`test-mb-utils-regexp.el`](./utils/test-mb-utils-regexp.el): seven ERT
   tests for alternatives, integer alternatives, adjacent grouping, string
   factoring, unmatchable expressions, and exact finite-set complements.
@@ -570,7 +571,7 @@ comprises:
 
 * a clean `emacs -Q` load of all ninety-eight utility and mode-extension
   features plus the ERT tooling;
-* 808 passing ERT tests from the batch entry point;
+* 809 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 

@@ -140,10 +140,20 @@ buffer ends with a newline."
     (point)))
 
 (cl-defun rpoint (&optional (point (point)))
-  "Same as `point' but accepts negative argument POINT. If POINT
-is -1, the last point in buffer is returned, if -2 the last but
-one point and so on."
-  (mod point (1+ (point-max))))
+  "Return POINT, interpreting negative values relative to `point-max'.
+-1 denotes `point-max', -2 the preceding position, and so on.
+Signal a user error when the resulting position is outside the
+accessible part of the current buffer."
+  (cl-check-type point integer)
+  (let ((result
+	 (if (< point 0)
+	     (+ (1+ (point-max)) point)
+	   point)))
+    (unless (<= (point-min) result (point-max))
+      (user-error
+       "Point %S is outside buffer bounds %d..%d"
+       point (point-min) (point-max)))
+    result))
 ;;(goto-char (rpoint -2))
 
 (cl-defun buffer-substring* (&key (start (point-min))

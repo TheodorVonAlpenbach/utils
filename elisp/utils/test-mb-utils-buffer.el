@@ -67,6 +67,19 @@
     (should (= (buffer-paragraph-point -1) 15))
     (should (= (point) 3))))
 
+(ert-deftest mb-utils-buffer-relative-point ()
+  (with-temp-buffer
+    (insert "abc")
+    (should (= (rpoint 1) 1))
+    (should (= (rpoint (point-max)) (point-max)))
+    (should (= (rpoint -1) (point-max)))
+    (should (= (rpoint -4) (point-min)))
+    (should-error (rpoint 0) :type 'user-error)
+    (should-error (rpoint 5) :type 'user-error)
+    (should-error (rpoint -5) :type 'user-error)
+    (should-error (rpoint 1.0) :type 'wrong-type-argument)
+    (should (equal (buffer-substring* :start -2) "c"))))
+
 (ert-deftest mb-utils-buffer-insert-and-overwrite ()
   (with-temp-buffer
     (insert "abcd")
