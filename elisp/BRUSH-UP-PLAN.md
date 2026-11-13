@@ -1544,7 +1544,8 @@ Flanked adjacent pairs no longer fabricate `(nil nil)` boundaries for empty
 or singleton input: empty input remains empty, and a singleton produces one
 self-pair after applying its mapping function. Consecutive tuple generation
 now rejects zero, negative, and non-integer widths instead of returning
-meaningless empty tuples.
+meaningless empty tuples. Power-set index generation rejects negative and
+non-integer set sizes instead of recursing without a valid base case.
 
 The widely used `aif`, `awhen`, `acond`, and `asetf` macros now live in the
 small standalone [`mb-anaphora.el`](./utils/mb-anaphora.el) module rather than

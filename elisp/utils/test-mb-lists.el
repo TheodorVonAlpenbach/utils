@@ -197,7 +197,11 @@
    (should-error (tuples '(a b c) 0) :type 'user-error)
    (should-error (tuples '(a b c) -1) :type 'user-error)
    (should-error (tuples '(a b c) 1.0) :type 'wrong-type-argument)
+   (should (equal (power-set-indices 0) '(nil)))
    (should (equal (power-set-indices 2) '(nil (0) (1) (1 0))))
+   (should-error (power-set-indices -1) :type 'user-error)
+   (should-error (power-set-indices 2.0) :type 'wrong-type-argument)
+   (should (equal (power-set nil) '(nil)))
    (should (equal (power-set '(a b)) '(nil (a) (b) (b a)))))
 
 (ert-deftest mb-lists-cut ()

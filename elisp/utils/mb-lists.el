@@ -266,7 +266,10 @@ length of LIST."
 ;;(tuples '(a b c d e) 3)
 
 (cl-defun power-set-indices (n)
-  "Return the indices corresponding to a power set for at set with N elements"
+  "Return power-set index lists for a set containing N elements."
+  (cl-check-type n integer)
+  (unless (>= n 0)
+    (user-error "Power-set size must be nonnegative: %S" n))
   (if (zerop n)
     '(())
     (let ((psi-1 (power-set-indices (1- n))))
