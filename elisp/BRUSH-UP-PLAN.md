@@ -571,7 +571,7 @@ comprises:
 
 * a clean `emacs -Q` load of all ninety-eight utility and mode-extension
   features plus the ERT tooling;
-* 814 passing ERT tests from the batch entry point;
+* 815 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -1901,3 +1901,5 @@ as `1.0` from being silently rendered as `1th`.
 Fixed-width string splitting now rejects nonpositive and non-integer widths
 before its modulo and range calculations, preventing zero-width
 nontermination.
+Regexp-based splitting now rejects zero-length separator matches instead of
+repeating the same match position indefinitely.

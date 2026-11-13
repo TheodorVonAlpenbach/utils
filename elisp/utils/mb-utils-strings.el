@@ -121,12 +121,18 @@ FROM-END is non-nil) may be shorter than N."
 ;;(split-string-by-length "0123456789012345" 3 :from-end t)
 
 (cl-defun regexp-consecutive-matches (regexp string)
-  "Returns the position boundaries of the consecutive substrings of
-STRING that matches REGEXP"
+  "Return boundaries of successive non-overlapping REGEXP matches in STRING.
+Signal a user error when REGEXP produces a zero-length match, which
+cannot advance the search position."
   (cl-loop with position = 0
 	while (string-match regexp string position)
-	do (setq position (match-end 0))
-	collect (list (match-beginning 0) (match-end 0))))
+	for beginning = (match-beginning 0)
+	for end = (match-end 0)
+	do
+	(when (= beginning end)
+	  (user-error "Regexp matches an empty string at position %d" beginning))
+	(setq position end)
+	collect (list beginning end)))
 ;;(regexp-consecutive-matches "a" "aasdfaa")
 
 (cl-defun split-string-modify-positions (positions with-separator)

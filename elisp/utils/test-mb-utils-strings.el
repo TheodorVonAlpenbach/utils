@@ -37,6 +37,21 @@
   (should-error (split-string-by-length "abc" 2.0)
                 :type 'wrong-type-argument))
 
+(ert-deftest mb-utils-strings-regexp-consecutive-matches ()
+  (should
+   (equal
+    (regexp-consecutive-matches "a" "baacaa")
+    '((1 2) (2 3) (4 5) (5 6))))
+  (should
+   (equal
+    (regexp-consecutive-matches "a+" "baacaa")
+    '((1 3) (4 6))))
+  (should-not (regexp-consecutive-matches "z" "baacaa"))
+  (should-error (regexp-consecutive-matches "a*" "bbb")
+                :type 'user-error)
+  (should-error (split-string* "abc" "")
+                :type 'user-error))
+
 (ert-deftest mb-utils-strings-string-match ()
 "Test of `string-match*'"
  (should (equal (string-match* "\\(e\\)" "sdkjhalkqweee " :num '(0 1 10)) '("e" "e" nil))))
