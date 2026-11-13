@@ -521,14 +521,6 @@ consider `buffer-substring-no-properties'"
   (message "This method is obsolete. Use `substring-no-properties' instead")
   (set-text-properties 0 (length string) nil string) string)
 
-(cl-defun substring* (string &optional (start 0) (end nil))
-  "Same as SUBSTRING but takes negative limit arguments (meaning from end)"
-  (let ((n (length string)))
-    (substring string 
-      (mod start n)
-      (when (numberp end) (mod end n)))))
-;;(substring* "012345" 0 -1)
-
 (cl-defmacro with-lines ((line string) &rest body)
   `(cl-loop for ,line in (string-lines ,string)
 	 do (progn ,@body)))

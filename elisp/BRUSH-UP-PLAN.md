@@ -1797,7 +1797,7 @@ usage decision:
   shell formatting as a new module with an explicit contract and tests rather
   than restoring the incomplete implementation.
 
-Thirty-three compatibility wrappers, constants, and unusable stubs were retired after
+Thirty-four compatibility wrappers, constants, and unusable stubs were retired after
 repository-wide caller checks. `string-to-character-list` duplicated
 `string-to-list`, `blanks` duplicated `make-string`, and `reverse-lines` was
 only an alias for `reverse-region`. `buffer-string*` only wrapped
@@ -1829,6 +1829,9 @@ later positions did, and invalid indices produced misleading results.
 `draw-nth` remains the maintained destructive remove-and-return operation.
 The uncalled obsolete `group-list` wrapper was removed because it always
 signalled an error; `cut` remains its supported replacement.
+The uncalled `substring*` wrapper was removed because standard `substring`
+already supports negative indices, while its modulo conversion corrupted
+ordinary boundary values and failed on empty strings.
 
 ### Behaviourally equivalent for observed uses
 
@@ -1854,7 +1857,6 @@ These look replaceable but are not, and the difference is easy to miss.
 | --- | --- | --- |
 | `listify` | `ensure-list` | **Interpreted lambdas**: `(lambda () nil)` is itself a list, so `ensure-list` returns it unwrapped while `listify` wraps it. **Vectors**: `listify` coerces element-wise to `(1 2)`; `ensure-list` wraps to `([1 2])`. Byte-compiled lambdas happen to agree. |
 | `flatten` | `flatten-tree` | Agree on full flattening, including nil removal, but `flatten` takes a `LEVELS` argument for partial flattening that has no standard equivalent. |
-| `substring*` | `substring` | Standard `substring` already supports negative indices, so that is no longer a reason to keep this. They diverge only out of range: `substring*` wraps via `mod` and silently returns a value where `substring` signals `args-out-of-range`. Decide whether that masking is wanted before retiring. |
 | `string-remove-props` | `substring-no-properties` | The local helper strips properties destructively rather than returning a copy. It remains in active LilyPond code and encoding-sensitive archived browser code, so retain it until those callers can be migrated deliberately. |
 | `blank-p` | `string-blank-p` | `blank-p` returns a boolean; `string-blank-p` returns a match position. Interchangeable in conditionals, not under `equal`. |
 | `constantly` | `always` | `always` only covers the constantly-`t` case; `constantly` builds a closure returning any value. |
