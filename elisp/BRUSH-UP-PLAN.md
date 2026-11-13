@@ -1552,6 +1552,9 @@ division by zero on empty input.
 Fixed-width list cutting now rejects nonpositive and non-integer widths
 explicitly rather than exposing an internal assertion or failing during list
 traversal.
+List expansion and resizing now reject negative and non-integer counts,
+handle zero without arithmetic errors, and report attempts to grow an empty
+list explicitly rather than dividing by zero.
 
 The widely used `aif`, `awhen`, `acond`, and `asetf` macros now live in the
 small standalone [`mb-anaphora.el`](./utils/mb-anaphora.el) module rather than

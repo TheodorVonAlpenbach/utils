@@ -662,8 +662,21 @@ TABLE must be a list of lists."
 	  table))
 
 (cl-defun expand-repeat (list n)
-  (cl-destructuring-bind (a b) (cl-floor n (length list))
-    (append list (apply #'append (make-list a list)) (cl-subseq list 0 b))))
+  "Append N elements to LIST by repeating LIST's contents.
+N must be a nonnegative integer.  An empty LIST can only be
+expanded by zero elements."
+  (cl-check-type n integer)
+  (unless (>= n 0)
+    (user-error "Expansion count must be nonnegative: %S" n))
+  (cond
+   ((zerop n) (cl-copy-list list))
+   ((null list)
+    (user-error "Cannot repeat an empty list"))
+   (t
+    (cl-destructuring-bind (a b) (cl-floor n (length list))
+      (append list
+	      (apply #'append (make-list a list))
+	      (cl-subseq list 0 b))))))
 ;;(expand-repeat '(1 2 3 4) 6)
 
 (cl-defun diffs-list (list)
@@ -671,6 +684,12 @@ TABLE must be a list of lists."
 ;;(diffs-list '(1 2 4))
 
 (cl-defun resize-list (list n &optional (extend-fn #'expand-repeat))
+  "Return LIST resized to N elements.
+Shorter results are copied from LIST.  Longer results are produced
+by calling EXTEND-FN with LIST and the number of required elements."
+  (cl-check-type n integer)
+  (unless (>= n 0)
+    (user-error "List size must be nonnegative: %S" n))
   (let ((length (length list)))
     (if (< length n)
       (funcall extend-fn list (- n length))
