@@ -3,7 +3,7 @@
 (require 'ert)
 (require 'mb-utils-io)
 
-(ert-deftest test-mb-utils-io-file-round-trip ()
+(ert-deftest mb-utils-io-file-round-trip ()
   "Test text file writing, appending, and reading."
   (let ((file (make-temp-file "mb-utils-io-test-")))
     (unwind-protect
@@ -14,41 +14,48 @@
           (should (equal (file-lines file) '("first" "second"))))
       (delete-file file))))
 
-(ert-deftest test-mb-utils-io-read-and-print ()
+(ert-deftest mb-utils-io-read-and-print ()
   "Test reading and printing one Lisp object."
   (let ((file (make-temp-file "mb-utils-io-test-")))
     (unwind-protect
         (progn
           (should (eq (print* '(:answer 42) file) 'finished))
+          (should (equal (read* file) '(:answer 42)))
+          (print* '(:answer 42) file t)
           (should (equal (read* file) '(:answer 42))))
       (delete-file file))))
 
-(ert-deftest test-mb-utils-io-temporary-file ()
-  "Test portable temporary-file cleanup."
-  (let (temporary-path)
-    (with-temp-file*
-      (setq temporary-path file)
-      (should (file-exists-p file))
-      (insert "temporary")
-      (write-region nil nil file nil 'silent))
-    (should-not (file-exists-p temporary-path))))
+(ert-deftest mb-utils-io-with-file ()
+  "Test temporary writable and read-only file contexts."
+  (let ((file (make-temp-file "mb-utils-io-test-")))
+    (unwind-protect
+        (progn
+          (string-to-file "first" file)
+          (with-file file
+            (goto-char (point-max))
+            (insert " second"))
+          (should (equal (file-string file) "first second"))
+          (should
+           (equal (with-file-readonly file
+                    (goto-char (point-max))
+                    (insert " temporary")
+                    (buffer-string))
+                  "first second temporary"))
+          (should (equal (file-string file) "first second")))
+      (delete-file file))))
 
-(ert-deftest test-mb-utils-io-temp-file-name ()
-  "Test the temporary name and directory result."
-  (pcase-let ((`(,name ,directory) (get-temp-file-name)))
-    (should (string-prefix-p "mb-utils-" name))
-    (should (file-directory-p directory))
-    (should-not (file-exists-p (expand-file-name name directory)))))
+(ert-deftest mb-utils-io-blank-buffer ()
+  "Test region deletion without changing the kill ring."
+  (let ((kill-ring '("sentinel")))
+    (with-temp-buffer
+      (insert "abc")
+      (blank-buffer :start 2 :end 3)
+      (should (equal (buffer-string) "ac"))
+      (should (equal kill-ring '("sentinel")))
+      (blank-buffer)
+      (should (equal (buffer-string) "")))))
 
-(ert-deftest test-mb-utils-io-current-directory ()
-  "Test temporary binding of `default-directory'."
-  (let ((original default-directory))
-    (should (equal (with-current-directory temporary-file-directory
-                     default-directory)
-                   temporary-file-directory))
-    (should (equal default-directory original))))
-
-(ert-deftest test-mb-utils-io-with-buffer-object ()
+(ert-deftest mb-utils-io-with-buffer-object ()
   "Test return, current-buffer, and point semantics with a buffer object."
   (let ((origin (current-buffer))
         (target (generate-new-buffer " *mb-utils-io-buffer*")))
@@ -65,7 +72,7 @@
           (should (= (with-current-buffer target (point)) 3)))
       (kill-buffer target))))
 
-(ert-deftest test-mb-utils-io-with-buffer-name ()
+(ert-deftest mb-utils-io-with-buffer-name ()
   "Test that `with-buffer' accepts a live buffer name."
   (let ((target (generate-new-buffer " *mb-utils-io-name*")))
     (unwind-protect
@@ -74,7 +81,7 @@
                     target))
       (kill-buffer target))))
 
-(ert-deftest test-mb-utils-io-with-buffer-nil ()
+(ert-deftest mb-utils-io-with-buffer-nil ()
   "Test that nil means the current buffer for `with-buffer'."
   (let ((origin (current-buffer))
         (evaluations 0))
@@ -83,7 +90,7 @@
                 origin))
     (should (= evaluations 1))))
 
-(ert-deftest test-mb-utils-io-with-buffer-restores-after-error ()
+(ert-deftest mb-utils-io-with-buffer-restores-after-error ()
   "Test restoration after an error while retaining target point changes."
   (let ((origin (current-buffer))
         (target (generate-new-buffer " *mb-utils-io-error*")))
@@ -100,7 +107,7 @@
           (should (= (with-current-buffer target (point)) 3)))
       (kill-buffer target))))
 
-(ert-deftest test-mb-utils-io-with-buffer-star ()
+(ert-deftest mb-utils-io-with-buffer-star ()
   "Test the legacy strict-buffer variant and its nil behavior."
   (let ((origin (current-buffer))
         (target (generate-new-buffer " *mb-utils-io-star*")))
@@ -111,14 +118,14 @@
           (should-error (with-buffer* nil t) :type 'wrong-type-argument))
       (kill-buffer target))))
 
-(ert-deftest test-mb-utils-io-with-buffer-rejects-dead-buffer ()
+(ert-deftest mb-utils-io-with-buffer-rejects-dead-buffer ()
   "Test that both single-buffer macros reject a dead buffer."
   (let ((target (generate-new-buffer " *mb-utils-io-dead*")))
     (kill-buffer target)
     (should-error (with-buffer target t) :type 'error)
     (should-error (with-buffer* target t) :type 'error)))
 
-(ert-deftest test-mb-utils-io-with-buffers ()
+(ert-deftest mb-utils-io-with-buffers ()
   "Test iteration order, return value, and hygienic expansion."
   (let ((first (generate-new-buffer " *mb-utils-io-first*"))
         (second (generate-new-buffer " *mb-utils-io-second*"))
@@ -135,7 +142,7 @@
       (kill-buffer first)
       (kill-buffer second))))
 
-(ert-deftest test-mb-utils-io-with-point ()
+(ert-deftest mb-utils-io-with-point ()
   "Test temporary buffer selection and persistent point movement."
   (let ((origin (current-buffer))
         (target (generate-new-buffer " *mb-utils-io-point*")))
@@ -151,14 +158,14 @@
           (should (= (with-current-buffer target (point)) 4)))
       (kill-buffer target))))
 
-(ert-deftest test-parse-csv-string-with-string-separator ()
+(ert-deftest mb-utils-io-parse-csv-string-with-string-separator ()
   "Test simple separated text parsing."
   (should (equal (parse-csv-string "a;b\nc;d") '(("a" "b") ("c" "d"))))
   (should (equal (parse-csv-string "a;;b") '(("a" "" "b"))))
   (should (equal (parse-csv-string "a;b\n\nc;d")
                  '(("a" "b") ("c" "d")))))
 
-(ert-deftest test-parse-csv-string-with-character-separator ()
+(ert-deftest mb-utils-io-parse-csv-string-with-character-separator ()
   "Test quoted CSV parsing with a character separator."
   (should (equal (parse-csv-string "a,b\nc,d" ?,)
                  '(("a" "b") ("c" "d"))))
@@ -172,21 +179,21 @@
   (should-error (parse-csv-string "a,\"b,c" ?,)
                 :type 'error))
 
-(ert-deftest test-mb-csv-read-field ()
+(ert-deftest mb-utils-io-csv-read-field ()
   "Test reading individual CSV fields and advancing the cursor."
   (let ((line "a,\"b,c\",d"))
     (should (equal (mb-csv--read-field line 0 ?,) '("a" . 2)))
     (should (equal (mb-csv--read-field line 2 ?,) '("b,c" . 8)))
     (should (equal (mb-csv--read-field line 8 ?,) '("d")))))
 
-(ert-deftest test-csv-string ()
+(ert-deftest mb-utils-io-csv-string ()
   "Test CSV serialization."
   (should (equal (csv-string '((a "b" nil) (1 2 3)))
                  "a;\"b\";\n1;2;3"))
   (should (equal (csv-string '((a nil c)) "," "\r\n" "NULL")
                  "a,NULL,c")))
 
-(ert-deftest test-mb-utils-io-byte-vector-round-trip ()
+(ert-deftest mb-utils-io-byte-vector-round-trip ()
   "Test binary vector writing, slicing, and reading."
   (let ((file (make-temp-file "mb-utils-io-test-")))
     (unwind-protect
@@ -195,6 +202,20 @@
           (should (equal (read-byte-vector file) [1 127 128 255]))
           (should (equal (read-byte-vector file :from 1 :to 3) [127 128])))
       (delete-file file))))
+
+(ert-deftest mb-utils-io-hexl-byte-stream ()
+  "Test byte stream movement and MIDI variable-length decoding."
+  (with-temp-buffer
+    (set-buffer-multibyte nil)
+    (insert (unibyte-string 0 127 #x81 0))
+    (hexl-mode)
+    (hexl-beginning-of-buffer 1)
+    (should (= (read-position) 0))
+    (should (equal (read-bytes 2) '(0 127)))
+    (should (= (read-position) 2))
+    (should (equal (read-variable-length-integer) '(128 2)))
+    (should-error (read-bytes -1))
+    (should-error (read-byte 0))))
 
 (provide 'test-mb-utils-io)
 

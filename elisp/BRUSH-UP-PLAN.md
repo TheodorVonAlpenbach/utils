@@ -371,10 +371,11 @@ The first subset is intentionally conservative:
 * [`test-list-envelope.el`](./prototypes/geometry/test-list-envelope.el): nine ERT tests for
   rectangle construction, validation, containment, overlap, intersection, and
   union.
-* [`test-mb-utils-io.el`](./utils/test-mb-utils-io.el): eighteen ERT tests for
-  text and binary file I/O, temporary-file cleanup, directory binding,
-  buffer-selection and point semantics, error restoration, multi-buffer
-  iteration, CSV parsing, field iteration, and serialization.
+* [`test-mb-utils-io.el`](./utils/test-mb-utils-io.el): eighteen namespaced ERT
+  tests for text and binary file I/O, writable and read-only file contexts,
+  non-killing buffer clearing, buffer-selection and point semantics, error
+  restoration, multi-buffer iteration, CSV parsing and serialization, and
+  MIDI byte-stream decoding.
 * [`test-mb-utils-buffer.el`](./utils/test-mb-utils-buffer.el): sixteen ERT
   tests for buffer metadata, marks and regions, line navigation, editing,
   comments, word transformations, temporary files, save-as behavior, and the
@@ -600,6 +601,16 @@ all four macros have inline indentation and Edebug declarations. Eight
 additional tests characterize buffer objects and names, nil and dead buffers,
 return values, persistent point movement, error restoration, hygienic
 iteration, and `with-point`.
+
+A second I/O pass retired uncalled wrappers around standard buffer, temporary
+file, and directory-binding primitives, along with a production `test-*`
+function containing hard-coded Cygwin paths and unused hexl conversion
+helpers. The active `read*` and `print*` compatibility APIs remain because
+games, Ada helpers, and archived data modules still call them. `blank-buffer`
+now deletes text without modifying the kill ring. The retained file-context
+macros have normal indentation and Edebug declarations, and MIDI
+variable-length integers are decoded in stream order rather than reversed.
+Eighteen consistently namespaced tests cover the retained contracts.
 
 The maintained file list and load paths now live in
 [`test-manifest.el`](./tests/test-manifest.el). Both the batch entry point and
@@ -1869,6 +1880,14 @@ removed in favor of `file-name-concat` and `file-name-with-extension`.
 The uncalled `copy-libs` helper was removed because its recursive copying
 contract was hard-coded to Scilab `.sci` and `.sce` files; no current workflow
 justified generalizing it.
+Uncalled I/O conveniences `overwrite-buffer-with-file`, `prinl`,
+`overwrite-safe`, `get-temp-file-name`, `with-temp-file*`, and
+`with-current-directory` were removed in favor of standard buffer operations,
+`make-temp-file`, `unwind-protect`, and a direct `default-directory` binding.
+The hard-coded `test-io-byte-vector` function and unused `file-to-bytes`,
+`buffer-to-bytes`, `bs-read-string`, `read-integer`, and
+`insert-bytes-in-buffer` hexl helpers were also retired; the smaller byte
+stream API used by the MIDI modules remains.
 The internal `product-safe` and `product-safe-list` fallback functions were
 removed because modern integer multiplication preserves exact bignums.
 The uncalled `list-move` and `swimming-relative-distances` stubs were removed

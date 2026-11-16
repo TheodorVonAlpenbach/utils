@@ -1,80 +1,57 @@
 ;;; mb-utils-io.el --- File, CSV, and binary I/O helpers -*- lexical-binding: t; -*-
 
+;;; Commentary:
+
+;; Text and binary file access, temporary buffer contexts, CSV conversion, and
+;; byte-stream helpers used by the MIDI modules.
+
+;;; Code:
+
 (require 'cl-lib)
 (require 'hexl)
 (require 'pp)
 (require 'subr-x)
 
-(cl-defun overwrite-buffer-with-file (f &optional buf &key (pos nil))
-  "Deletes buffer content and inserts file F instead. If :POS is
-specified, then goto that posistion in file. Else goto beginning of
-file."
-  (when buf (set-buffer buf))
-  (blank-buffer (current-buffer))
-  (insert-file-contents f)
-  (goto-char (or pos (point-min))))
-
-(cl-defun read* (file)
-  "`read's first elisp object in FILE and returns it."
+(defun read* (file)
+  "Read and return the first Emacs Lisp object in FILE."
   (with-temp-buffer
     (insert-file-contents file)
     (read (current-buffer))))
 
-(cl-defun print* (object file &optional pritty-print-p)
-  "`print's OBJECT to FILE. Overwrites if FILE already exists."
+(cl-defun print* (object file &optional pretty-print-p)
+  "Write OBJECT as an Emacs Lisp object to FILE.
+Pretty-print OBJECT when PRETTY-PRINT-P is non-nil.  Replace any existing
+contents and return `finished'."
   (with-temp-file file
-    (if pritty-print-p
-      (pp object (current-buffer))
+    (if pretty-print-p
+        (pp object (current-buffer))
       (print object (current-buffer)))
     'finished))
 
-(cl-defun prinl (list)
-  "Pretty prints LIST. Each item is printed on a separated line"
-  (cl-loop for x in list
-	do (insert (format "%S\n" x))))
-;;(prinl '(a b c))
-
 (cl-defun buffer-string-no-properties (&optional (buffer (current-buffer)))
+  "Return all text in BUFFER without text properties."
   (with-current-buffer buffer
     (buffer-substring-no-properties (point-min) (point-max))))
-;;(substring (buffer-string-no-properties) 1 30)
 
 (cl-defun file-string (filename &optional coding-system)
-  "Returns content of FILENAME as a string.
-Note that the function discards the EOF character.
-
-NB! If FILENAME should be absolute, otherwise this function will
-expand it to the directory of this module."
-  ;; (unless (absolute-path-p filename)
-  ;;   (warn "Filename is not absolute. Results are undefined."))
+  "Return the contents of FILENAME as a string.
+Bind `coding-system-for-read' to CODING-SYSTEM when it is non-nil.
+Resolve relative file names against `default-directory'."
   (with-temp-buffer
     (let ((coding-system-for-read coding-system))
       (insert-file-contents filename)
       (buffer-string))))
-;;(file-string "~/tmp/qwe.txt")
 
 (cl-defun file-lines (filename &optional coding-system)
-  "Returns content of file as a string.
-Note that the function discards the EOF character."
+  "Return the contents of FILENAME as a list of lines.
+Pass CODING-SYSTEM to `file-string'."
   (string-lines (file-string filename coding-system)))
-;;(file-lines "mb-utils-io.el")
 
 (cl-defun string-to-file (string path &optional (overwrite t))
-  "Writes STRING to FILE.
-If optional argument OVERWRITE is NIL then STRING is appended to
-FILE. Otherwise it overwrites the old content."
+  "Write STRING to PATH.
+Overwrite existing contents when OVERWRITE is non-nil; otherwise append
+STRING."
   (funcall (if overwrite #'write-region #'append-to-file) string nil path))
-;;(string-to-file "aaa" "~/tmp/qwe.txt" nil)
-
-(cl-defun overwrite-safe (string &optional (buffer (current-buffer)))
-  "Overwrites transaction safe the content of BUFFER with STRING. The
-default value of optional parameter BUFFER is the current buffer."
-  (save-excursion
-    (switch-to-buffer buffer)
-    (let ((old-end (point-max)))	; ensure transaction
-      (goto-char old-end)
-      (insert string)
-      (kill-region (point-min) old-end))))
 
 (defmacro with-buffer* (buffer &rest body)
   "Evaluate BODY in BUFFER and return the value of its last form.
@@ -117,53 +94,25 @@ target buffer persist."
 ;;(with-point (290 "mb-utils-io.el") (line-string))
 
 (defmacro with-file (file &rest body)
-  "Insert FILE in a temporary buffer, evaluate body and save the
-\(possibly\) modified buffer back to FILE."
+  "Insert FILE in a temporary buffer and evaluate BODY.
+Save the possibly modified buffer back to FILE after BODY returns."
+  (declare (indent 1) (debug t))
   `(with-temp-file ,file
      (insert-file-contents ,file)
      ,@body))
-(def-edebug-spec with-file t)
 
 (defmacro with-file-readonly (file &rest body)
-  "Insert FILE in a temporary buffer, evaluate body and kill temporary buffer"
+  "Insert FILE in a temporary buffer and evaluate BODY without saving."
+  (declare (indent 1) (debug t))
   `(with-temp-buffer
-     (unwind-protect 
-       (progn
-	 (insert-file-contents ,file)
-	 ,@body))))
-(def-edebug-spec with-file-readonly t)
-
-(cl-defun get-temp-file-name ()
-  "Return a unique file name and its temporary directory.
-The result is a list of the form (NAME DIRECTORY).  The file is
-not created."
-  (let ((path (make-temp-name
-               (expand-file-name "mb-utils-" temporary-file-directory))))
-    (list (file-name-nondirectory path) (file-name-directory path))))
-
-(defmacro with-temp-file* (&rest body)
-  "Evaluate BODY in a temporary file buffer.
-The temporary path is bound to `file'.  Delete the file and kill
-the buffer after BODY finishes."
-  (declare (indent 0) (debug t))
-  (let ((temporary-path (cl-gensym "temporary-path")))
-    `(let* ((,temporary-path (make-temp-file "mb-utils-"))
-            (file ,temporary-path))
-       (unwind-protect
-           (with-temp-buffer
-             (setq buffer-file-name file)
-             ,@body)
-         (when (file-exists-p ,temporary-path)
-           (delete-file ,temporary-path))))))
-  
-(defmacro with-current-directory (directory &rest body)
-  "Evalute BODY with current directory temporarily set to DIRECTORY."
-  `(let ((default-directory ,directory))
+     (insert-file-contents ,file)
      ,@body))
   
 (cl-defun blank-buffer (&key (buffer (current-buffer)) start end)
+  "Delete the region between START and END in BUFFER.
+START and END default to the accessible beginning and end of BUFFER."
   (with-current-buffer buffer
-    (kill-region (or start (point-min)) (or end (point-max)))))
+    (delete-region (or start (point-min)) (or end (point-max)))))
 
 (cl-defun mb-csv--read-field (line start char-separator)
   "Read one field from LINE at START.
@@ -220,12 +169,17 @@ When OMIT-NULLS is non-nil, omit empty fields."
 ;;(parse-csv-line "** 30031,\"FR165 L34P LO S.S., MIN\",** 30031")
 ;;(parse-csv-line "")
 
-(defvar *csv-show-progress* nil)
+(defvar *csv-show-progress* nil
+  "When non-nil, report progress while parsing CSV rows.")
 
 (cl-defun parse-csv-string (string &optional
 				   (column-separator ";")
 				   line-separator (omit-nulls t))
-  "Parse CSV data in STRING into a list of rows."
+  "Parse CSV data in STRING into a list of rows.
+COLUMN-SEPARATOR may be a regexp string for simple splitting or a
+character for quote-aware field parsing.  LINE-SEPARATOR defaults to a
+newline regexp.  When OMIT-NULLS is non-nil, omit blank lines and empty
+fields parsed with a character separator."
   (cl-loop with lines = (split-string string (or line-separator "\n") omit-nulls)
 	for x in lines
 	for i from 0
@@ -236,14 +190,15 @@ When OMIT-NULLS is non-nil, omit empty fields."
 		  (parse-csv-line x column-separator omit-nulls))))
 
 (cl-defun parse-csv-file (filename &rest args)
-  "Parses csv file FILENAME to a list of lists.
-See `parse-csv-string' for more details"
+  "Parse CSV file FILENAME into a list of rows.
+Pass ARGS to `parse-csv-string'."
   (apply #'parse-csv-string (file-string filename) args))
-;;(parse-csv-file "")
 
 (cl-defun csv-string (lists &optional (column-separator ";")
 			      line-separator (nil-conversion ""))
-  "Default LINE-SEPARATOR is \\n"
+  "Serialize LISTS as separated rows.
+COLUMN-SEPARATOR defaults to semicolon and LINE-SEPARATOR to newline.
+Render non-nil values with `%S' and nil values as NIL-CONVERSION."
   (mapconcat
    (lambda (row)
      (mapconcat (lambda (value)
@@ -253,14 +208,19 @@ See `parse-csv-string' for more details"
 ;;(csv-string '((a b c) (1 nil 3)))
 
 (cl-defun write-csv (lists filename &key column-separator line-separator
-				      overwrite )
-  "Saves  csv file FILENAME to a list of lists."
+				      overwrite)
+  "Serialize LISTS and write them to FILENAME.
+COLUMN-SEPARATOR and LINE-SEPARATOR have the meanings documented by
+`csv-string'.  Overwrite FILENAME when OVERWRITE is non-nil; otherwise
+append the serialized rows."
   (string-to-file
    (csv-string lists
      (or column-separator ";") (or line-separator "\n")) filename overwrite))
 
 ;;; Binary stuff
 (cl-defun read-byte-vector (file &key (from 0) to)
+  "Return bytes FROM through TO in FILE as a vector.
+FROM defaults to zero and TO defaults to the end of FILE."
   (with-temp-buffer
     (set-buffer-multibyte nil)
     (insert-file-contents-literally file nil from to)
@@ -268,77 +228,44 @@ See `parse-csv-string' for more details"
 ;;(pp (read-byte-vector "/cygdrive/c/Users/eier/Documents/MATLAB/miningsuite/ragtime.wav" :to 10000))
 
 (cl-defun write-byte-vector (vector file &key (from 0) to)
+  "Write the slice from FROM through TO of byte VECTOR to FILE.
+FROM defaults to zero and TO defaults to the end of VECTOR."
   (with-temp-file file
     (set-buffer-multibyte nil)
     (mapc (lambda (byte) (insert-char byte))
           (cl-subseq vector from to))))
 
-(cl-defun test-io-byte-vector ()
-  (let ((f1 "/cygdrive/c/Users/eier/Documents/MATLAB/miningsuite/ragtime.wav")
-	(f2 "/cygdrive/c/Users/eier/Documents/MATLAB/miningsuite/ragtime2.wav"))
-    (write-byte-vector (cl-coerce (read-byte-vector f1) 'string) f2)))
-;;(test-io-byte-vector)
-
-(cl-defun file-to-bytes (file)
-  (with-temp-buffer
-    (insert-file-contents file)
-    (hexl-mode)
-    (buffer-to-bytes (current-buffer))))
-;;(file-to-bytes "c:/emacs-22.1/site-lisp/mb-lisp/midi/test-new2.midi")
-  
-(cl-defun buffer-to-bytes (buffer)
-  "this has been checked and ok! next step is to make a read file thing."
-  (with-current-buffer buffer
-    (hexl-beginning-of-buffer 1)
-    (cl-loop with bytes = (list (hexl-char-after-point))
-	  for n below hexl-max-address
-	  do (progn (hexl-forward-char 1)
-		    (push (hexl-char-after-point) bytes))
-	  finally return (nreverse bytes))))
-;;(read-bytes-from-buffer "test.midi")
-
 (cl-defun read-position ()
+  "Return the current byte address in a hexl buffer."
   (hexl-current-address))
 
 (cl-defun read-bytes (n)
-  "Returns the folloing N bytes in the buffer stream as a list.
-Also, stream marker is moved to the point after the NTh byte.
-Must be called in a hexl mode buffer context."
-  (cl-loop for i below n 
+  "Return the next N bytes from the current hexl buffer.
+Move the stream position forward by N bytes.  N must be a non-negative
+integer."
+  (unless (and (integerp n) (>= n 0))
+    (error "Byte count must be a non-negative integer: %S" n))
+  (cl-loop repeat n
 	collect (hexl-char-after-point)
 	do (when (< (hexl-current-address) hexl-max-address)
 	     (hexl-forward-char 1))))
 
-(cl-defun bs-read-string (n)
-  "Reads N bytes from the buffer stream and converts them to a string of length N"
-  (apply #'string (read-bytes n)))
-;;(bs-read-string (read-bytes-from-file "c:/emacs-22.1/site-lisp/mb-lisp/music-analyzer/test.midi") 4)
-
-(cl-defun read-integer (&optional (n 4))
-  "Reads N bytes from the buffer stream and converts them to a N bytes integer"
-  (hexl-hex-string-to-integer
-   (mapconcat (lambda (byte) (format "%02x" byte)) (read-bytes n) "")))
-
 (cl-defun read-byte (&optional (n 1))
-  "Returns the Nth next byte in the buffer stream, and moves
-stream marker to the point after this byte. The bytes 1...N-1 are
-discareded. Must be called in a hexl mode buffer context."
+  "Return the Nth byte from the current hexl stream.
+Discard the preceding N minus one bytes and move the stream position
+forward by N bytes.  N must be a positive integer."
+  (unless (and (integerp n) (cl-plusp n))
+    (error "Byte offset must be a positive integer: %S" n))
   (cl-first (last (read-bytes n))))
 
-(cl-defun insert-bytes-in-buffer (bytes buffer)
-  "Inserts the BYTES list into BUFFER at curent point"
-  (with-current-buffer buffer
-    (mapc #'insert bytes)))
-
 (cl-defun bytes-to-buffer (bytes buffer)
-  "Removes exising content in BUFFER and inserts the BYTES list into it."
+  "Replace BUFFER contents with BYTES."
   (with-current-buffer buffer
     (delete-region (point-min) (point-max))
     (mapc #'insert bytes)))
 
 (cl-defun bytes-to-file (bytes file)
-  "Creates a new file FILE consisting of BYTES.
-If FILE already exists, it will be overwritten."
+  "Write BYTES to FILE, replacing any existing contents."
   (with-temp-buffer
     (bytes-to-buffer bytes (current-buffer))
     (setq buffer-file-name file)
@@ -347,10 +274,11 @@ If FILE already exists, it will be overwritten."
 ;(bytes-to-file '(1 2 3 4) "c:/emacs-22.1/site-lisp/mb-lisp/utils/test1.bin")
 
 (cl-defun read-variable-length-integer ()
-  (let ((bytes (nreverse 
-		(cl-loop for byte = (read-byte) then (read-byte)
-		      collect (mod byte 128)
-		      until (< byte 128)))))
+  "Read and return a MIDI variable-length integer.
+Return a list containing its decoded value and encoded byte count."
+  (let ((bytes (cl-loop for byte = (read-byte) then (read-byte)
+		        collect (mod byte 128)
+		        until (< byte 128))))
     (list (cl-reduce (lambda (value byte) (+ (* value 128) byte))
                      bytes :initial-value 0)
           (length bytes))))

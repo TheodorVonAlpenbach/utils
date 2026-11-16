@@ -30,7 +30,6 @@ header. Format is 0, 1, 2."
        :time-division time-division
        :tracks tracks))))
 ;;(read-midi-file "c:/Documents and Settings/matsb/My Documents/projects/UiO/project/bach-chorals/midi/000206b_.mid")
-;;(file-to-bytes "c:/Documents and Settings/matsb/My Documents/projects/UiO/midi-files/bach-chorals/000206b_.mid")
 
 (cl-defun write-midi-file (mf file)
   (bytes-to-file (midi-file-to-bytes mf) file))
