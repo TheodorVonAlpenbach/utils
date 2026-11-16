@@ -1756,12 +1756,18 @@ generated API and increment behavior are covered by six namespaced tests in
 the maintained baseline.
 
 [`mb-utils-economy.el`](./utils/mb-utils-economy.el) now loads independently
-with lexical binding and `cl-lib` as its only dependency. A large anonymous
-dataset that was sorted into the global variable `list` at load time has been
-removed. The geometric-series calculation needed by the financial functions
-is now private to the module. `withdraw-to-zero` includes all N withdrawals
-rather than N-1; tests verify that using its returned balance in `growth`
-reaches zero.
+with lexical binding and explicit `cl-lib` and `mb-utils-math` dependencies.
+A large anonymous dataset that was sorted into the global variable `list` at
+load time has been removed, along with the unused `to-double` wrapper around
+the built-in `float`. The geometric-series calculation needed by the financial
+functions is now private to the module. `withdraw-to-zero` includes all N
+withdrawals rather than N-1; tests verify that using its returned balance in
+`growth` reaches zero. Period counts, growth factors, nonempty average
+selections, and annualization domains now reject undefined inputs instead of
+producing infinities or NaNs. CFaR follows the conventional positional `START`
+and optional `END` interface, uses the shared `average` helper, and delegates
+the remaining bounds checking to `cl-subseq`. Its five namespaced tests run in
+the maintained baseline.
 
 [`mb-math-functions.el`](./utils/mb-math-functions.el) now loads independently
 with lexical binding and no startup helper dependencies. Degree-function macro

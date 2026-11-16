@@ -34,7 +34,7 @@ TEMPLATE-NUMBER  Conversions
 (cl-defun ada-jira-tag (number &optional
 				 (ada-prefix "ADA-")
 				 (template-number 17000)
-				 (cut-off 200))
+				 (cut-off 300))
   (format "%s%d" ada-prefix (ada-tag-number number template-number cut-off)))
 ;;(ada-jira-tag 984)
 
