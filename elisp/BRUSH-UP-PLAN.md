@@ -485,9 +485,10 @@ The first subset is intentionally conservative:
 * [`test-mb-texinfo.el`](./mode-extensions/test-mb-texinfo.el): five ERT tests
   for command formatting and insertion, commented snippets, generated wrapper
   commands, keymaps, and hook registration.
-* [`test-mb-utils-file.el`](./utils/test-mb-utils-file.el): seven ERT tests for
-  path construction, directory membership, readable-file lookup, filename
-  transformations, parent directories, and recursive Scilab source copying.
+* [`test-mb-utils-file.el`](./utils/test-mb-utils-file.el): eight ERT tests for
+  path construction, directory membership and listings, readable-file lookup,
+  filename transformations and literal renaming, parent directories, and
+  canonical directory names.
 * [`test-mb-utils-sets.el`](./utils/test-mb-utils-sets.el): four ERT tests for
   open/closed and degenerate interval boundaries, custom orderings,
   one-dimensional spheres, and set equality.
@@ -575,7 +576,7 @@ comprises:
 
 * a clean `emacs -Q` load of all ninety-eight utility and mode-extension
   features plus the ERT tooling;
-* 818 passing ERT tests from the batch entry point;
+* 819 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -1498,11 +1499,18 @@ path. The unrelated global `describe-mode` advice has been retired; TeX setup
 no longer changes help behavior throughout Emacs.
 
 [`mb-utils-file.el`](./utils/mb-utils-file.el) now uses built-in path and
-recursive file APIs instead of startup aliases and the shell-oriented
-`unix-find` helper. Directory membership checks respect path-component
-boundaries, and recursive Scilab copying creates missing destination
-directories and replaces older destination files. Its tests use disposable
-directories rather than assuming that the home directory is under `/home`.
+file APIs instead of startup aliases. Directory membership checks respect
+path-component boundaries, and tests use disposable directories rather than
+assuming that the home directory is under `/home`.
+The module now delegates readable-file lookup, extension replacement, and
+parent traversal to modern Emacs APIs. Parent counts reject invalid values,
+and literal batch renaming no longer interprets file-name text as glob or
+regexp syntax or renames matching directories. The unused
+`concat-directories` and `file-name-add-extension` wrappers have been retired
+in favor of `file-name-concat` and `file-name-with-extension`. The uncalled,
+Scilab-specific `copy-libs` synchronization helper has also been removed
+rather than generalized without a current use. Eight namespaced tests cover
+the maintained behavior.
 
 [`mb-utils-tree.el`](./utils/mb-utils-tree.el) now uses lexical binding and
 declares its built-in dependencies. Its narrower redefinition of Emacs's
@@ -1856,6 +1864,11 @@ The unused deprecated `split-string-at-pos`, `subseq*`, `remf*`, and
 compatibility alias was also removed.
 The unused `pure-string` helper was removed because its behavior did not match
 its formatting-removal docstring and no production code depended on it.
+The unused `concat-directories` and `file-name-add-extension` wrappers were
+removed in favor of `file-name-concat` and `file-name-with-extension`.
+The uncalled `copy-libs` helper was removed because its recursive copying
+contract was hard-coded to Scilab `.sci` and `.sce` files; no current workflow
+justified generalizing it.
 The internal `product-safe` and `product-safe-list` fallback functions were
 removed because modern integer multiplication preserves exact bignums.
 The uncalled `list-move` and `swimming-relative-distances` stubs were removed

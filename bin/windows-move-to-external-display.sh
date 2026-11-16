@@ -72,7 +72,14 @@ else
   [[ "$operation" == "dry-run" ]] && dry_run=true
   arguments=("$monitor" "$dry_run")
 fi
+Modernize file utilities
 
+- use modern Emacs APIs for lookup, extensions, and parent traversal
+- make batch renaming literal and restrict it to regular files
+- retire unused path, extension, and Scilab copying helpers
+- expand and namespace portable file utility tests
+
+Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>
 if output=$(gdbus call --session \
   --dest "$destination" \
   --object-path "$object_path" \
