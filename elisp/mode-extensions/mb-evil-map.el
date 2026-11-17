@@ -5,6 +5,7 @@
 (require 'vc)
 
 (declare-function evil-key-chord-define "mb-evil")
+(declare-function mb-evil-setup "mb-evil")
 (declare-function mb-evil-buffer "mb-evil")
 (declare-function mb-evil-inner-defun "mb-evil")
 (declare-function mb-evil-inner-variable-name "mb-evil")
@@ -304,6 +305,7 @@ Return non-nil when activation occurred."
   (when (locate-library "evil")
     (require 'mb-evil)
     (require 'key-chord)
+    (mb-evil-setup)
     (mb-evil-map-setup)
     t))
 

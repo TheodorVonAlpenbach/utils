@@ -552,7 +552,7 @@ replaced with built-in operations.
 | --- | --- | --- |
 | `global-map` | [`global-map.el`](./global/global-map.el) | Active startup keymap; independently loadable with explicit activation |
 | `mb-utils-io` | [`mb-utils-io.el`](./utils/mb-utils-io.el) | Active shared utility; independently loadable |
-| `mb-evil-map` | [`mb-evil-map.el`](./mode-extensions/mb-evil-map.el) | Active optional integration; independently loadable with deferred global keymaps |
+| `mb-evil-map` | [`mb-evil-map.el`](./mode-extensions/mb-evil-map.el) | Active optional integration; independently loadable with deferred, explicit Evil setup and global keymaps |
 | `mb-things` | [`mb-things.el`](./utils/mb-things.el) | Active shared utility; independently loadable |
 | `mb-lisp` | [`mb-lisp.el`](./mode-extensions/mb-lisp.el) | Active mode extension; independently loadable with explicit activation |
 | `mb-python` | [`mb-python.el`](./mode-extensions/mb-python.el) | Active mode extension; independently loadable |
@@ -680,6 +680,19 @@ bindings now use a local command factory rather than expanding the unloaded
 `insert-n` macro; this removes a real startup-order failure. Five deterministic
 tests cover repeated insertion and mock the Evil/key-chord registration
 boundary.
+
+[`mb-evil.el`](./mode-extensions/mb-evil.el) now separates its command
+definitions from global activation. The idempotent `mb-evil-setup` entry point
+enables Evil, installs hooks and advice, configures initial states, and is
+called by the existing optional keymap activator. Already-open startup buffers
+are configured directly rather than reverted, preserving unsaved changes.
+Temporary FFAP advice is removed even when visiting a target fails, repeated
+surround delimiters use the correct shifted endpoint, and the confirmed retired
+Scilab dispatch branches are gone. Six focused tests run with the configured
+Evil packages; they remain outside the package-independent batch baseline.
+The unreferenced `evil-sp.el` and unfinished `mb-evil-motion.el` experiments
+have been retired. The vendored `evil-textobj-line.el` remains because
+`mb-evil` actively requires its line text objects.
 
 Full startup validation now loads [`.emacs`](./.emacs) in batch mode after
 the focused and baseline tests. The optional `xclip` and `mozc` integrations

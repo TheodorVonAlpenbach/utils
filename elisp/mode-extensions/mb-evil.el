@@ -1,5 +1,12 @@
-;; -*- lexical-binding: t; -*-
-;;;; My evil adaptations
+;;; mb-evil.el --- Personal Evil commands and setup -*- lexical-binding: t; -*-
+
+;;; Commentary:
+
+;; Personal Evil commands and explicit setup used by `mb-evil-map'.
+
+;;; Code:
+
+;;;; My Evil adaptations
 ;;;; See also http://wikemacs.org/wiki/Evil
 
 ;;;; I want 'df' to be key chord for leaving insert state.
@@ -20,50 +27,44 @@
 
 ;;;; Also useful to look at key bindings in
 ;;;; ~/.emacs.d/elpa/evil-20160525.1148/evil-maps.el
+(require 'cl-lib)
+(require 'ffap)
 (require 'evil)
 (require 'evil-cleverparens)
 (require 'evil-cleverparens-text-objects)
 (require 'evil-textobj-line)
-
-(evil-mode)
-(setf evil-move-beyond-eol t)
-(setf evil-cross-lines t)
-(evil-select-search-module 'evil-search-module 'evil-search)
-
 (require 'evil-exchange)
-(evil-exchange-install)
+
+(declare-function gnuplot-run-buffer nil)
+(declare-function gnuplot-send-buffer-to-gnuplot nil)
+(declare-function mb-lilypond-compile "mb-lilypond")
+(declare-function slime-compile-and-load-file "slime")
+(declare-function slime-eval "slime")
+(declare-function slime-eval-defun "slime")
+(declare-function slime-eval-last-expression "slime")
+(declare-function slime-pprint-eval-last-expression "slime")
+(declare-function split-5-points-string "quiz-park")
+
+(defvar mb-evil--setup-complete nil
+  "Non-nil after `mb-evil-setup' has completed.")
+
+(defvar mb-evil--default-mode-line-colors nil
+  "Mode-line background and foreground saved by `mb-evil-setup'.")
 
 (cl-defun set-mb-lisp-locals ()
-  "My local modifications of lisp modes."
+  "Enable personal behavior for Lisp modes."
   (evil-cleverparens-mode)
   (setf evil-symbol-word-search t)
   (display-fill-column-indicator-mode))
 
-(add-hook 'emacs-lisp-mode-hook #'set-mb-lisp-locals)
-(add-hook 'lisp-mode-hook #'set-mb-lisp-locals)
-
-(setf evil-cleverparens-swap-move-by-word-and-symbol t)
-(setf parens-require-spaces t)
-
-;;; Smartparens adjustments for elisp (should do the same for common list etc)
-(sp-local-pair 'emacs-lisp-mode "'" nil :actions nil)
-(sp-local-pair 'emacs-lisp-mode "`" "'" :when '(sp-in-string-p sp-in-comment-p))
-
-;;; Finally, need to revert .emacs* buffers since they have not yet been
-;;; hooked by the functionality loaded here
-(cl-loop for b in (list (get-buffer ".emacs") (get-file-buffer +emacs-local+))
-      do (with-current-buffer b (revert-buffer nil t)))
-
 ;;; Keyboard shortcuts
 (cl-defun evil-key-chord-define (state keymap key def &rest bindings)
-  "Bind KEY to DEF in evil STATE in keymap.
+  "Bind KEY to DEF in Evil STATE in KEYMAP.
 STATE can take the same values as in `evil-define-key'."
   (let ((aux-maps
          (cond ((listp state)
-                (mapcar
-                 (lambda (st)
-                   (evil-get-auxiliary-keymap keymap st t))
-                 state))
+                (cl-loop for st in state
+                         collect (evil-get-auxiliary-keymap keymap st t)))
                (state
                 (list (evil-get-auxiliary-keymap keymap state t)))
                (t
@@ -91,13 +92,11 @@ STATE can take the same values as in `evil-define-key'."
   (when (buffer-file-name)
     (save-buffer)))
 ;;; Save on exit insert state ("df")
-(add-hook 'evil-insert-state-exit-hook 'save-buffer-file)
-;;(pop evil-insert-state-exit-hook)
 
 (cl-defun mb-show-process-buffer ()
+  "Display the process buffer associated with the current major mode."
   (interactive)
   (cl-case major-mode
-    (mbscilab-mode (mbscilab-show-process-buffer))
     (octave-mode (octave-show-process-buffer))
     (emacs-lisp-mode (display-buffer "*scratch*" '(display-buffer-use-some-window)))
     (mb-lisp-mode (mblisp-show-process-buffer))))
@@ -112,35 +111,34 @@ By default the last line."
       (with-no-warnings (end-of-buffer))
       (forward-line (- count (line-number-at-pos))))
     (eol)
-    (let ((c (current-column)))
-      (cl-loop while (> (current-column) column) do (backward-char)))))
+    (cl-loop while (> (current-column) column) do (backward-char))))
 
-(cl-defun ffap-read-file-or-url-no-prompt (prompt guess)
-  "Same as `ffap-read-file-or-url' but without prompting."
+(cl-defun ffap-read-file-or-url-no-prompt (_prompt guess)
+  "Return the expanded file or URL from GUESS without prompting."
   (or guess (setq guess default-directory))
-  (let (dir)
-    (unless (ffap-url-p guess)
-      (unless (ffap-file-remote-p guess)
-	(setq guess
-	      (abbreviate-file-name (expand-file-name guess))))
-      (setq dir (file-name-directory guess)))
-    (or (ffap-url-p guess)
-	(substitute-in-file-name guess))))
+  (unless (or (ffap-url-p guess)
+              (ffap-file-remote-p guess))
+    (setq guess (abbreviate-file-name (expand-file-name guess))))
+  (or (ffap-url-p guess)
+      (substitute-in-file-name guess)))
 
 (cl-defun ffap-no-prompt (&optional filename)
-  "Same as `ffap' but without prompting."
+  "Visit FILENAME using `ffap' without prompting."
   (interactive)
   (advice-add #'ffap-read-file-or-url :override #'ffap-read-file-or-url-no-prompt)
-  (ffap filename)
-  (advice-remove #'ffap-read-file-or-url #'ffap-read-file-or-url-no-prompt))
+  (unwind-protect
+      (ffap filename)
+    (advice-remove #'ffap-read-file-or-url
+                   #'ffap-read-file-or-url-no-prompt)))
 
 (cl-defun ffap-no-prompt-read-only (&optional filename)
-  "Same as `ffap-no-prompt' with read only mode."
+  "Visit FILENAME using `ffap-no-prompt' and make its buffer read-only."
   (interactive)
   (ffap-no-prompt filename)
   (setf buffer-read-only t))
 
 (cl-defun ffap-previous ()
+  "Visit the previous file or URL recognized by FFAP."
   (interactive)
   (ffap-next t))
 
@@ -176,6 +174,7 @@ A simple split consists of two windows only."
 ;;(swap-windows)
 
 (cl-defun find-tag-no-prompt ()
+  "Visit the tag at point without prompting."
   (interactive)
   (let* ((tagname (find-tag-default))
 	 (buf (find-tag-noselect tagname))
@@ -187,6 +186,7 @@ A simple split consists of two windows only."
 ;;(find-tag-no-prompt)
 
 (cl-defun find-tag-no-prompt-read-only ()
+  "Visit the tag at point and make a newly opened buffer read-only."
   (interactive)
   (let ((n (length (buffer-list))))
     (find-tag-no-prompt)
@@ -207,15 +207,14 @@ A simple split consists of two windows only."
 ;;(mapcar #'minor-mode-p '(slime-mode undo-tree-mode))
 
 (cl-defun slime-p ()
-  "Return nil iff slime-mode is not active"
+  "Return non-nil when `slime-mode' is active."
   (minor-mode-p 'slime-mode))
 ;;(slime-p)
 
 ;;; Eval machinery
 (cl-defun mb-eval-string (string &rest args)
-  "This is the core function of the mb-eval machinery. Most other
-eval function should end up here to secure a sort of conformity
-between different"
+  "Evaluate STRING for the current major mode.
+Pass ARGS to the mode-specific evaluator when it accepts them."
   (cl-case major-mode
     (mb-lisp-mode
      (if (slime-p)
@@ -223,8 +222,7 @@ between different"
        (apply #'mb-lisp-eval-1 string args)))
     (emacs-lisp-mode (eval (read string)))
     (octave-mode (octave-send-string string))
-    (js-mode (apply #'js-eval-string string args))
-    (mbscilab-mode (mbscilab-eval string))))
+    (js-mode (apply #'js-eval-string string args))))
 ;;(mb-eval-string "(+ 2 2)")
 
 (cl-defun eval-form ()
@@ -239,7 +237,8 @@ between different"
     (octave-mode (octave-send-block))))
 
 (cl-defun mb-eval-last-sexp (&rest args)
-  "Eval the syntaks expression preceding point."
+  "Evaluate the expression preceding point.
+Pass ARGS to the mode-specific evaluator."
   (interactive)
   (cl-case major-mode
     (emacs-lisp-mode (eval-last-sexp args))
@@ -254,6 +253,7 @@ between different"
     (t (apply #'mb-eval-region (append (last-sexp-region) args)))))
 
 (cl-defun eval-current-sexp ()
+  "Evaluate the expression at point for the current major mode."
   (interactive)
   (cl-case major-mode
     ((emacs-lisp-mode mb-lisp-mode)
@@ -271,6 +271,8 @@ between different"
 ;;(+ (+ 111 2) 3)
 
 (cl-defun eval-defun-test (&optional no-eval-p)
+  "Evaluate the current definition and its following test.
+With NO-EVAL-P non-nil, evaluate only the test."
   (interactive)
   (unless no-eval-p (mb-eval-defun))
   (save-excursion
@@ -287,6 +289,7 @@ between different"
 ;;(eval-defun-test)
 
 (cl-defun gp-eval-buffer ()
+  "Run the current Gnuplot buffer and visit its output file."
   (interactive)
   (gnuplot-run-buffer)
   (let ((filename (string-match* "set[\t ]+output[\t ]+['\"]\\([^'\"]*\\)"
@@ -294,12 +297,14 @@ between different"
     (find-file-other-window filename)))
 
 (cl-defun strip-ssh (filename)
-  "Strip the ssh prefix of filename"
+  "Strip an old-style SSH prefix from FILENAME."
   (or (string-match* "/ssh:[^:]*:\\(.*\\)" filename :num 1)
       filename))
 ;;(strip-ssh "/ssh:pf:/home/mats_progfab_no/git/problem-server/")
 
 (cl-defun mb-eval-buffer (&optional args)
+  "Evaluate or compile the current buffer.
+Pass optional ARGS to evaluators that accept additional arguments."
   (interactive)
   (cl-case major-mode
     (emacs-lisp-mode (apply #'eval-buffer args))
@@ -309,7 +314,6 @@ between different"
 		    (lisp-load-file (strip-ssh (buffer-file-name)))))
     (metafont-mode (meta-compile-file (buffer-file-name)))
     (octave-mode (octave-source-buffer))
-    (mbscilab-mode (mbscilab-eval-buffer))
     (python-mode (python-shell-send-buffer nil))
     ((c++-mode cc-mode makefile-mode) (compile "make -k"))
     (latex-mode (TeX-command-run-all nil))
@@ -317,6 +321,7 @@ between different"
     (otherwise (mb-eval-region (point-min) (point-max)))))
 
 (cl-defun mb-eval-defun ()
+  "Evaluate the current definition for the current major mode."
   (interactive)
   (cl-case major-mode
     (emacs-lisp-mode (eval-defun current-prefix-arg))
@@ -326,11 +331,12 @@ between different"
     (otherwise (mb-eval-region (bod*) (eod*) t))))
 
 (cl-defun mb-eval-region (start end &optional printflag read-function)
+  "Evaluate the region from START to END for the current major mode.
+PRINTFLAG and READ-FUNCTION are passed to Emacs Lisp evaluation."
   (interactive "r")
   (cl-case major-mode
     (emacs-lisp-mode (eval-region start end printflag read-function))
     (python-mode (python-shell-send-region start end nil))
-    ((mbscilab-mode scilab-mode) (mbscilab-eval-region start end))
     (sh-mode (sh-execute-region start end))
     (latex-mode (TeX-command-run-all-region))
 ;;    (octave-mode (octave-send-region start end))
@@ -340,21 +346,25 @@ between different"
 	     printflag)))))
 
 (cl-defun mb-eval-region-from-point (&optional printflag read-function)
-  "Evalutates content from POINT to the end of the buffer."
-  (interactive "r")
+  "Evaluate from the current line through the end of the buffer.
+Pass PRINTFLAG and READ-FUNCTION to `mb-eval-region'."
+  (interactive)
   (mb-eval-region (bol) (point-max) printflag read-function))
 
 (cl-defun mb-eval-region-to-point (&optional printflag read-function)
-  "Evalutates content from the end of the buffer to POINT."
-  (interactive "r")
+  "Evaluate from the start of the buffer through the current line.
+Pass PRINTFLAG and READ-FUNCTION to `mb-eval-region'."
+  (interactive)
   (mb-eval-region (point-min) (eol*) printflag read-function))
 
 (cl-defun mb-compile-buffer ()
+  "Compile the current buffer when its major mode supports compilation."
   (interactive)
   (cl-case major-mode
     (octave-mode (octave-source-buffer))))
 
 (cl-defun mb-normal-state-init ()
+  "Enable key chords when entering Evil normal state."
   (key-chord-mode 1))
 ;;(add-hook 'evil-normal-state-entry-hook 'mb-normal-state-init)
 
@@ -382,56 +392,54 @@ mentioned\) RESULT is returned unmodified."
       (quail-input-method (first result))
       (error "Unexpected output from KEY-CHORD-INPUT-METHOD: %S" result))))
 
-(cl-defun mb-key-chord-advice (x)
+(cl-defun mb-key-chord-advice (_input-method)
+  "Restore `key-chord-input-method' after activating an input method."
   (setq input-method-function 'key-chord-input-method))
-;; activate-input-method overrides input-method-function, so therfore:
-(advice-add #'activate-input-method :after #'mb-key-chord-advice)
 
 (cl-defun mb-insert-state-init ()
+  "Set up input methods and key chords for Evil insert state."
   ;;(key-chord-mode 1)
   (when (member (buffer-name) '("arbeidslog" "log.org"))
     (activate-input-method 'norwegian-keyboard))
   (advice-add #'key-chord-input-method
 	      :filter-return #'quailify-key-chord-input-method))
-(add-hook 'evil-insert-state-entry-hook #'mb-insert-state-init)
 
 (cl-defun mb-insert-state-cleanup ()
+  "Remove insert-state key-chord input translation."
   (advice-remove #'key-chord-input-method #'quailify-key-chord-input-method))
-(add-hook 'evil-insert-state-exit-hook #'mb-insert-state-cleanup)
 
-(let ((default-color (cons (face-background 'mode-line)
-				   (face-foreground 'mode-line))))
-  (add-hook 'post-command-hook
-	    (lambda ()
-	      (let ((color (cond ((minibufferp) default-color)
-				 ((evil-insert-state-p) '("#e80000" . "#ffffff"))
-				 ((evil-emacs-state-p)  '("#444488" . "#ffffff"))
-				 ((buffer-modified-p)   '("#006fa0" . "#ffffff"))
-				 (t default-color))))
-		(set-face-background 'mode-line (car color))
-		(set-face-foreground 'mode-line (cdr color))))))
+(defun mb-evil-update-mode-line ()
+  "Update mode-line colors to reflect the current Evil state."
+  (let ((color
+         (cond ((minibufferp) mb-evil--default-mode-line-colors)
+               ((evil-insert-state-p) '("#e80000" . "#ffffff"))
+               ((evil-emacs-state-p) '("#444488" . "#ffffff"))
+               ((buffer-modified-p) '("#006fa0" . "#ffffff"))
+               (t mb-evil--default-mode-line-colors))))
+    (set-face-background 'mode-line (car color))
+    (set-face-foreground 'mode-line (cdr color))))
 
-;; move to mode ext
-(cl-loop for (mode . state) in '((inferior-emacs-lisp-mode . emacs)
-                              (inferior-lisp-mode . emacs)
-                              (inferior-octave-mode . emacs)
-                              (shell-mode . emacs)
-                              (git-commit-mode . emacs)
-                              (git-rebase-mode . emacs)
-                              (term-mode . emacs)
-                              (help-mode . emacs)
-                              (helm-grep-mode . emacs)
-                              (grep-mode . emacs)
-                              (bc-menu-mode . emacs)
-                              (magit-branch-manager-mode . emacs)
-                              (rdictcc-buffer-mode . emacs)
-                              (dired-mode . emacs)
-                              (wdired-mode . normal))
-      do (evil-set-initial-state mode state))
+(defconst mb-evil--initial-states
+  '((inferior-emacs-lisp-mode . emacs)
+    (inferior-lisp-mode . emacs)
+    (inferior-octave-mode . emacs)
+    (shell-mode . emacs)
+    (git-commit-mode . emacs)
+    (git-rebase-mode . emacs)
+    (term-mode . emacs)
+    (help-mode . emacs)
+    (helm-grep-mode . emacs)
+    (grep-mode . emacs)
+    (bc-menu-mode . emacs)
+    (magit-branch-manager-mode . emacs)
+    (rdictcc-buffer-mode . emacs)
+    (dired-mode . emacs)
+    (wdired-mode . normal))
+  "Initial Evil states for modes used by the personal configuration.")
 
 (cl-defun alf/key-chord-undefine (keys)
   "Undefine the key chord identified by KEYS.
-This should be done by key-chord-unset-global, however that
+This should be done by `key-chord-unset-global', however that
 does not work for me."
   (let ((key1 (logand 255 (aref keys 0)))
         (key2 (logand 255 (aref keys 1))))
@@ -442,29 +450,31 @@ does not work for me."
       (global-unset-key (vector 'key-chord key2 key1)))))
 ;;(alf/key-chord-undefine "df")
 
-(evil-define-text-object mb-evil-buffer (cl-count &optional beg end type)
-  "Smartparens sexp object."
+(evil-define-text-object mb-evil-buffer
+    (cl-count &optional _beg _end _type)
+  "Select the entire buffer."
   (evil-range (point-min) (point-max) 'inclusive :expanded t))
 
-(evil-define-text-object mb-evil-inner-defun (cl-count &optional beg end type)
-  "Object for inner defun of c++ like languages"
+(evil-define-text-object mb-evil-inner-defun
+    (cl-count &optional _beg _end _type)
+  "Select the inside of a definition in C-like languages."
   (evil-range (bol* :point (bod*) :offset 1)
 	      (eol* :point (eod*) :offset -2)
 	      'inclusive :expanded t))
 
-(evil-define-text-object mb-evil-inner-variable-name (cl-count &optional beg end type)
-  "Smartparens sexp object. E.g. +foobar+ --> foobar"
+(evil-define-text-object mb-evil-inner-variable-name
+    (cl-count &optional _beg _end _type)
+  "Select the inside of a delimited variable name."
   (cl-destructuring-bind (beg end) (last-sexp-region)
     (evil-range (1+ beg) (1- end) 'inclusive :expanded t)))
 
 (evil-define-operator evil-yank-line (beg end type register yank-handler)
   "Yank to end of line.
-MB: I have overrided the original evil-yank-line to comform to
-evil-delete-line. I.e. Y yanks the same region as C changes (and
-D deletes). 
+This overrides `evil-yank-line' to conform to `evil-delete-line':
+Y yanks the same region as C changes and D deletes.
 
 This function is simply a clone of `evil-delete-line', with every
-occurence of 'delete' replaced with 'yank'."
+occurrence of \"delete\" replaced with \"yank\"."
   :motion nil
   :keep-visual t
   (interactive "<R><x>")
@@ -505,9 +515,9 @@ By default the last line."
       (goto-char (point-min))
       (forward-line (1- count)))
     (evil-goto-column c)))
-(define-key evil-normal-state-map "gG" 'evil-goto-line-preserve-column)
 
 (cl-defun print-last-pdf-in-Messages ()
+  "Visit the last PDF file mentioned in the *Messages* buffer."
   (interactive)
   (with-buffer "*Messages*"
     (save-excursion
@@ -518,10 +528,12 @@ By default the last line."
 
 ;;;; Insert quotes (put this somewhere else when finished)
 (cl-defun mb-surround-region-1 (region left right n)
+  "Surround REGION with N copies of LEFT and RIGHT."
   (insert-at left (first region) n)
-  (insert-at right (+ (second region) (length left)) n))
+  (insert-at right (+ (second region) (* n (length left))) n))
 
 (cl-defun mb-surround-lookup-right (left)
+  "Return the closing delimiter corresponding to LEFT."
   (string-case left
     ("(" ")")
     ("`" "'")
@@ -534,16 +546,19 @@ By default the last line."
 ;;(mapcar #'mb-surround-lookup-right (list "`" "'" "(" "<"))
 
 (cl-defun mb-surround-region (region left n)
+  "Surround REGION with N copies of LEFT and its matching delimiter."
   (mb-surround-region-1 region left (mb-surround-lookup-right left) n))
 
 (cl-defun mb-surround-word (left n)
+  "Surround N words at point with LEFT and its matching delimiter."
   (mb-surround-region (cons (bow*) (eow* n)) left 1))
 
 (cl-defun mb-surround-symbol (left n)
-  (message "%S" (list (point) (bos*) (eos*)))
+  "Surround N symbols at point with LEFT and its matching delimiter."
   (mb-surround-region (list (bos*) (eos* n)) left 1))
 
 (cl-defun mb-surround (left n)
+  "Surround the active region or N symbols with delimiter LEFT."
   (if (use-region-p)
     (mb-surround-region (region) left n)
     ;; (mb-surround-word left n)
@@ -552,15 +567,17 @@ By default the last line."
 ;; Undo surround: strictly assume surround is 1 char wide on both
 ;; sides
 (cl-defun mb-undo-surround (n)
+  "Remove N delimiter characters around the word at point."
   (if (use-region-p)
     (error "Undo surround region not implemented!")
     (save-excursion
       (bow)
-      (backward-delete-char n)
+      (delete-char (- n))
       (eow)
       (delete-char n))))
 
 (cl-defun evil-increment-rectangle ()
+  "Replace a visual rectangle with consecutive integers."
   (interactive)
   (let ((p (point))
 	(m (mark)))
@@ -597,4 +614,49 @@ By default the last line."
      (split-5-points-string (region-string beg end))
      (list beg end))))
 
+(defun mb-evil--configure-open-lisp-buffers ()
+  "Enable personal Lisp behavior in already-open startup buffers."
+  (cl-loop for buffer in
+           (list (get-buffer ".emacs")
+                 (and (boundp '+emacs-local+)
+                      (get-file-buffer +emacs-local+)))
+           when (buffer-live-p buffer)
+           do (with-current-buffer buffer
+                (set-mb-lisp-locals))))
+
+(defun mb-evil-setup ()
+  "Activate personal Evil behavior.
+Repeated calls have no effect.  Return non-nil after successful setup."
+  (interactive)
+  (unless mb-evil--setup-complete
+    (evil-mode 1)
+    (setf evil-move-beyond-eol t
+          evil-cross-lines t
+          evil-cleverparens-swap-move-by-word-and-symbol t
+          parens-require-spaces t)
+    (evil-select-search-module 'evil-search-module 'evil-search)
+    (evil-exchange-install)
+    (add-hook 'emacs-lisp-mode-hook #'set-mb-lisp-locals)
+    (add-hook 'lisp-mode-hook #'set-mb-lisp-locals)
+    (sp-local-pair 'emacs-lisp-mode "'" nil :actions nil)
+    (sp-local-pair 'emacs-lisp-mode "`" "'"
+                   :when '(sp-in-string-p sp-in-comment-p))
+    (mb-evil--configure-open-lisp-buffers)
+    (add-hook 'evil-insert-state-exit-hook #'save-buffer-file)
+    (advice-add #'activate-input-method :after #'mb-key-chord-advice)
+    (add-hook 'evil-insert-state-entry-hook #'mb-insert-state-init)
+    (add-hook 'evil-insert-state-exit-hook #'mb-insert-state-cleanup)
+    (setq mb-evil--default-mode-line-colors
+          (cons (face-background 'mode-line)
+                (face-foreground 'mode-line)))
+    (add-hook 'post-command-hook #'mb-evil-update-mode-line)
+    (cl-loop for (mode . state) in mb-evil--initial-states
+             do (evil-set-initial-state mode state))
+    (define-key evil-normal-state-map "gG"
+                #'evil-goto-line-preserve-column)
+    (setq mb-evil--setup-complete t))
+  mb-evil--setup-complete)
+
 (provide 'mb-evil)
+
+;;; mb-evil.el ends here
