@@ -1,94 +1,123 @@
 ;;; mb-combinatorics.el --- Combinatorial utility functions -*- lexical-binding: t; -*-
 
+;;; Commentary:
+
+;; Exact integer sequences, coefficients, divisor sums, and related
+;; combinatorial helpers.
+
+;;; Code:
+
 (require 'cl-lib)
 (require 'mb-utils-math)
 
-;;; Code:
+(defun mb-combinatorics--check-nonnegative-integer (value name)
+  "Signal an error unless VALUE named NAME is a non-negative integer."
+  (unless (and (integerp value) (>= value 0))
+    (error "%s must be a non-negative integer: %S" name value)))
 
 (cl-defun factorial (n &optional (m 1))
   "Return the product M through N.
 With the default M of 1, return N!.  See also `derangement'."
+  (mb-combinatorics--check-nonnegative-integer n "N")
+  (mb-combinatorics--check-nonnegative-integer m "M")
   (cond
     ((zerop n) 1)
-    ((cl-minusp n)
-     (error "FACTORIAL is only valid for non-negative integers"))
     (t (product-a-b m n))))
 ;;(mapcar #'factorial (0-n 10))
 ;; (* 1.0 (factorial 5910))
 
-(cl-defun derangement (n &optional (!0 1) (!1 0))
-  "Returns !N. See also `factorial'.
-For the definition of !N, see https://en.wikipedia.org/wiki/Derangement"
-  (if (cl-minusp n)
-      (error "DERANGEMENT is only valid for non-negative integers")
-    (cl-case n
-      (0 !0)
-      (1 !1)
-      (otherwise
-       (cl-loop for i from 2 to n
-		for Ln-2 = !0 then Ln-1
-		for Ln-1 = !1 then Ln
-		for Ln = (* (1- i) (+ Ln-1 Ln-2))
-		finally return Ln)))))
+(cl-defun derangement (n &optional (initial-zero 1) (initial-one 0))
+  "Return the subfactorial !N.
+INITIAL-ZERO and INITIAL-ONE override the first two sequence values."
+  (mb-combinatorics--check-nonnegative-integer n "N")
+  (cl-case n
+    (0 initial-zero)
+    (1 initial-one)
+    (otherwise
+     (cl-loop for i from 2 to n
+	      for Ln-2 = initial-zero then Ln-1
+	      for Ln-1 = initial-one then Ln
+	      for Ln = (* (1- i) (+ Ln-1 Ln-2))
+	      finally return Ln))))
 ;;(mapcar #'derangement (0-n 11))
-
-(defalias 'n! #'factorial)
-(defalias '!n #'derangement)
 
 (cl-defun factorials (n &optional (m 1))
   "Return M!, (M + 1)!, ... N!.
 By default, M is 1."
+  (mb-combinatorics--check-nonnegative-integer n "N")
+  (mb-combinatorics--check-nonnegative-integer m "M")
   (cl-loop for i from m to n
-	   for p = (n! m) then (* p i)
+	   for p = (factorial m) then (* p i)
 	   collect p))
 ;;(factorials 5 3)
 
 (cl-defun fibonacci-numbers (n &optional (start-values '(0 1)))
   "Return the N first Fibonacci numbers.
-The optional START-VALUES modifies the two first elements in the
-resulting sequence."
+START-VALUES must contain exactly the first two numeric values."
+  (mb-combinatorics--check-nonnegative-integer n "N")
+  (unless (and (proper-list-p start-values)
+               (= (length start-values) 2)
+               (cl-every #'numberp start-values))
+    (error "START-VALUES must contain exactly two numbers: %S" start-values))
   (if (< n 2)
-    (cl-subseq start-values 0 n)
+      (cl-subseq start-values 0 n)
     (let ((res (reverse start-values)))
-     (cl-loop for i below (- n 2)
-	   do (push (+ (cl-first res) (cl-second res)) res))
-     (nreverse res))))
+      (cl-loop repeat (- n 2)
+	       do (push (+ (cl-first res) (cl-second res)) res))
+      (nreverse res))))
 ;;(fibonacci-numbers 0)
 
-(defconst +golden-ratio+ (/ (1+ (sqrt 5)) 2))
+(defun mb-combinatorics--fibonacci-pair (n)
+  "Return the cons (F(N) . F(N + 1)) using fast doubling."
+  (if (zerop n)
+      '(0 . 1)
+    (pcase-let* ((`(,a . ,b)
+                  (mb-combinatorics--fibonacci-pair (/ n 2)))
+                 (c (* a (- (* 2 b) a)))
+                 (d (+ (* a a) (* b b))))
+      (if (cl-evenp n)
+          (cons c d)
+        (cons d (+ c d))))))
 
-(cl-defun fibonacci-nth (n)
-  (let ((psi +golden-ratio+)
-	(phi (- 1 +golden-ratio+)))
-    (/ (- (expt phi n) (expt psi n))
-       (- phi psi))))
-;;(time (fibonacci-nth 50))
+(defun fibonacci-nth (n)
+  "Return the exact Nth Fibonacci number."
+  (mb-combinatorics--check-nonnegative-integer n "N")
+  (car (mb-combinatorics--fibonacci-pair n)))
+;;(time (fibonacci-nth 50000))
 
-(cl-defun binomial-coefficient-simple (n m)
-  "Weak version, cannot deal with Ns and Ms greater than ~ 11"
-  (/ (factorial n (1+ m)) (factorial (- n m))))
-;;(binomial-coefficient-simple 10 4)
-
-(cl-defun simplify-ratio (ratio)
-  (mapcar (bind #'/ (apply #'cl-gcd ratio)) ratio))
+(defun simplify-ratio (ratio)
+  "Divide the integer elements of RATIO by their greatest common divisor."
+  (unless (and (proper-list-p ratio) ratio (cl-every #'integerp ratio))
+    (error "RATIO must be a nonempty list of integers: %S" ratio))
+  (let ((divisor (apply #'cl-gcd ratio)))
+    (when (zerop divisor)
+      (error "Cannot simplify an all-zero ratio"))
+    (mapcar (lambda (value) (/ value divisor)) ratio)))
 ;;(simplify-ratio '(6 10))
 
-(cl-defun aliquot-sum (n)
+(defun aliquot-sum (n)
+  "Return the sum of the proper positive divisors of N."
+  (unless (and (integerp n) (> n 0))
+    (error "N must be a positive integer: %S" n))
   (sum (all-factors n t)))
 ;;(mapcar #'aliquot-sum (1-n 10))
 
-(cl-defun amicable-numbers-p (x y)
+(defun amicable-numbers-p (x y)
+  "Return non-nil when distinct positive integers X and Y are amicable."
   (and (/= x y)
        (= (aliquot-sum x) y)
        (= (aliquot-sum y) x)))
 ;;(amicable-numbers-p 220 284)
 
-(cl-defun abundancy-index (n)
+(defun abundancy-index (n)
+  "Return the abundancy index of positive integer N as a reduced ratio."
+  (unless (and (integerp n) (> n 0))
+    (error "N must be a positive integer: %S" n))
   (simplify-ratio (list (sum (all-factors n)) n)))
 ;;(mapcar #'abundancy-index '(220 284 30))
 
 (cl-defun remove-factors (factors divisor)
-  "Removes all factors in FACTORS that are also factors in DIVISOR"
+  "Remove from FACTORS all factors shared with DIVISOR."
   (cl-loop for factor in factors
 	for d = divisor then (/ d cl-gcd)
 	for cl-gcd = (cl-gcd factor d)
@@ -96,9 +125,14 @@ resulting sequence."
 ;;(remove-factors '(2 3 4 5) 12)
 
 (cl-defun binomial-coefficient (n m &optional (method :auto))
-  "Returns n!/(m!*(n-m)!"
-  (if (or (cl-minusp m) (> m n))
-    0
+  "Return the binomial coefficient N choose M.
+METHOD is passed to `product*'.  Return zero when integer M is outside
+the range from zero through N."
+  (mb-combinatorics--check-nonnegative-integer n "N")
+  (unless (integerp m)
+    (error "M must be an integer: %S" m))
+  (if (or (< m 0) (> m n))
+      0
     (let* ((m* (max m (- n m)))
 	   (factors
 	    (cl-loop for denominator-factor in (a-b 1 (- n m*))
@@ -109,177 +143,65 @@ resulting sequence."
 ;;(time (binomial-coefficient 112 100 :auto))
 
 (cl-defun binomial-coefficients-n (n1 n2 m &optional (method :auto))
-  "Returns (n1 / m), ((n1 + 1) / m) ... (n2 / m)"
+  "Return N1 choose M through N2 choose M.
+METHOD is passed to `binomial-coefficient'."
   (cl-loop for n from n1 to n2
-	for bc = (binomial-coefficient n m method) then (/ (* bc n) (- n m))
-	collect bc))
+           collect (binomial-coefficient n m method)))
 ;;(binomial-coefficients-n 4 6 3)
 
 (cl-defun binomial-coefficients-m (n m1 m2 &optional (method :auto))
-  "Returns (n / m1), (n / (m1 + 1)) ... (n2 / m2)"
+  "Return N choose M1 through N choose M2.
+METHOD is passed to `binomial-coefficient'."
   (cl-loop for m from m1 to m2
-	for bc = (binomial-coefficient n m method) then (/ (* bc (- n m -1)) m)
-	collect bc))
+           collect (binomial-coefficient n m method)))
 ;;(binomial-coefficients-m 6 0 5)
 ;;(binomial-coefficient 5 2)
 
 (cl-defun catalan-nth (n)
   "Return the Nth Catalan number.
 The Catalan numbers form the sequence A000108 in the OEIS."
+  (mb-combinatorics--check-nonnegative-integer n "N")
   (/ (binomial-coefficient (2* n) n) (1+ n)))
 ;;(catalan-nth 3)
-
-(defconst uefa-groups
-  '(((PSG fra) (Porto por))
-    ((Schalke ger) (Arsenal eng))
-    ((Malaga spa) (Milan ita))
-    ((Dortmund ger) (Real-Madrid spa))
-    ((Juventus ita) (Shakhtar-Donetsk rus))
-    ((Bayern-Munchen ger) (Valencia spa))
-    ((Barcelona spa) (Celtic sco))
-    ((Manchester-United eng) (Galatasaray tur))))
-
-(cl-defun uefa-team-nation-map (&optional (groups uefa-groups))
-  (apply #'append groups))
-;;(uefa-team-nation-map)
-
-(cl-defun uefa-winners (&optional (groups uefa-groups))
-  (mapcar (compose #'cl-first #'cl-first) groups))
-;;(uefa-winners)
-
-(cl-defun uefa-runner-ups (&optional (groups uefa-groups))
-  (mapcar (compose #'cl-first #'cl-second) groups))
-;;(uefa-runner-ups)
-
-(cl-defun uefa-winner-p (team &optional (groups uefa-groups))
-  (member team (uefa-winners groups)))
-;;(uefa-winner-p 'Real-Madrid)
-
-(cl-defun uefa-teams (&optional (groups uefa-groups))
-  (append (uefa-winners groups) (uefa-runner-ups groups)))
-;;(uefa-teams)
-
-(cl-defun uefa-group-member-p (team group)
-  (cl-member team (mapcar #'cl-first group) :test #'equal))
-;;(uefa-group-member-p 'PSG (first uefa-groups))
-
-(cl-defun uefa-group (team &optional (groups uefa-groups))
-  (cl-find team groups :test #'uefa-group-member-p))
-;;(uefa-group (first (uefa-winners)))
-
-(cl-defun uefa-same-group-p (team1 team2 &optional (groups uefa-groups))
-  (uefa-group-member-p team1 (uefa-group team2 groups)))
-;;(uefa-same-group-p 'Schalke 'Arsenal)
-
-(cl-defun uefa-team-country (team &optional (groups uefa-groups))
-  (cl-second (cl-find team (uefa-group team groups) :key #'cl-first)))
-;;(uefa-team-country 'PSG)
-
-(cl-defun uefa-same-country-p (team1 team2 &optional (groups uefa-groups))
-  (eq (uefa-team-country team1 groups) (uefa-team-country team2 groups)))
-;;(uefa-same-country-p 'Malaga 'Barcelona)
-
-(cl-defun uefa-possible-opponents-gen-p (team1 team2 &optional (groups uefa-groups))
-  "Returns nil iff TEAM1 TEAM2 are not allowed to meet. See also
-`uefa-possible-opponents-p'"
-  (not (or (uefa-same-group-p team1 team2 groups)
-	   (uefa-same-country-p team1 team2 groups)
-	   (eq (not (null (uefa-winner-p team1 groups)))
-	       (not (null (uefa-winner-p team2 groups)))))))
-;;(uefa-possible-opponents-gen-p 'Schalke 'PSG)
-
-(cl-defun uefa-possible-opponents-gen (team &optional (groups uefa-groups))
-  "Returns a list of all the teams that are allowed to meet TEAM.
-See also `uefa-possible-opponents-gen"
-  (cl-remove-if-not
-   (lambda (opponent)
-     (uefa-possible-opponents-gen-p team opponent groups))
-   (uefa-teams groups)))
-;;(uefa-possible-opponents-gen 'Barcelona)
-
-(cl-defun uefa-opposite-team-group (team &optional (groups uefa-groups))
-  (if (uefa-winner-p team groups)
-    (uefa-runner-ups groups)
-    (uefa-winners groups)))
-;;(uefa-opposite-team-group 'Barcelona)
-
-(cl-defun uefa-possible-opponents-p (winner runner-up &optional (groups uefa-groups))
-  "Returns nil iff the WINNER and RUNNER-UP teams are not allowed to meet."
-  (not (or (uefa-same-group-p winner runner-up groups)
-	   (uefa-same-country-p winner runner-up groups))))
-;;(uefa-possible-opponents-p 'Barcelona 'Real-Madrid)
-
-;; (copy-if #'(lambda (runner-up) (uefa-possible-opponents-p winner runner-up groups))
-;; 	   (uefa-runner-ups groups))
-;;(uefa-possible-opponents 'Barcelona)
-
-(cl-defun uefa-possible-draws
-    (winners-left runner-ups-left &optional (groups uefa-groups))
-  "Return all valid draws between WINNERS-LEFT and RUNNER-UPS-LEFT.
-Each recursive result has the form (MATCH . DRAWS-GIVEN-MATCH)."
-  (if winners-left
-    (cl-loop with winner = (cl-first winners-left)
-	  for runner-up in runner-ups-left
-	  for match = (list winner runner-up)
-	  for draws-given-match =
-	  (and (uefa-possible-opponents-p winner runner-up groups)
-	       (uefa-possible-draws (cl-rest winners-left)
-				    (remove runner-up runner-ups-left) groups))
-	  if draws-given-match collect (cons match draws-given-match))
-    (list t)))
-
-(cl-defun uefa-possible-draws-main (&optional (groups uefa-groups))
-  (uefa-possible-draws (copy-sequence (uefa-winners groups))
-		       (copy-sequence (uefa-runner-ups groups))
-		       groups))
-;;(setf res (uefa-possible-draws-main))
-;;(cl-count t (flatten res))
-
-(cl-defun rummy-hands (&optional (players 2) (cards (if (< players 5) 10 6)) (deck 52))
-  "Return the number of possible initial rummy hands,
-given PLAYERS number of players each having HANDS initial hands.
-The function is inspired by the film \"The Midnight Sky\", where XXX
-claims there are over 60 billion initial rummy hands. Since the
-scene where this quote occurs involves two players, we assume
-PLAYERS is 2 and CARDS is 10.
-
-This assertion seems wrong given the Wikipedia definition of
-standard rummy."
-  (cl-assert (<= (* players cards) deck) t "Too many players or cards!")
-  (/ (product (cl-loop for n below players
-		    collect (binomial-coefficient deck cards)
-		    do (cl-decf deck cards)))
-     (n! players)))
-;;(rummy-hands 2)
 
 (cl-defun stirling-numbers-2 (n k)
   "Return the Stirling number of the second kind S(N, K).
 This is the number of partitions of N labeled elements into K
 nonempty subsets."
-  (round
-   (cl-loop with k-i!s = (nreverse (factorials k 0))
-	 for i from 0 to k
-	 for sign = (expt -1 (- k i))
-	 for i! = 1 then (* i! i)
-	 for k-i! in k-i!s
-	 for addend = (* sign (/ (expt i n) 1.0 k-i! i!))
-	 ;; do (print (list i sign i! k-i! addend))
-	 sum addend)))
+  (mb-combinatorics--check-nonnegative-integer n "N")
+  (mb-combinatorics--check-nonnegative-integer k "K")
+  (if (> k n)
+      0
+    (let ((values (make-vector (1+ k) 0)))
+      (aset values 0 1)
+      (cl-loop for i from 1 to n
+               do
+               (cl-loop for j from (min i k) downto 1
+                        do (aset values j
+                                 (+ (* j (aref values j))
+                                    (aref values (1- j)))))
+               (aset values 0 0))
+      (aref values k))))
 ;;(stirling-numbers-2 0 0)
 ;;(cl-loop for k to 10 collect (stirling-numbers-2 10 k))
 
 (cl-defun stirling-numbers-1 (n k)
-  "Return coefficients s(n, k), i.e. a Stirling number of the first kind.
-This is the number of permutations of n elements with k disjoint
-cycles."
-  (cl-loop with 2n-k = (- (2* n) k)
-	for j from n to 2n-k
-	for signum = (expt -1 (- j k))
-	for addend = (* signum
-			(binomial-coefficient (1- j) (1- k))
-			(binomial-coefficient 2n-k j)
-			(stirling-numbers-2 (- j k) (- j n)))
-	sum addend))
+  "Return the unsigned Stirling number of the first kind C(N, K).
+This is the number of permutations of N elements with K disjoint cycles."
+  (mb-combinatorics--check-nonnegative-integer n "N")
+  (mb-combinatorics--check-nonnegative-integer k "K")
+  (if (> k n)
+      0
+    (let ((values (make-vector (1+ k) 0)))
+      (aset values 0 1)
+      (cl-loop for i from 1 to n
+               do
+               (cl-loop for j from (min i k) downto 1
+                        do (aset values j
+                                 (+ (aref values (1- j))
+                                    (* (1- i) (aref values j)))))
+               (aset values 0 0))
+      (aref values k))))
 ;;(cl-loop for k to 4 collect (stirling-numbers-1 4 k))
 
 (provide 'mb-combinatorics)

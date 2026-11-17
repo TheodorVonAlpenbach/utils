@@ -581,7 +581,7 @@ comprises:
 
 * a clean `emacs -Q` load of all ninety-eight utility and mode-extension
   features plus the ERT tooling;
-* 821 passing ERT tests from the batch entry point;
+* 818 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -1662,11 +1662,15 @@ baseline.
 with lexical binding and supported Common Lisp accessors. The obsolete
 factorial size warning was removed because modern Emacs integers are
 arbitrary-precision. Repairs cover negative derangements, out-of-range
-binomial coefficients, distinctness in amicable pairs, UEFA side/opponent
-selection, recursive draw generation, and Stirling-number documentation.
-The UEFA recursion is characterized with a small deterministic fixture rather
-than only the historical tournament data. Its 13 namespaced tests run in the
-maintained baseline.
+binomial coefficients, distinctness in amicable pairs, and Stirling-number
+documentation. A subsequent whole-module review retired the uncalled 2012
+UEFA draw experiment, film-inspired rummy calculation, weak duplicate
+binomial implementation, and punctuation aliases for factorial and
+derangement. Fibonacci indexing now uses exact fast doubling rather than an
+inexact golden-ratio formula. Factorial, Fibonacci, binomial, Catalan, divisor,
+and Stirling helpers validate their integer domains; both kinds of Stirling
+numbers now use exact recurrences with correct zero and out-of-range
+boundaries. Ten namespaced tests run in the maintained baseline.
 
 [`mb-utils-buffer.el`](./utils/mb-utils-buffer.el) now loads independently
 with lexical binding and explicit dependencies. Loading it no longer changes
