@@ -1599,7 +1599,10 @@ small standalone [`mb-anaphora.el`](./utils/mb-anaphora.el) module rather than
 the broad `mb-utils-div` collection. `mb-utils-div` requires the new feature,
 so existing callers retain the same API without acquiring new dependencies.
 Focused tests cover branch values, single evaluation, short-circuiting,
-nested `it` bindings, and generalized assignment.
+nested `it` bindings, and generalized assignment. A subsequent whole-module
+review made `acond` preserve the `cond` contract for successful test-only
+clauses and made `asetf` evaluate generalized-place subforms only once through
+`cl-callf`. The five focused tests now include both edge cases.
 
 [`mb-utils-div.el`](./utils/mb-utils-div.el) now loads independently with
 explicit Common Lisp, string, anaphora, and ISO-time dependencies instead of
