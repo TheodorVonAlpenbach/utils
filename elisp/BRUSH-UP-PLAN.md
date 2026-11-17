@@ -1541,7 +1541,15 @@ have been replaced with built-in operations. The maintained tests characterize
 the existing subtree-filter result shapes, multi-match copy order and invalid
 filters, relation conversion, and copy independence. The tests now use
 module-namespaced ERT symbols, and the older duplicate
-`ert-mb-utils-tree.el` test file has been removed.
+`ert-mb-utils-tree.el` test file has been removed. A whole-module review made
+relation conversion enforce its documented forest model: malformed pairs and
+nil nodes now fail explicitly, duplicate edges are ignored, and cycles or
+children with multiple parents are rejected instead of disappearing or
+sharing mutable subtree structure. Relation conversion now supports
+list-valued nodes under a custom equality predicate, internal subtree dispatch
+is private, and all public traversal contracts are documented. The seven
+focused tests cover these boundaries while preserving established child and
+search ordering.
 
 [`mb-sequences.el`](./utils/mb-sequences.el) now loads without the startup
 environment and uses `cl-lib` directly. Its public helper names remain

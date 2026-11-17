@@ -16,7 +16,7 @@
     (should-not (equal tree copy))))
 
 (ert-deftest mb-utils-tree-relations-round-trip ()
-  "Test conversion between relations and trees."
+  "Test conversion, ordering, equality, and relation validation."
   (let* ((relations '((a b) (a c) (c d) (b e)))
          (tree (car (relations->tree relations))))
     (should (equal tree '(a (c (d)) (b (e)))))
@@ -25,14 +25,23 @@
                                    (format "%S" relation)))
                    (cl-sort (copy-tree relations) #'string-lessp
                             :key (lambda (relation)
-                                   (format "%S" relation)))))))
+                                   (format "%S" relation))))))
+  (should (equal (relations->tree '((a b) (a b))) '((a (b)))))
+  (should (equal (relations->tree '((a b) (b c)) :reverse-p t)
+                 '((c (b (a))))))
+  (should (equal (relations->tree '(((a) (b)) ((a) (c))) :test #'equal)
+                 '(((a) ((c)) ((b))))))
+  (should-error (relations->tree '((a b c))))
+  (should-error (relations->tree '((a b) (c b))))
+  (should-error (relations->tree '((a b) (b a))))
+  (should-error (relations->tree '((a nil)))))
 
 (ert-deftest mb-utils-tree-tree-to-relations ()
-  "Test of `tree->relations'"
- (should (equal (tree->relations nil) nil)))
+  "Test empty relation extraction."
+  (should (equal (tree->relations nil) nil)))
 
 (ert-deftest mb-utils-tree-find-subtree ()
-  "Test of `find-subtree'"
+  "Test descendant, ancestor, and pruned subtree searches."
   (should (equal (find-subtree 'f '((a (b (c (d))))
 				    (e (f (g (h))))))
 		 '(f (g (h)))))
@@ -46,6 +55,7 @@
                  '((e (f (g (h))))))))
 
 (ert-deftest mb-utils-tree-copy-subtree ()
+  "Test copying all matches, ordering, and filter validation."
   (let ((trees '((a (b (f (d))))
 		 (e (f (g (h)))))))
     (should (equal (copy-subtree 'f trees)
@@ -56,7 +66,7 @@
 		  :type 'error)))
 
 (ert-deftest mb-utils-tree-leaves ()
-  "Test of `tree-leaves'"
+  "Test leaf traversal."
   (should (equal (tree-leaves '()) nil))
   (should (equal (tree-leaves '(a)) '(a)))
   (should (equal (tree-leaves '(a (b))) '(b)))
@@ -65,7 +75,7 @@
   (should (equal (tree-leaves '(a (c (d (f))) (b (e)))) '(f e))))
 
 (ert-deftest mb-utils-tree-member ()
-  "Test of `tree-member'"
+  "Test subtree lookup direction, keys, and comparison predicates."
   (should (equal (tree-member 'a ()) nil))
   (should (equal (tree-member 'a '(a)) '(a)))
   (should (equal (tree-member 'a '(a (b))) '(a (b))))
