@@ -505,9 +505,10 @@ The first subset is intentionally conservative:
 * [`test-mb-utils-economy.el`](./utils/test-mb-utils-economy.el): five ERT tests
   for growth, deposits, withdrawals, annualized profit, and basic financial
   helpers.
-* [`test-mb-math-functions.el`](./utils/test-mb-math-functions.el): six ERT
-  tests for degree and hyperbolic functions, finite and infinite series,
-  special functions, polynomial roots, and numerical root solvers.
+* [`test-mb-math-functions.el`](./utils/test-mb-math-functions.el): six
+  namespaced ERT tests for degree and hyperbolic functions, finite and infinite
+  series, special functions, polynomial roots, and numerical root solvers,
+  including invalid numerical domains.
 * [`test-mb-lists.el`](./utils/test-mb-lists.el): thirty-one ERT tests for
   list generation, grouping, products, ordering, partitioning, repetition
   detection, rotation, interleaved unzipping, padding, sorted structures, and
@@ -1807,7 +1808,13 @@ expansion uses symbols directly, while squaring and polynomial evaluation are
 implemented without startup helpers. The migration corrected three defects: the
 reversed sign of `tanh`, the finite geometric series for ratio -1, and endpoint
 damping results in `falsi-method` that were computed but discarded. Numerical
-characterization tests cover the affected functions.
+characterization tests cover the affected functions. A whole-module review
+subsequently made finite and infinite geometric bounds explicit, rejected
+undefined inverse-error, normal-quantile, and quadratic domains, and made both
+root solvers reject invalid tolerances, iterations, derivatives, and
+unbracketed intervals instead of leaking NaN, infinity, or arithmetic errors.
+Internal degree-generation and error-approximation helpers are now private,
+and all six tests use the module namespace.
 
 [`mb-utils-iso-time.el`](./utils/mb-utils-iso-time.el) now uses lexical binding
 and built-in Emacs time conversion rather than relying circularly on
