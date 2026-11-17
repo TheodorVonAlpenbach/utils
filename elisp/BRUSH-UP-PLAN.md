@@ -375,7 +375,10 @@ The first subset is intentionally conservative:
   tests for text and binary file I/O, writable and read-only file contexts,
   non-killing buffer clearing, buffer-selection and point semantics, error
   restoration, multi-buffer iteration, CSV parsing and serialization, and
-  MIDI byte-stream decoding.
+  generic hexl byte-stream movement and validation.
+* [`test-midi-utils.el`](./projects/midi/test-midi-utils.el): two ERT tests for
+  MIDI variable-length quantity encoding and decoding at one- through
+  four-byte boundaries.
 * [`test-mb-utils-buffer.el`](./utils/test-mb-utils-buffer.el): sixteen ERT
   tests for buffer metadata, marks and regions, line navigation, editing,
   comments, word transformations, temporary files, save-as behavior, and the
@@ -577,7 +580,7 @@ comprises:
 
 * a clean `emacs -Q` load of all ninety-eight utility and mode-extension
   features plus the ERT tooling;
-* 819 passing ERT tests from the batch entry point;
+* 821 passing ERT tests from the batch entry point;
 * byte-compilation of the libraries, their tests, and the batch runner without
   warnings, with compiled output written outside the source tree.
 
@@ -609,8 +612,15 @@ helpers. The active `read*` and `print*` compatibility APIs remain because
 games, Ada helpers, and archived data modules still call them. `blank-buffer`
 now deletes text without modifying the kill ring. The retained file-context
 macros have normal indentation and Edebug declarations, and MIDI
-variable-length integers are decoded in stream order rather than reversed.
-Eighteen consistently namespaced tests cover the retained contracts.
+byte-stream logic has moved out of the generic module. Eighteen consistently
+namespaced tests cover the retained I/O contracts.
+
+[`midi-utils.el`](./projects/midi/midi-utils.el) now owns both encoding and
+decoding of MIDI variable-length quantities. Decoding uses the generic hexl
+byte-stream operations from `mb-utils-io` but keeps MIDI framing semantics in
+the MIDI project. Two focused tests cover the standard one- through four-byte
+encodings, including the corrected stream-order decoding of `#x81 #x00` as
+128.
 
 The maintained file list and load paths now live in
 [`test-manifest.el`](./tests/test-manifest.el). Both the batch entry point and

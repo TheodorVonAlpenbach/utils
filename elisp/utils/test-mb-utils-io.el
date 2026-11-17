@@ -204,16 +204,15 @@
       (delete-file file))))
 
 (ert-deftest mb-utils-io-hexl-byte-stream ()
-  "Test byte stream movement and MIDI variable-length decoding."
+  "Test byte stream movement and count validation."
   (with-temp-buffer
     (set-buffer-multibyte nil)
-    (insert (unibyte-string 0 127 #x81 0))
+    (insert (unibyte-string 0 127))
     (hexl-mode)
     (hexl-beginning-of-buffer 1)
     (should (= (read-position) 0))
     (should (equal (read-bytes 2) '(0 127)))
     (should (= (read-position) 2))
-    (should (equal (read-variable-length-integer) '(128 2)))
     (should-error (read-bytes -1))
     (should-error (read-byte 0))))
 

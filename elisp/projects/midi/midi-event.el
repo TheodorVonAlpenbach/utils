@@ -1,5 +1,6 @@
 (require 'midi-channel-event)
 (require 'midi-meta-event)
+(require 'midi-utils)
 
 (cl-defstruct (midi-event (:type list) :named (:conc-name me-))
   "Represent a general midi event."
@@ -13,7 +14,7 @@
 
 ;;; read/write
 (cl-defun read-midi-event ()
-  (let ((delta-time (first (read-variable-length-integer)))
+  (let ((delta-time (first (midi-read-variable-length-integer)))
 	(status-byte (read-byte)))
     (make-midi-event
      :delta-time delta-time
@@ -21,7 +22,8 @@
 		  (read-midi-channel-event status-byte)
 		  (if (= status-byte #xff)
 		    (let* ((type-id (read-byte))
-			  (event-length (first (read-variable-length-integer)))
+			  (event-length
+                           (first (midi-read-variable-length-integer)))
 			  (event-bytes (read-bytes event-length)))
 		      (read-midi-meta-event type-id event-bytes))
 		    (error "read-midi-system-exclusive-event is not implemented!"))))))

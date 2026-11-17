@@ -273,16 +273,6 @@ forward by N bytes.  N must be a positive integer."
     (save-buffer)))
 ;(bytes-to-file '(1 2 3 4) "c:/emacs-22.1/site-lisp/mb-lisp/utils/test1.bin")
 
-(cl-defun read-variable-length-integer ()
-  "Read and return a MIDI variable-length integer.
-Return a list containing its decoded value and encoded byte count."
-  (let ((bytes (cl-loop for byte = (read-byte) then (read-byte)
-		        collect (mod byte 128)
-		        until (< byte 128))))
-    (list (cl-reduce (lambda (value byte) (+ (* value 128) byte))
-                     bytes :initial-value 0)
-          (length bytes))))
-
 (provide 'mb-utils-io)
 
 ;;; mb-utils-io.el ends here

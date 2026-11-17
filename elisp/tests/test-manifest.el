@@ -7,7 +7,7 @@
 (defconst mb-tests-load-directories
   '("" "download" "elisp" "external" "games/cram" "games/maths" "global"
     "list-database" "mode-extensions"
-    "projects/ratings" "prototypes/geometry" "quiz" "utils"))
+    "projects/midi" "projects/ratings" "prototypes/geometry" "quiz" "utils"))
 
 (defconst mb-tests-baseline-files
   '("prototypes/geometry/test-list-interval.el"
@@ -64,6 +64,7 @@
     "mode-extensions/test-mb-sql.el"
     "mode-extensions/test-mb-tex.el"
     "mode-extensions/test-mb-texinfo.el"
+    "projects/midi/test-midi-utils.el"
     "projects/ratings/test-glicko.el"
     "projects/ratings/test-rating-plot.el"
     "quiz/test-quiz-cleanup.el"
